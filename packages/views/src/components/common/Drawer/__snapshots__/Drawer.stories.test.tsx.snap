@@ -93,7 +93,7 @@ exports[`./Drawer.stories BackAndActions 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -103,7 +103,7 @@ exports[`./Drawer.stories BackAndActions 1`] = `
                 >
                   Spending limit
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -378,7 +378,7 @@ exports[`./Drawer.stories CollapsibleSections 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -388,7 +388,7 @@ exports[`./Drawer.stories CollapsibleSections 1`] = `
                 >
                   Send 1,250 USDC
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -818,7 +818,7 @@ exports[`./Drawer.stories Expandable 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -828,7 +828,7 @@ exports[`./Drawer.stories Expandable 1`] = `
                 >
                   Send 1,250 USDC
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -1197,7 +1197,7 @@ exports[`./Drawer.stories FooterActions 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -1207,7 +1207,7 @@ exports[`./Drawer.stories FooterActions 1`] = `
                 >
                   Send 1,250 USDC
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -1490,7 +1490,7 @@ exports[`./Drawer.stories FooterSingleAction 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -1500,7 +1500,7 @@ exports[`./Drawer.stories FooterSingleAction 1`] = `
                 >
                   Allowlist
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -1747,7 +1747,7 @@ exports[`./Drawer.stories Full 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -1757,7 +1757,7 @@ exports[`./Drawer.stories Full 1`] = `
                 >
                   Operations Vault
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -1915,7 +1915,7 @@ exports[`./Drawer.stories List 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -1925,7 +1925,7 @@ exports[`./Drawer.stories List 1`] = `
                 >
                   Proposer role
                 </span>
-              </div>
+              </h2>
             </div>
             <div
               aria-label="Drawer actions"
@@ -2175,7 +2175,7 @@ exports[`./Drawer.stories LongContent 1`] = `
         tabindex="0"
       />
       <div
-        aria-label="Scrolling drawer"
+        aria-label="Batch transaction"
         class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-dialog dark:[--card:var(--muted)] dark:shadow-[inset_0_0_0_1px_var(--color-border-light),inset_0_1px_0_rgb(255_255_255/0.04),0_24px_64px_rgb(0_0_0/0.6)] p-0"
         data-base-ui-focusable=""
         data-open=""
@@ -2196,7 +2196,7 @@ exports[`./Drawer.stories LongContent 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -2204,8 +2204,13 @@ exports[`./Drawer.stories LongContent 1`] = `
                 <span
                   class="block min-w-0 overflow-hidden whitespace-nowrap"
                 >
-                  Scrolling body
+                  Batch of 14 payments
                 </span>
+              </h2>
+              <div
+                class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
+              >
+                Nonce #43 · Ethereum
               </div>
             </div>
             <div
@@ -2249,288 +2254,619 @@ exports[`./Drawer.stories LongContent 1`] = `
           <div
             class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
           >
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
+            <div
+              class="flex flex-col gap-6"
             >
-              Paragraph 
-              1
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              2
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              3
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              4
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              5
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              6
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              7
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              8
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              9
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              10
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              11
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              12
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              13
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              14
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              15
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              16
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              17
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              18
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              19
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              20
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              21
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              22
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              23
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              24
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              25
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              26
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              27
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              28
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              29
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              30
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
+              <section
+                class="flex w-full flex-col gap-2"
+              >
+                <div
+                  class="flex items-baseline justify-between gap-2"
+                >
+                  <span
+                    class="m-0 text-xs leading-4 font-semibold text-muted-foreground uppercase"
+                    data-slot="typography"
+                    data-variant="paragraph-mini-bold"
+                  >
+                    Summary
+                  </span>
+                </div>
+                <dl
+                  class="flex w-full flex-col gap-3 rounded-lg bg-muted p-3"
+                >
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Total
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        48,600 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Payments
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        14
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Network
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        Ethereum
+                      </div>
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+              <section
+                class="flex w-full flex-col gap-2"
+              >
+                <div
+                  class="flex items-baseline justify-between gap-2"
+                >
+                  <span
+                    class="m-0 text-xs leading-4 font-semibold text-muted-foreground uppercase"
+                    data-slot="typography"
+                    data-variant="paragraph-mini-bold"
+                  >
+                    Payments
+                  </span>
+                </div>
+                <dl
+                  class="flex w-full flex-col gap-3 rounded-lg bg-muted p-3"
+                >
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Engineering payroll
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        18,400 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Design payroll
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        6,200 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Operations payroll
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        4,800 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Audit retainer
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        5,000 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Legal retainer
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        2,500 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Cloud hosting
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        1,350 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Data provider
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        900 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Grants: tooling
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        3,000 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Grants: research
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        2,000 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Office rent
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        2,100 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Recruiting
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        750 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Community events
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        600 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Bug bounty
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        500 USDC
+                      </div>
+                    </dd>
+                  </div>
+                  <div
+                    aria-orientation="horizontal"
+                    class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                    data-orientation="horizontal"
+                    data-slot="separator"
+                    role="separator"
+                  />
+                  <div
+                    class="flex min-h-8 items-center justify-between gap-2"
+                  >
+                    <dt
+                      class="shrink-0"
+                    >
+                      <span
+                        class="m-0 text-sm leading-5 font-medium"
+                        data-slot="typography"
+                        data-variant="paragraph-small-medium"
+                      >
+                        Insurance
+                      </span>
+                    </dt>
+                    <dd
+                      class="min-w-0"
+                    >
+                      <div
+                        class="m-0 text-sm leading-5 font-normal text-right"
+                        data-slot="typography"
+                        data-variant="paragraph-small"
+                      >
+                        500 USDC
+                      </div>
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+            </div>
           </div>
           <div
             class="flex flex-col gap-2 border-t border-border px-6 pt-4 pb-6"
           >
-            <button
-              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 w-full"
-              data-slot="button"
-              tabindex="0"
-              type="button"
+            <div
+              class="grid gap-2 grid-cols-[1fr_2fr]"
             >
-              Submit delegation
-            </button>
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                data-slot="button"
+                tabindex="0"
+                type="button"
+              >
+                Reject
+              </button>
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                data-slot="button"
+                tabindex="0"
+                type="button"
+              >
+                Review and sign
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2639,7 +2975,7 @@ exports[`./Drawer.stories LongTitle 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -2649,7 +2985,7 @@ exports[`./Drawer.stories LongTitle 1`] = `
                 >
                   Quarterly operations and treasury rebalancing account
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -2895,7 +3231,7 @@ exports[`./Drawer.stories Navigation 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -2905,7 +3241,7 @@ exports[`./Drawer.stories Navigation 1`] = `
                 >
                   Send 1,250 USDC
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -3055,7 +3391,7 @@ exports[`./Drawer.stories Navigation 1`] = `
 </div>
 `;
 
-exports[`./Drawer.stories NoHeader 1`] = `
+exports[`./Drawer.stories OnlyTitle 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
@@ -3090,135 +3426,13 @@ exports[`./Drawer.stories NoHeader 1`] = `
         tabindex="0"
       />
       <div
-        aria-label="Headerless drawer"
-        class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-dialog dark:[--card:var(--muted)] dark:shadow-[inset_0_0_0_1px_var(--color-border-light),inset_0_1px_0_rgb(255_255_255/0.04),0_24px_64px_rgb(0_0_0/0.6)] p-0"
-        data-base-ui-focusable=""
-        data-open=""
-        data-side="right"
-        data-slot="sheet-content"
-        id="_r_29_"
-        role="dialog"
-        style="--nested-dialogs: 0;"
-        tabindex="-1"
-      >
-        <div
-          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
-        >
-          <div
-            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
-          >
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              1
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              2
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-            <span
-              class="m-0 text-sm leading-5 font-normal mb-4"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Paragraph 
-              3
-               — the drawer body scrolls once the content outgrows the panel.
-            </span>
-          </div>
-        </div>
-        <button
-          aria-label="Close"
-          class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs size-9 absolute top-6 right-6"
-          data-slot="button"
-          tabindex="0"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-x"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M18 6 6 18"
-            />
-            <path
-              d="m6 6 12 12"
-            />
-          </svg>
-        </button>
-      </div>
-      <span
-        data-base-ui-focus-guard=""
-        data-type="inside"
-        role="button"
-        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
-        tabindex="0"
-      />
-    </div>
-  </div>
-</div>
-`;
-
-exports[`./Drawer.stories OnlyTitle 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 0px;"
->
-  <div
-    class="shadcn-scope"
-  >
-    <div
-      data-base-ui-portal=""
-      data-slot="sheet-portal"
-      id="_r_2e_"
-    >
-      <div
-        aria-hidden="true"
-        data-base-ui-inert=""
-        role="presentation"
-        style="position: fixed; inset: 0; user-select: none;"
-      />
-      <div
-        aria-hidden="true"
-        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
-        data-base-ui-inert=""
-        data-open=""
-        data-slot="sheet-overlay"
-        role="presentation"
-        style="user-select: none;"
-      />
-      <span
-        data-base-ui-focus-guard=""
-        data-type="inside"
-        role="button"
-        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
-        tabindex="0"
-      />
-      <div
         aria-label="Title only drawer"
         class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-dialog dark:[--card:var(--muted)] dark:shadow-[inset_0_0_0_1px_var(--color-border-light),inset_0_1px_0_rgb(255_255_255/0.04),0_24px_64px_rgb(0_0_0/0.6)] p-0"
         data-base-ui-focusable=""
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_2c_"
+        id="_r_29_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -3233,7 +3447,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -3243,7 +3457,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
                 >
                   Batched transactions
                 </span>
-              </div>
+              </h2>
             </div>
             <div
               aria-label="Drawer actions"
@@ -3256,7 +3470,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_2g_"
+                id="base-ui-_r_2d_"
                 tabindex="0"
                 type="button"
               >
@@ -3338,7 +3552,7 @@ exports[`./Drawer.stories Phone 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_2j_"
+      id="_r_2g_"
     >
       <div
         aria-hidden="true"
@@ -3369,7 +3583,7 @@ exports[`./Drawer.stories Phone 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_2h_"
+        id="_r_2e_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -3421,7 +3635,7 @@ exports[`./Drawer.stories Phone 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -3431,7 +3645,7 @@ exports[`./Drawer.stories Phone 1`] = `
                 >
                   Send 1,250 USDC
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -3455,7 +3669,7 @@ exports[`./Drawer.stories Phone 1`] = `
                 aria-label="Previous"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_2l_"
+                id="base-ui-_r_2i_"
                 tabindex="0"
                 type="button"
               >
@@ -3481,7 +3695,7 @@ exports[`./Drawer.stories Phone 1`] = `
                 aria-label="Next"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_2n_"
+                id="base-ui-_r_2k_"
                 tabindex="0"
                 type="button"
               >
@@ -3507,7 +3721,7 @@ exports[`./Drawer.stories Phone 1`] = `
                 aria-label="Expand to full screen"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_2p_"
+                id="base-ui-_r_2m_"
                 tabindex="0"
                 type="button"
               >
@@ -3542,7 +3756,7 @@ exports[`./Drawer.stories Phone 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_2r_"
+                id="base-ui-_r_2o_"
                 tabindex="0"
                 type="button"
               >
@@ -3717,7 +3931,7 @@ exports[`./Drawer.stories Resizable 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_2u_"
+      id="_r_2r_"
     >
       <div
         aria-hidden="true"
@@ -3748,7 +3962,7 @@ exports[`./Drawer.stories Resizable 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_2s_"
+        id="_r_2p_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -3815,7 +4029,7 @@ exports[`./Drawer.stories Resizable 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -3825,7 +4039,7 @@ exports[`./Drawer.stories Resizable 1`] = `
                 >
                   Send 1,250 USDC
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -3849,7 +4063,7 @@ exports[`./Drawer.stories Resizable 1`] = `
                 aria-label="Previous"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_30_"
+                id="base-ui-_r_2t_"
                 tabindex="0"
                 type="button"
               >
@@ -3875,7 +4089,7 @@ exports[`./Drawer.stories Resizable 1`] = `
                 aria-label="Next"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_32_"
+                id="base-ui-_r_2v_"
                 tabindex="0"
                 type="button"
               >
@@ -3901,7 +4115,7 @@ exports[`./Drawer.stories Resizable 1`] = `
                 aria-label="Expand to full screen"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_34_"
+                id="base-ui-_r_31_"
                 tabindex="0"
                 type="button"
               >
@@ -3936,7 +4150,7 @@ exports[`./Drawer.stories Resizable 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_36_"
+                id="base-ui-_r_33_"
                 tabindex="0"
                 type="button"
               >
@@ -4111,7 +4325,7 @@ exports[`./Drawer.stories Sections 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_39_"
+      id="_r_36_"
     >
       <div
         aria-hidden="true"
@@ -4142,7 +4356,7 @@ exports[`./Drawer.stories Sections 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_37_"
+        id="_r_34_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -4157,7 +4371,7 @@ exports[`./Drawer.stories Sections 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -4167,7 +4381,7 @@ exports[`./Drawer.stories Sections 1`] = `
                 >
                   Proposer role
                 </span>
-              </div>
+              </h2>
             </div>
             <div
               aria-label="Drawer actions"
@@ -4180,7 +4394,7 @@ exports[`./Drawer.stories Sections 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_3b_"
+                id="base-ui-_r_38_"
                 tabindex="0"
                 type="button"
               >
@@ -4294,7 +4508,7 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_3e_"
+      id="_r_3b_"
     >
       <div
         aria-hidden="true"
@@ -4325,7 +4539,7 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_3c_"
+        id="_r_39_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -4377,7 +4591,7 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -4387,7 +4601,7 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                 >
                   Send 1,250 USDC
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -4405,7 +4619,7 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_3g_"
+                id="base-ui-_r_3d_"
                 tabindex="0"
                 type="button"
               >
@@ -4541,6 +4755,8 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
               <section
                 aria-label="Signatures"
                 class="flex flex-col"
+                data-open=""
+                data-slot="collapsible"
               >
                 <div
                   class="flex items-center gap-2"
@@ -4549,6 +4765,13 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                     class="text-sm font-medium"
                   >
                     Signatures
+                  </span>
+                  <span
+                    class="border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge border-transparent h-6 gap-1.5 px-2 py-[3px] text-xs leading-4 rounded-lg bg-badge-warning-subtle text-badge-warning-strong"
+                    data-slot="badge"
+                    data-variant="warning"
+                  >
+                    1 of 3 required
                   </span>
                   <button
                     aria-label="Copy link"
@@ -4592,15 +4815,19 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                     6 days left
                   </span>
                   <button
-                    aria-controls="_r_3h_"
+                    aria-controls="base-ui-_r_3e_"
+                    aria-disabled="false"
                     aria-expanded="true"
                     aria-label="Hide signatures"
-                    class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+                    data-panel-open=""
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
                     type="button"
                   >
                     <svg
                       aria-hidden="true"
-                      class="lucide lucide-chevron-down size-4"
+                      class="lucide lucide-chevron-down"
                       fill="none"
                       height="24"
                       stroke="currentColor"
@@ -4619,7 +4846,10 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                 </div>
                 <div
                   class="min-h-0 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border max-h-[28vh] flex-none overscroll-contain pt-3"
-                  id="_r_3h_"
+                  data-open=""
+                  data-slot="collapsible-content"
+                  id="base-ui-_r_3e_"
+                  style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                 >
                   <ul
                     class="flex flex-col gap-3"
@@ -4696,7 +4926,7 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                         class="border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 gap-1.5 px-2 py-[3px] text-xs leading-4 rounded-lg bg-success-subtle text-success-strong"
                         data-slot="tooltip-trigger"
                         data-variant="success"
-                        id="base-ui-_r_3j_"
+                        id="base-ui-_r_3g_"
                         tabindex="0"
                       >
                         <svg
@@ -4828,6 +5058,959 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
 </div>
 `;
 
+exports[`./Drawer.stories SignaturesNotSigner 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="sheet-portal"
+      id="_r_3j_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="sheet-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-label="Transaction"
+        class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-dialog dark:[--card:var(--muted)] dark:shadow-[inset_0_0_0_1px_var(--color-border-light),inset_0_1px_0_rgb(255_255_255/0.04),0_24px_64px_rgb(0_0_0/0.6)] p-0"
+        data-base-ui-focusable=""
+        data-open=""
+        data-side="right"
+        data-slot="sheet-content"
+        id="_r_3h_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+        >
+          <header
+            class="flex items-center gap-3 px-6 pt-6"
+            data-slot="drawer-header"
+          >
+            <div
+              class="flex shrink-0 items-center"
+            >
+              <div
+                class="flex size-9 items-center justify-center rounded-md border border-border bg-card"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-list-checks size-4"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13 5h8"
+                  />
+                  <path
+                    d="M13 12h8"
+                  />
+                  <path
+                    d="M13 19h8"
+                  />
+                  <path
+                    d="m3 17 2 2 4-4"
+                  />
+                  <path
+                    d="m3 7 2 2 4-4"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div
+              class="flex min-w-0 flex-1 flex-col gap-0.5"
+            >
+              <h2
+                class="m-0 text-base font-semibold min-w-0 leading-tight"
+                data-slot="typography"
+                data-variant="paragraph-bold"
+              >
+                <span
+                  class="block min-w-0 overflow-hidden whitespace-nowrap"
+                >
+                  Send 1,250 USDC
+                </span>
+              </h2>
+              <div
+                class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
+              >
+                Nonce #42 · Ethereum
+              </div>
+            </div>
+            <div
+              aria-label="Drawer actions"
+              class="flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 [&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none shrink-0"
+              data-orientation="horizontal"
+              data-slot="button-group"
+              role="group"
+            >
+              <button
+                aria-label="Close"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_3l_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-x"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6 6 18"
+                  />
+                  <path
+                    d="m6 6 12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </header>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
+          >
+            <dl
+              class="flex w-full flex-col gap-3 rounded-lg bg-muted p-3"
+            >
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Recipient
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    0x8675...a19b
+                  </div>
+                </dd>
+              </div>
+              <div
+                aria-orientation="horizontal"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="separator"
+              />
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Amount
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    1,250 USDC
+                  </div>
+                </dd>
+              </div>
+              <div
+                aria-orientation="horizontal"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="separator"
+              />
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Network
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    Ethereum
+                  </div>
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <div
+            class="flex flex-col gap-2 border-t border-border px-6 pt-4 pb-6"
+          >
+            <div
+              class="mb-2 border-b border-border pb-4"
+            >
+              <section
+                aria-label="Signatures"
+                class="flex flex-col"
+                data-closed=""
+                data-slot="collapsible"
+              >
+                <div
+                  class="flex items-center gap-2"
+                >
+                  <span
+                    class="text-sm font-medium"
+                  >
+                    Signatures
+                  </span>
+                  <span
+                    class="text-xs font-medium tabular-nums"
+                  >
+                    1/3
+                  </span>
+                  <span
+                    class="flex-1"
+                  />
+                  <button
+                    aria-disabled="false"
+                    aria-expanded="false"
+                    aria-label="Show signatures"
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-chevron-up"
+                      fill="none"
+                      height="24"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m18 15-6-6-6 6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <p
+                  class="text-xs text-muted-foreground"
+                >
+                  You aren't a signer of this Safe
+                </p>
+                <div
+                  class="min-h-0 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border max-h-[28vh] flex-none overscroll-contain pt-3"
+                  data-closed=""
+                  data-slot="collapsible-content"
+                  hidden=""
+                  id="base-ui-_r_3m_"
+                  style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
+                >
+                  <ul
+                    class="flex flex-col gap-3"
+                  >
+                    <li
+                      class="relative flex h-10 items-center justify-between gap-3"
+                    >
+                      <span
+                        class="flex min-w-0 items-center gap-1"
+                      >
+                        <span
+                          class="flex min-w-0 items-center gap-2"
+                        >
+                          <div
+                            class="icon"
+                            style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjQ0IDk0JSA1MSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNTQgNjYlIDU2JSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyOTcgNzklIDUxJSkiIGQ9Ik0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjwvc3ZnPg=="); width: 24px; height: 24px;"
+                          />
+                          <span
+                            class="truncate text-sm"
+                          >
+                            Ops lead
+                          </span>
+                        </span>
+                      </span>
+                      <span
+                        class="border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 gap-1.5 px-2 py-[3px] text-xs leading-4 rounded-lg bg-success-subtle text-success-strong"
+                        data-slot="badge"
+                        data-variant="success"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="lucide lucide-check"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M20 6 9 17l-5-5"
+                          />
+                        </svg>
+                        Signed
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        class="absolute top-[34px] left-[11.5px] h-6 border-l border-dashed border-muted-foreground/40"
+                      />
+                    </li>
+                    <li
+                      class="relative flex h-10 items-center justify-between gap-3"
+                    >
+                      <span
+                        class="flex min-w-0 items-center gap-1"
+                      >
+                        <span
+                          class="flex min-w-0 items-center gap-2"
+                        >
+                          <div
+                            class="icon"
+                            style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjkxIDQ1JSA1MSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNTQgNjYlIDQ0JSkiIGQ9Ik0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0wLDZoMXYxaC0xek03LDZoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyNTAgNTMlIDQyJSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjwvc3ZnPg=="); width: 24px; height: 24px;"
+                          />
+                          <span
+                            class="truncate text-sm"
+                          >
+                            Finance
+                          </span>
+                        </span>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </div>
+            <div
+              class="grid gap-2"
+            >
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                data-disabled=""
+                data-slot="button"
+                disabled=""
+                tabindex="0"
+                type="button"
+              >
+                Sign
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Drawer.stories SignaturesThresholdMet 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="sheet-portal"
+      id="_r_3p_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="sheet-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-label="Transaction"
+        class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-dialog dark:[--card:var(--muted)] dark:shadow-[inset_0_0_0_1px_var(--color-border-light),inset_0_1px_0_rgb(255_255_255/0.04),0_24px_64px_rgb(0_0_0/0.6)] p-0"
+        data-base-ui-focusable=""
+        data-open=""
+        data-side="right"
+        data-slot="sheet-content"
+        id="_r_3n_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+        >
+          <header
+            class="flex items-center gap-3 px-6 pt-6"
+            data-slot="drawer-header"
+          >
+            <div
+              class="flex shrink-0 items-center"
+            >
+              <div
+                class="flex size-9 items-center justify-center rounded-md border border-border bg-card"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-list-checks size-4"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13 5h8"
+                  />
+                  <path
+                    d="M13 12h8"
+                  />
+                  <path
+                    d="M13 19h8"
+                  />
+                  <path
+                    d="m3 17 2 2 4-4"
+                  />
+                  <path
+                    d="m3 7 2 2 4-4"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div
+              class="flex min-w-0 flex-1 flex-col gap-0.5"
+            >
+              <h2
+                class="m-0 text-base font-semibold min-w-0 leading-tight"
+                data-slot="typography"
+                data-variant="paragraph-bold"
+              >
+                <span
+                  class="block min-w-0 overflow-hidden whitespace-nowrap"
+                >
+                  Send 1,250 USDC
+                </span>
+              </h2>
+              <div
+                class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
+              >
+                Nonce #42 · Ethereum
+              </div>
+            </div>
+            <div
+              aria-label="Drawer actions"
+              class="flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 [&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none shrink-0"
+              data-orientation="horizontal"
+              data-slot="button-group"
+              role="group"
+            >
+              <button
+                aria-label="Close"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_3r_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-x"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6 6 18"
+                  />
+                  <path
+                    d="m6 6 12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </header>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
+          >
+            <dl
+              class="flex w-full flex-col gap-3 rounded-lg bg-muted p-3"
+            >
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Recipient
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    0x8675...a19b
+                  </div>
+                </dd>
+              </div>
+              <div
+                aria-orientation="horizontal"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="separator"
+              />
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Amount
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    1,250 USDC
+                  </div>
+                </dd>
+              </div>
+              <div
+                aria-orientation="horizontal"
+                class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch data-[orientation=horizontal]:w-full"
+                data-orientation="horizontal"
+                data-slot="separator"
+                role="separator"
+              />
+              <div
+                class="flex min-h-8 items-center justify-between gap-2"
+              >
+                <dt
+                  class="shrink-0"
+                >
+                  <span
+                    class="m-0 text-sm leading-5 font-medium"
+                    data-slot="typography"
+                    data-variant="paragraph-small-medium"
+                  >
+                    Network
+                  </span>
+                </dt>
+                <dd
+                  class="min-w-0"
+                >
+                  <div
+                    class="m-0 text-sm leading-5 font-normal text-right"
+                    data-slot="typography"
+                    data-variant="paragraph-small"
+                  >
+                    Ethereum
+                  </div>
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <div
+            class="flex flex-col gap-2 border-t border-border px-6 pt-4 pb-6"
+          >
+            <div
+              class="mb-2 border-b border-border pb-4"
+            >
+              <section
+                aria-label="Signatures"
+                class="flex flex-col"
+                data-open=""
+                data-slot="collapsible"
+              >
+                <div
+                  class="flex items-center gap-2"
+                >
+                  <span
+                    class="text-sm font-medium"
+                  >
+                    Signatures
+                  </span>
+                  <span
+                    class="border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 gap-1.5 px-2 py-[3px] text-xs leading-4 rounded-lg bg-success-subtle text-success-strong"
+                    data-slot="badge"
+                    data-variant="success"
+                  >
+                    2 of 2 signed
+                  </span>
+                  <span
+                    class="flex-1"
+                  />
+                  <button
+                    aria-controls="base-ui-_r_3s_"
+                    aria-disabled="false"
+                    aria-expanded="true"
+                    aria-label="Hide signatures"
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+                    data-panel-open=""
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-chevron-down"
+                      fill="none"
+                      height="24"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m6 9 6 6 6-6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div
+                  class="min-h-0 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border max-h-[28vh] flex-none overscroll-contain pt-3"
+                  data-open=""
+                  data-slot="collapsible-content"
+                  id="base-ui-_r_3s_"
+                  style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
+                >
+                  <ul
+                    class="flex flex-col gap-3"
+                  >
+                    <li
+                      class="relative flex h-10 items-center justify-between gap-3"
+                    >
+                      <span
+                        class="flex min-w-0 items-center gap-2"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-plus size-3.5 text-muted-foreground"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M5 12h14"
+                            />
+                            <path
+                              d="M12 5v14"
+                            />
+                          </svg>
+                        </span>
+                        <span
+                          class="truncate text-sm"
+                        >
+                          Created by 
+                          Ops lead
+                        </span>
+                      </span>
+                      <span
+                        class="shrink-0 text-xs text-muted-foreground tabular-nums"
+                      >
+                        Nov 12, 10:02
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        class="absolute top-[34px] left-[11.5px] h-6 border-l border-border"
+                      />
+                    </li>
+                    <li
+                      class="relative flex h-10 items-center justify-between gap-3"
+                    >
+                      <span
+                        class="flex min-w-0 items-center gap-1"
+                      >
+                        <span
+                          class="flex min-w-0 items-center gap-2"
+                        >
+                          <div
+                            class="icon"
+                            style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjQ0IDk0JSA1MSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNTQgNjYlIDU2JSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0xLDVoMXYxaC0xek02LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyOTcgNzklIDUxJSkiIGQ9Ik0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjwvc3ZnPg=="); width: 24px; height: 24px;"
+                          />
+                          <span
+                            class="truncate text-sm"
+                          >
+                            Ops lead
+                          </span>
+                        </span>
+                      </span>
+                      <span
+                        class="border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 gap-1.5 px-2 py-[3px] text-xs leading-4 rounded-lg bg-success-subtle text-success-strong"
+                        data-slot="tooltip-trigger"
+                        data-variant="success"
+                        id="base-ui-_r_3u_"
+                        tabindex="0"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="lucide lucide-check"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M20 6 9 17l-5-5"
+                          />
+                        </svg>
+                        Signed
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        class="absolute top-[34px] left-[11.5px] h-6 border-l border-border"
+                      />
+                    </li>
+                    <li
+                      class="relative flex h-10 items-center justify-between gap-3"
+                    >
+                      <span
+                        class="flex min-w-0 items-center gap-1"
+                      >
+                        <span
+                          class="flex min-w-0 items-center gap-2"
+                        >
+                          <div
+                            class="icon"
+                            style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjEwIDc1JSA1OSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNTQgNjYlIDQyJSkiIGQ9Ik0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0yLDRoMXYxaC0xek01LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgzMzAgNzQlIDMxJSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xeiIvPjwvc3ZnPg=="); width: 24px; height: 24px;"
+                          />
+                          <span
+                            class="truncate text-sm"
+                          >
+                            Treasury
+                          </span>
+                        </span>
+                      </span>
+                      <span
+                        class="border font-medium transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge border-transparent dark:bg-accent-secondary/20 dark:text-accent-success h-6 gap-1.5 px-2 py-[3px] text-xs leading-4 rounded-lg bg-success-subtle text-success-strong"
+                        data-slot="tooltip-trigger"
+                        data-variant="success"
+                        id="base-ui-_r_40_"
+                        tabindex="0"
+                      >
+                        <svg
+                          aria-hidden="true"
+                          class="lucide lucide-check"
+                          fill="none"
+                          height="24"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M20 6 9 17l-5-5"
+                          />
+                        </svg>
+                        Signed
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        class="absolute top-[34px] left-[11.5px] h-6 border-l border-dashed border-muted-foreground/40"
+                      />
+                    </li>
+                    <li
+                      class="relative flex h-10 items-center justify-between gap-3"
+                    >
+                      <span
+                        class="flex min-w-0 items-center gap-1 opacity-50"
+                      >
+                        <span
+                          class="flex min-w-0 items-center gap-2"
+                        >
+                          <div
+                            class="icon"
+                            style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjkxIDQ1JSA1MSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNTQgNjYlIDQ0JSkiIGQ9Ik0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0wLDZoMXYxaC0xek03LDZoMXYxaC0xek0yLDZoMXYxaC0xek01LDZoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyNTAgNTMlIDQyJSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjwvc3ZnPg=="); width: 24px; height: 24px;"
+                          />
+                          <span
+                            class="truncate text-sm"
+                          >
+                            Finance
+                          </span>
+                        </span>
+                        <span
+                          class="shrink-0 text-sm text-muted-foreground"
+                        >
+                          (you)
+                        </span>
+                      </span>
+                      <span
+                        class="sr-only"
+                      >
+                        Not needed
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </div>
+            <div
+              class="grid gap-2"
+            >
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                data-slot="button"
+                tabindex="0"
+                type="button"
+              >
+                Execute
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
 exports[`./Drawer.stories SizeLg 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
@@ -4838,7 +6021,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_3m_"
+      id="_r_43_"
     >
       <div
         aria-hidden="true"
@@ -4869,7 +6052,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_3k_"
+        id="_r_41_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -4884,7 +6067,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -4894,7 +6077,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
                 >
                   Wide drawer
                 </span>
-              </div>
+              </h2>
             </div>
             <div
               aria-label="Drawer actions"
@@ -4907,7 +6090,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_3o_"
+                id="base-ui-_r_45_"
                 tabindex="0"
                 type="button"
               >
@@ -4989,7 +6172,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_3r_"
+      id="_r_48_"
     >
       <div
         aria-hidden="true"
@@ -5020,7 +6203,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_3p_"
+        id="_r_46_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -5068,7 +6251,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -5078,7 +6261,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
                 >
                   Proposer role
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >
@@ -5107,7 +6290,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_3t_"
+                id="base-ui-_r_4a_"
                 tabindex="0"
                 type="button"
               >

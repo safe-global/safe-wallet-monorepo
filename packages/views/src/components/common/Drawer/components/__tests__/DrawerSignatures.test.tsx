@@ -108,4 +108,27 @@ describe('DrawerSignatures', () => {
 
     expect(screen.getAllByRole('listitem')[2]).toHaveTextContent('CarolNot needed')
   })
+
+  it('opens and folds from the page when controlled', () => {
+    const onOpenChange = jest.fn()
+    const { rerender } = render(
+      <DrawerSignatures status={required} rows={rows} open={false} onOpenChange={onOpenChange} />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show signatures' }))
+
+    expect(onOpenChange).toHaveBeenCalledWith(true)
+    expect(screen.getByRole('button', { name: 'Show signatures' })).toHaveAttribute('aria-expanded', 'false')
+
+    rerender(<DrawerSignatures status={required} rows={rows} open onOpenChange={onOpenChange} />)
+
+    expect(screen.getByRole('button', { name: 'Hide signatures' })).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('shows a note under the title row', () => {
+    render(<DrawerSignatures rows={rows} status={<span>1/2 gauge</span>} note="You aren't a signer of this Safe" />)
+
+    expect(screen.getByText('1/2 gauge')).toBeInTheDocument()
+    expect(screen.getByText("You aren't a signer of this Safe")).toBeInTheDocument()
+  })
 })

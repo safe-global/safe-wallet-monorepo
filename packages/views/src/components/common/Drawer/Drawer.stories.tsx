@@ -162,28 +162,52 @@ export const OnlyTitle: Story = {
   },
 }
 
-export const NoHeader: Story = {
-  args: {
-    ariaLabel: 'Headerless drawer',
-    children: (
-      <DrawerBody>
-        <Paragraphs count={3} />
-      </DrawerBody>
-    ),
-  },
-}
+const payments: [string, number][] = [
+  ['Engineering payroll', 18400],
+  ['Design payroll', 6200],
+  ['Operations payroll', 4800],
+  ['Audit retainer', 5000],
+  ['Legal retainer', 2500],
+  ['Cloud hosting', 1350],
+  ['Data provider', 900],
+  ['Grants: tooling', 3000],
+  ['Grants: research', 2000],
+  ['Office rent', 2100],
+  ['Recruiting', 750],
+  ['Community events', 600],
+  ['Bug bounty', 500],
+  ['Insurance', 500],
+]
+const usdc = (amount: number) => `${amount.toLocaleString('en-US')} USDC`
 
+/** A batch long enough to scroll: the body scrolls while the header and footer stay put. */
 export const LongContent: Story = {
   args: {
-    ariaLabel: 'Scrolling drawer',
+    ariaLabel: 'Batch transaction',
     children: (
       <>
-        <DrawerHeader title="Scrolling body" />
+        <DrawerHeader title={`Batch of ${payments.length} payments`} subtitle="Nonce #43 · Ethereum" />
         <DrawerBody>
-          <Paragraphs count={30} />
+          <div className="flex flex-col gap-6">
+            <DrawerSection title="Summary">
+              <DrawerList
+                items={[
+                  { label: 'Total', content: usdc(payments.reduce((sum, [, amount]) => sum + amount, 0)) },
+                  { label: 'Payments', content: payments.length },
+                  { label: 'Network', content: 'Ethereum' },
+                ]}
+              />
+            </DrawerSection>
+            <DrawerSection title="Payments">
+              <DrawerList items={payments.map(([label, amount]) => ({ label, content: usdc(amount) }))} />
+            </DrawerSection>
+          </div>
         </DrawerBody>
         <DrawerFooter>
-          <Button className="w-full">Submit delegation</Button>
+          <DrawerActions
+            secondary={<Button variant="secondary">Reject</Button>}
+            primary={<Button>Review and sign</Button>}
+          />
         </DrawerFooter>
       </>
     ),
@@ -227,6 +251,7 @@ export const Navigation: Story = {
             hasPrevious: true,
             hasNext: false,
             position: '12 of 12',
+            shortcuts: { previous: 'K', next: 'J' },
           }}
         />
         <DrawerBody>
@@ -500,6 +525,43 @@ export const SignaturesThresholdMet: Story = {
           }
         >
           <DrawerActions primary={<Button>Execute</Button>} />
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+/** A page can pass its own status, such as a gauge, and add a note under it. */
+export const SignaturesNotSigner: Story = {
+  args: {
+    ariaLabel: 'Transaction',
+    children: (
+      <>
+        <DrawerHeader media={iconTile} title="Send 1,250 USDC" subtitle="Nonce #42 · Ethereum" />
+        <DrawerBody>
+          <DrawerList items={summaryRows} />
+        </DrawerBody>
+        <DrawerFooter
+          summary={
+            <DrawerSignatures
+              status={<span className="text-xs font-medium tabular-nums">1/3</span>}
+              note="You aren't a signer of this Safe"
+              rows={[
+                {
+                  id: 'a',
+                  status: 'signed',
+                  signer: signer('Ops lead', '0x1000000000000000000000000000000000000001'),
+                },
+                {
+                  id: 'b',
+                  status: 'needed',
+                  signer: signer('Finance', '0x2000000000000000000000000000000000000002'),
+                },
+              ]}
+            />
+          }
+        >
+          <DrawerActions primary={<Button disabled>Sign</Button>} />
         </DrawerFooter>
       </>
     ),
