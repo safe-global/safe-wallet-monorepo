@@ -3,21 +3,13 @@ import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENE
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, mockClipboard, render, screen } from '@/tests/test-utils'
 import SpaceQueueRow from './SpaceQueueRow'
 
 jest.mock('./AddToAddressBook', () => ({
   __esModule: true,
   default: ({ address, chainId }: { address: string; chainId: string }) => (
     <button>{`Add ${address} on ${chainId}`}</button>
-  ),
-}))
-jest.mock('@/components/common/EthHashInfo', () => ({
-  __esModule: true,
-  default: ({ address }: { address: string }) => (
-    <span data-testid="counterparty">
-      <button aria-label="Copy to clipboard">{address}</button>
-    </span>
   ),
 }))
 jest.mock('./QueueTxDetails', () => ({
@@ -28,7 +20,6 @@ jest.mock('./RowActionsMenu', () => ({ __esModule: true, default: () => null }))
 jest.mock('./SignersTooltip', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/components/transactions/TxSummary/QueueActions', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/features/swap/public/hooks/useIsExpiredSwap', () => ({ __esModule: true, default: () => false }))
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => false }))
 
 const CHAIN_ID = '137'
 const RECIPIENT = checksumAddress(faker.finance.ethereumAddress())
@@ -68,10 +59,13 @@ describe('SpaceQueueRow', () => {
     expect(addAction()).toBeInTheDocument()
   })
 
-  it('keeps copy to clipboard on the unnamed counterparty', () => {
+  it('copies the unnamed counterparty address when the address is clicked', () => {
+    const writeText = mockClipboard()
     renderRow(transferTo({ value: RECIPIENT }))
 
-    expect(screen.getByRole('button', { name: 'Copy to clipboard' })).toHaveTextContent(RECIPIENT)
+    fireEvent.click(screen.getByLabelText('Copy to clipboard'))
+
+    expect(writeText).toHaveBeenCalledWith(RECIPIENT)
   })
 
   it('does not offer to add a counterparty the gateway already names', () => {

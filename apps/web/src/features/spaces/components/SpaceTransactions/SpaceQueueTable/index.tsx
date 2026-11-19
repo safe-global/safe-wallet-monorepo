@@ -237,7 +237,7 @@ const SpaceQueueTable = ({
             className={cn(
               tableVariants({ variant: 'panel' }),
               'table-fixed',
-              groups ? 'min-w-[1192px]' : 'min-w-[1128px]',
+              groups ? 'min-w-[1224px]' : 'min-w-[1160px]',
             )}
           >
             <QueueTableHeader

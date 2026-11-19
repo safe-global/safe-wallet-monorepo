@@ -4,7 +4,7 @@ import { cn } from '@safe-global/views/utils/cn'
 import CollapseAllButton, { type CollapseAllButtonProps } from './CollapseAllButton'
 import { QUEUE_COLUMNS, type QueueColumn } from './columns'
 
-// Fixed widths (cell padding included) add up to 968px, 1032px when rows name their Safe; the 1128px or 1192px floor leaves To 160px
+// Fixed widths (cell padding included) add up to 968px, 1032px when rows name their Safe; the 1160px or 1224px floor leaves To 192px, room for an address and its add-to-address-book action
 const COLUMN_WIDTHS: Record<QueueColumn, string> = {
   Nonce: 'w-16',
   Transaction: 'w-[21.5rem]',

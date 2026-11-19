@@ -21,6 +21,7 @@ const transfer = (
   confirmations: number,
   status = TransactionStatus.AWAITING_CONFIRMATIONS,
   conflictType: TransactionQueuedItem['conflictType'] = 'None',
+  recipient: { value: string; name?: string } = { value: RECIPIENT, name: 'Treasury' },
 ): TransactionQueuedItem => ({
   type: TransactionListItemType.TRANSACTION,
   conflictType,
@@ -31,7 +32,7 @@ const transfer = (
     txInfo: {
       type: TransactionInfoType.TRANSFER,
       sender: { value: SAFE_A },
-      recipient: { value: RECIPIENT, name: 'Treasury' },
+      recipient,
       direction: TransferDirection.OUTGOING,
       transferInfo: { type: 'NATIVE_COIN', value: '1000000000000000000' },
     },
@@ -73,6 +74,40 @@ export const QUEUE_SECTIONS: SpaceQueueSection[] = [
       {
         chainId: '1',
         items: [{ type: TransactionListItemType.LABEL, label: 'Next' }, transfer('b-1-4', 4, 1)],
+      },
+    ],
+  },
+]
+
+const UNNAMED = { value: '0xa2130cA1aB1F8A8A1B0E2a8F0C2D5e1b3c4d379f' }
+const AWAITING = TransactionStatus.AWAITING_CONFIRMATIONS
+
+/** The same unnamed address in rows of two Safes, beside a named one, for the add-to-address-book action */
+export const UNNAMED_COUNTERPARTY_SECTIONS: SpaceQueueSection[] = [
+  {
+    safeAddress: SAFE_A,
+    chains: [
+      {
+        chainId: '1',
+        items: [
+          { type: TransactionListItemType.LABEL, label: 'Next' },
+          transfer('a-1-56', 56, 2, TransactionStatus.AWAITING_EXECUTION, 'None', UNNAMED),
+          { type: TransactionListItemType.LABEL, label: 'Queued' },
+          transfer('a-1-57', 57, 1, AWAITING, 'None', UNNAMED),
+          transfer('a-1-58', 58, 0),
+        ],
+      },
+    ],
+  },
+  {
+    safeAddress: SAFE_B,
+    chains: [
+      {
+        chainId: '1',
+        items: [
+          { type: TransactionListItemType.LABEL, label: 'Next' },
+          transfer('b-1-4', 4, 1, AWAITING, 'None', UNNAMED),
+        ],
       },
     ],
   },

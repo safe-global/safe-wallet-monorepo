@@ -120,7 +120,7 @@ export const CollapseAll: Story = {
 
 export const TableHeaderRow: Story = {
   render: () => (
-    <Table className="table-fixed min-w-[1128px]">
+    <Table className="table-fixed min-w-[1160px]">
       <QueueTableHeader collapseAll={{ allCollapsed: false, count: 3, onToggle: fn() }} />
     </Table>
   ),
@@ -130,7 +130,7 @@ export const TableHeaderRow: Story = {
 export const SkeletonRows: Story = {
   tags: ['skip-visual-test'],
   render: () => (
-    <Table className="table-fixed min-w-[1128px]">
+    <Table className="table-fixed min-w-[1160px]">
       <TableBody>
         <QueueSkeletonRow height={168} rowHeight={56} />
       </TableBody>
