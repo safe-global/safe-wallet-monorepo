@@ -17,3 +17,7 @@
 /.yarnrc.yml        @safe-global/infrasec @compojoom @PooyaRaki
 /.yarn/             @safe-global/infrasec @compojoom @PooyaRaki
 /.husky/            @safe-global/infrasec @compojoom @PooyaRaki
+
+# E2E suite and the test that requires an E2E decision for each web flag
+/apps/web/e2e/                          @safe-global/safe-qa @compojoom @PooyaRaki
+/apps/web/config/remote-config.test.ts  @safe-global/safe-qa @compojoom @PooyaRaki
