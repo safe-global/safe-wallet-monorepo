@@ -84,13 +84,13 @@ describe('WALLET_WEB remote-config declaration', () => {
   })
 
   // A key shared with mobile is one Feature row in the Config Service, so both files must agree.
-  it('declares a key shared with mobile with the same description and scope', () => {
+  it('declares a key shared with mobile with the same description, scope and enabled', () => {
     const mobileByKey = new Map(mobileDecl.features.map((f) => [f.key, f]))
     const mismatched = decl.features
       .filter((f) => mobileByKey.has(f.key))
       .filter((f) => {
         const mobile = mobileByKey.get(f.key)
-        return mobile?.description !== f.description || mobile?.scope !== f.scope
+        return mobile?.description !== f.description || mobile?.scope !== f.scope || mobile?.enabled !== f.enabled
       })
       .map((f) => f.key)
     expect(mismatched).toEqual([])
