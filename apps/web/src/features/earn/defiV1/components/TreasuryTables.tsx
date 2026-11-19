@@ -3,17 +3,16 @@ import { ArrowDown, ArrowUp, ArrowUpDown, Clock, Coins, Lock, Sprout } from 'luc
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
-import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
 import { CHAIN_IDS, IDLE_CASH } from '../opportunities'
 import { budgetLeft, depositRoute } from '../shelf'
 import type { Holding, Operation, Opportunity, Sort, SortKey } from '../types'
+import { GroupBand, TableCard } from './GroupedTable'
 
-const BAND_CELL = 'bg-foreground/[0.03] py-0!'
 const OPS = DEFI_V1_COPY.operations
 const COLUMN_WIDTHS = ['', 'w-24', 'w-28', 'w-32', 'w-24', 'w-32 @6xl:w-44', 'w-40']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
@@ -32,35 +31,6 @@ export type Selection = { selected: string[]; isFull: boolean; onToggle: (id: st
 export type OpportunityGroup = { key: string; title?: string; showColumns?: boolean; items: Opportunity[] }
 
 const BAND_COLUMNS = HEADERS.slice(1, -1).map(({ label }) => label)
-const BAND_LABEL = 'text-xs font-semibold uppercase text-muted-foreground'
-
-const GroupBand = ({ title, count, showColumns }: { title: string; count: number; showColumns?: boolean }) => {
-  const label = (
-    <div className="flex min-h-10 items-center gap-2">
-      <span className={showColumns ? BAND_LABEL : 'text-sm font-medium text-foreground'}>{title}</span>
-      <Badge variant="subtle">{count}</Badge>
-    </div>
-  )
-  if (!showColumns)
-    return (
-      <TableRow data-no-hover data-no-divider>
-        <TableCell colSpan={COLUMN_COUNT} className={`rounded-lg ${BAND_CELL}`}>
-          {label}
-        </TableCell>
-      </TableRow>
-    )
-  return (
-    <TableRow data-no-hover data-no-divider>
-      <TableCell className={`rounded-l-lg ${BAND_CELL}`}>{label}</TableCell>
-      {BAND_COLUMNS.map((column) => (
-        <TableCell key={column} className={cn(BAND_LABEL, BAND_CELL)}>
-          {column}
-        </TableCell>
-      ))}
-      <TableCell colSpan={COLUMN_COUNT - BAND_COLUMNS.length - 1} className={`rounded-r-lg ${BAND_CELL}`} />
-    </TableRow>
-  )
-}
 
 const SortIcon = ({ direction }: { direction?: Sort['direction'] }) => {
   const Icon = direction === 'asc' ? ArrowUp : direction === 'desc' ? ArrowDown : ArrowUpDown
@@ -395,21 +365,6 @@ const OpportunityRow = ({
   )
 }
 
-const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
-  <Card radius="xl" size="none">
-    <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[992px] [&_td]:px-4 [&_th]:px-4">
-        <colgroup>
-          {COLUMN_WIDTHS.map((width, index) => (
-            <col key={index} className={width || undefined} />
-          ))}
-        </colgroup>
-        {children}
-      </Table>
-    </CardContent>
-  </Card>
-)
-
 export const OpportunitiesTable = ({
   label,
   groups,
@@ -435,7 +390,7 @@ export const OpportunitiesTable = ({
 }) => {
   const isEmpty = groups.every((group) => group.items.length === 0)
   return (
-    <TableCard label={label}>
+    <TableCard label={label} widths={COLUMN_WIDTHS} className="min-w-[992px]">
       <ColumnHeaders
         title={label}
         count={groups.length > 1 && !groups[0].title ? groups[0].items.length : undefined}
@@ -453,7 +408,12 @@ export const OpportunitiesTable = ({
         {groups.map((group) => (
           <Fragment key={group.key}>
             {group.title && (
-              <GroupBand title={group.title} count={group.items.length} showColumns={group.showColumns} />
+              <GroupBand
+                title={group.title}
+                count={group.items.length}
+                columnCount={COLUMN_COUNT}
+                columns={group.showColumns ? BAND_COLUMNS : undefined}
+              />
             )}
             {group.items.map((item) => (
               <OpportunityRow

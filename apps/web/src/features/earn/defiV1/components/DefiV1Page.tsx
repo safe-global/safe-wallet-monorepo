@@ -50,7 +50,7 @@ const nextSort = (current: Sort | null, key: SortKey): Sort | null => {
     : null
 }
 
-const initialPositions = (): Position[] =>
+export const initialPositions = (): Position[] =>
   EXISTING_POSITIONS.flatMap((existing) => {
     const opportunity = OPPORTUNITIES.find((item) => item.id === existing.opportunityId)
     return opportunity ? [{ opportunity, principal: existing.principal, earned: existing.earned, pending: false }] : []
