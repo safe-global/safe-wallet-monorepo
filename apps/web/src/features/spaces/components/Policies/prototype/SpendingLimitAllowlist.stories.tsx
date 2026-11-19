@@ -172,7 +172,8 @@ const meta = {
       </div>
     ),
   ],
-  tags: ['skip-visual-test'],
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['skip-visual-test', '!dev'],
 } satisfies Meta<typeof FormInScope>
 
 export default meta

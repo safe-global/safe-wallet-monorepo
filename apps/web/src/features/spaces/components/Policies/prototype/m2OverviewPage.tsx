@@ -78,6 +78,7 @@ import {
   type M2Account,
   AccountProtectionIcon,
   usePrototypeModel,
+  TOOLTIP_OFFSET,
 } from './m2Prototype'
 
 /** The Ops bot's limit next to a live Payments allowlist; locked: the allowlist applies to it, so it can't be edited. */
@@ -260,7 +261,7 @@ const matchesQuery = (query: string, values: string[]): boolean => {
 const toggle = <T,>(values: T[], value: T): T[] =>
   values.includes(value) ? values.filter((item) => item !== value) : [...values, value]
 
-type FilterOption<T extends string> = { value: T; label: string; icon?: ReactNode }
+export type FilterOption<T extends string> = { value: T; label: string; icon?: ReactNode }
 
 /** A dropdown pill styled like M1's policy type filter badges. */
 const FilterPill = <T extends string>({
@@ -418,7 +419,7 @@ const PolicyIcons = ({ types }: { types: M2PolicyType[] }): ReactElement => {
             >
               <Icon className="size-3.5 text-muted-foreground" aria-hidden />
             </TooltipTrigger>
-            <TooltipContent>{name}</TooltipContent>
+            <TooltipContent sideOffset={TOOLTIP_OFFSET}>{name}</TooltipContent>
           </Tooltip>
         )
       })}
@@ -430,7 +431,7 @@ const PolicyIcons = ({ types }: { types: M2PolicyType[] }): ReactElement => {
               +{overflow.length}
             </Typography>
           </TooltipTrigger>
-          <TooltipContent>
+          <TooltipContent sideOffset={TOOLTIP_OFFSET}>
             <div className="flex flex-col gap-1">
               {overflow.map((type) => (
                 <span key={type}>{POLICY_TYPES[type].name}</span>
@@ -468,7 +469,7 @@ const MultiNetworkThreshold = ({ networks }: { networks: NetworkEntry[] }): Reac
       <TooltipTrigger render={<span className="inline-flex" />} aria-label="Threshold differs per network">
         {badge}
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>
         <div className="flex flex-col gap-1">
           {networks.map(({ account }) => (
             <span key={account.chainId}>
@@ -1073,7 +1074,7 @@ const CoverageTag = ({ coverage, account }: { coverage: Coverage; account: M2Acc
           {label}
         </Badge>
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>{tooltip}</TooltipContent>
     </Tooltip>
   )
 }
@@ -1242,7 +1243,7 @@ const AddRuleMenu = ({
     return (
       <Tooltip>
         <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
-        <TooltipContent>Account settings block adding policies.</TooltipContent>
+        <TooltipContent sideOffset={TOOLTIP_OFFSET}>Account settings block adding policies.</TooltipContent>
       </Tooltip>
     )
 
@@ -1454,7 +1455,7 @@ export const RowStatusChip = ({ status, tooltip }: { status: RowStatus; tooltip?
       >
         {chip}
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>{tooltip}</TooltipContent>
     </Tooltip>
   )
 }
@@ -1527,7 +1528,7 @@ const policyRowColumns: DataTableColumn<PolicyRow>[] = [
           <TooltipTrigger render={<span className="inline-flex" />}>
             <ChainIndicator chainId={account.chainId} onlyLogo showUnknown imageSize={24} />
           </TooltipTrigger>
-          <TooltipContent>{CHAIN_NAMES[account.chainId] ?? account.chainId}</TooltipContent>
+          <TooltipContent sideOffset={TOOLTIP_OFFSET}>{CHAIN_NAMES[account.chainId] ?? account.chainId}</TooltipContent>
         </Tooltip>
       </RowCell>
     ),
@@ -1840,7 +1841,7 @@ const GroupValue = ({ grouping, row }: { grouping: Grouping; row: PolicyRow }): 
             >
               <ChainIndicator chainId={row.account.chainId} onlyLogo showUnknown imageSize={16} />
             </TooltipTrigger>
-            <TooltipContent>{networkName}</TooltipContent>
+            <TooltipContent sideOffset={TOOLTIP_OFFSET}>{networkName}</TooltipContent>
           </Tooltip>
         </div>
       )
@@ -2058,7 +2059,7 @@ const PolicyIconChip = ({ type }: { type: M2PolicyType }): ReactElement => {
       <TooltipTrigger render={<span className={cn(GROUP_CHIP, 'border border-border bg-card')} />} aria-label={name}>
         <Icon className="size-4 text-muted-foreground" aria-hidden />
       </TooltipTrigger>
-      <TooltipContent>{name}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>{name}</TooltipContent>
     </Tooltip>
   )
 }
@@ -2114,7 +2115,7 @@ const EnforcementIcon = ({
           <Landmark className="size-4" aria-hidden />
         )}
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>{tooltip}</TooltipContent>
     </Tooltip>
   )
 }
@@ -2325,7 +2326,7 @@ const unique = <T,>(values: T[]): T[] => [...new Set(values)]
 
 const NO_PILL_FILTERS: Omit<PolicyFilters, 'query'> = { accounts: [], networks: [], types: [], statuses: [] }
 
-type FilterGroup = {
+export type FilterGroup = {
   label: string
   options: FilterOption<string>[]
   selected: string[]
@@ -2378,7 +2379,13 @@ const FilterSection = ({ label, options, selected, onChange }: FilterGroup): Rea
 }
 
 /** The Filters button next to search: a count when any are on; the popover applies each change at once. */
-const FiltersPopover = ({ groups, onClearAll }: { groups: FilterGroup[]; onClearAll: () => void }): ReactElement => {
+export const FiltersPopover = ({
+  groups,
+  onClearAll,
+}: {
+  groups: FilterGroup[]
+  onClearAll: () => void
+}): ReactElement => {
   const activeCount = groups.reduce((count, { selected }) => count + selected.length, 0)
 
   return (
@@ -2415,7 +2422,7 @@ const FiltersPopover = ({ groups, onClearAll }: { groups: FilterGroup[]; onClear
 }
 
 /** One removable chip per active filter value, then Clear all; nothing at all when no filter is on. */
-const ActiveFilterChips = ({
+export const ActiveFilterChips = ({
   groups,
   onClearAll,
 }: {

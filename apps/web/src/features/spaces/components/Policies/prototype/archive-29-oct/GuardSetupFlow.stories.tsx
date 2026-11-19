@@ -1694,6 +1694,8 @@ const withPrototypeFrame: Decorator = (Story, context) => (
 
 const meta = {
   title: 'Prototype/Policies archive/29 Oct 13:30 – policy enforcement',
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['!dev'],
   component: GuardSetupFlowPrototype,
   decorators: [withPrototypeFrame],
   // Shared with the All states canvas, not stories.

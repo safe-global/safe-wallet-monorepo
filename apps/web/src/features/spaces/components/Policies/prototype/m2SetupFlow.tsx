@@ -160,6 +160,7 @@ import {
   type SignerId,
   AccountProtectionIcon,
   usePrototypeModel,
+  TOOLTIP_OFFSET,
 } from './m2Prototype'
 
 /**
@@ -341,7 +342,7 @@ export type Recipient = {
   selected: boolean
 }
 
-type Contact = { name: string; address: string }
+export type Contact = { name: string; address: string }
 
 export const PREFILLED_RECIPIENTS: Recipient[] = [
   {
@@ -418,7 +419,7 @@ const getShownRecipients = (choices: SetupChoices, account?: M2Account): Recipie
   account ? choices.recipients : choices.recipients.filter(({ history }) => !history)
 
 /** A token the form can list; `balance` is absent for one added by hand that the account doesn't hold. */
-type AccountToken = { symbol: string; name: string; logoUri: string; balance?: string; address?: string }
+export type AccountToken = { symbol: string; name: string; logoUri: string; balance?: string; address?: string }
 
 const tokenLogo = (address: string) => `https://safe-transaction-assets.safe.global/tokens/logos/${address}.png`
 const ETH_LOGO = 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png'
@@ -495,10 +496,10 @@ const getFormTokens = (choices: SetupChoices, account?: M2Account): AccountToken
 }
 
 /** The tokens left checked for the picked account. */
-const getAllowedTokens = (choices: SetupChoices, account?: M2Account): AccountToken[] =>
+export const getAllowedTokens = (choices: SetupChoices, account?: M2Account): AccountToken[] =>
   getFormTokens(choices, account).filter(({ symbol }) => !choices.excludedTokens.includes(symbol))
 
-const getSelectedRecipients = (choices: SetupChoices): Recipient[] =>
+export const getSelectedRecipients = (choices: SetupChoices): Recipient[] =>
   choices.recipients.filter(({ selected }) => selected)
 
 const recipientKey = ({ address }: Recipient): string => address.toLowerCase()
@@ -536,7 +537,7 @@ const MutedLine = ({ children }: { children: ReactNode }): ReactElement => (
 )
 
 /** A Create section: one light grey surface with its items white inside it. */
-const GroupSurface = ({
+export const GroupSurface = ({
   title,
   description,
   action,
@@ -544,8 +545,8 @@ const GroupSurface = ({
   markNew,
   children,
 }: {
-  title: string
-  description?: string
+  title: ReactNode
+  description?: ReactNode
   /** Top right of the section, e.g. Select all. */
   action?: ReactNode
   /** For scrolling the section into view, e.g. "Change tokens". */
@@ -566,7 +567,7 @@ const GroupSurface = ({
 )
 
 /** The account field's height, so every row on the form matches whatever its content. */
-const ItemSurface = ({
+export const ItemSurface = ({
   children,
   className,
   markNew,
@@ -811,7 +812,7 @@ const PreflightFailure = ({ preflight }: { preflight: Exclude<Preflight, 'ready'
 type DraftFields = { address: string; name: string }
 
 /** "Add a recipient" as a new item at the bottom of the list: Enter or ✓ adds it, ✕ or Esc drops it. */
-const RecipientDraftRow = ({
+export const RecipientDraftRow = ({
   listedAddresses,
   onConfirm,
   onRemove,
@@ -930,7 +931,7 @@ const CONTACT_LIST_CLASSES = [
 const ContactDivider = (): ReactElement => <div className="h-px bg-border/60" aria-hidden />
 
 /** M1's RecipientGroupHeader (AddressBookInput) restyled as the panel table's header bar. */
-const ContactsHeader = ({
+export const ContactsHeader = ({
   Icon,
   label,
   tooltip,
@@ -948,7 +949,7 @@ const ContactsHeader = ({
       <span className="min-w-0 truncate">{label}</span>
       <Tooltip>
         <TooltipTrigger render={<Info className="size-3.5 shrink-0 cursor-help" />} />
-        <TooltipContent>{tooltip}</TooltipContent>
+        <TooltipContent sideOffset={TOOLTIP_OFFSET}>{tooltip}</TooltipContent>
       </Tooltip>
       <span className="ml-auto">{count}</span>
     </div>
@@ -968,7 +969,7 @@ const LOCAL_CONTACTS: Contact[] = [
   { name: 'payments-team.eth', address: '0x8c3d4e5f60718293a4b5c6d7e8f901a2b3c4d5e6' },
 ]
 
-const CONTACT_GROUPS: { id: string; Icon: LucideIcon; label: string; tooltip: string; contacts: Contact[] }[] = [
+export const CONTACT_GROUPS: { id: string; Icon: LucideIcon; label: string; tooltip: string; contacts: Contact[] }[] = [
   {
     id: 'workspace',
     Icon: Building2,
@@ -988,18 +989,21 @@ const CONTACT_GROUPS: { id: string; Icon: LucideIcon; label: string; tooltip: st
 const ALL_CONTACTS = CONTACT_GROUPS.flatMap(({ contacts }) => contacts)
 
 /** The contacts M1's recipient field lists, as a checkbox list; contacts already listed are locked on. */
-const AddFromAddressBook = ({
+export const AddFromAddressBook = ({
   open,
   onOpenChange,
   listedAddresses,
   onAdd,
   anchorRef,
   externalQuery,
+  isSingle = false,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   listedAddresses: string[]
   onAdd: (contacts: Contact[]) => void
+  /** One contact per pick, e.g. a signer: a click picks it, with no boxes and no Add. */
+  isSingle?: boolean
   /** Opens under this element instead of its own button, searched by `externalQuery` (the recipient row's field). */
   anchorRef?: RefObject<HTMLDivElement | null>
   externalQuery?: string
@@ -1115,20 +1119,31 @@ const AddFromAddressBook = ({
                             'flex items-center gap-3 rounded-lg px-4 py-3 transition-colors hover:bg-foreground/5',
                             isListed ? 'cursor-default' : 'cursor-pointer',
                           )}
-                          onClick={isListed ? undefined : () => togglePick(key)}
+                          onClick={
+                            isListed
+                              ? undefined
+                              : isSingle
+                                ? () => {
+                                    onAdd([contact])
+                                    changeOpen(false)
+                                  }
+                                : () => togglePick(key)
+                          }
                         >
                           <div className="min-w-0 flex-1">
                             <SafeAddress name={contact.name} address={contact.address} avatarSize={24} />
                           </div>
                           {/* The row toggles too, so a click on the box itself must not reach it and toggle twice. */}
-                          <span className="flex shrink-0" onClick={(event) => event.stopPropagation()}>
-                            <Checkbox
-                              checked={isListed || picked.includes(key)}
-                              disabled={isListed}
-                              onCheckedChange={() => togglePick(key)}
-                              aria-label={`Add ${contact.name}`}
-                            />
-                          </span>
+                          {!isSingle && (
+                            <span className="flex shrink-0" onClick={(event) => event.stopPropagation()}>
+                              <Checkbox
+                                checked={isListed || picked.includes(key)}
+                                disabled={isListed}
+                                onCheckedChange={() => togglePick(key)}
+                                aria-label={`Add ${contact.name}`}
+                              />
+                            </span>
+                          )}
                         </div>
                       </li>
                     )
@@ -1139,14 +1154,18 @@ const AddFromAddressBook = ({
           </div>
         )}
 
-        <div className="shrink-0 px-1">
-          <ContactDivider />
-        </div>
-        <div className="shrink-0 p-2">
-          <Button className="w-full" disabled={picked.length === 0} onClick={add}>
-            Add
-          </Button>
-        </div>
+        {!isSingle && (
+          <>
+            <div className="shrink-0 px-1">
+              <ContactDivider />
+            </div>
+            <div className="shrink-0 p-2">
+              <Button className="w-full" disabled={picked.length === 0} onClick={add}>
+                Add
+              </Button>
+            </div>
+          </>
+        )}
       </PopoverContent>
     </Popover>
   )
@@ -1175,18 +1194,24 @@ const matchesToken = ({ symbol, name, address }: AccountToken, query: string): b
 }
 
 /** "Add a token" as a new row that searches like M1's TokenSelector; closing without a pick drops the row. */
-const TokenDraftRow = ({
+export const TokenDraftRow = ({
   addable,
   onConfirm,
   onRemove,
+  groupLabel = 'Popular',
+  noun = 'token',
 }: {
   addable: AccountToken[]
   onConfirm: (symbol: string) => void
   onRemove: () => void
+  /** The dropdown's heading, e.g. All networks when it lists networks. */
+  groupLabel?: string
+  /** What the row adds, for its labels and empty state. */
+  noun?: string
 }): ReactElement => {
   const anchor = useComboboxAnchor()
   const [query, setQuery] = useState('')
-  const groups: TokenGroup[] = addable.length > 0 ? [{ value: 'popular', label: 'Popular', items: addable }] : []
+  const groups: TokenGroup[] = addable.length > 0 ? [{ value: 'popular', label: groupLabel, items: addable }] : []
   const isTyping = query.trim() !== ''
   // ✓ adds the first token the typed text matches, as Enter on the highlighted one would.
   const firstMatch = isTyping ? addable.find((token) => matchesToken(token, query)) : undefined
@@ -1213,7 +1238,7 @@ const TokenDraftRow = ({
       >
         <ComboboxInput
           autoFocus
-          aria-label="Token"
+          aria-label={noun}
           placeholder="Search by name or address"
           showTrigger={!isTyping}
           // Spacing set explicitly to the token rows': icon 12px in, text 12px after the 24px icon box.
@@ -1233,7 +1258,7 @@ const TokenDraftRow = ({
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label="Add token"
+                aria-label={`Add ${noun}`}
                 disabled={!firstMatch}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => firstMatch && onConfirm(firstMatch.symbol)}
@@ -1261,7 +1286,7 @@ const TokenDraftRow = ({
           data-m2-new-corner="end"
           className="max-h-80"
         >
-          <ComboboxEmpty>No tokens found</ComboboxEmpty>
+          <ComboboxEmpty>No {noun}s found</ComboboxEmpty>
           <ComboboxList>
             {(group: TokenGroup) => (
               <ComboboxGroup key={group.value} items={group.items}>
@@ -1347,7 +1372,7 @@ const AddressPill = ({
   </div>
 )
 
-const SelectableChip = ({
+export const SelectableChip = ({
   isSelected,
   onToggle,
   icon,
@@ -1414,7 +1439,7 @@ const SelectableChip = ({
 )
 
 /** One checkbox per token, all checked by default. */
-const TokensGroup = ({
+export const TokensGroup = ({
   account,
   choices,
   onChoicesChange,
@@ -1524,7 +1549,7 @@ const EmptyItem = ({ children }: { children: ReactNode }): ReactElement => (
 const PageRoomContext = createContext<(isNeeded: boolean) => void>(() => {})
 
 /** Shown from the start, as M1's spender field is; picking the account brings in the suggested recipients. */
-const RecipientsGroup = ({
+export const RecipientsGroup = ({
   account,
   choices,
   onChoicesChange,
@@ -1675,7 +1700,7 @@ const RecipientsGroup = ({
 }
 
 /** M1's action row (SpendingLimitPolicyForm): a submit-sized Button in TxCardActions. */
-const PrimaryAction = ({
+export const PrimaryAction = ({
   label,
   disabled,
   disabledHint,
@@ -1698,7 +1723,7 @@ const PrimaryAction = ({
       {disabled && disabledHint ? (
         <Tooltip>
           <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
-          <TooltipContent>{disabledHint}</TooltipContent>
+          <TooltipContent sideOffset={TOOLTIP_OFFSET}>{disabledHint}</TooltipContent>
         </Tooltip>
       ) : (
         button
@@ -3744,7 +3769,9 @@ const SummaryInfo = ({ details }: { details?: string }): ReactElement | null =>
       >
         <Info className="size-3.5" aria-hidden />
       </TooltipTrigger>
-      <TooltipContent className="max-w-xs">{details}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET} className="max-w-xs">
+        {details}
+      </TooltipContent>
     </Tooltip>
   ) : null
 
@@ -3901,12 +3928,12 @@ const ShieldIcon = (): ReactElement => <Users aria-hidden />
 /** Account protection's icon, as on the protection row in the table. */
 const ProtectionIcon = (): ReactElement => <AccountProtectionIcon aria-hidden />
 
-const StepLabel = ({ children }: { children: ReactNode }): ReactElement => (
+export const StepLabel = ({ children }: { children: ReactNode }): ReactElement => (
   <span className="truncate text-sm leading-5 group-enabled:group-hover:underline">{children}</span>
 )
 
 /** A check once the step is done, a plus for the current and later steps; later steps are greyed. */
-const StepIcon = ({ isDone, isUpcoming }: { isDone: boolean; isUpcoming: boolean }): ReactElement => {
+export const StepIcon = ({ isDone, isUpcoming }: { isDone: boolean; isUpcoming: boolean }): ReactElement => {
   const Icon = isDone ? Check : Plus
 
   return (

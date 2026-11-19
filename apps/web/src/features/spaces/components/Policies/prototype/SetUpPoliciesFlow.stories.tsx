@@ -73,6 +73,8 @@ const shell = createM1FlowStory({ store: WIZARD_STORE })
 
 const meta = {
   title: 'Prototype/Set up policies flow',
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['!dev'],
   component: WizardStory,
   decorators: [shell.decorator],
   parameters: {

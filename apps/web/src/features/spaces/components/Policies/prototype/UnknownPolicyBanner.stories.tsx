@@ -119,6 +119,8 @@ const shell = createM1FlowStory({ store: WIZARD_STORE })
 
 const meta = {
   title: 'Prototype/Handoff – unknown policy banner',
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['!dev'],
   component: CreateStepWithBanner,
   decorators: [shell.decorator],
   parameters: {

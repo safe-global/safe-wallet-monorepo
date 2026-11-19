@@ -7,6 +7,8 @@ const shell = createPoliciesM2Story()
 
 const meta = {
   title: 'Prototype/Policies overview',
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['!dev'],
   component: PoliciesOverviewPage,
   decorators: [shell.decorator],
   parameters: shell.parameters,

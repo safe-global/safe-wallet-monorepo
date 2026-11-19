@@ -24,6 +24,8 @@ const shell = createPoliciesM2Story()
 
 const meta = {
   title: 'Prototype/Account panel',
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['!dev'],
   component: PanelOverOverview,
   decorators: [shell.decorator],
   parameters: shell.parameters,

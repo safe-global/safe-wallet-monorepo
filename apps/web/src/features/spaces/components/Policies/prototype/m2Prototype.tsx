@@ -648,6 +648,8 @@ export const createPoliciesM2Story = (
   options: Pick<MockStoryConfig, 'wallet' | 'store'> & {
     /** False when the story mounts the toasts itself (the full flow, whose wizard covers the page). */
     notifications?: boolean
+    /** The app route the shell renders, e.g. the Safe accounts page; the Policies prototype by default. */
+    pathname?: string
   } = {},
 ) => {
   const setup = createMockStory({
@@ -655,7 +657,7 @@ export const createPoliciesM2Story = (
     wallet: options.wallet ?? 'connected',
     store: { ...options.store, ...CHAINS_STORE },
     layout: 'fullPage',
-    pathname: PROTOTYPE_PATHNAME,
+    pathname: options.pathname ?? PROTOTYPE_PATHNAME,
     features: { spaces: true },
     query: { spaceId: SPACE_ID },
     shadcn: true,
@@ -805,6 +807,9 @@ const NameLine = ({
     </span>
   ) : null
 
+/** Tooltip offset in the prototypes: the arrow tip lands 4px from the element (8px, the default, leaves about 3px). */
+export const TOOLTIP_OFFSET = 9
+
 /** How long the tooltip waits before closing, so the pointer can cross from the address to the tooltip's copy button. */
 const TOOLTIP_CLOSE_DELAY_MS = 150
 
@@ -850,7 +855,13 @@ export const SafeAddress = ({
         <TooltipTrigger render={<span className="inline-flex shrink-0" />}>
           <Identicon address={address} size={avatarSize} />
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-none" onMouseEnter={show} onMouseLeave={hide}>
+        <TooltipContent
+          sideOffset={TOOLTIP_OFFSET}
+          side="top"
+          className="max-w-none"
+          onMouseEnter={show}
+          onMouseLeave={hide}
+        >
           <FullAddress address={address} chainId={chainId} />
         </TooltipContent>
       </Tooltip>
@@ -898,7 +909,13 @@ export const AddressHoverTooltip = ({
   return (
     <Tooltip open={isOpen} onOpenChange={(next) => (next ? show() : hide())}>
       <TooltipTrigger render={<span className={className} />}>{children}</TooltipTrigger>
-      <TooltipContent side="top" className="max-w-none" onMouseEnter={show} onMouseLeave={hide}>
+      <TooltipContent
+        sideOffset={TOOLTIP_OFFSET}
+        side="top"
+        className="max-w-none"
+        onMouseEnter={show}
+        onMouseLeave={hide}
+      >
         <span className="flex flex-col gap-0.5">
           {note && <span className="opacity-70">{note}</span>}
           <FullAddress address={address} chainId={chainId} />
