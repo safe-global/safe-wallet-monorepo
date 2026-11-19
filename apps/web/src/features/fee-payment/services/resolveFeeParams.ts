@@ -1,4 +1,5 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
@@ -63,6 +64,10 @@ export const resolveFeeParams = async ({
       `Untrusted Pay from Safe refundReceiver ${refundReceiver} returned by CGW on chain ${chainId}`,
     )
     throw new Error(`Refusing to sign: untrusted refundReceiver ${refundReceiver} returned by CGW.`)
+  }
+
+  if (!sameAddress(resolvedGasToken, gasToken)) {
+    throw new Error(`Refusing to sign: the fee quote is in ${resolvedGasToken}, not in the gas token picked.`)
   }
 
   return createTx(
