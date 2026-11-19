@@ -1,21 +1,14 @@
 import { useCallback, useMemo, useState, type SyntheticEvent } from 'react'
 import { useRouter } from 'next/router'
-import { LayoutGrid, Rows3, Table2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { Button } from '@safe-global/views/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@safe-global/views/components/ui/dropdown-menu'
-import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { AddCustomAppModal } from '@/components/safe-apps/AddCustomAppModal'
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
 import SafeAppsZeroResultsPlaceholder from '@/components/safe-apps/SafeAppsZeroResultsPlaceholder'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
+import { getUniqueTags } from '@/components/safe-apps/utils'
 import { AppRoutes } from '@/config/routes'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
@@ -35,79 +28,42 @@ import type { AppsV1Config, AppsView } from '../context'
 import { APPS_V1_COPY } from '../copy'
 import { AppsGrid } from './AppsGrid'
 import { AppsTable } from './AppsTable'
+import { AppsToolbar } from './AppsToolbar'
 
 const COPY = APPS_V1_COPY
-const GROUP_OPTIONS = Object.keys(COPY.groupByOption) as AppsGroupBy[]
-const VIEWS: { value: AppsView; icon: typeof Table2 }[] = [
-  { value: 'table', icon: Table2 },
-  { value: 'grid', icon: LayoutGrid },
-]
 const IDLE_BALANCES = idleByAsset(summariseTreasury(TREASURY_TOTAL, initialPositions()).idle, IDLE_MIX)
 const INVEST_OPTIONS = OPPORTUNITIES.filter((item) => item.access === 'all')
-
-const AppsToolbar = ({
-  groupBy,
-  onGroupBy,
-  view,
-  onView,
-}: {
-  groupBy: AppsGroupBy
-  onGroupBy: (value: AppsGroupBy) => void
-  view: AppsView
-  onView: (value: AppsView) => void
-}) => (
-  <div className="flex flex-wrap items-center justify-end gap-2" data-testid="apps-toolbar">
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" data-testid="apps-group-by" />}>
-        <Rows3 />
-        {`${COPY.groupBy}: ${COPY.groupByOption[groupBy]}`}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>{COPY.groupBy}</DropdownMenuLabel>
-          <DropdownMenuRadioGroup value={groupBy} onValueChange={(value) => onGroupBy(value as AppsGroupBy)}>
-            {GROUP_OPTIONS.map((option) => (
-              <DropdownMenuRadioItem key={option} value={option}>
-                {COPY.groupByOption[option]}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-    <Tabs value={view} onValueChange={(value) => onView(value as AppsView)}>
-      <TabsList variant="toggle" aria-label="View">
-        {VIEWS.map(({ value, icon: Icon }) => (
-          <TabsTrigger key={value} value={value} data-testid={`apps-view-${value}`}>
-            <Icon />
-            {COPY.view[value]}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
-  </div>
-)
 
 /** DES-201 prototype: the Apps list on the Treasury table, grouped by job, with built-in features listed first. */
 export const AppsV1View = ({
   config,
+  allApps,
   filteredApps,
   customApps,
   query,
+  onQuery,
   selectedCategories,
+  onCategories,
   batchOnly,
+  onBatchOnly,
   pinnedIds,
   onTogglePin,
+  onAddCustom,
   onRemoveCustom,
 }: {
   config: AppsV1Config
+  allApps: SafeApp[]
   filteredApps: SafeApp[]
   customApps: SafeApp[]
   query: string
+  onQuery: (value: string) => void
   selectedCategories: string[]
+  onCategories: (value: string[]) => void
   batchOnly: boolean
+  onBatchOnly: (value: boolean) => void
   pinnedIds: Set<number>
   onTogglePin: (appId: number) => void
+  onAddCustom: (app: SafeApp) => void
   onRemoveCustom?: (app: SafeApp) => void
 }) => {
   const router = useRouter()
@@ -120,6 +76,8 @@ export const AppsV1View = ({
   const [view, setView] = useState<AppsView>(config.view)
   const [hubTab, setHubTab] = useState<HubTab>('swap')
   const [isMoving, setIsMoving] = useState(false)
+  const [isAddingCustom, setIsAddingCustom] = useState(false)
+  const categories = useMemo(() => getUniqueTags(allApps), [allApps])
 
   const chainName = useCallback(
     (id: string) => configs.find((chain) => chain.chainId === id)?.chainName ?? `Chain ${id}`,
@@ -172,8 +130,29 @@ export const AppsV1View = ({
   const togglePin = (row: AppRow) => row.app && onTogglePin(row.app.id)
 
   return (
-    <div className="flex flex-col gap-4" data-testid="apps-v1">
-      <AppsToolbar groupBy={groupBy} onGroupBy={setGroupBy} view={view} onView={setView} />
+    <div className="flex flex-col gap-4 pt-5" data-testid="apps-v1">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Typography as="h1" variant="h3">
+          {COPY.title}
+        </Typography>
+        <Button variant="outline" onClick={() => setIsAddingCustom(true)} data-testid="add-custom-app">
+          <Plus />
+          {COPY.addCustom}
+        </Button>
+      </div>
+
+      <AppsToolbar
+        onQuery={onQuery}
+        categories={categories}
+        selectedCategories={selectedCategories}
+        onCategories={onCategories}
+        batchOnly={batchOnly}
+        onBatchOnly={onBatchOnly}
+        groupBy={groupBy}
+        onGroupBy={setGroupBy}
+        view={view}
+        onView={setView}
+      />
 
       {view === 'table' ? (
         <AppsTable groups={groups} isPinned={isPinned} onOpen={onOpen} onTogglePin={togglePin} chainName={chainName} />
@@ -197,6 +176,13 @@ export const AppsV1View = ({
         isBookmarked={previewDrawerApp && pinnedIds.has(previewDrawerApp.id)}
         onClose={closePreviewDrawer}
         onBookmark={onTogglePin}
+      />
+
+      <AddCustomAppModal
+        open={isAddingCustom}
+        onClose={() => setIsAddingCustom(false)}
+        onSave={onAddCustom}
+        safeAppsList={allApps}
       />
 
       <MoveFundsDialog

@@ -2,6 +2,16 @@ import type { AppsGroupBy, Job } from './catalogue'
 import type { AppsView } from './context'
 
 export const APPS_V1_COPY = {
+  title: 'Apps',
+  addCustom: 'Add custom app',
+  searchLabel: 'Search apps',
+  searchPlaceholder: 'Search by name or category',
+  filters: 'Filters',
+  category: 'Category',
+  noCategories: 'No categories',
+  optimizedWith: 'Optimized with',
+  batch: 'Batch transactions',
+  clearFilters: 'Clear filters',
   jobs: {
     grow: 'Grow idle funds',
     trade: 'Trade and move',
