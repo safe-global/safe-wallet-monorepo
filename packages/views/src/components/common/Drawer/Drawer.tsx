@@ -28,7 +28,12 @@ export const Drawer = ({
   const [headerCount, setHeaderCount] = useState(0)
   const [expanded, setExpanded] = useState(false)
 
-  if (!open && expanded) setExpanded(false)
+  // Reset on the next open, so the layout holds while the drawer slides out
+  const [wasOpen, setWasOpen] = useState(open)
+  if (open !== wasOpen) {
+    setWasOpen(open)
+    if (open) setExpanded(false)
+  }
 
   const fullScreen = isMobile || expanded
   const canExpand = expandable && !isMobile
