@@ -765,7 +765,11 @@ describe('WalletConnectProvider', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           authId,
           { method: 'personal_sign', params: [siweMessage, testSafeAddress] },
-          expect.objectContaining({ name: appName, url: 'https://apps-portal.safe.global/wallet-connect' }),
+          expect.objectContaining({
+            name: appName,
+            url: 'https://apps-portal.safe.global/wallet-connect',
+            dappUrl: authOrigin,
+          }),
         )
         expect(approveSessionAuthSpy).toHaveBeenCalledWith(
           authId,
@@ -1100,6 +1104,7 @@ describe('WalletConnectProvider', () => {
     it('passes the request onto the Safe Wallet Provider and sends the response to WalletConnect', async () => {
       const peerDescription = faker.lorem.sentence()
       const peerIcon = faker.image.url()
+      const verifiedOrigin = faker.internet.url({ appendSlash: false })
 
       jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
       jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
@@ -1149,6 +1154,7 @@ describe('WalletConnectProvider', () => {
           request: { method: 'fake', params: [] },
           chainId: 'eip155:5', // Goerli
         },
+        verifyContext: { verified: { validation: 'VALID', origin: verifiedOrigin, isScam: false } },
       } as unknown as WalletKitTypes.SessionRequest)
 
       expect(mockRequest).toHaveBeenCalledWith(
@@ -1159,6 +1165,7 @@ describe('WalletConnectProvider', () => {
           description: peerDescription,
           url: 'https://apps-portal.safe.global/wallet-connect',
           iconUrl: peerIcon,
+          dappUrl: verifiedOrigin,
         },
       )
 

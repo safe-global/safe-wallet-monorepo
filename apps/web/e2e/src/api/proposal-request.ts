@@ -1,8 +1,3 @@
-/**
- * Reads the attribution that the wallet declares when it proposes a transaction to CGW.
- *
- * Only `declared` is returned: the rest of the request, its headers included, never leaves this helper.
- */
 import type { Page, Request } from '@playwright/test'
 import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
