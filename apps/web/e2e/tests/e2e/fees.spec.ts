@@ -1,6 +1,6 @@
 import { Wallet, parseEther, parseUnits } from 'ethers'
 import { offerGasPaymentOptions } from '../../src/api/chain-config'
-import { balanceOf, emptyBalance } from '../../src/chain/balances'
+import { balanceOf } from '../../src/chain/balances'
 import { gasFeesOf } from '../../src/chain/transactions'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -68,28 +68,6 @@ test.describe('Fees where the relayer does not offer Pay from Safe', { tag: '@e2
       .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
       .toMatchObject({ detailedExecutionInfo: { executor: { value: owner } } })
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
-  })
-
-  test('should execute a transfer of an owner without ETH with the relay where the relayer sponsors free transactions', async ({
-    safePage,
-    safeApiClient,
-    journey,
-  }) => {
-    const recipient = Wallet.createRandom().address
-    const owner = journey.owners.alice.address
-    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
-    await emptyBalance(journey.env, owner)
-    await offerGasPaymentOptions(safePage, ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
-
-    const review = new TxReviewPage(safePage)
-    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
-    await review.sign()
-    await review.executeWithRelay()
-    await review.waitForExecution()
-
-    await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
-    expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
-    expect(await balanceOf(journey.env, owner)).toBe(0n)
   })
 
   test('should execute a transfer from the wallet of an owner who declines the free transaction', async ({

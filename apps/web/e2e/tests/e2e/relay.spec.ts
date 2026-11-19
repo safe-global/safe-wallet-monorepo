@@ -1,6 +1,6 @@
 import { Wallet, parseEther } from 'ethers'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
-import { balanceOf } from '../../src/chain/balances'
+import { balanceOf, emptyBalance } from '../../src/chain/balances'
 import { sponsoredTransactionsUsed } from '../../src/fixtures/email-session'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -26,13 +26,15 @@ async function executorOfNonce(
 }
 
 test.describe('Execute with the relay', { tag: '@e2e' }, () => {
-  test('should execute a transfer from the relayer account when an owner signs and picks the relay', async ({
+  test('should execute a transfer from the relayer account when an owner without ETH signs and picks the relay', async ({
     safePage,
     safeApiClient,
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
+    const owner = journey.owners.alice.address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    await emptyBalance(journey.env, owner)
 
     const review = new TxReviewPage(safePage)
     await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
@@ -44,6 +46,7 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     await expect.poll(() => executorOfNonce(safeApiClient, safe.address, 0)).toBe(RELAYER)
+    expect(await balanceOf(journey.env, owner)).toBe(0n)
   })
 
   test("should spend one of the Workspace plan's sponsored transactions when a Safe in a Business Workspace relays", async ({
