@@ -3,7 +3,7 @@
  * Contract addresses are the real mainnet deployments; every person, vendor and Safe is made up.
  */
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
-import type { AddressBookContact, ContactTag, WorkspaceTag } from '../types'
+import type { AddressBookContact, ContactTag, PendingRequest, SuggestedContact, WorkspaceTag } from '../types'
 
 const logo = (chainId: string) => `mock-assets/safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.webp`
 
@@ -91,4 +91,58 @@ export const LOCAL_CONTACTS: AddressBookContact[] = [
   { address: ADDRESSES.hardwareWallet, name: 'My hardware wallet', chains: [ethereum, base] },
   { address: ADDRESSES.treasuryLookAlike, name: 'Old treasury', chains: [ethereum] },
   { address: ADDRESSES.treasury, name: 'Treasury', chains: [ethereum], isShared: true },
+]
+
+export const SUGGESTED_SIGNERS: SuggestedContact[] = [
+  {
+    address: '0x60E543e244f513795d6a7fbCf0479A4DBA950a9A',
+    chains: [ethereum, arbitrum, optimism],
+    suggestedName: 'Treasury signer 4',
+    reason: { kind: 'signer', safes: ['Treasury'] },
+  },
+  {
+    address: '0xFf23675C1fc258d5DB60fd1A6259d2209255221D',
+    chains: [base, ethereum],
+    suggestedName: 'Payroll signer 3',
+    reason: { kind: 'signer', safes: ['Payroll'] },
+  },
+  {
+    address: '0x834984C04f21A982f8BfC1f18157087E5B52B21C',
+    chains: [gnosis, optimism, arbitrum],
+    suggestedName: 'Ops multisig signer 2',
+    reason: { kind: 'signer', safes: ['Ops multisig', 'Grants program'] },
+  },
+  {
+    address: '0x19cc57aF6C4bcd078b72522c3ef6B6705c6d1d22',
+    chains: [optimism, arbitrum],
+    suggestedName: 'Grants program signer 3',
+    reason: { kind: 'signer', safes: ['Grants program'] },
+  },
+]
+
+export const PENDING_REQUESTS: PendingRequest[] = [
+  {
+    id: 1,
+    address: '0x4E2b0b2d6b0f3a1c5e9D8F7A6b5C4d3E2f1a0B9c',
+    name: 'Brightline Payroll Services',
+    chains: [ethereum, base],
+    requestedBy: MEMBERS.jonas,
+    isInWorkspace: false,
+  },
+  {
+    id: 2,
+    address: ADDRESSES.northwind,
+    name: 'Northwind Logistics (new invoices)',
+    chains: [ethereum, arbitrum],
+    requestedBy: MEMBERS.lena,
+    isInWorkspace: true,
+  },
+  {
+    id: 3,
+    address: '0x8a7b6c5d4E3f2a1B0c9D8E7f6A5b4C3d2E1f0A9B',
+    name: 'Conference venue deposit',
+    chains: [optimism],
+    requestedBy: '0x2f6C1A8B9d0E3f4a5B6c7d8e9f0a1B2c3D4e5F6A',
+    isInWorkspace: false,
+  },
 ]

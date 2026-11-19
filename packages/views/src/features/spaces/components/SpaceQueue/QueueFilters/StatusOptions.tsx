@@ -3,7 +3,6 @@ import { CalendarClock, CircleCheck, Clock3, PenLine, Split, Users, type LucideI
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { DropdownMenuSeparator } from '@safe-global/views/components/ui/dropdown-menu'
 import type { QueueStatusOption } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
-import FilterDropdown from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterDropdown'
 import FilterOptionItem from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterOptionItem'
 import { STATUS_OPTION_LABELS } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/labels'
 
@@ -45,8 +44,8 @@ export type StatusOptionsProps = {
   onToggle: (option: QueueStatusOption) => void
 }
 
-/** The Status filter's checkboxes, shared by its own menu and the Filter menu */
-export const StatusOptions = ({ statuses, flags, counts, selected, onToggle }: StatusOptionsProps): ReactElement => {
+/** The Status filter's checkboxes in the Filter menu */
+const StatusOptions = ({ statuses, flags, counts, selected, onToggle }: StatusOptionsProps): ReactElement => {
   const renderOption = (option: QueueStatusOption) => (
     <FilterOptionItem
       key={option}
@@ -67,10 +66,4 @@ export const StatusOptions = ({ statuses, flags, counts, selected, onToggle }: S
   )
 }
 
-const StatusFilter = (props: StatusOptionsProps): ReactElement => (
-  <FilterDropdown label="Status" contentClassName="min-w-56">
-    <StatusOptions {...props} />
-  </FilterDropdown>
-)
-
-export default StatusFilter
+export default StatusOptions
