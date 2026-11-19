@@ -1,3 +1,5 @@
+import * as fs from 'fs'
+import * as path from 'path'
 import Ajv2020 from 'ajv/dist/2020'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import decl from './remote-config.json'
@@ -5,6 +7,47 @@ import schema from './remote-config.schema.json'
 
 const enumKeys = new Set<string>(Object.values(FEATURES))
 const declaredKeys = decl.features.map((f) => f.key)
+
+const REPO_ROOT = path.join(__dirname, '..', '..', '..')
+const WEB_SOURCE_DIRS = ['apps/web/src', 'packages/utils/src', 'packages/store/src'].map((dir) =>
+  path.join(REPO_ROOT, dir),
+)
+
+const isProductionSource = (rel: string): boolean =>
+  /\.(ts|tsx)$/.test(rel) &&
+  !/\.(test|spec|stories)\.(ts|tsx)$/.test(rel) &&
+  !/(^|\/)(tests|__tests__|__mocks__)\//.test(rel)
+
+/**
+ * Collects every `FEATURES.<KEY>` member access in the web app and the shared
+ * packages it uses (excluding tests, mocks and stories), so the declaration stays
+ * in lockstep with what the code reads.
+ */
+const collectUsedFeatureKeys = (dirs: string[]): Set<string> => {
+  const used = new Set<string>()
+  for (const dir of dirs) {
+    const entries = fs.readdirSync(dir, { recursive: true, encoding: 'utf-8' })
+    for (const rel of entries) {
+      if (!isProductionSource(rel)) {
+        continue
+      }
+      const full = path.join(dir, rel)
+      if (!fs.statSync(full).isFile()) {
+        continue
+      }
+      const source = fs.readFileSync(full, 'utf-8')
+      for (const match of source.matchAll(/\bFEATURES\.([A-Z0-9_]+)/g)) {
+        used.add(match[1])
+      }
+    }
+  }
+  return used
+}
+
+// packages/utils/src/utils/ens.ts spells this key as a string to stay free of the FEATURES import
+const KEYS_READ_AS_STRINGS = ['DOMAIN_LOOKUP']
+
+const usedKeys = new Set([...collectUsedFeatureKeys(WEB_SOURCE_DIRS), ...KEYS_READ_AS_STRINGS])
 
 describe('WALLET_WEB remote-config declaration', () => {
   it('validates against remote-config.schema.json', () => {
@@ -28,8 +71,13 @@ describe('WALLET_WEB remote-config declaration', () => {
     expect(unknown).toEqual([])
   })
 
-  it('every FEATURES value is declared', () => {
-    const missing = [...enumKeys].filter((k) => !declaredKeys.includes(k))
-    expect(missing).toEqual([])
+  it('every FEATURES key used in web source is declared', () => {
+    const undeclared = [...usedKeys].filter((k) => !declaredKeys.includes(k))
+    expect(undeclared).toEqual([])
+  })
+
+  it('every declared key is actually used in web source (no dead declarations)', () => {
+    const unused = declaredKeys.filter((k) => !usedKeys.has(k))
+    expect(unused).toEqual([])
   })
 })
