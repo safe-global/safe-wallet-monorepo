@@ -8,6 +8,7 @@ import {
   InputGroupTextarea,
 } from '../input-group'
 import { Search, Mail, Send } from 'lucide-react'
+import { userEvent, within } from 'storybook/test'
 import { SearchInput } from '../search-input'
 
 /**
@@ -308,4 +309,17 @@ export const AllVariants: Story = {
       </div>
     </div>
   ),
+}
+
+export const ScriptGuardError: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <div style={{ width: '300px' }}>
+      <SearchInput placeholder="Search or create a tag" />
+      <p className="text-muted-foreground mt-2 text-sm">The error sits below the box; the input stays in place.</p>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.type(within(canvasElement).getByRole('searchbox'), '<script>')
+  },
 }
