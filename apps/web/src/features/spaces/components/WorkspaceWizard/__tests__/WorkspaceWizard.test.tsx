@@ -97,6 +97,18 @@ describe('WorkspaceWizard', () => {
     await waitFor(() => expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: { spaceId } }))
   })
 
+  it('offers a retry when the user behind a first checkout cannot be loaded', async () => {
+    server.use(sessionHandler('complete'))
+    renderWizard(
+      'survey',
+      { sessionId: `cs_${faker.string.alphanumeric(24)}` },
+      { createdSpaceId: faker.string.uuid() },
+    )
+    server.use(http.get(`${GATEWAY_URL}/v1/users`, () => new HttpResponse(null, { status: 500 })))
+
+    expect(await screen.findByText("We couldn't load your account")).toBeInTheDocument()
+  })
+
   it('waits for the draft before it looks for the Workspace of a first checkout', async () => {
     const spaceId = faker.string.uuid()
     server.use(

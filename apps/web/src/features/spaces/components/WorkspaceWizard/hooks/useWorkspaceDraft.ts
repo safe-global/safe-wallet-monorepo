@@ -9,11 +9,14 @@ import {
   type WorkspaceDraftFields,
 } from '../../../public/store/workspaceDraftSlice'
 
-/** The signed-in user's onboarding draft; `isReady` is false until we know who the user is. */
+/**
+ * The signed-in user's onboarding draft; `isReady` is false until we know who the user is, and `isUserError` tells
+ * a failed user request apart from one that is still loading.
+ */
 export const useWorkspaceDraft = () => {
   const dispatch = useAppDispatch()
   const isSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
+  const { currentData: user, isError, refetch } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
   const stored = useAppSelector(selectStoredWorkspaceDraft)
   const ownerId = user?.id
 
@@ -29,5 +32,17 @@ export const useWorkspaceDraft = () => {
     [dispatch, ownerId],
   )
 
-  return { draft, update, ownAddresses, isReady: ownerId !== undefined }
+  // A skipped query cannot refetch, and a signed-out user has nothing to retry.
+  const retryUser = useCallback(() => {
+    if (isSignedIn) void refetch()
+  }, [isSignedIn, refetch])
+
+  return {
+    draft,
+    update,
+    ownAddresses,
+    isReady: ownerId !== undefined,
+    isUserError: isSignedIn && isError && user === undefined,
+    retryUser,
+  }
 }
