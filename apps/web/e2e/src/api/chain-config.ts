@@ -8,11 +8,7 @@ const CHAINS_ENDPOINT = /\/v[12]\/chains(\/\d+)?(\?.*)?$/
 const isChainsPage = (body: unknown): body is { results: Chain[] } =>
   typeof body === 'object' && body !== null && 'results' in body && Array.isArray(body.results)
 
-/**
- * Makes the relayer of every chain offer only `options` to the wallet in `page`, from its next page load. The stack
- * has one chain config, with every option; production lists `PAY_FROM_SAFE` on no chain and has no relayer on most.
- * The gateway and the relay keep the config of the stack, so an option left in `options` still relays.
- */
+/** Makes the relayer of every chain offer only `options` to the wallet in `page`; the gateway keeps its own config. */
 export async function offerGasPaymentOptions(page: Page, options: GasPaymentOption[]): Promise<void> {
   const withOptions = (chain: Chain): Chain =>
     chain.relayer ? { ...chain, relayer: { ...chain.relayer, gasPaymentOptions: options } } : chain
