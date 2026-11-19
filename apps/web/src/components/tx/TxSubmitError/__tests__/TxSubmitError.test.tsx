@@ -7,7 +7,7 @@ import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import { BaseError } from 'viem'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
-import TxSubmitError from '..'
+import TxSubmitError, { SERVICE_BUSY_MESSAGE } from '..'
 
 /** The ethers error the Ledger module rejects with, as viem re-wraps it. */
 const ledgerSubmitError = (error: Parameters<typeof mapLedgerError>[0]): Error => {
@@ -143,7 +143,7 @@ describe('TxSubmitError', () => {
   })
 
   describe('CGW response states (WA-3252)', () => {
-    it.each([429, 502, 500, 503, 422])('renders the agreed copy for a %s from CGW', (status) => {
+    it.each([502, 500, 503, 422])('renders the agreed copy for a %s from CGW', (status) => {
       const error = asError({ status, data: {} })
 
       const { getByText } = render(<TxSubmitError error={error} />)
@@ -166,6 +166,16 @@ describe('TxSubmitError', () => {
       expect(container.textContent).not.toContain('nginx')
       expect(container.textContent).not.toContain('<')
       expect(queryByText(/Could not submit/)).not.toBeInTheDocument()
+    })
+
+    it('tells the user the service is busy for a 429 from CGW, never that the transaction could not be submitted', () => {
+      const error = asError({ status: 429, data: { code: 429, message: 'Too Many Requests' } })
+
+      const { getByText, queryByText } = render(<TxSubmitError error={error} />)
+
+      expect(getByText(SERVICE_BUSY_MESSAGE)).toBeInTheDocument()
+      expect(queryByText(/Could not submit/)).not.toBeInTheDocument()
+      expect(queryByText(/on our end/)).not.toBeInTheDocument()
     })
 
     it('renders the banned-Safe copy for a 451', () => {

@@ -36,3 +36,17 @@ export const Member: Story = { args: { canReview: false, requests: PENDING_REQUE
 export const AdminEmpty: Story = { args: { requests: [] } }
 
 export const MemberEmpty: Story = { args: { canReview: false, requests: [] } }
+
+const LONG = ' with a name long enough to need truncating'
+
+/** Long names in a 1000px container, where the Contact column used to run over Chains. */
+export const LongTextNarrow: Story = {
+  decorators: [(Story) => <div className="w-[1000px]">{Story()}</div>],
+  args: {
+    requests: PENDING_REQUESTS.map((request) => ({
+      ...request,
+      name: request.name + LONG,
+      requestedBy: request.requestedBy && request.requestedBy + LONG,
+    })),
+  },
+}
