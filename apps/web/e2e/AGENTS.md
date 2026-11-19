@@ -8,7 +8,7 @@ All new web E2E tests are written here. A Playwright test is only for behaviour 
 
 - `tests/e2e/` — journeys: each test acts in the UI and checks the result in CGW and on chain (`src/chain/`). A test that changes an existing Safe seeds it with `seedSafe(journey, …)` from `src/seed/`
 - `tests/{regression,smoke}/` — specs that read the Safes their scenarios prepare as `safes.<name>`, and the owners `alice`, `bob`, `carol` and `dave` from the `owners` fixture
-- Every spec is registered in `environment/playwright-specs.mjs` and runs on the isolated stack
+- Every spec is registered in `environment/playwright-specs.mjs` and runs on the isolated stack; its `flags` name the feature flags whose feature it covers
 - `src/pages/` — page objects · `src/fixtures/` — fixtures · `src/data/` — test data · `src/api/` — API helpers
 
 ## Commands
