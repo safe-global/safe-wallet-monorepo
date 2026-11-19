@@ -82,6 +82,7 @@ describe('DangerZoneSection', () => {
       memberCount: 0,
       safeCount: 0,
       experimentalFeatures: [],
+      setupStatus: null,
     }
 
     renderSection(space)
@@ -105,6 +106,7 @@ describe('DangerZoneSection', () => {
       memberCount: 0,
       safeCount: 0,
       experimentalFeatures: [],
+      setupStatus: null,
     }
 
     renderSection(viewedSpace)
@@ -122,6 +124,7 @@ describe('DangerZoneSection', () => {
       memberCount: 0,
       safeCount: 0,
       experimentalFeatures: [],
+      setupStatus: null,
     }
 
     beforeEach(() => {
