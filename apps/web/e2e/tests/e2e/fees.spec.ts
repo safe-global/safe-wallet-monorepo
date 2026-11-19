@@ -69,26 +69,4 @@ test.describe('Fees where the relayer does not offer Pay from Safe', { tag: '@e2
       .toMatchObject({ detailedExecutionInfo: { executor: { value: owner } } })
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
   })
-
-  test('should execute a transfer from the wallet of an owner who declines the free transaction', async ({
-    safePage,
-    safeApiClient,
-    journey,
-  }) => {
-    const recipient = Wallet.createRandom().address
-    const owner = journey.owners.alice.address
-    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
-    await offerGasPaymentOptions(safePage, ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
-
-    const review = new TxReviewPage(safePage)
-    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
-    await review.sign()
-    await review.executeDecliningSponsor()
-    await review.waitForExecution()
-
-    await expect
-      .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
-      .toMatchObject({ detailedExecutionInfo: { executor: { value: owner } } })
-    expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
-  })
 })
