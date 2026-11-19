@@ -13,7 +13,7 @@ Config Service diffs against when seeding/verifying `Feature` rows for a release
 
 | Field           | Maps to `Feature`     | Notes                                              |
 | --------------- | --------------------- | -------------------------------------------------- |
-| `key`           | `Feature.key`         | Must be a value of the `FEATURES` enum.            |
+| `key`           | `Feature.key`         | A `FEATURES` value that web code reads.            |
 | `description`   | `Feature.description` | Code is authoritative.                             |
 | `scope`         | `Feature.scope`       | `GLOBAL` or `PER_CHAIN`.                           |
 | `defaultChains` | `Feature.chains`      | Release-time seed (chain IDs). Empty for `GLOBAL`. |
@@ -23,8 +23,9 @@ Config Service diffs against when seeding/verifying `Feature` rows for a release
 1. Add the key to the `FEATURES` enum in
    [`packages/utils/src/utils/chains.ts`](../../../../packages/utils/src/utils/chains.ts).
 2. Add a matching entry here (`key`, `description`, `scope`, `defaultChains`).
-3. `remote-config.test.ts` (the sync test) fails if the enum and this file disagree
-   or the file is schema-invalid.
+3. `remote-config.test.ts` (the sync test) fails if web code (`apps/web/src`,
+   `packages/utils/src`, `packages/store/src`) reads a flag that is not declared, if a
+   declared flag is not read anywhere, or if the file is schema-invalid.
 
 On release, an operator reconciles flags via the Config Service admin "Reconcile
 flags" view. `defaultChains` is currently seeded empty for every flag; run the

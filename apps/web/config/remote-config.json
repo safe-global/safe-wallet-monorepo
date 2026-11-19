@@ -33,12 +33,6 @@
       "defaultChains": []
     },
     {
-      "key": "SAFE_TX_GAS_OPTIONAL",
-      "description": "Treat safeTxGas as optional (Safe >= 1.3.0).",
-      "scope": "PER_CHAIN",
-      "defaultChains": []
-    },
-    {
       "key": "TX_SIMULATION",
       "description": "Transaction simulation via Tenderly.",
       "scope": "PER_CHAIN",
@@ -50,7 +44,6 @@
       "scope": "PER_CHAIN",
       "defaultChains": []
     },
-    { "key": "RELAYING", "description": "Gasless transaction relaying.", "scope": "PER_CHAIN", "defaultChains": [] },
     {
       "key": "EIP1271",
       "description": "EIP-1271 smart-contract signature verification.",
@@ -94,7 +87,6 @@
       "scope": "PER_CHAIN",
       "defaultChains": []
     },
-    { "key": "SAP_BANNER", "description": "Safe Apps promotion banner.", "scope": "PER_CHAIN", "defaultChains": [] },
     { "key": "NATIVE_SWAPS", "description": "Native token swaps.", "scope": "PER_CHAIN", "defaultChains": [] },
     {
       "key": "NATIVE_SWAPS_USE_COW_STAGING_SERVER",
@@ -220,7 +212,6 @@
       "scope": "PER_CHAIN",
       "defaultChains": []
     },
-    { "key": "SEND_FLOW", "description": "New token send flow.", "scope": "PER_CHAIN", "defaultChains": [] },
     { "key": "BATCHING", "description": "Transaction batching.", "scope": "PER_CHAIN", "defaultChains": [] },
     { "key": "OIDC_AUTH", "description": "OIDC-based social login.", "scope": "PER_CHAIN", "defaultChains": [] },
     {
