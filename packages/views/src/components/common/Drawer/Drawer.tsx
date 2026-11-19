@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactElement, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Sheet, SheetContent } from '@safe-global/views/components/ui/sheet'
@@ -43,7 +43,17 @@ export const Drawer = ({
 
   const fullScreen = isMobile || expanded
   const showResizeHandle = resizable && !fullScreen
-  const maxWidth = typeof window === 'undefined' ? WIDTHS.lg : Math.max(MIN_WIDTH, window.innerWidth - VIEWPORT_GUTTER)
+  const [viewportWidth, setViewportWidth] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!open || !showResizeHandle) return
+    const update = () => setViewportWidth(window.innerWidth)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [open, showResizeHandle])
+
+  const maxWidth = viewportWidth === null ? WIDTHS.lg : Math.max(MIN_WIDTH, viewportWidth - VIEWPORT_GUTTER)
   const currentWidth = Math.min(width ?? WIDTHS[size], maxWidth)
   const canExpand = expandable && !isMobile
 
@@ -87,7 +97,7 @@ export const Drawer = ({
         showCloseButton={false}
         aria-label={ariaLabel}
         data-full-screen={fullScreen || undefined}
-        style={showResizeHandle && width !== null ? { width } : undefined}
+        style={showResizeHandle && width !== null ? { width: currentWidth } : undefined}
       >
         {showResizeHandle && (
           <DrawerResizeHandle width={currentWidth} min={MIN_WIDTH} max={maxWidth} onResize={setWidth} />

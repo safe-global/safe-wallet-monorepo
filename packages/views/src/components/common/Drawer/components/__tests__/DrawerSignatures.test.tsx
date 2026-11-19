@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import { DrawerSignatures, type DrawerSignatureRow } from '../DrawerSignatures'
+import { DrawerSignatures, DrawerSignaturesBadge, type DrawerSignatureRow } from '../DrawerSignatures'
 
 const rows: DrawerSignatureRow[] = [
   { id: 'created', status: 'created', signer: 'Alice', time: 'Nov 12, 10:02' },
@@ -7,11 +7,11 @@ const rows: DrawerSignatureRow[] = [
   { id: 'bob', status: 'needed', signer: 'Bob', action: <button>Notify</button> },
 ]
 
-const visible = (text: string) => screen.getAllByText(text).filter((element) => !element.closest('[hidden]'))
+const required = <DrawerSignaturesBadge tone="warning">1 of 2 required</DrawerSignaturesBadge>
 
 describe('DrawerSignatures', () => {
   it('starts folded with how many signatures are still required', () => {
-    render(<DrawerSignatures signed={1} required={2} rows={rows} />)
+    render(<DrawerSignatures status={required} rows={rows} />)
 
     expect(screen.getByText('1 of 2 required')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Show signatures' })).toHaveAttribute('aria-expanded', 'false')
@@ -19,7 +19,7 @@ describe('DrawerSignatures', () => {
   })
 
   it('unfolds into the signer timeline, with the row action on a missing signer', () => {
-    render(<DrawerSignatures signed={1} required={2} rows={rows} />)
+    render(<DrawerSignatures status={required} rows={rows} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Show signatures' }))
 
@@ -30,7 +30,7 @@ describe('DrawerSignatures', () => {
   })
 
   it('draws a solid line before a signature and a dashed one before a missing signer', () => {
-    render(<DrawerSignatures signed={1} required={2} rows={rows} defaultOpen />)
+    render(<DrawerSignatures status={required} rows={rows} defaultOpen />)
 
     const items = screen.getAllByRole('listitem')
 
@@ -39,31 +39,57 @@ describe('DrawerSignatures', () => {
     expect(items[2].querySelector('[aria-hidden].border-l')).toBeNull()
   })
 
-  it('says when every signature is in', () => {
-    render(<DrawerSignatures signed={2} required={2} rows={rows.slice(0, 2)} />)
+  it('keeps the status the app passes, folded and open', () => {
+    render(
+      <DrawerSignatures
+        status={<DrawerSignaturesBadge tone="success">2 of 2 signed</DrawerSignaturesBadge>}
+        rows={rows}
+      />,
+    )
+
+    expect(screen.getByText('2 of 2 signed')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show signatures' }))
 
     expect(screen.getByText('2 of 2 signed')).toBeInTheDocument()
   })
 
-  it('asks for your signature once, in the badge while folded and on your row when open', () => {
-    const yourTurn: DrawerSignatureRow[] = [
-      ...rows.slice(0, 2),
-      { id: 'you', status: 'needed', signer: 'Carol', you: true },
-    ]
-    render(<DrawerSignatures signed={1} required={2} rows={yourTurn} />)
+  it('asks for your signature on your row when it is still needed', () => {
+    render(
+      <DrawerSignatures
+        status={required}
+        rows={[...rows.slice(0, 2), { id: 'you', status: 'needed', signer: 'Carol', you: true }]}
+        defaultOpen
+      />,
+    )
 
-    expect(visible('Your signature required')).toHaveLength(1)
-
-    fireEvent.click(screen.getByRole('button', { name: 'Show signatures' }))
-
-    expect(visible('Your signature required')).toHaveLength(1)
+    expect(screen.getByText('Your signature required')).toBeInTheDocument()
     expect(screen.getByText('(you)')).toBeInTheDocument()
+  })
+
+  it('shows a signer who is no longer needed without a request, a badge or their action', () => {
+    render(
+      <DrawerSignatures
+        status={<DrawerSignaturesBadge tone="success">2 of 2 signed</DrawerSignaturesBadge>}
+        rows={[
+          ...rows.slice(0, 2),
+          { id: 'bob', status: 'signed', signer: 'Bob' },
+          { id: 'you', status: 'not-needed', signer: 'Carol', you: true, action: <button>Notify</button> },
+        ]}
+        defaultOpen
+      />,
+    )
+
+    expect(screen.queryByText('Your signature required')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Notify' })).not.toBeInTheDocument()
+    expect(screen.getByText('(you)')).toBeInTheDocument()
+    expect(screen.getAllByRole('listitem')[2].querySelector('[aria-hidden].border-l')).toHaveClass('border-dashed')
   })
 
   it('opens and folds from the page when controlled', () => {
     const onOpenChange = jest.fn()
     const { rerender } = render(
-      <DrawerSignatures signed={1} required={2} rows={rows} open={false} onOpenChange={onOpenChange} />,
+      <DrawerSignatures status={required} rows={rows} open={false} onOpenChange={onOpenChange} />,
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Show signatures' }))
@@ -71,24 +97,15 @@ describe('DrawerSignatures', () => {
     expect(onOpenChange).toHaveBeenCalledWith(true)
     expect(screen.getByRole('button', { name: 'Show signatures' })).toHaveAttribute('aria-expanded', 'false')
 
-    rerender(<DrawerSignatures signed={1} required={2} rows={rows} open onOpenChange={onOpenChange} />)
+    rerender(<DrawerSignatures status={required} rows={rows} open onOpenChange={onOpenChange} />)
 
     expect(screen.getByRole('button', { name: 'Hide signatures' })).toHaveAttribute('aria-expanded', 'true')
   })
 
-  it('shows the page status in place of the count badge, with a note under it', () => {
-    render(
-      <DrawerSignatures
-        signed={1}
-        required={2}
-        rows={rows}
-        status={<span>1/2 gauge</span>}
-        note="You aren't a signer of this Safe"
-      />,
-    )
+  it('shows a note under the title row', () => {
+    render(<DrawerSignatures rows={rows} status={<span>1/2 gauge</span>} note="You aren't a signer of this Safe" />)
 
     expect(screen.getByText('1/2 gauge')).toBeInTheDocument()
-    expect(screen.queryByText('1 of 2 required')).not.toBeInTheDocument()
     expect(screen.getByText("You aren't a signer of this Safe")).toBeInTheDocument()
   })
 })
