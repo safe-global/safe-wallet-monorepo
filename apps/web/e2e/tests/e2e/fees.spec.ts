@@ -6,14 +6,14 @@ import { test, expect } from '../../src/fixtures/journey.fixture'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxHistoryPage } from '../../src/pages/tx-history.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
-import { seedExecutedTransfer, seedSafe } from '../../src/seed/safe'
+import { seedSafe } from '../../src/seed/safe'
 
 const AMOUNT = '0.001'
 const MAX_PRIORITY_FEE_GWEI = '2'
 const MAX_FEE_GWEI = '3'
 
 test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
-  test('should send the execution with the max fee and the max priority fee that the owner sets in the fee card', async ({
+  test('should send the execution with the max fees that the owner sets in the fee card, and show it as paid from the signer wallet in the history', async ({
     safePage,
     safeApiClient,
     journey,
@@ -39,19 +39,9 @@ test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
       maxPriorityFeePerGas: parseUnits(MAX_PRIORITY_FEE_GWEI, 'gwei'),
       maxFeePerGas: parseUnits(MAX_FEE_GWEI, 'gwei'),
     })
-  })
-
-  test('should show the fees as paid from the signer wallet in the history of a transfer that an owner executed', async ({
-    safePage,
-    journey,
-  }) => {
-    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
-    await seedExecutedTransfer(safe, { recipient: Wallet.createRandom().address, amount: AMOUNT })
-
     const history = new TxHistoryPage(safePage)
     await history.goto(safe.prefixedAddress)
     await history.expand(history.transactionsLabelled('Sent'))
-
     await expect(history.feesPayer).toHaveText('Paid from signer wallet')
   })
 })

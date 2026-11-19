@@ -188,10 +188,11 @@ export class TxReviewPage {
 
   /**
    * Set the max priority fee and the max fee per gas of the execution, in Gwei, in the gas settings of the fee card.
-   * The settings open with the estimate they have at that moment, so this waits until the card shows the estimated fee.
+   * The settings open with the estimate they have at that moment, so this waits until the wallet's fee is estimated:
+   * the row is editable (the wallet pays) and shows an amount, which needs the gas limit.
    */
   async setGasFees({ maxPriorityFee, maxFee }: { maxPriorityFee: string; maxFee: string }): Promise<void> {
-    await this.gasFeeRow.filter({ hasText: /\d/ }).waitFor()
+    await this.gasFeeRow.filter({ has: this.page.getByTestId('gas-fee-edit-button'), hasText: /\d/ }).waitFor()
     await this.gasSettingsToggle.click()
     await this.maxPriorityFeeInput.fill(maxPriorityFee)
     await this.maxFeeInput.fill(maxFee)
