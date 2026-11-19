@@ -5,7 +5,10 @@ import { DrawerBody } from '@safe-global/views/components/common/Drawer/componen
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { DrawerActions } from '@safe-global/views/components/common/Drawer/components/DrawerActions'
-import { DrawerSignatures } from '@safe-global/views/components/common/Drawer/components/DrawerSignatures'
+import {
+  DrawerSignatures,
+  DrawerSignaturesBadge,
+} from '@safe-global/views/components/common/Drawer/components/DrawerSignatures'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
@@ -411,8 +414,7 @@ export const SignaturesFooter: Story = {
         <DrawerFooter
           summary={
             <DrawerSignatures
-              signed={1}
-              required={3}
+              status={<DrawerSignaturesBadge tone="warning">1 of 3 required</DrawerSignaturesBadge>}
               meta="6 days left"
               defaultOpen
               actions={
@@ -452,6 +454,52 @@ export const SignaturesFooter: Story = {
             secondary={<Button variant="secondary">Reject</Button>}
             primary={<Button>Review and sign</Button>}
           />
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+/** The threshold is met without you, so your row asks for nothing and the action is execute. */
+export const SignaturesThresholdMet: Story = {
+  args: {
+    ariaLabel: 'Transaction',
+    children: (
+      <>
+        <DrawerHeader media={iconTile} title="Send 1,250 USDC" subtitle="Nonce #42 · Ethereum" />
+        <DrawerBody>
+          <DrawerList items={summaryRows} />
+        </DrawerBody>
+        <DrawerFooter
+          summary={
+            <DrawerSignatures
+              status={<DrawerSignaturesBadge tone="success">2 of 2 signed</DrawerSignaturesBadge>}
+              defaultOpen
+              rows={[
+                { id: 'created', status: 'created', signer: 'Ops lead', time: 'Nov 12, 10:02' },
+                {
+                  id: 'a',
+                  status: 'signed',
+                  signer: signer('Ops lead', '0x1000000000000000000000000000000000000001'),
+                  time: 'Nov 12, 10:04',
+                },
+                {
+                  id: 'c',
+                  status: 'signed',
+                  signer: signer('Treasury', '0x3000000000000000000000000000000000000003'),
+                  time: 'Nov 12, 11:30',
+                },
+                {
+                  id: 'b',
+                  status: 'not-needed',
+                  signer: signer('Finance', '0x2000000000000000000000000000000000000002'),
+                  you: true,
+                },
+              ]}
+            />
+          }
+        >
+          <DrawerActions primary={<Button>Execute</Button>} />
         </DrawerFooter>
       </>
     ),

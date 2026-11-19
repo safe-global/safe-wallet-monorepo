@@ -7,29 +7,41 @@ import { cn } from '@safe-global/views/utils/cn'
 
 export type DrawerSignatureRow = {
   id: string
-  status: 'created' | 'signed' | 'needed'
+  /** `not-needed`: the threshold was met without this signer. */
+  status: 'created' | 'signed' | 'needed' | 'not-needed'
   /** Who: for `created` a name, otherwise the signer's identity (identicon, name, address). */
   signer: ReactNode
   /** When it was created or signed; shown on the row, or in the Signed badge's tooltip. */
   time?: string
   you?: boolean
-  /** Trailing control on a `needed` row that isn't yours, such as Notify. */
+  /** Trailing control on a `needed` row that isn't yours, such as Notify. Your own `needed` row asks for your signature. */
   action?: ReactNode
 }
 
 export type DrawerSignaturesProps = {
-  signed: number
-  required: number
+  /** Next to the title, such as `DrawerSignaturesBadge` or a signature gauge. */
+  status: ReactNode
   rows: DrawerSignatureRow[]
   /** Muted text on the right of the title row, such as "6 days left". */
   meta?: ReactNode
-  /** Icon buttons after the badge, such as copy link. */
+  /** Icon buttons after the status, such as copy link. */
   actions?: ReactNode
   /** Folded by default so the body keeps most of the height. */
   defaultOpen?: boolean
 }
 
-const YOUR_SIGNATURE = 'Your signature required'
+/** The count or "Your signature required" next to the title. The app decides the text and tone. */
+export const DrawerSignaturesBadge = ({
+  tone,
+  children,
+}: {
+  tone: 'success' | 'warning'
+  children: ReactNode
+}): ReactElement => (
+  <Badge variant={tone} size="status" shape="status">
+    {children}
+  </Badge>
+)
 
 const SignedBadge = ({ time }: { time?: string }): ReactElement => {
   const badge = (
@@ -64,7 +76,12 @@ const RowContent = ({ row }: { row: DrawerSignatureRow }): ReactElement => {
   }
 
   const signer = (
-    <span className={cn('flex min-w-0 items-center gap-1', row.status === 'needed' && row.you && 'opacity-50')}>
+    <span
+      className={cn(
+        'flex min-w-0 items-center gap-1',
+        ((row.status === 'needed' && row.you) || row.status === 'not-needed') && 'opacity-50',
+      )}
+    >
       {row.signer}
       {row.you && <span className="shrink-0 text-sm text-muted-foreground">(you)</span>}
     </span>
@@ -79,28 +96,23 @@ const RowContent = ({ row }: { row: DrawerSignatureRow }): ReactElement => {
     )
   }
 
+  if (row.status === 'not-needed') return signer
+
   return (
     <>
       {signer}
-      {row.you ? (
-        <Badge variant="warning" size="status" shape="status">
-          {YOUR_SIGNATURE}
-        </Badge>
-      ) : (
-        row.action
-      )}
+      {row.you ? <DrawerSignaturesBadge tone="warning">Your signature required</DrawerSignaturesBadge> : row.action}
     </>
   )
 }
 
 /** A line from each row to the next: solid once the next step happened, dashed while it's still missing. */
 const lineFor = (next?: DrawerSignatureRow): 'done' | 'missing' | undefined =>
-  next ? (next.status === 'needed' ? 'missing' : 'done') : undefined
+  next ? (next.status === 'signed' || next.status === 'created' ? 'done' : 'missing') : undefined
 
 /** Who has signed, folded into one line above the drawer's actions. Goes in `DrawerFooter`'s `summary`. */
 export const DrawerSignatures = ({
-  signed,
-  required,
+  status,
   rows,
   meta,
   actions,
@@ -108,25 +120,11 @@ export const DrawerSignatures = ({
 }: DrawerSignaturesProps): ReactElement => {
   const [open, setOpen] = useState(defaultOpen)
   const listId = useId()
-  const complete = signed >= required
-  const yourTurn = rows.some((row) => row.status === 'needed' && row.you)
-
-  const badgeLabel = complete
-    ? `${signed} of ${required} signed`
-    : yourTurn
-      ? YOUR_SIGNATURE
-      : `${signed} of ${required} required`
-
   return (
     <section aria-label="Signatures" className="flex flex-col">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Signatures</span>
-        {/* Your own row says it once the list is open */}
-        {!(yourTurn && open) && (
-          <Badge variant={complete ? 'success' : 'warning'} size="status" shape="status">
-            {badgeLabel}
-          </Badge>
-        )}
+        {status}
         {actions}
         <span className="flex-1" />
         {meta && <span className="text-xs text-muted-foreground">{meta}</span>}
