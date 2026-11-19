@@ -588,6 +588,24 @@ describe('SpaceDashboard – pending transactions "View all"', () => {
     ])
   })
 
+  it('omits pending_tx_count from PENDING_TX_WIDGET_VIEW_ALL_CLICKED when the pending total is unknown', () => {
+    mockUseHasFeature.mockReturnValue(true)
+    ;(useSpacePendingTransactions as jest.Mock).mockReturnValue({
+      transactions: [],
+      count: 4,
+      totalCount: undefined,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+
+    render(<SpaceDashboard />)
+    fireEvent.click(screen.getByTestId('pending-tx-view-all'))
+
+    const [[, params]] = getCallsForEvent(SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED.action)
+    expect(params).toEqual({ workspace_id: MOCK_SPACE_ID })
+  })
+
   it.each([false, undefined])('hides "View all" when the Transactions page flag is %s', (flag) => {
     mockUseHasFeature.mockReturnValue(flag)
 

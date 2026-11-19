@@ -123,7 +123,10 @@ const SpaceDashboard = () => {
     if (!spaceId) return
     trackEvent(
       { ...SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED, label: spaceId },
-      { workspace_id: spaceId, pending_tx_count: pendingTxTotalCount },
+      {
+        workspace_id: spaceId,
+        ...(pendingTxTotalCount !== undefined && { pending_tx_count: pendingTxTotalCount }),
+      },
     )
     router.push({ pathname: AppRoutes.spaces.transactions, query: { spaceId } })
   }

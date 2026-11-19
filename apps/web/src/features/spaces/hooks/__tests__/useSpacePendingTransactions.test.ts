@@ -134,12 +134,21 @@ describe('useSpacePendingTransactions', () => {
     expect(result.current.count).toBe(2)
   })
 
-  it('falls back to the returned transactions as the total count when the gateway omits it', async () => {
+  it('counts the returned transactions as the whole queue when the gateway omits the total and the page is not full', async () => {
     respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }))
 
     const { result } = renderInSpace(4)
 
     await waitFor(() => expect(result.current.totalCount).toBe(2))
+  })
+
+  it('leaves the total count unknown when the gateway omits it and the page reached the limit', async () => {
+    respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }))
+
+    const { result } = renderInSpace(2)
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.totalCount).toBeUndefined()
   })
 
   it('returns every transaction of a conflict group, oldest first', async () => {
