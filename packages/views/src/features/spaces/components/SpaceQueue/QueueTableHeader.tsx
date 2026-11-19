@@ -11,7 +11,7 @@ const COLUMN_WIDTHS: Record<QueueColumn, string> = {
   To: '',
   Proposed: 'w-36',
   Signatures: 'w-28',
-  Status: 'w-40',
+  Urgency: 'w-40',
   Action: 'w-36',
 }
 
