@@ -114,7 +114,7 @@ const WizardStepPage = ({ step }: { step: WizardStepId }): ReactElement => {
 
 const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
   const router = useRouter()
-  const { draft, isReady } = useWorkspaceDraft()
+  const { draft, isReady, isUserError, retryUser } = useWorkspaceDraft()
   const sessionId = queryString(router.query[CHECKOUT_SESSION_QUERY_PARAM])
   const urlSpaceId = queryString(router.query.spaceId)
   const { data: session } = useBillingGetCheckoutSessionV1Query(sessionId ? { sessionId } : skipToken)
@@ -127,6 +127,17 @@ const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
   if (isReturning) {
     const spaceId = urlSpaceId ?? draft.createdSpaceId
     // A first checkout names its Workspace only in the draft, which loads with the user.
+    if (!spaceId && isUserError) {
+      return (
+        <SetupProgress
+          isWorking={false}
+          title="We couldn't load your account"
+          body="Check your connection and try again."
+          actionLabel="Try again"
+          onAction={retryUser}
+        />
+      )
+    }
     if (!spaceId && !isReady) return <SetupProgress isWorking title="Setting up your Workspace" />
     return <CheckoutReturnScreen sessionId={sessionId} spaceId={spaceId} />
   }

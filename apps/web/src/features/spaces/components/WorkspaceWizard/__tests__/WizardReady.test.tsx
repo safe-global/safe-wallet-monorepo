@@ -1,9 +1,11 @@
+import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
+import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'
 import { fakeUserId, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
 import { userHandler } from '@/tests/msw/workspaceWizard'
-import { render, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { useWorkspaceDraft } from '../hooks/useWorkspaceDraft'
 import WizardReady from '../WizardReady'
 
@@ -55,5 +57,29 @@ describe('WizardReady', () => {
     expect(await screen.findByText('The user is known')).toBeInTheDocument()
     expect(screen.getByText('Loading')).toBeInTheDocument()
     expect(screen.queryByText(step)).not.toBeInTheDocument()
+  })
+
+  it('offers a retry instead of loading forever when the user cannot be loaded', async () => {
+    mockSafeProFlag = true
+    const ownerId = fakeUserId()
+    server.use(http.get(`${GATEWAY_URL}/v1/users`, () => new HttpResponse(null, { status: 500 })))
+    const step = faker.lorem.words()
+    const { user } = renderWithUserEvent(
+      <WizardReady>
+        <p>{step}</p>
+      </WizardReady>,
+      {
+        initialReduxState: {
+          auth: signedInAuthState(),
+          workspaceDraft: workspaceDraftBuilder().with({ ownerId }).build(),
+        },
+      },
+    )
+    expect(await screen.findByText("We couldn't load your account")).toBeInTheDocument()
+
+    server.use(userHandler(ownerId))
+    await user.click(screen.getByRole('button', { name: 'Try again' }))
+
+    expect(await screen.findByText(step)).toBeInTheDocument()
   })
 })
