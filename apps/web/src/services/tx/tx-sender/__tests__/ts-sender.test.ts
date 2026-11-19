@@ -36,6 +36,8 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import { requestSafenetCheck } from '@/features/safenet-checks/public/services/requestSafenetCheck'
+import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
@@ -269,6 +271,27 @@ describe('txSender', () => {
         safeAddress: '0x123',
       })
       expect(requestSafenetCheck).toHaveBeenCalledWith(expect.objectContaining({ isFirstSignature: true }))
+    })
+
+    it('should send the declared attribution with the proposal', async () => {
+      let body: Record<string, unknown> | undefined
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, async ({ request }) => {
+          body = (await request.json()) as Record<string, unknown>
+          return HttpResponse.json({ txId: '123', txStatus: 'AWAITING_CONFIRMATIONS' })
+        }),
+      )
+      const declared = declaredAttributionBuilder().build()
+
+      await dispatchTxProposal({
+        chainId: '4',
+        safeAddress: '0x123',
+        sender: '0x456',
+        safeTx: createMockSafeTransaction({ to: '0x123', data: '0x0' }),
+        declared,
+      })
+
+      expect(body?.declared).toEqual(declared)
     })
 
     it('should fail to propose a new tx', async () => {
@@ -1449,7 +1472,7 @@ describe('txSender', () => {
         return bodies
       }
 
-      const createNestedTx = (executed = false) =>
+      const createNestedTx = (executed = false, declared?: DeclaredAttribution) =>
         dispatchNestedTxCreation({
           safeTx: createMockSafeTransaction({ to: toBeHex('0x123', 20), data: '0x' }),
           wallet,
@@ -1458,7 +1481,7 @@ describe('txSender', () => {
           chainId: '4',
           safeAddress: CHILD_SAFE,
           executed,
-          declared: undefined,
+          declared,
         })
 
       beforeEach(() => {
@@ -1499,6 +1522,17 @@ describe('txSender', () => {
             method: 'approveHash',
           }),
         )
+      })
+
+      it('proposes the child with the declared attribution', async () => {
+        const bodies = trackProposals([])
+        jest.mocked(mockSafeSDK.signTypedData).mockResolvedValue(eoaSignature)
+        jest.mocked(MockEip1193Provider.request).mockResolvedValue(PARENT_SAFE_TX_HASH)
+        const declared = declaredAttributionBuilder().build()
+
+        await createNestedTx(false, declared)
+
+        expect(bodies[0].declared).toEqual(declared)
       })
 
       it('marks the tx executed when the parent executes the approveHash immediately', async () => {

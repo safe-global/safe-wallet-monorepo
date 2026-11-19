@@ -640,11 +640,17 @@ describe('SignOrExecute hooks', () => {
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
       const signSpy = jest.spyOn(txSender, 'dispatchOnChainSigning')
       const nestedSpy = jest.spyOn(txSender, 'dispatchNestedTxCreation').mockResolvedValue('nested-id')
-
-      const { result } = renderHook(() => useTxActions())
+      const declared = declaredAttributionBuilder().build()
+      const ref: { current?: ReturnType<typeof useTxActions> } = {}
+      const Harness = () => {
+        ref.current = useTxActions()
+        return null
+      }
+      const flowContext: TxFlowContextType = { ...initialContext, declared }
+      render(createElement(TxFlowContext.Provider, { value: flowContext }, createElement(Harness)))
       const safeTx = createSafeTx()
 
-      const id = await result.current.signTx(safeTx, undefined, 'origin')
+      const id = await ref.current!.signTx(safeTx, undefined, 'origin')
 
       // Without an envelope the child tx is proposed here, and the queue rejects unsigned proposals
       expect(id).toEqual({ txId: 'nested-id', isNestedSigning: true })
@@ -659,6 +665,7 @@ describe('SignOrExecute hooks', () => {
         origin: 'origin',
         scope: undefined,
         nestedTransaction: undefined,
+        declared,
       })
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(signSpy).not.toHaveBeenCalled()
