@@ -67,6 +67,7 @@ import {
   type M2Account,
   AccountProtectionIcon,
   usePrototypeModel,
+  TOOLTIP_OFFSET,
 } from './m2Prototype'
 import { ACCOUNT_SETTING_GROUPS, getAccountTokens, type Baseline } from './m2SetupFlow'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -1379,7 +1380,9 @@ export const ProtectionDrawer = ({
                       Edit policies
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>A change is already waiting to apply. Cancel it to make a new one.</TooltipContent>
+                  <TooltipContent sideOffset={TOOLTIP_OFFSET}>
+                    A change is already waiting to apply. Cancel it to make a new one.
+                  </TooltipContent>
                 </Tooltip>
               ) : (
                 <Button className="w-full" onClick={onEditPolicies}>

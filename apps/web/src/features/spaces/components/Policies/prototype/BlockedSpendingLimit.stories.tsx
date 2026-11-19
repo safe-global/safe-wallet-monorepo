@@ -18,6 +18,8 @@ const shell = createPoliciesM2Story()
 
 const meta = {
   title: 'Prototype/Spending limit side panel – blocked by allowlist',
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['!dev'],
   component: DrawerOverPolicies,
   decorators: [shell.decorator],
   parameters: shell.parameters,

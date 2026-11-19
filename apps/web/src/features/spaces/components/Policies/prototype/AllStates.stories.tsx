@@ -72,7 +72,8 @@ const meta = {
   id: 'prototype-policies-m2-all-states',
   parameters: { layout: 'fullscreen' },
   // Dozens of live iframes: not a stable visual snapshot.
-  tags: ['skip-visual-test'],
+  // Superseded: kept for older links, hidden from the sidebar.
+  tags: ['skip-visual-test', '!dev'],
 } satisfies Meta
 
 export default meta

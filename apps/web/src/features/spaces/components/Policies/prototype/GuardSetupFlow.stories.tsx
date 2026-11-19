@@ -92,6 +92,7 @@ import {
   type SignerId,
   PrototypeModelContext,
   usePrototypeModel,
+  TOOLTIP_OFFSET,
 } from './m2Prototype'
 import {
   ACCOUNT_SETTING_GROUPS,
@@ -245,7 +246,7 @@ const PolicyListRow = ({
   return (
     <Tooltip>
       <TooltipTrigger render={<span className="block w-full" />}>{row}</TooltipTrigger>
-      <TooltipContent>{disabledReason}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>{disabledReason}</TooltipContent>
     </Tooltip>
   )
 }
@@ -2295,7 +2296,9 @@ const withPrototypeFrame: Decorator = (Story, context) => (
 )
 
 const meta = {
-  title: 'Prototype/Policies M2 – full flow',
+  title: 'Prototype/Policy engine/2 · Policies one by one: everything else allowed, unless enforcement (guard) is on',
+  // A plain URL, since the title's · would end up in it.
+  id: 'prototype-policies-one-by-one',
   component: GuardSetupFlowPrototype,
   decorators: [withPrototypeFrame],
   // Shared with the All states canvas, not stories.
@@ -2312,6 +2315,7 @@ type Story = StoryObj<typeof meta>
 /** Overview → side panel → Create … Confirm → Change pending → second signer → Execute → Active, in local state only. */
 export const PoliciesM2FullFlow: Story = {
   name: 'A · Account protection + other policies (29 Oct)',
+  tags: ['!dev'],
 }
 
 // B's name for the one thing you set up, in place of A's "account protection".
@@ -2361,6 +2365,7 @@ const BTerms = ({ children, terms = B_TERMS }: { children: ReactNode; terms?: [R
  */
 export const AccountPoliciesWithRules: Story = {
   name: 'B · Policy enforcement with policies inside (30 Oct)',
+  tags: ['!dev'],
   decorators: [
     (Story) => (
       <PrototypeModelContext.Provider value="policies">
@@ -2374,7 +2379,7 @@ export const AccountPoliciesWithRules: Story = {
 
 /** C: no container, every policy on its own; New lists them all and each account shows its policies underneath. */
 export const SimplePolicies: Story = {
-  name: 'C · Simple policies, one at a time (30 Oct)',
+  name: 'Full flow (30 Oct)',
   decorators: [
     (Story) => (
       <PrototypeModelContext.Provider value="simple">
@@ -2428,6 +2433,7 @@ const VERSIONS: { date: string; title: string; href: string; note: string }[] = 
 /** Every version worth going back to, newest last, with where to open it. */
 export const VersionHistory: Story = {
   name: 'Version history',
+  tags: ['!dev'],
   render: () => (
     <div className="mx-auto flex max-w-2xl flex-col gap-3 p-8">
       <Typography variant="h3">Policies prototype versions</Typography>

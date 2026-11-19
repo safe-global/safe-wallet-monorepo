@@ -20,7 +20,7 @@ import type {
   SafeAccountGroup,
   SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import { SafeAddress } from './m2Prototype'
+import { SafeAddress, TOOLTIP_OFFSET } from './m2Prototype'
 import {
   getEligibilityCopy,
   INELIGIBILITY_TEXT,
@@ -81,7 +81,7 @@ export const SpreadAccountSummary = ({ account }: { account: SafeAccountOption }
       <TooltipTrigger render={<span className="inline-flex" />}>
         <ThresholdBadge threshold={account.threshold} owners={account.owners} />
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>
         {account.threshold} of {account.owners} signers needed
       </TooltipContent>
     </Tooltip>
@@ -89,7 +89,7 @@ export const SpreadAccountSummary = ({ account }: { account: SafeAccountOption }
       <TooltipTrigger render={<span className="inline-flex" />} aria-label={account.chain?.chainName}>
         <ChainIndicator chainId={account.chainId} onlyLogo imageSize={24} />
       </TooltipTrigger>
-      <TooltipContent>{account.chain?.chainName ?? account.chainId}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>{account.chain?.chainName ?? account.chainId}</TooltipContent>
     </Tooltip>
     <AccountBalance fiatTotal={account.fiatTotal} fitColumn />
   </div>
@@ -127,7 +127,9 @@ const OptionRow = ({
       >
         {children}
       </TooltipTrigger>
-      <TooltipContent side="bottom">{INELIGIBILITY_TEXT[account.ineligibleReason]}</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET} side="bottom">
+        {INELIGIBILITY_TEXT[account.ineligibleReason]}
+      </TooltipContent>
     </Tooltip>
   )
 }

@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import Identicon from '@/components/common/Identicon'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { PolicyDrawerActions } from '../components/PolicyDrawerActions'
-import { AccountProtectionIcon, SafeAddress, type M2Account } from './m2Prototype'
+import { AccountProtectionIcon, SafeAddress, type M2Account, TOOLTIP_OFFSET } from './m2Prototype'
 
 export const EDIT_IN_ENFORCEMENT_LABEL = 'Edit in policy enforcement'
 export const EDIT_IN_ENFORCEMENT_HINT = 'Policies on this Safe account are enforced, so they change together.'
@@ -43,7 +43,7 @@ export const PanelNavButtons = ({ nav }: { nav: PanelNav }): ReactElement | null
       >
         <ChevronLeft />
       </TooltipTrigger>
-      <TooltipContent>Back to account protection</TooltipContent>
+      <TooltipContent sideOffset={TOOLTIP_OFFSET}>Back to account protection</TooltipContent>
     </Tooltip>
   ) : null
 
@@ -72,7 +72,7 @@ export const PolicyIconTile = ({
         >
           <AccountProtectionIcon className="size-3" aria-hidden />
         </TooltipTrigger>
-        <TooltipContent>Checked by account protection</TooltipContent>
+        <TooltipContent sideOffset={TOOLTIP_OFFSET}>Checked by account protection</TooltipContent>
       </Tooltip>
     )}
   </div>
