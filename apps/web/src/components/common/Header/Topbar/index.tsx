@@ -74,8 +74,12 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
   const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress))
 
-  const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
-  const contextHeight = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_HEIGHT : SEARCH_CONTEXT_HEIGHT
+  const hideSearch = !showSpaceSafeBar && Boolean(txFlow)
+
+  const contextWrap =
+    showLogo || hideSearch ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
+  const contextHeight =
+    showLogo || hideSearch ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_HEIGHT : SEARCH_CONTEXT_HEIGHT
 
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
@@ -118,7 +122,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             <SafeLogo />
           ) : showSpaceSafeBar ? (
             <SpaceSafeBar />
-          ) : (
+          ) : hideSearch ? null : (
             <GlobalSearchInput className="h-full w-64 rounded-3xl md:w-80" />
           )}
         </div>
