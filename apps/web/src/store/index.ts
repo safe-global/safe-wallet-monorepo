@@ -43,6 +43,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
+import { safeOverviewsTokenListListener } from './api/gateway/safeOverviewsTokenListListener'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 import { spaceQueueReconciliationListener } from '@/features/spaces/public/store/spaceQueueReconciliationListener'
 
@@ -150,6 +151,7 @@ const listeners = [
   trialReminderListener,
   forbiddenSessionListener,
   spaceQueueReconciliationListener,
+  safeOverviewsTokenListListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {

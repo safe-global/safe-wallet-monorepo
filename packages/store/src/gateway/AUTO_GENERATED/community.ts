@@ -26,8 +26,8 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/community/campaigns/${queryArg.resourceId}/activities`,
           params: {
-            holder: queryArg.holder,
             cursor: queryArg.cursor,
+            holder: queryArg.holder,
           },
         }),
         providesTags: ['community'],
@@ -97,8 +97,8 @@ export type CommunityGetCampaignByIdV1ApiArg = {
 export type CommunityGetCampaignActivitiesV1ApiResponse = unknown
 export type CommunityGetCampaignActivitiesV1ApiArg = {
   resourceId: string
-  holder?: string
   cursor?: string
+  holder?: string
 }
 export type CommunityGetCampaignLeaderboardV1ApiResponse = /** status 200  */ CampaignRankPage
 export type CommunityGetCampaignLeaderboardV1ApiArg = {
