@@ -169,7 +169,8 @@ export const useFeesPreview = ({
 
   // Sync `feeGasToken` with the latest preview state
   //  - preview unavailable (errored / no eligible token after settling): drop the persisted
-  //    selection so `mergePayFromSafeFeeParams` bails and the tx is signed as signer-pays.
+  //    selection, so no stale token is merged. The CTA is held while the quote is missing, and
+  //    `mergePayFromSafeFeeParams` throws if signing is reached without it.
   //  - preview succeeded and the user hasn't picked anything yet: persist the implicit
   //    default.
   useEffect(() => {

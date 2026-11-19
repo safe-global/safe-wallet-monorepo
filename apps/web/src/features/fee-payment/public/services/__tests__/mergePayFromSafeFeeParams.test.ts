@@ -85,15 +85,12 @@ describe('mergePayFromSafeFeeParams', () => {
     expect(mockResolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when no gas token is selected', async () => {
+  it('throws when the Safe pays and no gas token is quoted, instead of signing a tx the signer would pay', async () => {
     const safeTx = createSafeTx()
 
-    const result = await mergePayFromSafeFeeParams({
-      ...baseArgs(safeTx),
-      feeGasToken: undefined,
-    })
+    const merge = mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feeGasToken: undefined })
 
-    expect(result).toEqual({ safeTx, feesMerged: false })
+    await expect(merge).rejects.toThrow('The fee quote for paying from the Safe account is not ready')
     expect(mockResolveFeeParams).not.toHaveBeenCalled()
   })
 
