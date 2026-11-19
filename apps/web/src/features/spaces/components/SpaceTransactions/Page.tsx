@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/com
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@safe-global/views/utils/cn'
 import AuthState from '../AuthState'
+import SpaceTransactionHistory from './SpaceTransactionHistory'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
 export default function SpaceTransactionsPage({ spaceId }: { spaceId: string }) {
@@ -22,10 +23,17 @@ export default function SpaceTransactionsPage({ spaceId }: { spaceId: string }) 
             <TabsTrigger value="pending" className="cursor-pointer">
               Pending
             </TabsTrigger>
+            <TabsTrigger value="history" className="cursor-pointer">
+              History
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pending">
             <SpaceTransactionQueue key={spaceId} spaceId={spaceId} />
+          </TabsContent>
+
+          <TabsContent value="history">
+            <SpaceTransactionHistory />
           </TabsContent>
         </Tabs>
       </div>
