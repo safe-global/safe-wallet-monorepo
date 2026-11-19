@@ -1,13 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { ShieldCheck, UserRoundPen } from 'lucide-react'
+import { ChevronsUpDown, Copy, ListChecks, ShieldCheck, UserRoundPen } from 'lucide-react'
 import { Drawer } from './Drawer'
 import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
-import { DrawerSubtitle } from '@safe-global/views/components/common/Drawer/components/DrawerSubtitle'
-import { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
@@ -43,13 +41,11 @@ export const Full: Story = {
     ariaLabel: 'Full drawer',
     children: (
       <>
-        <DrawerHeader>
-          <div className="size-7 rounded-full bg-primary" />
-          <div className="min-w-0">
-            <DrawerTitle>Operations Vault</DrawerTitle>
-            <DrawerSubtitle>Last updated 2 minutes ago</DrawerSubtitle>
-          </div>
-        </DrawerHeader>
+        <DrawerHeader
+          media={<div className="size-9 rounded-full bg-primary" />}
+          title="Operations Vault"
+          subtitle="Last updated 2 minutes ago"
+        />
         <DrawerBody>
           <Paragraphs count={3} />
         </DrawerBody>
@@ -61,22 +57,26 @@ export const Full: Story = {
   },
 }
 
-/** The Policies header: a badge-style icon, a large title and a status chip pushed to the right. */
+/** The Policies header: an icon tile, a title and the status on the second line. */
 export const StatusHeader: Story = {
   args: {
     ariaLabel: 'Proposer role',
     children: (
       <>
-        <DrawerHeader>
-          <div className="bg-success-subtle flex size-10 items-center justify-center rounded-lg">
-            <UserRoundPen className="text-success-strong size-4" />
-          </div>
-          <DrawerTitle size="lg">Proposer role</DrawerTitle>
-          <Badge variant="warning" size="status" shape="status" className="ml-auto">
-            <BadgeDot />
-            Pending
-          </Badge>
-        </DrawerHeader>
+        <DrawerHeader
+          media={
+            <div className="flex size-10 items-center justify-center rounded-lg bg-success-subtle">
+              <UserRoundPen className="size-4 text-success-strong" />
+            </div>
+          }
+          title="Proposer role"
+          status={
+            <Badge variant="warning" size="status" shape="status">
+              <BadgeDot />
+              Pending
+            </Badge>
+          }
+        />
         <DrawerBody>
           <Paragraphs count={3} />
         </DrawerBody>
@@ -94,9 +94,7 @@ export const Sections: Story = {
     ariaLabel: 'Sectioned drawer',
     children: (
       <>
-        <DrawerHeader>
-          <DrawerTitle size="lg">Proposer role</DrawerTitle>
-        </DrawerHeader>
+        <DrawerHeader title="Proposer role" />
         <DrawerBody>
           <div className="flex flex-col gap-4">
             <DrawerSection title="Pending signatures" rightNode="Expires in 1h 33 min">
@@ -120,9 +118,7 @@ export const List: Story = {
     ariaLabel: 'List drawer',
     children: (
       <>
-        <DrawerHeader>
-          <DrawerTitle size="lg">Proposer role</DrawerTitle>
-        </DrawerHeader>
+        <DrawerHeader title="Proposer role" />
         <DrawerBody>
           <DrawerList
             items={[
@@ -151,9 +147,7 @@ export const OnlyTitle: Story = {
     ariaLabel: 'Title only drawer',
     children: (
       <>
-        <DrawerHeader>
-          <DrawerTitle>Batched transactions</DrawerTitle>
-        </DrawerHeader>
+        <DrawerHeader title="Batched transactions" />
         <DrawerBody>
           <Paragraphs count={3} />
         </DrawerBody>
@@ -178,9 +172,7 @@ export const LongContent: Story = {
     ariaLabel: 'Scrolling drawer',
     children: (
       <>
-        <DrawerHeader>
-          <DrawerTitle>Scrolling body</DrawerTitle>
-        </DrawerHeader>
+        <DrawerHeader title="Scrolling body" />
         <DrawerBody>
           <Paragraphs count={30} />
         </DrawerBody>
@@ -198,9 +190,88 @@ export const SizeLg: Story = {
     size: 'lg',
     children: (
       <>
-        <DrawerHeader>
-          <DrawerTitle>Wide drawer</DrawerTitle>
-        </DrawerHeader>
+        <DrawerHeader title="Wide drawer" />
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+      </>
+    ),
+  },
+}
+
+const iconTile = (
+  <div className="flex size-9 items-center justify-center rounded-md border border-border bg-card">
+    <ListChecks className="size-4" />
+  </div>
+)
+
+/** Previous and next step through the list the drawer was opened from; the ends are disabled. */
+export const Navigation: Story = {
+  args: {
+    ariaLabel: 'Transaction 3 of 12',
+    children: (
+      <>
+        <DrawerHeader
+          media={iconTile}
+          title="Send 1,250 USDC"
+          subtitle="Nonce #42 · Ethereum"
+          navigation={{
+            onPrevious: () => {},
+            onNext: () => {},
+            hasPrevious: true,
+            hasNext: false,
+            position: '12 of 12',
+          }}
+        />
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+      </>
+    ),
+  },
+}
+
+/** Back returns to the drawer this one was opened from. Extra actions sit in the same group, before close. */
+export const BackAndActions: Story = {
+  args: {
+    ariaLabel: 'Spending limit',
+    children: (
+      <>
+        <DrawerHeader
+          media={iconTile}
+          title="Spending limit"
+          subtitle="Treasury · Ethereum"
+          onBack={() => {}}
+          actions={[
+            { label: 'Copy link', icon: <Copy />, onClick: () => {} },
+            { label: 'Expand all sections', icon: <ChevronsUpDown />, onClick: () => {}, shortcut: 'E' },
+          ]}
+        />
+        <DrawerBody>
+          <Paragraphs count={3} />
+        </DrawerBody>
+      </>
+    ),
+  },
+}
+
+/** A title that doesn't fit fades out at the end instead of wrapping or pushing the buttons. */
+export const LongTitle: Story = {
+  args: {
+    ariaLabel: 'Long title',
+    children: (
+      <>
+        <DrawerHeader
+          media={iconTile}
+          title="Quarterly operations and treasury rebalancing account"
+          status={
+            <Badge variant="success" size="status" shape="status">
+              <BadgeDot />
+              Active
+            </Badge>
+          }
+          navigation={{ onPrevious: () => {}, onNext: () => {}, hasPrevious: true, hasNext: true }}
+        />
         <DrawerBody>
           <Paragraphs count={3} />
         </DrawerBody>
