@@ -4,6 +4,7 @@ import Ajv2020 from 'ajv/dist/2020'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import decl from './remote-config.json'
 import schema from './remote-config.schema.json'
+import testChainFeatures from '../e2e/environment/infra/scripts/cfg_management/test-chain-features.json'
 
 const enumKeys = new Set<string>(Object.values(FEATURES))
 const declaredKeys = decl.features.map((f) => f.key)
@@ -79,5 +80,32 @@ describe('WALLET_WEB remote-config declaration', () => {
   it('every declared key is actually used in web source (no dead declarations)', () => {
     const unused = declaredKeys.filter((k) => !usedKeys.has(k))
     expect(unused).toEqual([])
+  })
+})
+
+describe('E2E test-chain flags (test-chain-features.json)', () => {
+  const onKeys: string[] = testChainFeatures.on
+  const offReasons: Record<string, string> = testChainFeatures.off
+  const offKeys = Object.keys(offReasons)
+
+  it('switches every declared flag on or gives a reason to keep it off', () => {
+    const undecided = declaredKeys.filter((k) => !onKeys.includes(k) && !offKeys.includes(k))
+    expect(undecided).toEqual([])
+  })
+
+  it('does not list a flag as both on and off', () => {
+    expect(onKeys.filter((k) => offKeys.includes(k))).toEqual([])
+  })
+
+  it('has no duplicate on keys', () => {
+    expect(new Set(onKeys).size).toBe(onKeys.length)
+  })
+
+  it('gives reasons only for declared flags', () => {
+    expect(offKeys.filter((k) => !declaredKeys.includes(k))).toEqual([])
+  })
+
+  it('gives a non-empty reason for every off flag', () => {
+    expect(offKeys.filter((k) => offReasons[k].trim() === '')).toEqual([])
   })
 })
