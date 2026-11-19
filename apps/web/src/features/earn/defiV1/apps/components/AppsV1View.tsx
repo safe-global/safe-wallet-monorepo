@@ -124,7 +124,12 @@ export const AppsV1View = ({
     }
   }
 
-  const onSelect = (row: AppRow) => (row.app ? setPreviewRow(row) : openBuiltIn(row))
+  const onSelect = (row: AppRow) => {
+    if (row.app) return setPreviewRow(row)
+    if (row.builtIn !== 'treasury') return openBuiltIn(row)
+    setHubTab('invest')
+    setIsMoving(true)
+  }
 
   const onOpen = (row: AppRow) => {
     if (!row.app) return openBuiltIn(row)

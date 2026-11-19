@@ -90,7 +90,7 @@ export const BUILT_INS: AppRow[] = [
     id: 'built-in-treasury',
     builtIn: 'treasury',
     name: 'Invest',
-    does: 'Put idle funds to work in vetted yield',
+    does: 'Stake or lend idle funds and track positions in Treasury',
     job: 'grow',
     chainIds: BUILT_IN_CHAINS,
   },

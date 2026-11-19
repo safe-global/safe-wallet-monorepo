@@ -68,6 +68,7 @@ describe('buildRows', () => {
 
   it('searches built-ins and custom apps by name and description', () => {
     expect(names(rows({ filteredApps: [], query: 'swap' }))).toEqual(['Swap'])
+    expect(names(rows({ filteredApps: [], query: 'treasury' }))).toEqual(['Invest'])
     expect(names(rows({ filteredApps: [], query: 'my' }))).toEqual(['My app'])
   })
 
