@@ -2,6 +2,7 @@
  * A pull request releases a flag when it changes the flag to `"enabled": true` in apps/web/config/remote-config.json.
  * CI then runs the specs that cover the flag several times and posts a checklist for the reviewer.
  */
+import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { playwrightSpecs } from './playwright-specs.mjs'
 
@@ -34,7 +35,7 @@ function coverage(flag, registry, reasons) {
 
 function chainsCell(flag) {
   if (flag.scope === 'GLOBAL') return 'All chains'
-  return flag.defaultChains.length ? flag.defaultChains.join(', ') : 'None, chosen in the admin'
+  return flag.defaultChains?.length ? flag.defaultChains.join(', ') : 'None, chosen in the admin'
 }
 
 /** The pull request comment that lists the released flags and what the reviewer must confirm */
@@ -94,5 +95,7 @@ export function releaseOutputs(baseDeclarationPath, env = process.env) {
       : ''
   const comment = releaseComment(released, { reasons, runUrl })
   if (!comment) return 'specs=\ncomment='
-  return `specs=${specsFilter(specs)}\ncomment<<FLAG_RELEASE\n${comment}\nFLAG_RELEASE`
+  // A random delimiter, so that no release reason in the comment can end the output early.
+  const delimiter = `FLAG_RELEASE_${randomUUID()}`
+  return `specs=${specsFilter(specs)}\ncomment<<${delimiter}\n${comment}\n${delimiter}`
 }

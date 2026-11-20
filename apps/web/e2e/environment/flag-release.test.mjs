@@ -63,6 +63,12 @@ test('lists each released flag with its coverage, or the reason when no spec cov
   assert.match(comment, /- \[ \] QA tested the feature on staging\./)
 })
 
+test('lists a per-chain flag without defaultChains as chosen in the admin', () => {
+  const { defaultChains: _omitted, ...withoutChains } = flag('NO_CHAINS', true)
+  const comment = releaseComment([withoutChains], { registry: {} })
+  assert.match(comment, /\| `NO_CHAINS` \| PER_CHAIN \| None, chosen in the admin \|/)
+})
+
 test('warns that a GLOBAL flag goes on for all chains and says nothing of a burn-in without specs', () => {
   const comment = releaseComment([flag('G', true, { scope: 'GLOBAL' })], { registry: {} })
   assert.match(comment, /\| `G` \| GLOBAL \| All chains \|/)
@@ -94,8 +100,13 @@ test('writes the burn-in filter and the comment when the head declaration releas
     GITHUB_REPOSITORY: 'org/repo',
     GITHUB_RUN_ID: '7',
   })
-  assert.match(outputs, /^specs=e2e\/ens\\\.spec\\\.ts\ncomment<<FLAG_RELEASE\n### Flag release checklist\n/)
+  const [, delimiter] =
+    outputs.match(
+      /^specs=e2e\/ens\\\.spec\\\.ts\ncomment<<(FLAG_RELEASE_[0-9a-f-]{36})\n### Flag release checklist\n/,
+    ) ?? []
+  assert.ok(delimiter, outputs)
+  assert.ok(outputs.endsWith(`\n${delimiter}`))
+  assert.equal(outputs.split(delimiter).length, 3)
   assert.match(outputs, /\| `DOMAIN_LOOKUP` \|/)
   assert.match(outputs, /\(https:\/\/github\.com\/org\/repo\/actions\/runs\/7\)/)
-  assert.match(outputs, /\nFLAG_RELEASE$/)
 })
