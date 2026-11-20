@@ -1,14 +1,10 @@
 import { type Locator, type Page } from '@playwright/test'
 
 export class WorkspaceAddressBookPage {
-  readonly addContactButton: Locator
   readonly importButton: Locator
-  readonly exportButton: Locator
 
   constructor(private readonly page: Page) {
-    this.addContactButton = page.getByRole('button', { name: 'Add contact' })
     this.importButton = page.getByRole('button', { name: 'Import', exact: true })
-    this.exportButton = page.getByRole('button', { name: 'Export', exact: true })
   }
 
   async goto(workspaceId: string): Promise<void> {
@@ -54,7 +50,7 @@ export class WorkspaceAddressBookPage {
     await this.row(name).getByRole('button', { name: 'Add to Workspace' }).click()
   }
 
-  async editTags(contactName: string, tagName: string): Promise<void> {
+  async addTag(contactName: string, tagName: string): Promise<void> {
     await this.rowMenuButton(contactName).click()
     await this.menuItem('Edit tags').click()
     const dialog = this.page.getByRole('dialog').filter({ hasText: 'Edit tags' })
