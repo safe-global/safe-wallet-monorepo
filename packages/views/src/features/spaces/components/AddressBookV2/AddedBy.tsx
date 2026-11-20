@@ -9,7 +9,7 @@ export const EmptyCell = () => <span className="text-muted-foreground text-xs">&
 /** A member's name, or their shortened wallet address, beside an initials avatar. */
 const AddedBy = ({ name }: { name?: string }) =>
   name ? (
-    <span className="inline-flex min-w-0 items-center gap-1.5">
+    <span className="flex min-w-0 items-center gap-1.5">
       <Avatar size="xs">
         <AvatarFallback>{getInitials(name)}</AvatarFallback>
       </Avatar>

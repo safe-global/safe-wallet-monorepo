@@ -8,6 +8,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/entitlements', () => ({
   useEntitlementsGetEntitlementsV1Query: (...args: unknown[]) => mockEntitlementsQuery(...args),
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/billing'),
   useBillingGetSubscriptionsV1Query: (...args: unknown[]) => mockSubscriptionsQuery(...args),
 }))
 

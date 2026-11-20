@@ -66,3 +66,17 @@ export const AddDialogError: Story = {
     />
   ),
 }
+
+const LONG = ' with a name long enough to need truncating'
+
+/** Long names and Safe names in a 1000px container, where the Contact column used to run over Chains. */
+export const LongTextNarrow: Story = {
+  decorators: [(Story) => <div className="w-[1000px]">{Story()}</div>],
+  args: {
+    suggestions: SUGGESTED_SIGNERS.map((item) => ({
+      ...item,
+      suggestedName: item.suggestedName + LONG,
+      reason: { ...item.reason, safes: item.reason.safes.map((safe) => safe + LONG) },
+    })),
+  },
+}

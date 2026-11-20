@@ -12,6 +12,8 @@ import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import * as walletUtils from '@/utils/wallets'
 import { trackTxEvents } from '@/components/tx/shared/tracking'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
+import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
 
 jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
   ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
@@ -84,12 +86,16 @@ describe('TxFlowProvider', () => {
     onContinueToExecute,
     isExecutable,
     isBatchable,
+    isBatch,
+    declared,
     safeTx,
   }: {
     txId?: string
     onContinueToExecute?: (txId: string) => void
     isExecutable?: boolean
     isBatchable?: boolean
+    isBatch?: boolean
+    declared?: DeclaredAttribution
     safeTx?: SafeTransaction
   }) => {
     const Wrapper = ({ children }: PropsWithChildren) => (
@@ -103,6 +109,8 @@ describe('TxFlowProvider', () => {
           onContinueToExecute={onContinueToExecute}
           isExecutable={isExecutable}
           isBatchable={isBatchable}
+          isBatch={isBatch}
+          declared={declared}
         >
           {children}
         </TxFlowProvider>
@@ -133,6 +141,26 @@ describe('TxFlowProvider', () => {
     expect(result.current.isBatchable).toBe(isBatchable)
   })
 
+  it('declares an in-app flow as a native transfer', () => {
+    const { result } = renderContext({})
+
+    expect(result.current.declared).toEqual({ channel: 'NATIVE_TRANSFER' })
+  })
+
+  it('declares a batch as a native batch', () => {
+    const { result } = renderContext({ isBatch: true })
+
+    expect(result.current.declared).toEqual({ channel: 'NATIVE_BATCH' })
+  })
+
+  it('declares the source the flow was opened with', () => {
+    const declared = declaredAttributionBuilder().build()
+
+    const { result } = renderContext({ declared, isBatch: true })
+
+    expect(result.current.declared).toEqual(declared)
+  })
+
   it('keeps the id of an existing transaction when continuing to execute', () => {
     const existingTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
     const { result } = renderContext({ txId: existingTxId })
@@ -140,6 +168,17 @@ describe('TxFlowProvider', () => {
     act(() => result.current.continueToExecute(existingTxId))
 
     expect(result.current.txId).toBe(existingTxId)
+    expect(result.current.isCreation).toBe(false)
+  })
+
+  it('executes the new transaction when signing an existing one proposed a new id', () => {
+    const proposalId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+    const newTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+    const { result } = renderContext({ txId: proposalId })
+
+    act(() => result.current.continueToExecute(newTxId))
+
+    expect(result.current.txId).toBe(newTxId)
     expect(result.current.isCreation).toBe(false)
   })
 

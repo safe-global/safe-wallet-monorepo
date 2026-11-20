@@ -27,6 +27,7 @@ import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 import SeatLimitBanner from './SeatLimitBanner'
 import SelectedCounter from '@safe-global/views/features/spaces/components/SelectedCounter'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 import { seatsTooltip } from '../Plans/PlanStatusCard'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { countSeats } from '@/utils/spaces'
@@ -88,7 +89,7 @@ const SpaceSafeAccounts = () => {
                 tooltip={seatsTooltip(tierName, limit)}
               />
             )}
-            <InputGroup variant="search" inputSize="lg" className="flex-1">
+            <InputGroup variant="search" inputSize="lg" fieldError="hidden" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>
@@ -139,7 +140,7 @@ const SpaceSafeAccounts = () => {
           No Safe accounts match your search
         </Typography>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4" data-tour={TOUR_TARGETS.safeAccountsList}>
           {similarAddresses.size > 0 && <SecurityBanner title="Verify before you trust" />}
           <SafeAccountsTable
             items={visibleSafes}
