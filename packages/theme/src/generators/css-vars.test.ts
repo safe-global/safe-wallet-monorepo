@@ -24,7 +24,15 @@ describe('generateCSSVars', () => {
 
   it('should include media query for prefers-color-scheme', () => {
     expect(cssOutput).toContain('@media (prefers-color-scheme: dark)')
-    expect(cssOutput).toContain(":root:not([data-theme='light'])")
+    expect(cssOutput).toContain(':root:not([data-theme])')
+  })
+
+  it('overrides the dark base palette for GTA VI while inheriting status colors', () => {
+    const gta6Vars = cssOutput.match(/\[data-theme-variant="gta6"\] \{([^}]*)\}/)?.[1]
+
+    expect(gta6Vars).toMatch(/--color-primary-main: #FF92CC/i)
+    expect(gta6Vars).toMatch(/--color-background-main: #170F24/i)
+    expect(gta6Vars).not.toContain('--color-error-main')
   })
 
   it('should include spacing variables', () => {

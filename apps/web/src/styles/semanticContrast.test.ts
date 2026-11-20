@@ -79,3 +79,16 @@ describe('semantic tint contrast', () => {
     ).toBeLessThan(AA_TEXT)
   })
 })
+
+describe('GTA VI theme contrast', () => {
+  const palette = readBlock('vars.css', "[data-theme-variant='gta6']")
+
+  it.each([
+    ['--color-text-primary', '--color-background-main'],
+    ['--color-text-secondary', '--color-background-paper'],
+    ['--color-text-contrast', '--color-primary-main'],
+    ['--color-primary-main', '--color-background-light'],
+  ])('keeps %s legible on %s', (foreground, background) => {
+    expect(contrastRatio(readVar(palette, foreground), readVar(palette, background))).toBeGreaterThanOrEqual(AA_TEXT)
+  })
+})

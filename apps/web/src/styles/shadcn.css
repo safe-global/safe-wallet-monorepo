@@ -155,6 +155,43 @@
   --badge-dot-warning: #facc15; /* yellow-400 */
 }
 
+[data-theme-variant='gta6'] .shadcn-scope {
+  --background: var(--color-background-main);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-background-paper);
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --dialog: var(--card);
+  --primary: var(--color-primary-main);
+  --primary-foreground: var(--color-text-contrast);
+  --secondary: var(--color-background-secondary);
+  --secondary-foreground: var(--foreground);
+  --secondary-hover: var(--color-background-light-hover);
+  --muted: var(--secondary);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-background-light);
+  --accent-foreground: var(--foreground);
+  --border: var(--color-border-light);
+  --input: var(--color-background-sheet);
+  --ring: var(--color-primary-main);
+  --sidebar: var(--color-background-sheet);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --accent-secondary: var(--color-secondary-main);
+  --accent-secondary-foreground: var(--primary-foreground);
+  --chart-1: var(--color-primary-main);
+  --chart-2: var(--color-info-main);
+  --chart-3: var(--color-secondary-main);
+  --icon-brand: var(--color-primary-main);
+  --icon-hover: var(--color-primary-dark);
+}
+
 @theme inline {
   /* Override Tailwind's default system font stack with the Safe{Wallet} app font */
   --font-sans: 'DM Sans', sans-serif;

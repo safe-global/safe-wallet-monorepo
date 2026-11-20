@@ -36,6 +36,31 @@ main {
   width: 100%;
 }
 
+[data-theme-variant='gta6'] {
+  color-scheme: dark;
+}
+
+[data-theme-option='gta6'] {
+  background:
+    linear-gradient(90deg, var(--color-static-main), transparent),
+    var(--color-static-main) url(/images/themes/gta6-sunset.webp) 75% 65% / cover;
+  color: var(--color-static-primary);
+}
+
+[data-theme-option='gta6'] > [aria-hidden] {
+  border-color: currentColor;
+}
+
+[data-theme-option='gta6'][aria-pressed='true'] > [aria-hidden] > span {
+  background-color: currentColor;
+}
+
+[data-theme-option='gta6']:hover,
+[data-theme-option='gta6']:focus-visible {
+  outline: 2px solid var(--color-primary-main);
+  outline-offset: 2px;
+}
+
 a {
   color: inherit;
   text-decoration: none;

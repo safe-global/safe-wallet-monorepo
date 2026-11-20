@@ -11,6 +11,8 @@ export enum TOKEN_LISTS {
   ALL = 'ALL',
 }
 
+export type AppearanceTheme = 'system' | 'light' | 'dark' | 'gta6'
+
 // Curation state for nested safes (replaces old hide/show mechanism)
 export interface CuratedNestedSafeState {
   /** Addresses of nested safes selected by user */
@@ -46,6 +48,7 @@ export type SettingsState = {
   }
   theme: {
     darkMode?: boolean
+    variant?: 'gta6'
   }
   env: EnvState
   signing: {
@@ -103,7 +106,13 @@ export const settingsSlice = createSlice({
       state.transactionExecution = payload
     },
     setDarkMode: (state, { payload }: PayloadAction<SettingsState['theme']['darkMode']>) => {
-      state.theme.darkMode = payload
+      state.theme = { darkMode: payload }
+    },
+    setAppearanceTheme: (state, { payload }: PayloadAction<AppearanceTheme>) => {
+      state.theme = {
+        darkMode: payload === 'system' ? undefined : payload !== 'light',
+        variant: payload === 'gta6' ? 'gta6' : undefined,
+      }
     },
     setHiddenTokensForChain: (state, { payload }: PayloadAction<{ chainId: string; assets: string[] }>) => {
       const { chainId, assets } = payload
@@ -167,6 +176,7 @@ export const {
   setCurrency,
   setQrShortName,
   setDarkMode,
+  setAppearanceTheme,
   setHiddenTokensForChain,
   setCuratedNestedSafes,
   clearCuratedNestedSafes,
@@ -181,6 +191,13 @@ export const {
 } = settingsSlice.actions
 
 export const selectSettings = (state: RootState): SettingsState => state[settingsSlice.name]
+
+export const selectAppearanceTheme = createSelector(selectSettings, ({ theme }): AppearanceTheme => {
+  if (theme?.variant === 'gta6') return 'gta6'
+  if (theme?.darkMode === true) return 'dark'
+  if (theme?.darkMode === false) return 'light'
+  return 'system'
+})
 
 export const selectCurrency = (state: RootState): SettingsState['currency'] => {
   return state[settingsSlice.name].currency || initialState.currency

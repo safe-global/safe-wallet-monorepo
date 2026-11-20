@@ -174,9 +174,42 @@
   --color-tag-lagoon-dot: #5cc6b8;
 }
 
+[data-theme-variant='gta6'] {
+  --color-text-primary: #fff3fa;
+  --color-text-secondary: #c9b4d3;
+  --color-text-disabled: #9d83af;
+  --color-text-contrast: #210f28;
+  --color-primary-dark: #f065ac;
+  --color-primary-main: #ff92cc;
+  --color-primary-light: #ffc0df;
+  --color-secondary-dark: #bfa6cb;
+  --color-secondary-main: #ffd0a6;
+  --color-secondary-light: #b0ffc9;
+  --color-secondary-background: #412442;
+  --color-border-main: #836386;
+  --color-border-light: #503655;
+  --color-border-background: #170f24;
+  --color-background-default: #170f24;
+  --color-background-main: #170f24;
+  --color-background-sheet: #20142f;
+  --color-background-paper: #281a36;
+  --color-background-light: #3d2244;
+  --color-background-light-hover: #4d2d53;
+  --color-background-secondary: #352345;
+  --color-background-skeleton: #fff3fa12;
+  --color-background-disabled: #fff3fa1f;
+  --color-logo-main: #fff3fa;
+  --color-logo-background: #3d2244;
+  --color-static-main: #170f24;
+  --color-static-light: #503655;
+  --color-static-primary: #fff3fa;
+  --color-static-text-secondary: #c9b4d3;
+  --color-static-text-brand: #ff92cc;
+}
+
 /* The same as above for the brief moment before JS loads */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root:not([data-theme]) {
     --color-text-primary: #ffffff;
     --color-text-secondary: #636669;
     --color-text-disabled: rgba(255, 255, 255, 0.3);

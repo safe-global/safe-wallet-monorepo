@@ -51,4 +51,13 @@ describe('AppearanceSection', () => {
     fireEvent.click(screen.getByTestId('theme-card-system'))
     expect(store.getState().settings.theme.darkMode).toBeUndefined()
   })
+
+  it('sets the GTA VI variant in the shared theme preference', () => {
+    const { store } = renderWithStore()
+
+    fireEvent.click(screen.getByRole('button', { name: 'GTA VI' }))
+
+    expect(screen.getByRole('button', { name: 'GTA VI' })).toHaveAttribute('aria-pressed', 'true')
+    expect(store.getState().settings.theme).toEqual({ darkMode: true, variant: 'gta6' })
+  })
 })

@@ -6,6 +6,7 @@
 import type { ColorPalette } from '../palettes/types'
 import lightPalette from '../palettes/light'
 import darkPalette from '../palettes/dark'
+import gta6Palette from '../palettes/gta6'
 import { spacingWeb } from '../tokens'
 
 /**
@@ -21,7 +22,7 @@ function toKebabCase(str: string): string {
  * Example: { text: { primary: '#000' } } => '--color-text-primary: #000;'
  * Converts camelCase keys to kebab-case for CSS conventions.
  */
-function flattenPaletteToCSS(palette: ColorPalette, indent = '  '): string[] {
+function flattenPaletteToCSS(palette: Partial<ColorPalette>, indent = '  '): string[] {
   const vars: string[] = []
 
   function flatten(obj: unknown, prefix = 'color'): void {
@@ -122,6 +123,7 @@ export function generateCSSVars(): string {
 
   const lightVars = flattenPaletteToCSS(webLightPalette)
   const darkVars = flattenPaletteToCSS(webDarkPalette)
+  const gta6Vars = flattenPaletteToCSS(gta6Palette)
   const spacingVars = generateSpacingCSS()
 
   return `/* This file is generated from @safe-global/theme. Do not edit directly. */
@@ -135,9 +137,13 @@ ${spacingVars.join('\n')}
 ${darkVars.join('\n')}
 }
 
+[data-theme-variant="gta6"] {
+${gta6Vars.join('\n')}
+}
+
 /* The same as above for the brief moment before JS loads */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root:not([data-theme]) {
 ${darkVars.map((v) => '  ' + v).join('\n')}
   }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAppSelector } from '@/store'
-import { selectSettings } from '@/store/settingsSlice'
+import { selectAppearanceTheme } from '@/store/settingsSlice'
 
 const isSystemDarkMode = (): boolean => {
   if (typeof window === 'undefined' || !window.matchMedia) return false
@@ -8,7 +8,7 @@ const isSystemDarkMode = (): boolean => {
 }
 
 export const useDarkMode = (): boolean => {
-  const settings = useAppSelector(selectSettings)
+  const theme = useAppSelector(selectAppearanceTheme)
   // The effect below persists the resolved theme to <html data-theme>. Read it
   // synchronously on first render so a remount (e.g. Next.js route change)
   // doesn't flash light-mode for a frame before the effect runs.
@@ -18,11 +18,17 @@ export const useDarkMode = (): boolean => {
   })
 
   useEffect(() => {
-    const isDark = settings.theme.darkMode ?? isSystemDarkMode()
+    const isDark = theme === 'system' ? isSystemDarkMode() : theme !== 'light'
 
     setIsDarkMode(isDark)
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
-  }, [settings.theme.darkMode])
+    const root = document.documentElement
+    root.dataset.theme = isDark ? 'dark' : 'light'
+    if (theme === 'gta6') {
+      root.dataset.themeVariant = theme
+    } else {
+      delete root.dataset.themeVariant
+    }
+  }, [theme])
 
   return isDarkMode
 }

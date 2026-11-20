@@ -1,31 +1,11 @@
-import { useId } from 'react'
 import Head from 'next/head'
 
-import { Switch } from '@safe-global/views/components/ui/switch'
-import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { useAppDispatch } from '@/store'
-import { setDarkMode } from '@/store/settingsSlice'
 import SettingsHeader from '@/components/settings/SettingsHeader'
-import { trackEvent } from '@/services/analytics'
-import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
-import { useDarkMode } from '@/hooks/useDarkMode'
+import ThemeOptions from '@/components/settings/ThemeOptions'
 import { BRAND_NAME } from '@/config/constants'
 
 const Appearance = () => {
-  const dispatch = useAppDispatch()
-  const isDarkMode = useDarkMode()
-  const darkModeId = useId()
-
-  const handleDarkModeToggle = (checked: boolean) => {
-    dispatch(setDarkMode(checked))
-
-    trackEvent({
-      ...SETTINGS_EVENTS.APPEARANCE.DARK_MODE,
-      label: checked,
-    })
-  }
-
   return (
     <>
       <Head>
@@ -34,24 +14,12 @@ const Appearance = () => {
       <SettingsHeader />
       <main>
         <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
-          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_2fr]">
+          <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_3fr]">
             <div>
               <Typography variant="h4">Theme</Typography>
             </div>
 
-            <div>
-              <Field orientation="horizontal">
-                <Switch
-                  id={darkModeId}
-                  aria-labelledby={`${darkModeId}-label`}
-                  checked={isDarkMode}
-                  onCheckedChange={handleDarkModeToggle}
-                />
-                <FieldLabel id={`${darkModeId}-label`} htmlFor={darkModeId}>
-                  Dark mode
-                </FieldLabel>
-              </Field>
-            </div>
+            <ThemeOptions />
           </div>
         </div>
       </main>

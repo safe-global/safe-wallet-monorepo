@@ -114,6 +114,19 @@
   background-color: var(--background);
 }
 
+[data-theme-variant='gta6'] .main {
+  background-image:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-background-main) 55%, transparent),
+      var(--color-background-main) 95%
+    ),
+    url(/images/themes/gta6-sunset.webp);
+  background-position: top center;
+  background-repeat: no-repeat;
+  background-size: max(960px, 100%) max(320px, 34vw);
+}
+
 /* 52px matches the collapsed (icon-mode) sidebar width. */
 .mainSidebarCollapsed {
   padding-left: 52px;
