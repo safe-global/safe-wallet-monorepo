@@ -20,7 +20,7 @@ export const playwrightSpecs = {
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},
   'e2e/create-safe.spec.ts': {},
-  'e2e/delete.spec.ts': { flags: ['DELETE_TX', 'PROPOSERS'] },
+  'e2e/delete.spec.ts': { flags: ['DELETE_TX'] },
   'e2e/ens.spec.ts': { flags: ['DOMAIN_LOOKUP'] },
   'e2e/erc20-transfer.spec.ts': {},
   'e2e/fees.spec.ts': {},
