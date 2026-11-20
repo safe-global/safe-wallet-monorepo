@@ -9,6 +9,8 @@ import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
+import { useSafeProFlag } from '@/hooks/useIsSafeProEnabled'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 // ---------------------------------------------------------------------------
@@ -17,8 +19,10 @@ import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.plan,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.survey,
 ]
 
 const guardRules: GuardRule[] = [
@@ -28,6 +32,13 @@ const guardRules: GuardRule[] = [
   {
     match: ({ isStoreHydrated }) => !isStoreHydrated,
     action: () => allow(),
+  },
+
+  // The plan step exists only in the onboarding wizard
+  {
+    match: ({ pathname, isPlanStepEnabled }) =>
+      isPlanStepEnabled === false && pathname.startsWith(AppRoutes.welcome.plan),
+    action: () => redirect(AppRoutes.welcome.createSpace),
   },
 
   // Public and welcome routes are always accessible
@@ -89,6 +100,12 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   const isSpaceRoute = useIsSpaceRoute()
+  const isWorkspaceWizardEnabled = useIsWorkspaceWizardEnabled()
+  const isSafePro = useSafeProFlag()
+  const isPlanStepEnabled =
+    isWorkspaceWizardEnabled === undefined || isSafePro === undefined
+      ? undefined
+      : isWorkspaceWizardEnabled && isSafePro
 
   const [fetchSpaces] = useLazySpacesGetV1Query()
 
@@ -137,10 +154,12 @@ export const useFlowActivationGuard: UseGuard = () => {
         isSiweAuthenticated,
         hasSpaces,
         isPartOfSpaceUrl,
+        isPlanStepEnabled,
       },
       guardRules,
     )
   }, [
+    isPlanStepEnabled,
     pathname,
     guardQuery,
     spaceId,

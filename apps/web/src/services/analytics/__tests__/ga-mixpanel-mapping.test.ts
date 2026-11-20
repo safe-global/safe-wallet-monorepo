@@ -75,6 +75,12 @@ describe('GA to Mixpanel Mapping', () => {
         MixpanelEvent.WC_SAFE_APP_SUGGESTION_RESULT,
       )
     })
+
+    it('should map the Pending widget "View all" click', () => {
+      expect(GA_TO_MIXPANEL_MAPPING[SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED.action]).toBe(
+        MixpanelEvent.PENDING_TX_WIDGET_VIEW_ALL_CLICKED,
+      )
+    })
   })
 
   describe('GA_LABEL_TO_MIXPANEL_PROPERTY', () => {
