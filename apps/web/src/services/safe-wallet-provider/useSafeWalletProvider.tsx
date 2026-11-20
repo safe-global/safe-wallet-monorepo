@@ -33,6 +33,10 @@ import { walletConnectServices } from '@/features/walletconnect/public/services/
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { verifyAndStripNestedTxCalldata, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { buildDeclared } from '@safe-global/utils/utils/declaredAttribution'
+
+const declareWalletConnectApp = (appInfo: AppInfo) =>
+  buildDeclared('WALLET_CONNECT', { name: appInfo.name, url: appInfo.dappUrl })
 
 export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSafes = true): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -111,7 +115,13 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
             onClose,
           )
         } else {
-          setTxFlow(<SignMessageOnChainFlow props={{ requestId: id, message, method }} />, onClose)
+          setTxFlow(
+            <SignMessageOnChainFlow
+              props={{ requestId: id, message, method }}
+              declared={declareWalletConnectApp(appInfo)}
+            />,
+            onClose,
+          )
         }
       })
     }
@@ -179,6 +189,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
                 params: params.params,
                 ...(nestedChildTx && { nestedChildTx }),
               }}
+              declared={declareWalletConnectApp(appInfo)}
               onSubmit={onSubmit}
             />,
             onClose,
