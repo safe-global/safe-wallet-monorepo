@@ -1,4 +1,5 @@
-import { _hydrationReducer } from '@/store'
+import { _hydrationReducer, getPersistedState, makeStore } from '@/store'
+import local from '@/services/local-storage/local'
 import { OrderByOption, ORDER_BY_RESET_VERSION } from '@/store/orderByPreferenceSlice'
 
 describe('store', () => {
@@ -198,6 +199,36 @@ describe('store', () => {
         orderBy: OrderByOption.LAST_VISITED,
         resetVersion: ORDER_BY_RESET_VERSION,
       })
+    })
+  })
+
+  describe('getPersistedState', () => {
+    beforeEach(() => localStorage.clear())
+    afterAll(() => localStorage.clear())
+
+    it('drops a stored slice of the wrong kind, so hydration keeps the initial slice', () => {
+      local.setItem('session', [])
+      local.setItem('settings', true)
+      local.setItem('visitedSafes', 'x')
+      local.setItem('pendingCfDeletes', {})
+      const store = makeStore()
+      const initial = store.getState()
+
+      store.dispatch({ type: '@@HYDRATE', payload: getPersistedState() })
+
+      const state = store.getState()
+      expect(state.session).toEqual(initial.session)
+      expect(state.settings).toEqual(initial.settings)
+      expect(state.visitedSafes).toEqual(initial.visitedSafes)
+      expect(state.pendingCfDeletes).toEqual([])
+    })
+
+    it('keeps stored slices of the right kind, including array slices', () => {
+      const pendingCfDeletes = [{ chainId: '1', address: '0x1' }]
+      local.setItem('pendingCfDeletes', pendingCfDeletes)
+      local.setItem('session', { lastChainId: '137' })
+
+      expect(getPersistedState()).toEqual({ pendingCfDeletes, session: { lastChainId: '137' } })
     })
   })
 })
