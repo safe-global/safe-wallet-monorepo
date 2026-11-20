@@ -1,8 +1,4 @@
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { gatedDynamic } from '@/utils/gatedDynamic'
+import { HnAnalysisGroupCard } from '../../components/HnAnalysisGroupCard'
 
-const HnAnalysisGroupCard = gatedDynamic(FEATURES.HYPERNATIVE, () =>
-  import('../../components/HnAnalysisGroupCard').then((mod) => ({ default: mod.HnAnalysisGroupCard })),
-)
-
+// Static: a failed chunk would hide the threat findings; ThreatAnalysis checks the HYPERNATIVE flag
 export default HnAnalysisGroupCard

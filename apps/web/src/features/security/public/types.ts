@@ -1,7 +1,7 @@
 /**
  * Security Feature - Public Types
  *
- * Import from `@/features/security/types` — type-only imports are erased at compile time
+ * Import from `@/features/security/public/types` — type-only imports are erased at compile time
  * and incur zero runtime cost.
  */
 

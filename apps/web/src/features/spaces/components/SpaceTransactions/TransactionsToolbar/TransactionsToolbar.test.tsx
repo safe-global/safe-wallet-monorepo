@@ -43,16 +43,31 @@ const renderToolbar = (filters: SpaceQueueFilters = NO_SPACE_QUEUE_FILTERS) => {
       filters={filters}
       onFiltersChange={onFiltersChange}
       onSearchChange={jest.fn()}
+      groupBy="status"
+      onGroupByChange={jest.fn()}
     />,
   )
   return onFiltersChange
 }
 
+const openFilterSection = (section: string) => {
+  fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
+  fireEvent.click(screen.getByRole('menuitem', { name: section }))
+}
+
 describe('TransactionsToolbar', () => {
+  it('has no Urgency or Safe button beside the Filter menu', () => {
+    renderToolbar()
+
+    expect(screen.queryByRole('button', { name: 'Urgency' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Safe' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+  })
+
   it('lists every status and flag with its count', () => {
     renderToolbar()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Urgency')
 
     expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute1',
@@ -67,7 +82,7 @@ describe('TransactionsToolbar', () => {
   it('checks the selected statuses', () => {
     renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Urgency')
 
     expect(screen.getByRole('menuitemcheckbox', { name: /Execute/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('menuitemcheckbox', { name: /Sign/ })).toHaveAttribute('aria-checked', 'false')
@@ -76,16 +91,16 @@ describe('TransactionsToolbar', () => {
   it('adds a status that is picked to the filters', () => {
     const onFiltersChange = renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Urgency')
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Sign/ }))
 
     expect(onFiltersChange).toHaveBeenCalledWith({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute', 'sign'] })
   })
 
-  it('hides the flag counts in the Status menu while a status is selected', () => {
+  it('hides the flag counts in the Urgency menu while a status is selected', () => {
     renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['sign'] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Urgency')
 
     expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute1',
@@ -97,10 +112,10 @@ describe('TransactionsToolbar', () => {
     ])
   })
 
-  it('hides the status counts in the Status menu while a flag is selected', () => {
+  it('hides the status counts in the Urgency menu while a flag is selected', () => {
     renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['conflicting'] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Urgency')
 
     expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute',
@@ -115,16 +130,16 @@ describe('TransactionsToolbar', () => {
   it('removes a status that is picked again', () => {
     const onFiltersChange = renderToolbar({ statuses: ['execute', 'sign'], safes: [], chainIds: [], signers: [] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Urgency')
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Execute/ }))
 
     expect(onFiltersChange).toHaveBeenCalledWith({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
   })
 
-  it('lists the Safes by count and selects every chain of the one picked', () => {
+  it('lists the Safes by count in the Filter menu and selects every chain of the one picked', () => {
     const onFiltersChange = renderToolbar()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Safe' }))
+    openFilterSection('Safe account')
     const options = screen.getAllByRole('menuitemcheckbox')
 
     expect(options).toHaveLength(2)
@@ -144,8 +159,7 @@ describe('TransactionsToolbar', () => {
   it('lists the networks by count in the Filter menu and adds the one picked', () => {
     const onFiltersChange = renderToolbar()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Network' }))
+    openFilterSection('Network')
     const options = screen.getAllByRole('menuitemcheckbox')
 
     expect(options.map((option) => option.textContent)).toEqual([
@@ -161,8 +175,7 @@ describe('TransactionsToolbar', () => {
   it('lists the signers by count in the Filter menu and removes one picked again, in any address case', () => {
     const onFiltersChange = renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, signers: [signerB.toLowerCase()] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Signer' }))
+    openFilterSection('Signer')
     const options = screen.getAllByRole('menuitemcheckbox')
 
     expect(options).toHaveLength(2)
@@ -204,10 +217,10 @@ describe('TransactionsToolbar', () => {
   it('shows one chip per filter, naming up to two values', () => {
     renderToolbar({ statuses: ['sign', 'execute', 'blocked', 'conflicting'], safes: [], chainIds: [], signers: [] })
 
-    expect(screen.getByText('Status:').parentElement).toHaveTextContent('Status:Ready to sign, Ready to execute +2')
+    expect(screen.getByText('Urgency:').parentElement).toHaveTextContent('Urgency:Ready to sign, Ready to execute +2')
   })
 
-  it('removes the statuses with the Status chip', () => {
+  it('removes the statuses with the Urgency chip', () => {
     const filters = {
       ...NO_SPACE_QUEUE_FILTERS,
       statuses: ['sign' as const],
@@ -215,7 +228,7 @@ describe('TransactionsToolbar', () => {
     }
     const onFiltersChange = renderToolbar(filters)
 
-    const statusChip = screen.getByText('Status:').parentElement as HTMLElement
+    const statusChip = screen.getByText('Urgency:').parentElement as HTMLElement
     fireEvent.click(within(statusChip).getByRole('button', { name: 'Remove' }))
 
     expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, statuses: [] })
@@ -231,6 +244,26 @@ describe('TransactionsToolbar', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
 
     expect(onFiltersChange).toHaveBeenLastCalledWith(NO_SPACE_QUEUE_FILTERS)
+  })
+
+  it('passes the grouping picked in Group by on to the queue', () => {
+    const onGroupByChange = jest.fn()
+    render(
+      <TransactionsToolbar
+        spaceId={faker.string.uuid()}
+        counts={counts}
+        filters={NO_SPACE_QUEUE_FILTERS}
+        onFiltersChange={jest.fn()}
+        onSearchChange={jest.fn()}
+        groupBy="status"
+        onGroupByChange={onGroupByChange}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Group by Urgency' }))
+    fireEvent.click(screen.getByRole('menuitemradio', { name: /Up next/ }))
+
+    expect(onGroupByChange).toHaveBeenCalledWith('next')
   })
 
   describe('search', () => {
@@ -251,6 +284,8 @@ describe('TransactionsToolbar', () => {
           filters={NO_SPACE_QUEUE_FILTERS}
           onFiltersChange={jest.fn()}
           onSearchChange={onSearchChange}
+          groupBy="status"
+          onGroupByChange={jest.fn()}
         />,
       )
 

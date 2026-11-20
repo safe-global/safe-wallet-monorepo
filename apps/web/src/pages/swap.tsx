@@ -22,7 +22,6 @@ const SwapPage = () => {
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
   const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
 
-  // Access swap widgets via feature architecture (renders null during SSR via proxy stub)
   let sell = undefined
   if (token && amount) {
     sell = {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTransactionQueue } from '@/services/transactions'
-import { getLatestTransactions } from '@/utils/tx-list'
+import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useSpaceSafesWithQueue } from './useSpaceSafesWithQueue'
 
 export type SpacePendingTxItem = TransactionQueuedItem & { safeAddress: string; chainId: string }
@@ -43,7 +43,7 @@ export const usePerSafePendingTransactions = (limit = 3, skip = false) => {
               trusted: true,
               cursor: `limit=${limit}&offset=0`,
             })
-            return { chainId, address, transactions: getLatestTransactions(page.results) }
+            return { chainId, address, transactions: page.results.filter(isTransactionQueuedItem) }
           }),
         )
         results.push(...batchResults)

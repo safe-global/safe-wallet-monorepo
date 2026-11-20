@@ -12,7 +12,8 @@ import {
   multisigTransactionBuilder,
   queuedTransactionItem,
 } from '@/tests/builders/queuedTransaction'
-import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider/WalletContext'
+import { walletContextBuilder } from '@/tests/builders/wallet'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
 import ParentSafeNonce from '..'
 
 jest.mock('@/hooks/useSafeInfo')
@@ -52,16 +53,25 @@ const mockParentSafeApi = (parentSafeAddress: string, { noncesFail = false, queu
   )
 }
 
-const renderParentSafeNonce = (parentSafeAddress: string) => {
-  const setParentSafeNonce = jest.fn()
-  const clearParentSafeNonce = jest.fn()
-  const walletContext = { setParentSafeNonce, clearParentSafeNonce } as unknown as WalletContextType
+const renderParentSafeNonce = (parentSafeAddress: string, { signerNonce }: { signerNonce?: number } = {}) => {
+  let nonce = signerNonce
+  const walletContext = walletContextBuilder()
+    .with({
+      getParentSafeNonce: () => nonce,
+      setParentSafeNonce: (chosen) => {
+        nonce = chosen
+      },
+      clearParentSafeNonce: () => {
+        nonce = undefined
+      },
+    })
+    .build()
   const view = render(
     <WalletContext.Provider value={walletContext}>
       <ParentSafeNonce parentSafeAddress={parentSafeAddress} />
     </WalletContext.Provider>,
   )
-  return { ...view, setParentSafeNonce, clearParentSafeNonce }
+  return { ...view, getSignerNonce: () => nonce }
 }
 
 const getLoadedNonceInput = async () => {
@@ -89,11 +99,11 @@ describe('ParentSafeNonce', () => {
 
   it('shows the parent Safe recommended nonce without pinning it for the signer', async () => {
     mockParentSafeApi(parentSafeAddress)
-    const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
+    const { getSignerNonce } = renderParentSafeNonce(parentSafeAddress)
 
     await getLoadedNonceInput()
 
-    expect(setParentSafeNonce).not.toHaveBeenCalled()
+    expect(getSignerNonce()).toBeUndefined()
   })
 
   it('offers the parent Safe queued txs as nonces to replace', async () => {
@@ -109,47 +119,56 @@ describe('ParentSafeNonce', () => {
 
   it('hands the signer a nonce the user types', async () => {
     mockParentSafeApi(parentSafeAddress)
-    const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
+    const { getSignerNonce } = renderParentSafeNonce(parentSafeAddress)
 
     await typeNonce(await getLoadedNonceInput(), QUEUED_NONCE)
 
-    await waitFor(() => expect(setParentSafeNonce).toHaveBeenLastCalledWith(QUEUED_NONCE))
+    await waitFor(() => expect(getSignerNonce()).toBe(QUEUED_NONCE))
   })
 
   it('stops pinning a nonce when the user resets to the recommended one', async () => {
     const user = userEvent.setup()
     mockParentSafeApi(parentSafeAddress)
-    const { setParentSafeNonce, clearParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
+    const { getSignerNonce } = renderParentSafeNonce(parentSafeAddress)
     const input = await getLoadedNonceInput()
     await typeNonce(input, QUEUED_NONCE)
-    await waitFor(() => expect(setParentSafeNonce).toHaveBeenLastCalledWith(QUEUED_NONCE))
+    await waitFor(() => expect(getSignerNonce()).toBe(QUEUED_NONCE))
 
     await user.click(screen.getByRole('button', { name: 'Reset to recommended nonce' }))
 
-    await waitFor(() => expect(clearParentSafeNonce).toHaveBeenCalled())
+    await waitFor(() => expect(getSignerNonce()).toBeUndefined())
     expect(input).toHaveValue(String(RECOMMENDED_NONCE))
-    expect(setParentSafeNonce).not.toHaveBeenCalledWith(RECOMMENDED_NONCE)
   })
 
   it('rejects a nonce below the parent Safe on-chain nonce', async () => {
     mockParentSafeApi(parentSafeAddress)
-    const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
+    const { getSignerNonce } = renderParentSafeNonce(parentSafeAddress)
     const input = await getLoadedNonceInput()
 
     await typeNonce(input, CURRENT_NONCE - 1)
 
     await waitFor(() => expect(input).toHaveAccessibleName(`Nonce can't be lower than ${CURRENT_NONCE}`))
-    expect(setParentSafeNonce).not.toHaveBeenCalledWith(CURRENT_NONCE - 1)
+    expect(getSignerNonce()).not.toBe(CURRENT_NONCE - 1)
   })
 
-  it('clears the signer nonce when it unmounts', async () => {
+  it('keeps the chosen nonce for the signer when the review step unmounts before signing', async () => {
     mockParentSafeApi(parentSafeAddress)
-    const { clearParentSafeNonce, unmount } = renderParentSafeNonce(parentSafeAddress)
-    await getLoadedNonceInput()
+    const { getSignerNonce, unmount } = renderParentSafeNonce(parentSafeAddress)
+    await typeNonce(await getLoadedNonceInput(), QUEUED_NONCE)
+    await waitFor(() => expect(getSignerNonce()).toBe(QUEUED_NONCE))
 
     unmount()
 
-    expect(clearParentSafeNonce).toHaveBeenCalled()
+    expect(getSignerNonce()).toBe(QUEUED_NONCE)
+  })
+
+  it('shows the nonce already chosen for the signer when the review step mounts again', async () => {
+    mockParentSafeApi(parentSafeAddress)
+    renderParentSafeNonce(parentSafeAddress, { signerNonce: QUEUED_NONCE })
+
+    const input = await screen.findByRole('combobox')
+
+    await waitFor(() => expect(input).toHaveValue(String(QUEUED_NONCE)))
   })
 
   it('shows an error when the parent Safe nonce cannot be loaded', async () => {

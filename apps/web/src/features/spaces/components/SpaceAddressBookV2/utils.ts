@@ -1,7 +1,15 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { AddressBookContact, ContactTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import type {
+  AddressBookRequestItemDto,
+  SpaceAddressBookItemDto,
+  SpaceAddressBookTagDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type {
+  AddressBookContact,
+  ContactTag,
+  PendingRequest,
+} from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import { toChainInfos } from '../../utils'
 
@@ -18,6 +26,23 @@ export const toWorkspaceContacts = (
     chains: toChainInfos(item.chainIds, configs),
     addedBy: resolveMemberName(item.createdByUserId) || item.createdBy || undefined,
     tags: item.tagIds.flatMap((id) => tagById.get(id) ?? []),
+  }))
+}
+
+export const toPendingRequests = (
+  requests: AddressBookRequestItemDto[],
+  workspaceItems: SpaceAddressBookItemDto[],
+  configs: Chain[],
+  resolveMemberName: (userId: number | undefined) => string | undefined,
+): PendingRequest[] => {
+  const workspaceAddresses = new Set(workspaceItems.map((item) => item.address.toLowerCase()))
+  return requests.map((request) => ({
+    id: request.id,
+    address: request.address,
+    name: request.name,
+    chains: toChainInfos(request.chainIds, configs),
+    requestedBy: resolveMemberName(request.requestedByUserId) || request.requestedBy || undefined,
+    isInWorkspace: workspaceAddresses.has(request.address.toLowerCase()),
   }))
 }
 

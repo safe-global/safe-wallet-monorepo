@@ -1,5 +1,5 @@
 import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
-import useChains, { useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain } from '@/hooks/useChains'
 import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import Track from '@/components/common/Track'
@@ -12,37 +12,10 @@ import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { getDeviatingSetups, getSafeSetups } from '../../public/utils/utils'
-import { Typography } from '@safe-global/views/components/ui/typography'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
-
-/**
- * ChainIndicatorList component displays a list of chains with their logos and names
- * Used in address book and other contexts where chain visualization is needed
- */
-export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
-  const { configs } = useChains()
-
-  return (
-    <>
-      {chainIds.map((chainId, index) => {
-        const chain = configs.find((chain) => chain.chainId === chainId)
-        return (
-          <div key={chainId} className="relative top-[5px] inline-flex flex-wrap">
-            <ChainIndicator responsive key={chainId} chainId={chainId} showUnknown={false} onlyLogo={true} />
-            <Typography className="relative top-[2px] mx-1">
-              {chain && chain.chainName}
-              {index === chainIds.length - 1 ? '.' : ','}
-            </Typography>
-          </div>
-        )
-      })}
-    </>
-  )
-}
 
 export const InconsistentSignerSetupWarning = () => {
   const router = useRouter()

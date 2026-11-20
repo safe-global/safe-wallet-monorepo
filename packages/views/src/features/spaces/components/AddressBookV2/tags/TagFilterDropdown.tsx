@@ -41,7 +41,7 @@ const TagFilterDropdown = ({
 
   return (
     <TagMenu
-      trigger={<Button variant="outline" size="action" data-testid="filters-dropdown" />}
+      trigger={<Button variant="outline" size="lg" data-testid="filters-dropdown" />}
       triggerContent={
         <>
           <ListFilter aria-hidden="true" data-icon="inline-start" />

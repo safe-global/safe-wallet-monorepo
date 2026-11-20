@@ -1,7 +1,7 @@
 import { positionsFixtures } from '@safe-global/test/msw/fixtures'
 import { render, screen } from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
-import Positions from '../public/components/Positions'
+import Positions from '../components/Positions'
 
 jest.mock('../hooks/usePositions')
 jest.mock('../hooks/usePositionsFiatTotal')
