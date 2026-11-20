@@ -140,7 +140,8 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     await queue.goto(pairing.child.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toContainText('1/1')
     await queue.execute(0)
-    await childReview.continueAndExecute()
+    // The relay would execute the child by itself: the parent gets the request only if its wallet executes
+    await childReview.continueAndExecuteDecliningSponsor()
     await parentReview.signAndExecute()
 
     await expect.poll(() => safeApiClient.getNonce(pairing.child.address)).toBe(1)

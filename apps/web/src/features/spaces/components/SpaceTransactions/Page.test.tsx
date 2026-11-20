@@ -43,13 +43,14 @@ describe('SpaceTransactionsPage', () => {
 
   it('resets the queue filters when switching to another Workspace', () => {
     const { rerender } = render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Urgency' }))
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Sign/ }))
-    expect(screen.getByText('Status:')).toBeInTheDocument()
+    expect(screen.getByText('Urgency:')).toBeInTheDocument()
 
     rerender(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
 
-    expect(screen.queryByText('Status:')).not.toBeInTheDocument()
+    expect(screen.queryByText('Urgency:')).not.toBeInTheDocument()
   })
 
   it('empties the search when switching to another Workspace', () => {

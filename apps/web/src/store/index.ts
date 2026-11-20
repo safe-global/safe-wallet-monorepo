@@ -43,6 +43,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
+import { safeOverviewsTokenListListener } from './api/gateway/safeOverviewsTokenListListener'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 import { spaceQueueReconciliationListener } from '@/features/spaces/public/store/spaceQueueReconciliationListener'
 
@@ -74,6 +75,7 @@ const rootReducer = combineReducers({
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
+  [slices.spaceQueueViewSlice.name]: slices.spaceQueueViewSlice.reducer,
   [slices.feePaymentSourcePreferenceSlice.name]: slices.feePaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
   // Deliberately absent from `persistedSlices`: a restored dialog would wait for a request that is gone.
@@ -149,6 +151,7 @@ const listeners = [
   trialReminderListener,
   forbiddenSessionListener,
   spaceQueueReconciliationListener,
+  safeOverviewsTokenListListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {

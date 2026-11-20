@@ -1,4 +1,5 @@
 import { act, render, screen, fireEvent } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
 import PaginatedDataTable, { type DataTableColumn } from './index'
 
 const mockUseIsMobile = jest.fn(() => false)
@@ -36,7 +37,7 @@ describe('PaginatedDataTable', () => {
       expect(screen.queryByText('extra-cell')).not.toBeInTheDocument()
     })
 
-    it('drops secondary columns when the container is narrower than the column minimums', () => {
+    const mockContainerWidth = () => {
       let notify: ((width: number) => void) | undefined
       class ResizeObserverMock {
         constructor(callback: ResizeObserverCallback) {
@@ -49,20 +50,76 @@ describe('PaginatedDataTable', () => {
       }
       const globalWithObserver = globalThis as { ResizeObserver?: typeof ResizeObserver }
       globalWithObserver.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+      return {
+        setWidth: (width: number) => act(() => notify?.(width)),
+        restore: () => delete globalWithObserver.ResizeObserver,
+      }
+    }
+
+    it('drops secondary columns when the container is narrower than the column minimums', () => {
+      const container = mockContainerWidth()
 
       try {
         render(<PaginatedDataTable columns={columnsWithSecondary} rows={['a']} getRowKey={(row) => row} />)
         expect(screen.getByText('Extra')).toBeInTheDocument()
 
-        // Below the 330px column-minimum floor → compact
-        act(() => notify?.(300))
+        container.setWidth(300)
         expect(screen.queryByText('Extra')).not.toBeInTheDocument()
 
-        // Wide enough again → full column set returns
-        act(() => notify?.(400))
+        container.setWidth(400)
         expect(screen.getByText('Extra')).toBeInTheDocument()
       } finally {
-        delete globalWithObserver.ResizeObserver
+        container.restore()
+      }
+    })
+
+    it('counts the checkbox column when deciding whether the columns fit', () => {
+      const container = mockContainerWidth()
+
+      try {
+        render(
+          <PaginatedDataTable
+            columns={columnsWithSecondary}
+            rows={['a']}
+            getRowKey={(row) => row}
+            selectable
+            selectedKeys={new Set()}
+            onSelectionChange={jest.fn()}
+          />,
+        )
+        container.setWidth(350)
+
+        expect(screen.queryByText('Extra')).not.toBeInTheDocument()
+      } finally {
+        container.restore()
+      }
+    })
+
+    it('gives share columns their minWidth plus an even part of the spare width', () => {
+      const container = mockContainerWidth()
+      const sharedColumns: DataTableColumn<string>[] = [
+        { id: 'first', header: 'First', width: 'share', minWidth: 300, cell: (row) => row },
+        { id: 'second', header: 'Second', width: 'share', minWidth: 100, cell: (row) => row },
+        { id: 'last', header: 'Last', width: 'share', minWidth: 100, priority: 'secondary', cell: (row) => row },
+        { id: 'fit', header: 'Fit', width: 'fit', minWidth: 60, cell: (row) => row },
+      ]
+
+      try {
+        render(<PaginatedDataTable columns={sharedColumns} rows={['a']} getRowKey={(row) => row} />)
+        expect(screen.getByRole('columnheader', { name: 'First' }).style.width).toBe('')
+
+        container.setWidth(860)
+
+        // 860 − (300 + 100 + 100 + 60) leaves 300 spare, 100 per share column
+        expect(screen.getByRole('columnheader', { name: 'First' }).style.width).toBe('400px')
+        expect(screen.getByRole('columnheader', { name: 'Second' }).style.width).toBe('200px')
+        expect(screen.getByRole('columnheader', { name: 'Last' }).style.width).toBe('')
+        expect(screen.getByRole('columnheader', { name: 'Fit' }).style.width).toBe('')
+
+        container.setWidth(500)
+        expect(screen.getByRole('columnheader', { name: 'First' }).style.width).toBe('')
+      } finally {
+        container.restore()
       }
     })
   })
@@ -372,6 +429,97 @@ describe('PaginatedDataTable', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
 
       expect(screen.getByText('detail-a')).toBeInTheDocument()
+      expect(onRowClick).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('selection', () => {
+    const makeKeys = (count: number) => Array.from({ length: count }, () => faker.string.uuid())
+
+    const selectableTable = (
+      rows: string[],
+      props: Partial<React.ComponentProps<typeof PaginatedDataTable<string>>> = {},
+    ) => (
+      <PaginatedDataTable
+        columns={columns}
+        rows={rows}
+        getRowKey={(row) => row}
+        selectable
+        getSelectionLabel={(row) => `Select ${row}`}
+        {...props}
+      />
+    )
+
+    it('renders no checkboxes unless selectable', () => {
+      const rows = makeKeys(2)
+
+      render(<PaginatedDataTable columns={columns} rows={rows} getRowKey={(row) => row} />)
+
+      expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    })
+
+    it('reports the toggled row key through onSelectionChange', () => {
+      const rows = makeKeys(3)
+      const onSelectionChange = jest.fn()
+
+      render(selectableTable(rows, { selectedKeys: new Set(), onSelectionChange }))
+      fireEvent.click(screen.getByRole('checkbox', { name: `Select ${rows[1]}` }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set([rows[1]]))
+    })
+
+    it('selects only the current page from the header checkbox', () => {
+      const rows = makeKeys(30)
+      const onSelectionChange = jest.fn()
+
+      render(selectableTable(rows, { pageSize: 25, selectedKeys: new Set(), onSelectionChange }))
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select all rows on this page' }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set(rows.slice(0, 25)))
+    })
+
+    it('clears the page when every row on it is selected', () => {
+      const rows = makeKeys(3)
+      const onSelectionChange = jest.fn()
+
+      render(selectableTable(rows, { selectedKeys: new Set(rows), onSelectionChange }))
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Deselect all rows on this page' }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set())
+    })
+
+    it('keeps the selection on other pages when the current page is cleared', () => {
+      const rows = makeKeys(30)
+      const onOtherPage = rows[27]
+      const onSelectionChange = jest.fn()
+
+      render(
+        selectableTable(rows, {
+          pageSize: 25,
+          selectedKeys: new Set([...rows.slice(0, 25), onOtherPage]),
+          onSelectionChange,
+        }),
+      )
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Deselect all rows on this page' }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set([onOtherPage]))
+    })
+
+    it('shows the header checkbox as mixed when only some rows on the page are selected', () => {
+      const rows = makeKeys(3)
+
+      render(selectableTable(rows, { selectedKeys: new Set([rows[0]]), onSelectionChange: jest.fn() }))
+
+      expect(screen.getByRole('checkbox', { name: 'Select all rows on this page' })).toBePartiallyChecked()
+    })
+
+    it('does not fire onRowClick when a checkbox is clicked', () => {
+      const rows = makeKeys(2)
+      const onRowClick = jest.fn()
+
+      render(selectableTable(rows, { selectedKeys: new Set(), onSelectionChange: jest.fn(), onRowClick }))
+      fireEvent.click(screen.getByRole('checkbox', { name: `Select ${rows[0]}` }))
+
       expect(onRowClick).not.toHaveBeenCalled()
     })
   })

@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import QueueToolbar from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/QueueToolbar'
+import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import type { SpaceQueueFilters } from '../../../hooks/useSpaceQueue'
 import NewTransactionButton from '../NewTransactionButton'
 import SearchTransactions from './SearchTransactions'
@@ -12,6 +13,8 @@ type TransactionsToolbarProps = {
   filters: SpaceQueueFilters
   onFiltersChange: (filters: SpaceQueueFilters) => void
   onSearchChange: (search: string) => void
+  groupBy: QueueGroupBy
+  onGroupByChange: (groupBy: QueueGroupBy) => void
 }
 
 const TransactionsToolbar = ({
@@ -20,12 +23,15 @@ const TransactionsToolbar = ({
   filters,
   onFiltersChange,
   onSearchChange,
+  groupBy,
+  onGroupByChange,
 }: TransactionsToolbarProps): ReactElement => {
   const options = useQueueFilterOptions(counts, filters, onFiltersChange)
   return (
     <QueueToolbar
       {...options}
       search={<SearchTransactions onSearch={onSearchChange} />}
+      groupBy={{ value: groupBy, onChange: onGroupByChange }}
       action={<NewTransactionButton spaceId={spaceId} />}
     />
   )

@@ -89,7 +89,7 @@ const SpaceSafeAccounts = () => {
                 tooltip={seatsTooltip(tierName, limit)}
               />
             )}
-            <InputGroup variant="search" inputSize="lg" className="flex-1">
+            <InputGroup variant="search" inputSize="lg" fieldError="hidden" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>
