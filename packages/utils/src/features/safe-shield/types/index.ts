@@ -58,6 +58,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ThreatStatus.MODULE_CHANGE
     | ThreatStatus.HYPERNATIVE_GUARD
     | ThreatStatus.INVALID_GUARD
+    | ThreatStatus.SWAP_WITH_OTHER_ACTIONS
     | CommonSharedStatus.FAILED
   [StatusGroup.CUSTOM_CHECKS]: ThreatStatus.NO_THREAT | ThreatStatus.CUSTOM_CHECKS_FAILED
   [StatusGroup.DEADLOCK]:
@@ -105,6 +106,8 @@ export enum ThreatStatus {
   HYPERNATIVE_GUARD = 'HYPERNATIVE_GUARD', // used only for Safes with Hypernative Guard installed
   // 9I — client-side check: setGuard target does not implement the Guard interface (bricks pre-1.4.1 Safes)
   INVALID_GUARD = 'INVALID_GUARD',
+  // Client-side check: a CoW swap order presignature batched with calls that are not part of the order
+  SWAP_WITH_OTHER_ACTIONS = 'SWAP_WITH_OTHER_ACTIONS',
 }
 
 export enum DeadlockStatus {

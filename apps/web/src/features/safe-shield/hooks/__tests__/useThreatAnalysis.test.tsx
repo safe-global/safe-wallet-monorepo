@@ -1,4 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
+import { Interface } from 'ethers'
 import { useThreatAnalysis } from '../useThreatAnalysis'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -560,6 +562,63 @@ describe('useThreatAnalysis - Hypernative Guard', () => {
     await waitFor(() => {
       const [, , loading] = result.current
       expect(loading).toBe(true)
+    })
+  })
+})
+
+describe('useThreatAnalysis - Swap with other actions', () => {
+  const settlementInterface = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
+  const presignToUnknownContract = buildSafeTransaction(
+    settlementInterface.encodeFunctionData('setPreSignature', [faker.string.hexadecimal({ length: 112 }), true]),
+  )
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseIsHypernativeEligible.mockReturnValue(buildEligibility({ isHypernativeEligible: false }))
+    mockUseThreatAnalysisHypernative.mockReturnValue([undefined, undefined, false])
+    mockUseNestedThreatAnalysis.mockReturnValue([undefined, undefined, false])
+    mockUseNestedTransaction.mockReturnValue({
+      nestedSafeInfo: undefined,
+      nestedSafeTx: undefined,
+      isNested: false,
+      isNestedLoading: false,
+    })
+  })
+
+  it('adds the finding to the threat results', async () => {
+    mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
+
+    const { result } = renderHook(() => useThreatAnalysis(presignToUnknownContract))
+
+    await waitFor(() => {
+      const [threatResult] = result.current
+      expect(threatResult?.THREAT?.map(({ type }) => type)).toEqual([
+        ThreatStatus.SWAP_WITH_OTHER_ACTIONS,
+        ThreatStatus.MALICIOUS,
+      ])
+    })
+  })
+
+  it('reports the finding while the threat analysis has no result', async () => {
+    mockUseThreatAnalysisUtils.mockReturnValue([undefined, undefined, true])
+
+    const { result } = renderHook(() => useThreatAnalysis(presignToUnknownContract))
+
+    await waitFor(() => {
+      const [threatResult, , loading] = result.current
+      expect(threatResult?.THREAT?.[0].type).toBe(ThreatStatus.SWAP_WITH_OTHER_ACTIONS)
+      expect(loading).toBe(true)
+    })
+  })
+
+  it('adds nothing for a transaction without a presignature', async () => {
+    mockUseThreatAnalysisUtils.mockReturnValue(buildThreatResult(Severity.OK))
+
+    const { result } = renderHook(() => useThreatAnalysis(buildSafeTransaction('0x1234')))
+
+    await waitFor(() => {
+      const [threatResult] = result.current
+      expect(threatResult?.THREAT?.map(({ type }) => type)).toEqual([ThreatStatus.MALICIOUS])
     })
   })
 })
