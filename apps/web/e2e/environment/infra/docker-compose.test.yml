@@ -673,6 +673,8 @@ services:
       DEFAULT_NOT_FOUND_EXPIRE_TIME_SECONDS: '2'
       CONTRACT_NOT_FOUND_EXPIRE_TIME_SECONDS: '2'
       TOKEN_NOT_FOUND_EXPIRE_TIME_SECONDS: '2'
+      # Temporary: an event clears the owner Safes, but the refill reads TXS's 15 s page cache and keeps it for 60 s
+      OWNERS_TTL_SECONDS: '0'
       PRICES_PROVIDER_API_BASE_URI: http://price-fixtures:8091
       PRICES_PROVIDER_API_KEY: ''
       SAFE_DATA_DECODER_BASE_URI: http://decoder-web:8888
