@@ -41,15 +41,23 @@ export const fetchSafeMessage = async (safeMessageHash: string, chainId: string)
   return message
 }
 
-const useSyncSafeMessageSigner = (
-  message: MessageItem | undefined,
-  decodedMessage: string | TypedData,
-  safeMessageHash: string,
-  requestId: string | undefined,
-  origin: string | undefined,
-  declared: DeclaredAttribution | undefined,
-  onClose: () => void,
-) => {
+const useSyncSafeMessageSigner = ({
+  message,
+  decodedMessage,
+  safeMessageHash,
+  requestId,
+  origin,
+  declared,
+  onClose,
+}: {
+  message: MessageItem | undefined
+  decodedMessage: string | TypedData
+  safeMessageHash: string
+  requestId: string | undefined
+  origin: string | undefined
+  declared: DeclaredAttribution | undefined
+  onClose: () => void
+}) => {
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const wallet = useWallet()
   const safeSignerAddress = useSafeSignerAddress()

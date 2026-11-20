@@ -277,15 +277,15 @@ const SignMessage = ({ message, origin, requestId, declared }: SignMessageProps)
     (!isBlindSigningEnabled && isBlindSigningRequest) ||
     (needsRiskConfirmation && !isRiskConfirmed)
 
-  const { onSign, submitError } = useSyncSafeMessageSigner(
-    safeMessage,
+  const { onSign, submitError } = useSyncSafeMessageSigner({
+    message: safeMessage,
     decodedMessage,
     safeMessageHash,
     requestId,
     origin,
     declared,
-    () => setTxFlow(undefined),
-  )
+    onClose: () => setTxFlow(undefined),
+  })
 
   const handleSign = async () => {
     const updatedMessage = await onSign()
