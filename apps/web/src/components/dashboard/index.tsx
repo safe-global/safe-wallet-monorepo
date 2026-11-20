@@ -1,37 +1,37 @@
 import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
-import dynamic from 'next/dynamic'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
 import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
-import { useIsRecoverySupported } from '@/features/recovery'
+import RecoveryHeader from '@/features/recovery/public/components/RecoveryHeader'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
-import { InconsistentSignerSetupWarning, MastercopyWarning } from '@/features/multichain'
-import { MyAccountsFeature } from '@/features/myAccounts'
-import { ActionRequiredPanel } from './ActionRequiredPanel'
+import InconsistentSignerSetupWarning from '@/features/multichain/public/components/InconsistentSignerSetupWarning'
+import MastercopyWarning from '@/features/multichain/public/components/MastercopyWarning'
+import { ActionRequiredPanel } from '@/components/dashboard/ActionRequiredPanel/ActionRequiredPanel'
 import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
-import { useVulnerableSafe } from '@/features/security'
+import { useVulnerableSafe } from '@/features/security/public/hooks/useVulnerableModules'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
-import { useIsPositionsFeatureEnabled } from '@/features/positions'
-import { useBannerVisibility, BannerType, HnBannerForCarousel, HypernativeFeature } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
-import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
+import useIsPositionsFeatureEnabled from '@/features/positions/public/hooks/useIsPositionsFeatureEnabled'
+import { useBannerVisibility } from '@/features/hypernative/public/hooks/useBannerVisibility'
+import { BannerType } from '@/features/hypernative/public/hooks/useBannerStorage'
+import { HnBannerForCarousel } from '@/features/hypernative/public/components/HnBannerForCarousel'
+import useIsStakingPromoBannerVisible, {
+  STAKING_PROMO_BANNER_HIDE_KEY,
+} from '@/features/stake/public/hooks/useIsStakingPromoBannerVisible'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-
-const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
-const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
+import HnPendingBanner from '@/features/hypernative/public/components/HnPendingBanner'
+import StakingPromoBanner from '@/features/stake/public/components/StakingPromoBanner'
+import NonPinnedWarning from '@/features/myAccounts/public/components/NonPinnedWarning'
+import PositionsWidget from '@/features/positions/public/components/PositionsWidget'
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
-  const hn = useLoadFeature(HypernativeFeature)
-  const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
-  const supportsRecovery = useIsRecoverySupported()
   const isVulnerableSafe = useVulnerableSafe()
 
   const { balances, loaded: balancesLoaded } = useVisibleBalances()
@@ -41,7 +41,6 @@ const Dashboard = (): ReactElement => {
 
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
-  const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
 
@@ -84,7 +83,7 @@ const Dashboard = (): ReactElement => {
         <div className={css.rightCol}>
           <ActionRequiredPanel defaultExpanded={isVulnerableSafe}>
             <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
-            {supportsRecovery && <RecoveryHeader />}
+            <RecoveryHeader />
             <InconsistentSignerSetupWarning />
             <MastercopyWarning />
             <NonPinnedWarning />
@@ -92,7 +91,7 @@ const Dashboard = (): ReactElement => {
 
           {safe.deployed && <PendingTxsList />}
 
-          <hn.HnPendingBanner />
+          <HnPendingBanner />
         </div>
       </div>
     </>

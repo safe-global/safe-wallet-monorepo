@@ -1,9 +1,16 @@
 import { faker } from '@faker-js/faker'
 import userEvent from '@testing-library/user-event'
-import { fakerChecksummedAddress, render, screen, waitFor } from '@/tests/test-utils'
+import { fakerChecksummedAddress, fakerLookalikeAddress, render, screen, waitFor, within } from '@/tests/test-utils'
+import * as useChains from '@/hooks/useChains'
+import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoisoning'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { getStoreInstance } from '@/store'
+import { RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import ImportDialog from '..'
 
+jest.mock('@/services/analytics/events/addressPoisoning')
+jest.mock('@/services/analytics/mixpanel-events')
 jest.mock('@/services/analytics')
 
 const CHAIN_ID = '11155111'
@@ -62,6 +69,18 @@ describe('ImportDialog', () => {
     expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toEqual({ [address]: 'Second' })
   })
 
+  it('imports a file with a tags column and ignores the tags', async () => {
+    const address = fakerChecksummedAddress()
+    const { input } = renderDialog()
+    const file = new File([`${HEADER},tags\n${address},Treasury,${CHAIN_ID},Ops;Vendor`], 'address-book.csv', {
+      type: 'text/csv',
+    })
+
+    await uploadAndImport(input, file)
+
+    expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toEqual({ [address]: 'Treasury' })
+  })
+
   it('counts the entries and distinct chains of the file in the summary', async () => {
     const chainIds = ['1', ' 100', '56', '1']
     const { input } = renderDialog()
@@ -90,6 +109,218 @@ describe('ImportDialog', () => {
       .upload(input, new File(['{"a":1}'], 'balances.json', { type: 'application/json' }))
 
     expect(await screen.findByText('File type must be text/csv', { exact: false })).toBeInTheDocument()
+    expect(screen.getByTestId('import-btn')).toBeDisabled()
+  })
+})
+
+describe('ImportDialog look-alike check', () => {
+  const contact = fakerChecksummedAddress()
+  const contactName = faker.person.fullName()
+  const lookalike = fakerLookalikeAddress(contact)
+  const clean = fakerChecksummedAddress()
+  const initialReduxState = { addressBook: { [CHAIN_ID]: { [contact]: contactName } } }
+  const rows = (...addresses: string[]) =>
+    addresses.map((address) => `${address},${faker.person.firstName()},${CHAIN_ID}`)
+
+  const savedAddresses = () => Object.keys(getStoreInstance().getState().addressBook[CHAIN_ID] ?? {})
+  const confirmDialog = () => screen.findByRole('dialog', { name: 'Similar addresses detected' })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // An imported look-alike is persisted and would be hydrated back as a saved address in the next test.
+    localStorage.clear()
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+  })
+
+  it('says how many addresses in the file look like other addresses', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(lookalike, clean)))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '1 address in this file looks similar to other addresses.',
+    )
+  })
+
+  it('asks the user to verify instead of import when look-alikes are found', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(lookalike, clean)))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toHaveTextContent('Verify'))
+  })
+
+  it('keeps the Import label when no address looks like another', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(clean)))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toBeEnabled())
+    expect(screen.getByTestId('import-btn')).toHaveTextContent('Import')
+  })
+
+  it('skips the look-alike rows when the user chooses to skip them', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, clean]))
+  })
+
+  it('imports every row when the user includes the look-alikes', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('Yes, import them anyway'))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, lookalike, clean]))
+  })
+
+  it('imports straight away when no address looks like another', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(clean)))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, clean]))
+    expect(screen.queryByRole('dialog', { name: 'Similar addresses detected' })).not.toBeInTheDocument()
+  })
+
+  it('keeps a saved address in the file when skipping the look-alike that imitates it', async () => {
+    const renamed = faker.person.firstName()
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile([`${contact},${renamed},${CHAIN_ID}`, ...rows(lookalike)]))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() => expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toEqual({ [contact]: renamed }))
+  })
+
+  it('imports straight away when the ADDRESS_POISONING_PROTECTION flag is off', async () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, lookalike, clean]))
+    expect(screen.queryByRole('dialog', { name: 'Similar addresses detected' })).not.toBeInTheDocument()
+  })
+
+  it('tracks the warning and the decision to import anyway', async () => {
+    const params = { [MixpanelEventParams.LOCATION]: 'address_book_import' }
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, params)
+
+    await userEvent.setup().click(within(await confirmDialog()).getByText('Yes, import them anyway'))
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, params))
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
+  })
+
+  it('tracks the decision to skip the look-alikes', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_import',
+        [MixpanelEventParams.DISMISS_ACTION]: 'skip',
+      }),
+    )
+  })
+
+  it('tracks the decision to close the confirmation', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByRole('button', { name: 'Close' }))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_import',
+        [MixpanelEventParams.DISMISS_ACTION]: 'cancel',
+      }),
+    )
+    expect(savedAddresses()).toEqual([contact])
+  })
+})
+
+describe('ImportDialog with its own import', () => {
+  const renderWithImport = (props: { validateRows?: jest.Mock; onImport: jest.Mock }) => {
+    const handleClose = jest.fn()
+    render(<ImportDialog handleClose={handleClose} {...props} />)
+    const input = document.body.querySelector('input[type="file"]') as HTMLInputElement
+    return { handleClose, input }
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('hands the rows to onImport instead of the local address book, then closes', async () => {
+    const address = fakerChecksummedAddress()
+    const onImport = jest.fn().mockResolvedValue({ done: true })
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${address},Treasury,${CHAIN_ID}`]))
+
+    await waitFor(() => expect(handleClose).toHaveBeenCalled())
+    expect(onImport).toHaveBeenCalledWith([[address, 'Treasury', CHAIN_ID]])
+    expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toBeUndefined()
+  })
+
+  it('shows the error onImport returns and lets the user try again', async () => {
+    const onImport = jest
+      .fn()
+      .mockResolvedValueOnce({ done: false, error: 'The import failed' })
+      .mockResolvedValueOnce({ done: true })
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${fakerChecksummedAddress()},Treasury,${CHAIN_ID}`]))
+
+    expect(await screen.findByText('The import failed')).toBeInTheDocument()
+    expect(handleClose).not.toHaveBeenCalled()
+
+    await userEvent.setup().click(screen.getByTestId('import-btn'))
+
+    await waitFor(() => expect(handleClose).toHaveBeenCalled())
+  })
+
+  it('stays open with the file and no error when onImport is not done', async () => {
+    const onImport = jest.fn().mockResolvedValue({ done: false })
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${fakerChecksummedAddress()},Treasury,${CHAIN_ID}`]))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toBeEnabled())
+    expect(handleClose).not.toHaveBeenCalled()
+    expect(screen.getByTestId('summary-message')).toBeInTheDocument()
+    expect(screen.queryByText(RTK_QUERY_ERROR_MESSAGES.generic)).not.toBeInTheDocument()
+  })
+
+  it('shows a generic error and lets the user try again when onImport throws', async () => {
+    const onImport = jest.fn().mockRejectedValue(new Error('toWorkspaceImport broke'))
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${fakerChecksummedAddress()},Treasury,${CHAIN_ID}`]))
+
+    expect(await screen.findByText(RTK_QUERY_ERROR_MESSAGES.generic)).toBeInTheDocument()
+    expect(screen.getByTestId('import-btn')).toBeEnabled()
+    expect(handleClose).not.toHaveBeenCalled()
+  })
+
+  it('blocks the file with the reason validateRows gives', async () => {
+    const validateRows = jest.fn().mockReturnValue('Row 2: chain 999 is not supported')
+    const onImport = jest.fn()
+    const { input } = renderWithImport({ validateRows, onImport })
+
+    await userEvent.setup().upload(input, csvFile([`${fakerChecksummedAddress()},Treasury,999`]))
+
+    expect(await screen.findByText('Row 2: chain 999 is not supported')).toBeInTheDocument()
     expect(screen.getByTestId('import-btn')).toBeDisabled()
   })
 })

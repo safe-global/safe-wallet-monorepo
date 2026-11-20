@@ -1,5 +1,5 @@
 import { pendingTxScanner } from '../pendingTx'
-import { createMockContext } from '../test-helpers'
+import { createMockContext } from '../../../public/utils/test-helpers'
 
 describe('pendingTxScanner', () => {
   it('returns clear for 0 queued transactions', async () => {

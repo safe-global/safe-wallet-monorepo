@@ -1,7 +1,9 @@
 import { mapConsolidatedAnalysisResults } from '../mapConsolidatedAnalysisResults'
-import { Severity, StatusGroup, RecipientStatus, ContractStatus } from '../../types'
+import { Severity, StatusGroup, RecipientStatus, ContractStatus, CommonSharedStatus } from '../../types'
+import { ErrorType, getErrorInfo } from '../errors'
 import type { GroupedAnalysisResults, RecipientAnalysisResults, ContractAnalysisResults } from '../../types'
 import { RecipientAnalysisResultBuilder, ContractAnalysisResultBuilder } from '../../builders'
+import { MAX_ACTIVITY_CHECK_ADDRESSES, SkippedActivityAnalysisResult } from '../../hooks/address-analysis/config'
 import { faker } from '@faker-js/faker'
 
 describe('mapConsolidatedAnalysisResults', () => {
@@ -500,6 +502,70 @@ describe('mapConsolidatedAnalysisResults', () => {
         name: undefined,
         logoUrl: undefined,
       })
+    })
+  })
+
+  describe('failed lookups in RECIPIENT_ACTIVITY', () => {
+    const lowAddress = faker.finance.ethereumAddress()
+    const failedAddresses = [faker.finance.ethereumAddress(), faker.finance.ethereumAddress()]
+    const lowActivity = RecipientAnalysisResultBuilder.lowActivity().build()
+    const failed = getErrorInfo(ErrorType.RECIPIENT)
+
+    const consolidate = (entries: [string, GroupedAnalysisResults][]) => {
+      const addressesResultsMap: RecipientAnalysisResults = Object.fromEntries(entries)
+      return mapConsolidatedAnalysisResults(addressesResultsMap, Object.values(addressesResultsMap))
+    }
+
+    const activity = (address: string): [string, GroupedAnalysisResults] => [
+      address,
+      { [StatusGroup.RECIPIENT_ACTIVITY]: [address === lowAddress ? lowActivity : failed] },
+    ]
+
+    it.each<[string, string[]]>([
+      ['low activity first', [lowAddress, ...failedAddresses]],
+      ['failed lookups first', [...failedAddresses, lowAddress]],
+    ])('should show the failed lookups over low activity when %s', (_order, addresses) => {
+      const result = consolidate(addresses.map(activity))
+
+      expect(result).toHaveLength(1)
+      expect(result[0].type).toBe(CommonSharedStatus.FAILED)
+      expect(result[0].addresses?.map(({ address }) => address).sort()).toEqual([...failedAddresses].sort())
+    })
+
+    it('should keep the skipped check description for every recipient above the cap', () => {
+      const addresses = Array.from({ length: MAX_ACTIVITY_CHECK_ADDRESSES + 1 }, () => faker.finance.ethereumAddress())
+
+      const result = consolidate(
+        addresses.map((address): [string, GroupedAnalysisResults] => [
+          address,
+          { [StatusGroup.RECIPIENT_ACTIVITY]: [SkippedActivityAnalysisResult] },
+        ]),
+      )
+
+      expect(result).toHaveLength(1)
+      expect(result[0]).toMatchObject({
+        type: CommonSharedStatus.FAILED,
+        title: SkippedActivityAnalysisResult.title,
+        description: SkippedActivityAnalysisResult.description,
+      })
+      expect(result[0].addresses).toHaveLength(MAX_ACTIVITY_CHECK_ADDRESSES + 1)
+    })
+
+    it.each<[string, (CommonSharedStatus | RecipientStatus)[]]>([
+      ['failed first', [CommonSharedStatus.FAILED, RecipientStatus.NEW_RECIPIENT]],
+      ['new recipient first', [RecipientStatus.NEW_RECIPIENT, CommonSharedStatus.FAILED]],
+    ])('should keep the first of two equal-severity entries in other groups (%s)', (_order, types) => {
+      const newRecipient = RecipientAnalysisResultBuilder.newRecipient().severity(Severity.WARN).build()
+      const interaction = (type: CommonSharedStatus | RecipientStatus): GroupedAnalysisResults => ({
+        [StatusGroup.RECIPIENT_INTERACTION]: [type === CommonSharedStatus.FAILED ? failed : newRecipient],
+      })
+
+      const result = consolidate(
+        types.map((type): [string, GroupedAnalysisResults] => [faker.finance.ethereumAddress(), interaction(type)]),
+      )
+
+      expect(result).toHaveLength(1)
+      expect(result[0].type).toBe(types[0])
     })
   })
 })

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useForm } from 'react-hook-form'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import AddMemberInput from './AddMemberInput'
 
 type FormValues = {
@@ -16,7 +16,7 @@ const addressBook = {
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   shadcn: true,
   store: {
     addressBook: {

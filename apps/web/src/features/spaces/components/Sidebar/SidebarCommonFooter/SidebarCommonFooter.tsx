@@ -1,5 +1,4 @@
 import { useState, useCallback, type ReactElement } from 'react'
-import { Sparkles } from 'lucide-react'
 import {
   SidebarFooter,
   SidebarMenu,
@@ -10,24 +9,19 @@ import { cn } from '@safe-global/views/utils/cn'
 import { icons } from '../config'
 import css from '../styles.module.css'
 import { IS_PRODUCTION } from '@/config/constants'
-import { OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { Switch } from '@safe-global/views/components/ui/switch'
 import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
-import { openCookieBanner } from '@/store/popupSlice'
-import { BEAMER_SELECTOR } from '@/services/beamer'
-import { ApiCtaSidebar } from '../ApiCtaSidebar'
-import {
-  SafeProFeature,
-  useIsSafeProAnnouncementEnabled,
-  useSafeProSidebarBannerDismissed,
-} from '@/features/safe-pro-announcement'
-import { useLoadFeature } from '@/features/__core__'
-import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
+import { useAppDispatch } from '@/store'
+import { ApiCtaSidebar } from '../ApiCtaSidebar/ApiCtaSidebar'
+import { WhatsNewButton } from '../WhatsNewButton/WhatsNewButton'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
+import { useSafeProSidebarBannerDismissed } from '@/features/safe-pro-announcement/public/hooks/useSafeProSidebarBannerDismissed'
+import { SidebarIndexingStatus } from '../SidebarIndexingStatus/SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
@@ -37,47 +31,39 @@ import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
-import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { useTwoFactorAwarenessDismissed } from '@/features/oidc-auth/public/hooks/useTwoFactorAwarenessDismissed'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import { reloadPage } from '@/utils/navigation'
+import WorkspaceTwoFactorAwarenessCard from '@/features/oidc-auth/public/components/WorkspaceTwoFactorAwarenessCard'
+import SafeProSidebarBanner from '@/features/safe-pro-announcement/public/components/SafeProSidebarBanner'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
-  const hasBeamerConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.UPDATES))
   const isDarkMode = useDarkMode()
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
-  const { SafeProSidebarBanner, $isReady: isSafeProLoaded, $error: safeProError } = useLoadFeature(SafeProFeature)
-  const {
-    WorkspaceTwoFactorAwarenessCard,
-    $isReady: isTwoFactorCardLoaded,
-    $error: twoFactorCardError,
-  } = useLoadFeature(OidcAuthFeature)
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   const isSafePro = useIsSafeProEnabled()
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
-  // A failed chunk counts as no banner: its stub then renders nothing for good.
   // Its copy is pre-launch only, so it retires once Safe Pro is live.
-  const hasSafeProBanner =
-    isSafeProAnnouncementEnabled && !isSafePro && pathname !== AppRoutes.spaces.plans && !safeProError
+  const hasSafeProBanner = isSafeProAnnouncementEnabled && !isSafePro && pathname !== AppRoutes.spaces.plans
   const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
 
   const spaceId = useCurrentSpaceId()
   // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
-  const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
+  const isTwoFactorBannerFlagOn = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
+  const isOidcAuthEnabled = useHasFeature(FEATURES.OIDC_AUTH) === true
+  const isTwoFactorCardEnabled = isTwoFactorBannerFlagOn && isOidcAuthEnabled
   const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
   // Continue needs a Workspace to link to, so the card waits until one is known.
   const hasTwoFactorCard =
     isTwoFactorCardEnabled &&
     !isTwoFactorCardDismissed &&
-    !twoFactorCardError &&
     spaceId !== null &&
     pathname !== AppRoutes.spaces.settingsGeneral
   // One slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
   const showTwoFactorCard = hasTwoFactorCard && !showSafeProBanner
-  // Both are lazy: their stubs render nothing, so opening the slot early leaves an empty box.
-  const isBannerPending = (showSafeProBanner && !isSafeProLoaded) || (showTwoFactorCard && !isTwoFactorCardLoaded)
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
@@ -91,12 +77,6 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   const handleHelpMenuClose = useCallback(() => {
     setHelpMenuAnchor(null)
   }, [])
-
-  const handleBeamerClick = useCallback(() => {
-    if (!hasBeamerConsent) {
-      dispatch(openCookieBanner({ warningKey: CookieAndTermType.UPDATES }))
-    }
-  }, [dispatch, hasBeamerConsent])
 
   return (
     <SidebarFooter data-testid="sidebar-common-footer">
@@ -121,7 +101,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
-        {!isBannerPending && (showSafeProBanner || showTwoFactorCard) && (
+        {(showSafeProBanner || showTwoFactorCard) && (
           <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
             {/* One grid cell for both, so nothing below moves when one gives way to the other. */}
             <div className="mb-2 grid">
@@ -173,33 +153,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
               </Tooltip>
             </SidebarMenuButton>
           </Track>
-          <Track
-            {...OVERVIEW_EVENTS.WHATS_NEW}
-            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: "What's New" }}
-          >
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <SidebarMenuButton
-                    type="button"
-                    id={BEAMER_SELECTOR}
-                    data-testid="list-item-whats-new"
-                    aria-label="What's new"
-                    className={cn(
-                      'h-9 w-9 min-w-9 shrink-0 gap-0 !px-0 !py-0 text-center !justify-center !overflow-visible',
-                      '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.25]',
-                      css.sidebarInteractive,
-                      css.footerBeamerButton,
-                    )}
-                    onClick={handleBeamerClick}
-                  />
-                }
-              >
-                <Sparkles aria-hidden strokeWidth={1.25} />
-              </TooltipTrigger>
-              <TooltipContent side="top">What&apos;s new</TooltipContent>
-            </Tooltip>
-          </Track>
+          <WhatsNewButton />
           <div className={css.footerHelpStatus}>
             <SidebarIndexingStatus isSafeSidebar={isSafeSidebar} />
           </div>

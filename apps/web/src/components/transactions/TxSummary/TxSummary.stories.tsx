@@ -3,7 +3,7 @@ import type { Decorator, Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { ChevronDownIcon } from 'lucide-react'
 import type { MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { AppRoutes } from '@/config/routes'
 import { PendingStatus } from '@/store/pendingTxsSlice'
@@ -22,7 +22,7 @@ import {
   queueSettingsChange,
   queueSwapBuyOrder,
   queueSwapSellOrder,
-} from '@safe-global/views/components/transactions/TxSummary/TxSummary.fixtures'
+} from '@safe-global/views/components/transactions/TxSummary/TxSummary.storyData'
 
 /**
  * TxSummary's grid switches on CSS **container** queries (680px and 380px), not the viewport, so a

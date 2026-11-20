@@ -11,7 +11,7 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }))
 
-jest.mock('@/features/transactions/utils', () => ({
+jest.mock('@/features/transactions/public/utils', () => ({
   getTxStatus: () => 'Awaiting confirmations',
 }))
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { faker } from '@faker-js/faker'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { multiSendTxDataBuilder } from '@/tests/builders/dataDecoded'
 import Multisend from '.'
 

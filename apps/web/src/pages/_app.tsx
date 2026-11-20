@@ -1,9 +1,8 @@
 import Analytics from '@/services/analytics/Analytics'
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { type ReactElement } from 'react'
-import { type AppProps } from 'next/app'
 import Head from 'next/head'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
 
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
@@ -12,7 +11,8 @@ import { Provider } from 'react-redux'
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
+import { useHydrateStore, useInitChains } from '@/store'
+import { getAppStore } from '@/services/appStore'
 import PageLayout from '@/components/common/PageLayout'
 import LaunchScreen from '@/components/common/LaunchScreen'
 import useLoadableStores from '@/hooks/useLoadableStores'
@@ -22,13 +22,11 @@ import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
-import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import AppChrome from '@/components/common/AppChrome'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
@@ -38,66 +36,35 @@ import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
-import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } from '@/features/spaces'
-import { RecoveryFeature } from '@/features/recovery'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { useLoadFeature } from '@/features/__core__'
-import { TargetedOutreachFeature } from '@/features/targeted-outreach'
+import CounterfactualHooks from '@/features/counterfactual/public/components/CounterfactualHooks'
+import useCounterfactualSafeSync from '@/features/counterfactual/public/hooks/useCounterfactualSafeSync'
+import { useInviteNotification } from '@/features/spaces/public/hooks/useInviteNotification'
+import { useSafeWorkspaceAttach } from '@/features/spaces/public/hooks/useSafeWorkspaceAttach'
+import { useSafeWorkspaceCheck } from '@/features/spaces/public/hooks/useSafeWorkspaceCheck'
+import Recovery from '@/features/recovery/public/components/Recovery'
+import { usePrototypeDarkMode } from '@/features/spaces/public/hooks/usePrototypeDarkMode'
 
-/**
- * Wrapper that lazy-loads Recovery via the feature system.
- */
-const RecoveryLoader = () => {
-  const { Recovery } = useLoadFeature(RecoveryFeature)
-  return <Recovery />
-}
-
-/**
- * Wrapper that lazy-loads CounterfactualHooks via the feature system.
- * This ensures the entire counterfactual feature loads as a single chunk
- * through handle.ts rather than scattered next/dynamic imports.
- */
-const CounterfactualHooksLoader = () => {
-  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
-  return <CounterfactualHooks />
-}
-
-/**
- * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
- */
-const SpendingLimitsLoaderWrapper = () => {
-  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
-  return <SpendingLimitsLoader />
-}
-
-/**
- * Wrapper that lazy-loads OutreachPopup via the feature system.
- * This ensures the entire targeted-outreach feature loads as a single chunk.
- */
-const TargetedOutreachPopupLoader = () => {
-  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
-  return <OutreachPopup />
-}
-import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts'
-import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
+import { useVisitedSafes } from '@/features/myAccounts/public/hooks/useVisitedSafes'
+import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/hooks/usePortfolioRefetchOnTxHistory'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureRenderError, initObservability } from '@/services/observability'
 import { DatadogProvider } from '@/services/observability/providers/datadog'
-import { MixpanelTracingProvider } from '@/services/observability/providers/mixpanel'
+import { MixpanelTracingProvider } from '@/services/observability/providers/mixpanel/provider'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
-import { CaptchaProvider } from '@/components/common/Captcha'
-import { HnQueueAssessmentProvider } from '@/features/hypernative'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
+import { HnQueueAssessmentProvider } from '@/features/hypernative/public/components/HnQueueAssessmentProvider'
+import { useHypernativeTokenRefresh } from '@/features/hypernative/public/hooks/useHypernativeTokenRefresh'
+import { useOidcLoginCallback } from '@/features/oidc-auth/public/hooks/useOidcLoginCallback'
+import { useStepUpRecovery } from '@/features/oidc-auth/public/hooks/useStepUpRecovery'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+import SpendingLimitsLoader from '@/features/spending-limits/public/components/SpendingLimitsLoader'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -106,9 +73,6 @@ if (typeof window !== 'undefined') {
   // DatadogProvider self-gates when its RUM tokens are absent.
   initObservability([new DatadogProvider(), new MixpanelTracingProvider()])
 }
-
-const reduxStore = makeStore()
-setStoreInstance(reduxStore)
 
 // Safe-scoped notification + tracking hooks. Split out of InitApp so they can
 // be unmounted entirely while the require-login gate is keeping the user out
@@ -132,7 +96,7 @@ export const SafeScopedSubscriptions = (): null => {
 }
 
 const InitApp = (): ReactElement | null => {
-  useHydrateStore(reduxStore)
+  useHydrateStore(getAppStore())
   useInitChains()
   useAdjustUrl()
   useGtm()
@@ -141,12 +105,12 @@ const InitApp = (): ReactElement | null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useHypernativeTokenRefresh()
   useUnlockBodyScroll()
   useRegisterServiceWorker()
   useRememberSpace()
@@ -174,15 +138,28 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   return <ObservabilityErrorBoundary onError={captureRenderError}>{content}</ObservabilityErrorBoundary>
 }
 
-// Must render inside the Redux provider to read the step-up phase.
-const AppLaunchScreen = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
+type AppProps = {
+  Component: ComponentType<Record<string, unknown>>
+  pageProps: Record<string, unknown>
+  router: { pathname: string; query: Partial<Record<string, string | string[]>> }
+}
 
-  return <LaunchScreen stepUpCaption={stepUpCaption} />
+const PrototypeApp = ({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageProps'>): ReactElement => {
+  const [isDarkMode] = usePrototypeDarkMode()
+  return (
+    <ShadcnProvider dark={isDarkMode}>
+      <Component {...pageProps} />
+    </ShadcnProvider>
+  )
 }
 
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
+
+  if (router.pathname === '/prototypes/pending-queue')
+    return <PrototypeApp Component={Component} pageProps={pageProps} />
+
+  const reduxStore = getAppStore()
 
   return (
     <Provider store={reduxStore}>
@@ -200,25 +177,19 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <LazyWeb3Init />
 
-          <AppLaunchScreen />
+          <LaunchScreen />
 
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />
           </PageLayout>
 
-          <CookieAndTermBanner />
+          <AppChrome />
 
-          <TargetedOutreachPopupLoader />
+          <Recovery />
 
-          <Notifications />
+          <CounterfactualHooks />
 
-          <RecoveryLoader />
-
-          <CounterfactualHooksLoader />
-
-          <SpendingLimitsLoaderWrapper />
-
-          <PkModulePopup />
+          <SpendingLimitsLoader />
         </CaptchaProvider>
       </AppProviders>
     </Provider>

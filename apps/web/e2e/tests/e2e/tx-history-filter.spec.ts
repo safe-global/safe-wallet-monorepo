@@ -9,7 +9,7 @@ test.describe('Filter the transaction history', { tag: '@e2e' }, () => {
     journey,
   }) => {
     // seedSafe funds the Safe with 1 ETH, its incoming transfer
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     await seedExecutedTransfer(safe, { recipient: Wallet.createRandom().address, amount: '0.001' })
 
     const history = new TxHistoryPage(safePage)

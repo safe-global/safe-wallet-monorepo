@@ -8,7 +8,7 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 const useSpaceSubmit = (
   handleSubmit: UseFormHandleSubmit<{ name: string }>,
@@ -40,10 +40,6 @@ const useSpaceSubmit = (
     [router, getSelectSafesQuery],
   )
 
-  const selectSafesUrl = createdSpaceId
-    ? `${AppRoutes.welcome.selectSafes}?${new URLSearchParams(getSelectSafesQuery(createdSpaceId))}`
-    : undefined
-
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
 
@@ -64,6 +60,10 @@ const useSpaceSubmit = (
       if (isSafePro) {
         setCreatedSpaceId(newSpaceId)
         setIsSubmitting(false)
+        // The URL must name the Workspace: the router guard or Back from checkout can reload this step
+        void router.replace({ pathname: router.pathname, query: { ...router.query, spaceId: newSpaceId } }, undefined, {
+          shallow: true,
+        })
         return
       }
       goToSelectSafes(newSpaceId)
@@ -104,7 +104,6 @@ const useSpaceSubmit = (
     onSubmit,
     createdSpaceId,
     goToSelectSafes,
-    selectSafesUrl,
   }
 }
 

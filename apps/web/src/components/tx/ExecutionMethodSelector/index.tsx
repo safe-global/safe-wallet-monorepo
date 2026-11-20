@@ -12,8 +12,6 @@ import SponsoredBy from '../SponsoredBy'
 import RemainingRelays from '../RemainingRelays'
 import SponsoredTxsCounter from '../SponsoredTxsCounter'
 import { Info } from 'lucide-react'
-import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
-import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -23,16 +21,11 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { SponsoredOffer } from '@/utils/gasPayment'
+import GasTooHighBanner from '@/features/no-fee-campaign/public/components/GasTooHighBanner'
 
 export const enum ExecutionMethod {
   RELAY = 'RELAY',
   WALLET = 'WALLET',
-}
-
-// Wrapper component to load GasTooHighBanner (follows React naming conventions)
-const GasTooHighBannerLoader = () => {
-  const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
-  return <GasTooHighBanner />
 }
 
 const CampaignLabel = ({ offer }: { offer: Extract<SponsoredOffer, { option: 'NO_FEE_CAMPAIGN' }> }) => {
@@ -234,7 +227,7 @@ export const _ExecutionMethodSelector = ({
               className="flex flex-1 cursor-pointer items-center gap-2"
             >
               <RadioGroupItem value={ExecutionMethod.WALLET} />
-              <Typography className={css.radioLabel}>
+              <Typography as="span" className={css.radioLabel}>
                 <WalletIcon provider={wallet?.label || ''} width={20} height={20} icon={wallet?.icon} /> Connected
                 wallet
               </Typography>
@@ -244,7 +237,7 @@ export const _ExecutionMethodSelector = ({
 
         {offer.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && (
           <div className={css.gasBannerWrapper}>
-            <GasTooHighBannerLoader />
+            <GasTooHighBanner />
           </div>
         )}
       </div>

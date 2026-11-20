@@ -1,8 +1,8 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
-import { useIsQualifiedSafe } from '@/features/spaces'
+import useIsQualifiedSafe from '@/features/spaces/public/hooks/useIsQualifiedSafe'
 import { OrderByOption, ORDER_BY_RESET_VERSION, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { getStoreInstance } from '@/store'
 
@@ -10,7 +10,7 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }))
@@ -19,9 +19,9 @@ const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 
 // The list is rendered by the shared accounts table (covered by its own suite). Stub it to a row per
 // item that surfaces the selection toggle so we can assert the modal wiring.
-jest.mock('@/features/myAccounts', () => ({
+jest.mock('@/features/myAccounts/public/components/SafeAccountsTable', () => ({
   __esModule: true,
-  SafeAccountsTable: ({
+  default: ({
     items,
     selection,
     reorder,
@@ -113,6 +113,9 @@ const mockModal: UseTrustedSafesModalReturn = {
   submitSelection: jest.fn(),
   setSearchQuery: jest.fn(),
 }
+
+const confirmationDialogHasFocus = (title: string) =>
+  waitFor(() => expect(screen.getByRole('dialog', { name: title })).toHaveFocus())
 
 describe('TrustedSafesModal', () => {
   beforeEach(() => {
@@ -210,13 +213,14 @@ describe('TrustedSafesModal', () => {
     expect(mockModal.toggleSelection).toHaveBeenCalledWith('0x1234567890abcdef1234567890abcdef12345678')
   })
 
-  it('should show similarity confirmation dialog when pendingConfirmation is set', () => {
+  it('should show similarity confirmation dialog when pendingConfirmation is set', async () => {
     const modalWithPending = {
       ...mockModal,
       pendingConfirmation: '0x1234567890abcdef1234567890abcdef12345678',
     }
     render(<TrustedSafesModal modal={modalWithPending} />)
     expect(screen.getByText('Similar address detected')).toBeInTheDocument()
+    await confirmationDialogHasFocus('Similar address detected')
   })
 
   it('shows the select-all control with the selection count', () => {
@@ -237,7 +241,7 @@ describe('TrustedSafesModal', () => {
     expect(allSelectedModal.deselectAll).toHaveBeenCalled()
   })
 
-  it('should show select all confirmation dialog when pendingSelectAllConfirmation is true', () => {
+  it('should show select all confirmation dialog when pendingSelectAllConfirmation is true', async () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -258,9 +262,10 @@ describe('TrustedSafesModal', () => {
     expect(screen.getByText('Similar addresses detected')).toBeInTheDocument()
     expect(screen.getByText('No, skip similar addresses')).toBeInTheDocument()
     expect(screen.getByText('Yes, include them anyway')).toBeInTheDocument()
+    await confirmationDialogHasFocus('Similar addresses detected')
   })
 
-  it('should call confirmSelectAll when confirm clicked in select all dialog', () => {
+  it('should call confirmSelectAll when confirm clicked in select all dialog', async () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -278,11 +283,12 @@ describe('TrustedSafesModal', () => {
       ],
     }
     render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
+    await confirmationDialogHasFocus('Similar addresses detected')
     fireEvent.click(screen.getByText('Yes, include them anyway'))
     expect(mockModal.confirmSelectAll).toHaveBeenCalled()
   })
 
-  it('should call skipSimilarSelectAll when skip clicked in select all dialog', () => {
+  it('should call skipSimilarSelectAll when skip clicked in select all dialog', async () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -300,6 +306,7 @@ describe('TrustedSafesModal', () => {
       ],
     }
     render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
+    await confirmationDialogHasFocus('Similar addresses detected')
     fireEvent.click(screen.getByText('No, skip similar addresses'))
     expect(mockModal.skipSimilarSelectAll).toHaveBeenCalled()
   })

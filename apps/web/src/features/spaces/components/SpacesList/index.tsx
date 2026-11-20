@@ -1,12 +1,7 @@
-import { useLoadFeature } from '@/features/__core__'
-import { MyAccountsFeature } from '@/features/myAccounts'
-import { SafeProFeature, useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
-import Image from 'next/image'
-import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
-import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.webp'
 import SafeMarkIcon from '@safe-global/views/assets/images/logo-no-text.svg'
 import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
@@ -25,12 +20,12 @@ import { useCallback, useState } from 'react'
 import css from './styles.module.css'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@safe-global/views/utils/cn'
-import { MemberStatus } from '@/features/spaces'
+import { MemberStatus } from '../../public/hooks/useSpaceMembers'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
-import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
+import { filterSpacesByStatus, getInvitedByName } from '../../utils'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
 import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
@@ -38,10 +33,13 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
-import { SPACES_LIMIT } from '@/features/spaces/constants'
+import { SPACES_LIMIT } from '../../constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import AccountsNavigation from '@/features/myAccounts/public/components/AccountsNavigation'
+import SafeProWorkspacesBanner from '@/features/safe-pro-announcement/public/components/SafeProWorkspacesBanner'
+import SafeProBanner from '@/features/safe-pro-announcement/public/components/SafeProBanner'
 
 const AddSpaceButton = ({
   onClick,
@@ -104,8 +102,6 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   // The Safe Pro terms only apply once Safe Pro is live.
   const isSafePro = useIsSafeProEnabled()
-  const { SafeProBanner } = useLoadFeature(SafeProFeature)
-
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
@@ -230,8 +226,8 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
             ))}
           </div>
 
-          <Image
-            src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
+          <img
+            src={isDarkMode ? '/images/spaces/workspaces_empty_dark.webp' : '/images/spaces/workspaces_empty.png'}
             alt="Workspace dashboard showing accounts grouped by Workspace"
             className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
@@ -267,8 +263,6 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 }
 
 const SpacesList = () => {
-  const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
-  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
   const isUserSignedIn = useAppSelector(isAuthenticated)

@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import type { DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
-import { createMockStory } from '@/stories/mocks'
-import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/public/constants'
 import ProposersList from './index'
 
 const setup = createMockStory({

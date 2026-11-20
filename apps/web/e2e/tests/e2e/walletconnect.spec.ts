@@ -2,7 +2,7 @@
  * A dApp connects to a Safe over WalletConnect and sends it requests, through the hosted relay.
  *
  * The test plays the dApp with a real WalletConnect client in the Playwright process, so it reads the responses
- * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of OWNER_4.
+ * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of Alice.
  */
 import { Wallet, hashMessage, parseEther, toQuantity } from 'ethers'
 import { HomePage } from '../../src/pages/home.page'
@@ -24,7 +24,7 @@ type WalletConnectFixtures = {
 
 const test = base.extend<WalletConnectFixtures>({
   safe: async ({ journey }, provide) => {
-    await provide(await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }))
+    await provide(await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 }))
   },
 
   dapp: async ({ safePage, safe }, provide, testInfo) => {
@@ -95,7 +95,7 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     const answer = await response
     expect(answer).toEqual({ result: expect.stringMatching(/^0x[0-9a-f]{64}$/) })
     const { result: hash } = answer as { result: string }
-    await expect.poll(async () => (await receiptOf(dapp, hash))?.status, { timeout: 60_000 }).toBe('0x1')
+    await expect.poll(async () => (await receiptOf(dapp, hash))?.status).toBe('0x1')
 
     expect(await balanceOf(journey.env, recipient)).toBe(value)
   })

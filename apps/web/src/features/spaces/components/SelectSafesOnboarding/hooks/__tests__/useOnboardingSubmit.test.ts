@@ -1,8 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useOnboardingSubmit from '../useOnboardingSubmit'
-import type { SafeItem } from '@/hooks/safes'
-import type { MultiChainSafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import type { MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 
@@ -49,25 +49,30 @@ jest.mock('@/services/analytics/events/spaces', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+jest.mock('../../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 
 // The grouping helpers are resolved lazily: requiring the real barrel while it is being mocked
 // trips its import cycle before initialization.
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   flattenSafeItems: (items: Array<SafeItem | MultiChainSafeItem>) =>
     items.flatMap((item) => ('safes' in item ? item.safes : [item])),
+  _getMultiChainAccounts: (...args: unknown[]) =>
+    jest.requireActual('@/hooks/safes/useAllSafesGrouped')._getMultiChainAccounts(...args),
+  _getSingleChainAccounts: (...args: unknown[]) =>
+    jest.requireActual('@/hooks/safes/useAllSafesGrouped')._getSingleChainAccounts(...args),
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: (safe: SafeItem | MultiChainSafeItem) => 'safes' in safe,
-  _getMultiChainAccounts: (...args: unknown[]) => jest.requireActual('@/hooks/safes')._getMultiChainAccounts(...args),
-  _getSingleChainAccounts: (...args: unknown[]) => jest.requireActual('@/hooks/safes')._getSingleChainAccounts(...args),
 }))
 
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
 let mockAddressBookError = false
 const mockPrepareNames = jest.fn<{ items?: unknown[]; error?: string }, [unknown[]]>((items) => ({ items }))
 
-jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+jest.mock('../../../../public/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: () => mockSpaceAddressBook,
   useSpaceAddressBookState: () => ({
@@ -77,8 +82,8 @@ jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   }),
 }))
 
-jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useUpsertWorkspaceSafeName'),
+jest.mock('../../../../public/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('../../../../public/hooks/useUpsertWorkspaceSafeName'),
   usePrepareWorkspaceSafeNames: () => mockPrepareNames,
 }))
 
@@ -773,56 +778,32 @@ describe('useOnboardingSubmit — naming step', () => {
   })
 })
 
-describe('useOnboardingSubmit — step-up return', () => {
-  const NEXT_STEP_URL = '/welcome/invite-members?spaceId=42'
+describe('useOnboardingSubmit — verification cancel', () => {
   const onSuccess = jest.fn()
-  const setReturnUrl = { type: 'stepUp/stepUpReturnUrlSet', payload: NEXT_STEP_URL }
-  const clearReturnUrl = { type: 'stepUp/stepUpReturnUrlCleared', payload: NEXT_STEP_URL }
-
-  const submitNewSafe = async (selectedSafes: Record<string, boolean>) => {
-    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [], NEXT_STEP_URL))
-    await waitFor(() => expect(result.current.selectedSafesLength).toBe(mockSpaceSafes.length))
-    act(() => {
-      result.current.formMethods.setValue('selectedSafes', selectedSafes)
-    })
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-  }
 
   beforeEach(() => {
     jest.clearAllMocks()
     mockSpaceSafes = []
     mockSpaceAddressBook = [{ address: '0xnew', name: 'Named', chainIds: ['1'] }]
     mockAddressBookError = false
-    mockAddSafesToSpace.mockResolvedValue({ data: {} })
     mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
   })
 
-  it('sends a step-up on the add on to the next step', async () => {
+  it('stays on this step without an error when the user cancels the verification', async () => {
     mockAddSafesToSpace.mockResolvedValueOnce({ error: { status: 403, data: { message: 'elevation_required' } } })
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, []))
+    await waitFor(() => expect(result.current.selectedSafesLength).toBe(mockSpaceSafes.length))
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { '1:0xnew': true })
+    })
 
-    await submitNewSafe({ '1:0xnew': true })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
 
-    expect(mockDispatch).toHaveBeenCalledWith(setReturnUrl)
-    expect(mockDispatch).not.toHaveBeenCalledWith(clearReturnUrl)
+    expect(mockAddSafesToSpace).toHaveBeenCalled()
     expect(onSuccess).not.toHaveBeenCalled()
-  })
-
-  it('drops the return URL once the add needs no step-up', async () => {
-    await submitNewSafe({ '1:0xnew': true })
-
-    expect(mockDispatch).toHaveBeenCalledWith(setReturnUrl)
-    expect(mockDispatch).toHaveBeenCalledWith(clearReturnUrl)
-    expect(onSuccess).toHaveBeenCalled()
-  })
-
-  it('keeps a step-up on this step when a Safe is removed first, because only the removal is replayed', async () => {
-    mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
-    mockRemoveSafesFromSpace.mockResolvedValueOnce({ error: { status: 403, data: { message: 'elevation_required' } } })
-
-    await submitNewSafe({ '1:0xexisting': false, '1:0xnew': true })
-
-    expect(mockDispatch).not.toHaveBeenCalledWith(setReturnUrl)
+    expect(result.current.error).toBeUndefined()
+    expect(result.current.isSubmitting).toBe(false)
   })
 })

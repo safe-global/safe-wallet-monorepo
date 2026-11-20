@@ -1,1 +1,1 @@
-export { default as PendingSignatures, type PendingSignaturesProps } from './PendingSignatures'
+export { type PendingSignaturesProps } from './PendingSignatures'

@@ -1,14 +1,12 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import AssetsHeader from '@/components/balances/AssetsHeader'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
-// Direct import — Next.js already code-splits per page, so useLoadFeature lazy-loading is redundant
-import { NftsPage } from '@/features/nfts'
+import NftsPage from '@/features/nfts/public/components/NftsPage'
 import { BRAND_NAME } from '@/config/constants'
 
-const NFTs: NextPage = () => {
+const NFTs = () => {
   const isFeatureEnabled = useHasFeature(FEATURES.ERC721)
 
   return (

@@ -1,16 +1,15 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature, useCurrentSpaceId, useFeatureFlagRedirect, useFeatureRedirect } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import { useCurrentSpaceId } from '@/features/spaces/public/hooks/useCurrentSpaceId'
+import useFeatureRedirect from '@/features/spaces/public/hooks/useFeatureRedirect'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import SpaceTransactionsContent from '@/features/spaces/public/components/SpaceTransactionsPage'
 
 export default function SpaceTransactionsPage() {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
-  const spaces = useLoadFeature(SpacesFeature)
-  useFeatureFlagRedirect()
   useFeatureRedirect(FEATURES.SPACE_TRANSACTIONS, AppRoutes.spaces.index)
 
   if (!router.isReady || !spaceId) return null
@@ -22,7 +21,7 @@ export default function SpaceTransactionsPage() {
       </Head>
 
       <main>
-        <spaces.SpaceTransactionsPage spaceId={spaceId} />
+        <SpaceTransactionsContent spaceId={spaceId} />
       </main>
     </>
   )

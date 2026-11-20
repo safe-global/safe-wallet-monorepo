@@ -6,26 +6,23 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
-import {
-  OnboardingLayout,
-  StepCounter,
-  SafeAppMockup,
-  deriveSidePanelAccountsFromSpace,
-  useSafeNameLookup,
-} from '../OnboardingLayout'
+import OnboardingLayout from '../OnboardingLayout/OnboardingLayout'
+import StepCounter from '../OnboardingLayout/StepCounter'
+import SafeAppMockup from '../OnboardingLayout/mockup/SafeAppMockup'
+import { deriveSidePanelAccountsFromSpace } from '../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace'
+import { useSafeNameLookup } from '../OnboardingLayout/mockup/useSafeNameLookup'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
-import { flattenSafeItems } from '@/hooks/safes'
-import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
 import ClaimTrialModal from '../Plans/ClaimTrialModal'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
-import { useStepUpReturnUrl } from '@/features/oidc-auth'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
 const ONBOARDING_STEP = 1
@@ -47,7 +44,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
   const { onExit, hasNoSpaces } = useOnboardingExit(isEditMode)
-  const { error, isSubmitting, onSubmit, createdSpaceId, goToSelectSafes, selectSafesUrl } = useSpaceSubmit(
+  const { error, isSubmitting, onSubmit, createdSpaceId, goToSelectSafes } = useSpaceSubmit(
     handleSubmit,
     spaceId,
     isEditMode,
@@ -56,8 +53,6 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const trialLock = useWorkspaceLock(createdSpaceId ?? null)
   const offersTrial = Boolean(createdSpaceId) && trialLock.isLocked && trialLock.reason === 'trial-offered'
   const isTrialCheckFailed = Boolean(createdSpaceId) && trialLock.isError
-  // The page reloads after a step-up and loses the created Workspace, so the challenge returns to its Safes step.
-  useStepUpReturnUrl(offersTrial ? selectSafesUrl : undefined)
   useEffect(() => {
     if (createdSpaceId && !trialLock.isResolving && !trialLock.isError && !offersTrial) goToSelectSafes(createdSpaceId)
   }, [createdSpaceId, trialLock.isResolving, trialLock.isError, offersTrial, goToSelectSafes])

@@ -7,7 +7,7 @@ import {
   mockMultiSpenderPolicy,
   mockPendingPolicy,
   mockPendingRemoval,
-} from '../../../mocks/policies'
+} from '../../../../../public/utils/policies'
 import { useSpendingLimitDetails } from '../useSpendingLimitDetails'
 
 jest.mock('../../../hooks/usePolicyDetailsBase')

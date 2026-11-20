@@ -4,10 +4,10 @@ import { Switch } from '@safe-global/views/components/ui/switch'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { NetworkLogosList } from '@/features/multichain'
+import NetworkLogosList from '@/components/common/NetworkLogosList'
 import { cn } from '@safe-global/views/utils/cn'
 import { useAppDispatch } from '@/store'
-import { setOverride, clearOverride } from '@/features/feature-flag-overrides/store'
+import { setOverride, clearOverride } from '../public/store/featureFlagOverridesSlice'
 import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 
 // Kept in the DOM but hidden so the controls column stays aligned across rows.

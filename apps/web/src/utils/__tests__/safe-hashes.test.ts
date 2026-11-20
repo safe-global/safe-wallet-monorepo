@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { getDomainHash, getSafeMessageMessageHash, getSafeTxMessageHash } from '../safe-hashes'
+import { getDomainHash, getSafeMessageMessageHash, getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import { AbiCoder, hashMessage, keccak256, TypedDataEncoder } from 'ethers'
 import type { SafeTransactionData, SafeVersion } from '@safe-global/types-kit'
 

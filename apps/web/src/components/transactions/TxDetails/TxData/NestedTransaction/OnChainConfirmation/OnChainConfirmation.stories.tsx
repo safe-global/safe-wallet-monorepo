@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { OnChainConfirmation } from './index'
-import { mockOnChainConfirmationData, mockNestedTxDetails } from './mockData'
+import { mockOnChainConfirmationData, mockNestedTxDetails } from './OnChainConfirmation.storyData'
 import { http, HttpResponse } from 'msw'
 
 const meta = {

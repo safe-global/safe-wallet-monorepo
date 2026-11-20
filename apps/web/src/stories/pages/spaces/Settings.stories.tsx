@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory, type FeatureFlags } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import type { FeatureFlags } from '@/stories/mocks/types'
 // The settings index page only client-redirects to /spaces/settings/general, which no-ops
 // in Storybook — render the general settings page directly instead.
 import SpaceSettings from '@/pages/spaces/settings/general'
@@ -19,7 +20,8 @@ const createSettingsSetup = (pathname: string, features: FeatureFlags = {}) =>
     wallet: 'connected',
     layout: 'fullPage',
     pathname,
-    features: { spaces: true, ...features },
+    authenticated: true,
+    features,
     query: { spaceId: '1' },
   })
 

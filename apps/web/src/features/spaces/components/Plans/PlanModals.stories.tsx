@@ -2,19 +2,21 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import type { PaymentLink, Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
-import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import ChangePlanDialog from './ChangePlanDialog'
 import ClaimTrialModal from './ClaimTrialModal'
 import PlanChooserModal from './PlanChooserModal'
 import SelectAccountsStep from './SelectAccountsStep'
 import TrialEndingModal from './TrialEndingModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscription } from './plans.fixtures'
+import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscription } from './plans.storyData'
 
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true, safePro: true },
+  authenticated: true,
+  features: { safePro: true },
   pathname: '/spaces',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

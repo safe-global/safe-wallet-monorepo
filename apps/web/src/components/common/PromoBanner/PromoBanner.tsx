@@ -1,12 +1,12 @@
 import css from './styles.module.css'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import Image, { type StaticImageData } from 'next/image'
 import Link, { type LinkProps } from 'next/link'
 import { X as CloseIcon } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
-import type { AnalyticsEvent } from '@/services/analytics'
-import { trackEvent, MixpanelEventParams } from '@/services/analytics'
+import type { AnalyticsEvent } from '@/services/analytics/types'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 const DEFAULT_BACKGROUND = 'linear-gradient(90deg, #b0ffc9, #d7f6ff)'
 
@@ -31,7 +31,7 @@ export interface PromoBannerProps {
   trackingParams?: AnalyticsEvent
   trackHideProps?: AnalyticsEvent
   onDismiss?: () => void
-  imageSrc?: string | StaticImageData
+  imageSrc?: string
   imageAlt?: string
   endIcon?: ReactNode
   customFontColor?: string
@@ -120,7 +120,7 @@ const PromoBanner = ({
     >
       <div className={`flex flex-row gap-4 ${css.bannerStack}`}>
         {imageSrc ? (
-          <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
+          <img className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
         ) : null}
         <div className={css.bannerContent}>
           <Typography

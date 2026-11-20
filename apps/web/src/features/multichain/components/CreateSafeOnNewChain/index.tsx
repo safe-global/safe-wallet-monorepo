@@ -3,19 +3,21 @@ import NetworkInput from '@/components/common/NetworkInput'
 import { updateAddressBook } from '@/components/new-safe/create/logic/address-book'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import useAddressBook from '@/hooks/useAddressBook'
-import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { trackEvent } from '@/services/analytics'
 import { gtmSetChainId } from '@/services/analytics/gtm'
 import { showNotification } from '@/store/notificationsSlice'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { FormProvider, useForm } from 'react-hook-form'
-import { useSafeCreationData } from '../../hooks/useSafeCreationData'
+import { useSafeCreationData } from '../../public/hooks/useSafeCreationData'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { hasMultiChainAddNetworkFeature, predictAddressBasedOnReplayData } from '../../utils'
+import { hasMultiChainAddNetworkFeature, predictAddressBasedOnReplayData } from '../../public/utils/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { useRouter } from 'next/router'
@@ -26,10 +28,12 @@ import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/ho
 import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
-import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services'
+import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../public/types'
+import { persistCounterfactualSafe } from '@/features/counterfactual/public/services/persistCounterfactualSafe'
 import { isAuthenticated } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { useIsAdmin } from '@/features/spaces/public/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLimit'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -142,11 +146,6 @@ const ReplaySafeDialog = ({
         dispatch,
       })
       if (!persistResult.ok) {
-        if (persistResult.stepUpPending) {
-          // Nothing to show, but the dialog must not close as if the network had been added.
-          hasError = true
-          return
-        }
         setCreationError(persistResult.error)
         hasError = true
         dispatch(

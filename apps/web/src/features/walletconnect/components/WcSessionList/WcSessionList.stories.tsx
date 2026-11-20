@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import type { SessionTypes } from '@walletconnect/types'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import WcSessionList from './index'
 
 const setup = createMockStory({
@@ -54,8 +54,13 @@ const createSession = (topic: string, name: string, url: string, icon: string): 
 })
 
 const sessions: SessionTypes.Struct[] = [
-  createSession('session-1', 'Uniswap Interface', 'https://app.uniswap.org', 'https://app.uniswap.org/favicon.png'),
-  createSession('session-2', 'CoW Swap', 'https://swap.cow.fi', 'https://swap.cow.fi/favicon.png'),
+  createSession(
+    'session-1',
+    'Uniswap Interface',
+    'https://app.uniswap.org',
+    'mock-assets/app.uniswap.org/favicon.webp',
+  ),
+  createSession('session-2', 'CoW Swap', 'https://swap.cow.fi', ''),
   createSession(
     'session-3',
     'A dApp with a very long name that gets truncated',

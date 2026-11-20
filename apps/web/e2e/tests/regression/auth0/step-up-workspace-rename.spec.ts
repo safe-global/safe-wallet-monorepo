@@ -2,14 +2,13 @@
  * Step-up authentication for a sensitive Workspace action, end to end against the gateway and the local Auth0.
  *
  * The user signs in by email without a second factor, so the gateway answers the rename with
- * `elevation_required`. The wallet sends the user to Auth0 for a code and, on return, repeats the rename on the
- * page the user left. Without the step-up the name must not change.
+ * `elevation_required`. The wallet asks for a code in a popup and then sends the rename again, on the page the
+ * user is on. Without the step-up the name must not change.
  */
 import type { Page } from '@playwright/test'
 import { test, expect } from '../../../src/fixtures/test.fixture'
 import {
   createWorkspace,
-  launchScreen,
   signInWithEmail,
   uniqueEmail,
   workspaceName,
@@ -17,10 +16,18 @@ import {
   type EmailSession,
 } from '../../../src/fixtures/email-session'
 import { Auth0Page } from '../../../src/pages/auth0.page'
-import { completeStepUp, expectActionReplayed, toast } from '../../../src/fixtures/step-up'
+import {
+  clickVerify,
+  completeStepUp,
+  expectActionCompleted,
+  expectSamePage,
+  openStepUpPopup,
+  stepUpDialog,
+} from '../../../src/fixtures/step-up'
 
 const ORIGINAL_NAME = 'Step-up Workspace'
 const NEW_NAME = 'Renamed after step-up'
+const RENAMED = 'Workspace name updated'
 const SETTINGS_PATH = '/spaces/settings/general'
 
 const nameInput = (page: Page) => page.getByTestId('space-name-input')
@@ -47,48 +54,68 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
     await rename(safePage, NEW_NAME)
     await completeStepUp(safePage)
 
-    await expectActionReplayed(safePage, settingsUrl, 'Workspace updated')
+    await expectActionCompleted(safePage, settingsUrl, RENAMED)
     await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
     await expect.poll(() => workspaceName(session, workspaceId)).toBe(NEW_NAME)
   })
 
-  test('that cancelling returns the user to the page without an error and without the rename', async ({ safePage }) => {
-    const auth0 = new Auth0Page(safePage)
-
+  test('that cancelling on Auth0 keeps the form, and the user can save again', async ({ safePage }) => {
     await rename(safePage, NEW_NAME)
+    const auth0 = await openStepUpPopup(safePage)
     await auth0.cancelButton.click()
 
+    await expectSamePage(safePage)
+    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
+    expect(await workspaceName(session, workspaceId)).toBe(ORIGINAL_NAME)
+
+    await safePage.getByTestId('space-save-button').click()
+    await completeStepUp(safePage)
+
+    await expectActionCompleted(safePage, settingsUrl, RENAMED)
+    await expect.poll(() => workspaceName(session, workspaceId)).toBe(NEW_NAME)
+  })
+
+  test('that cancelling the dialog keeps the form without a rename', async ({ safePage }) => {
+    await rename(safePage, NEW_NAME)
+    await expect(stepUpDialog(safePage)).toBeVisible()
+    await safePage.getByTestId('step-up-cancel-button').click()
+
+    await expect(stepUpDialog(safePage)).toBeHidden()
     await expect(safePage).toHaveURL(settingsUrl)
-    await expect(launchScreen(safePage)).toBeHidden()
-    await expect(nameInput(safePage)).toHaveValue(ORIGINAL_NAME)
-    await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
+    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
     expect(await workspaceName(session, workspaceId)).toBe(ORIGINAL_NAME)
   })
 
-  test('that the rename fails when Auth0 does not report the second factor', async ({ safePage }) => {
-    const auth0 = new Auth0Page(safePage)
-
+  test('that the dialog reports a failure when Auth0 does not report the second factor', async ({ safePage }) => {
     await rename(safePage, NEW_NAME)
-    await auth0.verify({ reportSecondFactor: false })
+    const popup = await clickVerify(safePage)
+    const popupClosed = popup.waitForEvent('close')
+    await new Auth0Page(popup).verify({ reportSecondFactor: false })
 
-    await expect(safePage).toHaveURL(settingsUrl)
-    await expect(toast(safePage, 'Verification was not completed')).toBeVisible()
-    await expect(launchScreen(safePage)).toBeHidden()
-    await expect(nameInput(safePage)).toHaveValue(ORIGINAL_NAME)
+    await expect(stepUpDialog(safePage)).toContainText('Verification was not completed')
+    await popupClosed
     expect(await workspaceName(session, workspaceId)).toBe(ORIGINAL_NAME)
+
+    // "Try again" opens the popup from the same dialog; this time the second factor is reported.
+    await completeStepUp(safePage)
+
+    await expectActionCompleted(safePage, settingsUrl, RENAMED)
+    await expect.poll(() => workspaceName(session, workspaceId)).toBe(NEW_NAME)
   })
 
   test('that a second sensitive action right after a step-up needs no new code', async ({ safePage }) => {
     await rename(safePage, NEW_NAME)
     await completeStepUp(safePage)
-    await expectActionReplayed(safePage, settingsUrl, 'Workspace updated')
-    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
+    await expectActionCompleted(safePage, settingsUrl, RENAMED)
 
+    // The elevation belongs to the session, not to the page: a reload keeps it, and settles the form.
+    await safePage.reload()
+    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
     await rename(safePage, 'Renamed again')
 
-    await expect(toast(safePage, 'Workspace name updated')).toBeVisible()
-    await expect(safePage).toHaveURL(settingsUrl)
     await expect.poll(() => workspaceName(session, workspaceId)).toBe('Renamed again')
+    await expect(stepUpDialog(safePage)).toBeHidden()
+    await expect(safePage).toHaveURL(settingsUrl)
   })
 })
 
@@ -101,7 +128,8 @@ test.describe('Workspace rename after a sign-in with a second factor', { tag: '@
 
     await rename(safePage, NEW_NAME)
 
-    await expect(toast(safePage, 'Workspace name updated')).toBeVisible()
+    await expect(safePage.getByRole('alert').filter({ hasText: RENAMED })).toBeVisible()
+    await expect(stepUpDialog(safePage)).toBeHidden()
     await expect(safePage).toHaveURL(workspaceUrl(SETTINGS_PATH, uuid))
     await expect.poll(() => workspaceName(session, uuid)).toBe(NEW_NAME)
   })

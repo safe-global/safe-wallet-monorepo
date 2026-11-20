@@ -3,9 +3,9 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import { PositionGroup } from './index'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
-const WETH_LOGO = 'https://assets.coingecko.com/coins/images/2518/small/weth.png'
-const USDC_LOGO = 'https://assets.coingecko.com/coins/images/6319/small/usdc.png'
-const DAI_LOGO = 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png'
+const WETH_LOGO = 'mock-assets/assets.coingecko.com/coins/images/2518/small/weth.webp'
+const USDC_LOGO = 'mock-assets/assets.coingecko.com/coins/images/6319/small/usdc.webp'
+const DAI_LOGO = 'mock-assets/assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.webp'
 
 const mockSupplyGroup: Protocol['items'][0] = {
   name: 'Supply',

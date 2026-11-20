@@ -1,48 +1,32 @@
 import * as assets from './assets.mjs'
 import * as basic from './basic.mjs'
-import * as batch from './batch.mjs'
 import * as chains from './chains.mjs'
-import * as cow from './cow.mjs'
 import * as dashboard from './dashboard.mjs'
-import * as fallbackHandlers from './fallback-handlers.mjs'
-import * as history from './history.mjs'
-import * as historySummary from './history-summary.mjs'
 import * as ledger from './ledger.mjs'
-import * as notes from './notes.mjs'
 import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
-import * as rejection from './rejection.mjs'
-import * as replacement from './replacement.mjs'
 import * as safeApps from './safe-apps.mjs'
-import * as sharing from './sharing.mjs'
-import * as spaces from './spaces.mjs'
 import * as transferForm from './transfer-form.mjs'
+import * as trezor from './trezor.mjs'
 import * as zerion from './zerion.mjs'
 
-const modules = [
-  assets,
-  basic,
-  batch,
-  chains,
-  cow,
-  dashboard,
-  fallbackHandlers,
-  history,
-  historySummary,
-  ledger,
-  notes,
-  proposers,
-  recovery,
-  rejection,
-  replacement,
-  safeApps,
-  sharing,
-  spaces,
-  transferForm,
-  zerion,
-]
+const modules = [assets, basic, chains, dashboard, ledger, proposers, recovery, safeApps, transferForm, trezor, zerion]
 
-/** The scenario functions by name; specs.mjs refers to them by these names. */
+/** The scenario functions by name; playwright-specs.mjs refers to them by these names. */
 export const scenarios = Object.fromEntries(
   modules.flatMap((module) => Object.entries(module)).filter(([name]) => /^prepare\w+Scenario$/.test(name)),
 )
+
+/** The names of the Safes that each scenario returns; specs read them as `safes.<name>`. */
+export const scenarioSafes = {
+  prepareAssetsScenario: ['assets'],
+  prepareBalancesEndpointsScenario: ['tokenLists'],
+  prepareBasicScenario: ['basic'],
+  prepareDashboardScenario: ['queue'],
+  prepareLedgerScenario: ['ledgerSign', 'ledgerExecute'],
+  prepareMastercopyScenario: ['migratable', 'unofficialSingleton'],
+  prepareTransferFormScenario: ['transferForm'],
+  prepareTrezorScenario: ['trezorSign', 'trezorExecute'],
+  prepareZerionPortfolioScenario: ['portfolio'],
+  prepareZerionPositionsScenario: ['positions'],
+}

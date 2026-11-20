@@ -1,5 +1,5 @@
 import { multichainSetupScanner } from '../multichainSetup'
-import { createMockContext } from '../test-helpers'
+import { createMockContext } from '../../../public/utils/test-helpers'
 
 describe('multichainSetupScanner', () => {
   it('returns not_applicable for single-chain Safe', async () => {

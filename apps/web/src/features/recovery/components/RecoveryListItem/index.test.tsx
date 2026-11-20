@@ -4,7 +4,7 @@ import { userEvent } from '@testing-library/user-event'
 import { render } from '@/tests/test-utils'
 import RecoveryListItem from '.'
 import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 const MockRecoverySummary = () => {
   const { setSubmitError } = useContext(RecoveryListItemContext)

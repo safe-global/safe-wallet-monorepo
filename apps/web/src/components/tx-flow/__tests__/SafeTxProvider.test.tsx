@@ -2,15 +2,16 @@ import { useContext, useEffect, type ReactNode } from 'react'
 import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { act, render, screen, waitFor } from '@/tests/test-utils'
-import SafeTxProvider, { SafeTxContext } from '../SafeTxProvider'
+import SafeTxProvider from '../SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { getTxOrigin } from '@/utils/transactions'
-import { gtfPaymentSourcePreferenceSlice } from '@/features/gtf/store'
+import { feePaymentSourcePreferenceSlice } from '@/features/fee-payment/public/store/feePaymentSourcePreferenceSlice'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { Errors, logError } from '@/services/exceptions'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
@@ -19,8 +20,8 @@ jest.mock('@/services/exceptions', () => ({
 
 const mockedLogError = logError as jest.MockedFunction<typeof logError>
 
-jest.mock('@/services/tx/tx-sender', () => {
-  const actual = jest.requireActual('@/services/tx/tx-sender')
+jest.mock('@/services/tx/tx-sender/create', () => {
+  const actual = jest.requireActual('@/services/tx/tx-sender/create')
   return { ...actual, createTx: jest.fn(actual.createTx) }
 })
 
@@ -52,8 +53,8 @@ const TestConsumer = () => {
 }
 
 const PaymentModeReader = () => {
-  const { gtfPaymentMode } = useContext(SafeTxContext)
-  return <div data-testid="payment-mode">{gtfPaymentMode}</div>
+  const { feePaymentMode } = useContext(SafeTxContext)
+  return <div data-testid="payment-mode">{feePaymentMode}</div>
 }
 
 /** Stands in for any of the ~20 review components that do `.catch(setSafeTxError)`. */
@@ -237,7 +238,7 @@ describe('SafeTxProvider', () => {
     })
   })
 
-  describe('gtfPaymentMode persistence', () => {
+  describe('feePaymentMode persistence', () => {
     it('defaults to "safe" when no preference is persisted', () => {
       mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
 
@@ -259,7 +260,7 @@ describe('SafeTxProvider', () => {
         </SafeTxProvider>,
         {
           initialReduxState: {
-            [gtfPaymentSourcePreferenceSlice.name]: { [SIGNER_A.toLowerCase()]: 'signer' },
+            [feePaymentSourcePreferenceSlice.name]: { [SIGNER_A.toLowerCase()]: 'signer' },
           },
         },
       )
@@ -267,15 +268,15 @@ describe('SafeTxProvider', () => {
       expect(screen.getByTestId('payment-mode')).toHaveTextContent('signer')
     })
 
-    it('persists changes via setGtfPaymentMode', async () => {
+    it('persists changes via setFeePaymentMode', async () => {
       mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
 
       const Toggle = () => {
-        const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
+        const { feePaymentMode, setFeePaymentMode } = useContext(SafeTxContext)
         return (
           <>
-            <div data-testid="payment-mode">{gtfPaymentMode}</div>
-            <button onClick={() => setGtfPaymentMode('signer')}>toggle</button>
+            <div data-testid="payment-mode">{feePaymentMode}</div>
+            <button onClick={() => setFeePaymentMode('signer')}>toggle</button>
           </>
         )
       }
@@ -306,7 +307,7 @@ describe('SafeTxProvider', () => {
         </SafeTxProvider>,
         {
           initialReduxState: {
-            [gtfPaymentSourcePreferenceSlice.name]: {
+            [feePaymentSourcePreferenceSlice.name]: {
               [SIGNER_A.toLowerCase()]: 'signer',
               [SIGNER_B.toLowerCase()]: 'safe',
             },
@@ -328,8 +329,8 @@ describe('SafeTxProvider', () => {
 
     it('does not throw when no wallet is connected and the setter is invoked', () => {
       const Toggle = () => {
-        const { setGtfPaymentMode } = useContext(SafeTxContext)
-        return <button onClick={() => setGtfPaymentMode('signer')}>toggle</button>
+        const { setFeePaymentMode } = useContext(SafeTxContext)
+        return <button onClick={() => setFeePaymentMode('signer')}>toggle</button>
       }
 
       render(

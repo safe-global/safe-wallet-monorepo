@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SecurityDrawerContent from './SecurityDrawerContent'
-import { createMockStory } from '@/stories/mocks'
-import { createMockContext } from '@/features/security/testing'
-import type { ScanResult } from '@/features/security/types'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createMockContext } from '@/features/security/public/utils/test-helpers'
+import type { ScanResult } from '@/features/security/public/types'
 
 const SAFE_QUERY = 'eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 
@@ -37,7 +37,7 @@ const withIssues: Record<string, ScanResult> = {
   multichain_setup: mkResult({ status: 'not_applicable' }),
 }
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityDrawerContent',

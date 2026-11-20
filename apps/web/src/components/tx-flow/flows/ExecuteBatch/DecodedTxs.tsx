@@ -5,11 +5,25 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SyntheticEvent } from 'react'
 import extractTxInfo from '@/services/tx/extractTxInfo'
-import { isCustomTxInfo, isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
+import {
+  isCustomTxInfo,
+  isMultisigDetailedExecutionInfo,
+  isNativeTokenTransfer,
+  isTransferTxInfo,
+} from '@/utils/transaction-guards'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { useState } from 'react'
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
+import SafenetRiskChip from '@/features/safenet-checks/public/components/SafenetRiskChip'
+import SafenetBatchWarning from '@/features/safenet-checks/public/components/SafenetBatchWarning'
+
+const BatchTxRiskChip = ({ details }: { details: TransactionDetails }) => {
+  const execution = details.detailedExecutionInfo
+  if (!isMultisigDetailedExecutionInfo(execution)) return null
+
+  return <SafenetRiskChip safeTxHash={execution.safeTxHash} timestampMs={execution.submittedAt} />
+}
 
 type DecodableTx = TransactionDetails & { txData: NonNullable<TransactionDetails['txData']> }
 
@@ -22,6 +36,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
 
   return (
     <>
+      <SafenetBatchWarning txs={txs} />
       <MultisendActionsHeader title="Batched transactions" setOpen={setOpenMap} amount={decodableTxs.length} compact />
 
       <Card variant="muted" size="none" className="mt-2">
@@ -72,6 +87,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
                     expanded={openMap?.[idx] ?? false}
                     onChange={onChange}
                     isExecuted={!!transaction.executedAt}
+                    badge={<BatchTxRiskChip details={transaction} />}
                   />
                 )
               })}

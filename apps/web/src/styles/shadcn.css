@@ -215,6 +215,25 @@
   --color-badge-warning-strong: var(--badge-warning-strong);
   --color-badge-dot-success: var(--badge-dot-success);
   --color-badge-dot-warning: var(--badge-dot-warning);
+  /* Tag chips use the theme's address book tag colours, see components/ui/tag.tsx. */
+  --color-tag-default: var(--color-background-main);
+  --color-tag-default-foreground: var(--color-text-primary);
+  --color-tag-slate: var(--color-tag-slate-bg);
+  --color-tag-slate-foreground: var(--color-tag-slate-fg);
+  --color-tag-clay: var(--color-tag-clay-bg);
+  --color-tag-clay-foreground: var(--color-tag-clay-fg);
+  --color-tag-rose: var(--color-tag-rose-bg);
+  --color-tag-rose-foreground: var(--color-tag-rose-fg);
+  --color-tag-lilac: var(--color-tag-lilac-bg);
+  --color-tag-lilac-foreground: var(--color-tag-lilac-fg);
+  --color-tag-iris: var(--color-tag-iris-bg);
+  --color-tag-iris-foreground: var(--color-tag-iris-fg);
+  --color-tag-cobalt: var(--color-tag-cobalt-bg);
+  --color-tag-cobalt-foreground: var(--color-tag-cobalt-fg);
+  --color-tag-sky: var(--color-tag-sky-bg);
+  --color-tag-sky-foreground: var(--color-tag-sky-fg);
+  --color-tag-lagoon: var(--color-tag-lagoon-bg);
+  --color-tag-lagoon-foreground: var(--color-tag-lagoon-fg);
   --color-icon-brand: var(--icon-brand);
   --color-icon-hover: var(--icon-hover);
   --color-info-subtle: var(--color-info-background);
@@ -232,18 +251,12 @@
   --radius-infinite: 9999px;
 }
 
-/*
- * Scoped Tailwind Preflight
- *
- * Since we can't import tailwindcss/preflight.css globally (it would break MUI),
- * we scope the relevant subset of preflight resets to .shadcn-scope.
- * Derived from: node_modules/tailwindcss/preflight.css
- *
- * Intentionally omitted (document-level, handled by MUI CssBaseline):
- *   - html/:host line-height, font-family, tap-highlight
- *   - [hidden] display:none
- */
 @layer base {
+  /* Any author `display` (e.g. the iframe reset below, or `flex`) beats the browser's own [hidden] rule. */
+  .shadcn-scope [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+
   /* 1. Box model reset  2. Remove default margins/padding  3. Reset borders */
   .shadcn-scope,
   .shadcn-scope *,

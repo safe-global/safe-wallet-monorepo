@@ -4,7 +4,7 @@ import { type SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useCallback, useMemo } from 'react'
 import useChainId from '@/hooks/useChainId'
-import { useGetSpaceAddressBook } from '@/features/spaces'
+import useGetSpaceAddressBook from '@/features/spaces/public/hooks/useGetSpaceAddressBook'
 import { useAddressBookSource } from '@/components/common/AddressBookSourceProvider'
 
 export enum ContactSource {
@@ -19,6 +19,7 @@ const mapLocalToContacts = (addressBook: AddressBook, chainId: string): Extended
     name,
     address,
     chainIds: [chainId],
+    tagIds: [],
     createdBy: '',
     createdByUserId: 0,
     lastUpdatedBy: '',

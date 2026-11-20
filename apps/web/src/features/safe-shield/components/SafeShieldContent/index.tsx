@@ -9,24 +9,27 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from '@safe-global/views/features/safe-shield/components/SafeShieldContent/SafeShieldAnalysisEmpty'
-import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import { AnalysisGroupCard } from '../AnalysisGroupCard/AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
 import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
 import { ProChecksRow } from '../ProChecksRow'
 import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
-import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
+import { isContractCall } from '../../utils/isContractCall'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { analysisVisibilityDelay, calculateAnalysisDelays, useDelayedLoading } from '../../hooks/useDelayedLoading'
-import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
-import { useLoadFeature } from '@/features/__core__'
-import { ThreatAnalysis } from '../ThreatAnalysis'
+import { CARD_ORDER, PRO_CARD_ORDER, getRevealDelays } from '../../utils/revealDelays'
+import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
+import { ThreatAnalysis } from '../ThreatAnalysis/ThreatAnalysis'
+import SafenetChecksSection from '@/features/safenet-checks/public/components/SafenetChecksSection'
+import HnInfoCard from '@/features/hypernative/public/components/HnInfoCard'
+import HnCustomChecksCard from '@/features/hypernative/public/components/HnCustomChecksCard'
 
 export const SafeShieldContent = ({
   recipient,
@@ -61,8 +64,6 @@ export const SafeShieldContent = ({
   isSafePro?: boolean
   isOffchainMessage?: boolean
 }): ReactElement => {
-  const hn = useLoadFeature(HypernativeFeature)
-  const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
   const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
@@ -72,18 +73,23 @@ export const SafeShieldContent = ({
 
   const highlightedSeverity = overallStatus?.severity
   const loading = recipientLoading || contractLoading || threatLoading || deadlockLoading
-  const isLoadingVisible = useDelayedLoading(loading, analysisVisibilityDelay)
-  const shouldShowContent = !isLoadingVisible
+  const shouldShowContent = !loading
 
   const recipientEmpty = isEmpty(recipientResults)
   const contractEmpty = isEmpty(contractResults)
-  const threatEmpty = isEmpty(threatResults) || isEmpty(threatResults?.THREAT)
+  const threatEmpty = !hasThreatCardResults(threatResults)
   const deadlockEmpty = isEmpty(deadlockResults)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
   const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx
 
-  const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
-    calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
+  const revealDelays = getRevealDelays(isSafePro ? PRO_CARD_ORDER : CARD_ORDER, {
+    recipient: !recipientEmpty,
+    contract: !contractEmpty,
+    deadlock: !deadlockEmpty,
+    threat: !threatEmpty,
+    customChecks: !isEmpty(threatResults.CUSTOM_CHECKS),
+    simulation: !!safeTx,
+  })
 
   const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
 
@@ -94,7 +100,7 @@ export const SafeShieldContent = ({
     <AnalysisGroupCard
       data-testid="contract-analysis-group-card"
       data={contractResults}
-      delay={contractAnalysisDelay}
+      delay={revealDelays.contract}
       highlightedSeverity={highlightedSeverity}
       analyticsEvent={SAFE_SHIELD_EVENTS.CONTRACT_DECODED}
       showImage
@@ -105,7 +111,7 @@ export const SafeShieldContent = ({
     <AnalysisGroupCard
       data-testid="deadlock-analysis-group-card"
       data={deadlockResults}
-      delay={deadlockAnalysisDelay}
+      delay={revealDelays.deadlock}
       highlightedSeverity={highlightedSeverity}
       analyticsEvent={SAFE_SHIELD_EVENTS.DEADLOCK_ANALYZED}
     />
@@ -118,12 +124,12 @@ export const SafeShieldContent = ({
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
         {showHypernativeInfo && (
-          <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
+          <HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
 
-        {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
+        {loading && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={loading} />}
 
-        {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
+        {shouldShowContent && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
         <div data-testid="open-checks-list">
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
@@ -134,7 +140,7 @@ export const SafeShieldContent = ({
           {!isSafePro && (
             <AnalysisGroupCard
               data-testid="recipient-analysis-group-card"
-              delay={recipientDelay}
+              delay={revealDelays.recipient}
               data={recipientResults}
               highlightedSeverity={highlightedSeverity}
               analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
@@ -147,14 +153,14 @@ export const SafeShieldContent = ({
 
           <ThreatAnalysis
             threat={threat}
-            delay={threatAnalysisDelay}
+            delay={revealDelays.threat}
             highlightedSeverity={highlightedSeverity}
             hypernativeAuth={hypernativeAuth}
           />
 
-          <hn.HnCustomChecksCard
+          <HnCustomChecksCard
             threat={threat}
-            delay={threatAnalysisDelay}
+            delay={revealDelays.customChecks}
             highlightedSeverity={highlightedSeverity}
             hypernativeAuth={hypernativeAuth}
           />
@@ -162,13 +168,13 @@ export const SafeShieldContent = ({
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
-              delay={simulationAnalysisDelay}
+              delay={revealDelays.simulation}
               highlightedSeverity={highlightedSeverity}
             />
           )}
 
           {/* Safenet is the final check, including when the Pro rollout is off. */}
-          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
+          {!isSafePro && shouldShowContent && <SafenetChecksSection />}
         </div>
 
         {showProSection && (
@@ -178,7 +184,7 @@ export const SafeShieldContent = ({
               {hasProFeatures ? (
                 <AnalysisGroupCard
                   data-testid="recipient-analysis-group-card"
-                  delay={recipientDelay}
+                  delay={revealDelays.recipient}
                   data={recipientResults}
                   highlightedSeverity={highlightedSeverity}
                   analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
@@ -197,15 +203,14 @@ export const SafeShieldContent = ({
               {!contractLoading && !threatLoading && (hasProFeatures || hasOwnTenderly) && (
                 <TenderlySimulation
                   safeTx={safeTx}
-                  delay={simulationAnalysisDelay}
+                  delay={revealDelays.simulation}
                   highlightedSeverity={highlightedSeverity}
                   autoRun={hasProFeatures}
                 />
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
 
-              {isSafenetEnabled &&
-                (hasProFeatures ? <safenet.SafenetChecksSection /> : <safenet.SafenetChecksSection locked />)}
+              {isSafenetEnabled && (hasProFeatures ? <SafenetChecksSection /> : <SafenetChecksSection locked />)}
             </div>
           </div>
         )}

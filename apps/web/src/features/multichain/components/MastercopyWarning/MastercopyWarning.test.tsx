@@ -1,16 +1,20 @@
-import type { ReactNode } from 'react'
-import { screen } from '@testing-library/react'
+import type { ReactElement, ReactNode } from 'react'
+import { fireEvent, screen } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
+import { TxModalContext } from '@/components/tx-flow'
+import { MigrateSafeL2Flow } from '@/components/tx-flow/flows/MigrateSafeL2Flow'
 import { MastercopyWarning } from './MastercopyWarning'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
-import type { MastercopyMigration } from '../../hooks/useMastercopyMigration'
+import type { MastercopyMigration } from '../../public/hooks/useMastercopyMigration'
 
 const CHANGELOG = 'https://github.com/gnosis/safe-contracts/releases'
 
-jest.mock('../../hooks/useMastercopyMigration')
+jest.mock('../../public/hooks/useMastercopyMigration')
 jest.mock('@/hooks/useIsSafeOwner')
-jest.mock('@/components/tx-flow/flows', () => ({
+jest.mock('@/components/tx-flow/flows/MigrateSafeL2Flow', () => ({
   MigrateSafeL2Flow: () => null,
+}))
+jest.mock('@/components/tx-flow/flows/UpdateSafeFlow', () => ({
   UpdateSafeFlow: () => null,
 }))
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -18,7 +22,7 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => ReactNode }) => <>{children(true)}</>,
 }))
 
-const mockUseMastercopyMigration = jest.requireMock('../../hooks/useMastercopyMigration')
+const mockUseMastercopyMigration = jest.requireMock('../../public/hooks/useMastercopyMigration')
   .useMastercopyMigration as jest.Mock
 const mockUseIsSafeOwner = jest.requireMock('@/hooks/useIsSafeOwner').default as jest.Mock
 
@@ -53,6 +57,23 @@ describe('MastercopyWarning', () => {
       expect(screen.getByText(/You should migrate it to a compatible version/)).toBeInTheDocument()
       expect(screen.getByTestId('migrate-mastercopy-btn')).toBeInTheDocument()
       expect(screen.getByText('Migrate')).toBeInTheDocument()
+    })
+
+    it('opens the migration flow when Migrate is clicked', () => {
+      const setTxFlow = jest.fn()
+      mockUseMastercopyMigration.mockReturnValue(
+        migration({ state: ImplementationVersionState.UNKNOWN, action: 'migrate' }),
+      )
+
+      render(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <MastercopyWarning />
+        </TxModalContext.Provider>,
+      )
+      fireEvent.click(screen.getByTestId('migrate-mastercopy-btn'))
+
+      const openedFlow: ReactElement = setTxFlow.mock.lastCall[0]
+      expect(openedFlow.type).toBe(MigrateSafeL2Flow)
     })
 
     it("renders the Get CLI ActionCard for the 'cli' action", () => {

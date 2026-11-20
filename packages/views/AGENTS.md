@@ -5,7 +5,7 @@
 ## Rules
 
 - **Only presentation lives here.** A file belongs in this package if a designer would edit it to change how something looks or reads: markup, styles, assets, UI text, and formatting a value for display. Code that decides what is true lives in the app, even when it is a pure function, and a view receives its result as props. That includes which state something is in, who may do what, what data means, and how API data maps to what is shown. To check: if changing the code could change what a user is allowed to do or what they are told is true, it does not belong here.
-- **No imports from an app.** Production files must not import `@/…` (apps/web) or anything that holds hooks, store access, SDK calls or analytics. Data and callbacks come in through props. ESLint (`no-restricted-imports`) enforces this; tests and stories are exempt.
+- **No hooks, store access, SDK calls or analytics.** Production files must not import anything that holds them. Data and callbacks come in through props.
 - Inside the package, import other package files as `@safe-global/views/…`.
 - Assets the views render (SVGs, CSS modules) live in the package (`src/assets/`, next to the view). An SVG that the app also serves by URL stays in `apps/web/public` as well.
 - shadcn primitives are managed with the shadcn CLI from `apps/web` (`components.json` points at this package); read `src/components/ui/README.md` before editing them by hand.

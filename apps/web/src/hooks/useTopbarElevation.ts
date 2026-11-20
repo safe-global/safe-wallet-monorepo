@@ -2,16 +2,12 @@ import { useEffect, useSyncExternalStore } from 'react'
 
 // Allowlist of modals that must elevate the topbar above their backdrop while open.
 // Add a new id here before calling `useTopbarElevation` from a new modal.
-const ELEVATED_MODAL_IDS = ['recovery', 'tx-flow'] as const
-
-export type ElevatedModalId = (typeof ELEVATED_MODAL_IDS)[number]
+export type ElevatedModalId = 'recovery' | 'tx-flow'
 
 // Popups whose backdrop lives in the shadcn overlay layer (--z-overlay) rather than the low-z
 // modal layer above. While one is open the topbar is raised one step above that backdrop so it
 // stays lit while the rest of the page dims.
-const OVERLAY_POPUP_IDS = ['safe-selector'] as const
-
-export type OverlayPopupId = (typeof OVERLAY_POPUP_IDS)[number]
+export type OverlayPopupId = 'safe-selector'
 
 /**
  * Builds an elevate-while-open hook pair sharing a module-level store:

@@ -3,8 +3,8 @@ import { SupportedChainId } from '@cowprotocol/cow-sdk'
 import { TradeType } from '@cowprotocol/widget-lib'
 import darkPalette from '@safe-global/theme/palettes/dark'
 import lightPalette from '@safe-global/theme/palettes/light'
-import { SWAP_FEE_RECIPIENT } from '@/features/swap/constants'
-import { getSwapWidgetParams, type SwapWidgetParamsInput } from '@/features/swap/helpers/widgetParams'
+import { SWAP_FEE_RECIPIENT } from '../../public/constants'
+import { getSwapWidgetParams, type SwapWidgetParamsInput } from '../widgetParams'
 
 const buildInput = (overrides: Partial<SwapWidgetParamsInput> = {}): SwapWidgetParamsInput => ({
   chainId: SupportedChainId.GNOSIS_CHAIN,
@@ -45,6 +45,12 @@ describe('getSwapWidgetParams', () => {
       standaloneMode: false,
       enabledTradeTypes: [TradeType.SWAP, TradeType.LIMIT, TradeType.ADVANCED],
     })
+  })
+
+  it('approves only the trade amount instead of an unlimited allowance', () => {
+    const params = getSwapWidgetParams(buildInput())
+
+    expect(params.disableInfiniteApprove).toBe(true)
   })
 
   it('preselects the sell token from the route and leaves the buy token empty', () => {

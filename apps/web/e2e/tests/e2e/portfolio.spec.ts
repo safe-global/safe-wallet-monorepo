@@ -16,17 +16,17 @@ test.describe('Zerion portfolio', { tag: '@e2e' }, () => {
     safes,
   }) => {
     const mainnetApi = new SafeApiClient(CHAIN_IDS.ethereum)
-    const address = safeAddress(safes.ETH_ZERION_SAFE)
+    const address = safeAddress(safes.portfolio)
     const portfolio = (await mainnetApi.getPortfolio(address)).tokenBalances.map(({ tokenInfo }) => tokenInfo.symbol)
     const onChain = (await mainnetApi.getBalances(address, 'usd', { trusted: false })).items.map(
       ({ tokenInfo }) => tokenInfo.symbol,
     )
     const zerionOnly = portfolio.filter((symbol) => !onChain.includes(symbol))
     // Precondition: Zerion lists a token that the chain does not hold, so the two lists can be told apart.
-    expect(zerionOnly.length, `Zerion lists no token beyond the chain for ${safes.ETH_ZERION_SAFE}`).toBeGreaterThan(0)
+    expect(zerionOnly.length, `Zerion lists no token beyond the chain for ${safes.portfolio}`).toBeGreaterThan(0)
 
     const assets = new AssetsPage(safePage)
-    await assets.goto(safes.ETH_ZERION_SAFE)
+    await assets.goto(safes.portfolio)
     await assets.setHideSmallBalances(false)
 
     await assets.setShowAllTokens(false)
@@ -40,14 +40,14 @@ test.describe('Zerion portfolio', { tag: '@e2e' }, () => {
 
   test('should show the positions that Zerion reports on the dashboard', async ({ safePage, safes }) => {
     const mainnetApi = new SafeApiClient(CHAIN_IDS.ethereum)
-    const apps = (await mainnetApi.getPortfolio(safeAddress(safes.ETH_ZERION_SAFE))).positionBalances.map(
+    const apps = (await mainnetApi.getPortfolio(safeAddress(safes.portfolio))).positionBalances.map(
       ({ appInfo }) => appInfo.name,
     )
     // Precondition: the widget stays hidden without positions.
-    expect(apps.length, `Zerion lists no position for ${safes.ETH_ZERION_SAFE}`).toBeGreaterThan(0)
+    expect(apps.length, `Zerion lists no position for ${safes.portfolio}`).toBeGreaterThan(0)
 
     const home = new HomePage(safePage)
-    await home.goto(safes.ETH_ZERION_SAFE)
+    await home.goto(safes.portfolio)
 
     for (const app of apps) await expect(home.positionsWidget).toContainText(app)
   })

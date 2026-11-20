@@ -53,6 +53,15 @@ export const setHandleResponseHook = (hook: HandleResponseHook) => {
   customHandleResponse = hook
 }
 
+/** Resolves true when the platform removed the cause of the error, so the request is sent once more. */
+type RecoverErrorHook = (error: FetchBaseQueryError) => Promise<boolean>
+
+let customRecoverError: RecoverErrorHook = async () => false
+
+export const setRecoverErrorHook = (hook: RecoverErrorHook) => {
+  customRecoverError = hook
+}
+
 export const rawBaseQuery = fetchBaseQuery({
   baseUrl: '/',
   headers: {
@@ -126,11 +135,19 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
     credentials: shouldIncludeCredentials ? ('include' as RequestCredentials) : ('omit' as RequestCredentials),
   }
 
-  const response = await rawBaseQuery(adjustedArgs, api, extraOptions)
+  const send = async () => {
+    const result = await rawBaseQuery(adjustedArgs, api, extraOptions)
 
-  // Apply platform-specific response handling
-  if (response.meta?.response) {
-    await customHandleResponse(response.meta.response, urlEnd)
+    // Apply platform-specific response handling
+    if (result.meta?.response) {
+      await customHandleResponse(result.meta.response, urlEnd)
+    }
+    return result
+  }
+
+  let response = await send()
+  if (response.error && (await customRecoverError(response.error))) {
+    response = await send()
   }
 
   if (response.error?.status === 404 && SUBSCRIPTIONS_ROUTE.test(urlEnd)) {

@@ -44,3 +44,16 @@ export const WithName: Story = {
     onCancel: () => alert('Cancelled'),
   },
 }
+
+export const AddressBookContact: Story = {
+  args: {
+    open: true,
+    safe: { address: baseSafe.address },
+    description:
+      'This address is similar to an address in your address book. This could indicate an address poisoning attack.',
+    addressLabel: 'Address',
+    hint: 'Verify the full address carefully. Continue only if you recognize this address.',
+    onConfirm: () => alert('Confirmed!'),
+    onCancel: () => alert('Cancelled'),
+  },
+}

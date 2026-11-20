@@ -19,4 +19,24 @@ describe('DialogContent', () => {
     expect(overlay).toHaveClass('z-[1452]')
     expect(overlay).not.toHaveClass('z-[1451]')
   })
+
+  it.each([
+    [false, 1],
+    [true, 2],
+  ])('renders the backdrop of a nested dialog only when forceBackdrop is %s', (forceBackdrop, expectedOverlays) => {
+    render(
+      <Dialog open>
+        <DialogContent showCloseButton={false}>
+          Parent
+          <Dialog open>
+            <DialogContent showCloseButton={false} forceBackdrop={forceBackdrop}>
+              Child
+            </DialogContent>
+          </Dialog>
+        </DialogContent>
+      </Dialog>,
+    )
+
+    expect(document.querySelectorAll('[data-slot="dialog-overlay"]')).toHaveLength(expectedOverlays)
+  })
 })

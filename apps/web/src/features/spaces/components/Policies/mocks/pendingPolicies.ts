@@ -1,5 +1,5 @@
 import type { NativeTokenMetadataDto, PendingPolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MOCK_SAFES } from './policies'
+import { MOCK_SAFES } from '../../../public/utils/policies'
 
 /** Shaped like the CGW `policies/pending` response. */
 
@@ -40,7 +40,7 @@ export const mockEthMetadata = (): NativeTokenMetadataDto => ({
   address: '0x0000000000000000000000000000000000000000',
   symbol: 'ETH',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
   name: 'Ether',
   trusted: true,
 })

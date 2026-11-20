@@ -8,24 +8,18 @@ import Footer from '../Footer'
 import SideDrawer from './SideDrawer'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
-import { useLoadFeature } from '@/features/__core__'
-import { BatchingFeature } from '@/features/batching'
-import { SpacesFeature } from '@/features/spaces'
 import { AppRoutes } from '@/config/routes'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
-import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
+import useKeyboardObserver from '@/hooks/useKeyboardObserver/useKeyboardObserver'
 import { useIsTopbarElevated, useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
 import { useCssHeightVar } from '@/hooks/useCssHeightVar'
-
-const ONBOARDING_ROUTES = [
-  AppRoutes.welcome.createSpace,
-  AppRoutes.welcome.selectSafes,
-  AppRoutes.welcome.inviteMembers,
-  AppRoutes.welcome.survey,
-]
+import BatchSidebar from '@/features/batching/public/components/BatchSidebar'
+import SelectSafeModal from '@/features/spaces/public/components/SelectSafeModal'
+import SafeWorkspaceSignInDialog from '@/features/spaces/public/components/SafeWorkspaceSignInDialog'
+import SafeWorkspaceChooserDialog from '@/features/spaces/public/components/SafeWorkspaceChooserDialog'
 
 const STATIC_PAGE_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
@@ -35,7 +29,6 @@ const NO_HEADER_ROUTES = [
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
   AppRoutes.welcome.survey,
-  AppRoutes.spaces.createSpace,
   ...STATIC_PAGE_ROUTES,
 ]
 
@@ -49,11 +42,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isSidebarExpanded, setSidebarExpanded] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
-  const { BatchSidebar } = useLoadFeature(BatchingFeature)
-  const { SelectSafeModal, SafeWorkspaceSignInDialog, SafeWorkspaceChooserDialog } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
-  const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isWelcomeListRoute = WELCOME_LIST_ROUTES.includes(pathname)
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
@@ -123,7 +113,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
 
-            {isOnboardingRoute ? <div className={css.onboardingMotion}>{children}</div> : children}
+            {children}
           </SafeLoadingError>
         </div>
 

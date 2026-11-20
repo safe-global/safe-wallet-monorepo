@@ -2,9 +2,11 @@ import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@safe-global/views/components/ui/sidebar'
 import { withMockProvider } from '@/storybook/decorators'
-import { MOCK_SPACE_ID, createChainData } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createChainData } from '@/stories/mocks/chains'
+import { createHandlers } from '@/stories/mocks/handlers'
 import { EnhancedSidebar } from './index'
-import { SafeSidebarVariant } from './variants/SafeSidebarVariant'
+import { SafeSidebarVariant } from './variants/SafeSidebarVariant/SafeSidebarVariant'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
@@ -18,6 +20,7 @@ import type {
   SpaceItem,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { safeDefiGroup, safeMainNavigation } from './config'
+import { mockNow } from '@/stories/mocks/now'
 
 const defaultChainShortName =
   (Object.entries(chains) as [string, string][]).find(([, id]) => id === String(DEFAULT_CHAIN_ID))?.[0] ?? 'sep'
@@ -44,9 +47,9 @@ const safeSidebarStoryState = {
         endpointName: 'getChainsConfigV2' as const,
         requestId: 'safe-sidebar-story',
         originalArgs: CONFIG_SERVICE_KEY,
-        startedTimeStamp: Date.now(),
+        startedTimeStamp: mockNow(),
         data: chainsAdapter.setAll(chainsInitialState, [storyChain]),
-        fulfilledTimeStamp: Date.now(),
+        fulfilledTimeStamp: mockNow(),
         error: undefined,
       },
     },
@@ -97,6 +100,7 @@ const meta = {
     spaceInitial: { control: 'text' },
   },
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'fullscreen',
     nextjs: {
       appDirectory: false,

@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { ChainSelectorBlock } from '@/features/spaces'
-import { CreateSafeOnNewChain } from '@/features/multichain'
+import ChainSelectorBlock from '@/features/spaces/public/components/ChainSelectorBlock'
+import CreateSafeOnNewChain from '@/features/multichain/public/components/CreateSafeOnNewChain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {
   return (

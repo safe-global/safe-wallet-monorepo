@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode } from 'react'
 import { X } from 'lucide-react'
-import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@safe-global/views/components/ui/dialog'
+import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
 import { Button } from '@safe-global/views/components/ui/button'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { cn } from '@safe-global/views/utils/cn'
@@ -132,12 +132,6 @@ const ModalDialog = ({
         if (!nextOpen) onClose?.()
       }}
     >
-      {forceBackdrop && (
-        <DialogPortal keepMounted={keepMounted}>
-          <DialogOverlay forceRender className={overlayClassName} />
-        </DialogPortal>
-      )}
-
       <DialogContent
         data-testid={dataTestid}
         showCloseButton={false}
@@ -149,7 +143,8 @@ const ModalDialog = ({
           isFullScreen && 'translate-x-0 translate-y-0',
           className,
         )}
-        overlayClassName={forceBackdrop ? 'hidden' : overlayClassName}
+        forceBackdrop={forceBackdrop}
+        overlayClassName={overlayClassName}
         style={{ ...(inlineMaxWidth != null ? { maxWidth: inlineMaxWidth } : {}), ...fullScreenStyle }}
         onClick={(e) => e.stopPropagation()}
       >

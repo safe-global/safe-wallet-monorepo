@@ -1,5 +1,5 @@
 import type { OnTradeParamsPayload } from '@cowprotocol/events'
-import { stableCoinAddresses } from '@/features/swap/helpers/data/stablecoins'
+import { stableCoinAddresses } from './data/stablecoins'
 import { EURCV_ADDRESS } from '@/config/eurcv'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 

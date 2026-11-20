@@ -4,7 +4,8 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as executionPreChecks from '@/services/tx/executionPreChecks'
 import { useValidateTxData } from '../useValidateTxData'
@@ -23,9 +24,9 @@ const createWrapper = (safeTx?: SafeTransaction) => {
     setSafeTxGas: () => {},
     setTxOrigin: () => {},
     isReadOnly: false,
-    gtfPaymentMode: 'safe',
-    setGtfPaymentMode: () => {},
-    setGtfSelectedGasToken: () => {},
+    feePaymentMode: 'safe',
+    setFeePaymentMode: () => {},
+    setFeeGasToken: () => {},
   }
   return function Wrapper({ children }: { children: ReactNode }) {
     return <SafeTxContext.Provider value={value}>{children}</SafeTxContext.Provider>

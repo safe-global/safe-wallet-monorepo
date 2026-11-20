@@ -132,6 +132,10 @@ export const designSystemSyntaxRules = [
       `Don't set geometry/colour utilities (h-*, px-*/py-*, text-xs|sm|base|lg, text-[…], rounded-*, bg-*, border) on <${element}> — use the \`variant\`, \`size\` ('sm'|'default'|'lg'|'auto'), and \`shape\` ('pill'|'tag') props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/${element} story; add a variant to components/ui/${element.toLowerCase()}.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
     ),
   ),
+  dsBadgeClassnameRule(
+    'Tag',
+    "Don't set geometry/colour utilities (h-*, px-*/py-*, text-xs|sm|base|lg, text-[…], rounded-*, bg-*, border) on <Tag> — use the `color` prop. `className` is layout-only (w-*, margins, flex/grid). See the UI/Tag story; add a colour to the `tag` palette in @safe-global/theme if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
+  ),
   ...[
     'DialogContent',
     'DialogHeader',

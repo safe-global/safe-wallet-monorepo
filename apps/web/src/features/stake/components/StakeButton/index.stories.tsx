@@ -2,14 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import StakeButton from './index'
 
 const nativeToken: Balance['tokenInfo'] = {
   address: '0x0000000000000000000000000000000000000000',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
   name: 'Ether',
   symbol: 'ETH',
   type: TokenType.NATIVE_TOKEN,

@@ -1,11 +1,11 @@
 import { X as CloseIcon } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import Image from 'next/image'
 import Track from '@/components/common/Track'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
-import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE, MixpanelEventParams } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 export interface HnMiniTxBannerProps extends WithHnSignupFlowProps {
   onDismiss: () => void
@@ -36,7 +36,7 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
     >
       <div className={css.banner} onClick={handleClick}>
         <div className={`flex flex-row items-center gap-3 ${css.bannerStack}`}>
-          <Image
+          <img
             className={css.bannerImage}
             src="/images/hypernative/guardian-badge.svg"
             alt="Guardian badge"

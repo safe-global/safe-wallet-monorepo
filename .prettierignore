@@ -24,7 +24,6 @@ apps/mobile/resources/
 # Web
 apps/web/.next
 apps/web/storybook-static
-apps/web/cypress/downloads
 apps/web/e2e/environment/artifacts
 apps/web/.swc
 apps/web/out

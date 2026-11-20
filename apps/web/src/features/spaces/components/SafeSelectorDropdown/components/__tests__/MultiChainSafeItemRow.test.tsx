@@ -19,7 +19,7 @@ jest.mock('@/hooks/useChains', () => ({
 // Surface the explorerLink the summary row is (or isn't) given — the multi-chain summary must never
 // receive one, since its chain would be arbitrary.
 const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
-jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
+jest.mock('../../../../public/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
 }))
 
@@ -27,7 +27,7 @@ jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   const Mock = ({ explorerLink, onRename }: { explorerLink?: { href: string }; onRename?: () => void }) => (
     <div data-testid="safe-info-display">
       {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
-      {onRename && <button data-testid="rename-btn" onClick={onRename} />}
+      {onRename && <span role="button" data-testid="rename-btn" onClick={onRename} />}
     </div>
   )
   Mock.displayName = 'SafeInfoDisplay'

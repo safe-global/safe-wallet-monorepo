@@ -67,6 +67,7 @@ export interface ColorPalette {
     main: string
     background: string
   }
+  /** Category colours for `Tag`; never green, yellow, red or mint, which mean status. */
   background: {
     default: string
     main: string
@@ -93,7 +94,11 @@ export interface ColorPalette {
     textSecondary: string
     textBrand: string
   }
+  /** Address book tag colours, by the name CGW stores: chip text, chip fill and the dot */
+  tag: Record<TagColorName, { fg: string; bg: string; dot: string }>
 }
+
+export type TagColorName = 'slate' | 'clay' | 'rose' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon'
 
 /**
  * Static colors that don't change with theme mode.

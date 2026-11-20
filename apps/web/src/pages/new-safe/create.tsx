@@ -1,13 +1,12 @@
 import Head from 'next/head'
-import type { NextPage } from 'next'
 
 import CreateSafe from '@/components/new-safe/create'
 import { BRAND_NAME } from '@/config/constants'
 import SafeLogo from '@/components/common/SafeLogo'
 import { AppRoutes } from '@/config/routes'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/public/hooks/useCurrentSpaceId'
 
-const Open: NextPage = () => {
+const Open = () => {
   const spaceId = useCurrentSpaceId()
   const logoHref = spaceId ? `${AppRoutes.spaces.index}?spaceId=${spaceId}` : AppRoutes.index
 

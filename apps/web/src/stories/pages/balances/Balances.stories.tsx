@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within } from 'storybook/test'
 import { OperationType } from '@safe-global/types-kit'
 import { SAFE_ADDRESSES } from '@safe-global/test/msw/fixtures'
-import { createMockStory, type StoreOverrides } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import type { StoreOverrides } from '@/stories/mocks/types'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import Balances from '@/pages/balances'
 
@@ -67,5 +68,7 @@ export const SidebarCollapsed: Story = {
   ...balancesSetup(),
   play: async ({ canvasElement }) => {
     await userEvent.click(await within(canvasElement).findByTestId('sidebar-trigger'))
+    // A synthetic click leaves a keyboard-style focus ring, or sometimes no focus; a mouse user sees no ring
+    ;(document.activeElement as HTMLElement | null)?.blur()
   },
 }

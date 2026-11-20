@@ -25,20 +25,18 @@ import {
   dispatchTxProposal,
   dispatchTxRelay,
   dispatchTxSigning,
-} from '@/services/tx/tx-sender'
+} from '@/services/tx/tx-sender/dispatch'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { runExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature } from '@/features/gtf'
-import { mergeGtfFeeParams } from '@/features/gtf/services'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { mergePayFromSafeFeeParams } from '@/features/fee-payment/public/services/mergePayFromSafeFeeParams'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import type { SignerWallet } from '@/components/common/WalletProvider'
+import type { SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 
 // The in-app nested signer only ever proposes in its parent
@@ -78,8 +76,7 @@ export const useTxActions = (): TxActions => {
   const wallet = useWallet()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
-  const gtfFeature = useLoadFeature(GTFFeature)
-  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const { feePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
   const nestedChildTx = flowData?.nestedChildTx
@@ -90,13 +87,12 @@ export const useTxActions = (): TxActions => {
     const safeAddress = scope?.safeAddress ?? safe.address.value
     const chainId = scope?.chainId ?? safe.chainId
 
-    const withGtfFeeParams = (safeTx: SafeTransaction) =>
-      mergeGtfFeeParams({
+    const withPayFromSafeFeeParams = (safeTx: SafeTransaction) =>
+      mergePayFromSafeFeeParams({
         safeTx,
         chain,
-        gtfPaymentMode,
-        gtfSelectedGasToken,
-        gtfFeature,
+        feePaymentMode,
+        feeGasToken,
         chainId,
         safeAddress,
         numberSignatures: safe.threshold,
@@ -139,7 +135,7 @@ export const useTxActions = (): TxActions => {
     const signRelayedTx = async (safeTx: SafeTransaction, txId?: string): Promise<SafeTransaction> => {
       assertProvider(signer?.provider)
 
-      safeTx = await withGtfFeeParams(safeTx)
+      safeTx = await withPayFromSafeFeeParams(safeTx)
 
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
@@ -152,7 +148,7 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      safeTx = await withGtfFeeParams(safeTx)
+      safeTx = await withPayFromSafeFeeParams(safeTx)
 
       // Smart contract wallets can't sign off-chain
       const viaSafe = isSafeSigner(signer)
@@ -284,20 +280,7 @@ export const useTxActions = (): TxActions => {
     }
 
     return { signTx, executeTx, signProposerTx, proposeTx }
-  }, [
-    safe,
-    scope,
-    wallet,
-    signer,
-    onboard,
-    chain,
-    dispatch,
-    gtfFeature,
-    gtfPaymentMode,
-    gtfSelectedGasToken,
-    currency,
-    nestedChildTx,
-  ])
+  }, [safe, scope, wallet, signer, onboard, chain, dispatch, feePaymentMode, feeGasToken, currency, nestedChildTx])
 }
 
 export const useValidateNonce = (safeTx: SafeTransaction | undefined): boolean => {

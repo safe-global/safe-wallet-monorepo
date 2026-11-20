@@ -1,7 +1,7 @@
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChooseThreshold } from './ChooseThreshold'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'

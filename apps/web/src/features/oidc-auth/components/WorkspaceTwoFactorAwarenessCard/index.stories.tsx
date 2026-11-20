@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
-import WorkspaceTwoFactorAwarenessCard from './index'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import WorkspaceTwoFactorAwarenessCard from '../../public/components/WorkspaceTwoFactorAwarenessCard'
 
 const defaultSetup = createMockStory({
-  features: { spaces: true, oidcAuth: true, twoFactorAwarenessBanner: true },
+  authenticated: true,
+  features: { oidcAuth: true, twoFactorAwarenessBanner: true },
   pathname: '/spaces',
   query: { spaceId: '1' },
   shadcn: true,

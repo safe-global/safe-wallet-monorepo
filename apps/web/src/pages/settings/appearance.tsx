@@ -1,5 +1,4 @@
 import { useId } from 'react'
-import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import { Switch } from '@safe-global/views/components/ui/switch'
@@ -8,11 +7,12 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useAppDispatch } from '@/store'
 import { setDarkMode } from '@/store/settingsSlice'
 import SettingsHeader from '@/components/settings/SettingsHeader'
-import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { BRAND_NAME } from '@/config/constants'
 
-const Appearance: NextPage = () => {
+const Appearance = () => {
   const dispatch = useAppDispatch()
   const isDarkMode = useDarkMode()
   const darkModeId = useId()

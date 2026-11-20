@@ -7,12 +7,14 @@ import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import SignatureIcon from '@safe-global/views/assets/images/transactions/signature.svg'
 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
+import { trackEvent } from '@/services/analytics'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import SignerSelector from '@/components/common/SignerSelector'
 import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSectionTitle'
+import ParentSafeNonce from '../ParentSafeNonce'
 
 export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?: string }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
@@ -110,6 +112,8 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
         isOptionDisabled={isOptionDisabled}
         disabledReason={() => 'Already signed'}
       />
+
+      {signer?.isSafe && <ParentSafeNonce key={signer.address} parentSafeAddress={signer.address} />}
     </>
   )
 }

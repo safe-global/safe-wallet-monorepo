@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -10,15 +9,13 @@ import { RequiredConfirmation } from '@/components/settings/RequiredConfirmation
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import ProposersList from '@/components/settings/ProposersList'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
 import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
+import SpendingLimitsSettings from '@/features/spending-limits/public/components/SpendingLimitsSettings'
 
-const Setup: NextPage = () => {
+const Setup = () => {
   const { safe, safeLoaded } = useSafeInfo()
-  const { SpendingLimitsSettings } = useLoadFeature(SpendingLimitsFeature)
   const nonce = safe.nonce
   const ownerLength = safe.owners.length
   const threshold = safe.threshold
