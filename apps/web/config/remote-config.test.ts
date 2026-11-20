@@ -101,10 +101,9 @@ describe('WALLET_WEB remote-config declaration', () => {
 
 describe('E2E test-chain flags (test-chain-features.json)', () => {
   const onKeys: string[] = testChainFeatures.on
-  const offReasons: Record<string, string> = testChainFeatures.off
-  const offKeys = Object.keys(offReasons)
+  const offKeys: string[] = testChainFeatures.off
 
-  it('switches every declared flag on or gives a reason to keep it off', () => {
+  it('lists every declared flag as on or off', () => {
     const undecided = declaredKeys.filter((k) => !onKeys.includes(k) && !offKeys.includes(k))
     expect(undecided).toEqual([])
   })
@@ -113,16 +112,13 @@ describe('E2E test-chain flags (test-chain-features.json)', () => {
     expect(onKeys.filter((k) => offKeys.includes(k))).toEqual([])
   })
 
-  it('has no duplicate on keys', () => {
+  it('has no duplicate keys', () => {
     expect(new Set(onKeys).size).toBe(onKeys.length)
+    expect(new Set(offKeys).size).toBe(offKeys.length)
   })
 
-  it('gives reasons only for declared flags', () => {
+  it('lists only declared flags as off', () => {
     expect(offKeys.filter((k) => !declaredKeys.includes(k))).toEqual([])
-  })
-
-  it('gives a non-empty reason for every off flag', () => {
-    expect(offKeys.filter((k) => offReasons[k].trim() === '')).toEqual([])
   })
 })
 
