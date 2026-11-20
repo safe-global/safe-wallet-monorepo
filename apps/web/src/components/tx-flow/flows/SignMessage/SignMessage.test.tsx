@@ -4,7 +4,7 @@ import { act, useState } from 'react'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { hexlify, zeroPadValue, toUtf8Bytes } from 'ethers'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import SignMessage from './SignMessage'
+import SignMessage, { type SignMessageProps } from './SignMessage'
 import SignMessageFlow from '.'
 
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
@@ -22,6 +22,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { EIP1193Provider, WalletState, AppState, OnboardAPI } from '@web3-onboard/core'
 import { generateSafeMessageHash } from '@safe-global/utils/utils/safe-messages'
 import { chainBuilder } from '@/tests/builders/chains'
+import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -74,6 +75,21 @@ jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)
 }
+
+const signMessageProps = ({
+  message,
+  ...overrides
+}: Pick<SignMessageProps, 'message'> & Partial<SignMessageProps>): SignMessageProps => ({
+  logoUri: 'www.fake.com/test.png',
+  name: 'Test App',
+  requestId: '123',
+  declared: undefined,
+  message,
+  ...overrides,
+})
+
+const renderSignMessage = (props: Parameters<typeof signMessageProps>[0]) =>
+  renderWithSafeShield(<SignMessage {...signMessageProps(props)} />)
 
 const mockSafeShield = ({ needsRiskConfirmation = false, isRiskConfirmed = false } = {}) =>
   jest.spyOn(require('@/features/safe-shield/public/hooks/useSafeShield'), 'useSafeShield').mockReturnValue({
@@ -185,22 +201,13 @@ describe('SignMessage', () => {
     const EXAMPLE_MESSAGE = 'Hello world!'
 
     it('renders the (decoded) message', () => {
-      const { getByText } = renderWithSafeShield(
-        <SignMessage
-          requestId="123"
-          logoUri="www.fake.com/test.png"
-          name="Test App"
-          message={hexlify(toUtf8Bytes(EXAMPLE_MESSAGE))}
-        />,
-      )
+      const { getByText } = renderSignMessage({ message: hexlify(toUtf8Bytes(EXAMPLE_MESSAGE)) })
 
       expect(getByText(EXAMPLE_MESSAGE)).toBeInTheDocument()
     })
 
     it('displays the SafeMessage message', async () => {
-      const { getByTestId, findByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
-      )
+      const { getByTestId, findByText } = renderSignMessage({ message: EXAMPLE_MESSAGE })
 
       // Hash details live inside a collapsed accordion that unmounts its content; expand it first
       fireEvent.click(getByTestId('message-details'))
@@ -209,9 +216,7 @@ describe('SignMessage', () => {
     })
 
     it('generates the SafeMessage hash if not provided', async () => {
-      const { getByTestId, findByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
-      )
+      const { getByTestId, findByText } = renderSignMessage({ message: EXAMPLE_MESSAGE })
 
       fireEvent.click(getByTestId('message-details'))
 
@@ -231,25 +236,21 @@ describe('SignMessage', () => {
         nextStep: 'The signature will be submitted to the requesting app when the message is fully signed.',
       },
     ])('explains how confirmations are collected for a message $origin', async ({ requestId, nextStep }) => {
-      const { getByText, findByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId={requestId} />,
-      )
+      const { getByText, findByText } = renderSignMessage({ message: EXAMPLE_MESSAGE, requestId })
 
       expect(await findByText('Collect all the confirmations')).toBeInTheDocument()
       expect(getByText(nextStep)).toBeInTheDocument()
     })
 
     it('titles the sign message flow "Confirm message"', async () => {
-      const { findByTestId } = render(
-        <SignMessageFlow logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
-      )
+      const { findByTestId } = render(<SignMessageFlow {...signMessageProps({ message: EXAMPLE_MESSAGE })} />)
 
       expect(await findByTestId('modal-title')).toHaveTextContent('Confirm message')
     })
 
     it('leaves out the transaction note field', async () => {
       const { findByText, queryByLabelText } = render(
-        <SignMessageFlow logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
+        <SignMessageFlow {...signMessageProps({ message: EXAMPLE_MESSAGE })} />,
       )
 
       expect(await findByText(EXAMPLE_MESSAGE)).toBeInTheDocument()
@@ -297,9 +298,7 @@ describe('SignMessage', () => {
     }
 
     it('renders the message', () => {
-      const { getByText } = renderWithSafeShield(
-        <SignMessage requestId="123" logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} />,
-      )
+      const { getByText } = renderSignMessage({ message: EXAMPLE_MESSAGE })
 
       Object.keys(EXAMPLE_MESSAGE.message).forEach((key) => {
         expect(getByText(`${key}(`, { exact: false })).toBeInTheDocument()
@@ -309,9 +308,7 @@ describe('SignMessage', () => {
     })
 
     it('displays the SafeMessage message', async () => {
-      const { getByTestId, findByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
-      )
+      const { getByTestId, findByText } = renderSignMessage({ message: EXAMPLE_MESSAGE })
 
       // Hash details live inside a collapsed accordion that unmounts its content; expand it first
       fireEvent.click(getByTestId('message-details'))
@@ -320,9 +317,7 @@ describe('SignMessage', () => {
     })
 
     it('generates the SafeMessage hash if not provided', async () => {
-      const { getByTestId, findByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} requestId="123" />,
-      )
+      const { getByTestId, findByText } = renderSignMessage({ message: EXAMPLE_MESSAGE })
 
       fireEvent.click(getByTestId('message-details'))
 
@@ -330,10 +325,11 @@ describe('SignMessage', () => {
     })
   })
 
-  it('proposes a message if not already proposed', async () => {
+  it('proposes a message with its declared attribution if not already proposed', async () => {
     jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => true)
     jest.spyOn(onboard, 'default').mockReturnValue(mockOnboard)
     jest.spyOn(useWalletHook, 'default').mockReturnValue({} as ConnectedWallet)
+    const declared = declaredAttributionBuilder().build()
 
     // Mock message not found
     server.use(
@@ -342,15 +338,11 @@ describe('SignMessage', () => {
       }),
     )
 
-    const { getByText, baseElement } = renderWithSafeShield(
-      <SignMessage
-        logoUri="www.fake.com/test.png"
-        name="Test App"
-        message="Hello world!"
-        requestId="123"
-        origin="http://localhost:3000"
-      />,
-    )
+    const { getByText, baseElement } = renderSignMessage({
+      message: 'Hello world!',
+      declared,
+      origin: 'http://localhost:3000',
+    })
 
     const proposalSpy = jest.spyOn(sender, 'dispatchSafeMsgProposal').mockImplementation(() => Promise.resolve())
     const mockMessageHash = '0x456'
@@ -388,6 +380,7 @@ describe('SignMessage', () => {
         safe: extendedSafeInfo,
         message: 'Hello world!',
         origin: 'http://localhost:3000',
+        declared,
         //onboard: expect.anything(),
       }),
     )
@@ -464,9 +457,7 @@ describe('SignMessage', () => {
     }
     jest.spyOn(useSafeMessage, 'default').mockImplementation(useStatefulSafeMessage)
 
-    const { getByText } = renderWithSafeShield(
-      <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,
-    )
+    const { getByText } = renderSignMessage({ message: messageText })
 
     const confirmationSpy = jest
       .spyOn(sender, 'dispatchSafeMsgConfirmation')
@@ -497,15 +488,7 @@ describe('SignMessage', () => {
     jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => false)
     jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
 
-    const { getByText } = renderWithSafeShield(
-      <SignMessage
-        logoUri="www.fake.com/test.png"
-        name="Test App"
-        message="Hello world!"
-        requestId="123"
-        origin="http://localhost:3000"
-      />,
-    )
+    const { getByText } = renderSignMessage({ message: 'Hello world!', origin: 'http://localhost:3000' })
 
     expect(getByText('No wallet is connected.')).toBeInTheDocument()
 
@@ -519,15 +502,7 @@ describe('SignMessage', () => {
     jest.spyOn(useChainsHook, 'useCurrentChain').mockReturnValue(chainBuilder().build())
     jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
 
-    const { getByText, queryByText } = renderWithSafeShield(
-      <SignMessage
-        logoUri="www.fake.com/test.png"
-        name="Test App"
-        message="Hello world!"
-        requestId="123"
-        origin="http://localhost:3000"
-      />,
-    )
+    const { getByText, queryByText } = renderSignMessage({ message: 'Hello world!', origin: 'http://localhost:3000' })
 
     expect(getByText('Change your wallet network')).toBeInTheDocument()
     expect(queryByText('Sign')).toBeDisabled()
@@ -544,15 +519,7 @@ describe('SignMessage', () => {
     jest.spyOn(useIsSafeOwnerHook, 'default').mockImplementation(() => false)
     jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
 
-    const { getByText } = renderWithSafeShield(
-      <SignMessage
-        logoUri="www.fake.com/test.png"
-        name="Test App"
-        message="Hello world!"
-        requestId="123"
-        origin="http://localhost:3000"
-      />,
-    )
+    const { getByText } = renderSignMessage({ message: 'Hello world!', origin: 'http://localhost:3000' })
 
     expect(
       getByText("You are currently not a signer of this Safe account and won't be able to confirm this message."),
@@ -584,21 +551,12 @@ describe('SignMessage', () => {
       jest.spyOn(useSafeMessage, 'default').mockImplementation(() => [undefined, jest.fn(), undefined])
     }
 
-    const renderSignMessage = () =>
-      renderWithSafeShield(
-        <SignMessage
-          logoUri="www.fake.com/test.png"
-          name="Test App"
-          message="Hello world!"
-          requestId="123"
-          origin="http://localhost:3000"
-        />,
-      )
+    const renderForSigner = () => renderSignMessage({ message: 'Hello world!', origin: 'http://localhost:3000' })
 
     it('blocks signing for a Safe signer on a Safe below 1.5.0', () => {
       mockSigner({ isConnectedSafe: true, version: '1.4.1+L2' })
 
-      const { getByText } = renderSignMessage()
+      const { getByText } = renderForSigner()
 
       expect(getByText(NEEDS_NEWER_SAFE)).toBeInTheDocument()
       expect(getByText('Sign')).toBeDisabled()
@@ -610,7 +568,7 @@ describe('SignMessage', () => {
     ])('does not block $signer on a Safe $version', ({ isConnectedSafe, version }) => {
       mockSigner({ isConnectedSafe, version })
 
-      const { queryByText } = renderSignMessage()
+      const { queryByText } = renderForSigner()
 
       expect(queryByText(NEEDS_NEWER_SAFE)).not.toBeInTheDocument()
     })
@@ -619,7 +577,7 @@ describe('SignMessage', () => {
       mockSigner({ isConnectedSafe: true, version: '1.5.0' })
       const proposalSpy = jest.spyOn(sender, 'dispatchSafeMsgProposal').mockImplementation(() => Promise.resolve())
 
-      const { getByText } = renderSignMessage()
+      const { getByText } = renderForSigner()
       act(() => {
         fireEvent.click(getByText('Sign'))
       })
@@ -641,7 +599,7 @@ describe('SignMessage', () => {
         .spyOn(sender, 'dispatchSafeMsgConfirmation')
         .mockImplementation(() => Promise.resolve())
 
-      const { getByText } = renderSignMessage()
+      const { getByText } = renderForSigner()
       act(() => {
         fireEvent.click(getByText('Sign'))
       })
@@ -686,9 +644,7 @@ describe('SignMessage', () => {
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn, undefined])
 
-    const { getByText } = renderWithSafeShield(
-      <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,
-    )
+    const { getByText } = renderSignMessage({ message: messageText })
 
     await waitFor(() => {
       expect(getByText('Your connected wallet has already signed this message.')).toBeInTheDocument()
@@ -721,15 +677,7 @@ describe('SignMessage', () => {
       .spyOn(sender, 'dispatchSafeMsgProposal')
       .mockImplementation(() => Promise.reject(new Error('Test error')))
 
-    const { getByText } = renderWithSafeShield(
-      <SignMessage
-        logoUri="www.fake.com/test.png"
-        name="Test App"
-        message="Hello world!"
-        requestId="123"
-        origin="http://localhost:3000"
-      />,
-    )
+    const { getByText } = renderSignMessage({ message: 'Hello world!', origin: 'http://localhost:3000' })
 
     const button = getByText('Sign')
     expect(button).not.toBeDisabled()
@@ -790,9 +738,7 @@ describe('SignMessage', () => {
 
     jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn(), undefined])
 
-    const { getByText } = renderWithSafeShield(
-      <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,
-    )
+    const { getByText } = renderSignMessage({ message: messageText })
 
     await act(async () => {
       Promise.resolve()
@@ -868,9 +814,7 @@ describe('SignMessage', () => {
       }),
     )
 
-    const { getByText } = renderWithSafeShield(
-      <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={messageText} requestId="123" />,
-    )
+    const { getByText } = renderSignMessage({ message: messageText })
 
     await waitFor(() => {
       expect(getByText('Message successfully signed')).toBeInTheDocument()
@@ -946,12 +890,7 @@ describe('SignMessage', () => {
       const { getByText } = render(
         <SafeTxContext.Provider value={mockSafeTxContext}>
           <SafeShieldProvider>
-            <SignMessage
-              logoUri="www.fake.com/test.png"
-              name="Test App"
-              message={EXAMPLE_EIP712_MESSAGE}
-              requestId="123"
-            />
+            <SignMessage {...signMessageProps({ message: EXAMPLE_EIP712_MESSAGE })} />
           </SafeShieldProvider>
         </SafeTxContext.Provider>,
       )
@@ -968,7 +907,7 @@ describe('SignMessage', () => {
       const { getByText } = render(
         <SafeTxContext.Provider value={mockSafeTxContext}>
           <SafeShieldProvider>
-            <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />
+            <SignMessage {...signMessageProps({ message: 'Hello world!' })} />
           </SafeShieldProvider>
         </SafeTxContext.Provider>,
       )
@@ -983,9 +922,7 @@ describe('SignMessage', () => {
     it('disables Sign button when risk confirmation is needed but not confirmed', async () => {
       mockSafeShield({ needsRiskConfirmation: true, isRiskConfirmed: false })
 
-      const { getByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
-      )
+      const { getByText } = renderSignMessage({ message: 'Hello world!' })
 
       await waitFor(() => {
         expect(getByText('Sign')).toBeDisabled()
@@ -995,9 +932,7 @@ describe('SignMessage', () => {
     it('enables Sign button when risk is confirmed', async () => {
       mockSafeShield({ needsRiskConfirmation: true, isRiskConfirmed: true })
 
-      const { getByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
-      )
+      const { getByText } = renderSignMessage({ message: 'Hello world!' })
 
       await waitFor(() => {
         expect(getByText('Sign')).toBeEnabled()
@@ -1008,7 +943,7 @@ describe('SignMessage', () => {
       mockSafeShield()
 
       const { findByText, getByRole, getByText } = render(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="0x0000000" requestId="123" />,
+        <SignMessage {...signMessageProps({ message: '0x0000000' })} />,
       )
 
       expect(await findByText(/This request involves/)).toBeInTheDocument()
@@ -1026,10 +961,9 @@ describe('SignMessage', () => {
       }
       mockSafeShield()
 
-      const { findByText, getByText } = render(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="0x0000000" requestId="123" />,
-        { initialReduxState: blindSigningOn },
-      )
+      const { findByText, getByText } = render(<SignMessage {...signMessageProps({ message: '0x0000000' })} />, {
+        initialReduxState: blindSigningOn,
+      })
 
       expect(await findByText(/Proceed with caution\./)).toBeInTheDocument()
       await waitFor(() => expect(getByText('Sign')).toBeEnabled())
@@ -1038,9 +972,7 @@ describe('SignMessage', () => {
     it('shows RiskConfirmation checkbox when threat is detected', async () => {
       mockSafeShield({ needsRiskConfirmation: true, isRiskConfirmed: false })
 
-      const { getByTestId, getByText } = renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message="Hello world!" requestId="123" />,
-      )
+      const { getByTestId, getByText } = renderSignMessage({ message: 'Hello world!' })
 
       await waitFor(() => {
         expect(getByTestId('risk-confirmation-checkbox')).toBeInTheDocument()
@@ -1080,9 +1012,7 @@ describe('SignMessage', () => {
 
       jest.spyOn(useSafeMessage, 'default').mockReturnValue([msg, jest.fn(), undefined])
 
-      return renderWithSafeShield(
-        <SignMessage logoUri="www.fake.com/test.png" name="Test App" message={EXAMPLE_MESSAGE} />,
-      )
+      return renderSignMessage({ message: EXAMPLE_MESSAGE, requestId: undefined })
     }
 
     const mockConfirmationResponse = (response: () => HttpResponse) =>

@@ -1,4 +1,4 @@
-import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { CreateMessageDto, MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Eip1193Provider } from 'ethers'
@@ -14,6 +14,7 @@ import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getStoreInstance } from '@/store'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 /**
  * Signs the message with the connected signer. A Safe signer's signature only validates through EIP-1271,
@@ -37,11 +38,13 @@ export const dispatchSafeMsgProposal = async ({
   message,
   origin = '',
   safeSignerAddress,
+  declared,
 }: {
   provider: Eip1193Provider
   safe: SafeState
   message: MessageItem['message']
   origin: string | undefined
+  declared: DeclaredAttribution | undefined
   /** The signer's address when the signer is itself a Safe */
   safeSignerAddress?: string
 }): Promise<void> => {
@@ -55,17 +58,20 @@ export const dispatchSafeMsgProposal = async ({
       normalizedMessage = normalizeTypedData(message)
     }
 
+    const createMessageDto: CreateMessageDto = {
+      message: normalizedMessage,
+      signature,
+      origin: origin || null,
+      ...(declared && { declared }),
+    }
+
     // Use RTK Query mutation to propose message
     const store = getStoreInstance()
     const result = await store.dispatch(
       cgwApi.endpoints.messagesCreateMessageV1.initiate({
         chainId: safe.chainId,
         safeAddress: safe.address.value,
-        createMessageDto: {
-          message: normalizedMessage,
-          signature,
-          origin: origin || null,
-        },
+        createMessageDto,
       }),
     )
 
