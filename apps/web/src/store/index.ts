@@ -28,6 +28,7 @@ import { workspaceTrackingListener } from '@/features/spaces/public/store/worksp
 import { spaceSafesCacheListener } from '@/features/spaces/public/store/spaceSafesCacheListener'
 import { addressBookTagsCacheListener } from '@/features/spaces/public/store/addressBookTagsCacheListener'
 import { trialReminderListener } from '@/features/spaces/public/store/trialReminder'
+import { hnSessionListener } from '@/features/hypernative/public/store/hnSessionListener'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
@@ -71,6 +72,7 @@ const rootReducer = combineReducers({
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
   [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
+  [slices.hnSessionSlice.name]: slices.hnSessionSlice.reducer,
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
@@ -151,6 +153,7 @@ const listeners = [
   trialReminderListener,
   forbiddenSessionListener,
   spaceQueueReconciliationListener,
+  hnSessionListener,
   safeOverviewsTokenListListener,
 ]
 
