@@ -14,6 +14,20 @@ export const SEPOLIA_USDC: SeedToken = {
   decimals: 6,
 }
 
+/** Circle's USDC on Ethereum, served by the Ethereum fork */
+export const ETHEREUM_USDC: SeedToken = {
+  address: getAddress('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'),
+  symbol: 'USDC',
+  decimals: 6,
+}
+
+/** Circle's native USDC on Polygon, served by the Polygon fork */
+export const POLYGON_USDC: SeedToken = {
+  address: getAddress('0x3c499c542cef5e3811e1192ce70d8cc03d5c3359'),
+  symbol: 'USDC',
+  decimals: 6,
+}
+
 type TxsBalance = { tokenAddress: string | null; balance: string }
 type CgwBalances = { items: Array<{ tokenInfo: { address: string; type: string }; balance: string }> }
 
