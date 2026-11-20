@@ -14,6 +14,9 @@ import { useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { act, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { mockChainId, mockHasFeature, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
+import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
+import { useCurrentChain } from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import SwapWidget from '.'
 
 jest.mock('@cowprotocol/widget-react', () => ({
@@ -146,6 +149,17 @@ describe('SwapWidget', () => {
 
       expect(screen.queryByText('Blocked address')).not.toBeInTheDocument()
       expect(screen.getByTestId('cow-swap-widget')).toBeInTheDocument()
+    })
+  })
+
+  it('declares its proposals as coming from a widget', () => {
+    const chain = chainBuilder().build()
+    jest.mocked(useCurrentChain).mockReturnValue(chain)
+
+    renderAcceptedWidget()
+
+    expect(useCustomAppCommunicator).toHaveBeenCalledWith(expect.anything(), expect.anything(), chain, {
+      channel: 'WIDGET',
     })
   })
 

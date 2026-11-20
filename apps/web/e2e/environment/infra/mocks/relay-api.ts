@@ -73,8 +73,10 @@ async function relay(body: RelayBody, rpcUrls: Map<string, string>, rpc: Rpc): P
 async function send(url: string, call: Pick<RelayBody, 'to' | 'data'>, rpc: Rpc): Promise<Reply> {
   await rpc(url, 'anvil_setBalance', [RELAYER, RELAYER_BALANCE])
   await rpc(url, 'anvil_impersonateAccount', [RELAYER])
+  // Without a gas price the fork estimates a gas refund of 0, so a Safe that refunds the gas runs out of gas.
+  const gasPrice = await rpc(url, 'eth_gasPrice', [])
   try {
-    const taskId = await rpc(url, 'eth_sendTransaction', [{ from: RELAYER, ...call }])
+    const taskId = await rpc(url, 'eth_sendTransaction', [{ from: RELAYER, ...call, gasPrice }])
     return json(200, { taskId })
   } catch (error) {
     if (error instanceof RpcError) return rejection(400, error.message)

@@ -168,7 +168,8 @@ jobs:
   visual:
     needs: sweep
     runs-on: ubuntu-26.04-arm
-    timeout-minutes: 15
+    # 10 of these minutes are for the wait for the baseline run
+    timeout-minutes: 25
     name: Storybook visual tests (Argos)
     permissions:
       contents: read
@@ -192,15 +193,26 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: echo "sha=$(git merge-base origin/dev "$HEAD_SHA")" >> "$GITHUB_OUTPUT"
 
-      # Only a dev push run of the baseline commit itself gives a baseline; any other manifest could hide a change
+      # Only a dev push run of the baseline commit itself gives a baseline; any other manifest could hide a change.
+      # That run saves its manifest last, so a merge right after it waits for it instead of uploading every sheet.
       - name: Find the baseline manifest
         id: base-manifest
         env:
           GH_TOKEN: ${{ github.token }}
           BASE_SHA: ${{ steps.merge-base.outputs.sha || github.event.before || github.sha }}
         run: |
-          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/web-argos-storybook.yml/runs?head_sha=$BASE_SHA&branch=dev&event=push&status=success" \
-            --jq '.workflow_runs[0].id // empty' || true)
+          runs="repos/$GITHUB_REPOSITORY/actions/workflows/web-argos-storybook.yml/runs?head_sha=$BASE_SHA&branch=dev&event=push"
+          for _ in $(seq 1 40); do
+            run=$(gh api "$runs" --jq '
+              ([.workflow_runs[] | select(.conclusion == "success")][0].id)
+              // (if any(.workflow_runs[]; .status != "completed") then "in-progress" else empty end)' || true)
+            [ "$run" = in-progress ] || break
+            echo "The dev run of $BASE_SHA is still in progress, waiting for its manifest"
+            sleep 15
+          done
+          if [ "$run" = in-progress ]; then
+            run=""
+          fi
           if [ -n "$run" ] && gh run download "$run" --repo "$GITHUB_REPOSITORY" --name storybook-sheets-manifest --dir "$RUNNER_TEMP/base"; then
             mv "$RUNNER_TEMP/base/sheets-manifest.json" apps/web/base-manifest.json
             echo "sha=$BASE_SHA" >> "$GITHUB_OUTPUT"

@@ -10,7 +10,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
  */
 const usePortfolioRefetchOnTxHistory = (): void => {
   const { safe } = useSafeInfo()
-  const { refetch, fulfilledTimeStamp, shouldUsePortfolioEndpoint } = useRefetchBalances()
+  const { refetch, refetchSummary, fulfilledTimeStamp, shouldUsePortfolioEndpoint } = useRefetchBalances()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const prevTxHistoryTagRef = useRef<string | null | undefined>(undefined)
 
@@ -28,8 +28,14 @@ const usePortfolioRefetchOnTxHistory = (): void => {
 
     prevTxHistoryTagRef.current = safe.txHistoryTag
 
-    // Skip if portfolio endpoint isn't active or no successful fetch yet
-    if (!shouldUsePortfolioEndpoint || !fulfilledTimeStamp) {
+    // Without the portfolio endpoint the balances poll on their own, but the summary total does not
+    if (!shouldUsePortfolioEndpoint) {
+      refetchSummary()
+      return
+    }
+
+    // Skip if no successful fetch yet
+    if (!fulfilledTimeStamp) {
       return
     }
 
@@ -58,7 +64,7 @@ const usePortfolioRefetchOnTxHistory = (): void => {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [safe.txHistoryTag, refetch, fulfilledTimeStamp, shouldUsePortfolioEndpoint])
+  }, [safe.txHistoryTag, refetch, refetchSummary, fulfilledTimeStamp, shouldUsePortfolioEndpoint])
 }
 
 export default usePortfolioRefetchOnTxHistory
