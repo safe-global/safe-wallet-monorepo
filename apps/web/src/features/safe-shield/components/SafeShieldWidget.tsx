@@ -5,6 +5,8 @@ import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { useHypernativeOAuth } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
 import { useIsHypernativeEligible } from '@/features/hypernative/public/hooks/useIsHypernativeEligible'
+// eslint-disable-next-line no-restricted-imports -- prototype: opens Try Safe Pro in Storybook
+import { TRY_PRO_REASONS, useTryPro } from '@/features/safe-pro-announcement/prototypes/tryPro'
 
 const SafeShieldWidget = (): ReactElement => {
   const {
@@ -23,6 +25,7 @@ const SafeShieldWidget = (): ReactElement => {
   const { isHypernativeEligible, isHypernativeGuard, loading: eligibilityLoading } = useIsHypernativeEligible()
   const showHnInfo = !eligibilityLoading && isHypernativeEligible
   const showHnActiveStatus = !eligibilityLoading && isHypernativeGuard
+  const openTryPro = useTryPro()
 
   useTrackOnce(SAFE_SHIELD_EVENTS.TRANSACTION_STARTED)
 
@@ -42,6 +45,7 @@ const SafeShieldWidget = (): ReactElement => {
       hasProFeatures={hasProFeatures}
       isSafePro={isSafePro}
       isOffchainMessage={isOffchainMessage}
+      onUnlockPro={openTryPro && ((check) => openTryPro(TRY_PRO_REASONS[check]))}
     />
   )
 }

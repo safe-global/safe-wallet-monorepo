@@ -51,4 +51,13 @@ describe('ProChecksRow', () => {
     expect(screen.getByLabelText('Safe Pro')).toBeInTheDocument()
     expect(screen.queryByTestId('pro-upgrade-link')).not.toBeInTheDocument()
   })
+
+  it('opens the upgrade in place instead of linking when given onUpgrade', () => {
+    const onUpgrade = jest.fn()
+    render(<ProChecksRow hasProFeatures={false} onUpgrade={onUpgrade} />)
+
+    expect(screen.getByTestId('pro-upgrade-link')).not.toHaveAttribute('href')
+    fireEvent.click(screen.getByTestId('pro-upgrade-link'))
+    expect(onUpgrade).toHaveBeenCalledTimes(1)
+  })
 })

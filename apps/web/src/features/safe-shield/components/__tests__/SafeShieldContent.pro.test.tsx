@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import {
   ContractAnalysisBuilder,
@@ -324,4 +324,27 @@ describe('SafeShieldContent Safe Pro gating', () => {
       expect(screen.queryByTestId('tenderly-simulation')).not.toBeInTheDocument()
     },
   )
+
+  it('adds Unlock to the locked checks, naming the check, only when given onUnlockPro', () => {
+    const onUnlockPro = jest.fn()
+    const content = (unlock?: jest.Mock) => (
+      <SafeShieldContent
+        recipient={emptyAnalysis}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={contractCallTx}
+        hasProFeatures={false}
+        onUnlockPro={unlock}
+      />
+    )
+    const { rerender } = render(content())
+    expect(screen.queryByTestId('unlock-pro-check')).not.toBeInTheDocument()
+
+    rerender(content(onUnlockPro))
+    const [recipientUnlock, contractUnlock] = screen.getAllByTestId('unlock-pro-check')
+    fireEvent.click(recipientUnlock)
+    fireEvent.click(contractUnlock)
+    expect(onUnlockPro.mock.calls).toEqual([['recipient'], ['contract']])
+  })
 })

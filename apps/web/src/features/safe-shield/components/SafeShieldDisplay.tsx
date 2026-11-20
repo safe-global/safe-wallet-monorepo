@@ -13,7 +13,7 @@ import type {
   SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
-import { SafeShieldContent } from './SafeShieldContent'
+import { SafeShieldContent, type LockedProCheck } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus, getPrimaryResult } from '@safe-global/utils/features/safe-shield/utils'
@@ -47,6 +47,7 @@ export const SafeShieldDisplay = ({
   safeAnalysis,
   onAddToTrustedList,
   hasProFeatures = true,
+  onUnlockPro,
   isSafePro = true,
   isOffchainMessage = false,
 }: {
@@ -61,6 +62,7 @@ export const SafeShieldDisplay = ({
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
   hasProFeatures?: boolean
+  onUnlockPro?: (check: LockedProCheck) => void
   /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
   isSafePro?: boolean
   isOffchainMessage?: boolean
@@ -158,6 +160,7 @@ export const SafeShieldDisplay = ({
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
           hasProFeatures={hasProFeatures}
+          onUnlockPro={onUnlockPro}
           isSafePro={isSafePro}
           isOffchainMessage={isOffchainMessage}
         />

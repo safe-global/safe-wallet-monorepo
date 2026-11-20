@@ -10,6 +10,8 @@ import WalletIcon from '@safe-global/views/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 
 import RemainingRelays from '../RemainingRelays'
+// eslint-disable-next-line no-restricted-imports -- prototype: opens Try Safe Pro in Storybook
+import { TRY_PRO_REASONS, useTryPro } from '@/features/safe-pro-announcement/prototypes/tryPro'
 import SponsoredTxsCounter from '../SponsoredTxsCounter'
 import { Info } from 'lucide-react'
 
@@ -167,6 +169,20 @@ const SponsoredStrip = ({
   }
 }
 
+const ProUpsellCounter = (): ReactElement => {
+  const openTryPro = useTryPro()
+  return (
+    <SponsoredTxsCounter
+      left={0}
+      quota={null}
+      resetsAt={null}
+      isSubscription={false}
+      isPro={false}
+      onUpgrade={openTryPro && (() => openTryPro(TRY_PRO_REASONS.sponsored))}
+    />
+  )
+}
+
 export const _ExecutionMethodSelector = ({
   wallet,
   chain,
@@ -199,7 +215,7 @@ export const _ExecutionMethodSelector = ({
     if (!showsProUpsell) return null
     return (
       <div className={`${css.container} overflow-hidden rounded-[var(--radius)]`}>
-        <SponsoredTxsCounter left={0} quota={null} resetsAt={null} isSubscription={false} isPro={false} />
+        <ProUpsellCounter />
       </div>
     )
   }

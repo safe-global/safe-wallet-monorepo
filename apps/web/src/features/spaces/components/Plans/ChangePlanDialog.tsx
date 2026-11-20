@@ -79,7 +79,7 @@ export default function ChangePlanDialog({
     useChangePlan(spaceId)
   const { priceId, paymentLinkId } = pick.option
   const direction = getChangeDirection(currentPlan, pick)
-  const title = changeTitle(direction, pick.option.label)
+  const title = changeTitle(currentPlan.isTrialing ? 'change' : direction, pick.option.label)
   const note = NOTES[direction]
   // Stripe rejects a proration preview for a trial without a payment method, so the switch is explained instead.
   const isTrialSwitch = currentPlan.isTrialing

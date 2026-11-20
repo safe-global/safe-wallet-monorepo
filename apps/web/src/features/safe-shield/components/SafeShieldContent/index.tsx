@@ -14,6 +14,7 @@ import { TenderlySimulation } from '../TenderlySimulation'
 import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
 import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
 import { ProChecksRow } from '../ProChecksRow'
+import { Button } from '@safe-global/views/components/ui/button'
 import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
 import { isContractCall } from '../../utils/isContractCall'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'
@@ -31,6 +32,14 @@ import SafenetChecksSection from '@/features/safenet-checks/public/components/Sa
 import HnInfoCard from '@/features/hypernative/public/components/HnInfoCard'
 import HnCustomChecksCard from '@/features/hypernative/public/components/HnCustomChecksCard'
 
+export type LockedProCheck = 'recipient' | 'contract'
+
+const UnlockButton = ({ onClick }: { onClick: () => void }) => (
+  <Button variant="outline" size="xs" onClick={onClick} data-testid="unlock-pro-check">
+    Unlock
+  </Button>
+)
+
 export const SafeShieldContent = ({
   recipient,
   contract,
@@ -44,6 +53,7 @@ export const SafeShieldContent = ({
   safeAnalysis,
   onAddToTrustedList,
   hasProFeatures = true,
+  onUnlockPro,
   isSafePro = true,
   isOffchainMessage = false,
 }: {
@@ -60,6 +70,8 @@ export const SafeShieldContent = ({
   onAddToTrustedList?: () => void
   /** Without Safe Pro the simulation only runs on the user's own Tenderly project, if they set one up; else it is locked. */
   hasProFeatures?: boolean
+  /** Adds "Unlock" to the locked checks and opens the upgrade in place. */
+  onUnlockPro?: (check: LockedProCheck) => void
   /** Off: the pre-Pro layout, with the counterparty checks among the open ones and the simulation run by hand. */
   isSafePro?: boolean
   isOffchainMessage?: boolean
@@ -179,7 +191,7 @@ export const SafeShieldContent = ({
 
         {showProSection && (
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
-            <ProChecksRow hasProFeatures={hasProFeatures} />
+            <ProChecksRow hasProFeatures={hasProFeatures} onUpgrade={onUnlockPro && (() => onUnlockPro('recipient'))} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
               {hasProFeatures ? (
                 <AnalysisGroupCard
@@ -190,12 +202,22 @@ export const SafeShieldContent = ({
                   analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
                 />
               ) : (
-                <LockedCheckRow data-testid="recipient-analysis-locked">Known recipient</LockedCheckRow>
+                <LockedCheckRow
+                  data-testid="recipient-analysis-locked"
+                  action={onUnlockPro && <UnlockButton onClick={() => onUnlockPro('recipient')} />}
+                >
+                  Known recipient
+                </LockedCheckRow>
               )}
 
               {hasProFeatures && contractCard}
               {!hasProFeatures && isContractCall(safeTx) && (
-                <LockedCheckRow data-testid="contract-analysis-locked">Known contract</LockedCheckRow>
+                <LockedCheckRow
+                  data-testid="contract-analysis-locked"
+                  action={onUnlockPro && <UnlockButton onClick={() => onUnlockPro('contract')} />}
+                >
+                  Known contract
+                </LockedCheckRow>
               )}
 
               {hasProFeatures && deadlockCard}
