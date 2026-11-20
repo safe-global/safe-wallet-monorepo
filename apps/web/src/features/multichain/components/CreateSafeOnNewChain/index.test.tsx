@@ -310,7 +310,6 @@ describe('CreateSafeOnNewChain', () => {
     status: { status: PendingSafeStatus.AWAITING_EXECUTION, type: PayMethod.PayLater },
   }
 
-  // Like the Safe bar, it builds a new list of deployed networks on every render, e.g. after a poll
   const PollingParent = () => {
     const [, setPolls] = useState(0)
     return (
