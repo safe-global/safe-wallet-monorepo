@@ -54,7 +54,8 @@ the web team must approve.
 
 On the PR that releases a flag, the isolated E2E workflow runs the covering specs 5
 times (the `playwright burnin` job). A failure fails `Isolated E2E result`. The workflow
-also posts a "Flag release checklist" comment for the reviewer.
+also posts a "Flag release checklist" comment for the reviewer, together with the E2E
+report link.
 
 After the release that contains the change, reconcile shows an `ADD`. For a
 `PER_CHAIN` flag, choose the chains in the admin or seed them with `defaultChains`.
