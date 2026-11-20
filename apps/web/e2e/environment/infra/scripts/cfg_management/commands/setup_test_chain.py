@@ -23,6 +23,7 @@ def create_placeholder_image(color: str = "#B8AAF8") -> ContentFile:
 
 # The flags each forked chain gets; apps/web/config/remote-config.test.ts checks the file.
 # QUEUE_SERVICE is on because CGW runs with FF_SAFE_QUEUE_SERVICE and the wallet must sign for it.
+# SECURITY_HUB is off because it stalls transaction signing in the local stack.
 FEATURES_FILE = Path(__file__).resolve().parent.parent / "test-chain-features.json"
 DEFAULT_FEATURES = json.loads(FEATURES_FILE.read_text())["on"]
 
