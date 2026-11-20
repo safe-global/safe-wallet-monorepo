@@ -319,11 +319,11 @@ export const useFeesPreview = ({
       }
     }
 
-    const localGasFeeBaseUnits = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
+    // The signer's wallet or a sponsor pays the gas, so nothing of it leaves the Safe.
     const totalOutgoing = safeTx
       ? computeTotalOutgoing({
           safeTx,
-          gasFeeBaseUnits: localGasFeeBaseUnits,
+          gasFeeBaseUnits: 0n,
           relayCostFiat: 0,
           relayCostFiatCode: currency,
           nativeSymbol,

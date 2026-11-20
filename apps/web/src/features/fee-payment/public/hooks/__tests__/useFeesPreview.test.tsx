@@ -515,6 +515,23 @@ describe('useFeesPreview', () => {
       expect(result.current.gasFee.currency).toBe('ETH')
       expect(result.current.canCoverFees).toBe(true)
     })
+
+    it('leaves the gas out of the total outgoing of a native transfer, as the Safe does not pay it', () => {
+      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
+      const singleSignerSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
+      jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
+        safe: singleSignerSafe,
+        safeAddress: singleSignerSafe.address.value,
+        safeLoaded: true,
+        safeLoading: false,
+      })
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+      expect(result.current.gasFee.amount).toBe('0.00042')
+      expect(result.current.totalOutgoing?.primary).toEqual([{ amount: '0.0001', currency: 'ETH' }])
+      expect(result.current.totalOutgoing?.fees).toBeUndefined()
+    })
   })
 
   describe("when the gas can't be estimated locally", () => {
