@@ -11,11 +11,13 @@ import {
 import { didRevert, type EthersError } from '@/utils/ethers-utils'
 import { isGs026PreCheckError } from '@/services/tx/executionPreChecks'
 import { getCgwErrorInfo } from '@/utils/cgw-errors'
+import { CGW_TOO_MANY_REQUESTS } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 
 export const COULD_NOT_SUBMIT_MESSAGE = 'Could not submit the transaction.'
 export const COULD_NOT_SUBMIT_RETRY_MESSAGE = 'Could not submit the transaction. Try again.'
+export const SERVICE_BUSY_MESSAGE = 'The service is busy. Try again in a moment.'
 
 export const getRevertedMessage = (network?: string): string =>
   `Transaction reverted on ${network ?? 'the network'}. Gas was spent.`
@@ -96,6 +98,14 @@ const TxSubmitError = ({
   // agreed copy — never the response body, which can be an HTML error page —
   // and let ErrorMessage render the code-only support reference (WA-3252).
   const cgwError = getCgwErrorInfo(error)
+  if (cgwError?.status === CGW_TOO_MANY_REQUESTS) {
+    return (
+      <ErrorMessage error={error} level="warning" context={context}>
+        {SERVICE_BUSY_MESSAGE}
+      </ErrorMessage>
+    )
+  }
+
   if (cgwError) {
     return (
       <ErrorMessage error={error} level="error" context={context}>

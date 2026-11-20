@@ -1,13 +1,14 @@
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
-import AddContactDialog from './AddContactDialog'
+import AddContactDialog, { type TriggerSize } from './AddContactDialog'
 
-const AddLocalContact = () => {
+const AddLocalContact = ({ size }: { size?: TriggerSize }) => {
   const dispatch = useAppDispatch()
 
   return (
     <AddContactDialog
       triggerLabel="Add contact"
+      triggerSize={size}
       dialogTitle="Add contact"
       intro="This contact is stored locally in this browser. You can propose adding it to the shared Workspace address book later."
       successMessage="Contact added"

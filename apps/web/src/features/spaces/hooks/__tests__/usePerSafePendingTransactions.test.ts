@@ -18,8 +18,8 @@ const SAFE_2 = faker.finance.ethereumAddress()
 const CHAIN_1 = faker.string.numeric({ length: 3, allowLeadingZeros: false })
 const CHAIN_2 = faker.string.numeric({ length: 4, allowLeadingZeros: false })
 
-const queuedItemAt = (timestamp: number) =>
-  queuedTransactionItem(multisigTransactionBuilder().with({ timestamp }).build())
+const queuedItemAt = (timestamp: number, conflictType?: Parameters<typeof queuedTransactionItem>[1]) =>
+  queuedTransactionItem(multisigTransactionBuilder().with({ timestamp }).build(), conflictType)
 
 const respondWithSafeQueues = (queues: Record<string, QueuedItemPage['results']> | null) => {
   const requests: URL[] = []
@@ -90,6 +90,21 @@ describe('usePerSafePendingTransactions', () => {
 
     await waitFor(() => expect(result.current.transactions).toHaveLength(3))
     expect(result.current.transactions.map((tx) => tx.transaction.timestamp)).toEqual([1000, 2000, 3000])
+  })
+
+  it('returns every transaction of a conflict group', async () => {
+    respondWithSafeQueues({
+      [`${CHAIN_1}:${SAFE_1}`]: [
+        { type: 'CONFLICT_HEADER', nonce: 1 },
+        queuedItemAt(2000, 'HasNext'),
+        queuedItemAt(1000, 'End'),
+      ],
+    })
+
+    const { result } = renderHook(() => usePerSafePendingTransactions())
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.transactions.map((tx) => tx.transaction.timestamp)).toEqual([1000, 2000])
   })
 
   it('returns no more transactions than the limit', async () => {

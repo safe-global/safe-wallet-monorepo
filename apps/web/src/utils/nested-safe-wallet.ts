@@ -25,12 +25,18 @@ export type NestedWallet = {
   threshold: number
 }
 
+// The nonce the user chose for the parent Safe tx; it applies to one tx only
+export type ChosenParentSafeNonce = {
+  get: () => number | undefined
+  clear: () => void
+}
+
 export const getNestedWallet = (
   actualWallet: ConnectedWallet,
   safeInfo: SafeState,
   web3ReadOnly: JsonRpcProvider,
   router: NextRouter,
-  getParentSafeNonce: () => number | undefined,
+  chosenNonce: ChosenParentSafeNonce,
 ): NestedWallet => {
   let requestId = 0
   const nestedSafeSdk: WalletSDK = {
@@ -85,7 +91,7 @@ export const getNestedWallet = (
       })
 
       // The SDK defaults to the on-chain nonce, which collides with txs already queued in this Safe
-      const nonce = getParentSafeNonce() ?? (await getNonces(safeInfo.chainId, safeInfo.address.value)).recommendedNonce
+      const nonce = chosenNonce.get() ?? (await getNonces(safeInfo.chainId, safeInfo.address.value)).recommendedNonce
       const safeTx = await connectedSDK.createTransaction({
         transactions,
         onlyCalls: true,
@@ -108,27 +114,24 @@ export const getNestedWallet = (
             actualWallet.address,
             safeTx,
             safeTxHash,
-            undefined,
-            nestedChildTx,
+            // TODO(PLA-2351): declare the nested signer's channel
+            { nestedTransaction: nestedChildTx, declared: undefined },
           )
           result = await connectedSDK.approveTransactionHash(safeTxHash)
         } else {
           // Never executed here, even at threshold 1: the user executes it from the parent Safe
           const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
-          await proposeTx(
-            safeInfo.chainId,
-            safeInfo.address.value,
-            actualWallet.address,
-            signedTx,
-            safeTxHash,
-            undefined,
-            nestedChildTx,
-          )
+          await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, signedTx, safeTxHash, {
+            nestedTransaction: nestedChildTx,
+            declared: undefined,
+          })
         }
       } catch (err) {
         logError(ErrorCodes._817, err)
         throw err
       }
+
+      chosenNonce.clear()
 
       return {
         safeTxHash,

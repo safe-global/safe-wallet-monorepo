@@ -5,27 +5,38 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@s
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import TruncatedText from '@safe-global/views/components/common/AccountRow/TruncatedText'
 import ChainLogos from './ChainLogos'
-import ContactCell from './ContactCell'
+import ContactCell, { CONTACT_CELL_MIN_WIDTH } from './ContactCell'
 import RowDetail from './RowDetail'
 import { describeSuggestion, type SuggestedContact, type SuggestionReason } from './types'
 
 export type SuggestionAddLocation = 'row' | 'bulk'
 
-const ReasonText = ({ reason }: { reason: SuggestionReason }) => (
-  <span className="inline-flex min-w-0 items-center gap-1.5 text-sm" data-testid="suggestion-reason">
+const ReasonText = ({ children }: { children: ReactNode }) => (
+  <span className="flex min-w-0 items-center gap-1.5 text-sm" data-testid="suggestion-reason">
     <PenLine aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />
-    <span className="min-w-0">{describeSuggestion(reason)}</span>
+    {children}
   </span>
 )
 
 const Reason = ({ reason }: { reason: SuggestionReason }) => {
-  if (reason.safes.length === 1) return <ReasonText reason={reason} />
+  const text = describeSuggestion(reason)
+
+  if (reason.safes.length === 1) {
+    return (
+      <ReasonText>
+        <TruncatedText variant="paragraph-small" className="min-w-0" text={text} />
+      </ReasonText>
+    )
+  }
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<span className="inline-flex min-w-0" tabIndex={0} />}>
-        <ReasonText reason={reason} />
+      <TooltipTrigger render={<span className="flex min-w-0" tabIndex={0} />}>
+        <ReasonText>
+          <span className="min-w-0 truncate">{text}</span>
+        </ReasonText>
       </TooltipTrigger>
       <TooltipContent data-testid="suggestion-reason-safes">{reason.safes.join(', ')}</TooltipContent>
     </Tooltip>
@@ -35,7 +46,9 @@ const Reason = ({ reason }: { reason: SuggestionReason }) => {
 /** Phones have no hover, so the expanded row spells out every Safe. */
 const CompactReason = ({ reason }: { reason: SuggestionReason }) => (
   <div className="flex min-w-0 flex-col gap-1">
-    <ReasonText reason={reason} />
+    <ReasonText>
+      <span className="min-w-0">{describeSuggestion(reason)}</span>
+    </ReasonText>
     {reason.safes.length > 1 && (
       <Typography
         variant="paragraph-small"
@@ -131,7 +144,7 @@ const SuggestedContacts = ({
   const actionColumn: DataTableColumn<SuggestedContact> | undefined = canAdd
     ? {
         id: 'add',
-        width: '20%',
+        width: 'fit',
         align: 'end',
         minWidth: 180,
         cell: (item, { isCompact }) => <AddButton isCompact={isCompact} onClick={() => onAdd?.([item], 'row')} />,
@@ -139,7 +152,7 @@ const SuggestedContacts = ({
     : renderRowAction
       ? {
           id: 'action',
-          width: '20%',
+          width: 'fit',
           align: 'end',
           minWidth: 180,
           cell: (item, { isCompact }) => renderRowAction(item, { isCompact }),
@@ -150,7 +163,7 @@ const SuggestedContacts = ({
     {
       id: 'chains',
       header: 'Chains',
-      width: '10%',
+      width: 'share',
       priority: 'secondary',
       minWidth: 90,
       sortValue: (item) => item.chains.length,
@@ -159,6 +172,7 @@ const SuggestedContacts = ({
     {
       id: 'reason',
       header: 'Why suggested',
+      width: 'share',
       priority: 'secondary',
       minWidth: 200,
       sortValue: (item) => describeSuggestion(item.reason).toLowerCase(),
@@ -171,8 +185,8 @@ const SuggestedContacts = ({
     {
       id: 'contact',
       header: 'Contact',
-      width: '40%',
-      minWidth: 360,
+      width: 'share',
+      minWidth: CONTACT_CELL_MIN_WIDTH,
       sortValue: (item) => item.suggestedName.toLowerCase(),
       cell: (item, { isCompact }) => (
         <ContactCell

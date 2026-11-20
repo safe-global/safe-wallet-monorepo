@@ -1034,6 +1034,16 @@ export type NestedTransactionDto = {
   nonce: string
   notes?: string | null
 }
+export type DeclaredAttributionDto = {
+  /** Where the user started the request. Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, MCP, CLI. Truncated to 64 characters. */
+  channel?: string | null
+  /** App name. Truncated to 256 characters. */
+  appName?: string | null
+  /** App origin and path. Truncated to 2048 characters. */
+  appUrl?: string | null
+  /** ID of a listed Safe App. */
+  appId?: number | null
+}
 export type ProposeTransactionDto = {
   to: string
   value: string
@@ -1052,6 +1062,8 @@ export type ProposeTransactionDto = {
   origin?: string | null
   /** A child transaction for a second Safe, authorised by the parent transaction being an `approveHash` call committing to its hash. Unknown keys are rejected. */
   nestedTransaction?: NestedTransactionDto | null
+  /** Where the request came from, as reported by the client. */
+  declared?: DeclaredAttributionDto | null
 }
 export type CreationTransaction = {
   created: string

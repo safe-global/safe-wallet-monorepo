@@ -8,8 +8,7 @@ exports[`./NetworkLogosPill.stories FewNetworks 1`] = `
     class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-1fdopfm-MuiPaper-root"
-      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+      class="rounded-lg bg-card p-4"
     >
       <span
         class="bg-foreground/5 inline-flex items-center rounded-full p-0.75"
@@ -67,8 +66,7 @@ exports[`./NetworkLogosPill.stories WithOverflow 1`] = `
     class="shadcn-scope"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 css-1fdopfm-MuiPaper-root"
-      style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+      class="rounded-lg bg-card p-4"
     >
       <span
         class="bg-foreground/5 inline-flex items-center rounded-full p-0.75"
