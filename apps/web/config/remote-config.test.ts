@@ -5,6 +5,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import decl from './remote-config.json'
 import schema from './remote-config.schema.json'
 import mobileDecl from '../../mobile/config/remote-config.json'
+import testChainFeatures from '../e2e/environment/infra/scripts/cfg_management/test-chain-features.json'
 
 const enumKeys = new Set<string>(Object.values(FEATURES))
 const declaredKeys = decl.features.map((f) => f.key)
@@ -93,5 +94,36 @@ describe('WALLET_WEB remote-config declaration', () => {
       })
       .map((f) => f.key)
     expect(mismatched).toEqual([])
+  })
+})
+
+// Read only by the backend, so web does not declare them; the E2E stack still needs them on.
+const BACKEND_ONLY_ON_KEYS = ['CLASSIC_VIEW', 'LENDING', 'RELAYING']
+
+describe('E2E test-chain flags (test-chain-features.json)', () => {
+  const onKeys: string[] = testChainFeatures.on
+  const offKeys: string[] = testChainFeatures.off
+
+  it('lists every declared flag as on or off', () => {
+    const undecided = declaredKeys.filter((k) => !onKeys.includes(k) && !offKeys.includes(k))
+    expect(undecided).toEqual([])
+  })
+
+  it('does not list a flag as both on and off', () => {
+    expect(onKeys.filter((k) => offKeys.includes(k))).toEqual([])
+  })
+
+  it('has no duplicate keys', () => {
+    expect(new Set(onKeys).size).toBe(onKeys.length)
+    expect(new Set(offKeys).size).toBe(offKeys.length)
+  })
+
+  it('lists only declared flags as off', () => {
+    expect(offKeys.filter((k) => !declaredKeys.includes(k))).toEqual([])
+  })
+
+  it('lists only declared or backend-only flags as on', () => {
+    const unknown = onKeys.filter((k) => !declaredKeys.includes(k) && !BACKEND_ONLY_ON_KEYS.includes(k))
+    expect(unknown).toEqual([])
   })
 })

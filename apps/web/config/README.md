@@ -28,6 +28,13 @@ Config Service diffs against when seeding/verifying `Feature` rows for a release
 3. `remote-config.test.ts` (the sync test) fails if web code (`apps/web/src`,
    `packages/utils/src`, `packages/store/src`) reads a flag that is not declared, if a
    declared flag is not read anywhere, or if the file is schema-invalid.
+4. Decide the flag's state on the default chains of the isolated E2E stack: add the key
+   to `on` in
+   [`test-chain-features.json`](../e2e/environment/infra/scripts/cfg_management/test-chain-features.json),
+   or to `off`. The sync test fails until the flag is in one of them. A fork can switch
+   on more flags through `TEST_CHAIN_EXTRA_FEATURES`, as the Ethereum fork does for
+   `PORTFOLIO_ENDPOINT` and `POSITIONS`. The question of
+   E2E coverage comes later, in the PR that releases the flag.
 
 ## Releasing a flag
 

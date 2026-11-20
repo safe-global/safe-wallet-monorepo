@@ -85,7 +85,7 @@ Every testable page should have a stable, bookmarkable URL. Tests navigate direc
 
 ## 6. Feature Flags Come From the Chain Config
 
-Feature flags come from the chain config that CGW serves (`useHasFeature`). The isolated stack enables the features in [`setup_test_chain.py`](../environment/infra/scripts/cfg_management/commands/setup_test_chain.py); a flag that a Playwright spec needs goes in its `DEFAULT_FEATURES`. Test the state with the flag off in Jest, with `useHasFeature` mocked.
+Feature flags come from the chain config that CGW serves (`useHasFeature`). The isolated stack enables the flags listed under `on` in [`test-chain-features.json`](../environment/infra/scripts/cfg_management/test-chain-features.json); a flag that a Playwright spec needs goes there. Every flag declared in [`apps/web/config/remote-config.json`](../../config/remote-config.json) must be under `on` or under `off`; `config/remote-config.test.ts` fails otherwise. Test the state with the flag off in Jest, with `useHasFeature` mocked.
 
 ## 7. Setup Through the SDK and the Local APIs
 
