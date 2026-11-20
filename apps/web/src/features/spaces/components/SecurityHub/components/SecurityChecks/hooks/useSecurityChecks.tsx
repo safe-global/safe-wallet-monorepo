@@ -24,6 +24,9 @@ import {
   getModuleRowContent,
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/utils'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
+import TokenApprovalsList from '@safe-global/views/features/token-approvals/components/TokenApprovalsList'
+import type { TokenApprovalsCheck } from '@/features/token-approvals/public/hooks/useTokenApprovalsCheck'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
 
@@ -63,6 +66,50 @@ const rowTone = (status: ScanResult['status'], severity: SecurityGrade): Severit
   return { Icon, color: GRADE_ROW_COLOR[grade] }
 }
 
+const approvalsTitle = (check: TokenApprovalsCheck): string => {
+  switch (check.status) {
+    case 'scanning':
+      return `Checking token approvals · ${check.scannedCount.toLocaleString()} transactions`
+    case 'error':
+      return "Couldn't check token approvals"
+    case 'ready':
+      if (check.unlimitedCount > 0) {
+        return `${check.unlimitedCount} unlimited token approval${maybePlural(check.unlimitedCount)}`
+      }
+      return check.approvals.length > 0
+        ? `${check.approvals.length} token approval${maybePlural(check.approvals)}, none unlimited`
+        : 'No active token approvals'
+  }
+}
+
+// Only unlimited approvals are flagged; every approval is listed when the row is expanded
+const buildApprovalsItem = (check: TokenApprovalsCheck): SectionRow => {
+  const isFlagged = check.status === 'ready' && check.unlimitedCount > 0
+  const status: ScanResult['status'] = isFlagged ? 'issue' : check.status === 'ready' ? 'clear' : 'inconclusive'
+  const severity: SecurityGrade = isFlagged ? 'Medium' : 'Low'
+  const tone = rowTone(status, severity)
+  const expandedContent =
+    check.status === 'ready' ? (
+      <TokenApprovalsList approvals={check.approvals} checkedAtLabel={check.checkedAtLabel} onRescan={check.rescan} />
+    ) : check.status === 'error' ? (
+      <EvidenceList cta={{ label: 'Retry', onClick: check.rescan }} />
+    ) : undefined
+
+  return {
+    key: 'token-approvals',
+    severity,
+    isPassing: !isFlagged,
+    node: (
+      <Row
+        leadIcon={<SeverityIcon tone={tone} />}
+        accentTone={tone}
+        title={approvalsTitle(check)}
+        expandedContent={expandedContent}
+      />
+    ),
+  }
+}
+
 /**
  * Derives the rows rendered by `SecurityChecksSection` from raw scan results.
  *
@@ -77,6 +124,7 @@ export const useSecurityChecks = (
   safeQueryParam: string | undefined,
   /** Opens the Hypernative signup flow for a partner-tagged guard nudge (drawer-provided). */
   onHnSignupClick?: () => void,
+  approvalsCheck?: TokenApprovalsCheck,
 ): UseSecurityChecksResult => {
   const security = useSecurityServices()
   const [modulesExpanded, setModulesExpanded] = useState(false)
@@ -453,6 +501,10 @@ export const useSecurityChecks = (
       })
     }
 
+    if (approvalsCheck) {
+      items.push(buildApprovalsItem(approvalsCheck))
+    }
+
     return {
       failingRows: sortBySeverity(items.filter((i) => !i.isPassing)).map(({ key, node, severity }) => ({
         key,
@@ -470,6 +522,7 @@ export const useSecurityChecks = (
     safeQueryParam,
     modulesExpanded,
     onHnSignupClick,
+    approvalsCheck,
   ])
 
   if (!security || !buildCta) {

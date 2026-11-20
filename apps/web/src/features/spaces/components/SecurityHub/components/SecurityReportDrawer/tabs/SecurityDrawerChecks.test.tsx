@@ -20,6 +20,8 @@ jest.mock('@/features/security/public/hooks/useSecurityServices', () => ({
     jest.requireActual('@/features/security/public/services/securityServices').securityServices,
 }))
 
+jest.mock('@/features/token-approvals/public/hooks/useTokenApprovalsCheck', () => jest.fn(() => undefined))
+
 const mkResult = (status: ScanResult['status'], severity: ScanResult['severity'] = 'Low'): ScanResult => ({
   status,
   severity,

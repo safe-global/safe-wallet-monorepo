@@ -3,7 +3,18 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
 import { createMockContext } from '@/features/security/public/utils/test-helpers'
 import type { ScanResult } from '@/features/security/public/types'
+import { faker } from '@faker-js/faker'
+import type { TokenApprovalItem } from '@safe-global/views/features/token-approvals/components/TokenApprovalsList'
+import useTokenApprovalsCheck, {
+  type TokenApprovalsCheck,
+} from '@/features/token-approvals/public/hooks/useTokenApprovalsCheck'
 import SecurityChecksSection from '../components/SecurityChecks/SecurityChecksSection'
+
+jest.mock('@/features/token-approvals/public/hooks/useTokenApprovalsCheck', () => jest.fn())
+
+beforeEach(() => {
+  jest.mocked(useTokenApprovalsCheck).mockReturnValue(undefined)
+})
 
 // next/link isn't meaningful in a jsdom render; pass through to a plain anchor.
 jest.mock('next/link', () => {
@@ -405,6 +416,89 @@ describe('SecurityChecksSection', () => {
       const panel = row.closest('.rounded-lg')!
       expect(within(panel as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
       expect(within(panel as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
+    })
+  })
+
+  describe('token approvals', () => {
+    const buildApprovalItem = (overrides: Partial<TokenApprovalItem> = {}): TokenApprovalItem => ({
+      key: faker.string.uuid(),
+      tokenAddress: faker.finance.ethereumAddress(),
+      tokenSymbol: faker.string.alpha({ length: 4, casing: 'upper' }),
+      spenderAddress: faker.finance.ethereumAddress(),
+      spenderLabel: faker.company.name(),
+      amountLabel: '10 TKN',
+      isUnlimited: false,
+      ...overrides,
+    })
+
+    const readyCheck = (approvals: TokenApprovalItem[]): TokenApprovalsCheck => ({
+      status: 'ready',
+      approvals,
+      unlimitedCount: approvals.filter((approval) => approval.isUnlimited).length,
+      checkedAtLabel: 'just now',
+      rescan: jest.fn(),
+    })
+
+    const isBefore = (first: HTMLElement, second: HTMLElement) =>
+      !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
+
+    it('flags unlimited approvals under Needs review', () => {
+      jest
+        .mocked(useTokenApprovalsCheck)
+        .mockReturnValue(readyCheck([buildApprovalItem({ isUnlimited: true }), buildApprovalItem()]))
+
+      renderPanel()
+
+      const row = screen.getByText('1 unlimited token approval')
+      expect(isBefore(screen.getByText('Needs review · 1'), row)).toBe(true)
+      expect(isBefore(row, getChecksAccordion())).toBe(true)
+    })
+
+    it('puts approvals without an unlimited one under Healthy', () => {
+      jest.mocked(useTokenApprovalsCheck).mockReturnValue(readyCheck([buildApprovalItem(), buildApprovalItem()]))
+
+      renderPanel()
+
+      expect(isBefore(getChecksAccordion(), screen.getByText('2 token approvals, none unlimited'))).toBe(true)
+      expect(screen.queryByText(/^Needs review/)).not.toBeInTheDocument()
+    })
+
+    it('lists every approval, limited ones included, when the row is expanded', () => {
+      const unlimited = buildApprovalItem({ isUnlimited: true, amountLabel: 'Unlimited' })
+      const limited = buildApprovalItem({ amountLabel: '100 DAI' })
+      jest.mocked(useTokenApprovalsCheck).mockReturnValue(readyCheck([unlimited, limited]))
+      renderPanel()
+
+      fireEvent.click(screen.getByText('1 unlimited token approval'))
+
+      expect(screen.getByText(unlimited.tokenSymbol)).toBeInTheDocument()
+      expect(screen.getByText(limited.tokenSymbol)).toBeInTheDocument()
+      expect(screen.getByText('100 DAI')).toBeInTheDocument()
+    })
+
+    it('shows how many transactions were checked while scanning', () => {
+      jest.mocked(useTokenApprovalsCheck).mockReturnValue({ status: 'scanning', scannedCount: 1240 })
+
+      renderPanel()
+
+      expect(screen.getByText('Checking token approvals · 1,240 transactions')).toBeInTheDocument()
+    })
+
+    it('retries a failed approvals check', () => {
+      const rescan = jest.fn()
+      jest.mocked(useTokenApprovalsCheck).mockReturnValue({ status: 'error', rescan })
+      renderPanel()
+
+      fireEvent.click(screen.getByText("Couldn't check token approvals"))
+      fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+
+      expect(rescan).toHaveBeenCalledTimes(1)
+    })
+
+    it('has no approvals row when the check is off for the Safe’s chain', () => {
+      renderPanel()
+
+      expect(screen.queryByText(/token approval/i)).not.toBeInTheDocument()
     })
   })
 })
