@@ -2,13 +2,13 @@ import { renderHook, act, waitFor } from '@/tests/test-utils'
 import { useSubmitDelegation } from '../useSubmitDelegation'
 import * as useSafeAddressModule from '@/hooks/useSafeAddress'
 import * as useChainsModule from '@/hooks/useChains'
-import * as utilsModule from '@/features/proposers/utils/utils'
+import * as utilsModule from '../../public/utils/utils'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import type { PendingDelegation } from '@/features/proposers/types'
-import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
+import type { PendingDelegation } from '../../types'
+import { PROPOSER_LABEL_PLACEHOLDER } from '../../public/constants'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/delegates'),

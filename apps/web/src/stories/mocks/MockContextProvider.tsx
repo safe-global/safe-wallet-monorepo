@@ -1,5 +1,5 @@
 import React, { useEffect, type ReactNode, type ReactElement } from 'react'
-import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
+import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider/WalletContext'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
@@ -12,7 +12,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   QueueAssessmentContext,
   type QueueAssessmentContextValue,
-} from '@/features/hypernative/contexts/QueueAssessmentContext'
+} from '@/features/hypernative/public/components/QueueAssessmentContext'
 
 /**
  * Mock TxModal context - provides no-op implementations

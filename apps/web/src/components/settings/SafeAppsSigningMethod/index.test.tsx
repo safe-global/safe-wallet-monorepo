@@ -4,6 +4,9 @@ import { SafeAppsSigningMethod } from '.'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/settings', () => ({
+  ...jest.requireActual('@/services/analytics/events/settings'),
   SETTINGS_EVENTS: {
     SAFE_APPS: {
       CHANGE_SIGNING_METHOD: { action: 'Safe apps signing method changed', category: 'settings' },

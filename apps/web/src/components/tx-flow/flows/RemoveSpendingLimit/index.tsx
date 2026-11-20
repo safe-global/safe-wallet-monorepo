@@ -1,15 +1,12 @@
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { useMemo } from 'react'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import { useLoadFeature } from '@/features/__core__'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
+import RemoveSpendingLimitReview from '@/features/spending-limits/public/components/RemoveSpendingLimitReview'
 
 const RemoveSpendingLimitFlow = ({ spendingLimit }: { spendingLimit: SpendingLimitState }) => {
-  const { RemoveSpendingLimitReview } = useLoadFeature(SpendingLimitsFeature)
-
   const ReviewTransactionComponent = useMemo<typeof ReviewTransaction>(
     () =>
       function ReviewRemoveSpendingLimit(props) {

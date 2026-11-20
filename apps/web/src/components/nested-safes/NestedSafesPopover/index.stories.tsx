@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { useEffect, useState, type ComponentProps } from 'react'
 import { expect, fn, waitFor, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import { NestedSafesPopover } from './index'
 

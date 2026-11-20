@@ -1,15 +1,16 @@
 import { faker } from '@faker-js/faker'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, type ContextType, type ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { FullAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import Queue from '@/pages/transactions/queue'
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
-import { _SafeShieldContext, type _SafeShieldContextType } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldContext } from '@/features/safe-shield/public/hooks/useSafeShield'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 // eslint-disable-next-line no-restricted-imports -- prototype: uses the Plans story prices
@@ -51,7 +52,7 @@ const contractCallTx = {
   data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0xa9059cbb', operation: 0 },
 } as unknown as SafeTransaction
 
-const freeUserShield: _SafeShieldContextType = {
+const freeUserShield: NonNullable<ContextType<typeof SafeShieldContext>> = {
   ...FullAnalysisBuilder.noThreat().build(),
   setRecipientAddresses: () => {},
   setPoisoningAddresses: () => {},
@@ -140,7 +141,7 @@ export const Nudge3SafeShieldOnReview: Story = {
   decorators: [flowSetup.decorator],
   render: () => (
     <WithTryPro>
-      <_SafeShieldContext.Provider value={freeUserShield}>
+      <SafeShieldContext.Provider value={freeUserShield}>
         <TxLayoutBase title="Confirm transaction" subtitle="Contract interaction" step={1} stepCount={2} progress={100}>
           <div className="rounded-b-xl bg-card p-6">
             <Typography variant="paragraph-small" color="muted">
@@ -148,7 +149,7 @@ export const Nudge3SafeShieldOnReview: Story = {
             </Typography>
           </div>
         </TxLayoutBase>
-      </_SafeShieldContext.Provider>
+      </SafeShieldContext.Provider>
     </WithTryPro>
   ),
 }

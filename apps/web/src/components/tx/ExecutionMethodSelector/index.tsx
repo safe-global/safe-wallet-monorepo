@@ -10,11 +10,10 @@ import WalletIcon from '@safe-global/views/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 
 import RemainingRelays from '../RemainingRelays'
+// eslint-disable-next-line no-restricted-imports -- prototype: opens Try Safe Pro in Storybook
 import { TRY_PRO_REASONS, useTryPro } from '@/features/safe-pro-announcement/prototypes/tryPro'
 import SponsoredTxsCounter from '../SponsoredTxsCounter'
 import { Info } from 'lucide-react'
-import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
-import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -24,16 +23,11 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { SponsoredOffer } from '@/utils/gasPayment'
+import GasTooHighBanner from '@/features/no-fee-campaign/public/components/GasTooHighBanner'
 
 export const enum ExecutionMethod {
   RELAY = 'RELAY',
   WALLET = 'WALLET',
-}
-
-// Wrapper component to load GasTooHighBanner (follows React naming conventions)
-const GasTooHighBannerLoader = () => {
-  const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
-  return <GasTooHighBanner />
 }
 
 const CampaignLabel = ({ offer }: { offer: Extract<SponsoredOffer, { option: 'NO_FEE_CAMPAIGN' }> }) => {
@@ -259,7 +253,7 @@ export const _ExecutionMethodSelector = ({
 
         {offer.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && (
           <div className={css.gasBannerWrapper}>
-            <GasTooHighBannerLoader />
+            <GasTooHighBanner />
           </div>
         )}
       </div>

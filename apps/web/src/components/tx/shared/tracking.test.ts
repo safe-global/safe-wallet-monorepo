@@ -1,5 +1,6 @@
 import { getGasPaymentSource, trackTxEvents } from './tracking'
-import { trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -427,6 +428,7 @@ describe('getGasPaymentSource', () => {
 
   it.each([
     ['WALLET', 'signing_wallet'],
+    ['PAY_FROM_SAFE', 'safe'],
     ['FREE_DAILY_LIMIT', 'sponsored'],
     ['SUBSCRIPTION', 'sponsored'],
     ['NO_FEE_CAMPAIGN', 'sponsored'],

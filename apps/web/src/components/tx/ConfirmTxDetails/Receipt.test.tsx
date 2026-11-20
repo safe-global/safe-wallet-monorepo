@@ -1,7 +1,10 @@
 import { render } from '@/tests/test-utils'
 import { Receipt } from './Receipt'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
+import type { GasPayerSelection } from '@/features/fee-payment/public/hooks/useGasPayerSelection'
 
 const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 const ZERO = '0x0000000000000000000000000000000000000000'
@@ -9,14 +12,14 @@ const GAS_TOKEN = ZERO
 const NATIVE_LOGO = 'https://example.com/pol.png'
 const ERC20_GAS_TOKEN = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
 
-let mockRelayer: { type: string } | null = null
+let mockRelayer: { type: string; gasPaymentOptions: string[] } | null = null
 let mockBalanceItems: Array<{ tokenInfo: { address: string; logoUri: string; symbol: string } }> = []
 
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({
     chainId: '137',
     nativeCurrency: { symbol: 'POL', decimals: 18, logoUri: NATIVE_LOGO },
-    features: ['GTF'],
+    features: [],
     relayer: mockRelayer,
   }),
   useHasFeature: () => true,
@@ -33,7 +36,7 @@ jest.mock('@/hooks/useBalances', () => ({
 }))
 
 const mockUsePayFromSafeFeePreview = jest.fn()
-jest.mock('@/features/fee-payment/hooks/usePayFromSafeFeePreview', () => ({
+jest.mock('@/features/fee-payment/public/hooks/usePayFromSafeFeePreview', () => ({
   usePayFromSafeFeePreview: () => mockUsePayFromSafeFeePreview(),
 }))
 
@@ -79,28 +82,30 @@ const baseSafeTxData = {
 
 const renderReceipt = (ctx: Partial<SafeTxContextParams>, safeTxData: SafeTransaction['data'] = baseSafeTxData) => {
   const value = {
-    feePaymentMode: 'safe',
     feeGasToken: GAS_TOKEN,
     safeTx: { data: baseSafeTxData, signatures: new Map() } as unknown as SafeTransaction,
     ...ctx,
   } as unknown as SafeTxContextParams
 
   return render(
-    <SafeTxContext.Provider value={value}>
-      <Receipt safeTxData={safeTxData} />
-    </SafeTxContext.Provider>,
+    <FeePayerContext.Provider value={{ isPayFromSafe: true } as GasPayerSelection}>
+      <SafeTxContext.Provider value={value}>
+        <Receipt safeTxData={safeTxData} />
+      </SafeTxContext.Provider>
+    </FeePayerContext.Provider>,
   )
 }
 
-describe('Receipt GTF fee preview', () => {
+describe('Receipt Pay from Safe fee preview', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockRelayer = {
       type: 'RELAY_FEE',
+      gasPaymentOptions: ['PAY_FROM_SAFE'],
     }
   })
 
-  it('ignores the preview on chains without a RELAY_FEE relayer', () => {
+  it('ignores the preview on chains without a relayer', () => {
     mockRelayer = null
     mockUsePayFromSafeFeePreview.mockReturnValue({
       data: {
@@ -162,7 +167,7 @@ describe('Receipt GTF fee preview', () => {
 describe('Receipt GasToken identity', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockRelayer = { type: 'RELAY_FEE' }
+    mockRelayer = { type: 'RELAY_FEE', gasPaymentOptions: ['PAY_FROM_SAFE'] }
     mockBalanceItems = []
     mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
@@ -200,7 +205,7 @@ describe('Receipt GasToken identity', () => {
 describe('Receipt To row', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockRelayer = { type: 'RELAY_FEE' }
+    mockRelayer = { type: 'RELAY_FEE', gasPaymentOptions: ['PAY_FROM_SAFE'] }
     mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
 
@@ -221,7 +226,7 @@ describe('Receipt To row', () => {
 describe('Receipt Operation row', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockRelayer = { type: 'RELAY_FEE' }
+    mockRelayer = { type: 'RELAY_FEE', gasPaymentOptions: ['PAY_FROM_SAFE'] }
     mockUsePayFromSafeFeePreview.mockReturnValue({ data: undefined })
   })
 

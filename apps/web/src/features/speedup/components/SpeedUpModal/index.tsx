@@ -1,4 +1,5 @@
 import useGasPrice from '@/hooks/useGasPrice'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import ModalDialog from '@/components/common/ModalDialog'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
@@ -8,19 +9,22 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppDispatch } from '@/store'
-import { createExistingTx, dispatchCustomTxSpeedUp, dispatchSafeTxSpeedUp } from '@/services/tx/tx-sender'
+import { createExistingTx } from '@/services/tx/tx-sender/create'
+import { dispatchCustomTxSpeedUp, dispatchSafeTxSpeedUp } from '@/services/tx/tx-sender/dispatch'
 import { showNotification } from '@/store/notificationsSlice'
 import { useCallback, useState } from 'react'
 import GasParams from '@/components/tx/GasParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getTxOptions } from '@/utils/transactions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
-import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import { isWalletRejection } from '@/utils/wallets'
 import { type TransactionOptions } from '@safe-global/types-kit'
 import { PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
@@ -30,6 +34,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsPayFromSafeEnabled } from '@/features/fee-payment/public/hooks/useIsPayFromSafeEnabled'
 
 type Props = {
   open: boolean
@@ -45,7 +50,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
-  const isPayFromSafeChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useIsPayFromSafeEnabled() ?? false
 
   const wallet = useWallet()
   const onboard = useOnboard()
@@ -57,10 +62,12 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const dispatch = useAppDispatch()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isDisabled = waitingForConfirmation || !wallet || !speedUpFee || !onboard
+  const scope = useSafeScope()
   const [safeTx] = useAsync(() => {
     if (!chainInfo?.chainId) return
-    return createExistingTx(chainInfo.chainId, txId)
-  }, [txId, chainInfo?.chainId])
+    if (scope && !scope.sdk) return
+    return createExistingTx(chainInfo.chainId, txId, undefined, scope)
+  }, [txId, chainInfo?.chainId, scope])
 
   const safeTxHasSignatures = !!safeTx?.signatures?.size ? true : false
 

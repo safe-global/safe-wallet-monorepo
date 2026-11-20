@@ -134,7 +134,7 @@
       "count": 1
     }
   },
-  "src/features/fee-payment/services/__tests__/mergePayFromSafeFeeParams.test.ts": {
+  "src/features/fee-payment/public/services/__tests__/mergePayFromSafeFeeParams.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 1
     }
@@ -144,7 +144,7 @@
       "count": 3
     }
   },
-  "src/features/hypernative/components/HnSignupFlow/HnSignupFlow.test.tsx": {
+  "src/features/hypernative/public/components/__tests__/HnSignupFlow.test.tsx": {
     "@typescript-eslint/no-explicit-any": {
       "count": 2
     }
@@ -154,12 +154,12 @@
       "count": 4
     }
   },
-  "src/features/hypernative/hooks/__tests__/useBannerStorage.test.ts": {
+  "src/features/hypernative/public/hooks/__tests__/useBannerStorage.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 1
     }
   },
-  "src/features/hypernative/hooks/__tests__/useHypernativeOAuth.test.tsx": {
+  "src/features/hypernative/public/hooks/__tests__/useHypernativeOAuth.test.tsx": {
     "@typescript-eslint/no-explicit-any": {
       "count": 2
     }
@@ -184,7 +184,7 @@
       "count": 5
     }
   },
-  "src/features/multichain/hooks/__tests__/useSafeCreationData.test.ts": {
+  "src/features/multichain/public/hooks/__tests__/useSafeCreationData.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 1
     }
@@ -229,7 +229,7 @@
       "count": 18
     }
   },
-  "src/features/recovery/services/__tests__/setup.test.ts": {
+  "src/features/recovery/public/services/__tests__/setup.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 7
     }

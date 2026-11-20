@@ -4,16 +4,18 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/views/components/ui/input-group'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
-import { ConnectWalletHint } from '@/features/spaces'
-import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
-import type { AllSafeItems } from '@/hooks/safes'
+import ConnectWalletHint from '@/features/spaces/public/components/ConnectWalletHint'
+import SafeAccountsTable from '@/features/myAccounts/public/components/SafeAccountsTable'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
+import type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { OrderByOption, selectOrderByPreference, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
-import { useSaveManualOrder } from '@/hooks/safes'
+import { useSaveManualOrder } from '@/hooks/safes/useSaveManualOrder'
 import SecurityBanner from './SecurityBanner'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
@@ -143,7 +145,7 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
               Select all · {selectedCount} of {totalSafesCount} selected
             </button>
             <div className="flex grow basis-72 items-center justify-end gap-3">
-              <InputGroup variant="outline" className="max-w-sm flex-1">
+              <InputGroup variant="outline" fieldError="hidden" className="max-w-sm flex-1">
                 <InputGroupAddon>
                   <Search className="size-4" />
                 </InputGroupAddon>

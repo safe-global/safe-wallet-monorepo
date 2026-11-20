@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 import { Users } from 'lucide-react'
-import SafeWidget from '../SafeWidget'
+import SafeWidget from '../../public/components/SafeWidget'
 import { Badge } from '@safe-global/views/components/ui/badge'
-import { getTxStatus } from '@/features/transactions/utils'
+import { getTxStatus } from '@/features/transactions/public/utils'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import TxInfo from '@/components/transactions/TxInfo'
@@ -20,6 +20,9 @@ type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string; chainI
 interface PendingTxWidgetProps {
   transactions: SpacePendingTxItem[]
   loading?: boolean
+  /** Pending transactions in the whole Workspace queue; the overflow beyond `transactions` shows as `+N` next to "View all". */
+  totalCount?: number
+  onViewAll?: () => void
   error?: string
   onRefresh?: () => void
   onItemClick?: (safeAddress: string, txId: string) => void
@@ -36,6 +39,8 @@ const TxIcon = ({ tx }: { tx: SpacePendingTxItem }): ReactElement => (
 const PendingTxWidget = ({
   transactions,
   loading = false,
+  totalCount,
+  onViewAll,
   error,
   onRefresh,
   onItemClick,
@@ -43,6 +48,8 @@ const PendingTxWidget = ({
   const isEmpty = transactions.length === 0 && !loading
   const hasError = !!error && !loading
   const spaceId = useUrlSpaceId()
+  const overflowCount = totalCount !== undefined ? Math.max(0, totalCount - transactions.length) : undefined
+  const viewAll = onViewAll && !loading ? <SafeWidget.ViewAll count={overflowCount} onClick={onViewAll} /> : undefined
 
   if (hasError) {
     return (
@@ -61,7 +68,7 @@ const PendingTxWidget = ({
   }
 
   return (
-    <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
+    <SafeWidget title="Pending" action={viewAll} testId="space-dashboard-pending-widget">
       {loading ? (
         Array.from({ length: SKELETON_COUNT }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
       ) : transactions.length === 0 ? (

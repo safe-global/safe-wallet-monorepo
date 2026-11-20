@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { isActiveAdmin, isAdmin, useSpaceMembersByStatus } from './useSpaceMembers'
+import { isActiveAdmin, isAdmin, useSpaceMembersByStatus } from '../public/hooks/useSpaceMembers'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentMembership } from './useSpaceMembers'
+import { useCurrentMembership } from '../public/hooks/useSpaceMembers'
 
 export const useAdminCount = (members?: MemberDto[]) => {
   const { activeMembers } = useSpaceMembersByStatus()

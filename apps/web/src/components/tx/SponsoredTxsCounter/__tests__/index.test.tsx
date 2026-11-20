@@ -1,9 +1,12 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import SponsoredTxsCounter, { _formatResetsAt } from '../index'
+import SponsoredTxsCounter, { formatResetsAt } from '../index'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 describe('SponsoredTxsCounter', () => {
   it('tracks the upgrade prompt and its click only without Pro', () => {
@@ -21,10 +24,10 @@ describe('SponsoredTxsCounter', () => {
   })
 
   it('formats the reset moment in UTC and tolerates missing or broken dates', () => {
-    expect(_formatResetsAt('2026-11-01T00:00:00.000Z')).toBe('Nov 1, 00:00 UTC')
-    expect(_formatResetsAt('2026-10-17T15:52:37.000Z')).toBe('Oct 17, 15:52 UTC')
-    expect(_formatResetsAt(null)).toBeNull()
-    expect(_formatResetsAt('nope')).toBeNull()
+    expect(formatResetsAt('2026-11-01T00:00:00.000Z')).toBe('Nov 1, 00:00 UTC')
+    expect(formatResetsAt('2026-10-17T15:52:37.000Z')).toBe('Oct 17, 15:52 UTC')
+    expect(formatResetsAt(null)).toBeNull()
+    expect(formatResetsAt('nope')).toBeNull()
   })
 
   it('counts the plan allowance with the PRO chip on a Safe Pro Safe', () => {

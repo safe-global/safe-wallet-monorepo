@@ -4,7 +4,7 @@ import {
   getDeployment,
   getDeployedSpendingLimitModuleAddress,
   isAllowanceModuleAddress,
-} from '../services/spendingLimitDeployments'
+} from '../public/services/spendingLimitDeployments'
 
 describe('getLatestSpendingLimitAddress', () => {
   it('should return the v0.1.0 address on Ethereum mainnet (chainId 1)', () => {

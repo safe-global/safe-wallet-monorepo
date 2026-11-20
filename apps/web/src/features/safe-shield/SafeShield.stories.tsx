@@ -11,7 +11,8 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { safeFixtures } from '../../../../../config/test/msw/fixtures'
 import { createSafeInfoState } from '@/stories/mocks/defaults'
@@ -364,8 +365,6 @@ const overflowSafeTxContextValue: SafeTxContextParams = {
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
-  feePaymentMode: 'safe',
-  setFeePaymentMode: () => {},
   setFeeGasToken: () => {},
 }
 

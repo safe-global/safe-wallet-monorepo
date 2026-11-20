@@ -1,8 +1,19 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { chainBuilder } from '@/tests/builders/chains'
-import { spaceAddressBookItemBuilder, spaceAddressBookTagBuilder } from '@/tests/builders/space'
-import { staleCasingKeys, storedKeysOf, tagNamesOf, toLocalContacts, toWorkspaceContacts } from '../utils'
+import {
+  spaceAddressBookItemBuilder,
+  spaceAddressBookRequestBuilder,
+  spaceAddressBookTagBuilder,
+} from '@/tests/builders/space'
+import {
+  staleCasingKeys,
+  storedKeysOf,
+  tagNamesOf,
+  toLocalContacts,
+  toPendingRequests,
+  toWorkspaceContacts,
+} from '../utils'
 
 const itemBuilder = spaceAddressBookItemBuilder
 
@@ -214,5 +225,46 @@ describe('staleCasingKeys', () => {
     }
 
     expect(staleCasingKeys(books, after, address, ['1', '100'])).toEqual([{ chainId: '100', address: lower }])
+  })
+})
+
+describe('toPendingRequests', () => {
+  it('gives each request its id, name, address and chains', () => {
+    const request = spaceAddressBookRequestBuilder()
+      .with({ chainIds: ['1', '100'] })
+      .build()
+
+    const [row] = toPendingRequests([request], [], configs, noMember)
+
+    expect(row).toEqual(
+      expect.objectContaining({ id: request.id, name: request.name, address: request.address, isInWorkspace: false }),
+    )
+    expect(row.chains.map((chain) => chain.chainName)).toEqual(['Ethereum', 'Gnosis Chain'])
+  })
+
+  it('names the requester by their member name', () => {
+    const request = spaceAddressBookRequestBuilder().with({ requestedByUserId: 7 }).build()
+
+    const [row] = toPendingRequests([request], [], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
+
+    expect(row.requestedBy).toBe('Maya Chen')
+  })
+
+  it('falls back to the email or wallet the requester signed in with', () => {
+    const request = spaceAddressBookRequestBuilder().with({ requestedBy: 'alice@example.com' }).build()
+
+    const [row] = toPendingRequests([request], [], configs, noMember)
+
+    expect(row.requestedBy).toBe('alice@example.com')
+  })
+
+  it('marks a request whose address the Workspace has in another casing', () => {
+    const address = checksumAddress(faker.finance.ethereumAddress())
+    const request = spaceAddressBookRequestBuilder().with({ address }).build()
+    const saved = itemBuilder().with({ address: address.toLowerCase() }).build()
+
+    const [row] = toPendingRequests([request], [saved], configs, noMember)
+
+    expect(row.isInWorkspace).toBe(true)
   })
 })

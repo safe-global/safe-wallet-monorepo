@@ -2,14 +2,11 @@ import { faker } from '@faker-js/faker'
 import userEvent from '@testing-library/user-event'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import {
-  useAddressBookRequestsState,
-  useIsAdmin,
-  useIsInvited,
-  useMemberNameResolver,
-  useSpaceAddressBookState,
-} from '@/features/spaces'
+import { useAddressBookRequestsState } from '../../../hooks/useGetAddressBookRequests'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
+import { useIsAdmin, useIsInvited } from '../../../public/hooks/useSpaceMembers'
+import { useMemberNameResolver } from '../../../public/hooks/useMemberNameResolver'
+import { useSpaceAddressBookState } from '../../../public/hooks/useGetSpaceAddressBook'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Builder } from '@/tests/Builder'
@@ -17,6 +14,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import {
   buildSpaceAddressBookTags,
   spaceAddressBookItemBuilder,
+  spaceAddressBookRequestBuilder,
   spaceAddressBookTagBuilder,
 } from '@/tests/builders/space'
 import { getStoreInstance } from '@/store'
@@ -24,21 +22,77 @@ import type * as Store from '@/store'
 import type * as AddressBookSlice from '@/store/addressBookSlice'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import type { AddressBookState } from '@/store/addressBookSlice'
-import { downloadCsv } from '../../../utils/addressBookCsv'
+import { useWorkspaceSigners, type WorkspaceSigner } from '../../../hooks/useWorkspaceSigners'
+import { useAddressBookRequestActions } from '../../../hooks/useAddressBookRequestActions'
 import SpaceAddressBookV2 from '../index'
 
 const SPACE_ID = '7'
 
 const mockIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(),
+}))
+jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../public/hooks/useGetSpaceAddressBook'),
   useSpaceAddressBookState: jest.fn(),
+}))
+jest.mock('../../../hooks/useGetAddressBookRequests', () => ({
+  ...jest.requireActual('../../../hooks/useGetAddressBookRequests'),
   useAddressBookRequestsState: jest.fn(),
+}))
+jest.mock('../../../public/hooks/useMemberNameResolver', () => ({
   useMemberNameResolver: jest.fn(),
+}))
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => SPACE_ID),
 }))
+jest.mock('../../../public/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('../../../public/hooks/useUpsertWorkspaceSafeName'),
+  useUpsertWorkspaceSafeNames: jest.fn(() => jest.fn()),
+}))
+jest.mock('../../../public/hooks/useWorkspaceAddressBookLabel', () => ({
+  useWorkspaceAddressBookLabel: jest.fn(() => 'Workspace address book'),
+}))
+jest.mock('../../../hooks/useWorkspaceSigners', () => ({ useWorkspaceSigners: jest.fn() }))
+jest.mock('../../../hooks/useAddressBookRequestActions', () => ({ useAddressBookRequestActions: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
@@ -49,10 +103,6 @@ const mockTrackEvent = jest.fn()
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
-}))
-jest.mock('../../../utils/addressBookCsv', () => ({
-  ...jest.requireActual('../../../utils/addressBookCsv'),
-  downloadCsv: jest.fn(),
 }))
 jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
@@ -71,19 +121,13 @@ jest.mock('../../SpaceAddressBook/AddContact', () => {
   )
   return AddContact
 })
-jest.mock('../../SpaceAddressBook/Import', () => {
-  const ImportAddressBook = () => <button>Import</button>
-  return ImportAddressBook
+jest.mock('../ImportWorkspaceCsv', () => {
+  const ImportWorkspaceCsv = () => <button>Import</button>
+  return ImportWorkspaceCsv
 })
 jest.mock('../../SpaceAddressBook/AddLocalContact', () => {
   const AddLocalContact = () => <button>Add local contact</button>
   return AddLocalContact
-})
-jest.mock('../../SpaceAddressBook/PendingRequestsTable', () => {
-  const PendingRequestsTable = ({ requests }: { requests: unknown[] }) => (
-    <div data-testid="pending-table">{requests.length} pending</div>
-  )
-  return PendingRequestsTable
 })
 jest.mock('../../SpaceAddressBook/EditContactDialog', () => {
   const EditContactDialog = ({
@@ -162,20 +206,6 @@ jest.mock('@/components/address-book/EntryDialog', () => {
   return EntryDialog
 })
 
-const requestBuilder = () =>
-  Builder.new<AddressBookRequestItemDto>().with({
-    id: faker.number.int(),
-    name: faker.person.fullName(),
-    address: checksumAddress(faker.finance.ethereumAddress()),
-    chainIds: ['1'],
-    requestedBy: faker.internet.email(),
-    requestedByUserId: faker.number.int(),
-    reviewedBy: null,
-    reviewedByUserId: null,
-    status: 'PENDING',
-    createdAt: faker.date.recent().toISOString(),
-  })
-
 const SETTLED = { isLoading: false, isError: false }
 
 const EXPLORER = 'https://explorer.test/address/'
@@ -192,6 +222,23 @@ const mockWorkspaceBook = (state: Partial<ReturnType<typeof useSpaceAddressBookS
 const mockRequests = (state: Partial<ReturnType<typeof useAddressBookRequestsState>> = {}) => {
   ;(useAddressBookRequestsState as jest.Mock).mockReturnValue({ items: [], ...SETTLED, refetch: jest.fn(), ...state })
 }
+
+const mockRequestActions = () => {
+  const actions = { approve: jest.fn(), reject: jest.fn(), reviewingId: null }
+  ;(useAddressBookRequestActions as jest.Mock).mockReturnValue(actions)
+  return actions
+}
+
+const mockSigners = (state: Partial<ReturnType<typeof useWorkspaceSigners>> = {}) => {
+  ;(useWorkspaceSigners as jest.Mock).mockReturnValue({ signers: [], ...SETTLED, refetch: jest.fn(), ...state })
+}
+
+const signerBuilder = () =>
+  Builder.new<WorkspaceSigner>().with({
+    address: checksumAddress(faker.finance.ethereumAddress()),
+    chainIds: ['1'],
+    safes: [{ address: checksumAddress(faker.finance.ethereumAddress()), name: faker.company.name(), position: 1 }],
+  })
 
 const mockRole = (role: 'admin' | 'member' | 'invited') => {
   ;(useIsAdmin as jest.Mock).mockReturnValue(role === 'admin')
@@ -230,7 +277,10 @@ describe('SpaceAddressBookV2', () => {
     mockPrivateAddressBook(true)
     mockWorkspaceBook()
     mockRequests()
+    mockRequestActions()
+    mockSigners()
     ;(useMemberNameResolver as jest.Mock).mockReturnValue(() => undefined)
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(SPACE_ID)
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })
 
@@ -280,8 +330,9 @@ describe('SpaceAddressBookV2', () => {
 
       renderAddressBook()
 
-      expect(screen.getByRole('button', { name: 'Import' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument()
+      const csvGroup = screen.getByRole('group', { name: 'Import and export' })
+      expect(within(csvGroup).getByRole('button', { name: 'Import' })).toBeInTheDocument()
+      expect(within(csvGroup).getByRole('button', { name: 'Export' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Add contact' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Actions for Treasury' })).toBeInTheDocument()
     })
@@ -388,31 +439,70 @@ describe('SpaceAddressBookV2', () => {
       expect(within(screen.getByTestId('address-book-empty')).queryByRole('button')).not.toBeInTheDocument()
     })
 
-    it('exports the whole book as CSV, one row per chain', async () => {
-      const item = spaceAddressBookItemBuilder()
-        .with({ name: 'Treasury', chainIds: ['1', '100'] })
-        .build()
-      mockWorkspaceBook({ items: [item] })
+    describe('export', () => {
+      let createObjectURL: jest.Mock<string, [Blob]>
+      let anchorClick: jest.SpyInstance
 
-      renderAddressBook()
-      await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+      beforeEach(() => {
+        createObjectURL = jest.fn<string, [Blob]>(() => 'blob:address-book')
+        window.URL.createObjectURL = createObjectURL
+        anchorClick = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+      })
 
-      const [fileName, csv] = (downloadCsv as jest.Mock).mock.calls[0]
-      expect(fileName).toBe(`workspace-${SPACE_ID}-address-book.csv`)
-      expect(csv.split(/\r?\n/)).toEqual([
-        'address,name,chainId',
-        `${item.address},Treasury,1`,
-        `${item.address},Treasury,100`,
-      ])
-    })
+      afterEach(() => anchorClick.mockRestore())
 
-    it('tracks the export', async () => {
-      mockWorkspaceBook({ items: [spaceAddressBookItemBuilder().build()] })
+      const exportBook = async () => {
+        await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+        await userEvent.click(screen.getByTestId('export-modal-btn'))
+        await waitFor(() => expect(anchorClick).toHaveBeenCalled())
+      }
 
-      renderAddressBook()
-      await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+      it('counts one entry per chain before exporting', async () => {
+        mockWorkspaceBook({
+          items: [
+            spaceAddressBookItemBuilder()
+              .with({ chainIds: ['1', '100'] })
+              .build(),
+          ],
+        })
 
-      expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining(SPACE_EVENTS.EXPORT_ADDRESS_BOOK), undefined)
+        renderAddressBook()
+        await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+
+        expect(screen.getByTestId('export-summary')).toHaveTextContent('2 address book entries')
+      })
+
+      it('exports the whole book as CSV, one row per chain, with its tags', async () => {
+        const ops = spaceAddressBookTagBuilder().with({ id: 1, name: 'Ops' }).build()
+        const vendor = spaceAddressBookTagBuilder().with({ id: 2, name: 'Vendor' }).build()
+        const item = spaceAddressBookItemBuilder()
+          .with({ name: 'Treasury', chainIds: ['1', '100'], tagIds: [1, 2] })
+          .build()
+        mockWorkspaceBook({ items: [item], tags: [ops, vendor] })
+
+        renderAddressBook()
+        await exportBook()
+
+        const csv = (await createObjectURL.mock.calls[0][0].text()).trim()
+        expect(csv.split(/\r?\n/)).toEqual([
+          'address,name,chainId,tags',
+          `${item.address},Treasury,1,Ops;Vendor`,
+          `${item.address},Treasury,100,Ops;Vendor`,
+        ])
+        const anchor = anchorClick.mock.contexts[0] as HTMLAnchorElement
+        expect(anchor.getAttribute('download')).toMatch(new RegExp(`^workspace-${SPACE_ID}-address-book`))
+      })
+
+      it('tracks the export when the file is downloaded', async () => {
+        mockWorkspaceBook({ items: [spaceAddressBookItemBuilder().build()] })
+
+        renderAddressBook()
+        await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+        expect(mockTrackEvent).not.toHaveBeenCalledWith(SPACE_EVENTS.EXPORT_ADDRESS_BOOK)
+        await userEvent.click(screen.getByTestId('export-modal-btn'))
+
+        expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.EXPORT_ADDRESS_BOOK)
+      })
     })
   })
 
@@ -698,21 +788,193 @@ describe('SpaceAddressBookV2', () => {
   })
 
   describe('tabs', () => {
-    it('shows only the workspace contacts without the private address book', () => {
+    it('shows Workspace contacts and Suggested without the private address book', () => {
       mockPrivateAddressBook(false)
 
       renderAddressBook()
 
-      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Workspace contacts (0)'])
+      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+        'Workspace contacts (0)',
+        'Suggested (0)',
+      ])
+    })
+
+    it('shows the Suggested tab with its count after Workspace contacts', () => {
+      const shared = signerBuilder().build()
+      mockWorkspaceBook({ items: [spaceAddressBookItemBuilder().with({ address: shared.address }).build()] })
+      mockSigners({ signers: [signerBuilder().build(), shared] })
+
+      renderAddressBook()
+
+      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+        'Workspace contacts (1)',
+        'Suggested (1)',
+        'Local contacts (0)',
+        'Pending (0)',
+      ])
+    })
+
+    it('hides the count until suggestions have loaded', () => {
+      mockSigners({ signers: [signerBuilder().build()], isLoading: true })
+
+      renderAddressBook()
+
+      expect(screen.getByRole('tab', { name: 'Suggested' })).toBeInTheDocument()
+    })
+
+    it('reloads the suggestions after they failed to load', async () => {
+      const refetch = jest.fn()
+      mockSigners({ isError: true, refetch })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested' }))
+      await userEvent.click(within(screen.getByTestId('suggestions-error')).getByRole('button', { name: 'Reload' }))
+
+      expect(refetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('closes an open add dialog when the Workspace changes', async () => {
+      mockSigners({ signers: [signerBuilder().build()] })
+      const { rerender } = renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+      await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(faker.string.numeric(3))
+      rerender(<SpaceAddressBookV2 />)
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('offers admins to add a suggestion', async () => {
+      mockSigners({ signers: [signerBuilder().build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: 'Add to Workspace' })).toBeInTheDocument()
+    })
+
+    it('offers members a request instead of adding a suggestion', async () => {
+      const signer = signerBuilder().build()
+      mockRole('member')
+      mockSigners({ signers: [signer] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: `Request ${signer.safes[0].name} signer 1` })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
+    })
+
+    it('shows members which suggestions they already requested', async () => {
+      const signer = signerBuilder().build()
+      mockRole('member')
+      mockSigners({ signers: [signer] })
+      mockRequests({ items: [spaceAddressBookRequestBuilder().with({ address: signer.address }).build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: `${signer.safes[0].name} signer 1 requested` })).toBeInTheDocument()
     })
 
     it('shows the pending requests', async () => {
-      mockRequests({ items: [requestBuilder().build(), requestBuilder().build()] })
+      const [first, second] = [spaceAddressBookRequestBuilder().build(), spaceAddressBookRequestBuilder().build()]
+      mockRequests({ items: [first, second] })
 
       renderAddressBook()
       await userEvent.click(screen.getByRole('tab', { name: 'Pending (2)' }))
 
-      expect(screen.getByTestId('pending-table')).toHaveTextContent('2 pending')
+      expect(rowOf(first.name)).toBeInTheDocument()
+      expect(rowOf(second.name)).toBeInTheDocument()
+    })
+
+    it('lets an admin accept and decline a request', async () => {
+      const [first, second] = [spaceAddressBookRequestBuilder().build(), spaceAddressBookRequestBuilder().build()]
+      mockRequests({ items: [first, second] })
+      const { approve, reject } = mockRequestActions()
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (2)' }))
+      await userEvent.click(within(rowOf(second.name)).getByRole('button', { name: 'Accept' }))
+      await userEvent.click(within(rowOf(first.name)).getByRole('button', { name: 'Decline' }))
+
+      expect(approve).toHaveBeenCalledWith(second.id)
+      expect(reject).toHaveBeenCalledWith(first.id)
+    })
+
+    it('shows members their requests as pending, without Accept or Decline', async () => {
+      const request = spaceAddressBookRequestBuilder().build()
+      mockRole('member')
+      mockRequests({ items: [request] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+
+      const row = rowOf(request.name)
+      expect(within(row).getByText('Pending')).toBeInTheDocument()
+      expect(within(row).queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument()
+    })
+
+    it('names the member who asked for the contact', async () => {
+      const request = spaceAddressBookRequestBuilder().with({ requestedByUserId: 5 }).build()
+      mockRequests({ items: [request] })
+      ;(useMemberNameResolver as jest.Mock).mockReturnValue((userId?: number) =>
+        userId === 5 ? 'Lena Fischer' : undefined,
+      )
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+
+      expect(within(rowOf(request.name)).getByText('Lena Fischer')).toBeInTheDocument()
+    })
+
+    it('marks a request for an address the Workspace already has', async () => {
+      const request = spaceAddressBookRequestBuilder().build()
+      mockRequests({ items: [request] })
+      mockWorkspaceBook({
+        items: [spaceAddressBookItemBuilder().with({ address: request.address.toLowerCase() }).build()],
+      })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+
+      expect(within(rowOf(request.name)).getByText('Already in Workspace')).toBeInTheDocument()
+    })
+
+    it('holds Accept until the Workspace address book has loaded', async () => {
+      mockRequests({ items: [spaceAddressBookRequestBuilder().build()] })
+      mockWorkspaceBook({ isLoading: true })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+
+      expect(screen.getByTestId('pending-requests-loading')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument()
+    })
+
+    it('reloads the Workspace address book when it failed, before offering Accept', async () => {
+      mockRequests({ items: [spaceAddressBookRequestBuilder().build()] })
+      const refetchBook = mockWorkspaceBook({ isError: true })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+      await userEvent.click(within(screen.getByTestId('pending-requests-error')).getByRole('button'))
+
+      expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument()
+      expect(refetchBook).toHaveBeenCalled()
+    })
+
+    it('reloads the requests from the error state', async () => {
+      const refetch = jest.fn()
+      mockRequests({ isError: true, refetch })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending' }))
+      await userEvent.click(within(screen.getByTestId('pending-requests-error')).getByRole('button'))
+
+      expect(refetch).toHaveBeenCalled()
     })
 
     it('shows the loading state while the requests load', async () => {
@@ -738,6 +1000,38 @@ describe('SpaceAddressBookV2', () => {
   describe('local contacts', () => {
     const hardwareWallet = checksumAddress(faker.finance.ethereumAddress())
 
+    it('offers CSV import and export next to Add local contact', async () => {
+      renderAddressBook({ '1': { [hardwareWallet]: 'Hardware wallet' } })
+      await openLocalTab()
+
+      const csvGroup = within(screen.getByTestId('address-book-toolbar')).getByRole('group', {
+        name: 'Import and export',
+      })
+      expect(within(csvGroup).getByRole('button', { name: 'Import' })).toBeEnabled()
+      expect(within(csvGroup).getByRole('button', { name: 'Export' })).toBeEnabled()
+      // Same lucide icons as the Workspace contacts tab
+      expect(
+        within(csvGroup).getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up'),
+      ).toBeInTheDocument()
+      expect(
+        within(csvGroup).getByRole('button', { name: 'Export' }).querySelector('.lucide-download'),
+      ).toBeInTheDocument()
+      const toolbar = screen.getByTestId('address-book-toolbar')
+      expect(within(toolbar).getByRole('button', { name: 'Add local contact' })).toBeInTheDocument()
+    })
+
+    it('offers CSV import on an empty local book, with Export disabled', async () => {
+      renderAddressBook()
+      await openLocalTab()
+
+      const emptyState = screen.getByTestId('address-book-empty')
+      expect(within(emptyState).getByRole('button', { name: 'Import' })).toBeEnabled()
+      expect(within(emptyState).getByRole('button', { name: 'Export' })).toBeDisabled()
+      expect(
+        within(emptyState).getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up'),
+      ).toBeInTheDocument()
+    })
+
     it('merges a local contact saved on several chains into one row', async () => {
       renderAddressBook({
         '1': { [hardwareWallet]: 'Hardware wallet' },
@@ -759,7 +1053,7 @@ describe('SpaceAddressBookV2', () => {
     it('offers members to request a contact, showing ones already requested', async () => {
       mockRole('member')
       const requested = checksumAddress(faker.finance.ethereumAddress())
-      mockRequests({ items: [requestBuilder().with({ address: requested.toLowerCase() }).build()] })
+      mockRequests({ items: [spaceAddressBookRequestBuilder().with({ address: requested.toLowerCase() }).build()] })
 
       renderAddressBook({ '1': { [hardwareWallet]: 'Hardware wallet', [requested]: 'Vendor' } })
       await openLocalTab()

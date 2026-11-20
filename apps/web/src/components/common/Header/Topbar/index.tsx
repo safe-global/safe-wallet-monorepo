@@ -4,16 +4,14 @@ import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { Button } from '@safe-global/views/components/ui/button'
 import { AppRoutes } from '@/config/routes'
-import { HeaderNavigation, HeaderAccountInfo } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
-import { WalletFeature, useWalletPopover } from '@/features/wallet'
-import { GlobalSearchFeature } from '@/features/global-search'
-import { WalletConnectFeature } from '@/features/walletconnect'
-import { useDraftBatch } from '@/features/batching'
+import { HeaderNavigation } from '@/features/spaces/public/components/HeaderNavigation'
+import HeaderAccountInfo from '@/features/spaces/public/components/HeaderAccountInfo'
+import useWalletPopover from '@/features/wallet/public/hooks/useWalletPopover'
+import { useDraftBatch } from '@/features/batching/public/hooks/useDraftBatch'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCenterNotifications } from '@/store/notificationsSlice'
-import { openGlobalSearch } from '@/features/global-search/store'
+import { openGlobalSearch } from '@/features/global-search/public/store/globalSearchSlice'
 import { useWalletName } from '@/hooks/wallets/useWalletName'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
@@ -22,7 +20,7 @@ import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/public/hooks/useCurrentSpaceId'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import SafeLogo from '@/components/common/SafeLogo'
@@ -31,6 +29,10 @@ import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
 import { cn } from '@safe-global/views/utils/cn'
+import WalletPopover from '@/features/wallet/public/components/WalletPopover'
+import WalletConnectWidget from '@/features/walletconnect/public/components/WalletConnectWidget'
+import GlobalSearchModal from '@/features/global-search/public/components/GlobalSearchModal'
+import GlobalSearchInput from '@/features/global-search/public/components/GlobalSearchInput'
 
 export const SEARCH_CONTEXT_HEIGHT = 'h-14'
 export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
@@ -53,9 +55,6 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
     handleClose: handleWalletClose,
   } = useWalletPopover()
   const walletName = useWalletName(wallet)
-  const { WalletPopover } = useLoadFeature(WalletFeature)
-  const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
-  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectCenterNotifications)
   const spaceId = useCurrentSpaceId()
@@ -75,8 +74,12 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
   const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress))
 
-  const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
-  const contextHeight = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_HEIGHT : SEARCH_CONTEXT_HEIGHT
+  const hideSearch = !showSpaceSafeBar && Boolean(txFlow)
+
+  const contextWrap =
+    showLogo || hideSearch ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
+  const contextHeight =
+    showLogo || hideSearch ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_HEIGHT : SEARCH_CONTEXT_HEIGHT
 
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
@@ -119,7 +122,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             <SafeLogo />
           ) : showSpaceSafeBar ? (
             <SpaceSafeBar />
-          ) : (
+          ) : hideSearch ? null : (
             <GlobalSearchInput className="h-full w-64 rounded-3xl md:w-80" />
           )}
         </div>

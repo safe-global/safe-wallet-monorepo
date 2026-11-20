@@ -11,34 +11,37 @@ import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
-import * as cfServices from '@/features/counterfactual/services'
-import * as multichain from '@/features/multichain'
+import * as cfServicesPersistCounterfactualSafe from '@/features/counterfactual/public/services/persistCounterfactualSafe'
+import * as safeCreationEvents from '@/features/counterfactual/public/services/safeCreationEvents'
+import * as multichain from '@/features/multichain/public/utils/utils'
 import * as createLogic from '@/components/new-safe/create/logic'
 import * as web3 from '@/hooks/wallets/web3'
 import * as analytics from '@/services/analytics'
+import * as createLoadSafe from '@/services/analytics/events/createLoadSafe'
 import * as notificationsSlice from '@/store/notificationsSlice'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
-import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
+import { useIsAdmin } from '@/features/spaces/public/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLimit'
+import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/utils/elevation'
 
-// The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
-jest.mock('@/features/multichain', () => ({
+// Render the component itself, not the lazy wrapper, so every test sees it on the first render
+jest.mock('@/features/counterfactual/public/components/PayNowPayLater', () => ({
   __esModule: true,
-  ...jest.requireActual('@/features/multichain'),
-  NetworkLogosList: jest.requireActual('@/features/multichain/components/NetworkLogosList').default,
+  default: jest.requireActual('@/features/counterfactual/components/PayNowPayLater').default,
 }))
 jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
 jest.mock('@/hooks/useWalletCanPay', () => ({ __esModule: true, default: jest.fn(() => true) }))
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
+jest.mock('@/features/spaces/public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
+jest.mock('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'),
   useSpaceSafeCount: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+jest.mock('@/features/spaces/public/hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: jest.fn(),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -353,7 +356,9 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    const persistSpy = jest
+      .spyOn(cfServicesPersistCounterfactualSafe, 'persistCounterfactualSafe')
+      .mockResolvedValue({ ok: true })
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
@@ -382,8 +387,10 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
-    const eventSpy = jest.spyOn(cfServices, 'safeCreationDispatch')
+    jest
+      .spyOn(cfServicesPersistCounterfactualSafe, 'persistCounterfactualSafe')
+      .mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    const eventSpy = jest.spyOn(safeCreationEvents, 'safeCreationDispatch')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
@@ -393,7 +400,10 @@ describe('ReviewStep', () => {
       fireEvent.click(screen.getByTestId('review-step-next-btn'))
     })
 
-    expect(eventSpy).not.toHaveBeenCalledWith(cfServices.SafeCreationEvent.AWAITING_EXECUTION, expect.anything())
+    expect(eventSpy).not.toHaveBeenCalledWith(
+      safeCreationEvents.SafeCreationEvent.AWAITING_EXECUTION,
+      expect.anything(),
+    )
   })
 
   it('does not track a counterfactual creation for already-deployed safes', async () => {
@@ -409,7 +419,9 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    jest
+      .spyOn(cfServicesPersistCounterfactualSafe, 'persistCounterfactualSafe')
+      .mockResolvedValue({ ok: true, skipped: 'already-deployed' })
     const trackSpy = jest.spyOn(analytics, 'trackEvent')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -420,7 +432,7 @@ describe('ReviewStep', () => {
       fireEvent.click(screen.getByTestId('review-step-next-btn'))
     })
 
-    expect(trackSpy).not.toHaveBeenCalledWith(analytics.CREATE_SAFE_EVENTS.CREATED_SAFE, expect.anything())
+    expect(trackSpy).not.toHaveBeenCalledWith(createLoadSafe.CREATE_SAFE_EVENTS.CREATED_SAFE, expect.anything())
     expect(trackSpy).not.toHaveBeenCalledWith(expect.objectContaining({ label: 'counterfactual' }))
   })
 
@@ -437,7 +449,9 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    jest
+      .spyOn(cfServicesPersistCounterfactualSafe, 'persistCounterfactualSafe')
+      .mockResolvedValue({ ok: true, skipped: 'already-deployed' })
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -471,7 +485,7 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    jest.spyOn(cfServicesPersistCounterfactualSafe, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -502,7 +516,7 @@ describe('ReviewStep', () => {
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
     jest
-      .spyOn(cfServices, 'persistCounterfactualSafe')
+      .spyOn(cfServicesPersistCounterfactualSafe, 'persistCounterfactualSafe')
       .mockResolvedValue({ ok: false, error: new Error(backendMessage) })
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -535,7 +549,9 @@ describe('ReviewStep', () => {
       jest
         .spyOn(multichain, 'predictAddressBasedOnReplayData')
         .mockResolvedValue('0x0000000000000000000000000000000000000001')
-      return jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+      return jest
+        .spyOn(cfServicesPersistCounterfactualSafe, 'persistCounterfactualSafe')
+        .mockResolvedValue({ ok: true })
     }
 
     const newSafeHomeUrl = `/home?safe=${chainWithFeatures.shortName}%3A0x0000000000000000000000000000000000000001&spaceId=${MOCK_SPACE_UUID}`

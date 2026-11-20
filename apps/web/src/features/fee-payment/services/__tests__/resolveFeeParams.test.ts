@@ -1,13 +1,14 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
 
 import { resolveFeeParams } from '../resolveFeeParams'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import type { AppDispatch } from '@/store'
-import { FEE_COLLECTORS } from '../../constants'
+import { FEE_COLLECTORS } from '../../public/constants'
 
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
   createTx: jest.fn(),
 }))
 
@@ -165,8 +166,28 @@ describe('resolveFeeParams', () => {
     expect(mockCreateTx).not.toHaveBeenCalled()
     expect(mockTrackError).toHaveBeenCalledWith(
       expect.stringContaining('821'),
-      expect.stringContaining('Untrusted GTF refundReceiver'),
+      expect.stringContaining('Untrusted Pay from Safe refundReceiver'),
     )
+  })
+
+  it('throws when CGW quotes the fee in another gas token than the one picked', async () => {
+    mockInitiate.mockReturnValue({})
+    const otherToken = '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    const dispatch = buildDispatch(
+      buildThunk(Promise.resolve({ ...previewResponse, txData: { ...previewResponse.txData, gasToken: otherToken } })),
+    )
+
+    const resolve = resolveFeeParams({
+      chainId: '1',
+      safeAddress: '0xsafe',
+      safeTx,
+      gasToken: previewResponse.txData.gasToken,
+      numberSignatures: 3,
+      dispatch,
+    })
+
+    await expect(resolve).rejects.toThrow('not in the gas token picked')
+    expect(mockCreateTx).not.toHaveBeenCalled()
   })
 
   it('propagates errors from the preview dispatch', async () => {

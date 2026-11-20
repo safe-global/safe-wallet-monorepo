@@ -1,12 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import type { AllSafeItems } from '@/hooks/safes'
-import SafeAccountsTable from '../index'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import SafeAccountsTable from '../../../public/components/SafeAccountsTable'
 import type { RowCheckbox } from '../SafeAccountTableRow'
-import { useSafeAccountRows, type AccountGroup, type AccountLine } from '../useSafeAccountRows'
+import { useSafeAccountRows, type AccountGroup, type AccountLine } from '../../../public/hooks/useSafeAccountRows'
 
-jest.mock('../useSafeAccountRows', () => {
-  const actual = jest.requireActual('../useSafeAccountRows')
+jest.mock('../../../public/hooks/useSafeAccountRows', () => {
+  const actual = jest.requireActual('../../../public/hooks/useSafeAccountRows')
   return { ...actual, useSafeAccountRows: jest.fn() }
 })
 
