@@ -6,6 +6,8 @@ import decl from './remote-config.json'
 import schema from './remote-config.schema.json'
 import mobileDecl from '../../mobile/config/remote-config.json'
 import testChainFeatures from '../e2e/environment/infra/scripts/cfg_management/test-chain-features.json'
+import releasedWithoutE2e from '../e2e/environment/released-without-e2e.json'
+import { playwrightSpecs } from '../e2e/environment/playwright-specs.mjs'
 
 const enumKeys = new Set<string>(Object.values(FEATURES))
 const declaredKeys = decl.features.map((f) => f.key)
@@ -125,5 +127,68 @@ describe('E2E test-chain flags (test-chain-features.json)', () => {
   it('lists only declared or backend-only flags as on', () => {
     const unknown = onKeys.filter((k) => !declaredKeys.includes(k) && !BACKEND_ONLY_ON_KEYS.includes(k))
     expect(unknown).toEqual([])
+  })
+})
+
+describe('E2E coverage of released flags', () => {
+  const enabledKeys = decl.features.filter((f) => f.enabled).map((f) => f.key)
+  const specFlags: Record<string, string[]> = Object.fromEntries(
+    Object.entries(playwrightSpecs as Record<string, { flags?: string[] }>).map(([spec, entry]) => [
+      spec,
+      entry.flags ?? [],
+    ]),
+  )
+  const coveredKeys = new Set(Object.values(specFlags).flat())
+  const reasons: Record<string, string> = releasedWithoutE2e
+  const reasonKeys = Object.keys(reasons)
+  const compose = fs.readFileSync(
+    path.join(__dirname, '..', 'e2e', 'environment', 'infra', 'docker-compose.test.yml'),
+    'utf8',
+  )
+  const forkExtraKeys: Record<number, string[]> = Object.fromEntries(
+    compose
+      .split(/\n {2}cfg-chain-/)
+      .slice(1)
+      .flatMap((block) => {
+        const chainId = block.match(/FORK_CHAIN_ID: '(\d+)'/)?.[1]
+        const extra = block.match(/TEST_CHAIN_EXTRA_FEATURES: (\S+)/)?.[1]
+        return chainId && extra ? [[Number(chainId), extra.split(',')]] : []
+      }),
+  )
+
+  it('names only declared flags in the Playwright spec registry', () => {
+    const unknown = Object.entries(specFlags).flatMap(([spec, keys]) =>
+      keys.filter((k) => !declaredKeys.includes(k)).map((k) => `${spec}: ${k}`),
+    )
+    expect(unknown).toEqual([])
+  })
+
+  it('reads the extra flags of the forks from the compose file', () => {
+    expect(forkExtraKeys[1]).toEqual(expect.arrayContaining(['PORTFOLIO_ENDPOINT', 'POSITIONS']))
+  })
+
+  it('names only flags that the E2E stack switches on for a chain of the spec', () => {
+    const entries = Object.entries(playwrightSpecs as Record<string, { flags?: string[]; chains?: number[] }>)
+    const off = entries.flatMap(([spec, entry]) =>
+      (entry.flags ?? [])
+        .filter((k) => !testChainFeatures.on.includes(k))
+        .filter((k) => !(entry.chains ?? []).some((chainId) => forkExtraKeys[chainId]?.includes(k)))
+        .map((k) => `${spec}: ${k}`),
+    )
+    expect(off).toEqual([])
+  })
+
+  it('covers every released flag with a spec or gives a reason in released-without-e2e.json', () => {
+    const uncovered = enabledKeys.filter((k) => !coveredKeys.has(k) && !reasonKeys.includes(k))
+    expect(uncovered).toEqual([])
+  })
+
+  it('gives reasons only for released flags that no spec covers', () => {
+    const stale = reasonKeys.filter((k) => !enabledKeys.includes(k) || coveredKeys.has(k))
+    expect(stale).toEqual([])
+  })
+
+  it('gives a non-empty reason for every flag released without a spec', () => {
+    expect(reasonKeys.filter((k) => reasons[k].trim() === '')).toEqual([])
   })
 })
