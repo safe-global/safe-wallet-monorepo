@@ -1,6 +1,7 @@
 import type {
   TransactionDetails,
   ProposeTransactionDto,
+  NestedTransactionDto,
   Operation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -9,21 +10,6 @@ import { getStoreInstance } from '@/store'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { NestedTxEnvelope } from './nestedTxEnvelope'
 import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
-
-// TODO: replace with the generated type once the CGW schema ships `nestedTransaction`
-export type NestedTransactionDto = {
-  to: string
-  value: string
-  data?: string | null
-  operation: Operation
-  safeTxGas: string
-  baseGas: string
-  gasPrice: string
-  gasToken: string
-  refundReceiver?: string | null
-  nonce: string
-  notes?: string | null
-}
 
 const toNestedTransactionDto = (envelope: NestedTxEnvelope): NestedTransactionDto => ({
   to: envelope.to,
@@ -56,10 +42,7 @@ const proposeTx = async (
 ): Promise<TransactionDetails> => {
   const signatures = tx.signatures.size > 0 ? tx.encodedSignatures() : undefined
 
-  const proposeTransactionDto: ProposeTransactionDto & {
-    nestedTransaction?: NestedTransactionDto
-    declared?: DeclaredAttribution
-  } = {
+  const proposeTransactionDto: ProposeTransactionDto = {
     to: tx.data.to,
     value: tx.data.value?.toString() ?? '0',
     data: tx.data.data || undefined,

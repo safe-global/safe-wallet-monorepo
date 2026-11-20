@@ -8430,7 +8430,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-3cd4bf6",
+    "version": "main-b435613",
     "contact": {}
   },
   "tags": [],
@@ -11687,6 +11687,31 @@
           "results"
         ]
       },
+      "DeclaredAttributionDto": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Where the user started the request. Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, MCP, CLI. Truncated to 64 characters."
+          },
+          "appName": {
+            "type": "string",
+            "nullable": true,
+            "description": "App name. Truncated to 256 characters."
+          },
+          "appUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "App origin and path. Truncated to 2048 characters."
+          },
+          "appId": {
+            "type": "number",
+            "nullable": true,
+            "description": "ID of a listed Safe App."
+          }
+        }
+      },
       "CreateMessageDto": {
         "type": "object",
         "properties": {
@@ -11711,6 +11736,16 @@
           "origin": {
             "type": "string",
             "nullable": true
+          },
+          "declared": {
+            "nullable": true,
+            "description": "Where the request came from, as reported by the client.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeclaredAttributionDto"
+              }
+            ]
           }
         },
         "required": [
@@ -19406,6 +19441,16 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/NestedTransactionDto"
+              }
+            ]
+          },
+          "declared": {
+            "nullable": true,
+            "description": "Where the request came from, as reported by the client.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeclaredAttributionDto"
               }
             ]
           }

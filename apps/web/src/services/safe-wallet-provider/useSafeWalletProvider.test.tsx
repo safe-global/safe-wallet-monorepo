@@ -217,6 +217,7 @@ describe('useSafeWalletProvider', () => {
         message: 'message',
         requestId: expect.any(String),
         origin: appInfo.url,
+        declared: { channel: 'WALLET_CONNECT', appName: appInfo.name },
       })
 
       expect(resp).toBeInstanceOf(Promise)
@@ -350,6 +351,7 @@ describe('useSafeWalletProvider', () => {
         message: typedMessage,
         requestId: expect.any(String),
         origin: appInfo.url,
+        declared: { channel: 'WALLET_CONNECT', appName: appInfo.name },
       })
 
       expect(resp).toBeInstanceOf(Promise)
@@ -450,6 +452,35 @@ describe('useSafeWalletProvider', () => {
         },
         { ...appInfo, dappUrl },
       )
+
+      expect(mockSetTxFlow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            declared: { channel: 'WALLET_CONNECT', appName: appInfo.name, appUrl: dappUrl },
+          }),
+        }),
+        expect.any(Function),
+      )
+    })
+
+    it('declares the verified dApp URL of a WalletConnect message', () => {
+      jest.spyOn(router, 'useRouter').mockReturnValue({} as unknown as router.NextRouter)
+      jest.spyOn(messages, 'isOffchainEIP1271Supported').mockReturnValue(true)
+      const mockSetTxFlow = jest.fn()
+      const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
+        wrapper: ({ children }) => (
+          <Provider store={makeStore()}>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+      const dappUrl = faker.internet.url({ appendSlash: false })
+
+      result.current?.signMessage('message', { ...appInfo, dappUrl })
 
       expect(mockSetTxFlow).toHaveBeenCalledWith(
         expect.objectContaining({
