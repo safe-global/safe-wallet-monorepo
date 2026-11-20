@@ -12,8 +12,9 @@ import TxNonce from '../TxNonce'
 import TxStatusWidget from '../TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield/public/components/SafeShieldWidget'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
-import ChainIndicator from '@/components/common/ChainIndicator'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import ScopedSafeTag from '@safe-global/views/components/tx-flow/common/ScopedSafeTag'
+import { useChain } from '@/hooks/useChains'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import css from './styles.module.css'
 
 export const TxLayoutHeader = ({
@@ -50,6 +51,12 @@ export const TxLayoutHeader = ({
       {!hideNonce && safe.deployed && nonceNeeded && <TxNonce canEdit={!fixedNonce} />}
     </div>
   )
+}
+
+const ScopedSafe = ({ safeAddress, chainId }: { safeAddress: string; chainId: string }): ReactElement => {
+  const name = useSafeDisplayName(safeAddress, chainId)
+  const chain = useChain(chainId)
+  return <ScopedSafeTag address={safeAddress} name={name} chain={chain} />
 }
 
 export type TxLayoutBaseProps = {
@@ -149,20 +156,7 @@ const TxLayoutBase = ({
                 <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                   {title}
                 </Typography>
-                {scope && (
-                  <div data-testid="tx-flow-scoped-safe" className="flex min-w-0 items-center gap-2 text-sm">
-                    <EthHashInfo
-                      address={scope.safeAddress}
-                      chainId={scope.chainId}
-                      avatarSize={20}
-                      shortAddress
-                      showPrefix={false}
-                      showCopyButton={false}
-                      hasExplorer={false}
-                    />
-                    <ChainIndicator chainId={scope.chainId} inline imageSize={16} />
-                  </div>
-                )}
+                {scope && <ScopedSafe safeAddress={scope.safeAddress} chainId={scope.chainId} />}
               </div>
 
               <div
