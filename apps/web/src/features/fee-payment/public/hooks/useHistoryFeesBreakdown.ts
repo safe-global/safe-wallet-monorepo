@@ -5,10 +5,9 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { useCurrentChain } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -54,7 +53,6 @@ const buildFees = (
  * to scalars so polling `balances` doesn't re-trigger the receipt RPC.
  */
 export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryFeesData | null => {
-  const isPayFromSafeEnabled = useHasFeature(FEATURES.GTF)
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()
@@ -97,7 +95,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   // denominated in `gasToken` base units. Falls back to native chain metadata when the gas
   // token is the zero address.
   const safePaidData = useMemo<HistoryFeesData | null>(() => {
-    if (!isPayFromSafeEnabled || !executedAt || !exec || !isSafePaid) return null
+    if (!executedAt || !exec || !isSafePaid) return null
     if (!payment) return null
 
     const isNative = sameAddress(gasToken, ZERO_ADDRESS)
@@ -109,7 +107,6 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
 
     return buildFees(amount, symbol, fiatAmount, 'safe')
   }, [
-    isPayFromSafeEnabled,
     executedAt,
     isSafePaid,
     payment,
@@ -125,7 +122,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   // Only an unknown executor needs the receipt, to look for Rhinestone's log. Deps are primitives
   // so polling balances doesn't trigger a re-fetch.
   const [receipt] = useAsync(async () => {
-    if (!isPayFromSafeEnabled || !executedAt || !exec) return null
+    if (!executedAt || !exec) return null
     if (knownPayer || isSafePaid) return null
     if (!txHash || !provider) return null
     try {
@@ -135,13 +132,13 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
       if (!isRateLimitError(e)) logError(Errors._623, e, getRpcErrorContext(provider))
       throw e
     }
-  }, [isPayFromSafeEnabled, executedAt, !!exec, knownPayer, isSafePaid, txHash, provider])
+  }, [executedAt, !!exec, knownPayer, isSafePaid, txHash, provider])
 
   const payer = knownPayer ?? (receipt && isRelayedByRhinestone(receipt) ? 'sponsored' : null)
 
   const executorPaidData = useMemo<HistoryFeesData | null>(() => {
     // No payer without a multisig executor or receipt, so `exec` needs no check of its own.
-    if (!isPayFromSafeEnabled || !executedAt || isSafePaid || !payer) return null
+    if (!executedAt || isSafePaid || !payer) return null
     // CGW defaults `fee` to '0' when the Transaction Service has none.
     if (!fee || fee === '0') return null
 
@@ -154,7 +151,6 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
 
     return buildFees(amount, symbol, fiatAmount, payer)
   }, [
-    isPayFromSafeEnabled,
     executedAt,
     isSafePaid,
     payer,

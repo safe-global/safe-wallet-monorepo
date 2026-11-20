@@ -19,3 +19,11 @@ export const verifyStatusToVariant = (verifyContext?: VerifiedContext): VerifyVa
   }
   return 'unverified' // UNKNOWN or INVALID
 }
+
+// Ignores `isScam`: a scam-flagged origin is still where the request came from, which attribution needs to record
+export const getAttestedOrigin = (verifyContext?: VerifiedContext & { origin?: string }): string | undefined => {
+  if (verifyContext?.validation !== 'VALID') {
+    return undefined
+  }
+  return verifyContext.origin || undefined
+}

@@ -24,6 +24,8 @@ import { useSpacePlanState } from '../../public/hooks/useSpacePlanState'
 import PendingTxWidget from './PendingTxWidget'
 import AccountsWidget from '@/features/myAccounts/public/components/AccountsWidget'
 import SafeProAnnouncementModal from '@/features/safe-pro-announcement/public/components/SafeProAnnouncementModal'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const EmptyStateAddAction = () => {
   return (
@@ -45,12 +47,14 @@ const SpaceDashboard = () => {
   const {
     transactions: pendingTxs,
     count: pendingTxCount,
+    totalCount: pendingTxTotalCount,
     isLoading: isPendingTxLoading,
     error: pendingTxError,
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
   const { isHidden: isSetupHidden } = useSetupWidgetDismissal(spaceId)
+  const isTransactionsPageEnabled = useHasFeature(FEATURES.SPACE_TRANSACTIONS) === true
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
@@ -115,6 +119,18 @@ const SpaceDashboard = () => {
     )
   }
 
+  const handlePendingTxViewAll = () => {
+    if (!spaceId) return
+    trackEvent(
+      { ...SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED, label: spaceId },
+      {
+        workspace_id: spaceId,
+        ...(pendingTxTotalCount !== undefined && { pending_tx_count: pendingTxTotalCount }),
+      },
+    )
+    router.push({ pathname: AppRoutes.spaces.transactions, query: { spaceId } })
+  }
+
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupHidden
 
   const checkoutModal = <CheckoutReturnModals />
@@ -151,6 +167,8 @@ const SpaceDashboard = () => {
               <PendingTxWidget
                 transactions={pendingTxs}
                 loading={isPendingTxLoading}
+                totalCount={pendingTxTotalCount}
+                onViewAll={isTransactionsPageEnabled ? handlePendingTxViewAll : undefined}
                 error={pendingTxError ? String(pendingTxError) : undefined}
                 onRefresh={refetchPendingTxs}
                 onItemClick={handlePendingTxItemClick}

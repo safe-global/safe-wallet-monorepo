@@ -1,4 +1,5 @@
 import type {
+  AddressBookRequestItemDto,
   GetSpaceResponse,
   SpaceAddressBookItemDto,
   SpaceAddressBookTagDto,
@@ -36,6 +37,21 @@ export function spaceBuilder(): IBuilder<GetSpaceResponse> {
     members: [spaceMemberBuilder().build()],
     experimentalFeatures: [],
     setupStatus: null,
+  })
+}
+
+export function spaceAddressBookRequestBuilder(): IBuilder<AddressBookRequestItemDto> {
+  return Builder.new<AddressBookRequestItemDto>().with({
+    id: faker.number.int(),
+    name: faker.person.fullName(),
+    address: checksumAddress(faker.finance.ethereumAddress()),
+    chainIds: ['1'],
+    requestedBy: faker.internet.email(),
+    requestedByUserId: faker.number.int(),
+    reviewedBy: null,
+    reviewedByUserId: null,
+    status: 'PENDING',
+    createdAt: faker.date.recent().toISOString(),
   })
 }
 

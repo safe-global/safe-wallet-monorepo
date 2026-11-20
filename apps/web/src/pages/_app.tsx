@@ -45,6 +45,7 @@ import Recovery from '@/features/recovery/public/components/Recovery'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/public/hooks/useVisitedSafes'
 import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/hooks/usePortfolioRefetchOnTxHistory'
+import useClearPortfolioOnTx from '@/features/portfolio/public/hooks/useClearPortfolioOnTx'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureRenderError, initObservability } from '@/services/observability'
@@ -88,6 +89,7 @@ export const SafeScopedSubscriptions = (): null => {
   useTxTracking()
   useSafeMsgTracking()
   usePortfolioRefetchOnTxHistory()
+  useClearPortfolioOnTx()
   useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   useInviteNotification()
