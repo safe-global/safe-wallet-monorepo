@@ -57,6 +57,9 @@ type SafeShieldContextType = {
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
 
+export const _SafeShieldContext = SafeShieldContext
+export type { SafeShieldContextType as _SafeShieldContextType }
+
 const isCritical = <T extends { severity: Severity }>(result: T | null | undefined): result is T =>
   isSeverityHigherOrEqual(result?.severity, Severity.CRITICAL)
 

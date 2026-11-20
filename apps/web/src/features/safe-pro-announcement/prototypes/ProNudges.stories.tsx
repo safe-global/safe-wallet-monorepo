@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -14,15 +15,11 @@ import { PAID_PLANS } from '@/features/spaces/components/Plans/plans.storyData'
 // eslint-disable-next-line no-restricted-imports -- prototype: builds tiers like the Plans page
 import { _offersToTiers } from '@/features/spaces/components/Plans/planTiers'
 import { TryProModal } from './TryProModal'
+import { TRY_PRO_REASONS } from './tryPro'
+
+faker.seed(456)
 
 const TIERS = _offersToTiers(PAID_PLANS).filter((tier) => tier.billingCycle === 'month')
-
-const REASONS = {
-  sponsored: 'Safe Pro includes 50 sponsored transactions a month, so your team never pays gas.',
-  signing: 'With Safe Pro your co-signers share one queue and get notified when it’s their turn.',
-  recipient: 'Safe Pro checks every recipient against your address book and past transactions.',
-  contract: 'Safe Pro checks every contract you interact with before you sign.',
-}
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -73,7 +70,7 @@ const CoSignersToast = ({ onTryPro }: { onTryPro: (reason: string) => void }) =>
         variant: 'success',
         title: 'Signed',
         message: '2 more signatures needed. With Safe Pro, your co-signers share one queue and get notified to sign.',
-        link: { title: 'Try Safe Pro', onClick: () => onTryPro(REASONS.signing) },
+        link: { title: 'Try Safe Pro', onClick: () => onTryPro(TRY_PRO_REASONS.signing) },
         autoHideDuration: null,
       }),
     )
@@ -93,12 +90,12 @@ type Story = StoryObj<typeof meta>
 
 /** The modal any upgrade prompt opens in place, with the prompt's reason under the title. */
 export const TryProModalFromAPrompt: Story = {
-  render: () => <TryProModal tiers={TIERS} safeCount={3} reason={REASONS.sponsored} onClose={() => {}} />,
+  render: () => <TryProModal tiers={TIERS} safeCount={3} reason={TRY_PRO_REASONS.sponsored} onClose={() => {}} />,
 }
 
 /** A user with 7 Safes lands on 10, the smallest size that holds them all. */
 export const TryProModalPicksTheFittingSize: Story = {
-  render: () => <TryProModal tiers={TIERS} safeCount={7} reason={REASONS.recipient} onClose={() => {}} />,
+  render: () => <TryProModal tiers={TIERS} safeCount={7} reason={TRY_PRO_REASONS.recipient} onClose={() => {}} />,
 }
 
 /** A free user runs out of today's free transactions: the counter explains it and opens the modal. */
@@ -114,7 +111,7 @@ export const Nudge1SponsoredTransactionsRunOut: Story = {
               resetsAt={null}
               isSubscription={false}
               isPro={false}
-              onUpgrade={() => open(REASONS.sponsored)}
+              onUpgrade={() => open(TRY_PRO_REASONS.sponsored)}
             />
           </div>
         )}
@@ -143,7 +140,7 @@ export const Nudge3SafeShieldLockedChecks: Story = {
             safeTx={contractCallTx}
             hasProFeatures={false}
             isSafePro
-            onUnlockPro={(check) => open(REASONS[check])}
+            onUnlockPro={(check) => open(TRY_PRO_REASONS[check])}
           />
         )}
       </WithModal>
