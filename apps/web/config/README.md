@@ -30,7 +30,8 @@ Config Service diffs against when seeding/verifying `Feature` rows for a release
    declared flag is not read anywhere, or if the file is schema-invalid.
 4. Decide the flag's state in the isolated E2E stack: add the key to `on` in
    [`test-chain-features.json`](../e2e/environment/infra/scripts/cfg_management/test-chain-features.json),
-   or to `off` with a reason. The sync test fails until the flag is in one of them.
+   or to `off`. The sync test fails until the flag is in one of them. The question of
+   E2E coverage comes later, in the PR that releases the flag.
 
 ## Releasing a flag
 
