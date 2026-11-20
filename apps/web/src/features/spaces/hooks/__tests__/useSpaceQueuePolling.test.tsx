@@ -275,4 +275,68 @@ describe('useSpaceQueuePolling', () => {
 
     expect(messages(store)).toEqual([])
   })
+
+  it('does not toast for a transaction the wallet can sign when the flag is off', async () => {
+    mockHasFeature.mockReturnValue(false)
+    queue = [queuedTx([wallet])]
+    const { store } = renderPolling()
+
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+
+    expect(messages(store)).toEqual([])
+  })
+
+  it('does not toast for a transaction the wallet can sign when the user is not an active member', async () => {
+    mockIsActiveMember.mockReturnValue(false)
+    queue = [queuedTx([wallet])]
+    const { store } = renderPolling()
+
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+
+    expect(messages(store)).toEqual([])
+  })
+
+  it('toasts only the transactions the switched-to wallet can sign', async () => {
+    const otherWallet = faker.finance.ethereumAddress()
+    const { store, rerender } = await renderAfterFirstQueue()
+    mockWalletAddress.mockReturnValue(otherWallet)
+    rerender()
+
+    await pollWith(store, [queuedTx([wallet]), queuedTx([otherWallet])])
+
+    expect(messages(store)).toEqual(['A transaction requires your confirmation.'])
+  })
+
+  it('does not toast when the transactions of a Safe leave the queue', async () => {
+    queue = [queuedTx([wallet])]
+    const { store } = await renderAfterFirstQueue()
+
+    await pollWith(store, [])
+
+    expect(messages(store)).toEqual([])
+  })
+
+  it('does not request the queue at a poll while the tab is unfocused', async () => {
+    const store = makeStore()
+    store.dispatch({ type: '__rtkq/unfocused' })
+    renderPolling(store)
+    await waitFor(() => expect(requests).toHaveLength(1))
+
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+
+    expect(requests).toHaveLength(1)
+  })
+
+  it('requests the queue again at a poll once the tab is focused again', async () => {
+    const store = makeStore()
+    store.dispatch({ type: '__rtkq/unfocused' })
+    renderPolling(store)
+    await waitFor(() => expect(requests).toHaveLength(1))
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+    store.dispatch({ type: '__rtkq/focused' })
+
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL * 2))
+
+    expect(requests).toHaveLength(2)
+  })
 })

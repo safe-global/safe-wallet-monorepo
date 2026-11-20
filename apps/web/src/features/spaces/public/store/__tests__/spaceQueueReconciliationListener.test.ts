@@ -151,7 +151,7 @@ const txId = () => `multisig_${safeAddress}_${faker.string.hexadecimal({ length:
 
 describe('spaceQueueReconciliationListener', () => {
   beforeEach(() => {
-    mockTxDispatch.mockClear()
+    mockTxDispatch.mockReset()
   })
 
   it('should dispatch SIGNATURE_INDEXED once the signer left the missing signers', async () => {
@@ -391,5 +391,111 @@ describe('spaceQueueReconciliationListener', () => {
     await pollQueue(store)
 
     expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
+  })
+
+  it('should leave the child Safe pending while the parent approval is not executed', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    const parentAddress = faker.finance.ethereumAddress()
+    store.dispatch(
+      setPendingTx({
+        txId: id,
+        chainId,
+        safeAddress,
+        nonce: 3,
+        status: PendingStatus.NESTED_SIGNING,
+        signerAddress: parentAddress,
+        txHashOrParentSafeTxHash: faker.string.hexadecimal({ length: 64 }),
+        executed: false,
+        method: 'approveHash',
+      }),
+    )
+    respondWithQueue(page([results([queuedTx(id, 3, [parentAddress])])]))
+
+    await pollQueue(store)
+
+    expect(mockTxDispatch).not.toHaveBeenCalled()
+  })
+
+  it('should dispatch SIGNATURE_INDEXED for the child Safe once the parent approval is executed', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    const parentAddress = faker.finance.ethereumAddress()
+    store.dispatch(
+      setPendingTx({
+        txId: id,
+        chainId,
+        safeAddress,
+        nonce: 3,
+        status: PendingStatus.NESTED_SIGNING,
+        signerAddress: parentAddress,
+        txHashOrParentSafeTxHash: faker.string.hexadecimal({ length: 64 }),
+        executed: true,
+        method: 'approveHash',
+      }),
+    )
+    respondWithQueue(page([results([queuedTx(id, 3, [faker.finance.ethereumAddress()])])]))
+
+    await pollQueue(store)
+
+    expect(mockTxDispatch).toHaveBeenCalledTimes(1)
+    expect(mockTxDispatch).toHaveBeenCalledWith(TxEvent.SIGNATURE_INDEXED, { txId: id })
+  })
+
+  it('should dispatch SUCCESS once for a tx across two polls', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    store.dispatch(setPendingTx({ txId: id, ...processingTx(4) }))
+    mockTxDispatch.mockImplementation((event: TxEvent, payload: unknown) => {
+      if (event === TxEvent.SUCCESS) store.dispatch(clearPendingTx({ txId: (payload as { txId: string }).txId }))
+    })
+    respondWithQueue(page([results([queuedTx(txId(), 5)])]))
+    respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
+
+    await pollQueue(store)
+    await waitFor(() => expect(store.getState().pendingTxs[id]).toBeUndefined())
+    await pollQueue(store)
+
+    expect(mockTxDispatch.mock.calls.filter(([event]) => event === TxEvent.SUCCESS)).toHaveLength(1)
+  })
+
+  it('should not report SUCCESS for a deleted tx whose details are not found', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    store.dispatch(setPendingTx({ txId: id, ...processingTx(4) }))
+    respondWithQueue(page([results([queuedTx(txId(), 5)])]))
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/chains/${chainId}/transactions/${id}`, () => new HttpResponse(null, { status: 404 })),
+    )
+
+    await pollQueue(store)
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(mockTxDispatch).not.toHaveBeenCalled()
+  })
+
+  it('should report the other option of a conflict as cancelled once one option executes', async () => {
+    const store = makeTestStore()
+    const executedId = txId()
+    const cancelledId = txId()
+    const cancelled = processingTx(4)
+    store.dispatch(setPendingTx({ txId: executedId, ...processingTx(4) }))
+    store.dispatch(setPendingTx({ txId: cancelledId, ...cancelled }))
+    respondWithQueue(page([results([queuedTx(txId(), 5)])]))
+    respondWithDetails(executedId, { txStatus: TransactionStatus.SUCCESS })
+    respondWithDetails(cancelledId, { txStatus: TransactionStatus.CANCELLED })
+
+    await pollQueue(store)
+
+    await waitFor(() =>
+      expect(mockTxDispatch).toHaveBeenCalledWith(TxEvent.FAILED, {
+        txId: cancelledId,
+        chainId,
+        safeAddress,
+        nonce: 4,
+        groupKey: cancelled.groupKey,
+        error: new Error('Another transaction with the same nonce was executed instead.'),
+      }),
+    )
   })
 })

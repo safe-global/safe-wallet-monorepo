@@ -241,6 +241,21 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
     })
 
+    it('should redirect to welcome/spaces when not authenticated on /spaces/transactions', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.transactions,
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
+
     it('should redirect to welcome/spaces when not authenticated on /spaces/members', async () => {
       setupMocks({
         pathname: AppRoutes.spaces.members,

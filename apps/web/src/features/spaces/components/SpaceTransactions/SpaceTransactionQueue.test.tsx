@@ -183,6 +183,28 @@ describe('SpaceTransactionQueue', () => {
     expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
   })
 
+  it('shows an error, not the empty queue, when the gateway answers 404', async () => {
+    respondWith(null, 404)
+
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+    expect(await screen.findByText("Couldn't load the queue")).toBeInTheDocument()
+    expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
+  })
+
+  it('adds the row of a transaction that appears at a poll', async () => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
+    let results = page({ [safeA]: { '1': transactions(1) } })
+    server.use(http.get(queueUrl, () => HttpResponse.json(results)))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+
+    results = page({ [safeA]: { '1': transactions(1) }, [safeB]: { '137': transactions(1) } })
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+
+    expect(await screen.findAllByTestId('space-queue-safe')).toHaveLength(2)
+  })
+
   it('shows the empty state with the unavailable Safes when none of them could be loaded', async () => {
     respondWith(page({}, { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }))
 
@@ -409,6 +431,22 @@ describe('SpaceTransactionQueue', () => {
       await waitFor(() => expect(screen.getByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'network'))
 
       expect(requests).toHaveLength(requestCount)
+    })
+
+    it('keeps the filters and the search when regrouping', async () => {
+      respondWith(page({ [safeA]: { '1': transactions(1) } }))
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-table')
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'treasury' } })
+
+      fireEvent.click(screen.getByRole('button', { name: 'Group by network' }))
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'network'))
+      expect(mockToolbarProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] } }),
+      )
+      expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('treasury')
     })
 
     it('opens the queue with the grouping picked earlier in the session', async () => {

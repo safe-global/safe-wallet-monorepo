@@ -77,6 +77,23 @@ const getCardFor = (safe: SafeItem) => cardProps.find((c) => c.safe.address === 
 
 const cfState = (safe: SafeItem) => ({ [safe.chainId]: { [safe.address]: { status: {} } } })
 
+describe('SelectSafeModal new transaction picker', () => {
+  beforeEach(() => {
+    cardProps.length = 0
+    mockUseChains.mockReturnValue({ configs: [chainWithSwap, chainWithoutSwap] })
+  })
+
+  it('lists a Workspace Safe once on each network it is on', () => {
+    const onPolygon: SafeItem = { ...deployedSafe, chainId: '137' }
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, onPolygon], isLoading: false })
+
+    renderModal(ESafeAction.NewTransaction)
+
+    const listed = new Set(cardProps.map(({ safe }) => `${safe.chainId}:${safe.address}`))
+    expect([...listed]).toEqual([`1:${deployedSafe.address}`, `137:${deployedSafe.address}`])
+  })
+})
+
 describe('SelectSafeModal swap disabling', () => {
   beforeEach(() => {
     cardProps.length = 0

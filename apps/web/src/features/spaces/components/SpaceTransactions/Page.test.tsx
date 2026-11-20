@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import SpaceTransactionsPage from './Page'
 
@@ -51,6 +51,41 @@ describe('SpaceTransactionsPage', () => {
     rerender(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
 
     expect(screen.queryByText('Urgency:')).not.toBeInTheDocument()
+  })
+
+  it('requests the queue of the Workspace switched to', async () => {
+    const requestedSpaceIds: string[] = []
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/spaces/:spaceId/transactions/queued`, ({ params }) => {
+        requestedSpaceIds.push(params.spaceId as string)
+        return HttpResponse.json({
+          count: 0,
+          next: null,
+          previous: null,
+          results: {},
+          unavailableSafes: [],
+          counts: {
+            total: 0,
+            execute: 0,
+            sign: 0,
+            blocked: 0,
+            waiting: 0,
+            conflicting: 0,
+            stale: 0,
+            safes: [],
+            chains: [],
+            signers: [],
+          },
+        })
+      }),
+    )
+    const previousSpaceId = faker.string.uuid()
+    const nextSpaceId = faker.string.uuid()
+    const { rerender } = render(<SpaceTransactionsPage spaceId={previousSpaceId} />)
+
+    rerender(<SpaceTransactionsPage spaceId={nextSpaceId} />)
+
+    await waitFor(() => expect(requestedSpaceIds).toContain(nextSpaceId))
   })
 
   it('empties the search when switching to another Workspace', () => {

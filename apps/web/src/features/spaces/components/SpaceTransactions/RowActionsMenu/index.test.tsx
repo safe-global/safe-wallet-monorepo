@@ -67,6 +67,12 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
   ),
 }))
 
+const mockIsPending = { current: false }
+jest.mock('@/hooks/useIsPending', () => ({
+  __esModule: true,
+  default: () => mockIsPending.current,
+}))
+
 const mockWallet: { current: { address: string } | null } = { current: null }
 jest.mock('@/hooks/wallets/useWallet', () => ({
   __esModule: true,
@@ -116,6 +122,7 @@ describe('RowActionsMenu', () => {
     mockSetTxFlow.mockReset()
     mockTrackEvent.mockClear()
     mockIsOk.current = true
+    mockIsPending.current = false
     mockWallet.current = null
     mockIsNonceDeletable.mockReturnValue(true)
     mockGetTxDetails.mockReset().mockReturnValue({ currentData: undefined })
@@ -204,6 +211,18 @@ describe('RowActionsMenu', () => {
     )
     expect(screen.getByRole('menuitem', { name: 'Reject' })).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByRole('menuitem', { name: 'Copy link' })).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('disables replacing and rejecting while the transaction is pending', async () => {
+    mockIsPending.current = true
+    renderMenu(tx(7))
+    openMenu()
+
+    expect(await screen.findByRole('menuitem', { name: 'Replace with a transfer' })).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+    expect(screen.getByRole('menuitem', { name: 'Reject' })).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('copies the link to the transaction in the Safe of the row', async () => {
