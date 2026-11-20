@@ -10,6 +10,7 @@ const mockIsTourFlagOn = jest.fn()
 const mockIsBelowMd = jest.fn()
 const mockIsSpaceRoute = jest.fn()
 const mockIsActiveMember = jest.fn()
+const mockWorkspaceLock = jest.fn()
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -34,10 +35,14 @@ jest.mock('../../../public/hooks/useSpaceMembers', () => ({
 
 jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockSpaceId }))
 
+jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockWorkspaceLock() }))
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/users'),
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: mockUserId } }),
 }))
+
+const UNLOCKED = { isResolving: false, isError: false, isLocked: false }
 
 const tourWithSettingsSection = (
   <>
@@ -49,7 +54,7 @@ const tourWithSettingsSection = (
 const renderTour = () =>
   render(tourWithSettingsSection, { routerProps: { pathname: '/spaces', query: { spaceId: mockSpaceId } } })
 
-const markTourSeen = () => local.setItem(getWorkspaceTourSeenKey(mockUserId, mockSpaceId), true)
+const markTourSeen = () => local.setItem(getWorkspaceTourSeenKey(mockUserId), true)
 
 const addSpaceSelector = () => {
   const button = document.createElement('button')
@@ -64,6 +69,7 @@ describe('WorkspaceTour', () => {
     mockIsBelowMd.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
     mockIsActiveMember.mockReturnValue(true)
+    mockWorkspaceLock.mockReturnValue(UNLOCKED)
     const { result } = renderHook(() => useWorkspaceTourOpen())
     act(() => result.current.close())
   })
@@ -89,7 +95,7 @@ describe('WorkspaceTour', () => {
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Take the tour' })).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId, mockSpaceId))).toBeNull()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
   })
 
   it('stays hidden and leaves the visit unrecorded for a member who is not active', () => {
@@ -98,7 +104,7 @@ describe('WorkspaceTour', () => {
     renderTour()
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId, mockSpaceId))).toBeNull()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
   })
 
   it('stays hidden and leaves the visit unrecorded outside workspace pages', () => {
@@ -107,7 +113,26 @@ describe('WorkspaceTour', () => {
     renderTour()
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId, mockSpaceId))).toBeNull()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+  })
+
+  it('stays hidden and leaves the visit unrecorded while the workspace plan is still loading', () => {
+    mockWorkspaceLock.mockReturnValue({ ...UNLOCKED, isResolving: true })
+
+    renderTour()
+
+    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+  })
+
+  it('stays hidden, hides its Settings button and leaves the visit unrecorded when free access ended without a plan', () => {
+    mockWorkspaceLock.mockReturnValue({ ...UNLOCKED, isLocked: true })
+
+    renderTour()
+
+    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Take the tour' })).not.toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
   })
 
   it('hides the tour and its Settings button below the breakpoint where the sidebar becomes a drawer', () => {

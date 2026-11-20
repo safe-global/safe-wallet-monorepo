@@ -68,7 +68,7 @@ export async function seedLocalStorage(page: Page): Promise<void> {
   )
 }
 
-/** The workspace tour's seen flag is keyed by user and workspace ids, so it can't be pre-seeded; skip it when it opens. */
+/** The workspace tour's seen flag is keyed by the CGW user id, so it can't be pre-seeded; skip it when it opens. */
 export async function dismissWorkspaceTour(page: Page): Promise<void> {
   await page.addLocatorHandler(page.getByTestId('workspace-tour-welcome'), async () => {
     await page.getByRole('button', { name: 'Skip for now' }).click()

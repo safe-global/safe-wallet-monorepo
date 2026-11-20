@@ -31,27 +31,27 @@ describe('useWorkspaceTourVisit', () => {
     const onFirstVisit = renderVisit({ spaceId })
 
     expect(onFirstVisit).toHaveBeenCalledTimes(1)
-    expect(local.getItem(getWorkspaceTourSeenKey(userId, spaceId))).toBe(true)
+    expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBe(true)
   })
 
-  it('does not open the tour again for the same member and workspace', () => {
-    local.setItem(getWorkspaceTourSeenKey(userId, spaceId), true)
+  it('does not open the tour again for the same member', () => {
+    local.setItem(getWorkspaceTourSeenKey(userId), true)
 
     const onFirstVisit = renderVisit({ spaceId })
 
     expect(onFirstVisit).not.toHaveBeenCalled()
   })
 
-  it('opens the tour for the same member in another workspace', () => {
-    local.setItem(getWorkspaceTourSeenKey(userId, spaceId), true)
+  it('does not open the tour again when the member opens another workspace', () => {
+    local.setItem(getWorkspaceTourSeenKey(userId), true)
 
     const onFirstVisit = renderVisit({ spaceId: `${spaceId}1` })
 
-    expect(onFirstVisit).toHaveBeenCalledTimes(1)
+    expect(onFirstVisit).not.toHaveBeenCalled()
   })
 
-  it('opens the tour for another member of the same workspace', () => {
-    local.setItem(getWorkspaceTourSeenKey(userId, spaceId), true)
+  it('opens the tour for another member signed in on the same browser', () => {
+    local.setItem(getWorkspaceTourSeenKey(userId), true)
     mockCurrentUser.mockReturnValue({ id: userId + 1 })
 
     const onFirstVisit = renderVisit({ spaceId })
@@ -71,6 +71,6 @@ describe('useWorkspaceTourVisit', () => {
     const onFirstVisit = renderVisit({ spaceId, canShowTour: false })
 
     expect(onFirstVisit).not.toHaveBeenCalled()
-    expect(local.getItem(getWorkspaceTourSeenKey(userId, spaceId))).toBeNull()
+    expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBeNull()
   })
 })
