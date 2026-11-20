@@ -1,16 +1,12 @@
+import { CHECKOUT_RETURN_ORIGIN } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 
 /** Stripe replaces this literal with the session id on the way back; it must travel un-encoded. */
 export const _CHECKOUT_SESSION_ID_PLACEHOLDER = '{CHECKOUT_SESSION_ID}'
 export const CHECKOUT_SESSION_QUERY_PARAM = 'sessionId'
 
-// The CGW rejects non-public return URLs, so local development returns to the staging web app.
-const STAGING_WEB_ORIGIN = 'https://safe-wallet-web.dev.5afe.dev'
-
-const getPublicOrigin = (): string => {
-  const origin = typeof window !== 'undefined' ? window.location.origin : ''
-  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ? STAGING_WEB_ORIGIN : origin
-}
+const getPublicOrigin = (): string =>
+  CHECKOUT_RETURN_ORIGIN || (typeof window !== 'undefined' ? window.location.origin : '')
 
 const buildSpaceUrl = (pathname: string, spaceId: string): URL => {
   const url = new URL(pathname, getPublicOrigin())
