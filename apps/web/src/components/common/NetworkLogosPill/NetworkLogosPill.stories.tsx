@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import NetworkLogosPill from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
+  title: 'Features/Multichain/NetworkLogosPill',
   component: NetworkLogosPill,
   parameters: {
     layout: 'centered',
@@ -11,9 +11,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Paper sx={{ padding: 2 }}>
+        <div className="rounded-lg bg-card p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],

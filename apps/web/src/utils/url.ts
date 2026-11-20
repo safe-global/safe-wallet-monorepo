@@ -34,16 +34,6 @@ export const sanitizeUrl = (url: string): string => {
   return sanitizedUrl
 }
 
-export const getOriginPath = (url: string): string => {
-  try {
-    const { origin, pathname } = new URL(url)
-    return origin + (pathname === '/' ? '' : pathname)
-  } catch (e) {
-    console.error('Error parsing URL', url, e)
-    return url
-  }
-}
-
 // Function to strip URL parameters, returning only the base URL
 export const stripUrlParams = (url: string): string => {
   try {

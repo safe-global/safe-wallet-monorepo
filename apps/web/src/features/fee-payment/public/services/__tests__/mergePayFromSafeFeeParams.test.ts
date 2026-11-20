@@ -15,7 +15,7 @@ const RELAY_FEE_RELAYER = {
   safeCreationSponsored: false,
   safeTransactionSponsored: false,
   enableTenderlySimulationBeforeRelay: false,
-  gasPaymentOptions: ['SUBSCRIPTION'],
+  gasPaymentOptions: ['SUBSCRIPTION', 'PAY_FROM_SAFE'],
 }
 
 const buildChain = (features: string[], relayer: typeof RELAY_FEE_RELAYER | null = RELAY_FEE_RELAYER): Chain =>
@@ -25,8 +25,8 @@ const dispatch = jest.fn() as unknown as ReturnType<typeof jest.fn> & AppDispatc
 
 const baseArgs = (safeTx: SafeTransaction) => ({
   safeTx,
-  chain: buildChain(['GTF']),
-  feePaymentMode: 'safe' as const,
+  chain: buildChain([]),
+  isPayFromSafe: true,
   feeGasToken: '0xtoken',
   chainId: '1',
   safeAddress: '0xsafe',
@@ -43,25 +43,25 @@ describe('mergePayFromSafeFeeParams', () => {
     const safeTx = createSafeTx()
     safeTx.signatures.set('0xowner', { signer: '0xowner', data: '0xsig' } as any)
 
-    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx) })
+    const result = await mergePayFromSafeFeeParams(baseArgs(safeTx))
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(mockResolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when chain lacks the GTF feature', async () => {
+  it('bails out when the relayer does not offer Pay from Safe, whatever the flags', async () => {
     const safeTx = createSafeTx()
 
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
-      chain: buildChain([]),
+      chain: buildChain(['GTF', 'PAY_FROM_SAFE'], { ...RELAY_FEE_RELAYER, gasPaymentOptions: ['SUBSCRIPTION'] }),
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(mockResolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when the chain has the GTF flag but no RELAY_FEE relayer', async () => {
+  it('bails out when the chain has no relayer', async () => {
     const safeTx = createSafeTx()
 
     const result = await mergePayFromSafeFeeParams({
@@ -69,31 +69,28 @@ describe('mergePayFromSafeFeeParams', () => {
       chain: buildChain(['GTF'], null),
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(mockResolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when payment mode is signer', async () => {
+  it('bails out when the signer pays', async () => {
     const safeTx = createSafeTx()
 
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
-      feePaymentMode: 'signer',
+      isPayFromSafe: false,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(mockResolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when no gas token is selected', async () => {
+  it('throws when the Safe pays and no gas token is quoted, instead of signing a tx the signer would pay', async () => {
     const safeTx = createSafeTx()
 
-    const result = await mergePayFromSafeFeeParams({
-      ...baseArgs(safeTx),
-      feeGasToken: undefined,
-    })
+    const merge = mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feeGasToken: undefined })
 
-    expect(result).toBe(safeTx)
+    await expect(merge).rejects.toThrow('The fee quote for paying from the Safe account is not ready')
     expect(mockResolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -102,9 +99,9 @@ describe('mergePayFromSafeFeeParams', () => {
     const merged = createSafeTx()
     mockResolveFeeParams.mockResolvedValue(merged)
 
-    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx) })
+    const result = await mergePayFromSafeFeeParams(baseArgs(safeTx))
 
-    expect(result).toBe(merged)
+    expect(result).toEqual({ safeTx: merged, feesMerged: true })
     expect(mockResolveFeeParams).toHaveBeenCalledWith({
       chainId: '1',
       safeAddress: '0xsafe',

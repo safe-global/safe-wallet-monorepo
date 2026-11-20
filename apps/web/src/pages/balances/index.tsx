@@ -17,9 +17,14 @@ import useIsStakingPromoBannerVisible, {
   STAKING_PROMO_BANNER_HIDE_KEY,
 } from '@/features/stake/public/hooks/useIsStakingPromoBannerVisible'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
+import useSafeTotalBalance from '@/hooks/useSafeTotalBalance'
 import PortfolioRefreshHint from '@/features/portfolio/public/components/PortfolioRefreshHint'
 import NoFeeCampaignBanner from '@/features/no-fee-campaign/public/components/NoFeeCampaignBanner'
 import StakingPromoBanner from '@/features/stake/public/components/StakingPromoBanner'
+
+const TOKENS_ONLY_TOOLTIP =
+  'Total from this list only. Portfolio total includes positions and may use other token data.'
+const SUMMARY_TOOLTIP = "Includes positions and tokens you've hidden. Same total as on Home."
 
 const Balances = () => {
   const { balances, error } = useVisibleBalances()
@@ -32,6 +37,7 @@ const Balances = () => {
   )
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
+  const safeTotal = useSafeTotalBalance()
 
   const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
 
@@ -63,9 +69,9 @@ const Balances = () => {
         <div className="mb-4">
           <div className="flex flex-row items-center justify-between">
             <TotalAssetValue
-              fiatTotal={tokensFiatTotal}
+              fiatTotal={safeTotal.isSummaryEnabled ? safeTotal.fiatTotal : tokensFiatTotal}
               title="Total assets value"
-              tooltipTitle="Total from this list only. Portfolio total includes positions and may use other token data."
+              tooltipTitle={safeTotal.isSummaryEnabled ? SUMMARY_TOOLTIP : TOKENS_ONLY_TOOLTIP}
             />
 
             <div className="flex flex-col items-end gap-1">

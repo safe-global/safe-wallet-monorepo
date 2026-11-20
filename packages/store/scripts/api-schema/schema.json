@@ -8110,7 +8110,10 @@
             "description": "Device registered successfully for notifications"
           },
           "400": {
-            "description": "Invalid device data, expired timestamp, or invalid signature"
+            "description": "Expired timestamp"
+          },
+          "422": {
+            "description": "Invalid device data or malformed signature"
           }
         },
         "summary": "Register device for notifications (deprecated)",
@@ -8430,7 +8433,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-e62d995",
+    "version": "main-1fd3a47",
     "contact": {}
   },
   "tags": [],
@@ -11687,6 +11690,31 @@
           "results"
         ]
       },
+      "DeclaredAttributionDto": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Where the user started the request. Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, MCP, CLI. Truncated to 64 characters."
+          },
+          "appName": {
+            "type": "string",
+            "nullable": true,
+            "description": "App name. Truncated to 256 characters."
+          },
+          "appUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "App origin and path. Truncated to 2048 characters."
+          },
+          "appId": {
+            "type": "number",
+            "nullable": true,
+            "description": "ID of a listed Safe App."
+          }
+        }
+      },
       "CreateMessageDto": {
         "type": "object",
         "properties": {
@@ -11711,6 +11739,16 @@
           "origin": {
             "type": "string",
             "nullable": true
+          },
+          "declared": {
+            "nullable": true,
+            "description": "Where the request came from, as reported by the client.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeclaredAttributionDto"
+              }
+            ]
           }
         },
         "required": [
@@ -19408,6 +19446,16 @@
                 "$ref": "#/components/schemas/NestedTransactionDto"
               }
             ]
+          },
+          "declared": {
+            "nullable": true,
+            "description": "Where the request came from, as reported by the client.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DeclaredAttributionDto"
+              }
+            ]
           }
         },
         "required": [
@@ -19929,10 +19977,7 @@
         },
         "required": [
           "cloudMessagingToken",
-          "buildNumber",
-          "bundle",
           "deviceType",
-          "version",
           "safeRegistrations"
         ]
       },

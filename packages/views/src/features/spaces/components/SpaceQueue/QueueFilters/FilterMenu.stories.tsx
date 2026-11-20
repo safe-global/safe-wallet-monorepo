@@ -45,7 +45,7 @@ const openSubmenu =
     await screen.findAllByRole('menuitemcheckbox')
   }
 
-export const Status: Story = { play: openSubmenu('Status') }
+export const Urgency: Story = { play: openSubmenu('Urgency') }
 
 export const SafeAccount: Story = { play: openSubmenu('Safe account') }
 
