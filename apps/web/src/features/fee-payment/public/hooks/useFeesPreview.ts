@@ -70,7 +70,7 @@ export type FeesPreviewData = {
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
 /**
- * @param options.isExecution - the executor is known, so signer-pays is estimated even one signature short.
+ * @param options.isExecution - the executor is known, so signer-pays is estimated; while signing it is not.
  * @param options.isPayFromSafe - the Safe pays the fee, so the CGW quote is priced instead of the signer estimate.
  */
 export const useFeesPreview = ({
@@ -307,9 +307,8 @@ export const useFeesPreview = ({
   }
 
   if (isSignerMode) {
-    // Multi-signer can't simulate execTransaction at sign time — executor unknown, signatures
-    // incomplete — nor can a proposer or a failed estimate, so we surface an explanatory note instead of a fake number.
-    if (safe.threshold > 1 || cannotEstimateLocally) {
+    // The gas is priced once the executor is known: not while signing, nor for a proposer or a failed estimate.
+    if (!isExecution || safe.threshold > 1 || cannotEstimateLocally) {
       return {
         ...base,
         canCoverFees: true,
@@ -319,22 +318,7 @@ export const useFeesPreview = ({
       }
     }
 
-    // The signer's wallet or a sponsor pays the gas, so nothing of it leaves the Safe.
-    const totalOutgoing = safeTx
-      ? computeTotalOutgoing({
-          safeTx,
-          gasFeeBaseUnits: 0n,
-          relayCostFiat: 0,
-          relayCostFiatCode: currency,
-          nativeSymbol,
-          nativeDecimals,
-          gasTokenAddress: ZERO_ADDRESS,
-          gasSymbol: nativeSymbol,
-          gasDecimals: nativeDecimals,
-          balances,
-        })
-      : undefined
-
+    // No total outgoing: the signer's wallet or a sponsor pays the gas, not the Safe.
     return {
       ...base,
       canCoverFees: true,
@@ -343,7 +327,6 @@ export const useFeesPreview = ({
         amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
         currency: nativeSymbol,
       },
-      totalOutgoing,
       loading: !safeTx || gasLimitLoading || gasPriceLoading,
       error: false,
     }
