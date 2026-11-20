@@ -14,6 +14,8 @@ import {
   seatsLabel,
   _subscriptionToTier,
   toCurrentPlan,
+  trialFeaturesOf,
+  trialSizes,
 } from '../planTiers'
 import type {
   CurrentPlan,
@@ -471,5 +473,61 @@ describe('pickSeatOption', () => {
     expect(pickSeatOption({ ...monthly, currentPriceId: 'price_b10m' })).toBe(ten)
     expect(pickSeatOption(monthly, currentPlan({ billingCycle: 'year', seatsLabel: '10 Safe accounts' }))).toBe(ten)
     expect(pickSeatOption(monthly, currentPlan({ name: 'Starter', seatsLabel: '10 Safe accounts' }))).toBe(five)
+  })
+})
+
+describe('trialSizes', () => {
+  it('lists each monthly trial option smallest first, with the plan it belongs to', () => {
+    const starter: PlanGroup = {
+      name: 'Starter',
+      offers: [offer({ paymentLinkId: 's2m', planName: 'Starter', seats: 2, price: 189, copy: { subtitle: 'Small' } })],
+    }
+    const business: PlanGroup = {
+      name: 'Business',
+      offers: [
+        offer({ paymentLinkId: 'b20m', planName: 'Business', seats: 20, price: 1669 }),
+        offer({ paymentLinkId: 'b5m', planName: 'Business', seats: 5, price: 669 }),
+        offer({ paymentLinkId: 'b5y', planName: 'Business', seats: 5, billingCycle: 'year' }),
+      ],
+    }
+
+    expect(trialSizes([business, starter])).toEqual([
+      { paymentLinkId: 's2m', seats: 2, planName: 'Starter', subtitle: 'Small', monthlyPrice: 189, currency: 'eur' },
+      { paymentLinkId: 'b5m', seats: 5, planName: 'Business', subtitle: undefined, monthlyPrice: 669, currency: 'eur' },
+      {
+        paymentLinkId: 'b20m',
+        seats: 20,
+        planName: 'Business',
+        subtitle: undefined,
+        monthlyPrice: 1669,
+        currency: 'eur',
+      },
+    ])
+  })
+
+  it('skips an option without a seat count, which no size tab can name', () => {
+    const plan: PlanGroup = {
+      name: 'Business',
+      offers: [offer({ paymentLinkId: 'bxm', planName: 'Business', seats: null })],
+    }
+
+    expect(trialSizes([plan])).toEqual([])
+  })
+})
+
+describe('trialFeaturesOf', () => {
+  it('greys out the Business-only rows on Starter', () => {
+    const features = trialFeaturesOf('Starter')
+
+    expect(features.length).toBeGreaterThan(0)
+    expect(features.find((feature) => feature.label === 'Policies')).toEqual({ label: 'Policies', included: false })
+  })
+
+  it('includes every row on Business', () => {
+    expect(trialFeaturesOf('Business').every((feature) => feature.included)).toBe(true)
+  })
+
+  it('promises nothing for a plan the catalog does not describe', () => {
+    expect(trialFeaturesOf('Enterprise Plus')).toEqual([])
   })
 })

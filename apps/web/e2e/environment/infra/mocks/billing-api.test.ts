@@ -194,6 +194,90 @@ describe('billing API', () => {
     assert.doesNotMatch(page.body, /<script/i)
   })
 
+  it('starts the trial of the link on Start trial and returns with the session ID', async () => {
+    const { billing, announced } = recordingBilling()
+    const returnUrl = 'http://localhost:3080/welcome/survey?sessionId={CHECKOUT_SESSION_ID}'
+    const [, result] = await call(billing, 'POST', '/api/v1/payment-links/plink_e2e_starter_trial_new/checkout', {
+      upstreamCustomerId: CUSTOMER,
+      returnUrl,
+    })
+    assert.deepEqual(await subscriptionsOf(billing), [])
+
+    const reply = await send(billing, 'POST', `/checkout/${result.sessionId}/complete`)
+
+    assert.equal(reply.status, 303)
+    assert.equal(reply.headers.Location, `http://localhost:3080/welcome/survey?sessionId=${result.sessionId}`)
+    const [subscription] = await subscriptionsOf(billing)
+    assert.equal(subscription.status, 'trialing')
+    assert.equal(subscription.plan.id, STARTER_PRICE)
+    assert.equal(subscription.metadata.gracePeriod, 'false')
+    assert.equal(announced.length, 1)
+    const [, session] = await call(billing, 'GET', `/api/v1/sessions/${result.sessionId}`)
+    assert.equal(session.status, 'complete')
+    assert.equal(session.payment_status, 'no_payment_required')
+  })
+
+  it('leaves the session open behind the Back link, as Stripe does', async () => {
+    const { billing } = recordingBilling()
+    const returnUrl = 'http://localhost:3080/welcome/survey?sessionId={CHECKOUT_SESSION_ID}'
+    const [, result] = await call(billing, 'POST', '/api/v1/payment-links/plink_e2e_business_trial_new/checkout', {
+      upstreamCustomerId: CUSTOMER,
+      returnUrl,
+    })
+
+    const page = await send(billing, 'GET', `/checkout/${result.sessionId}`)
+    const [, session] = await call(billing, 'GET', `/api/v1/sessions/${result.sessionId}`)
+
+    assert.ok(page.body.includes(`href="http://localhost:3080/welcome/survey?sessionId=${result.sessionId}"`))
+    assert.equal(session.status, 'open')
+    assert.equal((session.metadata as Payload).customerGroup, 'wallet_web')
+  })
+
+  it('gives no default trial to a Workspace that started a checkout, and keeps it for every other one', async () => {
+    const { billing, announced } = recordingBilling()
+    const other = 'b'.repeat(32)
+    await call(billing, 'POST', '/api/v1/payment-links/plink_e2e_starter_trial_new/checkout', {
+      upstreamCustomerId: CUSTOMER,
+      returnUrl: 'http://localhost:3080/welcome/survey',
+    })
+
+    assert.deepEqual(await subscriptionsOf(billing), [])
+    assert.equal(announced.length, 0)
+    const [, others] = await call(billing, 'GET', `/api/v1/customers/${other}/subscriptions`)
+    assert.equal((others.subscriptions as Payload[]).length, 1)
+    assert.equal((await call(billing, 'GET', '/api/v1/sessions/cs_other'))[0], 404)
+    assert.equal((await call(billing, 'POST', '/checkout/cs_other/complete'))[0], 404)
+  })
+
+  it('stores and announces the plan once when the checkout is completed twice', async () => {
+    const { billing, announced } = recordingBilling()
+    const [, result] = await call(billing, 'POST', '/api/v1/payment-links/plink_e2e_starter_trial_new/checkout', {
+      upstreamCustomerId: CUSTOMER,
+      returnUrl: 'http://localhost:3080/welcome/survey',
+    })
+
+    await send(billing, 'POST', `/checkout/${result.sessionId}/complete`)
+    const second = await send(billing, 'POST', `/checkout/${result.sessionId}/complete`)
+
+    assert.equal(second.status, 303)
+    assert.equal(announced.length, 1)
+  })
+
+  it('starts an active plan, paid, for a link without a trial', async () => {
+    const { billing } = recordingBilling()
+    const [, result] = await call(billing, 'POST', '/api/v1/payment-links/plink_e2e_starter/checkout', {
+      upstreamCustomerId: CUSTOMER,
+      returnUrl: 'http://localhost:3080/spaces',
+    })
+
+    await send(billing, 'POST', `/checkout/${result.sessionId}/complete`)
+
+    const [subscription] = await subscriptionsOf(billing)
+    assert.equal(subscription.status, 'active')
+    const [, session] = await call(billing, 'GET', `/api/v1/sessions/${result.sessionId}`)
+    assert.equal(session.payment_status, 'paid')
+  })
+
   it('rejects a checkout for an unknown link or session, or without its fields', async () => {
     const { billing } = recordingBilling()
     const body = { upstreamCustomerId: CUSTOMER, returnUrl: 'https://wallet.test' }

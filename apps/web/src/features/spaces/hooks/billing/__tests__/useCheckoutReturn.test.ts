@@ -18,6 +18,7 @@ jest.mock('next/router', () => ({
 const mockSessionQuery = jest.fn()
 const mockSubscriptionsQuery = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/billing'),
   useBillingGetCheckoutSessionV1Query: (...args: unknown[]) => mockSessionQuery(...args),
   useBillingGetSubscriptionsV1Query: (...args: unknown[]) => mockSubscriptionsQuery(...args),
 }))

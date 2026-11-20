@@ -11,9 +11,6 @@ jest.mock('../../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
     return jest.requireActual('../../../../public/hooks/useSpaceMembers').MemberStatus
   },
-  get MemberRole() {
-    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MemberRole
-  },
   get MEMBER_ALIAS_MAX_LENGTH() {
     return jest.requireActual('../../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
@@ -67,6 +64,11 @@ jest.mock('../../sections/DangerZoneSection', () => ({
   default: () => <div data-testid="danger-zone-section" />,
 }))
 
+jest.mock('../../../WorkspaceTour/WorkspaceTourSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="workspace-tour-section" />,
+}))
+
 jest.mock('@/features/oidc-auth/public/components/WorkspaceTwoFactorSection', () => ({
   __esModule: true,
   default: ({ members, spaceId, isAdmin }: { members: { id: number }[]; spaceId?: string; isAdmin?: boolean }) => (
@@ -104,7 +106,16 @@ describe('GeneralPage', () => {
       'identity-section',
       'workspace-2fa-section',
       'appearance-section',
+      'workspace-tour-section',
       'danger-zone-section',
     ])
+  })
+
+  it('offers the workspace tour just above the danger zone', () => {
+    render(<GeneralPage />)
+
+    const tourSection = screen.getByTestId('workspace-tour-section')
+
+    expect(tourSection.nextElementSibling).toBe(screen.getByTestId('danger-zone-section'))
   })
 })

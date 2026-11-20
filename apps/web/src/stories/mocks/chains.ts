@@ -23,6 +23,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   workspacesExperimentalFeatures: false,
   policyRecipientAllowlist: false,
   spaceAuditLog: false,
+  spaceOnboardingSurvey: false,
 }
 
 /**
@@ -44,6 +45,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   workspacesExperimentalFeatures: 'WORKSPACES_EXPERIMENTAL_FEATURES',
   policyRecipientAllowlist: 'POLICY_RECIPIENT_ALLOWLIST',
   spaceAuditLog: 'SPACE_AUDIT_LOG',
+  spaceOnboardingSurvey: 'SPACE_ONBOARDING_SURVEY',
 }
 
 /**
@@ -118,11 +120,17 @@ export function createChainsPageData(chainData: Chain) {
 
 const SEPOLIA_CHAIN_ID = '11155111'
 
-// The allowlist needs a policy guard deployment, which only Sepolia has.
-const withPolicyRecipientAllowlist = (chain: Chain): Chain =>
-  chain.chainId === SEPOLIA_CHAIN_ID && !chain.features.includes(FEATURE_MAP.policyRecipientAllowlist)
-    ? { ...chain, features: [...chain.features, FEATURE_MAP.policyRecipientAllowlist] }
-    : chain
+// The allowlist needs a policy guard deployment, which only Sepolia has; the onboarding reads its flags from Sepolia,
+// the default chain outside production.
+const SEPOLIA_FEATURES = ['policyRecipientAllowlist', 'spaceOnboardingSurvey'] as const
+
+const withSepoliaFeatures = (chain: Chain, features: FeatureFlags): Chain => {
+  if (chain.chainId !== SEPOLIA_CHAIN_ID) return chain
+  const added = SEPOLIA_FEATURES.filter((flag) => features[flag])
+    .map((flag) => FEATURE_MAP[flag])
+    .filter((feature) => !chain.features.includes(feature))
+  return added.length > 0 ? { ...chain, features: [...chain.features, ...added] } : chain
+}
 
 /**
  * Full chains page response with the story chain swapped in.
@@ -134,7 +142,7 @@ const withPolicyRecipientAllowlist = (chain: Chain): Chain =>
 export function createChainsPageDataV2(chainData: Chain, features: FeatureFlags = {}) {
   const otherChains = chainFixtures.all.results
     .filter((chain) => chain.chainId !== chainData.chainId)
-    .map((chain) => (features.policyRecipientAllowlist ? withPolicyRecipientAllowlist(chain) : chain))
+    .map((chain) => withSepoliaFeatures(chain, features))
   return {
     ...chainFixtures.all,
     results: [chainData, ...otherChains],

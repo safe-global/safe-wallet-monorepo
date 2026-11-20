@@ -24,6 +24,8 @@ export interface GuardContext {
   isSiweAuthenticated: boolean
   hasSpaces: boolean
   isPartOfSpaceUrl: boolean
+  /** The wizard's plan step needs the wizard flag and Safe Pro; undefined while either loads. */
+  isPlanStepEnabled: boolean | undefined
 }
 
 // ---------------------------------------------------------------------------
