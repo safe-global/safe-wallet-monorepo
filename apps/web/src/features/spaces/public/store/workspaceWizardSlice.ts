@@ -2,9 +2,10 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
 
 /**
- * Whether the first onboarding step may offer the saved draft. Not persisted: it is about this page load only.
- * `unknown` until a step opens; `offer` when the wizard opened on its first step; `done` once the user answered the
- * offer or moved past the first step, because Back from step 2 is not a new start.
+ * Whether the first onboarding step may offer the saved draft. Not persisted: it is about this visit to the wizard only.
+ * `unknown` until a step opens, and again once the user leaves the wizard; `offer` when the wizard opened on its first
+ * step; `done` once the user answered the offer or moved past the first step, because Back from step 2 is not a new
+ * start.
  */
 type ResumeOffer = 'unknown' | 'offer' | 'done'
 
@@ -23,10 +24,13 @@ export const workspaceWizardSlice = createSlice({
     resumeOfferAnswered: (state) => {
       state.resumeOffer = 'done'
     },
+    wizardLeft: (state) => {
+      state.resumeOffer = 'unknown'
+    },
   },
 })
 
-export const { wizardStepOpened, resumeOfferAnswered } = workspaceWizardSlice.actions
+export const { wizardStepOpened, resumeOfferAnswered, wizardLeft } = workspaceWizardSlice.actions
 
 export const selectIsResumeOffered = (state: RootState): boolean =>
   state[workspaceWizardSlice.name].resumeOffer === 'offer'
