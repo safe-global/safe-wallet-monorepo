@@ -9,6 +9,7 @@ import {
   getCallTraceErrors,
   getSimulationStatus,
   getSimulationLink,
+  shareSimulation,
 } from '../utils'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
@@ -18,6 +19,8 @@ import { EthSafeSignature } from '@safe-global/protocol-kit'
 import { FETCH_STATUS, type TenderlySimulation } from '../types'
 import type { UseSimulationReturn } from '../useSimulation'
 import { TENDERLY_ORG_NAME, TENDERLY_PROJECT_NAME } from '@safe-global/utils/config/constants'
+import { http, HttpResponse } from 'msw'
+import { setupServer } from 'msw/node'
 
 describe('getStateOverwrites', () => {
   const mockOwners = [faker.finance.ethereumAddress(), faker.finance.ethereumAddress(), faker.finance.ethereumAddress()]
@@ -209,6 +212,58 @@ describe('getSimulationLink', () => {
 
     expect(result).toEqual(
       `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`,
+    )
+  })
+
+  it('should build a shared simulation URL when the simulation was shared', () => {
+    const result = getSimulationLink(
+      simulationId,
+      { url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate', accessToken: 'token' },
+      true,
+    )
+
+    expect(result).toEqual('https://dashboard.tenderly.co/shared/simulation/123')
+  })
+})
+
+describe('shareSimulation', () => {
+  const simulationId = faker.string.uuid()
+  const accessToken = faker.string.alphanumeric(32)
+  const customTenderly = {
+    url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate',
+    accessToken,
+  }
+  const shareUrl = `https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulations/${simulationId}/share`
+  const server = setupServer()
+
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
+  afterEach(() => server.resetHandlers())
+  afterAll(() => server.close())
+
+  it('should POST to the share endpoint of the custom project with the access key', async () => {
+    const requests: Request[] = []
+    server.use(
+      http.post(shareUrl, ({ request }) => {
+        requests.push(request)
+        return HttpResponse.json({})
+      }),
+    )
+
+    await expect(shareSimulation(simulationId, customTenderly)).resolves.toBeUndefined()
+
+    expect(requests).toHaveLength(1)
+    expect(requests[0].headers.get('X-Access-Key')).toEqual(accessToken)
+  })
+
+  it('should throw when the share endpoint responds with an error', async () => {
+    server.use(http.post(shareUrl, () => HttpResponse.json({}, { status: 403, statusText: 'Forbidden' })))
+
+    await expect(shareSimulation(simulationId, customTenderly)).rejects.toThrow('403 - Forbidden')
+  })
+
+  it('should throw without a request when the custom URL cannot be parsed', async () => {
+    await expect(shareSimulation(simulationId, { url: 'not-a-url', accessToken })).rejects.toThrow(
+      'Invalid Tenderly URL',
     )
   })
 })

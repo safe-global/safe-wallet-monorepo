@@ -15,18 +15,41 @@ const defaultSetup = createMockStory({
   pathname: '/settings/environment-variables',
 })
 
+const ownTenderlySetup = createMockStory({
+  scenario: 'efSafe',
+  wallet: 'owner',
+  layout: 'fullPage',
+  pathname: '/settings/environment-variables',
+  store: {
+    settings: {
+      env: {
+        rpc: {},
+        tenderly: {
+          url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate',
+          accessToken: 'tenderly-access-token',
+          publicSharing: true,
+        },
+      },
+    },
+  },
+})
+
 const meta = {
   title: 'Pages/Core/Settings/EnvironmentVariables',
   component: EnvironmentVariables,
   loaders: [mswLoader],
-  parameters: {
-    layout: 'fullscreen',
-    ...defaultSetup.parameters,
-  },
-  decorators: [defaultSetup.decorator],
+  parameters: { layout: 'fullscreen' },
 } satisfies Meta<typeof EnvironmentVariables>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  parameters: { ...defaultSetup.parameters },
+  decorators: [defaultSetup.decorator],
+}
+
+export const OwnTenderlyWithPublicSharing: Story = {
+  parameters: { ...ownTenderlySetup.parameters },
+  decorators: [ownTenderlySetup.decorator],
+}
