@@ -269,6 +269,10 @@ export const SPACE_EVENTS = {
     action: 'Transaction initiated',
     category: SPACE_CATEGORY,
   },
+  TRANSACTIONS_HISTORY_TAB_OPENED: {
+    action: 'Transactions history tab opened',
+    category: SPACE_CATEGORY,
+  },
   ONBOARDING_WIZARD: {
     action: 'Onboarding wizard item clicked',
     category: SPACE_CATEGORY,
