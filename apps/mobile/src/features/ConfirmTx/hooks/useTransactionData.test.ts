@@ -318,6 +318,7 @@ describe('useTransactionData', () => {
             buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
             safeTxHash,
             txDetails,
+            declared: { channel: 'NATIVE_TRANSFER' as const },
           },
         },
       },

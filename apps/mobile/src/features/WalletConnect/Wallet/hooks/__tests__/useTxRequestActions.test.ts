@@ -1,4 +1,5 @@
 import { act } from '@testing-library/react-native'
+import { faker } from '@faker-js/faker'
 import { renderHookWithStore, createTestStore } from '@/src/tests/test-utils'
 import { useTxRequestActions } from '../useTxRequestActions'
 import { composeSafeTxDraft } from '../../services/composeSafeTxDraft'
@@ -85,5 +86,50 @@ describe('useTxRequestActions', () => {
     // No outstanding request, pending retained → user can retry or reject.
     expect(store.getState()[walletKitSliceName].outstandingRequests).toEqual({})
     expect(store.getState()[walletKitSliceName].pending).toHaveLength(1)
+  })
+
+  describe('declared dApp', () => {
+    const dappName = faker.company.name()
+    const dappUrl = faker.internet.url({ appendSlash: false })
+
+    const reviewWithVerify = async (validation: 'VALID' | 'INVALID' | 'UNKNOWN') => {
+      mockCompose.mockResolvedValue(SAFE_TX_HASH)
+      const verifiedPending: PendingSessionRequest = {
+        ...pending,
+        verifyContext: { verified: { origin: dappUrl, validation, verifyUrl: faker.internet.url() } },
+      }
+      const store = createTestStore({
+        activeSafe: { address: SAFE_ADDRESS, chainId: '1' },
+        [walletKitSliceName]: {
+          sessions: { topic: { peer: { metadata: { name: dappName } } } },
+          pending: [verifiedPending],
+          outstandingRequests: {},
+        },
+      } as never)
+      const { result } = renderHookWithStore(() => useTxRequestActions(verifiedPending), store)
+
+      await act(async () => {
+        await result.current.review()
+      })
+    }
+
+    it('review declares the dApp with its session name and Verify-attested origin', async () => {
+      await reviewWithVerify('VALID')
+
+      expect(mockCompose).toHaveBeenCalledWith(
+        expect.objectContaining({ declared: { channel: 'WALLET_CONNECT', appName: dappName, appUrl: dappUrl } }),
+      )
+    })
+
+    it.each(['INVALID', 'UNKNOWN'] as const)(
+      'review declares only the dApp name when Verify returns %s',
+      async (validation) => {
+        await reviewWithVerify(validation)
+
+        expect(mockCompose).toHaveBeenCalledWith(
+          expect.objectContaining({ declared: { channel: 'WALLET_CONNECT', appName: dappName } }),
+        )
+      },
+    )
   })
 })

@@ -5,6 +5,7 @@ import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { synthesizeDraftTxDetails } from '@/src/features/ConfirmTx/utils/synthesizeDraftTxDetails'
 import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { setDraft } from '@/src/store/draftTxSlice'
+import { generateDeclaredAttribution } from '@/src/tests/factories/declaredAttribution'
 
 jest.mock('@/src/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/src/features/ConfirmTx/utils/synthesizeDraftTxDetails')
@@ -53,6 +54,8 @@ const makeDispatch = (previewResult: unknown) => {
   return { dispatch, reset }
 }
 
+const DECLARED = generateDeclaredAttribution()
+
 const run = (calls: DappCall[], previewResult: unknown = { data: { txInfo: {} } }) => {
   const { dispatch, reset } = makeDispatch(previewResult)
   return {
@@ -63,6 +66,7 @@ const run = (calls: DappCall[], previewResult: unknown = { data: { txInfo: {} } 
       safe,
       chain,
       dispatch: dispatch as never,
+      declared: DECLARED,
     }),
     dispatch,
     reset,
@@ -88,6 +92,14 @@ describe('composeSafeTxDraft', () => {
       transactions: [{ to: '0xabc', value: '0', data: '0x', operation: 0 }],
     })
     expect(dispatch).toHaveBeenCalledWith(setDraft(expect.objectContaining({ safeTxHash: SAFE_TX_HASH })))
+  })
+
+  it('stashes the dApp the draft is declared for', async () => {
+    const { promise, dispatch } = run([{ to: '0xabc', value: '0x0', data: '0x' }])
+
+    await promise
+
+    expect(dispatch).toHaveBeenCalledWith(setDraft(expect.objectContaining({ declared: DECLARED })))
   })
 
   it('normalizes a hex value to a decimal string', async () => {

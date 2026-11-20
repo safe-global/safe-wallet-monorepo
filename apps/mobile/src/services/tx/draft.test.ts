@@ -11,6 +11,7 @@ const buildDraft = (safeTxHash: string): DraftTx => ({
   buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 7 },
   safeTxHash,
   txDetails: { txId: safeTxHash } as TransactionDetails,
+  declared: { channel: 'NATIVE_TRANSFER' },
 })
 
 const outstandingRequest = {

@@ -47,5 +47,6 @@ export const rebuildDraftWithNonce = async ({
     safeAddress: draft.safeAddress,
     safe,
     dispatch,
+    declared: draft.declared,
   })
 }

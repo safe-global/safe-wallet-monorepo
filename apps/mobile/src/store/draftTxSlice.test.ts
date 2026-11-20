@@ -34,6 +34,7 @@ const buildDraft = (overrides: Partial<DraftTx> = {}): DraftTx => {
     },
     safeTxHash,
     txDetails: { txId: safeTxHash } as TransactionDetails,
+    declared: { channel: 'NATIVE_TRANSFER' },
     ...overrides,
   }
 }

@@ -65,6 +65,7 @@ const draft: DraftTx = {
   buildParams: { to: tokenAddress, value: '0', data: '0xdata', nonce: 0 },
   safeTxHash: '0xoldhash',
   txDetails: { txId: '0xoldhash' } as TransactionDetails,
+  declared: { channel: 'NATIVE_TRANSFER' },
 }
 
 const setupStore = () => {

@@ -11,10 +11,13 @@ import { composeSafeTxDraft, type DappCall } from '../services/composeSafeTxDraf
 import {
   removePending,
   rejectPending,
+  selectSessionsRecord,
   setOutstandingRequest,
   type PendingSessionRequest,
 } from '../store/walletKitSlice'
 import { logWalletKitError } from '../utils/errors'
+import { buildDeclared } from '@safe-global/utils/utils/declaredAttribution'
+import { getAttestedOrigin } from '@safe-global/utils/features/walletconnect/verify'
 
 const extractCalls = (method: PendingSessionRequest['method'], params: unknown): DappCall[] => {
   if (method === 'eth_sendTransaction') {
@@ -40,6 +43,9 @@ export const useTxRequestActions = (pending: PendingSessionRequest | null) => {
     pending && activeSafe ? { chainId: activeSafe.chainId, safeAddress: activeSafe.address } : skipToken,
   )
   const safeSDK = useSafeSDK()
+  const dappName = useAppSelector((s) =>
+    pending ? selectSessionsRecord(s)[pending.topic]?.peer.metadata.name : undefined,
+  )
   const [composing, setComposing] = useState(false)
 
   const ready = !!(activeSafe && safe && chain && safeSDK)
@@ -65,6 +71,10 @@ export const useTxRequestActions = (pending: PendingSessionRequest | null) => {
         safe,
         chain,
         dispatch,
+        declared: buildDeclared('WALLET_CONNECT', {
+          name: dappName,
+          url: getAttestedOrigin(pending.verifyContext?.verified),
+        }),
       })
       // Hand off to the confirm flow; the dApp is answered later by the propose-success listener.
       dispatch(
@@ -86,7 +96,7 @@ export const useTxRequestActions = (pending: PendingSessionRequest | null) => {
     } finally {
       setComposing(false)
     }
-  }, [pending, activeSafe, safe, chain, dispatch, router])
+  }, [pending, activeSafe, safe, chain, dispatch, router, dappName])
 
   return { review, reject, composing, ready }
 }

@@ -3,6 +3,7 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeTransactionDataPartial } from '@safe-global/types-kit'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { RootState } from '@/src/store'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 import { clearActiveSafe, setActiveSafe, switchActiveChain } from './activeSafeSlice'
 
 /**
@@ -21,6 +22,7 @@ export interface DraftTx {
   buildParams: SafeTransactionDataPartial
   safeTxHash: string
   txDetails: TransactionDetails
+  declared: DeclaredAttribution
 }
 
 interface DraftTxState {
