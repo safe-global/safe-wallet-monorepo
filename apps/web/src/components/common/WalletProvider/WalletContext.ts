@@ -18,6 +18,7 @@ export type WalletContextType = {
   signer: SignerWallet | null
   setSignerAddress: (address: string | undefined) => void
   // Nonce of the tx the in-app parent Safe signer creates; without one it uses the recommended nonce
+  getParentSafeNonce: () => number | undefined
   setParentSafeNonce: (nonce: number) => void
   clearParentSafeNonce: () => void
   isReady: boolean

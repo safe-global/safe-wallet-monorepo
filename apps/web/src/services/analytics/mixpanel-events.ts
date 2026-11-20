@@ -61,6 +61,7 @@ export enum MixpanelEvent {
   WORKSPACE_SAFE_UNLINKED = 'Workspace Safe Unlinked',
   ACCOUNTS_WIDGET_CLICKED = 'Accounts Widget Clicked',
   PENDING_TX_WIDGET_CLICKED = 'Pending TX Widget Clicked',
+  PENDING_TX_WIDGET_VIEW_ALL_CLICKED = 'Pending TX Widget View All Clicked',
   WALLET_SWITCHED = 'Wallet Switched',
   WALLET_DISCONNECTED = 'Wallet Disconnected',
   WORKSPACE_CREATE_STARTED = 'Workspace Create Started',
