@@ -104,6 +104,7 @@ jest.mock('@/features/spaces/public/components/SafeWorkspaceChooserDialog', () =
   __esModule: true,
   default: () => null,
 }))
+jest.mock('@/features/spaces/public/components/WorkspaceTour', () => ({ __esModule: true, default: () => null }))
 
 const STATIC_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
