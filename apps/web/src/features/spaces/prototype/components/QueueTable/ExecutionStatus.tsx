@@ -6,7 +6,7 @@ import { formatElapsed, type Execution } from '../../services/execution'
 import type { Proposal } from '../../types'
 import { HINT_CLASS, HintContent, StatusChip } from '../shared'
 
-const executionHint = (execution: Execution, now: number) =>
+export const executionHint = (execution: Execution, now: number) =>
   execution.phase === 'indexing'
     ? 'Included in a block. The queue updates once the transaction is indexed.'
     : `Submitted ${formatElapsed(now - execution.startedAt)} ago and waiting to be included in a block.${

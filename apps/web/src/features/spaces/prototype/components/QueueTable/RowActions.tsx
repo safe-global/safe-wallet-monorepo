@@ -15,6 +15,7 @@ import type { PreviewAction } from '../../services/queue'
 import { canSpeedUp, getLockingTx, type Executions } from '../../services/execution'
 import type { Milestone, Persona, Proposal } from '../../types'
 import { HINT_CLASS } from '../shared'
+import { ExecutionChip, executionHint } from './ExecutionStatus'
 
 export type RowActionsProps = {
   tx: Proposal
@@ -30,7 +31,7 @@ export type RowActionsProps = {
   filled?: boolean
   // Phones: the button fits its label instead of the table's fixed width.
   fit?: boolean
-  // Aligned table: Go to #N reads "Blocked by #N", since the row has no status badge.
+  // Aligned table: Go to #N reads "Blocked by #N" and Processing replaces the button, since the row has no status badge.
   blockedLabel?: boolean
   onReplaceHover?: (id: string | null) => void
   onReview: (tx: Proposal) => void
@@ -97,15 +98,24 @@ export function RowActions({
     <div className="flex items-center justify-end gap-1">
       {execution ? (
         canSpeedUp(execution, now) ? (
-          <Button
-            size="2xs"
-            variant="default"
-            className={width}
-            aria-label={`Speed up ${getTransactionLabel(tx)}`}
-            onClick={stop(() => onSpeedUp?.(tx.id))}
-          >
-            Speed up
-          </Button>
+          <Tooltip delay={150}>
+            <TooltipTrigger
+              render={
+                <Button
+                  size="2xs"
+                  variant="default"
+                  className={width}
+                  aria-label={`Speed up ${getTransactionLabel(tx)}`}
+                  onClick={stop(() => onSpeedUp?.(tx.id))}
+                >
+                  Speed up
+                </Button>
+              }
+            />
+            <TooltipContent className={HINT_CLASS}>{executionHint(execution, now)}</TooltipContent>
+          </Tooltip>
+        ) : blockedLabel ? (
+          <ExecutionChip execution={execution} now={now} />
         ) : (
           <span className={width} aria-hidden="true" />
         )

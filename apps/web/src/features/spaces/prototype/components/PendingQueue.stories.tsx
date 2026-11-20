@@ -26,3 +26,15 @@ export const PartialLoading: Story = { parameters: { nextjs: { router: { query: 
 export const SecurityLead: Story = {
   parameters: { nextjs: { router: { query: { option: 'cards', scenario: '20-safes', persona: 'security' } } } },
 }
+
+// Design QA: milestone 2 in layout B, the states the QA tickets point to.
+const designQa = (query: Record<string, string> = {}, viewport?: string): Story => ({
+  parameters: {
+    nextjs: { router: { query: { m: '2', align: 'titled', state: 'normal', scenario: '8-safes', ...query } } },
+    ...(viewport ? { viewport: { defaultViewport: viewport } } : {}),
+  },
+})
+export const DesignQa = designQa()
+export const DesignQaExecuting = designQa({ state: 'executing' })
+export const DesignQaTablet = designQa({}, 'tablet')
+export const DesignQaMobile = designQa({}, 'mobile1')

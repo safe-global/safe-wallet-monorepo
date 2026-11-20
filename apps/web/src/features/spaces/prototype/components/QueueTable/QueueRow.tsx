@@ -189,11 +189,11 @@ export function QueueRow({
     </Tooltip>
   )
 
-  // Aligned: the everyday status is in the gauge, so only exceptions show here.
+  // Aligned: the everyday status is in the gauge and executing is in the action cell, so only exceptions show here.
   const plainStatus = aligned && !willBeReplaced && !parentApproval
   const statusContent = (
     <div className="flex flex-wrap items-center gap-1.5">
-      {execution ? (
+      {aligned && (execution || lockedBy) ? null : execution ? (
         <ExecutionChip execution={execution} now={now} />
       ) : lockedBy ? (
         <LockedChip by={lockedBy} />
@@ -289,7 +289,7 @@ export function QueueRow({
       </Tooltip>
       {!aligned && proposerMark}
       {!compact && !m1 && <SafenetMark tx={tx} />}
-      {/* Aligned: only states the gauge can't show keep a chip, such as executing or locked. */}
+      {/* Aligned: only states the gauge can't show keep a chip, such as awaiting parent. */}
       {aligned && statusContent}
     </span>
   )
