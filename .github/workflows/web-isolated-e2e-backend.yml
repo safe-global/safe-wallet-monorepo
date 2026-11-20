@@ -398,7 +398,7 @@ jobs:
 
   publish-report:
     name: Publish E2E report
-    needs: merge-report
+    needs: [plan, merge-report]
     if: always() && needs.merge-report.result == 'success'
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
@@ -446,17 +446,8 @@ jobs:
           header: isolated-e2e-report
           message: ${{ steps.link.outputs.body }}
 
-  flag-release:
-    name: Flag release checklist
-    needs: plan
-    # Fork pull requests cannot comment, and the plan job fails them.
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-26.04-arm
-    timeout-minutes: 5
-    permissions:
-      pull-requests: write
-    steps:
       - name: Comment the checklist for the released flags
+        if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v3.0.5
         with:
           header: flag-release
