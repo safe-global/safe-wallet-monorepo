@@ -323,9 +323,11 @@ export const CreateSafeOnNewChain = ({
   defaultChainId?: string
 }) => {
   const { configs } = useChains()
+  // Callers pass a new array on each render; depending on it would reload the creation data and reset the dialog
+  const sourceChainId = deployedChainIds[0]
   const deployedChains = useMemo(
-    () => configs.filter((config) => config.chainId === deployedChainIds[0]),
-    [configs, deployedChainIds],
+    () => configs.filter((config) => config.chainId === sourceChainId),
+    [configs, sourceChainId],
   )
 
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChains)
