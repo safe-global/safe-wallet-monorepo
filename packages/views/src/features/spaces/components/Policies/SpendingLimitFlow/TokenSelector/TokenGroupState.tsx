@@ -10,10 +10,14 @@ const GroupHeading = ({ children }: { children: string }) => (
 
 type GroupStateProps = { label: string; 'data-testid': string }
 
-export const TokenGroupLoading = ({ label, 'data-testid': testId }: GroupStateProps) => (
+export const TokenGroupLoading = ({
+  label,
+  rowCount = SKELETON_ROW_COUNT,
+  'data-testid': testId,
+}: GroupStateProps & { rowCount?: number }) => (
   <div data-testid={testId} className="p-1">
     <GroupHeading>{label}</GroupHeading>
-    {Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
+    {Array.from({ length: rowCount }, (_, index) => (
       <div key={index} className="flex items-center gap-2 px-2 py-1.5">
         <Skeleton className="shrink-0 rounded-full" style={{ width: TOKEN_ICON_SIZE, height: TOKEN_ICON_SIZE }} />
         <Skeleton className="h-4 w-24" />
