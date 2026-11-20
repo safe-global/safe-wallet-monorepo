@@ -101,10 +101,9 @@ describe('WALLET_WEB remote-config declaration', () => {
 
 describe('E2E test-chain flags (test-chain-features.json)', () => {
   const onKeys: string[] = testChainFeatures.on
-  const offReasons: Record<string, string> = testChainFeatures.off
-  const offKeys = Object.keys(offReasons)
+  const offKeys: string[] = testChainFeatures.off
 
-  it('switches every declared flag on or gives a reason to keep it off', () => {
+  it('lists every declared flag as on or off', () => {
     const undecided = declaredKeys.filter((k) => !onKeys.includes(k) && !offKeys.includes(k))
     expect(undecided).toEqual([])
   })
@@ -113,16 +112,13 @@ describe('E2E test-chain flags (test-chain-features.json)', () => {
     expect(onKeys.filter((k) => offKeys.includes(k))).toEqual([])
   })
 
-  it('has no duplicate on keys', () => {
+  it('has no duplicate keys', () => {
     expect(new Set(onKeys).size).toBe(onKeys.length)
+    expect(new Set(offKeys).size).toBe(offKeys.length)
   })
 
-  it('gives reasons only for declared flags', () => {
+  it('lists only declared flags as off', () => {
     expect(offKeys.filter((k) => !declaredKeys.includes(k))).toEqual([])
-  })
-
-  it('gives a non-empty reason for every off flag', () => {
-    expect(offKeys.filter((k) => offReasons[k].trim() === '')).toEqual([])
   })
 })
 
@@ -137,12 +133,25 @@ describe('E2E coverage of released flags', () => {
   const coveredKeys = new Set(Object.values(specFlags).flat())
   const reasons: Record<string, string> = releasedWithoutE2e
   const reasonKeys = Object.keys(reasons)
+  const compose = fs.readFileSync(
+    path.join(__dirname, '..', 'e2e', 'environment', 'infra', 'docker-compose.test.yml'),
+    'utf8',
+  )
+  const forkExtraKeys = [...compose.matchAll(/TEST_CHAIN_EXTRA_FEATURES: (\S+)/g)].flatMap((m) => m[1].split(','))
 
   it('names only declared flags in the Playwright spec registry', () => {
     const unknown = Object.entries(specFlags).flatMap(([spec, keys]) =>
       keys.filter((k) => !declaredKeys.includes(k)).map((k) => `${spec}: ${k}`),
     )
     expect(unknown).toEqual([])
+  })
+
+  it('names only flags that the E2E stack switches on', () => {
+    const onInStack = new Set<string>([...testChainFeatures.on, ...forkExtraKeys])
+    const off = Object.entries(specFlags).flatMap(([spec, keys]) =>
+      keys.filter((k) => !onInStack.has(k)).map((k) => `${spec}: ${k}`),
+    )
+    expect(off).toEqual([])
   })
 
   it('covers every released flag with a spec or gives a reason in released-without-e2e.json', () => {

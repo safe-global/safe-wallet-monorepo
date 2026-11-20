@@ -30,7 +30,8 @@ Config Service diffs against when seeding/verifying `Feature` rows for a release
    declared flag is not read anywhere, or if the file is schema-invalid.
 4. Decide the flag's state in the isolated E2E stack: add the key to `on` in
    [`test-chain-features.json`](../e2e/environment/infra/scripts/cfg_management/test-chain-features.json),
-   or to `off` with a reason. The sync test fails until the flag is in one of them.
+   or to `off`. The sync test fails until the flag is in one of them. The question of
+   E2E coverage comes later, in the PR that releases the flag.
 
 ## Releasing a flag
 
@@ -41,7 +42,8 @@ shared with mobile must have the same `enabled` value in both files.
 
 The sync test requires E2E coverage for a released flag. Add the key to `flags` of the
 specs that cover the feature in
-[`playwright-specs.mjs`](../e2e/environment/playwright-specs.mjs). If no spec covers it,
+[`playwright-specs.mjs`](../e2e/environment/playwright-specs.mjs). A flag in `flags` must be
+`on` in the E2E stack, or the spec runs with the feature hidden. If no spec covers it,
 give the reason in
 [`released-without-e2e.json`](../e2e/environment/released-without-e2e.json), which QA or
 the web team must approve.
