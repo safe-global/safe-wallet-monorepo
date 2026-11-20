@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "config/**",
+        "$TURBO_ROOT$/apps/mobile/config/remote-config.json",
+        "$TURBO_ROOT$/packages/utils/src/**",
+        "$TURBO_ROOT$/packages/store/src/**"
+      ]
+    }
+  }
+}
