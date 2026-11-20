@@ -97,6 +97,9 @@ describe('WALLET_WEB remote-config declaration', () => {
   })
 })
 
+// Read only by the backend, so web does not declare them; the E2E stack still needs them on.
+const BACKEND_ONLY_ON_KEYS = ['CLASSIC_VIEW', 'LENDING', 'RELAYING']
+
 describe('E2E test-chain flags (test-chain-features.json)', () => {
   const onKeys: string[] = testChainFeatures.on
   const offKeys: string[] = testChainFeatures.off
@@ -117,5 +120,10 @@ describe('E2E test-chain flags (test-chain-features.json)', () => {
 
   it('lists only declared flags as off', () => {
     expect(offKeys.filter((k) => !declaredKeys.includes(k))).toEqual([])
+  })
+
+  it('lists only declared or backend-only flags as on', () => {
+    const unknown = onKeys.filter((k) => !declaredKeys.includes(k) && !BACKEND_ONLY_ON_KEYS.includes(k))
+    expect(unknown).toEqual([])
   })
 })
