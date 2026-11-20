@@ -62,7 +62,7 @@ export type PlanCta =
   | { kind: 'account-team'; label: 'Change via your account team' }
   | { kind: 'change'; label: string; direction: PlanChangeDirection }
   | { kind: 'subscribe'; label: string }
-  | { kind: 'sales'; label: 'Talk to sales' }
+  | { kind: 'sales'; label: string }
 
 export type PlanSummary = {
   name: string

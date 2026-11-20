@@ -294,6 +294,7 @@ describe('ChangePlanDialog', () => {
       />,
     )
 
+    expect(screen.getByRole('heading', { name: /^Switch to / })).toBeInTheDocument()
     expect(mockPreviewChange).not.toHaveBeenCalled()
     expect(screen.queryByTestId('change-plan-skeleton')).not.toBeInTheDocument()
     expect(screen.getByTestId('change-plan-trial-note')).toHaveTextContent(

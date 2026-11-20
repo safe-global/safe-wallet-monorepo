@@ -16,22 +16,14 @@ const TryProContext = createContext<OpenTryPro | undefined>(undefined)
 /** Undefined outside a {@link TryProProvider}, so production prompts keep linking to the plans page. */
 export const useTryPro = (): OpenTryPro | undefined => useContext(TryProContext)
 
-export const TryProProvider = ({
-  tiers,
-  safeCount,
-  children,
-}: {
-  tiers: PlanTier[]
-  safeCount: number
-  children: ReactNode
-}): ReactElement => {
+export const TryProProvider = ({ tiers, children }: { tiers: PlanTier[]; children: ReactNode }): ReactElement => {
   const [reason, setReason] = useState<string>()
   const close = useCallback(() => setReason(undefined), [])
 
   return (
     <TryProContext.Provider value={setReason}>
       {children}
-      {reason && <TryProModal tiers={tiers} safeCount={safeCount} reason={reason} onClose={close} />}
+      {reason && <TryProModal tiers={tiers} reason={reason} onClose={close} />}
     </TryProContext.Provider>
   )
 }

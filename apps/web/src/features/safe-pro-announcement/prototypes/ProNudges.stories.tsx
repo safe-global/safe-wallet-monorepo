@@ -14,13 +14,14 @@ import { SafeShieldDisplay } from '@/features/safe-shield/components/SafeShieldD
 // eslint-disable-next-line no-restricted-imports -- prototype: uses the Plans story prices
 import { PAID_PLANS } from '@/features/spaces/components/Plans/plans.storyData'
 // eslint-disable-next-line no-restricted-imports -- prototype: builds tiers like the Plans page
-import { _offersToTiers } from '@/features/spaces/components/Plans/planTiers'
+import { buildPlanTiers } from '@/features/spaces/components/Plans/planTiers'
+import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { TryProModal } from './TryProModal'
 import { TRY_PRO_REASONS } from './tryPro'
 
 faker.seed(456)
 
-const TIERS = _offersToTiers(PAID_PLANS).filter((tier) => tier.billingCycle === 'month')
+const TIERS = buildPlanTiers(PAID_PLANS).filter((tier) => tier.id !== ENTERPRISE_TIER.id)
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -43,20 +44,12 @@ const Stage = ({ children }: { children: ReactNode }) => (
 )
 
 /** Renders a nudge and opens the Try Safe Pro modal with the reason its prompt passes. */
-const WithModal = ({
-  safeCount = 3,
-  children,
-}: {
-  safeCount?: number
-  children: (open: (reason: string) => void) => ReactNode
-}) => {
+const WithModal = ({ children }: { children: (open: (reason: string) => void) => ReactNode }) => {
   const [reason, setReason] = useState<string>()
   return (
     <>
       {children(setReason)}
-      {reason && (
-        <TryProModal tiers={TIERS} safeCount={safeCount} reason={reason} onClose={() => setReason(undefined)} />
-      )}
+      {reason && <TryProModal tiers={TIERS} reason={reason} onClose={() => setReason(undefined)} />}
     </>
   )
 }
@@ -91,12 +84,7 @@ type Story = StoryObj<typeof meta>
 
 /** The modal any upgrade prompt opens in place, with the prompt's reason under the title. */
 export const TryProModalFromAPrompt: Story = {
-  render: () => <TryProModal tiers={TIERS} safeCount={3} reason={TRY_PRO_REASONS.sponsored} onClose={() => {}} />,
-}
-
-/** A user with 7 Safes lands on 10, the smallest size that holds them all. */
-export const TryProModalPicksTheFittingSize: Story = {
-  render: () => <TryProModal tiers={TIERS} safeCount={7} reason={TRY_PRO_REASONS.recipient} onClose={() => {}} />,
+  render: () => <TryProModal tiers={TIERS} reason={TRY_PRO_REASONS.sponsored} onClose={() => {}} />,
 }
 
 /** A free user runs out of today's free transactions: the counter explains it and opens the modal. */

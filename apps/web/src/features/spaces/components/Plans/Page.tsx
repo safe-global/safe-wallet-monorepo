@@ -13,6 +13,7 @@ import Plans from './index'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { takePlansEntry } from '../../public/services/planSelection'
 import { buildPlanTiers, pickSeatOption, toCurrentPlan } from './planTiers'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
 import { useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -59,10 +60,14 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
     () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing, seats?.quota) : undefined),
     [canChange, subscription, plan, isTrialing, seats?.quota],
   )
+  // A trial is not a plan the user chose, so it gets no "Current" card.
   const tiers = useMemo(
     () =>
-      buildPlanTiers(paidPlans, currentPlan && subscription ? { subscription, seatsQuota: seats?.quota } : undefined),
-    [paidPlans, currentPlan, subscription, seats?.quota],
+      buildPlanTiers(
+        paidPlans,
+        currentPlan && subscription && !isTrialing ? { subscription, seatsQuota: seats?.quota } : undefined,
+      ),
+    [paidPlans, currentPlan, subscription, isTrialing, seats?.quota],
   )
   const [entry] = useState(takePlansEntry)
   const isReady = isSafePro && !isPlanLoading && !isOffersLoading && !isUninitialized
@@ -83,9 +88,12 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   return (
     <AuthState spaceId={spaceId}>
       <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
-          Plans
-        </Typography>
+        <div className="mb-6 flex flex-col gap-2">
+          <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+            Plans
+          </Typography>
+          <Typography color="muted">{PRO_TRIAL_COPY.safesStayFree}</Typography>
+        </div>
 
         {!isSafePro ? (
           <Card

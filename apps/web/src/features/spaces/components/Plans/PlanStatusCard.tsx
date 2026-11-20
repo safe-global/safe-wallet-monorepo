@@ -10,6 +10,7 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import { TRIAL_DISCLAIMER } from '../../constants'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
 import type { Meter, PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
 
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
@@ -95,7 +96,7 @@ const statusText = (plan: PlanSummary | null, endDate: string | null, isSeatsFul
   }
   const until = endDate ?? 'the end of the period'
   return !plan.hasPaymentMethod
-    ? `Your free access is active until ${until}. Add a payment method before then or choose another plan to keep your Workspace.`
+    ? PRO_TRIAL_COPY.trialStatus(until)
     : plan.daysLeft != null
       ? `Active until ${until} · ${plan.daysLeft} day${maybePlural(plan.daysLeft)} left`
       : `Active until ${until}.`
@@ -131,7 +132,9 @@ export default function PlanStatusCard({
           <div className="flex flex-col gap-4 @2xl:flex-row @2xl:items-start @2xl:justify-between">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
+                <Typography variant="h4">
+                  {isTrial ? PRO_TRIAL_COPY.trialTitle : (plan?.name ?? 'No active plan')}
+                </Typography>
                 {badge && (
                   <Badge
                     variant="subtle"

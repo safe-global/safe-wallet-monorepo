@@ -16,18 +16,15 @@ import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/Execut
 // eslint-disable-next-line no-restricted-imports -- prototype: uses the Plans story prices
 import { PAID_PLANS } from '@/features/spaces/components/Plans/plans.storyData'
 // eslint-disable-next-line no-restricted-imports -- prototype: builds tiers like the Plans page
-import { _offersToTiers } from '@/features/spaces/components/Plans/planTiers'
+import { buildPlanTiers } from '@/features/spaces/components/Plans/planTiers'
+import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { TRY_PRO_REASONS, TryProProvider, useTryPro } from './tryPro'
 
 faker.seed(456)
 
-const TIERS = _offersToTiers(PAID_PLANS).filter((tier) => tier.billingCycle === 'month')
+const TIERS = buildPlanTiers(PAID_PLANS).filter((tier) => tier.id !== ENTERPRISE_TIER.id)
 
-const WithTryPro = ({ children }: { children: ReactNode }) => (
-  <TryProProvider tiers={TIERS} safeCount={3}>
-    {children}
-  </TryProProvider>
-)
+const WithTryPro = ({ children }: { children: ReactNode }) => <TryProProvider tiers={TIERS}>{children}</TryProProvider>
 
 const flowSetup = createMockStory({
   scenario: 'efSafe',

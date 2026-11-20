@@ -40,7 +40,7 @@ describe('tryPro', () => {
 
   it('opens Try Safe Pro with the prompt reason inside the provider', () => {
     render(
-      <TryProProvider tiers={TIERS} safeCount={3}>
+      <TryProProvider tiers={TIERS}>
         <Prompt />
       </TryProProvider>,
     )
