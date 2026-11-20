@@ -6,18 +6,19 @@ import type { WorkspaceTag } from '@safe-global/views/features/spaces/components
 import useGetSpaceAddressBook from '../../public/hooks/useGetSpaceAddressBook'
 import { useWorkspaceAddressBookLabel } from '../../public/hooks/useWorkspaceAddressBookLabel'
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
-import AddContactDialog from './AddContactDialog'
+import AddContactDialog, { type TriggerSize } from './AddContactDialog'
 
 export type { ContactField } from './AddContactDialog'
 
 type AddContactProps = {
   label?: string
+  size?: TriggerSize
   /** Shows the Tags field; the v2 address book passes them. */
   workspaceTags?: WorkspaceTag[]
   onTagLimitReached?: () => void
 }
 
-const AddContact = ({ label = 'Add contact', workspaceTags, onTagLimitReached }: AddContactProps) => {
+const AddContact = ({ label = 'Add contact', size, workspaceTags, onTagLimitReached }: AddContactProps) => {
   const addressBookItems = useGetSpaceAddressBook()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -25,6 +26,7 @@ const AddContact = ({ label = 'Add contact', workspaceTags, onTagLimitReached }:
   return (
     <AddContactDialog
       triggerLabel={label}
+      triggerSize={size}
       dialogTitle="Add contact"
       successMessage={getContactAddedMessage(workspaceAddressBookLabel)}
       successGroupKey="add-contact-success"

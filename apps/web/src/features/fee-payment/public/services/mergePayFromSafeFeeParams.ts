@@ -7,7 +7,7 @@ import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 export type PayFromSafeMergeContext = {
   safeTx: SafeTransaction
   chain: Chain | undefined
-  feePaymentMode: 'safe' | 'signer' | undefined
+  isPayFromSafe: boolean
   feeGasToken: string | undefined
   chainId: string
   safeAddress: string
@@ -16,27 +16,34 @@ export type PayFromSafeMergeContext = {
   dispatch: AppDispatch
 }
 
-/**
- * Merge CGW fee-preview fee fields into a SafeTx before the first signer signs.
- * Confirmers inherit the locked fields from the signed payload — bails out if signatures exist.
- */
+export type PayFromSafeMerge = {
+  safeTx: SafeTransaction
+  feesMerged: boolean
+}
+
+/** Merges the CGW quote into an unsigned SafeTx; signed payloads keep their fee params. */
 export const mergePayFromSafeFeeParams = async ({
   safeTx,
   chain,
-  feePaymentMode,
+  isPayFromSafe,
   feeGasToken,
   chainId,
   safeAddress,
   numberSignatures,
   currency,
   dispatch,
-}: PayFromSafeMergeContext): Promise<SafeTransaction> => {
-  if (safeTx.signatures.size > 0) return safeTx
-  if (!isPayFromSafeAvailable(chain)) return safeTx
-  if (feePaymentMode !== 'safe' || !feeGasToken) return safeTx
+}: PayFromSafeMergeContext): Promise<PayFromSafeMerge> => {
+  const unchanged = { safeTx, feesMerged: false }
+  if (safeTx.signatures.size > 0) return unchanged
+  if (!isPayFromSafeAvailable(chain)) return unchanged
+  if (!isPayFromSafe) return unchanged
+  // Signing without the quoted token would make the signer pay while the card says Safe account.
+  if (!feeGasToken) {
+    throw new Error('The fee quote for paying from the Safe account is not ready. Try again in a moment.')
+  }
 
   const { resolveFeeParams } = await import('../../services/resolveFeeParams')
-  return resolveFeeParams({
+  const merged = await resolveFeeParams({
     chainId,
     safeAddress,
     safeTx,
@@ -45,4 +52,5 @@ export const mergePayFromSafeFeeParams = async ({
     currency,
     dispatch,
   })
+  return { safeTx: merged, feesMerged: true }
 }
