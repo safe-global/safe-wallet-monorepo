@@ -16,6 +16,7 @@ import SuggestedTab from './SuggestedTab'
 import { useSuggestedContacts } from './useSuggestedContacts'
 import WorkspaceContacts from './WorkspaceContacts'
 import { toLocalContacts } from './utils'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 
 const TabLabel = ({ label, tooltip }: { label: string; tooltip: string }) => (
   <Tooltip>
@@ -61,7 +62,7 @@ const SpaceAddressBookV2 = () => {
           {/* Scrolls sideways on phones; pb-1.5 keeps the underline (bottom -5px) inside the scroll box. */}
           <div className="mb-2.5 overflow-x-auto overflow-y-hidden pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsList variant="underline">
-              <TabsTrigger value="workspace" className="cursor-pointer">
+              <TabsTrigger value="workspace" className="cursor-pointer" data-tour={TOUR_TARGETS.workspaceContactsTab}>
                 <TabLabel
                   label={withCount('Workspace contacts', workspaceBook.items.length, isWorkspaceSettled)}
                   tooltip="Shared contacts visible to everyone in this Workspace"
@@ -79,7 +80,7 @@ const SpaceAddressBookV2 = () => {
               </TabsTrigger>
               {isPrivateAddressBookEnabled && (
                 <>
-                  <TabsTrigger value="mine" className="cursor-pointer">
+                  <TabsTrigger value="mine" className="cursor-pointer" data-tour={TOUR_TARGETS.localContactsTab}>
                     <TabLabel
                       label={withCount('Local contacts', localContacts.length)}
                       tooltip="These contacts are in your local browser storage"

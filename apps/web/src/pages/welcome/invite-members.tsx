@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import InviteMembersOnboarding from '@/features/spaces/public/components/InviteMembersOnboarding'
+import WorkspaceOnboardingStep from '@/features/spaces/public/components/WorkspaceOnboardingStep'
 
 const InviteMembersPage = () => {
   return (
@@ -9,7 +9,7 @@ const InviteMembersPage = () => {
         <title>{`${BRAND_NAME} – Invite members`}</title>
       </Head>
 
-      <InviteMembersOnboarding />
+      <WorkspaceOnboardingStep step="invite" />
     </>
   )
 }

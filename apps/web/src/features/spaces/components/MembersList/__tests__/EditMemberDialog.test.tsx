@@ -38,9 +38,6 @@ jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
   },
-  get MemberRole() {
-    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
-  },
   get isAdmin() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
   },

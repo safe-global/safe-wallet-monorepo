@@ -1,5 +1,5 @@
 import { getPersistedState, makeStore } from '@/store'
-import { HYDRATE_ACTION } from '@/store/useHydrateStore'
+import { HYDRATE_ACTION } from '@/store/hydrateAction'
 import local from '@/services/local-storage/local'
 import { selectQueueGroupBy, setQueueGroupBy, spaceQueueViewSlice } from '../spaceQueueViewSlice'
 

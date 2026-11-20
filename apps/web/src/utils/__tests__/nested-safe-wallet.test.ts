@@ -205,8 +205,7 @@ describe('getNestedWallet send', () => {
       SIGNER,
       expect.anything(),
       expect.anything(),
-      undefined,
-      childEnvelope,
+      { nestedTransaction: childEnvelope, declared: undefined },
     )
   })
 
@@ -230,7 +229,7 @@ describe('getNestedWallet send', () => {
       await sendTransaction(execCalldata)
 
       expect(getCreatedTxData()).toBe(execCalldata)
-      expect(proposeTxMock.mock.calls[0][6]).toBeUndefined()
+      expect(proposeTxMock.mock.calls[0][5].nestedTransaction).toBeUndefined()
     })
 
     it('throws when the envelope does not match the executed tx', async () => {
@@ -263,8 +262,7 @@ describe('getNestedWallet send', () => {
         SIGNER,
         expect.anything(),
         expect.anything(),
-        undefined,
-        childEnvelope,
+        { nestedTransaction: childEnvelope, declared: undefined },
       )
     })
   })
@@ -281,8 +279,7 @@ describe('getNestedWallet send', () => {
       SIGNER,
       expect.anything(),
       expect.anything(),
-      undefined,
-      undefined,
+      { nestedTransaction: undefined, declared: undefined },
     )
   })
 
@@ -304,15 +301,10 @@ describe('getNestedWallet send', () => {
       params: [{ from: PARENT_SAFE, to: CHILD_SAFE, value: '0x0', data: '0xdeadbeef' }],
     })
 
-    expect(proposeTxMock).toHaveBeenCalledWith(
-      safeInfo.chainId,
-      PARENT_SAFE,
-      SIGNER,
-      signedTx,
-      keccak256('0x01'),
-      undefined,
-      undefined,
-    )
+    expect(proposeTxMock).toHaveBeenCalledWith(safeInfo.chainId, PARENT_SAFE, SIGNER, signedTx, keccak256('0x01'), {
+      nestedTransaction: undefined,
+      declared: undefined,
+    })
     expect(mockConnectedSdk.executeTransaction).not.toHaveBeenCalled()
     expect(result).toBe(keccak256('0x01'))
   })

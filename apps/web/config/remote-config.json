@@ -367,13 +367,6 @@
       "defaultChains": []
     },
     {
-      "key": "GTF",
-      "description": "GTF relayer strategy support.",
-      "scope": "PER_CHAIN",
-      "enabled": true,
-      "defaultChains": []
-    },
-    {
       "key": "SAFE_STAKING",
       "description": "Safe-token staking.",
       "scope": "PER_CHAIN",
@@ -495,6 +488,20 @@
     {
       "key": "POLICY_RECIPIENT_ALLOWLIST",
       "description": "Recipient allowlist policy for Workspaces.",
+      "scope": "PER_CHAIN",
+      "enabled": false,
+      "defaultChains": []
+    },
+    {
+      "key": "WORKSPACE_TOUR",
+      "description": "First-visit tour of the workspace for active members.",
+      "scope": "PER_CHAIN",
+      "enabled": false,
+      "defaultChains": []
+    },
+    {
+      "key": "WORKSPACE_ONBOARDING_V2",
+      "description": "New workspace setup wizard in the onboarding.",
       "scope": "PER_CHAIN",
       "enabled": false,
       "defaultChains": []

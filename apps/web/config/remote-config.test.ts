@@ -99,6 +99,9 @@ describe('WALLET_WEB remote-config declaration', () => {
   })
 })
 
+// Read only by the backend, so web does not declare them; the E2E stack still needs them on.
+const BACKEND_ONLY_ON_KEYS = ['CLASSIC_VIEW', 'LENDING', 'RELAYING']
+
 describe('E2E test-chain flags (test-chain-features.json)', () => {
   const onKeys: string[] = testChainFeatures.on
   const offKeys: string[] = testChainFeatures.off
@@ -120,6 +123,11 @@ describe('E2E test-chain flags (test-chain-features.json)', () => {
   it('lists only declared flags as off', () => {
     expect(offKeys.filter((k) => !declaredKeys.includes(k))).toEqual([])
   })
+
+  it('lists only declared or backend-only flags as on', () => {
+    const unknown = onKeys.filter((k) => !declaredKeys.includes(k) && !BACKEND_ONLY_ON_KEYS.includes(k))
+    expect(unknown).toEqual([])
+  })
 })
 
 describe('E2E coverage of released flags', () => {
@@ -137,7 +145,16 @@ describe('E2E coverage of released flags', () => {
     path.join(__dirname, '..', 'e2e', 'environment', 'infra', 'docker-compose.test.yml'),
     'utf8',
   )
-  const forkExtraKeys = [...compose.matchAll(/TEST_CHAIN_EXTRA_FEATURES: (\S+)/g)].flatMap((m) => m[1].split(','))
+  const forkExtraKeys: Record<number, string[]> = Object.fromEntries(
+    compose
+      .split(/\n {2}cfg-chain-/)
+      .slice(1)
+      .flatMap((block) => {
+        const chainId = block.match(/FORK_CHAIN_ID: '(\d+)'/)?.[1]
+        const extra = block.match(/TEST_CHAIN_EXTRA_FEATURES: (\S+)/)?.[1]
+        return chainId && extra ? [[Number(chainId), extra.split(',')]] : []
+      }),
+  )
 
   it('names only declared flags in the Playwright spec registry', () => {
     const unknown = Object.entries(specFlags).flatMap(([spec, keys]) =>
@@ -146,10 +163,17 @@ describe('E2E coverage of released flags', () => {
     expect(unknown).toEqual([])
   })
 
-  it('names only flags that the E2E stack switches on', () => {
-    const onInStack = new Set<string>([...testChainFeatures.on, ...forkExtraKeys])
-    const off = Object.entries(specFlags).flatMap(([spec, keys]) =>
-      keys.filter((k) => !onInStack.has(k)).map((k) => `${spec}: ${k}`),
+  it('reads the extra flags of the forks from the compose file', () => {
+    expect(forkExtraKeys[1]).toEqual(expect.arrayContaining(['PORTFOLIO_ENDPOINT', 'POSITIONS']))
+  })
+
+  it('names only flags that the E2E stack switches on for a chain of the spec', () => {
+    const entries = Object.entries(playwrightSpecs as Record<string, { flags?: string[]; chains?: number[] }>)
+    const off = entries.flatMap(([spec, entry]) =>
+      (entry.flags ?? [])
+        .filter((k) => !testChainFeatures.on.includes(k))
+        .filter((k) => !(entry.chains ?? []).some((chainId) => forkExtraKeys[chainId]?.includes(k)))
+        .map((k) => `${spec}: ${k}`),
     )
     expect(off).toEqual([])
   })

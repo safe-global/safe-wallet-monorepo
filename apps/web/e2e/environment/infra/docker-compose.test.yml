@@ -292,7 +292,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # The gateway reads Workspace spending limits and guard policies from a policy indexer; this one has no indexed state.
+  # The fee service quotes Pay from Safe fees for the gateway and allows their relay.
+  fee-service:
+    <<: *mock
+    command:
+      - /mocks/fee-service.ts
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '8096'
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  # The gateway reads Workspace spending limits from a policy indexer; this one has no indexed state.
   policy-indexer:
     <<: *mock
     command:
@@ -671,7 +685,7 @@ services:
       FF_MFA_STEP_UP: 'true'
       AUTH0_REDIRECT_URI: http://localhost:${REVERSE_PROXY_PORT:-8000}/cgw/v1/auth/oidc/callback
       AUTH0_API_AUDIENCE: safe-e2e-local
-      # On localhost the wallet names the staging app as the checkout return URL (returnUrl.ts); loopback is allowed anyway.
+      # Any allowed domain turns on loopback redirects here, so checkouts return to the local wallet.
       AUTH_ALLOWED_REDIRECT_DOMAIN: safe-wallet-web.dev.5afe.dev
       # Specs sign in and create Workspaces many times within minutes; the production limits answer them with 429.
       AUTH_RATE_LIMIT_MAX: '1000'
@@ -686,6 +700,7 @@ services:
       RELAY_PROVIDER_API_BASE_URI: http://relay-api:8092
       # One sponsored transaction per Safe and day, as on staging.
       RELAY_THROTTLE_LIMIT: '1'
+      FEE_SERVICE_BASE_URI: http://fee-service:8096
       FF_BILLING_SERVICE: 'true'
       SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
       SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
@@ -715,6 +730,8 @@ services:
       auth0-mock:
         condition: service_healthy
       relay-api:
+        condition: service_healthy
+      fee-service:
         condition: service_healthy
       billing-api:
         condition: service_healthy

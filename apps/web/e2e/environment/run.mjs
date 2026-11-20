@@ -51,6 +51,8 @@ export function walletEnvironment(manifest, env = process.env) {
     ...trezor,
     NEXT_PUBLIC_IS_PRODUCTION: 'false',
     NEXT_PUBLIC_IS_TEST_E2E: 'true',
+    // The local gateway accepts loopback returns; a developer's staging origin would send checkouts away.
+    NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN: '',
     NEXT_PUBLIC_POLLING_INTERVAL: '2000',
     NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',
     NEXT_PUBLIC_GATEWAY_URL_STAGING: gatewayUrl,
