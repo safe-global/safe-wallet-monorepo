@@ -13,7 +13,7 @@ import {
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 
 const OPTIONS: Array<{ value: QueueGroupBy; label: string; hint: string }> = [
-  { value: 'status', label: 'Status', hint: 'Transactions listed by order of urgency' },
+  { value: 'status', label: 'Urgency', hint: 'Transactions listed by order of urgency' },
   { value: 'next', label: 'Up next', hint: 'Next transaction on each Safe' },
   { value: 'safe', label: 'Safe', hint: 'Grouped by Safe, network and nonce order' },
   { value: 'network', label: 'Network', hint: 'Grouped by network' },

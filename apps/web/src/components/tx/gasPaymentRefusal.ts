@@ -19,7 +19,7 @@ export const getGasPaymentRefusal = (
   err: Error,
   gasPayer: GasPayer,
 ): { excluded: SponsoredOption[]; message: string } | undefined => {
-  if (gasPayer === 'WALLET') return undefined
+  if (gasPayer === 'WALLET' || gasPayer === 'PAY_FROM_SAFE') return undefined
 
   if (err instanceof QuotaExceededError) return { excluded: [gasPayer], message: sponsoredQuotaMessage(err) }
   if (err instanceof RelayLimitReachedError) return { excluded: [gasPayer], message: LIMIT_REACHED_MESSAGE }

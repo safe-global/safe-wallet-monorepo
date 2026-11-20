@@ -30,7 +30,7 @@ function SearchInput({
   const showClear = Boolean(onClear) && Boolean(props.value)
 
   return (
-    <InputGroup inputSize={inputSize} variant={variant} className={className}>
+    <InputGroup inputSize={inputSize} variant={variant} fieldError="hidden" className={className}>
       <InputGroupAddon align="inline-start">
         <Search className={cn('size-4', iconClassName)} data-testid="search-icon" />
       </InputGroupAddon>
