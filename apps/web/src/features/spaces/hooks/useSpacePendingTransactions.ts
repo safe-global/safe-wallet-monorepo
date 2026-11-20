@@ -11,6 +11,12 @@ import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
 const NO_TRANSACTIONS: SpacePendingTxItem[] = []
 
+// Without `count`, a page that reached the limit may hide more transactions, so the total is unknown
+const toTotalCount = (count: number | null, shown: number, limit: number): number | undefined => {
+  if (count !== null) return Math.max(count, shown)
+  return shown < limit ? shown : undefined
+}
+
 export const useSpacePendingTransactions = (limit = 3) => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
@@ -39,11 +45,12 @@ export const useSpacePendingTransactions = (limit = 3) => {
       .slice(0, limit)
   }, [page, limit])
 
-  if (hasSpaceQueue === false) return perSafe
+  if (hasSpaceQueue === false) return { ...perSafe, totalCount: undefined }
 
   return {
     transactions,
     count: transactions.length,
+    totalCount: page ? toTotalCount(page.count, transactions.length, limit) : undefined,
     isLoading: hasSpaceQueue === undefined || !spaceId || (spaceQueue.isFetching && !page),
     error: spaceQueue.isError ? 'Failed to load pending transactions' : undefined,
     refetch: () => {

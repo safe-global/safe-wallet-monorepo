@@ -5,7 +5,7 @@ import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
 import { toSupportedFiatCode } from '@/store/api/gateway/payFromSafeFeePreview'
 import type { AppDispatch } from '@/store'
-import { FEE_COLLECTORS } from '../public/constants'
+import { isFeeCollector } from '../public/constants'
 import { trackError, Errors } from '@/services/exceptions'
 
 export type ResolveFeeParamsArgs = {
@@ -56,11 +56,18 @@ export const resolveFeeParams = async ({
 
   const { safeTxGas, baseGas, gasPrice, gasToken: resolvedGasToken, refundReceiver } = preview.txData
 
-  if (!FEE_COLLECTORS.some((addr) => sameAddress(addr, refundReceiver))) {
+  if (!isFeeCollector(refundReceiver)) {
     // Surface to Sentry so a Fee collector rotation is observable instead of failing
     // silently for users who can't recover from the thrown error below.
-    trackError(Errors._821, `Untrusted GTF refundReceiver ${refundReceiver} returned by CGW on chain ${chainId}`)
+    trackError(
+      Errors._821,
+      `Untrusted Pay from Safe refundReceiver ${refundReceiver} returned by CGW on chain ${chainId}`,
+    )
     throw new Error(`Refusing to sign: untrusted refundReceiver ${refundReceiver} returned by CGW.`)
+  }
+
+  if (!sameAddress(resolvedGasToken, gasToken)) {
+    throw new Error(`Refusing to sign: the fee quote is in ${resolvedGasToken}, not in the gas token picked.`)
   }
 
   return createTx(

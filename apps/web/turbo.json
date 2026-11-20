@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "config/**",
+        "e2e/environment/infra/scripts/cfg_management/test-chain-features.json",
+        "$TURBO_ROOT$/apps/mobile/config/remote-config.json",
+        "$TURBO_ROOT$/packages/utils/src/**",
+        "$TURBO_ROOT$/packages/store/src/**"
+      ]
+    }
+  }
+}

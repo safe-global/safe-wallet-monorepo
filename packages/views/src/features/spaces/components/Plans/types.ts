@@ -34,6 +34,16 @@ export type PlanTier = {
   trialPeriodDays?: number | null
 }
 
+/** One size of the trial offer: the payment link that sells it and the plan behind it. */
+export type TrialSize = {
+  paymentLinkId: string
+  seats: number
+  planName: string
+  subtitle?: string
+  monthlyPrice: number | null
+  currency: string
+}
+
 /** What the user picked on a plan card: the tier and the seat option (one payment link) within it. */
 export type PlanPick = { tier: PlanTier; option: PlanSeatOption }
 

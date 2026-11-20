@@ -51,6 +51,8 @@ export interface FeatureFlags {
   policyRecipientAllowlist?: boolean
   /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
   spaceAuditLog?: boolean
+  /** SPACE_ONBOARDING_SURVEY on Sepolia, the default chain the onboarding reads it from (default: false) */
+  spaceOnboardingSurvey?: boolean
 }
 
 /**

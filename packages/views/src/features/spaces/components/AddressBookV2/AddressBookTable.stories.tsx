@@ -6,7 +6,7 @@ import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import AddressBookTable from './AddressBookTable'
-import { LOCAL_CONTACTS, WORKSPACE_CONTACTS } from './mocks/fixtures'
+import { LOCAL_CONTACTS, WORKSPACE_CONTACTS, WORKSPACE_TAGS } from './mocks/fixtures'
 
 /**
  * Contact (name + full address) · Chains · Added by · ⋮. Every column but the menu sorts. Below the
@@ -66,3 +66,21 @@ export const Compact: Story = {
 }
 
 export const Paginated: Story = { args: { pageSize: 4 } }
+
+const LONG = ' with a name long enough to need truncating'
+const [internal, vendor] = WORKSPACE_TAGS
+
+/** Long names and three tags in a 1000px container, just above the compact floor: text truncates, no column overlaps. */
+export const LongTextNarrow: Story = {
+  decorators: [(Story) => <div className="w-[1000px]">{Story()}</div>],
+  args: {
+    contacts: WORKSPACE_CONTACTS.map((contact) => ({
+      ...contact,
+      name: contact.name + LONG,
+      addedBy: contact.addedBy && contact.addedBy + LONG,
+      tags: [internal, vendor, { id: 9, name: 'Treasury operations and payroll', color: 'clay' as const }].map(
+        ({ id, name, color }) => ({ id, name, color }),
+      ),
+    })),
+  },
+}

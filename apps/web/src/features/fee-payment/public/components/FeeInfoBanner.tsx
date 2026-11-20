@@ -1,6 +1,6 @@
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { gatedDynamic } from '@/utils/gatedDynamic'
+import dynamic from '@/utils/dynamic'
 
-const FeeInfoBanner = gatedDynamic(FEATURES.GTF, () => import('../../components/FeeInfoBanner'))
+// No feature flag: Pay from Safe is an option of the chain's relayer, which the banner's slot checks.
+const FeeInfoBanner = dynamic(() => import('../../components/FeeInfoBanner'))
 
 export default FeeInfoBanner
