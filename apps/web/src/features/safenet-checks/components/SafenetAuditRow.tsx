@@ -7,7 +7,7 @@ import {
   type PublicCheckStatus,
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../useSafenetDisplayStatus'
+import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../public/hooks/useSafenetDisplayStatus'
 import {
   STATUS_PRESENTATION,
   UNAVAILABLE_PRESENTATION,
