@@ -42,7 +42,8 @@ shared with mobile must have the same `enabled` value in both files.
 
 The sync test requires E2E coverage for a released flag. Add the key to `flags` of the
 specs that cover the feature in
-[`playwright-specs.mjs`](../e2e/environment/playwright-specs.mjs). If no spec covers it,
+[`playwright-specs.mjs`](../e2e/environment/playwright-specs.mjs). A flag in `flags` must be
+`on` in the E2E stack, or the spec runs with the feature hidden. If no spec covers it,
 give the reason in
 [`released-without-e2e.json`](../e2e/environment/released-without-e2e.json), which QA or
 the web team must approve.
