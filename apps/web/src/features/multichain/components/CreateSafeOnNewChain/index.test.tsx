@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { getStoreInstance } from '@/store'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { CreateSafeOnSpecificChain } from './index'
+import { CreateSafeOnNewChain, CreateSafeOnSpecificChain } from './index'
 import { persistCounterfactualSafe } from '@/features/counterfactual/public/services/persistCounterfactualSafe'
 import { useIsAdmin } from '@/features/spaces/public/hooks/useSpaceMembers'
 import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'
@@ -10,9 +10,16 @@ import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLi
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { predictAddressBasedOnReplayData } from '../../public/utils/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import {
+  PendingSafeStatus,
+  type ReplayedSafeProps,
+  type UndeployedSafe,
+} from '@safe-global/utils/features/counterfactual/store/types'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { NextRouter } from 'next/router'
+import { useState } from 'react'
 
 jest.mock('@/features/counterfactual/public/services/persistCounterfactualSafe', () => ({
   persistCounterfactualSafe: jest.fn(),
@@ -277,5 +284,70 @@ describe('CreateSafeOnSpecificChain', () => {
     fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
     await waitFor(() => expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null })))
+  })
+})
+
+describe('CreateSafeOnNewChain', () => {
+  const deployedChain = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }).build()
+
+  const undeployedSafe: UndeployedSafe = {
+    props: {
+      factoryAddress: '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67',
+      masterCopy: '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762',
+      saltNonce: '0',
+      safeVersion: '1.4.1',
+      safeAccountConfig: {
+        owners: ['0x0000000000000000000000000000000000000abc'],
+        threshold: 1,
+        to: ZERO_ADDRESS,
+        data: '0x',
+        fallbackHandler: '0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99',
+        payment: 0,
+        paymentToken: ZERO_ADDRESS,
+        paymentReceiver: ZERO_ADDRESS,
+      },
+    },
+    status: { status: PendingSafeStatus.AWAITING_EXECUTION, type: PayMethod.PayLater },
+  }
+
+  // Like the Safe bar, it builds a new list of deployed networks on every render, e.g. after a poll
+  const PollingParent = () => {
+    const [, setPolls] = useState(0)
+    return (
+      <>
+        <button onClick={() => setPolls((polls) => polls + 1)}>Poll</button>
+        <CreateSafeOnNewChain
+          safeAddress={SAFE_ADDRESS}
+          deployedChainIds={[deployedChain.chainId]}
+          defaultChainId={chain.chainId}
+          currentName="My Safe"
+          open
+          onClose={jest.fn()}
+        />
+      </>
+    )
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: [deployedChain, chain] })
+    jest.spyOn(useChains, 'useChain').mockReturnValue(chain)
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseSpaceSafeCount.mockReturnValue(undefined)
+    mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
+    mockUseSpaceSafes.mockReturnValue({ currentData: undefined })
+  })
+
+  it('keeps the chosen network and Add network when the parent renders an equal list of deployed networks', async () => {
+    render(<PollingParent />, {
+      initialReduxState: { undeployedSafes: { [deployedChain.chainId]: { [SAFE_ADDRESS]: undeployedSafe } } },
+    })
+    await waitFor(() => expect(screen.getByTestId('modal-add-network-btn')).toBeEnabled())
+    expect(screen.getByTestId('added-network')).toHaveTextContent('Gnosis Chain')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Poll', hidden: true }))
+
+    expect(screen.getByTestId('added-network')).toHaveTextContent('Gnosis Chain')
+    expect(screen.getByTestId('modal-add-network-btn')).toBeEnabled()
   })
 })
