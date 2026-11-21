@@ -17,7 +17,7 @@ const meta = {
   parameters: { layout: 'padded' },
   args: { label: UP_NEXT_GROUP_LABELS.next, count: 4, collapsed: false, onToggle: fn() },
   render: (args) => (
-    <Table className="table-fixed min-w-[1128px]">
+    <Table className="table-fixed min-w-[1160px]">
       <TableBody>
         <QueueGroupRow {...args} />
       </TableBody>

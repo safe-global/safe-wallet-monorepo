@@ -2,6 +2,7 @@ import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type Rea
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { TableBody, tableVariants } from '@safe-global/views/components/ui/table'
 import { cn } from '@safe-global/views/utils/cn'
+import { AddToAddressBookProvider } from '../AddToAddressBook'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import { useSignerWallets } from '../../../hooks/useSignerWallets'
@@ -226,49 +227,51 @@ const SpaceQueueTable = ({
   const scopeTargets = getScopeTargets(virtualItems.map((virtualItem) => items[virtualItem.index]))
 
   return (
-    <DeleteTxDialogProvider>
-      {/* Same panel surface as the Space accounts table, so the two line up */}
-      <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
-        <ScopePool targets={scopeTargets} store={scopeStore} />
-        <table
-          aria-label="Pending transactions"
-          className={cn(
-            tableVariants({ variant: 'panel' }),
-            'table-fixed',
-            groups ? 'min-w-[1192px]' : 'min-w-[1128px]',
-          )}
-        >
-          <QueueTableHeader
-            namesSafes={!!groups}
-            collapseAll={
-              collapseUnit && collapsibleIds.length > 0
-                ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
-                : undefined
-            }
-          />
-          <TableBody ref={bodyRef}>
-            <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
-            {virtualItems.map((virtualItem) => {
-              const item = items[virtualItem.index]
-              return (
-                <VirtualRow
-                  key={item.key}
-                  item={item}
-                  index={virtualItem.index}
-                  scopeStore={scopeStore}
-                  measureRef={virtualizer.measureElement}
-                  chainConfigs={configs}
-                  onToggleSafe={onToggleSafe}
-                  onToggleChain={onToggleChain}
-                  onToggleGroup={onToggleGroup}
-                />
-              )
-            })}
-            <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
-          </TableBody>
-        </table>
-      </div>
-    </DeleteTxDialogProvider>
+    <AddToAddressBookProvider>
+      <DeleteTxDialogProvider>
+        {/* Same panel surface as the Space accounts table, so the two line up */}
+        <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
+          <ScopePool targets={scopeTargets} store={scopeStore} />
+          <table
+            aria-label="Pending transactions"
+            className={cn(
+              tableVariants({ variant: 'panel' }),
+              'table-fixed',
+              groups ? 'min-w-[1224px]' : 'min-w-[1160px]',
+            )}
+          >
+            <QueueTableHeader
+              namesSafes={!!groups}
+              collapseAll={
+                collapseUnit && collapsibleIds.length > 0
+                  ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
+                  : undefined
+              }
+            />
+            <TableBody ref={bodyRef}>
+              <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+              {virtualItems.map((virtualItem) => {
+                const item = items[virtualItem.index]
+                return (
+                  <VirtualRow
+                    key={item.key}
+                    item={item}
+                    index={virtualItem.index}
+                    scopeStore={scopeStore}
+                    measureRef={virtualizer.measureElement}
+                    chainConfigs={configs}
+                    onToggleSafe={onToggleSafe}
+                    onToggleChain={onToggleChain}
+                    onToggleGroup={onToggleGroup}
+                  />
+                )
+              })}
+              <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+            </TableBody>
+          </table>
+        </div>
+      </DeleteTxDialogProvider>
+    </AddToAddressBookProvider>
   )
 }
 
