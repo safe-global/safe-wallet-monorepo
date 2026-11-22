@@ -28,9 +28,9 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.72.1"
+    "typescript-eslint": "^8.72.2"
   },
   "dependencies": {
     "jest-fixed-jsdom": "^0.0.11",

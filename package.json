@@ -55,8 +55,8 @@
   },
   "devDependencies": {
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
-    "@storybook/builder-webpack5": "^10.6.6",
-    "@storybook/react": "^10.6.6",
+    "@storybook/builder-webpack5": "^10.6.7",
+    "@storybook/react": "^10.6.7",
     "@types/node": "^22.13.1",
     "@typescript/native": "npm:typescript@7.0.2",
     "ajv": "^8.20.0",
@@ -65,11 +65,11 @@
     "knip": "^5.0.0",
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "storybook": "^10.6.6",
-    "turbo": "^2.11.10",
+    "storybook": "^10.6.7",
+    "turbo": "^2.11.11",
     "typescript": "~5.9.2"
   },
   "dependenciesMeta": {
