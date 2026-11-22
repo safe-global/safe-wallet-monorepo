@@ -70,7 +70,7 @@ export type FeesPreviewData = {
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
 /**
- * @param options.isExecution - the executor is known, so signer-pays is estimated; while signing it is not.
+ * @param options.isExecution - the executor is known, so signer-pays is estimated, while signing it is not.
  * @param options.isPayFromSafe - the Safe pays the fee, so the CGW quote is priced instead of the signer estimate.
  */
 export const useFeesPreview = ({

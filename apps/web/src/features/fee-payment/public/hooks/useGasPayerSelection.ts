@@ -174,7 +174,7 @@ export const useGasPayerSelection = ({
           currency: fees.executionFee.currency,
           fiatAmount: fees.executionFee.fiatAmount,
         }
-    // Only what the Safe pays adds up to a total; the signer's wallet or a sponsor pays apart.
+    // Only what the Safe pays adds up to a total.
     const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : undefined
 
     const footer = buildFooter({
