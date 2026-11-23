@@ -1,10 +1,10 @@
 import {
   ALLOWLIST_UNAVAILABLE_ERROR,
   GUARD_NOT_SUPPORTED_ERROR,
-  TOO_MANY_CONFIGURATIONS_ERROR,
+  TRANSACTION_TOO_LARGE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState, TokenApprovalToRevoke } from '../types'
-import { MAX_POLICY_CONFIGURATIONS } from './allowlistConfigurations'
+import { estimateConfigurationGas, getConfigurationLimitError, MAX_TRANSACTION_GAS } from './allowlistLimits'
 import { withFirstSetupDefaults } from '../../services/firstSetupDefaults'
 import { getTokenCallbackHandlerAddress, isTokenCallbackHandler } from './fallbackHandlers'
 import {
@@ -39,7 +39,12 @@ export const createAllowlistSetupTxs = ({
   }
 
   const installed = guardState.status === 'none' ? withFirstSetupDefaults(chainId, configurations) : configurations
-  if (installed.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
+  const limitError = getConfigurationLimitError(installed)
+  if (limitError) throw new Error(limitError)
+  const revokedCount = guardState.status === 'none' ? revokedApprovals.length : 0
+  if (estimateConfigurationGas(installed, revokedCount) > MAX_TRANSACTION_GAS) {
+    throw new Error(TRANSACTION_TOO_LARGE_ERROR)
+  }
   const setup = { configurations: installed, root: getConfigurationRoot(installed) }
 
   if (guardState.status === 'none') {

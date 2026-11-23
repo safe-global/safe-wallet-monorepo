@@ -10,6 +10,7 @@ import {
   GUARD_READ_ERROR,
   GUARD_UNAVAILABLE_ERROR,
   ALLOWLIST_UNAVAILABLE_ERROR,
+  REMOVAL_TOO_LARGE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistRule } from '../../types'
 import { usePolicyGuard, type UsePolicyGuardResult } from '@/features/policy-guard/public/hooks/usePolicyGuard'
@@ -238,6 +239,18 @@ describe('useBuildAllowlistTransaction', () => {
     expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: ALLOWLIST_UNAVAILABLE_ERROR }))
     expect(setSafeTx).not.toHaveBeenCalledWith(expect.anything())
     expect(result.current.configurations).toBeUndefined()
+  })
+
+  it('should set the error and no transaction, when the allowlist would be too large to remove later', () => {
+    const manyTokens: AllowlistRule[] = Array.from({ length: 49 }, (_, index) => ({
+      tokenAddress: checksumAddress(`0x${(index + 1).toString(16).padStart(40, '0')}`),
+      recipients: [RECIPIENT],
+    }))
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
+    renderHook(() => useBuildAllowlistTransaction(manyTokens), { wrapper })
+
+    expect(setSafeTxError).toHaveBeenCalledWith(new Error(REMOVAL_TOO_LARGE_ERROR))
+    expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
   })
 
   it('sets the error when creating the transaction fails', async () => {

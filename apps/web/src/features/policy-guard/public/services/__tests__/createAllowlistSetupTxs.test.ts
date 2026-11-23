@@ -4,9 +4,10 @@ import { OperationType } from '@safe-global/types-kit'
 import {
   GUARD_NOT_SUPPORTED_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
+  TRANSACTION_TOO_LARGE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration, PolicyGuardState } from '../../types'
-import { MAX_POLICY_CONFIGURATIONS } from '../allowlistConfigurations'
+import { encodeErc20TransferPolicyData, MAX_POLICY_CONFIGURATIONS } from '../allowlistConfigurations'
 import { createAllowlistSetupTxs } from '../createAllowlistSetupTxs'
 import { withFirstSetupDefaults } from '../../../services/firstSetupDefaults'
 import { getConfigurationRoot } from '../policyGuardEncoders'
@@ -152,6 +153,41 @@ describe('createAllowlistSetupTxs', () => {
     expect(() => setup({ status: 'known', guardAddress }, many)).not.toThrow()
     expect(() => setup({ status: 'none' }, many)).toThrow(TOO_MANY_CONFIGURATIONS_ERROR)
     expect(() => setup({ status: 'none' }, many.slice(1))).not.toThrow()
+  })
+
+  it('should refuse a first setup, when it needs more gas than one transaction holds', () => {
+    const recipients = Array.from({ length: 140 }, () => getAddress(faker.finance.ethereumAddress()))
+    const large = [{ ...configurations[0], data: encodeErc20TransferPolicyData(recipients) }]
+
+    expect(() => setup({ status: 'none' }, large)).toThrow(TRANSACTION_TOO_LARGE_ERROR)
+  })
+
+  it('should refuse a first setup, when the revoked approvals take it over the gas of one transaction', () => {
+    const recipients = Array.from({ length: 138 }, () => getAddress(faker.finance.ethereumAddress()))
+    const large = [{ ...configurations[0], data: encodeErc20TransferPolicyData(recipients) }]
+    const approval = () => ({
+      tokenAddress: getAddress(faker.finance.ethereumAddress()),
+      spender: getAddress(faker.finance.ethereumAddress()),
+    })
+
+    expect(() => setup({ status: 'none' }, large)).not.toThrow()
+    expect(() =>
+      createAllowlistSetupTxs({
+        chainId,
+        safeAddress,
+        guardAddress,
+        guardState: { status: 'none' },
+        configurations: large,
+        revokedApprovals: [approval(), approval()],
+      }),
+    ).toThrow(TRANSACTION_TOO_LARGE_ERROR)
+  })
+
+  it('should refuse a change, when its later apply needs more gas than one transaction holds', () => {
+    const recipients = Array.from({ length: 146 }, () => getAddress(faker.finance.ethereumAddress()))
+    const large = [{ ...configurations[0], data: encodeErc20TransferPolicyData(recipients) }]
+
+    expect(() => setup({ status: 'known', guardAddress }, large)).toThrow(TRANSACTION_TOO_LARGE_ERROR)
   })
 
   it('only requests the configuration root when both slots are set', () => {

@@ -6,6 +6,7 @@ import {
   GUARD_NOT_SUPPORTED_ERROR,
   GUARD_READ_ERROR,
   GUARD_UNAVAILABLE_ERROR,
+  REMOVAL_TOO_LARGE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistRule } from '../types'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -23,6 +24,7 @@ import {
   buildAllowlistConfigurations,
   clearGuardExitConfigurations,
 } from '@/features/policy-guard/public/services/allowlistConfigurations'
+import { isAllowlistRemovable } from '@/features/policy-guard/public/services/allowlistLimits'
 import { createAllowlistSetupTxs } from '@/features/policy-guard/public/services/createAllowlistSetupTxs'
 import {
   getPolicyGuardAddress,
@@ -120,6 +122,7 @@ export const useBuildAllowlistTransaction = (
         currentFallbackHandler,
         revokedApprovals: revokedApprovalsKey ? JSON.parse(revokedApprovalsKey) : undefined,
       })
+      if (!isAllowlistRemovable(stableRules)) throw new Error(REMOVAL_TOO_LARGE_ERROR)
     } catch (e) {
       setSafeTxError(asError(e))
       return
