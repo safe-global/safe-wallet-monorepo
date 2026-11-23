@@ -320,6 +320,18 @@ describe('SignersTooltip', () => {
       expect(rowNames()).toEqual(['You', 'Max', 'Ana'])
     })
 
+    it('lists the unsigned connected wallet before the unsigned owners listed ahead of it', async () => {
+      const [ana, max, me] = [owner('Ana'), owner('Max'), owner('Me')]
+      connect(me.value)
+      respondWith(detailsWith([ana, max, me], [], 2))
+      const { user, trigger } = renderTooltip(0, 2, { status: 'sign' })
+
+      await user.hover(trigger)
+
+      await screen.findByText('You')
+      expect(rowNames()).toEqual(['You', 'Ana', 'Max'])
+    })
+
     it('says fully signed rather than waiting on no one', async () => {
       const [ana, max] = [owner('Ana'), owner('Max')]
       respondWith(detailsWith([ana, max], [ana, max], 2))
