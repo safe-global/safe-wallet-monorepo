@@ -32,7 +32,7 @@ const SINGLE_OWNER: OwnerSetup = { owners: ['alice'], threshold: 1 }
 const TWO_OF_THREE: OwnerSetup = { owners: ['alice', 'bob', 'carol'], threshold: 2 }
 
 /** The calls each reviewed transaction lists, in execution order */
-const SETUP_CALLS = [/configureImmediately/, /setGuard/, /setModuleGuard/]
+const SETUP_CALLS = [/configureImmediately/, /setGuard/, /setModuleGuard/, /setFallbackHandler/]
 const REQUEST_CALLS = [/requestConfiguration/]
 const APPLY_CALLS = [/applyConfiguration/]
 

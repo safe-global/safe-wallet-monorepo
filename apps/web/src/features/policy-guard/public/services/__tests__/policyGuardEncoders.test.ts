@@ -9,6 +9,7 @@ import {
   createFirstSetupTxs,
   createRemoveGuardTxs,
   createRequestConfigurationTx,
+  createSetFallbackHandlerTx,
   createSetGuardTx,
   createSetModuleGuardTx,
   describeSetupCall,
@@ -22,7 +23,11 @@ const guardIface = new Interface([
   'function requestConfiguration(bytes32 configureRoot)',
   `function applyConfiguration(${TUPLE}[] configurations)`,
 ])
-const safeIface = new Interface(['function setGuard(address)', 'function setModuleGuard(address)'])
+const safeIface = new Interface([
+  'function setGuard(address)',
+  'function setModuleGuard(address)',
+  'function setFallbackHandler(address)',
+])
 
 const safeAddress = getAddress(faker.finance.ethereumAddress())
 const guardAddress = getAddress(faker.finance.ethereumAddress())
@@ -49,6 +54,16 @@ describe('createFirstSetupTxs', () => {
     expect(txs.every((tx) => tx.value === '0')).toBe(true)
   })
 
+  it('should set the fallback handler last, when one is given', () => {
+    const handler = getAddress(faker.finance.ethereumAddress())
+
+    const txs = createFirstSetupTxs({ safeAddress, guardAddress, configurations, fallbackHandler: handler })
+
+    expect(txs.map((tx) => tx.to)).toEqual([guardAddress, safeAddress, safeAddress, safeAddress])
+    expect(safeIface.parseTransaction({ data: txs[3].data })?.name).toBe('setFallbackHandler')
+    expect(safeIface.parseTransaction({ data: txs[3].data })?.args[0]).toBe(handler)
+  })
+
   it('round-trips the configurations', () => {
     const [configure] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
     const [decoded] = guardIface.decodeFunctionData('configureImmediately', configure.data)
@@ -66,6 +81,19 @@ describe('createSetGuardTx / createSetModuleGuardTx', () => {
     expect(safeIface.parseTransaction({ data: guardTx.data })?.name).toBe('setGuard')
     expect(safeIface.parseTransaction({ data: moduleTx.data })?.name).toBe('setModuleGuard')
     expect(safeIface.parseTransaction({ data: moduleTx.data })?.args[0]).toBe(guardAddress)
+  })
+})
+
+describe('createSetFallbackHandlerTx', () => {
+  it('should call setFallbackHandler on the Safe with the handler, when the handler is changed', () => {
+    const handler = getAddress(faker.finance.ethereumAddress())
+
+    const tx = createSetFallbackHandlerTx(safeAddress, handler)
+
+    expect(tx.to).toBe(safeAddress)
+    expect(tx.value).toBe('0')
+    expect(tx.data.slice(0, 10)).toBe(id('setFallbackHandler(address)').slice(0, 10))
+    expect(safeIface.parseTransaction({ data: tx.data })?.args[0]).toBe(handler)
   })
 })
 
@@ -150,6 +178,16 @@ describe('describeSetupCall', () => {
       method,
       target: 'safe',
       param: { name, value: guardAddress },
+    })
+  })
+
+  it('should name setFallbackHandler with the handler it sets, when the call changes the fallback handler', () => {
+    const handler = getAddress(faker.finance.ethereumAddress())
+
+    expect(describeSetupCall(createSetFallbackHandlerTx(safeAddress, handler))).toEqual({
+      method: 'setFallbackHandler',
+      target: 'safe',
+      param: { name: 'handler', value: handler },
     })
   })
 

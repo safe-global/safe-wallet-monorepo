@@ -82,12 +82,12 @@ describe('useBuildAllowlistTransaction', () => {
     mockFeature()
   })
 
-  it('sets a multisend of 3 calls when no guard is set up', async () => {
+  it('sets a multisend of 4 calls when no guard is set up', async () => {
     mockGuard({ state: { status: 'none' } })
     const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
 
     await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
-    expect(sentBatch()).toHaveLength(3)
+    expect(sentBatch()).toHaveLength(4)
     expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
     expect(result.current.guardState).toEqual({ status: 'none' })
     const installed = withFirstSetupDefaults(CHAIN_ID, [
@@ -97,6 +97,18 @@ describe('useBuildAllowlistTransaction', () => {
     expect(result.current.configurations).toEqual(installed)
     expect(result.current.root).toBe(getConfigurationRoot(installed))
     expect(result.current.txs).toEqual(sentBatch())
+  })
+
+  it('should leave the fallback handler change out, when the Safe already uses the TokenCallbackHandler', async () => {
+    ;(useSafeScope as jest.Mock).mockReturnValue({
+      ...scope,
+      safe: { fallbackHandler: { value: '0x54e86d004d71a8D2112ec75FaCE57D730b0433F3' } },
+    })
+    mockGuard({ state: { status: 'none' } })
+    renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+    await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+    expect(sentBatch()).toHaveLength(3)
   })
 
   it('should return the exit clean-up and the allowlist configurations, when the guard is already known', async () => {
@@ -122,7 +134,7 @@ describe('useBuildAllowlistTransaction', () => {
     mockGuard({ state: { status: 'none' } })
     const { rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
     await waitFor(() => expect(txSetCount()).toBe(1))
-    expect(sentBatch()).toHaveLength(3)
+    expect(sentBatch()).toHaveLength(4)
 
     mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
     rerender()

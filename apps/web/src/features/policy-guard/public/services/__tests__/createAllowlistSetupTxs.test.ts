@@ -17,9 +17,11 @@ const iface = new Interface([
   'function requestConfiguration(bytes32 configureRoot)',
   'function setGuard(address)',
   'function setModuleGuard(address)',
+  'function setFallbackHandler(address)',
 ])
 
 const chainId = '11155111'
+const TOKEN_CALLBACK_HANDLER = '0x54e86d004d71a8D2112ec75FaCE57D730b0433F3'
 const safeAddress = getAddress(faker.finance.ethereumAddress())
 const guardAddress = getAddress(faker.finance.ethereumAddress())
 const configurations: PolicyConfiguration[] = [
@@ -49,11 +51,42 @@ const toTuple = ({ target, selector, operation, policy, data }: PolicyConfigurat
 ]
 
 describe('createAllowlistSetupTxs', () => {
-  it('configures immediately, then sets both guard slots, when no guard is installed', () => {
+  it('configures immediately, then sets both guard slots and the fallback handler, when no guard is installed', () => {
     expect(describeCalls({ status: 'none' })).toEqual([
       { to: guardAddress, name: 'configureImmediately' },
       { to: safeAddress, name: 'setGuard' },
       { to: safeAddress, name: 'setModuleGuard' },
+      { to: safeAddress, name: 'setFallbackHandler' },
+    ])
+  })
+
+  it('should set the TokenCallbackHandler, when the Safe uses another fallback handler', () => {
+    const { txs } = createAllowlistSetupTxs({
+      chainId,
+      safeAddress,
+      guardAddress,
+      guardState: { status: 'none' },
+      configurations,
+      currentFallbackHandler: getAddress(faker.finance.ethereumAddress()),
+    })
+
+    expect(iface.parseTransaction({ data: txs[3].data })?.args[0]).toBe(TOKEN_CALLBACK_HANDLER)
+  })
+
+  it('should leave the fallback handler out, when the Safe already uses the TokenCallbackHandler', () => {
+    const { txs } = createAllowlistSetupTxs({
+      chainId,
+      safeAddress,
+      guardAddress,
+      guardState: { status: 'none' },
+      configurations,
+      currentFallbackHandler: TOKEN_CALLBACK_HANDLER.toLowerCase(),
+    })
+
+    expect(txs.map((tx) => iface.parseTransaction({ data: tx.data })?.name)).toEqual([
+      'configureImmediately',
+      'setGuard',
+      'setModuleGuard',
     ])
   })
 

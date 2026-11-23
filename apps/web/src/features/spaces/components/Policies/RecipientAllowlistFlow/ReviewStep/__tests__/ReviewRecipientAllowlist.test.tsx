@@ -385,7 +385,7 @@ describe('ReviewRecipientAllowlist', () => {
   })
 
   it.each([
-    [{ status: 'none' }, ['SafePolicyGuard: configureImmediately', 'setGuard', 'setModuleGuard']],
+    [{ status: 'none' }, ['SafePolicyGuard: configureImmediately', 'setGuard', 'setModuleGuard', 'setFallbackHandler']],
     [{ status: 'known', guardAddress }, ['SafePolicyGuard: requestConfiguration']],
     [
       { status: 'partial', missingSlot: 'transaction', guardAddress },
@@ -518,6 +518,16 @@ describe('ReviewRecipientAllowlist', () => {
     expect(screen.getAllByTestId('allowlist-rule')).toHaveLength(configurations.length)
     expect(document.body.textContent).not.toContain(root)
     expect(document.body.textContent).not.toContain(request.data)
+  })
+
+  it('should name the TokenCallbackHandler the first setup sets as fallback handler, when the setter is expanded', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[3])
+
+    expect(screen.getByText('handler')).toBeInTheDocument()
+    expect(screen.getByText('TokenCallbackHandler')).toBeInTheDocument()
   })
 
   it('shows the guard a setter action sets', () => {
@@ -798,7 +808,7 @@ describe('RecipientAllowlistFlow review round trip', () => {
 
     expect(await screen.findByTestId('allowlist-review-summary')).toHaveTextContent('Alice')
 
-    fireEvent.click(screen.getByRole('button', { name: /back/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^back$/i }))
 
     expect(await screen.findByTestId('allowlist-recipients-section')).toHaveTextContent('Alice')
   })

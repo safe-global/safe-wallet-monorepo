@@ -87,6 +87,7 @@ export const getReviewRecipientsLabel = (count: number): string => `Allowed reci
 export const getNextSignersText = (names: string): string =>
   `${names} will be asked to sign next. Nothing changes until it's executed.`
 export const POLICY_GUARD_NAME = 'SafePolicyGuard'
+export const TOKEN_CALLBACK_HANDLER_NAME = 'TokenCallbackHandler'
 export const getRuleTitle = (index: number, count: number): string => `Rule ${index + 1} of ${count}`
 export const RULE_POLICY_LABEL = 'Policy'
 export const RULE_TARGET_LABEL = 'Applies to'

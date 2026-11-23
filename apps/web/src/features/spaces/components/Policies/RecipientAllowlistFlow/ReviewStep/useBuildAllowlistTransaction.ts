@@ -53,6 +53,7 @@ export const useBuildAllowlistTransaction = (
   const state = useMemo(() => (stateKey ? (JSON.parse(stateKey) as PolicyGuardState) : undefined), [stateKey])
 
   const sdk = scope?.sdk
+  const currentFallbackHandler = scope?.safe?.fallbackHandler?.value
   const rulesKey = JSON.stringify(rules)
   // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by value so an equal rules array doesn't rebuild
   const stableRules = useMemo(() => rules, [rulesKey])
@@ -95,7 +96,14 @@ export const useBuildAllowlistTransaction = (
         ? buildAllowlistChangeConfigurations(chainId, formBaseline, stableRules)
         : [...clearGuardExitConfigurations(safeAddress), ...buildAllowlistConfigurations(chainId, stableRules)]
       if (configurations.length === 0) throw new Error(EMPTY_ALLOWLIST_ERROR)
-      setup = createAllowlistSetupTxs({ chainId, safeAddress, guardAddress, guardState: state, configurations })
+      setup = createAllowlistSetupTxs({
+        chainId,
+        safeAddress,
+        guardAddress,
+        guardState: state,
+        configurations,
+        currentFallbackHandler,
+      })
     } catch (e) {
       setSafeTxError(asError(e))
       return
@@ -125,6 +133,7 @@ export const useBuildAllowlistTransaction = (
     sdk,
     chainId,
     safeAddress,
+    currentFallbackHandler,
     isAllowlistEnabled,
     setSafeTx,
     setSafeTxError,

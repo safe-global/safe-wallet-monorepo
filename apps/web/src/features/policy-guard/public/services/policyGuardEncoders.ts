@@ -14,7 +14,7 @@ const policyGuardInterface = new Interface([
 ])
 
 const safeInterface = Safe__factory.createInterface()
-const SAFE_SETUP_METHODS = ['setGuard', 'setModuleGuard']
+const SAFE_SETUP_METHODS = ['setGuard', 'setModuleGuard', 'setFallbackHandler']
 
 export const describeSetupCall = ({ data }: Pick<MetaTransactionData, 'data'>): SetupCallDescription | undefined => {
   const selector = data.slice(0, 10)
@@ -42,6 +42,12 @@ export const createSetModuleGuardTx = (safeAddress: string, guardAddress: string
   data: safeInterface.encodeFunctionData('setModuleGuard', [guardAddress]),
 })
 
+export const createSetFallbackHandlerTx = (safeAddress: string, handler: string): MetaTransactionData => ({
+  to: safeAddress,
+  value: '0',
+  data: safeInterface.encodeFunctionData('setFallbackHandler', [handler]),
+})
+
 /** Takes the guard off both slots, once an applied removal lets the two setters and their batch through. */
 export const createRemoveGuardTxs = (safeAddress: string): MetaTransactionData[] => [
   createSetGuardTx(safeAddress, ZERO_ADDRESS),
@@ -53,10 +59,13 @@ export const createFirstSetupTxs = ({
   safeAddress,
   guardAddress,
   configurations,
+  fallbackHandler,
 }: {
   safeAddress: string
   guardAddress: string
   configurations: PolicyConfiguration[]
+  /** Set last, when the Safe does not use it yet. */
+  fallbackHandler?: string
 }): MetaTransactionData[] => [
   {
     to: guardAddress,
@@ -65,6 +74,7 @@ export const createFirstSetupTxs = ({
   },
   createSetGuardTx(safeAddress, guardAddress),
   createSetModuleGuardTx(safeAddress, guardAddress),
+  ...(fallbackHandler ? [createSetFallbackHandlerTx(safeAddress, fallbackHandler)] : []),
 ]
 
 export const createRequestConfigurationTx = (guardAddress: string, configureRoot: string): MetaTransactionData => ({

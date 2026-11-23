@@ -1,10 +1,12 @@
 import {
+  ALLOWLIST_UNAVAILABLE_ERROR,
   GUARD_NOT_SUPPORTED_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState } from '../types'
 import { MAX_POLICY_CONFIGURATIONS } from './allowlistConfigurations'
 import { withFirstSetupDefaults } from '../../services/firstSetupDefaults'
+import { getTokenCallbackHandlerAddress, isTokenCallbackHandler } from './fallbackHandlers'
 import {
   createFirstSetupTxs,
   createRequestConfigurationTx,
@@ -19,12 +21,14 @@ export const createAllowlistSetupTxs = ({
   guardAddress,
   guardState,
   configurations,
+  currentFallbackHandler,
 }: {
   chainId: string
   safeAddress: string
   guardAddress: string
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
+  currentFallbackHandler?: string
 }): AllowlistSetup => {
   if (guardState.status === 'unknown' || guardState.status === 'unsupported') {
     throw new Error(GUARD_NOT_SUPPORTED_ERROR)
@@ -35,7 +39,13 @@ export const createAllowlistSetupTxs = ({
   const setup = { configurations: installed, root: getConfigurationRoot(installed) }
 
   if (guardState.status === 'none') {
-    return { ...setup, txs: createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed }) }
+    const tokenCallbackHandler = getTokenCallbackHandlerAddress(chainId)
+    if (!tokenCallbackHandler) throw new Error(ALLOWLIST_UNAVAILABLE_ERROR)
+    const fallbackHandler = isTokenCallbackHandler(chainId, currentFallbackHandler) ? undefined : tokenCallbackHandler
+    return {
+      ...setup,
+      txs: createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed, fallbackHandler }),
+    }
   }
 
   const request = createRequestConfigurationTx(guardAddress, setup.root)

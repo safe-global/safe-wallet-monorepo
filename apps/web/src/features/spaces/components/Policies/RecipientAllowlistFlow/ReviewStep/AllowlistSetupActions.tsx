@@ -23,6 +23,7 @@ import {
   RULE_RECIPIENTS_LABEL,
   RULE_REVOKED_RECIPIENTS_LABEL,
   RULE_TARGET_LABEL,
+  TOKEN_CALLBACK_HANDLER_NAME,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
@@ -31,6 +32,7 @@ import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxDa
 import singleTxCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
 import type { PolicyConfiguration, SetupCallDescription } from '@/features/policy-guard/public/types'
 import { isFallbackAccess } from '@/features/policy-guard/public/services/fallbackAccess'
+import { isTokenCallbackHandler } from '@/features/policy-guard/public/services/fallbackHandlers'
 import type { AllowlistAddressInfo } from '../hooks/useAllowlistAddressInfo'
 import { getRuleKind, type RuleKind } from './ruleKind'
 
@@ -44,6 +46,17 @@ type AllowlistSetupActionsProps = {
 }
 
 const CONFIGURING_METHODS = ['configureImmediately', 'requestConfiguration', 'applyConfiguration']
+
+const nameSetterParam = (
+  chainId: string,
+  { name, value }: { name: string; value: string },
+  getAddressInfo: (address: string) => AllowlistAddressInfo,
+): string | undefined => {
+  // Removing the guard sets the slot to the zero address, which isn't the guard
+  if (sameAddress(value, ZERO_ADDRESS)) return undefined
+  if (name !== 'handler') return POLICY_GUARD_NAME
+  return isTokenCallbackHandler(chainId, value) ? TOKEN_CALLBACK_HANDLER_NAME : getAddressInfo(value).name
+}
 
 const RuleAddress = ({ address, info }: { address: string; info: AllowlistAddressInfo }): ReactElement | null =>
   generateDataRowValue(address, 'address', true, { value: address, name: info.name, logoUri: info.logoUri })
@@ -203,10 +216,7 @@ const AllowlistSetupActions = ({
                         <TxDataRow title={description.param.name}>
                           <RuleAddress
                             address={description.param.value}
-                            info={{
-                              // Removing the guard sets the slot to the zero address, which isn't the guard
-                              name: sameAddress(description.param.value, ZERO_ADDRESS) ? undefined : POLICY_GUARD_NAME,
-                            }}
+                            info={{ name: nameSetterParam(chainId, description.param, getAddressInfo) }}
                           />
                         </TxDataRow>
                       )}
