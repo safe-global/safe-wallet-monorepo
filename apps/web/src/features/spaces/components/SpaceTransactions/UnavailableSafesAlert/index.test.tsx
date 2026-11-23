@@ -76,15 +76,21 @@ describe('UnavailableSafesAlert', () => {
     expect(screen.queryByText(/covers up to/)).not.toBeInTheDocument()
   })
 
-  it('explains the limit and offers no reload when the Workspace holds more Safe accounts than the queue reads', async () => {
+  it('adds the limit and still offers a plain Reload when the Workspace holds more Safe accounts than the queue reads', async () => {
     respondWithSpaceSafes({ '1': Array.from({ length: SPACE_QUEUE_MAX_SAFES + 1 }, address) })
+    const onRetry = jest.fn()
 
-    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
+    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={onRetry} />)
 
     openList()
 
-    expect(await screen.findByText(/covers up to 100 Safe accounts/)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Reload/ })).not.toBeInTheDocument()
+    expect(
+      await screen.findByText(/covers up to 100 Safe accounts, so some of these may not be included/),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Transactions aren't shown in the table\./)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Reload all/ })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Reload' }))
+    expect(onRetry).toHaveBeenCalledTimes(1)
   })
 
   it('reloads the whole queue', async () => {
@@ -110,7 +116,7 @@ describe('UnavailableSafesAlert', () => {
 
     openList()
 
-    expect(await screen.findByRole('button', { name: /Reload all 2/ })).toBeDisabled()
+    expect(await screen.findByRole('button', { name: 'Reload all 2' })).toBeDisabled()
   })
 })
 

@@ -39,9 +39,9 @@ const UnavailableSafesAlertView = ({
     <PopoverContent align="end" className="w-80 gap-0 p-0">
       <section aria-label={title} className="flex flex-col gap-3 p-4">
         <p className="text-xs text-muted-foreground">
-          {isOverLimit
-            ? `The pending queue covers up to ${maxSafes} Safe accounts, so these aren't included.`
-            : "Transactions aren't shown in the table."}
+          Transactions aren&apos;t shown in the table.
+          {isOverLimit &&
+            ` The pending queue covers up to ${maxSafes} Safe accounts, so some of these may not be included.`}
         </p>
         <ul className="flex flex-col gap-1.5" aria-label="Safe accounts that couldn't be loaded">
           {rows.map((row) => (
@@ -53,14 +53,12 @@ const UnavailableSafesAlertView = ({
           ))}
         </ul>
       </section>
-      {!isOverLimit && (
-        <div className="border-t border-border p-3">
-          <Button variant="outline" size="sm" className="w-full" disabled={isRetrying} onClick={onRetry}>
-            {isRetrying ? <Spinner className="size-3" /> : <RefreshCw />}
-            {rows.length > 1 ? `Reload all ${rows.length}` : 'Reload'}
-          </Button>
-        </div>
-      )}
+      <div className="border-t border-border p-3">
+        <Button variant="outline" size="sm" className="w-full" disabled={isRetrying} onClick={onRetry}>
+          {isRetrying ? <Spinner className="size-3" aria-hidden /> : <RefreshCw />}
+          {rows.length > 1 && !isOverLimit ? `Reload all ${rows.length}` : 'Reload'}
+        </Button>
+      </div>
     </PopoverContent>
   </Popover>
 )
