@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Check, CloudOff } from 'lucide-react'
+import { Check, CloudOff, History } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import {
@@ -81,4 +81,18 @@ export const QueueTruncatedNotice = ({ shown, total }: { shown: number; total: n
   <Typography variant="paragraph-small" color="muted">
     Showing {shown} of {total} pending transactions.
   </Typography>
+)
+
+export const HistoryComingSoon = (): ReactElement => (
+  <Empty className="rounded-2xl border border-border bg-card">
+    <EmptyHeader>
+      <EmptyMedia variant="icon">
+        <History />
+      </EmptyMedia>
+      <EmptyTitle>
+        <h2>Workspace history is coming</h2>
+      </EmptyTitle>
+      <EmptyDescription>Until then, you can find the transaction history inside each Safe.</EmptyDescription>
+    </EmptyHeader>
+  </Empty>
 )
