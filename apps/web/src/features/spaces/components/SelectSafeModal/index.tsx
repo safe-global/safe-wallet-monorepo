@@ -3,6 +3,7 @@ import dynamic from '@/utils/dynamic'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
+import { useSafeSignerCheck } from '../../hooks/useSafeSignerCheck'
 import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
@@ -51,6 +52,7 @@ const SelectSafeModal = () => {
   const hasHiddenUndeployedSafes = selectableSafes.length < flatSafes.length
   const filteredSafes = useSearchFilter(selectableSafes, query, matchSafe)
   const wallet = useWallet()
+  const getSignerStatus = useSafeSignerCheck(flatSafes, opened && isNewTxAction)
   const { actionMapper, resetActiveSafe } = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
@@ -73,11 +75,17 @@ const SelectSafeModal = () => {
   )
 
   // Same gate as the Safe-level New transaction button (CheckWallet)
-  const getNewTxDisabledTooltip = useCallback((): string | undefined => {
-    if (!isNewTxAction) return undefined
-    if (!wallet) return CheckWalletMessage.WalletNotConnected
-    return undefined
-  }, [isNewTxAction, wallet])
+  const getNewTxDisabled = useCallback(
+    (safe: SafeItem): { disabled: boolean; tooltip?: string } => {
+      if (!isNewTxAction) return { disabled: false }
+      if (!wallet) return { disabled: true, tooltip: CheckWalletMessage.WalletNotConnected }
+      const status = getSignerStatus(safe)
+      if (status === 'pending') return { disabled: true }
+      if (status === 'not-signer') return { disabled: true, tooltip: CheckWalletMessage.NotSafeOwner }
+      return { disabled: false }
+    },
+    [isNewTxAction, wallet, getSignerStatus],
+  )
 
   const handleClose = useCallback(() => {
     dispatch(closeSafeActionsModal())
@@ -124,7 +132,9 @@ const SelectSafeModal = () => {
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {filteredSafes.map((safe) => {
-                    const disabledTooltip = getSwapDisabledTooltip(safe) ?? getNewTxDisabledTooltip()
+                    const swapDisabledTooltip = getSwapDisabledTooltip(safe)
+                    const newTx = getNewTxDisabled(safe)
+                    const disabledTooltip = swapDisabledTooltip ?? newTx.tooltip
                     return (
                       <SafeCardReadOnly
                         key={`${safe.chainId}:${safe.address}`}
@@ -132,7 +142,7 @@ const SelectSafeModal = () => {
                         hideContextMenu
                         showPending={false}
                         onClick={() => void handleSafeClick(safe)}
-                        disabled={Boolean(disabledTooltip)}
+                        disabled={Boolean(swapDisabledTooltip) || newTx.disabled}
                         disabledTooltip={disabledTooltip}
                         className="px-4 sm:px-4"
                       />

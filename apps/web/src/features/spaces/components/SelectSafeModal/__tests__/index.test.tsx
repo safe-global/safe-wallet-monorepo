@@ -58,6 +58,11 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockUseWallet(),
 }))
 
+const mockGetSignerStatus = jest.fn()
+jest.mock('../../../hooks/useSafeSignerCheck', () => ({
+  useSafeSignerCheck: () => mockGetSignerStatus,
+}))
+
 const renderModal = (actionType: ESafeAction, undeployedSafes: Record<string, Record<string, unknown>> = {}) =>
   render(<SelectSafeModal />, {
     initialReduxState: {
@@ -131,6 +136,7 @@ describe('SelectSafeModal swap disabling', () => {
 describe('SelectSafeModal new transaction gating', () => {
   beforeEach(() => {
     cardProps.length = 0
+    mockGetSignerStatus.mockReturnValue('signer')
     mockUseChains.mockReturnValue({ configs: [chainWithSwap] })
     mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
     mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
@@ -168,6 +174,43 @@ describe('SelectSafeModal new transaction gating', () => {
     renderModal(ESafeAction.Send, cfState(cfSafe))
 
     expect(getCardFor(cfSafe)?.disabled).toBe(false)
+    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
+  })
+
+  it('disables a Safe the wallet has no role on with the not-a-signer tooltip', () => {
+    mockGetSignerStatus.mockReturnValue('not-signer')
+
+    renderModal(ESafeAction.NewTransaction)
+
+    const card = getCardFor(deployedSafe)
+    expect(card?.disabled).toBe(true)
+    expect(card?.disabledTooltip).toBe('Your connected wallet is not a signer of this Safe account')
+  })
+
+  it('keeps a Safe disabled without a tooltip while its role checks are pending', () => {
+    mockGetSignerStatus.mockReturnValue('pending')
+
+    renderModal(ESafeAction.NewTransaction)
+
+    const card = getCardFor(deployedSafe)
+    expect(card?.disabled).toBe(true)
+    expect(card?.disabledTooltip).toBeUndefined()
+  })
+
+  it('shows the connect-wallet tooltip before the not-a-signer one', () => {
+    mockUseWallet.mockReturnValue(null)
+    mockGetSignerStatus.mockReturnValue('not-signer')
+
+    renderModal(ESafeAction.NewTransaction)
+
+    expect(getCardFor(deployedSafe)?.disabledTooltip).toBe('Please connect your wallet')
+  })
+
+  it('does not apply the signer check to send', () => {
+    mockGetSignerStatus.mockReturnValue('not-signer')
+
+    renderModal(ESafeAction.Send)
+
     expect(getCardFor(deployedSafe)?.disabled).toBe(false)
   })
 })
