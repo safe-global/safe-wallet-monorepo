@@ -21,7 +21,6 @@ export const MAX_TRANSACTION_GAS = 16_777_216
 const BASE_GAS = 406_000
 const GAS_PER_RULE = 119_000
 const GAS_PER_RECIPIENT = 112_000
-const GAS_PER_REVOKED_APPROVAL = 60_000
 
 // setGuard, setModuleGuard and setFallbackHandler, which the removal allows
 const REMOVAL_SETTER_RULES = 3
@@ -38,12 +37,11 @@ const countRecipients = ({ data }: PolicyConfiguration): number => {
   }
 }
 
-/** The gas of one transaction that revokes `revokedApprovals` approvals and sets `configurations`, rounded up. */
-export const estimateConfigurationGas = (configurations: PolicyConfiguration[], revokedApprovals = 0): number =>
+/** The gas of one transaction that sets `configurations`, rounded up. */
+export const estimateConfigurationGas = (configurations: PolicyConfiguration[]): number =>
   BASE_GAS +
   configurations.length * GAS_PER_RULE +
-  configurations.reduce((sum, configuration) => sum + countRecipients(configuration), 0) * GAS_PER_RECIPIENT +
-  revokedApprovals * GAS_PER_REVOKED_APPROVAL
+  configurations.reduce((sum, configuration) => sum + countRecipients(configuration), 0) * GAS_PER_RECIPIENT
 
 /** Why the gateway would not store `configurations` as one request, if it would not. */
 export const getConfigurationLimitError = (configurations: PolicyConfiguration[]): string | undefined => {

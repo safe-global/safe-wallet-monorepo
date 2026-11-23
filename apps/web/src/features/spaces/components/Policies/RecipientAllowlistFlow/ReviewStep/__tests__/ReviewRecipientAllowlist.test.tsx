@@ -1,6 +1,5 @@
 import { cloneElement, type ReactElement, type ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -36,7 +35,6 @@ import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
 import useSpendingLimitTokenOptions from '../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
 import { useBuildAllowlistTransaction } from '../useBuildAllowlistTransaction'
 import { useSaveAllowlistConfiguration } from '../../hooks/useSaveAllowlistConfiguration'
-import type { TokenApprovals } from '@/store/api/gateway/tokenApprovals'
 import { toAllowlistRules, toFormBaseline } from '../../utils/allowlistEdit'
 import ReviewRecipientAllowlist from '..'
 import RecipientAllowlistFlow from '../..'
@@ -53,10 +51,6 @@ const mockResolveName = (address: string): string => ({ [RECIPIENT]: 'Alice', [T
 const PRIYA = checksumAddress(faker.finance.ethereumAddress())
 
 jest.mock('../useBuildAllowlistTransaction', () => ({ useBuildAllowlistTransaction: jest.fn() }))
-const mockApprovalsQuery = jest.fn()
-jest.mock('@/store/api/gateway/tokenApprovals', () => ({
-  useGetTokenApprovalsQuery: (...args: unknown[]) => mockApprovalsQuery(...args),
-}))
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   ...jest.requireActual('@safe-global/views/components/ui/tooltip'),
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -255,33 +249,8 @@ const mockGuardDelay = (delay = POLICY_GUARD_DELAY_SECONDS) => mockPolicyGuardDe
 
 const actionLabels = () => screen.getAllByTestId('action-item').map((item) => item.textContent)
 
-const mockApprovals = (result: { currentData?: TokenApprovals; isFetching?: boolean; isError?: boolean } = {}) =>
-  mockApprovalsQuery.mockReturnValue({
-    currentData: { approvals: [], isComplete: true },
-    isFetching: false,
-    isError: false,
-    refetch: jest.fn(),
-    ...result,
-  })
-
-const usdcApproval = (spender: string, allowance: string) => ({
-  tokenAddress: USDC,
-  tokenMetadata: {
-    address: USDC,
-    decimals: 6,
-    logoUri: '',
-    name: 'USD Coin',
-    symbol: 'USDC',
-    trusted: true,
-    type: 'ERC20' as const,
-  },
-  spender,
-  allowance,
-})
-
 beforeEach(() => {
   jest.clearAllMocks()
-  mockApprovals()
   mockGuardDelay()
   mockSave.mockResolvedValue(true)
   mockOwners([WALLET, TOM, PRIYA])
@@ -562,94 +531,6 @@ describe('ReviewRecipientAllowlist', () => {
     expect(screen.getByText('TokenCallbackHandler')).toBeInTheDocument()
   })
 
-  it('should list each open token approval and say that the setup revokes it, when no guard is set up', () => {
-    mockApprovals({
-      currentData: {
-        approvals: [usdcApproval(TOM, (2n ** 256n - 1n).toString()), usdcApproval(OTHER, '1500000')],
-        isComplete: true,
-      },
-    })
-    built({ status: 'none' })
-    renderReview()
-
-    const section = within(screen.getByTestId('allowlist-token-approvals'))
-    expect(section.getByText('Open token approvals')).toBeInTheDocument()
-    expect(
-      section.getByText(
-        'These addresses can spend tokens of this Safe account. The setup revokes every approval in the same transaction.',
-      ),
-    ).toBeInTheDocument()
-    const [unlimited, limited] = section.getAllByTestId('allowlist-token-approval')
-    expect(within(unlimited).getByText('USDC')).toBeInTheDocument()
-    expect(within(unlimited).getByText('Tom')).toBeInTheDocument()
-    expect(within(unlimited).getByText('Unlimited')).toBeInTheDocument()
-    expect(within(limited).getByText('1.5 USDC')).toBeInTheDocument()
-    expect(section.queryByTestId('allowlist-token-approvals-notice')).not.toBeInTheDocument()
-  })
-
-  it('should build the setup with the listed token approvals, when no guard is set up', () => {
-    const approvals = [usdcApproval(TOM, '1500000')]
-    mockApprovals({ currentData: { approvals, isComplete: true } })
-    built({ status: 'none' })
-    renderReview()
-
-    expect(mockApprovalsQuery).toHaveBeenCalledWith({ chainId: SEPOLIA, safeAddress: SAFE })
-    expect(mockBuild).toHaveBeenCalledWith(rules, undefined, undefined, approvals)
-  })
-
-  it('should say that the Safe account has no open token approvals, when the complete list is empty', () => {
-    built({ status: 'none' })
-    renderReview()
-
-    expect(screen.getByTestId('allowlist-token-approvals-notice')).toHaveTextContent(
-      'This Safe account has no open token approvals.',
-    )
-    expect(screen.queryByTestId('allowlist-token-approval')).not.toBeInTheDocument()
-  })
-
-  it('should warn that open approvals may remain and never say there are none, when the list is incomplete', () => {
-    mockApprovals({ currentData: { approvals: [], isComplete: false } })
-    built({ status: 'none' })
-    renderReview()
-
-    const notice = screen.getByTestId('allowlist-token-approvals-notice')
-    expect(notice).toHaveTextContent('This list may be incomplete.')
-    expect(notice).toHaveTextContent('The Safe account may still have open token approvals.')
-    expect(screen.queryByText('This Safe account has no open token approvals.')).not.toBeInTheDocument()
-  })
-
-  it('should warn, offer a retry and still build the setup, when the token approvals cannot be loaded', () => {
-    const refetch = jest.fn()
-    mockApprovalsQuery.mockReturnValue({ currentData: undefined, isFetching: false, isError: true, refetch })
-    built({ status: 'none' })
-    renderReview()
-
-    const notice = screen.getByTestId('allowlist-token-approvals-notice')
-    expect(notice).toHaveTextContent("Couldn't load the token approvals.")
-    expect(notice).toHaveTextContent('The Safe account may still have open token approvals.')
-    expect(mockBuild).toHaveBeenCalledWith(rules, undefined, undefined, [])
-
-    fireEvent.click(within(notice).getByRole('button', { name: 'Retry' }))
-
-    expect(refetch).toHaveBeenCalledTimes(1)
-  })
-
-  it('should let the setup wait for the token approvals, while they load', () => {
-    mockApprovals({ currentData: undefined, isFetching: true })
-    built()
-    renderReview()
-
-    expect(mockBuild).toHaveBeenCalledWith(rules, undefined, undefined, undefined)
-    expect(screen.getByTestId('review-skeleton')).toBeInTheDocument()
-  })
-
-  it('should show no token approvals, when the guard is already set', () => {
-    built({ status: 'known', guardAddress })
-    renderReview()
-
-    expect(screen.queryByTestId('allowlist-token-approvals')).not.toBeInTheDocument()
-  })
-
   it('shows the guard a setter action sets', () => {
     built({ status: 'partial', missingSlot: 'module', guardAddress })
     renderReview()
@@ -857,11 +738,10 @@ describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
   const tokenItem = (address: string) =>
     within(screen.getByTestId('allowlist-review-summary')).getByTestId(`allowlist-review-token-${address}`)
 
-  it('builds the edit from the live rules on the guard holding them, without asking for token approvals', () => {
+  it('builds the edit from the live rules on the guard holding them', () => {
     renderEdit()
 
-    expect(mockBuild).toHaveBeenCalledWith(editedRules, toAllowlistRules(baseline), INSTALLED_GUARD, [])
-    expect(mockApprovalsQuery).toHaveBeenCalledWith(skipToken)
+    expect(mockBuild).toHaveBeenCalledWith(editedRules, toAllowlistRules(baseline), INSTALLED_GUARD)
   })
 
   it('marks an added recipient Added and a removed one Removed and faded, counting only the kept ones', () => {

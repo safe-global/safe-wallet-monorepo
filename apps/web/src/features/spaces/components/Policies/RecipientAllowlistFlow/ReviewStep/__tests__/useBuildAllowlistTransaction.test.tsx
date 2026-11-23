@@ -20,9 +20,7 @@ import { useBuildAllowlistTransaction } from '../useBuildAllowlistTransaction'
 
 const mockServices = jest.requireActual('@/features/policy-guard/public/services/allowlistConfigurations')
 const { withFirstSetupDefaults } = jest.requireActual('@/features/policy-guard/services/firstSetupDefaults')
-const { getConfigurationRoot, createRevokeApprovalTx } = jest.requireActual(
-  '@/features/policy-guard/public/services/policyGuardEncoders',
-)
+const { getConfigurationRoot } = jest.requireActual('@/features/policy-guard/public/services/policyGuardEncoders')
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
@@ -87,7 +85,7 @@ describe('useBuildAllowlistTransaction', () => {
 
   it('sets a multisend of 4 calls when no guard is set up', async () => {
     mockGuard({ state: { status: 'none' } })
-    const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules, undefined, undefined, []), { wrapper })
+    const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
 
     await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
     expect(sentBatch()).toHaveLength(4)
@@ -108,28 +106,10 @@ describe('useBuildAllowlistTransaction', () => {
       safe: { fallbackHandler: { value: '0x54e86d004d71a8D2112ec75FaCE57D730b0433F3' } },
     })
     mockGuard({ state: { status: 'none' } })
-    renderHook(() => useBuildAllowlistTransaction(erc20Rules, undefined, undefined, []), { wrapper })
+    renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
 
     await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
     expect(sentBatch()).toHaveLength(3)
-  })
-
-  it('should revoke each open token approval first, when no guard is set up', async () => {
-    const approval = { tokenAddress: TOKEN, spender: RECIPIENT }
-    mockGuard({ state: { status: 'none' } })
-    renderHook(() => useBuildAllowlistTransaction(erc20Rules, undefined, undefined, [approval]), { wrapper })
-
-    await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
-    expect(sentBatch()).toHaveLength(5)
-    expect(sentBatch()[0]).toEqual(createRevokeApprovalTx(approval))
-  })
-
-  it('should set neither a transaction nor an error, when no guard is set up and the token approvals are not known yet', () => {
-    mockGuard({ state: { status: 'none' } })
-    renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
-
-    expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
-    expect(setSafeTxError).not.toHaveBeenCalledWith(expect.anything())
   })
 
   it('should return the exit clean-up and the allowlist configurations, when the guard is already known', async () => {
@@ -153,9 +133,7 @@ describe('useBuildAllowlistTransaction', () => {
 
   it('rebuilds when the guard state changes from none to known', async () => {
     mockGuard({ state: { status: 'none' } })
-    const { rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules, undefined, undefined, []), {
-      wrapper,
-    })
+    const { rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
     await waitFor(() => expect(txSetCount()).toBe(1))
     expect(sentBatch()).toHaveLength(4)
 
@@ -232,9 +210,7 @@ describe('useBuildAllowlistTransaction', () => {
       throw new Error(ALLOWLIST_UNAVAILABLE_ERROR)
     })
     mockGuard({ state: { status: 'none' } })
-    const { result } = renderHook(() => useBuildAllowlistTransaction(nativeRules, undefined, undefined, []), {
-      wrapper,
-    })
+    const { result } = renderHook(() => useBuildAllowlistTransaction(nativeRules), { wrapper })
 
     expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: ALLOWLIST_UNAVAILABLE_ERROR }))
     expect(setSafeTx).not.toHaveBeenCalledWith(expect.anything())
@@ -265,9 +241,7 @@ describe('useBuildAllowlistTransaction', () => {
 
   it('clears the old transaction before setting the rebuilt one on none to known', async () => {
     mockGuard({ state: { status: 'none' } })
-    const { rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules, undefined, undefined, []), {
-      wrapper,
-    })
+    const { rerender } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
     await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
     setSafeTx.mockClear()
 

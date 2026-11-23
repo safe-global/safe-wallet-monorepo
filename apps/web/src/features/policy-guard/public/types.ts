@@ -25,12 +25,9 @@ export type AllowlistEligibility = { eligible: true } | { eligible: false; reaso
 
 export type PolicyGuardTarget = { chainId: string; safeAddress: string }
 
-/** An ERC-20 approval of the Safe, which the first setup sets back to zero. */
-export type TokenApprovalToRevoke = { tokenAddress: string; spender: string }
-
 export type SetupCallDescription = {
   method: string
-  target: 'guard' | 'safe' | 'token'
-  /** The address a setter or an approval points at, e.g. `{ name: 'guard', value: '0x…' }`. */
+  target: 'guard' | 'safe'
+  /** The address a Safe setter points at, e.g. `{ name: 'guard', value: '0x…' }`. */
   param?: { name: string; value: string }
 }

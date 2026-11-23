@@ -120,15 +120,6 @@ export const reviewConsentLabel = (safeName: string, changeDelay: string): strin
   `I understand that ${safeName} will only be able to do what this allowlist allows, and that every later change takes ${changeDelay} to apply.`
 export const REVIEW_CONSENT_ERROR = 'Tick the box to continue.'
 
-export const TOKEN_APPROVALS_TITLE = 'Open token approvals'
-export const TOKEN_APPROVALS_DESCRIPTION =
-  'These addresses can spend tokens of this Safe account. The setup revokes every approval in the same transaction.'
-export const TOKEN_APPROVALS_UNLIMITED = 'Unlimited'
-export const NO_TOKEN_APPROVALS_TITLE = 'This Safe account has no open token approvals.'
-export const TOKEN_APPROVALS_INCOMPLETE_TITLE = 'This list may be incomplete.'
-export const TOKEN_APPROVALS_LOAD_ERROR_TITLE = "Couldn't load the token approvals."
-export const TOKEN_APPROVALS_MAY_REMAIN_DESCRIPTION = 'The Safe account may still have open token approvals.'
-
 export const ALLOWLIST_GAPS_TITLE = "What this allowlist doesn't cover"
 export const ALLOWLIST_GAP_APPROVALS =
   'Token approvals are not restricted. An address you approve can still move the selected tokens with transferFrom.'

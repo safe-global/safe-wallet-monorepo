@@ -1,12 +1,8 @@
 import { AbiCoder, Interface, keccak256, type Result } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import {
-  APPROVAL_SIGNATURE_HASH,
-  ERC20_INTERFACE,
-} from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.5.0/Safe__factory'
-import type { PolicyConfiguration, SetupCallDescription, TokenApprovalToRevoke } from '../types'
+import type { PolicyConfiguration, SetupCallDescription } from '../types'
 
 // Hand-written from SafePolicyGuard.sol until the WA-3034 artifact package is published
 const CONFIGURATION_TUPLE = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
@@ -24,11 +20,6 @@ export const describeSetupCall = ({ data }: Pick<MetaTransactionData, 'data'>): 
   const selector = data.slice(0, 10)
   const guardFunction = policyGuardInterface.getFunction(selector)
   if (guardFunction) return { method: guardFunction.name, target: 'guard' }
-
-  if (selector === APPROVAL_SIGNATURE_HASH) {
-    const [spender] = ERC20_INTERFACE.decodeFunctionData('approve', data)
-    return { method: 'approve', target: 'token', param: { name: 'spender', value: String(spender) } }
-  }
 
   const safeCall = safeInterface.parseTransaction({ data })
   if (!safeCall || !SAFE_SETUP_METHODS.includes(safeCall.name)) return undefined
@@ -55,12 +46,6 @@ export const createSetFallbackHandlerTx = (safeAddress: string, handler: string)
   to: safeAddress,
   value: '0',
   data: safeInterface.encodeFunctionData('setFallbackHandler', [handler]),
-})
-
-export const createRevokeApprovalTx = ({ tokenAddress, spender }: TokenApprovalToRevoke): MetaTransactionData => ({
-  to: tokenAddress,
-  value: '0',
-  data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, 0]),
 })
 
 /**

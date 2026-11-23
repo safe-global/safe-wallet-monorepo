@@ -3,14 +3,13 @@ import {
   GUARD_NOT_SUPPORTED_ERROR,
   TRANSACTION_TOO_LARGE_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState, TokenApprovalToRevoke } from '../types'
+import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState } from '../types'
 import { estimateConfigurationGas, getConfigurationLimitError, MAX_TRANSACTION_GAS } from './allowlistLimits'
 import { withFirstSetupDefaults } from '../../services/firstSetupDefaults'
 import { getTokenCallbackHandlerAddress, isTokenCallbackHandler } from './fallbackHandlers'
 import {
   createFirstSetupTxs,
   createRequestConfigurationTx,
-  createRevokeApprovalTx,
   createSetGuardTx,
   createSetModuleGuardTx,
   getConfigurationRoot,
@@ -23,7 +22,6 @@ export const createAllowlistSetupTxs = ({
   guardState,
   configurations,
   currentFallbackHandler,
-  revokedApprovals = [],
 }: {
   chainId: string
   safeAddress: string
@@ -31,8 +29,6 @@ export const createAllowlistSetupTxs = ({
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
   currentFallbackHandler?: string
-  /** Set to zero at the start of a first setup. */
-  revokedApprovals?: TokenApprovalToRevoke[]
 }): AllowlistSetup => {
   if (guardState.status === 'unknown' || guardState.status === 'unsupported') {
     throw new Error(GUARD_NOT_SUPPORTED_ERROR)
@@ -41,8 +37,7 @@ export const createAllowlistSetupTxs = ({
   const installed = guardState.status === 'none' ? withFirstSetupDefaults(chainId, configurations) : configurations
   const limitError = getConfigurationLimitError(installed)
   if (limitError) throw new Error(limitError)
-  const revokedCount = guardState.status === 'none' ? revokedApprovals.length : 0
-  if (estimateConfigurationGas(installed, revokedCount) > MAX_TRANSACTION_GAS) {
+  if (estimateConfigurationGas(installed) > MAX_TRANSACTION_GAS) {
     throw new Error(TRANSACTION_TOO_LARGE_ERROR)
   }
   const setup = { configurations: installed, root: getConfigurationRoot(installed) }
@@ -53,10 +48,7 @@ export const createAllowlistSetupTxs = ({
     const fallbackHandler = isTokenCallbackHandler(chainId, currentFallbackHandler) ? undefined : tokenCallbackHandler
     return {
       ...setup,
-      txs: [
-        ...revokedApprovals.map(createRevokeApprovalTx),
-        ...createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed, fallbackHandler }),
-      ],
+      txs: createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed, fallbackHandler }),
     }
   }
 

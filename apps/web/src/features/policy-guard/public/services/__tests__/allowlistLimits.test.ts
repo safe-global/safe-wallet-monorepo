@@ -35,12 +35,6 @@ describe('estimateConfigurationGas', () => {
 
     expect(estimateConfigurationGas(configurations)).toBe(406_000 + 2 * 119_000 + 2 * 112_000)
   })
-
-  it('should add 60,000 per revoked approval, when the transaction revokes approvals first', () => {
-    const configurations = [ruleWithoutData()]
-
-    expect(estimateConfigurationGas(configurations, 3)).toBe(406_000 + 119_000 + 3 * 60_000)
-  })
 })
 
 describe('getConfigurationLimitError', () => {

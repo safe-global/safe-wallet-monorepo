@@ -19,7 +19,6 @@ const iface = new Interface([
   'function setGuard(address)',
   'function setModuleGuard(address)',
   'function setFallbackHandler(address)',
-  'function approve(address spender, uint256 amount)',
 ])
 
 const chainId = '11155111'
@@ -60,46 +59,6 @@ describe('createAllowlistSetupTxs', () => {
       { to: safeAddress, name: 'setModuleGuard' },
       { to: safeAddress, name: 'setFallbackHandler' },
     ])
-  })
-
-  it('should revoke every given token approval before the setup, when no guard is installed', () => {
-    const token = getAddress(faker.finance.ethereumAddress())
-    const spender = getAddress(faker.finance.ethereumAddress())
-    const { txs } = createAllowlistSetupTxs({
-      chainId,
-      safeAddress,
-      guardAddress,
-      guardState: { status: 'none' },
-      configurations,
-      revokedApprovals: [{ tokenAddress: token, spender }],
-    })
-
-    expect(txs.map((tx) => ({ to: tx.to, name: iface.parseTransaction({ data: tx.data })?.name }))).toEqual([
-      { to: token, name: 'approve' },
-      { to: guardAddress, name: 'configureImmediately' },
-      { to: safeAddress, name: 'setGuard' },
-      { to: safeAddress, name: 'setModuleGuard' },
-      { to: safeAddress, name: 'setFallbackHandler' },
-    ])
-    expect(iface.parseTransaction({ data: txs[0].data })?.args.toArray()).toEqual([spender, 0n])
-  })
-
-  it('should revoke no token approval, when the guard is already installed', () => {
-    const { txs } = createAllowlistSetupTxs({
-      chainId,
-      safeAddress,
-      guardAddress,
-      guardState: { status: 'known', guardAddress },
-      configurations,
-      revokedApprovals: [
-        {
-          tokenAddress: getAddress(faker.finance.ethereumAddress()),
-          spender: getAddress(faker.finance.ethereumAddress()),
-        },
-      ],
-    })
-
-    expect(txs.map((tx) => iface.parseTransaction({ data: tx.data })?.name)).toEqual(['requestConfiguration'])
   })
 
   it('should set the TokenCallbackHandler, when the Safe uses another fallback handler', () => {
@@ -160,27 +119,6 @@ describe('createAllowlistSetupTxs', () => {
     const large = [{ ...configurations[0], data: encodeErc20TransferPolicyData(recipients) }]
 
     expect(() => setup({ status: 'none' }, large)).toThrow(TRANSACTION_TOO_LARGE_ERROR)
-  })
-
-  it('should refuse a first setup, when the revoked approvals take it over the gas of one transaction', () => {
-    const recipients = Array.from({ length: 138 }, () => getAddress(faker.finance.ethereumAddress()))
-    const large = [{ ...configurations[0], data: encodeErc20TransferPolicyData(recipients) }]
-    const approval = () => ({
-      tokenAddress: getAddress(faker.finance.ethereumAddress()),
-      spender: getAddress(faker.finance.ethereumAddress()),
-    })
-
-    expect(() => setup({ status: 'none' }, large)).not.toThrow()
-    expect(() =>
-      createAllowlistSetupTxs({
-        chainId,
-        safeAddress,
-        guardAddress,
-        guardState: { status: 'none' },
-        configurations: large,
-        revokedApprovals: [approval(), approval()],
-      }),
-    ).toThrow(TRANSACTION_TOO_LARGE_ERROR)
   })
 
   it('should refuse a change, when its later apply needs more gas than one transaction holds', () => {
