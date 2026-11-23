@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 
 export type TrackedRowAction = 'replace' | 'reject'
 
@@ -16,7 +17,7 @@ export type TrackedRowAction = 'replace' | 'reject'
 const WithReason = ({ reason, children }: { reason?: string; children: ReactElement }): ReactElement => {
   if (!reason) return children
   return (
-    <Tooltip delay={150}>
+    <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
       <TooltipTrigger render={<div />}>{children}</TooltipTrigger>
       <TooltipContent side="left" className="max-w-xs whitespace-normal">
         {reason}

@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import type { TokenInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import css from '@safe-global/views/components/transactions/TxType/styles.module.css'
 import { Code, GitMerge, Settings, type LucideIcon } from 'lucide-react'
@@ -56,7 +57,7 @@ const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
 const WithHint = ({ hint, children }: { hint?: string; children: ReactNode }): ReactElement => {
   if (!hint) return <span className="block min-w-0 truncate">{children}</span>
   return (
-    <Tooltip delay={150}>
+    <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
       <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{children}</TooltipTrigger>
       <TooltipContent>{hint}</TooltipContent>
     </Tooltip>

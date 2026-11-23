@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
 import SignersList from '@safe-global/views/features/spaces/components/SpaceQueue/SignersList'
 import type { QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
@@ -96,7 +97,7 @@ const SignersTooltip = (props: SignersTooltipProps): ReactElement => {
   const title = getStatusTitle(status, nextNonce)
   return (
     // Not hoverable: nothing in it to click, and it would sit over the next row and catch the pointer
-    <Tooltip delay={150} disableHoverablePopup>
+    <Tooltip delay={QUEUE_TOOLTIP_DELAY} disableHoverablePopup>
       <TooltipTrigger
         aria-label={getGaugeLabel(title, submitted, required)}
         className="flex w-fit shrink-0 items-center gap-1.5 rounded-sm text-sm tabular-nums outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"

@@ -3,6 +3,7 @@ import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENE
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatShortTimeAgo } from '@safe-global/utils/utils/date'
@@ -62,6 +63,7 @@ export const Counterparty = ({
             showCopyButton={false}
             hasExplorer={false}
             avatarSize={20}
+            showNameTooltip
           />
         )}
       </span>
@@ -81,7 +83,7 @@ const DetailsSlot = ({ className, children }: { className: string; children?: Re
 
 /** Short proposed time ("5h ago"), with the full date and time in the tooltip */
 export const ProposedTime = ({ timestamp }: { timestamp: number }): ReactElement => (
-  <Tooltip delay={150}>
+  <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
     <TooltipTrigger className="truncate">{formatShortTimeAgo(timestamp)}</TooltipTrigger>
     <TooltipContent>{formatDateTime(timestamp)}</TooltipContent>
   </Tooltip>

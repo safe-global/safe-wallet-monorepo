@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import { formatTime } from '@safe-global/utils/utils/date'
 
 /** Where a queued transaction stands while this browser signs or executes it */
@@ -63,7 +64,7 @@ const PendingChip = ({ phase, timing }: PendingChipProps): ReactElement => {
   const waiting = phase === 'awaitingParent'
 
   return (
-    <Tooltip delay={150}>
+    <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
       <TooltipTrigger
         render={
           <span

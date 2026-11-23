@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 
 type NonceTakenButtonProps = {
   /** The row's usual action, "Sign" or "Execute" */
@@ -10,7 +11,7 @@ type NonceTakenButtonProps = {
 
 /** The action of a transaction whose nonce another one is executing: it can only run if that one fails */
 const NonceTakenButton = ({ label, nonce }: NonceTakenButtonProps): ReactElement => (
-  <Tooltip delay={150}>
+  <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
     {/* A disabled button gets no pointer or focus events, so the wrapper holds the tooltip */}
     <TooltipTrigger
       render={

@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { formatDateTime } from '@safe-global/utils/utils/date'
-import { advanceClock, render, renderOnFakeClock, screen } from '@/tests/test-utils'
+import { advanceClock, render, renderOnFakeClock, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { Counterparty, ProposedTime } from './SpaceQueueRow'
 
 const party = () => ({ value: checksumAddress(faker.finance.ethereumAddress()), name: faker.person.fullName() })
@@ -31,6 +31,18 @@ describe('Counterparty', () => {
     expect(join).toHaveTextContent(new RegExp(`^${word}$`))
     expect(join).toHaveClass('text-muted-foreground', 'group-hover/transaction:text-foreground', 'w-8', 'shrink-0')
     expect(join).not.toHaveClass('capitalize', 'uppercase', 'rounded-md', 'bg-muted')
+  })
+
+  it('shows the name in a tooltip, not a browser title', async () => {
+    const txInfo = transfer('OUTGOING')
+    const { name } = (txInfo as { recipient: { name: string } }).recipient
+    const { container, user } = renderWithUserEvent(<Counterparty txInfo={txInfo} chainId="1" />)
+
+    expect(container.querySelector('[title]')).toBeNull()
+    await user.tab()
+    expect(screen.getByTestId('eth-hash-info-name')).toHaveFocus()
+
+    expect(await screen.findByText(name, { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
   })
 
   it('shows nothing when the transaction has no other party', () => {

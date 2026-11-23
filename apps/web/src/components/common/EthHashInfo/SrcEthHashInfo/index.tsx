@@ -40,6 +40,8 @@ export type EthHashInfoProps = {
   boldLabel?: boolean
   /** Shows the full address, instead of the copy hint, when hovering the address */
   showAddressTooltip?: boolean
+  /** Shows the name in a tooltip rather than the browser's title */
+  showNameTooltip?: boolean
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -66,6 +68,7 @@ const SrcEthHashInfo = ({
   href,
   boldLabel = false,
   showAddressTooltip = false,
+  showNameTooltip = false,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const isMobile = useIsBelowSm()
@@ -98,6 +101,14 @@ const SrcEthHashInfo = ({
     </>
   )
 
+  const nameLabel = href ? (
+    <NextLink href={href} className="overflow-hidden text-ellipsis text-inherit hover:underline">
+      {name}
+    </NextLink>
+  ) : (
+    <div className="overflow-hidden text-ellipsis">{name}</div>
+  )
+
   return (
     <div className={css.container}>
       {showAvatar && (
@@ -116,16 +127,21 @@ const SrcEthHashInfo = ({
       <div className={classnames('gap-1 overflow-hidden', { [css.inline]: onlyName })}>
         {!!name ? (
           <div
-            title={name}
+            title={showNameTooltip ? undefined : name}
             className={classnames('ethHashInfo-name flex items-center gap-1', { 'font-bold': boldLabel })}
             style={accountStylesWithBadge}
           >
-            {href ? (
-              <NextLink href={href} className="overflow-hidden text-ellipsis text-inherit hover:underline">
-                {name}
-              </NextLink>
+            {showNameTooltip ? (
+              <Tooltip>
+                <TooltipTrigger
+                  render={<span data-testid="eth-hash-info-name" tabIndex={0} className="min-w-0 overflow-hidden" />}
+                >
+                  {nameLabel}
+                </TooltipTrigger>
+                <TooltipContent>{name}</TooltipContent>
+              </Tooltip>
             ) : (
-              <div className="overflow-hidden text-ellipsis">{name}</div>
+              nameLabel
             )}
 
             {badgeTooltip

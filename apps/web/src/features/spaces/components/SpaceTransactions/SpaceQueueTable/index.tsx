@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { TableBody, tableVariants } from '@safe-global/views/components/ui/table'
+import { TooltipDelay } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
@@ -15,6 +16,7 @@ import QueueSkeletonRow from '@safe-global/views/features/spaces/components/Spac
 import QueueTableHeader from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTableHeader'
 import { QUEUE_TABLE_MIN_WIDTH } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -310,42 +312,45 @@ const SpaceQueueTable = ({
   return (
     <QueueNavigationContext.Provider value={navigation}>
       <DeleteTxDialogProvider>
-        {/* Same panel surface as the Space accounts table, so the two line up */}
-        <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
-          <ScopePool targets={scopeTargets} store={scopeStore} />
-          <table
-            aria-label="Pending transactions"
-            className={cn(tableVariants({ variant: 'panel' }), 'table-fixed [&_td]:px-4', QUEUE_TABLE_MIN_WIDTH)}
-          >
-            <QueueTableHeader
-              collapseAll={
-                collapseUnit && collapsibleIds.length > 0
-                  ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
-                  : undefined
-              }
-            />
-            <TableBody ref={bodyRef}>
-              <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
-              {virtualItems.map((virtualItem) => {
-                const item = items[virtualItem.index]
-                return (
-                  <VirtualRow
-                    key={item.key}
-                    item={item}
-                    index={virtualItem.index}
-                    scopeStore={scopeStore}
-                    measureRef={virtualizer.measureElement}
-                    chainConfigs={configs}
-                    onToggleSafe={onToggleSafe}
-                    onToggleChain={onToggleChain}
-                    onToggleGroup={onToggleGroup}
-                  />
-                )
-              })}
-              <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
-            </TableBody>
-          </table>
-        </div>
+        {/* Every tooltip in the table opens after the same delay, those of the shared components it renders too */}
+        <TooltipDelay delay={QUEUE_TOOLTIP_DELAY}>
+          {/* Same panel surface as the Space accounts table, so the two line up */}
+          <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
+            <ScopePool targets={scopeTargets} store={scopeStore} />
+            <table
+              aria-label="Pending transactions"
+              className={cn(tableVariants({ variant: 'panel' }), 'table-fixed [&_td]:px-4', QUEUE_TABLE_MIN_WIDTH)}
+            >
+              <QueueTableHeader
+                collapseAll={
+                  collapseUnit && collapsibleIds.length > 0
+                    ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
+                    : undefined
+                }
+              />
+              <TableBody ref={bodyRef}>
+                <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+                {virtualItems.map((virtualItem) => {
+                  const item = items[virtualItem.index]
+                  return (
+                    <VirtualRow
+                      key={item.key}
+                      item={item}
+                      index={virtualItem.index}
+                      scopeStore={scopeStore}
+                      measureRef={virtualizer.measureElement}
+                      chainConfigs={configs}
+                      onToggleSafe={onToggleSafe}
+                      onToggleChain={onToggleChain}
+                      onToggleGroup={onToggleGroup}
+                    />
+                  )
+                })}
+                <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+              </TableBody>
+            </table>
+          </div>
+        </TooltipDelay>
       </DeleteTxDialogProvider>
     </QueueNavigationContext.Provider>
   )

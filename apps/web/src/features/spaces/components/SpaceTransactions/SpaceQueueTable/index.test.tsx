@@ -7,7 +7,16 @@ import type { RootState } from '@/store'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { server } from '@/tests/server'
 import { useState } from 'react'
-import { act, fakerChecksummedAddress, fireEvent, render, screen, within } from '@/tests/test-utils'
+import {
+  act,
+  advanceClock,
+  fakerChecksummedAddress,
+  fireEvent,
+  render,
+  renderOnFakeClock,
+  screen,
+  within,
+} from '@/tests/test-utils'
 import local from '@/services/local-storage/local'
 import { getStoreInstance } from '@/store'
 import { setQueueCollapseAll, spaceQueueViewSlice } from '../../../public/store/spaceQueueViewSlice'
@@ -18,6 +27,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import type { SpaceQueueChain, SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import SpaceQueueTable from '.'
@@ -195,6 +205,22 @@ describe('SpaceQueueTable', () => {
     expect(screen.getByText(`${queued.transaction.id} blocked ${chainId} of ${safeA}`)).toBeInTheDocument()
     expect(mockScopeProps).toHaveBeenCalledWith({ initial: { chainId, safeAddress: safeA }, pollSafeInfo: false })
     expect(mockScopeProps).toHaveBeenCalledWith({ initial: { chainId, safeAddress: safeB }, pollSafeInfo: false })
+  })
+
+  it("opens the tooltips of the shared components it renders after the queue's delay", async () => {
+    jest.useFakeTimers()
+    try {
+      const { user } = renderOnFakeClock(<SpaceQueueTable sections={[sections[0]]} groupBy="safe" />)
+
+      await user.hover(screen.getByTestId('chain-logos'))
+      await advanceClock(QUEUE_TOOLTIP_DELAY - 50)
+      expect(screen.queryByText(chainName, { selector: '[data-slot="tooltip-content"]' })).not.toBeInTheDocument()
+
+      await advanceClock(100)
+      expect(screen.getByText(chainName, { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   it.each(['safe', 'status', 'next', 'network'] as const)(
