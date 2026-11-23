@@ -11,10 +11,6 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import TxNonce from '../TxNonce'
 import TxStatusWidget from '../TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield/public/components/SafeShieldWidget'
-import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
-import ScopedSafeTag from '@safe-global/views/components/tx-flow/common/ScopedSafeTag'
-import { useChain } from '@/hooks/useChains'
-import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import css from './styles.module.css'
 
 export const TxLayoutHeader = ({
@@ -51,12 +47,6 @@ export const TxLayoutHeader = ({
       {!hideNonce && safe.deployed && nonceNeeded && <TxNonce canEdit={!fixedNonce} />}
     </div>
   )
-}
-
-const ScopedSafe = ({ safeAddress, chainId }: { safeAddress: string; chainId: string }): ReactElement => {
-  const name = useSafeDisplayName(safeAddress, chainId)
-  const chain = useChain(chainId)
-  return <ScopedSafeTag address={safeAddress} name={name} chain={chain} />
 }
 
 export type TxLayoutBaseProps = {
@@ -116,8 +106,6 @@ const TxLayoutBase = ({
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
   const isDarkMode = useDarkMode()
-  // A flow opened from a Workspace has no Safe in the URL or sidebar, so the header names it
-  const scope = useSafeScope()
 
   return (
     <div className={classnames('flex flex-wrap', css.container)}>
@@ -156,7 +144,6 @@ const TxLayoutBase = ({
                 <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                   {title}
                 </Typography>
-                {scope && <ScopedSafe safeAddress={scope.safeAddress} chainId={scope.chainId} />}
               </div>
 
               <div

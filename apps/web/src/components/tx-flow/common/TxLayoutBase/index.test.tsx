@@ -1,9 +1,6 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { chainBuilder } from '@/tests/builders/chains'
-import * as useChains from '@/hooks/useChains'
 import TxLayoutBase from '.'
 
 // The Safe Shield widget and the status rail pull in network/analytics-heavy hooks; stub them so
@@ -24,25 +21,15 @@ jest.mock('@safe-global/views/components/tx-flow/safe-scope/context', () => ({
   useSafeScope: () => mockScope.current,
 }))
 
-const mockSafeName = { current: '' }
-jest.mock('@/hooks/useSafeDisplayName', () => ({
-  useSafeDisplayName: () => mockSafeName.current,
-}))
-
 const Step = () => <div data-testid="step-content">Step content</div>
 
 describe('TxLayoutBase', () => {
   beforeEach(() => {
     mockScope.current = undefined
-    mockSafeName.current = ''
-    const polygon = chainBuilder().with({ chainId: '137', chainName: 'Polygon' }).build()
-    jest.spyOn(useChains, 'useChain').mockImplementation((chainId) => (chainId === '137' ? polygon : undefined))
   })
 
-  it('names the Safe and network of a flow opened from a Workspace', () => {
-    const safeAddress = checksumAddress(faker.finance.ethereumAddress())
-    mockScope.current = { chainId: '137', safeAddress }
-    mockSafeName.current = faker.company.name()
+  it('leaves the Safe of a Workspace flow to the topbar, not the title row', () => {
+    mockScope.current = { chainId: '137', safeAddress: checksumAddress(faker.finance.ethereumAddress()) }
 
     render(
       <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
@@ -50,35 +37,7 @@ describe('TxLayoutBase', () => {
       </TxLayoutBase>,
     )
 
-    const scopedSafe = screen.getByTestId('tx-flow-scoped-safe')
-    expect(scopedSafe).toHaveTextContent(mockSafeName.current)
-    expect(scopedSafe).toHaveTextContent(shortenAddress(safeAddress))
-    expect(scopedSafe).toHaveTextContent('Polygon')
-  })
-
-  it('shows only the address and network of a Workspace Safe that has no name', () => {
-    const safeAddress = checksumAddress(faker.finance.ethereumAddress())
-    mockScope.current = { chainId: '137', safeAddress }
-
-    render(
-      <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
-        <Step />
-      </TxLayoutBase>,
-    )
-
-    const scopedSafe = screen.getByTestId('tx-flow-scoped-safe')
-    expect(scopedSafe).toHaveTextContent(shortenAddress(safeAddress))
-    expect(scopedSafe).toHaveTextContent('Polygon')
-    expect(screen.queryByTestId('tx-flow-scoped-safe-name')).not.toBeInTheDocument()
-  })
-
-  it('does not name a Safe in a flow opened from the Safe itself', () => {
-    render(
-      <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
-        <Step />
-      </TxLayoutBase>,
-    )
-
+    expect(screen.getByTestId('modal-title')).toHaveTextContent('Confirm transaction')
     expect(screen.queryByTestId('tx-flow-scoped-safe')).not.toBeInTheDocument()
   })
 

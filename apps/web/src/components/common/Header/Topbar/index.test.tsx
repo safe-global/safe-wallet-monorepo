@@ -12,6 +12,7 @@ import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { TxFlowSafeContext } from '@/components/tx-flow/safe-scope/txFlowSafe'
 import { wcPopupStore } from '@/features/walletconnect/public/store/wcPopupStore'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
@@ -125,7 +126,12 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('@/components/common/SpaceSafeBar', () => {
-  const MockSpaceSafeBar = () => <div data-testid="space-safe-bar" />
+  const MockSpaceSafeBar = ({ lockedSafe }: { lockedSafe?: { chainId: string; safeAddress: string } }) => (
+    <div
+      data-testid="space-safe-bar"
+      data-locked-safe={lockedSafe ? `${lockedSafe.chainId}:${lockedSafe.safeAddress}` : ''}
+    />
+  )
   MockSpaceSafeBar.displayName = 'SpaceSafeBar'
   return { __esModule: true, default: MockSpaceSafeBar }
 })
@@ -361,6 +367,54 @@ describe('Topbar', () => {
         </TxModalContext.Provider>,
       )
       expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+    })
+
+    describe('with a Workspace flow that acts on a scoped Safe', () => {
+      const flowSafe = { chainId: '137', safeAddress: '0x1234567890123456789012345678901234567890' }
+      const renderWithScopedFlow = () =>
+        render(
+          <TxModalContext.Provider
+            value={{ txFlow: <div data-testid="mock-tx-flow" />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}
+          >
+            <TxFlowSafeContext.Provider value={flowSafe}>
+              <Topbar />
+            </TxFlowSafeContext.Provider>
+          </TxModalContext.Provider>,
+        )
+
+      it('shows the Safe bar locked to that Safe, though the URL has none', () => {
+        mockIsSpaceRoute.mockReturnValue(true)
+        mockUseSafeAddress.mockReturnValue('')
+        renderWithScopedFlow()
+
+        expect(screen.getByTestId('space-safe-bar')).toHaveAttribute(
+          'data-locked-safe',
+          `${flowSafe.chainId}:${flowSafe.safeAddress}`,
+        )
+      })
+
+      it('shows the locked Safe bar in place of the logo on the policies route', () => {
+        mockIsSpaceRoute.mockReturnValue(true)
+        mockUsePathname.mockReturnValue('/spaces/policies')
+        renderWithScopedFlow()
+
+        expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+        expect(screen.queryByTestId('logo-image')).not.toBeInTheDocument()
+      })
+    })
+
+    it('does not lock the Safe bar of a flow whose Safe comes from the URL', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUseSafeAddress.mockReturnValue('0x1234567890123456789012345678901234567890')
+      render(
+        <TxModalContext.Provider
+          value={{ txFlow: <div data-testid="mock-tx-flow" />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}
+        >
+          <Topbar />
+        </TxModalContext.Provider>,
+      )
+
+      expect(screen.getByTestId('space-safe-bar')).toHaveAttribute('data-locked-safe', '')
     })
 
     it('renders SafeLogo on the policies route, with neither the safe bar nor the search input', () => {

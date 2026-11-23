@@ -105,8 +105,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-2);
   margin-bottom: var(--space-2);
 }
 

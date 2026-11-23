@@ -28,6 +28,7 @@ import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
+import { useTxFlowSafe } from '@/components/tx-flow/safe-scope/txFlowSafe'
 import { cn } from '@safe-global/views/utils/cn'
 import WalletPopover from '@/features/wallet/public/components/WalletPopover'
 import WalletConnectWidget from '@/features/walletconnect/public/components/WalletConnectWidget'
@@ -64,15 +65,17 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const urlSafeAddress = useSafeAddressFromUrl()
   const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
   const isPoliciesRoute = pathname === AppRoutes.spaces.policies
-  const showLogo = isSettingsWithoutSafe || isWelcomeListRoute || isPoliciesRoute
   const safeAddress = useSafeAddress()
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
   const draftBatch = useDraftBatch()
   const showSafeToken = useSafeTokenEnabled()
   const { txFlow } = useContext(TxModalContext)
+  // A flow opened from the Workspace keeps its Safe in a scope, not the URL; the bar shows it locked
+  const flowSafe = useTxFlowSafe()
+  const showLogo = !flowSafe && (isSettingsWithoutSafe || isWelcomeListRoute || isPoliciesRoute)
 
-  const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress))
+  const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress || flowSafe))
 
   const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
   const contextHeight = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_HEIGHT : SEARCH_CONTEXT_HEIGHT
@@ -117,7 +120,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           {showLogo ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (
-            <SpaceSafeBar />
+            <SpaceSafeBar lockedSafe={flowSafe} />
           ) : (
             <GlobalSearchInput className="h-full w-64 rounded-3xl md:w-80" />
           )}
