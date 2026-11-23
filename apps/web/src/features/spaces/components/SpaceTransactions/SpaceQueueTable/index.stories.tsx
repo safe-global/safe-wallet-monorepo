@@ -30,8 +30,9 @@ export const ByNetwork: Story = { args: { groupBy: 'network' } }
 export const UpNext: Story = { args: { groupBy: 'next' } }
 
 /**
- * Rows behind the next nonce read "Blocked by #n": Safe B's #17 waits on a #16 the wallet signs, Safe A's rows on a #1233
- * to execute. A click scrolls up to #n and highlights it, expanding its band when collapsed.
+ * Rows behind the next nonce the wallet can't act on read "Blocked by #n": Safe B #17 (fully signed) and #18 (waiting on
+ * others) wait on a #16 the wallet signs, while #19, the wallet's to sign, keeps Sign. Safe A rows wait on a #1233 to
+ * execute. A click scrolls up to #n and highlights it, expanding its band when collapsed.
  */
 export const BlockedBy: Story = { args: { sections: BLOCKED_SECTIONS } }
 

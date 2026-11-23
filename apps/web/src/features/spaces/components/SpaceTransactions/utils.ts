@@ -200,3 +200,13 @@ export const getBlockedByHint = (nonce: number, nextStatus?: QueueStatus): strin
   if (nextStatus === 'sign') return `#${nonce} needs your signature first.`
   return `#${nonce} is waiting on other signers.`
 }
+
+/**
+ * The nonce a row waits on when the user can't act on it: fully signed, or still signing without them, behind the
+ * Safe's next nonce. Undefined when the user can sign or execute it, or the next nonce isn't loaded.
+ */
+export const getBlockedBy = (status: QueueStatus, nonce?: number, nextNonce?: number): number | undefined => {
+  if (nextNonce === undefined) return undefined
+  if (status === 'blocked') return nextNonce
+  return status === 'waiting' && nonce !== undefined && nonce > nextNonce ? nextNonce : undefined
+}

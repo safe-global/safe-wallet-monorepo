@@ -88,7 +88,16 @@ export const QUEUE_SECTIONS: SpaceQueueSection[] = [
   },
 ]
 
-/** Fully signed rows behind the next nonce: Safe A waits on a #1233 to execute, Safe B on a #16 the story wallet signs */
+// Still missing a signature, but not the story wallet's
+const waitingOnOthers = (item: TransactionQueuedItem): TransactionQueuedItem => ({
+  ...item,
+  transaction: {
+    ...item.transaction,
+    executionInfo: { ...item.transaction.executionInfo, missingSigners: [{ value: RECIPIENT }] },
+  } as TransactionQueuedItem['transaction'],
+})
+
+/** Rows behind the next nonce the wallet can't act on: Safe A waits on a #1233 to execute, Safe B on a #16 the story wallet signs */
 export const BLOCKED_SECTIONS: SpaceQueueSection[] = [
   {
     safeAddress: SAFE_B,
@@ -100,6 +109,8 @@ export const BLOCKED_SECTIONS: SpaceQueueSection[] = [
           transfer('b-1-16', 16, 1),
           { type: TransactionListItemType.LABEL, label: 'Queued' },
           transfer('b-1-17', 17, 2, TransactionStatus.AWAITING_EXECUTION),
+          waitingOnOthers(transfer('b-1-18', 18, 1)),
+          transfer('b-1-19', 19, 1),
         ],
       },
     ],

@@ -5,6 +5,7 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import {
+  getBlockedBy,
   getBlockedByHint,
   getCounterparty,
   getNextNonce,
@@ -102,6 +103,19 @@ describe('getNextStatus', () => {
   it('is undefined when no loaded row is next', () => {
     const rows = getSectionRows([{ type: 'LABEL', label: 'Queued' }, transactionItem(8)])
     expect(getNextStatus(rows, ['blocked'])).toBeUndefined()
+  })
+})
+
+describe('getBlockedBy', () => {
+  it.each([
+    ['blocked', 4, 3, 3],
+    ['waiting', 4, 3, 3],
+    ['waiting', 3, 3, undefined],
+    ['sign', 4, 3, undefined],
+    ['execute', 3, 3, undefined],
+    ['blocked', 4, undefined, undefined],
+  ] as const)('a row to %s at #%s with #%s next waits on %s', (status, nonce, nextNonce, expected) => {
+    expect(getBlockedBy(status, nonce, nextNonce)).toBe(expected)
   })
 })
 

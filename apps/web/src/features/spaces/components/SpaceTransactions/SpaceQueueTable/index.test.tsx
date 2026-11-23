@@ -82,12 +82,14 @@ jest.mock('../SpaceQueueRow', () => ({
     chainId,
     safeAddress,
     nextNonce,
+    nextStatus,
   }: {
     item: TransactionQueuedItem
     status: string
     chainId: string
     safeAddress: string
     nextNonce?: number
+    nextStatus?: string
   }) {
     const navigation = jest.requireActual('./queueNavigation')
     const goTo = navigation.useQueueGoTo()
@@ -101,7 +103,7 @@ jest.mock('../SpaceQueueRow', () => ({
           <td>
             <button
               aria-label={`Go from ${item.transaction.id}`}
-              onClick={() => goTo({ safeAddress, chainId, nonce: nextNonce })}
+              onClick={() => goTo({ safeAddress, chainId, nonce: nextNonce, status: nextStatus })}
             />
           </td>
         )}
@@ -654,7 +656,7 @@ describe('SpaceQueueTable', () => {
       expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'auto' })
     })
 
-    it('goes to the first option when transactions share the nonce', () => {
+    it('goes to the option the hint is about when transactions share the nonce', () => {
       const first = transactionItem('AWAITING_CONFIRMATIONS', 3, 'HasNext')
       const second = transactionItem('AWAITING_EXECUTION', 3, 'End')
       render(
@@ -680,10 +682,10 @@ describe('SpaceQueueTable', () => {
 
       goFromBlocked()
 
-      // The Safe band, the chain, the conflict header, then the first option
-      expect(mockScrollToIndex).toHaveBeenCalledWith(3, expect.anything())
-      expect(rowOf(first)).toHaveAttribute('data-highlighted', 'on')
-      expect(rowOf(second)).not.toHaveAttribute('data-highlighted')
+      // The Safe band, the chain, the conflict header, the first option, then the second, which can execute
+      expect(mockScrollToIndex).toHaveBeenCalledWith(4, expect.anything())
+      expect(rowOf(second)).toHaveAttribute('data-highlighted', 'on')
+      expect(rowOf(first)).not.toHaveAttribute('data-highlighted')
     })
 
     it('expands the collapsed band holding the transaction, without changing the saved Collapse all', () => {
@@ -789,6 +791,41 @@ describe('SpaceQueueTable', () => {
       expect(await screen.findByText(hint)).toBeInTheDocument()
     })
 
+    it('shows "Blocked by #n" on a row behind the next nonce that still needs signatures, but not the user\'s', () => {
+      render(
+        <DeleteTxDialogProvider>
+          <Table>
+            <TableBody>
+              <SpaceQueueRow
+                item={queued}
+                safeAddress={safeA}
+                chainId={chainId}
+                status="waiting"
+                nextNonce={3}
+                nextStatus="waiting"
+              />
+            </TableBody>
+          </Table>
+        </DeleteTxDialogProvider>,
+      )
+
+      expect(screen.getByRole('button', { name: 'Blocked by #3' })).toBeInTheDocument()
+    })
+
+    it('keeps the action of a row behind the next nonce that the user can sign', () => {
+      render(
+        <DeleteTxDialogProvider>
+          <Table>
+            <TableBody>
+              <SpaceQueueRow item={queued} safeAddress={safeA} chainId={chainId} status="sign" nextNonce={3} />
+            </TableBody>
+          </Table>
+        </DeleteTxDialogProvider>,
+      )
+
+      expect(screen.queryByRole('button', { name: 'Blocked by #3' })).not.toBeInTheDocument()
+    })
+
     it.each<QueueStatus>(['execute', 'sign', 'waiting'])('keeps the row action of a transaction to %s', (status) => {
       render(
         <DeleteTxDialogProvider>
@@ -843,7 +880,26 @@ describe('SpaceQueueTable', () => {
       expect(row).toHaveAttribute('data-highlighted', 'on')
       expect(row).toHaveClass('[&>td]:bg-accent')
       expect(row).toHaveFocus()
+
+      // A second go-to while it is still highlighted takes the focus back
+      act(() => row.blur())
+      expect(row).not.toHaveFocus()
+      act(() => highlights.highlight(next.transaction.id))
+      expect(row).toHaveFocus()
       highlights.dispose()
+    })
+
+    it('shows a focus ring for keyboard focus', () => {
+      renderRow(next)
+
+      // jsdom computes no Tailwind: outline-hidden and outline-2 share --tw-outline-style, so outline-solid must come along
+      expect(screen.getByTestId('space-queue-row')).toHaveClass(
+        'outline-hidden',
+        'focus-visible:outline-solid',
+        'focus-visible:outline-2',
+        'focus-visible:outline-ring',
+      )
+      expect(screen.getByTestId('space-queue-row')).not.toHaveClass('outline-none')
     })
 
     it('truncates a pending label, with the full text in a tooltip', async () => {

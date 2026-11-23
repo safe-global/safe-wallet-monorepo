@@ -25,7 +25,7 @@ import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
-import { getBlockedByHint, getCounterparty, getNonce } from './utils'
+import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce } from './utils'
 
 export const Counterparty = ({
   txInfo,
@@ -139,9 +139,9 @@ const SpaceQueueRow = ({
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const showWarning = isImitation(tx) || (hasDefaultTokenlist && !isTrustedTx(tx))
   const goTo = useQueueGoTo()
-  const blockedBy = status === 'blocked' && !isPending ? nextNonce : undefined
+  const blockedBy = isPending ? undefined : getBlockedBy(status, nonce, nextNonce)
 
-  const { phase, takeFocus } = useRowHighlight(tx.id)
+  const { phase, seq, takeFocus } = useRowHighlight(tx.id)
   const rowRef = useRef<HTMLTableRowElement | null>(null)
   const measureRef = rowProps?.ref
   const setRowRef = useCallback(
@@ -153,8 +153,8 @@ const SpaceQueueRow = ({
     [measureRef],
   )
   useEffect(() => {
-    if (phase && takeFocus()) rowRef.current?.focus({ preventScroll: true })
-  }, [phase, takeFocus])
+    if (seq !== undefined && takeFocus()) rowRef.current?.focus({ preventScroll: true })
+  }, [seq, takeFocus])
 
   return (
     <TableRow
@@ -165,7 +165,7 @@ const SpaceQueueRow = ({
       data-highlighted={phase}
       data-no-hover={phase === 'on' ? '' : undefined}
       className={cn(
-        'group/transaction h-14 outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+        'group/transaction h-14 outline-hidden focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
         phase && HIGHLIGHT_CLASSES[phase],
       )}
     >
@@ -239,7 +239,7 @@ const SpaceQueueRow = ({
             <BlockedByButton
               nonce={blockedBy}
               hint={getBlockedByHint(blockedBy, nextStatus)}
-              onClick={() => goTo?.({ safeAddress, chainId, nonce: blockedBy })}
+              onClick={() => goTo?.({ safeAddress, chainId, nonce: blockedBy, status: nextStatus })}
             />
           ) : (
             <QueueActions tx={tx} dense />
