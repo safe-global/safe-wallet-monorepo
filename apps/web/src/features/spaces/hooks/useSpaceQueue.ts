@@ -99,11 +99,20 @@ export const useSpaceQueue = (
   query: SpaceQueueQuery = {},
   options: SubscriptionOptions & { skip?: boolean } = {},
 ) => {
+  const args = toQueryArgs(spaceId, query)
   const { data, currentData, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
-    toQueryArgs(spaceId, query),
+    args,
     options,
   )
   const { skip } = options
+
+  // A query that failed stays failed while Try again refetches it, so the error view doesn't flash other content
+  const argsKey = JSON.stringify(args)
+  const [failedArgsKey, setFailedArgsKey] = useState<string>()
+  if (isError && failedArgsKey !== argsKey) setFailedArgsKey(argsKey)
+  if (currentData && failedArgsKey === argsKey) setFailedArgsKey(undefined)
+  const isRetryingError = !isError && !currentData && !skip && failedArgsKey === argsKey
+  const hasError = isError || isRetryingError
 
   // A second refetch of an entry already loading sends no request, so the page and the poller can both listen
   useEffect(() => {
@@ -124,7 +133,7 @@ export const useSpaceQueue = (
     setLastQueue({ spaceId, query, queue: currentQueue })
   }
   // While a new search or filter loads, the last queue stays on screen instead of a skeleton. Never another Space's
-  const stale = !currentQueue && !skip && !isError && lastQueue?.spaceId === spaceId ? lastQueue : undefined
+  const stale = !currentQueue && !skip && !hasError && lastQueue?.spaceId === spaceId ? lastQueue : undefined
 
   return {
     queue: currentQueue ?? stale?.queue,
@@ -133,7 +142,9 @@ export const useSpaceQueue = (
     isStale: !!stale,
     // The last answer's counts stay while a new filter loads, so the menus keep them
     counts: data?.counts,
-    isError,
+    isError: hasError,
+    /** Try again is refetching a query that failed */
+    isRetryingError,
     isFetching,
     refetch,
   }

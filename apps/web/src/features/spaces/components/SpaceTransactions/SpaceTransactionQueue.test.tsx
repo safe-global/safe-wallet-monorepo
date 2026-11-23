@@ -11,6 +11,8 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection } from '../../hooks/useSpaceQueue'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getStoreInstance } from '@/store'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
 const mockToolbarProps = jest.fn()
@@ -173,7 +175,7 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safes not loaded')
+    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safe accounts not loaded')
     expect(screen.getByTestId('space-queue-safe')).toBeInTheDocument()
   })
 
@@ -200,8 +202,39 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe not loaded')
+    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe account not loaded')
     expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+    expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+  })
+
+  it('keeps the error view, with Try again loading, while it retries a failed filter', async () => {
+    let failFilter = true
+    let releaseRetry: () => void = () => {}
+    const retryReleased = new Promise<void>((resolve) => (releaseRetry = resolve))
+    server.use(
+      http.get(queueUrl, async ({ request }) => {
+        if (!new URL(request.url).searchParams.has('status')) {
+          return HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }))
+        }
+        if (failFilter) return new HttpResponse(null, { status: 500 })
+        await retryReleased
+        return HttpResponse.json(page({ [safeB]: { '1': transactions(1) } }))
+      }),
+    )
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+    await screen.findByText("Couldn't load the queue")
+    failFilter = false
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Try again' })).toBeDisabled())
+    expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+
+    releaseRetry()
+
+    await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeB))
     expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
   })
 
@@ -480,9 +513,8 @@ describe('SpaceTransactionQueue', () => {
 
       await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
       expect(screen.getByTestId('space-queue-body')).toHaveClass('opacity-50')
-      // Row actions such as Sign or Execute can't be used on the stale rows
       expect(screen.getByTestId('space-queue-body')).toHaveAttribute('inert')
-      // The same table stays mounted, so its rows and logos don't reload
+      expect(screen.getByRole('status')).toHaveTextContent('Updating results…')
       expect(screen.getByTestId('space-queue-table')).toBe(table)
       expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeA)
 
@@ -492,6 +524,7 @@ describe('SpaceTransactionQueue', () => {
       expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
       expect(screen.getByTestId('space-queue-body')).not.toHaveClass('opacity-50')
       expect(screen.getByTestId('space-queue-body')).not.toHaveAttribute('inert')
+      expect(screen.getByRole('status')).toBeEmptyDOMElement()
     })
 
     it('does not spin the Reload of unloaded Safes while a filter loads', async () => {
@@ -512,12 +545,15 @@ describe('SpaceTransactionQueue', () => {
     })
 
     it('shows the latest query when an earlier one answers after it', async () => {
+      let receiveB: () => void = () => {}
+      const bReceived = new Promise<void>((resolve) => (receiveB = resolve))
       let releaseB: () => void = () => {}
       const bReleased = new Promise<void>((resolve) => (releaseB = resolve))
       server.use(
         http.get(queueUrl, async ({ request }) => {
           const search = new URL(request.url).searchParams.get('search')
           if (search === 'b') {
+            receiveB()
             await bReleased
             return HttpResponse.json(page({ [safeB]: { '1': transactions(1) } }))
           }
@@ -527,14 +563,18 @@ describe('SpaceTransactionQueue', () => {
       )
       render(<SpaceTransactionQueue spaceId={spaceId} />)
       await screen.findByTestId('space-queue-safe')
-
       fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'b' } })
+      await act(() => bReceived)
       fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'c' } })
       await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
 
       releaseB()
+      const isBAnswered = () =>
+        Object.entries(getStoreInstance().getState()[cgwApi.reducerPath].queries).some(
+          ([cacheKey, entry]) => cacheKey.includes('"search":"b"') && entry?.status === 'fulfilled',
+        )
+      await waitFor(() => expect(isBAnswered()).toBe(true))
 
-      await new Promise((resolve) => setTimeout(resolve, 50))
       expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe)
       expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
     })
@@ -545,7 +585,6 @@ describe('SpaceTransactionQueue', () => {
         http.get(queueUrl, async ({ request }) => {
           requests.push(request)
           const isSearched = new URL(request.url).searchParams.has('search')
-          // Only the first unfiltered request answers, so the unfiltered queue shown later comes from the cache
           if (!isSearched && requests.length > 1) await delay('infinite')
           return HttpResponse.json(page({ [isSearched ? otherSafe : safeA]: { '1': transactions(1) } }))
         }),

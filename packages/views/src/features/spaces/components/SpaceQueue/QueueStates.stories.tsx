@@ -25,6 +25,11 @@ export const LoadError: Story = {
   render: () => <QueueLoadError onRetry={fn()} />,
 }
 
+/** Try again is refetching the queue that failed */
+export const LoadErrorRetrying: Story = {
+  render: () => <QueueLoadError onRetry={fn()} isRetrying />,
+}
+
 /** The gateway read only part of the queue */
 export const Truncated: Story = {
   render: () => <QueueTruncatedNotice shown={100} total={243} />,

@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { Check, CloudOff } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import {
   Empty,
   EmptyContent,
@@ -13,7 +14,13 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import NoTransactionsIcon from '@safe-global/views/assets/images/transactions/no-transactions.svg'
 
-export const QueueLoadError = ({ onRetry }: { onRetry: () => void }): ReactElement => (
+export const QueueLoadError = ({
+  onRetry,
+  isRetrying,
+}: {
+  onRetry: () => void
+  isRetrying?: boolean
+}): ReactElement => (
   <Empty role="alert" className="rounded-2xl border border-border bg-card">
     <EmptyHeader>
       <EmptyMedia variant="icon">
@@ -27,7 +34,8 @@ export const QueueLoadError = ({ onRetry }: { onRetry: () => void }): ReactEleme
       </EmptyDescription>
     </EmptyHeader>
     <EmptyContent>
-      <Button variant="outline" onClick={onRetry}>
+      <Button variant="outline" disabled={isRetrying} onClick={onRetry}>
+        {isRetrying && <Spinner className="size-3" aria-hidden />}
         Try again
       </Button>
     </EmptyContent>

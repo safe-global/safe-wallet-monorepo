@@ -86,7 +86,7 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
-  const { queue, queueQuery, isStale, counts, isError, isFetching, refetch } = useSpaceQueue(
+  const { queue, queueQuery, isStale, counts, isError, isRetryingError, isFetching, refetch } = useSpaceQueue(
     spaceId,
     { filters: queryFilters, search: querySearch },
     { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
@@ -113,26 +113,31 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
 
       {queue ? (
         // The last queue stays mounted and dimmed while a new search or filter loads, so the table doesn't flicker.
-        // Inert, so nobody signs or executes from rows that may no longer match
-        <div
-          data-testid="space-queue-body"
-          aria-busy={isStale}
-          inert={isStale}
-          className={cn('flex flex-col gap-6 transition-opacity', isStale && 'opacity-50')}
-        >
-          <QueueBody
-            spaceId={spaceId}
-            queue={queue}
-            groupBy={tableGroupBy}
-            isFetching={isFetching && !isStale}
-            isFiltered={hasSpaceQueueFilters(queueQuery.filters)}
-            isSearching={!!queueQuery.search}
-            onRetry={refetch}
-            onClearFilters={clearFilters}
-          />
+        // Inert, so nobody signs or executes from rows that may no longer match; the status line says why
+        <div className={cn('relative', isStale && 'cursor-progress')}>
+          <p role="status" className="absolute -top-5 left-0 text-xs text-muted-foreground">
+            {isStale ? 'Updating results…' : ''}
+          </p>
+          <div
+            data-testid="space-queue-body"
+            aria-busy={isStale}
+            inert={isStale}
+            className={cn('flex flex-col gap-6 transition-opacity', isStale && 'opacity-50')}
+          >
+            <QueueBody
+              spaceId={spaceId}
+              queue={queue}
+              groupBy={tableGroupBy}
+              isFetching={isFetching && !isStale}
+              isFiltered={hasSpaceQueueFilters(queueQuery.filters)}
+              isSearching={!!queueQuery.search}
+              onRetry={refetch}
+              onClearFilters={clearFilters}
+            />
+          </div>
         </div>
       ) : isError ? (
-        <QueueLoadError onRetry={refetch} />
+        <QueueLoadError onRetry={refetch} isRetrying={isRetryingError} />
       ) : (
         <SkeletonTxList />
       )}
