@@ -461,6 +461,7 @@ describe('useGasPayerSelection', () => {
     const TOTAL: FeesPreviewData['totalOutgoing'] = {
       primary: [{ amount: '1', currency: 'ETH' }],
       fees: { amount: '0.00001', currency: 'ETH' },
+      fiatTotal: '$2.50',
     }
 
     beforeEach(() => {
