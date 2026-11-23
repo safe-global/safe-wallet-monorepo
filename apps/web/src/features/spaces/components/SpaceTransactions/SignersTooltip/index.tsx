@@ -49,7 +49,9 @@ const SignersTooltipContent = ({
   const isYou = (address: string) => wallets.has(address.toLowerCase())
 
   const details = data?.detailedExecutionInfo?.type === 'MULTISIG' ? data.detailedExecutionInfo : undefined
-  const signers = details ? sortSigners(details.signers, details.confirmations, isYou) : []
+  const signers = details
+    ? sortSigners(details.signers, details.confirmations, isYou, (address) => sameAddress(address, connected))
+    : []
   const rows = signers.map(({ value, name, signed }) => ({
     address: value,
     signed,

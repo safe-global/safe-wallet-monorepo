@@ -7,6 +7,7 @@ import {
   TransferDirection,
 } from '@safe-global/store/gateway/types'
 import { http, HttpResponse } from 'msw'
+import { getFixtureData } from '@/stories/mocks/handlers'
 import type { SpaceQueueSection } from '../../hooks/useSpaceQueue'
 
 export const SPACE_QUEUE_URL = /\/v1\/spaces\/[^/]+\/transactions\/queued/
@@ -15,10 +16,13 @@ const SAFE_A = '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 const SAFE_B = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 const RECIPIENT = '0x6810e776880C02933D47DB1b9fc05908e5386b96'
 const TIMESTAMP = 1_767_225_600_000
+// The story wallet last: it never signs, so rows still missing a signature are its to sign
+const STORY_WALLET = getFixtureData('efSafe').safeData.owners[0]
 const OWNERS = [
   { value: '0x1F2a3b4C5d6E7f8091A2b3C4d5E6f708192A3b4C', name: 'Ana' },
   { value: '0x2A3b4C5d6E7f8091A2b3C4d5E6f708192A3b4C5D', name: 'Max' },
   { value: RECIPIENT, name: 'Treasury' },
+  STORY_WALLET,
 ]
 
 const transfer = (
@@ -46,7 +50,7 @@ const transfer = (
       nonce,
       confirmationsRequired: 2,
       confirmationsSubmitted: confirmations,
-      missingSigners: confirmations < 2 ? [{ value: RECIPIENT }] : [],
+      missingSigners: confirmations < 2 ? [{ value: RECIPIENT }, { value: STORY_WALLET.value }] : [],
     },
     txHash: null,
   } as TransactionQueuedItem['transaction'],

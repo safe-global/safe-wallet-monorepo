@@ -13,17 +13,18 @@ export const getSignersHeader = (submitted: number, required: number, unsignedCo
   return `${progress} · ${missing} more from ${unsignedCount} ${unsignedCount === 1 ? 'signer' : 'signers'}`
 }
 
-/** The user first, then the owners who signed, then the rest, each group in owner order */
+/** The connected wallet first, then the user's other wallets, then the owners who signed, then the rest */
 export const sortSigners = (
   signers: AddressInfo[],
   confirmations: MultisigConfirmationDetails[],
   isYou: (address: string) => boolean = () => false,
+  isConnected: (address: string) => boolean = () => false,
 ): SignerStatus[] => {
   const statuses = signers.map((signer) => ({
     ...signer,
     signed: confirmations.some(({ signer: { value } }) => sameAddress(value, signer.value)),
   }))
-  const rank = ({ value, signed }: SignerStatus) => (isYou(value) ? 0 : signed ? 1 : 2)
+  const rank = ({ value, signed }: SignerStatus) => (isConnected(value) ? -1 : isYou(value) ? 0 : signed ? 1 : 2)
   return [...statuses].sort((a, b) => rank(a) - rank(b))
 }
 

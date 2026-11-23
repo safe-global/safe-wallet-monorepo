@@ -56,4 +56,17 @@ describe('sortSigners with the user', () => {
 
     expect(sorted.map(({ value }) => value)).toEqual([me.value, b.value, a.value])
   })
+
+  it('puts the connected wallet before the other linked wallets', () => {
+    const [a, linked, connected] = [addressInfo(), addressInfo(), addressInfo()]
+
+    const sorted = sortSigners(
+      [a, linked, connected],
+      [],
+      (address) => address === linked.value || address === connected.value,
+      (address) => address === connected.value,
+    )
+
+    expect(sorted.map(({ value }) => value)).toEqual([connected.value, linked.value, a.value])
+  })
 })

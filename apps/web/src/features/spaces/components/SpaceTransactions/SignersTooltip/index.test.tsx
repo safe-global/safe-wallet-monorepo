@@ -331,7 +331,7 @@ describe('SignersTooltip', () => {
       expect(screen.queryByText(/Waiting on 0/)).not.toBeInTheDocument()
     })
 
-    it('names only the connected wallet "You" and marks the other linked wallets with their address', async () => {
+    it('names only the connected wallet "You", first, and marks the other linked wallets with their address', async () => {
       const [ana, me, linked] = [owner('Ana'), owner('Me'), owner('Linked')]
       connect(me.value)
       mockLinkedWallets = [linked.value]
@@ -341,7 +341,7 @@ describe('SignersTooltip', () => {
       await user.hover(trigger)
 
       await screen.findByText('You')
-      expect(rowNames()).toEqual(['You · ' + shortenAddress(linked.value), 'You', 'Ana'])
+      expect(rowNames()).toEqual(['You', 'You · ' + shortenAddress(linked.value), 'Ana'])
     })
 
     it("says when the user isn't a signer of the Safe", async () => {
