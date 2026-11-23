@@ -20,8 +20,6 @@ interface UseSignInRedirectProps {
   singleSpaceId?: string | null
   // The `spaceId` URL param if the user is an active member (e.g. a Workspace link sent here for
   // sign-in by the route guard). It wins over singleSpaceId and pending invites.
-  // The guard also passes the page that was opened as `next`; when it is a page of this
-  // Workspace, the user goes back to it instead of the Workspace home.
   requestedSpaceId?: string | null
 }
 

@@ -59,7 +59,6 @@ const guardRules: GuardRule[] = [
       const params = new URLSearchParams()
       if (typeof query.safe === 'string') params.set('safe', query.safe)
       if (typeof query.spaceId === 'string') params.set('spaceId', query.spaceId)
-      // And the Workspace page itself, so that sign-in returns there (validated by useSignInRedirect)
       if (isSpacesPath) params.set('next', currentUrl)
       const search = params.toString()
       return redirect(search ? `${target}?${search}` : target)
@@ -102,9 +101,8 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
-  // The return URL for sign-in, only needed when signed out on a Workspace page. Building it from
-  // the whole query elsewhere would re-run the guard (and refetch spaces) on every query change.
   const isSpacesPath = pathname.startsWith('/spaces')
+  // Signed out only: otherwise any query change would re-run the guard and refetch spaces (#9482)
   const currentUrl = !isSiweAuthenticated && isSpacesPath ? buildCurrentNextUrl(pathname, query) : ''
   const isSpaceRoute = useIsSpaceRoute()
   const isWorkspaceWizardEnabled = useIsWorkspaceWizardEnabled()
