@@ -1,7 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
-import { QueueEmpty, QueueLoadError, QueueNoMatches, QueueRefreshFailed, QueueTruncatedNotice } from './QueueStates'
+import {
+  HistoryComingSoon,
+  QueueEmpty,
+  QueueLoadError,
+  QueueNoMatches,
+  QueueRefreshFailed,
+  QueueTruncatedNotice,
+} from './QueueStates'
 
 const meta = {
   title: 'Features/Spaces/Transactions/QueueStates',
@@ -41,4 +48,8 @@ export const NoMatches: Story = {
 
 export const NoSearchMatches: Story = {
   render: () => <QueueNoMatches hasFilters={false} isSearching onClear={fn()} />,
+}
+
+export const HistoryTab: Story = {
+  render: () => <HistoryComingSoon />,
 }

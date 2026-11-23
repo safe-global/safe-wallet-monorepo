@@ -305,6 +305,57 @@ describe('useSignInRedirect', () => {
       expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-7' } })
     })
 
+    it('returns to the Workspace page of the next param after sign-in', async () => {
+      setupMocks({ routerQuery: { spaceId: 'space-7', next: '/spaces/transactions?spaceId=space-7&tab=history' } })
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 3, singleSpaceId: null, requestedSpaceId: 'space-7' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/spaces/transactions',
+        query: { spaceId: 'space-7', tab: 'history' },
+      })
+    })
+
+    it.each([
+      ['an external URL', 'https://evil.com/spaces?spaceId=space-7'],
+      ['a protocol-relative URL', '//evil.com/spaces?spaceId=space-7'],
+      ['a javascript: URL', 'javascript:alert(1)'],
+      ['a non-Workspace page', '/settings?spaceId=space-7'],
+      ['another Workspace', '/spaces/transactions?spaceId=space-8'],
+    ])('falls back to the Workspace home when next is %s', async (_, next) => {
+      setupMocks({ routerQuery: { spaceId: 'space-7', next } })
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 3, singleSpaceId: null, requestedSpaceId: 'space-7' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-7' } })
+    })
+
+    it('ignores next when the URL has no Workspace of the user', async () => {
+      setupMocks({ routerQuery: { next: '/spaces/transactions?spaceId=space-7' } })
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 2, singleSpaceId: null, requestedSpaceId: null }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
     it('still redirects to the single space when there are no invites', async () => {
       setupMocks()
 

@@ -11,6 +11,14 @@ jest.mock('../billing/useSpaceSubscription', () => ({
   useSpaceSubscription: (spaceId?: string) => mockUseSpaceSubscription(spaceId),
 }))
 jest.mock('../billing/useSpaceOffers', () => ({ useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId) }))
+const mockUseIsWorkspaceWizardEnabled = jest.fn()
+jest.mock('@/hooks/useIsWorkspaceWizardEnabled', () => ({
+  useIsWorkspaceWizardEnabled: () => mockUseIsWorkspaceWizardEnabled(),
+}))
+const mockUseSpace = jest.fn()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpacesGetOneV1Query: (args: unknown) => mockUseSpace(args),
+}))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const canceled = { status: 'canceled', createdAt: 1, cancelledAt: 1_765_000_000, currentPeriodEnd: null }
@@ -22,6 +30,56 @@ describe('useWorkspaceLock', () => {
     mockUseIsInvited.mockReturnValue(false)
     mockUseSpaceSubscription.mockReturnValue({ status: 'none', latestSubscription: undefined, isLoading: false })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: 60, isLoading: false })
+    mockUseIsWorkspaceWizardEnabled.mockReturnValue(true)
+    mockUseSpace.mockReturnValue({ currentData: { setupStatus: null }, isFetching: false })
+  })
+
+  it('sends a Workspace whose onboarding stopped at the checkout back to finish it, before any trial offer', () => {
+    mockUseSpace.mockReturnValue({ currentData: { setupStatus: 'pending' }, isFetching: false })
+
+    expect(renderHook(() => useWorkspaceLock(SPACE_ID)).result.current).toMatchObject({
+      isLocked: true,
+      reason: 'setup-pending',
+    })
+  })
+
+  it('opens a live Workspace even while its setup is still being applied', () => {
+    mockUseSpace.mockReturnValue({ currentData: { setupStatus: 'pending' }, isLoading: false })
+    mockUseSpaceSubscription.mockReturnValue({ status: 'trialing', latestSubscription: undefined, isLoading: false })
+
+    expect(renderHook(() => useWorkspaceLock(SPACE_ID)).result.current.isLocked).toBe(false)
+  })
+
+  it('waits for the Workspace before it picks a reason, also when the Workspace changes', () => {
+    mockUseSpace.mockReturnValue({ currentData: undefined, isLoading: false, isFetching: true })
+
+    expect(renderHook(() => useWorkspaceLock(SPACE_ID)).result.current).toMatchObject({
+      isLocked: false,
+      isResolving: true,
+    })
+  })
+
+  it('offers the trial instead of a setup the legacy onboarding cannot resume, when the wizard is off', () => {
+    mockUseIsWorkspaceWizardEnabled.mockReturnValue(false)
+    mockUseSpace.mockReturnValue({ currentData: { setupStatus: 'pending' }, isFetching: false })
+
+    expect(renderHook(() => useWorkspaceLock(SPACE_ID)).result.current).toMatchObject({
+      isLocked: true,
+      reason: 'trial-offered',
+    })
+  })
+
+  it('asks for a retry, not a trial, when the Workspace cannot be read, and reads it again', () => {
+    const refetchSpace = jest.fn()
+    mockUseSpace.mockReturnValue({ currentData: undefined, isFetching: false, isError: true, refetch: refetchSpace })
+    mockUseSpaceSubscription.mockReturnValue({ status: 'none', isLoading: false, refetch: jest.fn() })
+    mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: 60, isLoading: false, refetch: jest.fn() })
+
+    const { result } = renderHook(() => useWorkspaceLock(SPACE_ID))
+    expect(result.current).toMatchObject({ isLocked: false, isError: true })
+
+    result.current.retry()
+    expect(refetchSpace).toHaveBeenCalledTimes(1)
   })
 
   it.each(['none', 'canceled', 'pending'])('locks a lapsed Workspace whose plan status is %s', (status) => {

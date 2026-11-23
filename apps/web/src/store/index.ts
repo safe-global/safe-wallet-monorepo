@@ -28,8 +28,11 @@ import { workspaceTrackingListener } from '@/features/spaces/public/store/worksp
 import { spaceSafesCacheListener } from '@/features/spaces/public/store/spaceSafesCacheListener'
 import { addressBookTagsCacheListener } from '@/features/spaces/public/store/addressBookTagsCacheListener'
 import { trialReminderListener } from '@/features/spaces/public/store/trialReminder'
+import { workspaceDraftExpiryListener } from '@/features/spaces/public/store/workspaceDraftExpiryListener'
+import { workspaceDraftCompletionListener } from '@/features/spaces/public/store/workspaceDraftCompletionListener'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
+import { HYDRATE_ACTION } from './hydrateAction'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
 import { beamerApi } from './api/beamer'
@@ -77,6 +80,8 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.spaceQueueViewSlice.name]: slices.spaceQueueViewSlice.reducer,
   [slices.spaceQueuePollingSlice.name]: slices.spaceQueuePollingSlice.reducer,
+  [slices.workspaceDraftSlice.name]: slices.workspaceDraftSlice.reducer,
+  [slices.workspaceWizardSlice.name]: slices.workspaceWizardSlice.reducer,
   [slices.feePaymentSourcePreferenceSlice.name]: slices.feePaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
   // Deliberately absent from `persistedSlices`: a restored dialog would wait for a request that is gone.
@@ -112,6 +117,8 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.hnStateSlice.name,
   slices.feePaymentSourcePreferenceSlice.name,
   slices.featureFlagOverridesSlice.name,
+  slices.workspaceDraftSlice.name,
+  slices.spaceQueueViewSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -150,13 +157,15 @@ const listeners = [
   spaceSafesCacheListener,
   addressBookTagsCacheListener,
   trialReminderListener,
+  workspaceDraftExpiryListener,
+  workspaceDraftCompletionListener,
   forbiddenSessionListener,
   spaceQueueReconciliationListener,
   safeOverviewsTokenListListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
-  if (action.type === hydrate.HYDRATE_ACTION) {
+  if (action.type === HYDRATE_ACTION) {
     /**
      * When changing the schema of a Redux slice, previously stored data in LS might become incompatible.
      * To avoid this, we should always migrate the data on a case-by-case basis in the corresponding slice.
@@ -190,6 +199,13 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
         // Only the default sort direction is reset — the user's custom drag order is preserved.
         manualOrder: orderByState.manualOrder ?? {},
       }
+    }
+
+    // A saved Group by that is no longer an option falls back to the default
+    if (nextState[slices.spaceQueueViewSlice.name]) {
+      nextState[slices.spaceQueueViewSlice.name] = slices.migrateSpaceQueueView(
+        nextState[slices.spaceQueueViewSlice.name],
+      )
     }
 
     // Mark the store as hydrated so guards wait for persisted auth state.

@@ -96,6 +96,33 @@ export const COMPARE_SECTIONS: CompareSection[] = [
   },
 ]
 
+export type TrialFeature = { label: string; included: boolean }
+
+/** The plans a trial is sold for. */
+export type TrialPlanName = 'Starter' | 'Business'
+
+type TrialFeatureRow = { label: string | Record<TrialPlanName, string>; isBusinessOnly?: boolean }
+
+const TRIAL_CARD_FEATURES: TrialFeatureRow[] = [
+  { label: { Starter: '10 sponsored txs/month', Business: '50 sponsored txs/month' } },
+  { label: 'Unlimited members' },
+  { label: 'Recipient checks' },
+  { label: 'Transaction simulation' },
+  { label: 'Shared address book' },
+  { label: 'Activity log and 2FA' },
+  { label: 'Policies', isBusinessOnly: true },
+  { label: 'Proposers', isBusinessOnly: true },
+  { label: 'Priority support', isBusinessOnly: true },
+  { label: 'Guided onboarding', isBusinessOnly: true },
+]
+
+/** One list for both trial plans: on Starter the Business-only rows stay, greyed out, so switching shows what's missing. */
+export const trialFeatures = (plan: TrialPlanName): TrialFeature[] =>
+  TRIAL_CARD_FEATURES.map(({ label, isBusinessOnly }) => ({
+    label: typeof label === 'string' ? label : label[plan],
+    included: plan === 'Business' || !isBusinessOnly,
+  }))
+
 // TODO(safe-pro): Enterprise has no payment link; static card until sales flow is defined.
 export const ENTERPRISE_TIER: PlanTier = {
   id: 'enterprise',

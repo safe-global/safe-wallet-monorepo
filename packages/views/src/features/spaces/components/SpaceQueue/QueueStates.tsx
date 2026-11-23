@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Check, CloudOff } from 'lucide-react'
+import { Check, CloudOff, History } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -82,4 +82,18 @@ export const QueueRefreshFailed = (): ReactElement => (
     <AlertTitle>Couldn&apos;t refresh the queue</AlertTitle>
     <AlertDescription>Showing the last update. We&apos;ll keep trying in the background.</AlertDescription>
   </Alert>
+)
+
+export const HistoryComingSoon = (): ReactElement => (
+  <Empty className="rounded-2xl border border-border bg-card">
+    <EmptyHeader>
+      <EmptyMedia variant="icon">
+        <History />
+      </EmptyMedia>
+      <EmptyTitle>
+        <h2>Workspace history is coming</h2>
+      </EmptyTitle>
+      <EmptyDescription>Until then, you can find the transaction history inside each Safe.</EmptyDescription>
+    </EmptyHeader>
+  </Empty>
 )
