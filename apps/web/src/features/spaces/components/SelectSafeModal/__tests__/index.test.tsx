@@ -6,7 +6,6 @@ import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { NO_ACTIVATED_SAFES_MESSAGE } from '../constants'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
-const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
 
 const deployedSafe: SafeItem = {
   chainId: '1',
@@ -97,14 +96,6 @@ describe('SelectSafeModal swap disabling', () => {
     mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
   })
 
-  it('disables a counterfactual safe with the activation tooltip for the swap action', () => {
-    renderModal(ESafeAction.Swap, cfState(cfSafe))
-
-    const card = getCardFor(cfSafe)
-    expect(card?.disabled).toBe(true)
-    expect(card?.disabledTooltip).toBe(SWAP_DISABLED_CF_TOOLTIP)
-  })
-
   it('keeps a deployed safe on a swap-supported chain enabled', () => {
     renderModal(ESafeAction.Swap, cfState(cfSafe))
 
@@ -113,23 +104,41 @@ describe('SelectSafeModal swap disabling', () => {
     expect(card?.disabledTooltip).toBeUndefined()
   })
 
-  it('prefers the unsupported-chain tooltip over the counterfactual one', () => {
-    const cfOnUnsupportedChain: SafeItem = { ...cfSafe, chainId: '137' }
-    mockUseSpaceSafes.mockReturnValue({ allSafes: [cfOnUnsupportedChain], isLoading: false })
+  it('disables a safe on a chain without swaps with the unsupported-chain tooltip', () => {
+    const safeOnUnsupportedChain: SafeItem = { ...deployedSafe, chainId: '137' }
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [safeOnUnsupportedChain], isLoading: false })
 
-    renderModal(ESafeAction.Swap, cfState(cfOnUnsupportedChain))
+    renderModal(ESafeAction.Swap)
 
-    const card = getCardFor(cfOnUnsupportedChain)
+    const card = getCardFor(safeOnUnsupportedChain)
     expect(card?.disabled).toBe(true)
     expect(card?.disabledTooltip).toBe(SWAP_DISABLED_TOOLTIP)
   })
+})
 
-  it('does not disable a counterfactual safe for non-swap actions', () => {
-    renderModal(ESafeAction.Send, cfState(cfSafe))
+describe('SelectSafeModal counterfactual safes', () => {
+  beforeEach(() => {
+    cardProps.length = 0
+    mockGetSignerStatus.mockReturnValue('signer')
+    mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
+    mockUseChains.mockReturnValue({ configs: [chainWithSwap] })
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
+  })
 
-    const card = getCardFor(cfSafe)
-    expect(card?.disabled).toBe(false)
-    expect(card?.disabledTooltip).toBeUndefined()
+  it.each(Object.values(ESafeAction))('hides counterfactual safes for the %s action', (action) => {
+    renderModal(action, cfState(cfSafe))
+
+    expect(getCardFor(cfSafe)).toBeUndefined()
+    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
+  })
+
+  it.each(Object.values(ESafeAction))('shows an empty state for %s when every safe is counterfactual', (action) => {
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [cfSafe], isLoading: false })
+
+    const { getByText } = renderModal(action, cfState(cfSafe))
+
+    expect(cardProps).toHaveLength(0)
+    expect(getByText(NO_ACTIVATED_SAFES_MESSAGE)).toBeInTheDocument()
   })
 })
 
@@ -142,22 +151,6 @@ describe('SelectSafeModal new transaction gating', () => {
     mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
   })
 
-  it('hides counterfactual safes from the new transaction picker', () => {
-    renderModal(ESafeAction.NewTransaction, cfState(cfSafe))
-
-    expect(getCardFor(cfSafe)).toBeUndefined()
-    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
-  })
-
-  it('shows an empty state when every safe is counterfactual', () => {
-    mockUseSpaceSafes.mockReturnValue({ allSafes: [cfSafe], isLoading: false })
-
-    const { getByText } = renderModal(ESafeAction.NewTransaction, cfState(cfSafe))
-
-    expect(cardProps).toHaveLength(0)
-    expect(getByText(NO_ACTIVATED_SAFES_MESSAGE)).toBeInTheDocument()
-  })
-
   it('disables every safe with the connect-wallet tooltip when no wallet is connected', () => {
     mockUseWallet.mockReturnValue(null)
 
@@ -166,15 +159,6 @@ describe('SelectSafeModal new transaction gating', () => {
     const card = getCardFor(deployedSafe)
     expect(card?.disabled).toBe(true)
     expect(card?.disabledTooltip).toBe('Please connect your wallet')
-  })
-
-  it('keeps counterfactual safes visible for other actions', () => {
-    mockUseWallet.mockReturnValue(null)
-
-    renderModal(ESafeAction.Send, cfState(cfSafe))
-
-    expect(getCardFor(cfSafe)?.disabled).toBe(false)
-    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
   })
 
   it('disables a Safe the wallet has no role on with the not-a-signer tooltip', () => {

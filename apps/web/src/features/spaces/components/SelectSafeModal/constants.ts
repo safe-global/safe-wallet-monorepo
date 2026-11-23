@@ -8,4 +8,4 @@ export const safeModalTitles: Record<ESafeAction, string> = {
   [ESafeAction.NewTransaction]: 'New transaction from',
 }
 
-export const NO_ACTIVATED_SAFES_MESSAGE = 'No activated Safe accounts. Activate a Safe account to create a transaction.'
+export const NO_ACTIVATED_SAFES_MESSAGE = 'No activated Safe accounts. Activate a Safe account to continue.'

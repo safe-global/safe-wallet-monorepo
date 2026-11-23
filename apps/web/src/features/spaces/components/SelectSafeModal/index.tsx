@@ -26,7 +26,6 @@ import { NO_ACTIVATED_SAFES_MESSAGE, safeModalTitles } from './constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
-const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
 
 const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal'))
 
@@ -43,11 +42,10 @@ const SelectSafeModal = () => {
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
   const isNewTxAction = actionType === ESafeAction.NewTransaction
-  // Counterfactual Safes can't create transactions from a Space flow (see SafeScopeProvider), so they
-  // are hidden from the New transaction picker rather than failing on submit.
+  // Counterfactual Safes are out of scope for Space flows (see SafeScopeProvider)
   const selectableSafes = useMemo(
-    () => (isNewTxAction ? flatSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]) : flatSafes),
-    [isNewTxAction, flatSafes, undeployedSafes],
+    () => flatSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
+    [flatSafes, undeployedSafes],
   )
   const hasHiddenUndeployedSafes = selectableSafes.length < flatSafes.length
   const filteredSafes = useSearchFilter(selectableSafes, query, matchSafe)
@@ -68,10 +66,9 @@ const SelectSafeModal = () => {
       if (!isSwapAction) return undefined
       const chain = chains.find((c) => c.chainId === safe.chainId)
       if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)) return SWAP_DISABLED_TOOLTIP
-      if (undeployedSafes[safe.chainId]?.[safe.address]) return SWAP_DISABLED_CF_TOOLTIP
       return undefined
     },
-    [isSwapAction, chains, undeployedSafes],
+    [isSwapAction, chains],
   )
 
   // Same gate as the Safe-level New transaction button (CheckWallet)
