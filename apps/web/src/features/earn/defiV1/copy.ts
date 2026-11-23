@@ -24,7 +24,8 @@ export const formatLiveFor = (liveSince: string, today = new Date()): string => 
 }
 
 export const DEFI_V1_COPY = {
-  tabName: { treasury: 'Treasury', defi: 'DeFi' } satisfies Record<DefiV1Framing, string>,
+  tabName: { treasury: 'Deposits', defi: 'DeFi' } satisfies Record<DefiV1Framing, string>,
+  tabLead: 'Put idle cash to work. Withdraw anytime, subject to exit time.',
   pageTitle: { treasury: 'Put idle cash to work', defi: 'DeFi opportunities' } satisfies Record<DefiV1Framing, string>,
   pageLead: {
     treasury:
@@ -434,6 +435,8 @@ export const DEFI_V1_COPY = {
     review: 'Opens the transaction review, like any other transaction.',
   },
   workspace: {
+    title: 'Treasury',
+    lead: 'All Safes in this workspace',
     allSafes: 'All Safes',
     safe: 'Safe',
     across: (count: number) => `Across ${count} Safes`,

@@ -215,9 +215,16 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     <div className="@container min-w-0 px-6 pb-8 pt-5" data-testid="defi-v1-page">
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Typography as="h1" variant="h3">
-            {DEFI_V1_COPY.tabName[config.framing]}
-          </Typography>
+          <div className="flex flex-col gap-1">
+            <Typography as="h1" variant="h3">
+              {isWorkspace ? DEFI_V1_COPY.workspace.title : DEFI_V1_COPY.tabName[config.framing]}
+            </Typography>
+            {config.framing === 'treasury' && (
+              <Typography variant="paragraph-small" color="muted">
+                {isWorkspace ? DEFI_V1_COPY.workspace.lead : DEFI_V1_COPY.tabLead}
+              </Typography>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
