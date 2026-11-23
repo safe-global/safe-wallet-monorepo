@@ -158,7 +158,7 @@ describe('SpacesSidebarContent', () => {
     mockUseDefiV1.mockReturnValue(null)
   })
 
-  it('adds Treasury after Transactions in the DeFi prototype, active on its workspace view', () => {
+  it('adds Treasury after Home in the DeFi prototype, active on its workspace view', () => {
     mockUseDefiV1.mockReturnValue({ scope: 'workspace' })
 
     render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
@@ -166,8 +166,8 @@ describe('SpacesSidebarContent', () => {
     const [mainNav, , options] = mockUseResolvedSidebarNav.mock.calls[0]
     expect(mainNav.map((i: { label: string }) => i.label)).toEqual([
       'Home',
-      'Transactions',
       'Treasury',
+      'Transactions',
       'Policies',
       'Activity',
     ])

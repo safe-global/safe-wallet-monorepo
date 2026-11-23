@@ -84,7 +84,7 @@ export const SpacesSidebarContent = ({
   const filteredMainNavigation = useMemo(() => {
     const items = spacesMainNavigation.filter((i) => !gatedOffHrefs.has(i.href))
     if (!defiV1) return items
-    const after = items.findIndex((i) => i.href === AppRoutes.spaces.transactions) + 1
+    const after = items.findIndex((i) => i.href === AppRoutes.spaces.index) + 1
     return [...items.slice(0, after), TREASURY, ...items.slice(after)]
   }, [gatedOffHrefs, defiV1])
 
