@@ -1,5 +1,10 @@
 import { faker } from '@faker-js/faker'
-import type { Policy, PolicyAllowance, PolicySafe } from '@safe-global/views/features/spaces/components/Policies/types'
+import type {
+  PendingPolicyOperation,
+  Policy,
+  PolicyAllowance,
+  PolicySafe,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import { getSpendingLimitImpacts } from '../spendingLimitImpacts'
 
 const makeAllowance = (tokenAddress: string): PolicyAllowance => ({
@@ -22,6 +27,26 @@ const makeSpendingLimit = (
   safe,
   enabled,
   enforcement: { via: 'module', moduleAddress: faker.finance.ethereumAddress() },
+  data: { spenders },
+})
+
+const makeQueuedSpendingLimit = (
+  safe: PolicySafe,
+  spenders: { spender: string; allowances: PolicyAllowance[] }[],
+  operation: PendingPolicyOperation,
+): Policy => ({
+  id: faker.string.uuid(),
+  type: 'spending-limit',
+  status: 'pending',
+  operation,
+  safe,
+  enabled: true,
+  enforcement: { via: 'module', moduleAddress: faker.finance.ethereumAddress() },
+  safeTxHash: faker.string.hexadecimal({ length: 64 }),
+  nonce: faker.number.int({ max: 100 }),
+  confirmationsSubmitted: 1,
+  confirmationsRequired: 2,
+  proposedAt: faker.date.recent().getTime() / 1_000,
   data: { spenders },
 })
 
@@ -83,6 +108,71 @@ describe('getSpendingLimitImpacts', () => {
     ]
 
     expect(getSpendingLimitImpacts(policies, safe, [{ tokenAddress: usdc, recipients }])).toEqual([])
+  })
+
+  it('should, when the Safe has a queued spending limit, return its allowance as pending', () => {
+    const spender = faker.finance.ethereumAddress()
+    const queued = makeQueuedSpendingLimit(safe, [{ spender, allowances: [makeAllowance(weth)] }], 'create')
+
+    const impacts = getSpendingLimitImpacts([queued], safe, [{ tokenAddress: usdc, recipients }])
+
+    expect(impacts).toEqual([
+      expect.objectContaining({ policyId: queued.id, isPending: true, spender, impact: 'blocked' }),
+    ])
+  })
+
+  it('should, when the spending limit is active, return its allowance as not pending', () => {
+    const active = makeSpendingLimit(safe, [
+      { spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(usdc)] },
+    ])
+
+    const impacts = getSpendingLimitImpacts([active], safe, [{ tokenAddress: usdc, recipients }])
+
+    expect(impacts).toEqual([expect.objectContaining({ policyId: active.id, isPending: false })])
+  })
+
+  it('should, when a queued edit removes one allowance and adds another, return only the added one', () => {
+    const spender = faker.finance.ethereumAddress()
+    const queued = makeQueuedSpendingLimit(
+      safe,
+      [
+        {
+          spender,
+          allowances: [
+            { ...makeAllowance(usdc), change: 'removed' },
+            { ...makeAllowance(weth), change: 'added' },
+          ],
+        },
+      ],
+      'update',
+    )
+
+    const impacts = getSpendingLimitImpacts([queued], safe, [{ tokenAddress: usdc, recipients }])
+
+    expect(impacts.map(({ allowance }) => allowance.token.address)).toEqual([weth])
+  })
+
+  it('should, when the queued transaction removes the spending limit, return nothing for it', () => {
+    const queued = makeQueuedSpendingLimit(
+      safe,
+      [{ spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(usdc)] }],
+      'remove',
+    )
+
+    expect(getSpendingLimitImpacts([queued], safe, [{ tokenAddress: usdc, recipients }])).toEqual([])
+  })
+
+  it('should, when a queued spending limit leaves its module disabled on the Safe, return nothing for it', () => {
+    const queued: Policy = {
+      ...makeQueuedSpendingLimit(
+        safe,
+        [{ spender: faker.finance.ethereumAddress(), allowances: [makeAllowance(usdc)] }],
+        'update',
+      ),
+      enabled: false,
+    }
+
+    expect(getSpendingLimitImpacts([queued], safe, [{ tokenAddress: usdc, recipients }])).toEqual([])
   })
 
   it('should return one impact per allowance with the restricted ones first, when spenders mix both kinds', () => {

@@ -148,9 +148,19 @@ export const getBlockedSpendingLimitDescription = (
   `${spender} can send up to ${amount} to any address today. ${onceApplied(isEdit)}, it can't send ${symbol} anymore.`
 export const getBlockedSpendingLimitsDescription = (isEdit = false): string =>
   `They can send their tokens to any address today. ${onceApplied(isEdit)}, they can't send them anymore.`
+export const getPendingBlockedSpendingLimitDescription = (
+  spender: string,
+  amount: string,
+  symbol: string,
+  isEdit = false,
+): string =>
+  `${spender} has a pending spending limit of ${amount}. ${onceApplied(isEdit)}, it can't send ${symbol} with this limit.`
+export const getBlockedSpendingLimitsWithPendingDescription = (isEdit = false): string =>
+  `Some of them are still pending. ${onceApplied(isEdit)}, they can't send these tokens.`
 export const getSpendingLimitsGroupTitle = (safeName: string): string => `Spending limits on ${safeName}`
 export const FOLLOWS_ALLOWLIST_LABEL = 'Follows the allowlist'
 export const WILL_BE_BLOCKED_LABEL = 'Will be blocked'
+export const PENDING_SPENDING_LIMIT_LABEL = 'Pending'
 export const getTokenInAllowlistText = (symbol: string): string => `${symbol} is in this allowlist`
 export const getTokenNotInAllowlistText = (symbol: string): string => `${symbol} isn't in this allowlist`
 export const SPENDING_LIMITS_ACKNOWLEDGEMENT_LABEL = 'I understand how this allowlist changes these spending limits.'

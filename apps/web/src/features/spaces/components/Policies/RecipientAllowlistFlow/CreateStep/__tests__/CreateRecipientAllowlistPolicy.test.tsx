@@ -80,6 +80,8 @@ const mockPoisoning = useSafeShieldForAddressPoisoning as jest.MockedFunction<ty
 const mockSpendingLimits = useSpendingLimitImpacts as jest.MockedFunction<typeof useSpendingLimitImpacts>
 
 const spendingLimitImpact = (impact: SpendingLimitImpactKind): SpendingLimitImpact => ({
+  policyId: faker.string.uuid(),
+  isPending: false,
   spender: SAFE_B,
   allowance: {
     token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null },

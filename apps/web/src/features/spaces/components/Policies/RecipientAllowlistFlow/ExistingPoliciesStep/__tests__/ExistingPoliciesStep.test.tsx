@@ -35,7 +35,9 @@ const makeAllowance = (symbol: string): PolicyAllowance => ({
   resetsAtMinute: null,
 })
 
-const makeImpact = (symbol: string, impact: SpendingLimitImpactKind): SpendingLimitImpact => ({
+const makeImpact = (symbol: string, impact: SpendingLimitImpactKind, isPending = false): SpendingLimitImpact => ({
+  policyId: faker.string.uuid(),
+  isPending,
   spender: faker.finance.ethereumAddress(),
   allowance: makeAllowance(symbol),
   impact,
@@ -102,6 +104,37 @@ describe('ExistingPoliciesStep', () => {
     expect(screen.getByText('Will be blocked')).toBeInTheDocument()
     expect(screen.getByText('500/day · USDC is in this allowlist')).toBeInTheDocument()
     expect(screen.getByText("500/day · ETH isn't in this allowlist")).toBeInTheDocument()
+  })
+
+  it('should, when a spending limit is still pending, mark its row as pending', () => {
+    spendingLimits({ impacts: [makeImpact('USDC', 'restricted', true)] })
+    renderStep()
+
+    expect(screen.getByText('Pending · 500/day · USDC is in this allowlist')).toBeInTheDocument()
+    expect(screen.getByText("Your spending limit will follow this allowlist's rules.")).toBeInTheDocument()
+  })
+
+  it('should, when the only blocked limit is still pending, say that it is pending and will not send its token', () => {
+    spendingLimits({ impacts: [makeImpact('ETH', 'blocked', true)] })
+    renderStep()
+
+    expect(screen.getByText('1 spending limit will be blocked by this allowlist.')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /has a pending spending limit of 500 ETH \/ day\. Once this allowlist is active, it can't send ETH with this limit\./,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/to any address today/)).not.toBeInTheDocument()
+  })
+
+  it('should, when some of the blocked limits are still pending, say so in the shared description', () => {
+    spendingLimits({ impacts: [makeImpact('ETH', 'blocked'), makeImpact('DAI', 'blocked', true)] })
+    renderStep()
+
+    expect(screen.getByText('2 spending limits will be blocked by this allowlist.')).toBeInTheDocument()
+    expect(
+      screen.getByText("Some of them are still pending. Once this allowlist is active, they can't send these tokens."),
+    ).toBeInTheDocument()
   })
 
   it('should keep Next disabled until the change is acknowledged, when the limits have loaded', async () => {
