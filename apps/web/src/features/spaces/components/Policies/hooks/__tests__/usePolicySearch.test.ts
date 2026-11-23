@@ -4,11 +4,13 @@ import usePolicySearch from '../usePolicySearch'
 import {
   MOCK_ADDRESSES,
   MOCK_SAFES,
+  MOCK_TOKENS,
   asActivePolicy,
   mockPolicies,
   mockProposerPolicy,
   mockSpendingLimitPolicy,
 } from '../../../../public/utils/policies'
+import { mockAllowlistPolicy } from '../../../../public/utils/allowlistPolicies'
 import type { Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 const mockChains = [
@@ -210,5 +212,34 @@ describe('usePolicySearch', () => {
     rerender({ query: 'zzzznothing' })
 
     expect(result.current.policies).toHaveLength(0)
+  })
+
+  it('should, when the query is the address of an allowlist recipient, return that allowlist', () => {
+    const recipient = '0x7E3a9C1b5D2f4A6c8E0b1D3f5A7c9E2b4D6f8A1c'
+    const allowlist = asActivePolicy(
+      mockAllowlistPolicy({
+        data: { entries: [{ token: MOCK_TOKENS.usdc, recipients: [{ account: recipient, permission: 'ALWAYS' }] }] },
+      }),
+    )
+    const proposer = asActivePolicy(mockProposerPolicy())
+
+    const { result } = renderHook(() => usePolicySearch([allowlist, proposer], recipient))
+
+    expect(result.current.policies).toEqual([allowlist])
+  })
+
+  it('should, when the query is the address book name of an allowlist recipient, return that allowlist', () => {
+    const recipient = '0x7E3a9C1b5D2f4A6c8E0b1D3f5A7c9E2b4D6f8A1c'
+    mockResolveName.mockImplementation((address: string) => (address === recipient ? 'Payroll provider' : ''))
+    const allowlist = asActivePolicy(
+      mockAllowlistPolicy({
+        data: { entries: [{ token: MOCK_TOKENS.usdc, recipients: [{ account: recipient, permission: 'ALWAYS' }] }] },
+      }),
+    )
+    const proposer = asActivePolicy(mockProposerPolicy())
+
+    const { result } = renderHook(() => usePolicySearch([allowlist, proposer], 'Payroll provider'))
+
+    expect(result.current.policies).toEqual([allowlist])
   })
 })
