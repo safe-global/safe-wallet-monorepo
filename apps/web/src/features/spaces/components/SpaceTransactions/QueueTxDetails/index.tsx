@@ -5,6 +5,8 @@ import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/componen
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import css from '@safe-global/views/components/transactions/TxType/styles.module.css'
 import { Code, GitMerge, Settings, type LucideIcon } from 'lucide-react'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import TokenAmount from '@/components/common/TokenAmount'
 import TxInfo from '@/components/transactions/TxInfo'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
@@ -54,7 +56,7 @@ const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
   )
 }
 
-const WithHint = ({ hint, children }: { hint?: string; children: ReactNode }): ReactElement => {
+const WithHint = ({ hint, children }: { hint?: ReactNode; children: ReactNode }): ReactElement => {
   if (!hint) return <span className="block min-w-0 truncate">{children}</span>
   return (
     <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
@@ -119,7 +121,14 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
     const nonce = getNonce(tx)
     return (
       <WithHint
-        hint={`An empty transaction at #${nonce}. Executing it cancels everything else at this nonce.`}
+        hint={
+          <>
+            {`Rejects #${nonce}. If this executes, nothing else at #${nonce} can.`}&nbsp;
+            <ExternalLink href={HelpCenterArticle.CANCELLING_TRANSACTIONS}>
+              Learn more about on-chain rejections
+            </ExternalLink>
+          </>
+        }
       >{`Cancels #${nonce}`}</WithHint>
     )
   }

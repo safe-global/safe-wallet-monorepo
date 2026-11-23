@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker'
 import type { TokenInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import userEvent from '@testing-library/user-event'
 import { render, screen } from '@/tests/test-utils'
 import QueueTxDetails from '.'
 
@@ -14,10 +16,12 @@ const token = (symbol: string, decimals = 18): TokenInfo => ({
   trusted: true,
 })
 
-const renderSummary = (txInfo: object) =>
+const renderSummary = (txInfo: object, executionInfo?: object) =>
   render(
     <QueueTxDetails.Summary
-      tx={{ id: '1', timestamp: 0, txStatus: 'AWAITING_CONFIRMATIONS', txInfo } as unknown as Transaction}
+      tx={
+        { id: '1', timestamp: 0, txStatus: 'AWAITING_CONFIRMATIONS', txInfo, executionInfo } as unknown as Transaction
+      }
     />,
   )
 
@@ -60,5 +64,20 @@ describe('QueueTxDetails.Summary', () => {
     renderSummary({ type: 'Custom', methodName: null, to: { value: address() }, dataSize: '68', isCancellation: false })
 
     expect(screen.getByText('Unknown method')).toBeInTheDocument()
+  })
+
+  it('explains an on-chain rejection on hover and links to the help article', async () => {
+    renderSummary(
+      { type: 'Custom', methodName: null, to: { value: address() }, dataSize: '0', isCancellation: true },
+      { type: 'MULTISIG', nonce: 7, confirmationsRequired: 2, confirmationsSubmitted: 0 },
+    )
+
+    await userEvent.hover(screen.getByText('Cancels #7'))
+
+    expect(await screen.findByText(/Rejects #7\. If this executes, nothing else at #7 can\./)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Learn more about on-chain rejections/ })).toHaveAttribute(
+      'href',
+      HelpCenterArticle.CANCELLING_TRANSACTIONS,
+    )
   })
 })
