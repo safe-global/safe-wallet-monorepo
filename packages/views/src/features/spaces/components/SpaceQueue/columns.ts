@@ -1,4 +1,4 @@
-export const QUEUE_COLUMNS = ['Nonce', 'Safe', 'Transaction', 'Details', 'Note', 'Status', 'Action'] as const
+export const QUEUE_COLUMNS = ['Nonce', 'Safe', 'Transaction', 'Details', 'Status', 'Action'] as const
 
 export type QueueColumn = (typeof QUEUE_COLUMNS)[number]
 
@@ -11,7 +11,6 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Safe: 160,
   Transaction: 160,
   Details: undefined,
-  Note: 68,
   // Fits the gauge and the widest urgency chip, "Blocked by #12345"
   // TODO(WA-4164/WA-4165): back to layout B width (128px) once the status chip leaves this column
   Status: 240,

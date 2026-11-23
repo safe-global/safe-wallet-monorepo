@@ -1,11 +1,9 @@
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
-import { StickyNote } from 'lucide-react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
-import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
@@ -63,15 +61,6 @@ const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: s
 // The transaction type: a grey tag on the row, white while the row is hovered
 const TYPE_TAG =
   'flex min-w-0 max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card'
-
-const NoteMark = ({ note }: { note: string }): ReactElement => (
-  <Tooltip delay={150}>
-    <TooltipTrigger aria-label={`Note: ${note}`} className="flex text-muted-foreground hover:text-foreground">
-      <StickyNote className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
-    </TooltipTrigger>
-    <TooltipContent className="max-w-sm whitespace-normal">{note}</TooltipContent>
-  </Tooltip>
-)
 
 // Layout B's widths as the basis, the same on every row: when Details is narrower, the summary and the counterparty
 // shrink by the same amount on every row and truncate, so each part still lines up down the table
@@ -150,8 +139,6 @@ const SpaceQueueRow = ({
           </DetailsSlot>
         </span>
       </TableCell>
-
-      <TableCell>{tx.note && <NoteMark note={tx.note} />}</TableCell>
 
       <TableCell className="py-1">
         <span className="flex min-w-0 items-center gap-2">

@@ -14,7 +14,7 @@ describe('queue columns', () => {
   })
 
   it('places the columns after Details from the right edge', () => {
-    expect(getQueueColumnStart('Note')).toBe(`calc(100% - ${width('Note') + width('Status') + width('Action')}px)`)
+    expect(getQueueColumnStart('Status')).toBe(`calc(100% - ${width('Status') + width('Action')}px)`)
     expect(getQueueColumnStart('Action')).toBe(`calc(100% - ${width('Action')}px)`)
   })
 })

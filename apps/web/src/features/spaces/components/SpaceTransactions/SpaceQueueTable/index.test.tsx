@@ -6,7 +6,7 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import type { RootState } from '@/store'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { server } from '@/tests/server'
-import { fakerChecksummedAddress, fireEvent, render, screen, within } from '@/tests/test-utils'
+import { fakerChecksummedAddress, fireEvent, render, screen } from '@/tests/test-utils'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -154,16 +154,11 @@ describe('SpaceQueueTable', () => {
     (groupBy) => {
       render(<SpaceQueueTable sections={sections} groupBy={groupBy} />)
 
-      const headers = screen.getAllByRole('columnheader').slice(0, 6)
-      expect(headers.map((header) => header.textContent)).toEqual([
-        'Nonce',
-        'Safe',
-        'Transaction',
-        'Details',
-        'Note',
-        'Status',
-      ])
+      const headers = screen.getAllByRole('columnheader').slice(0, 5)
+      expect(headers.map((header) => header.textContent)).toEqual(['Nonce', 'Safe', 'Transaction', 'Details', 'Status'])
       headers.forEach((header) => expect(header.querySelector('.sr-only')).toBeNull())
+      expect(screen.getAllByRole('columnheader')).toHaveLength(6)
+      expect(screen.queryByRole('columnheader', { name: 'Note' })).not.toBeInTheDocument()
     },
   )
 
@@ -465,17 +460,8 @@ describe('SpaceQueueTable', () => {
       renderRow(next)
 
       const cells = screen.getByTestId('space-queue-row').querySelectorAll('td')
-      expect(cells).toHaveLength(7)
+      expect(cells).toHaveLength(6)
       expect(cells[1]).toHaveTextContent(shortenAddress(safeA, 3))
-      expect(cells[4]).toBeEmptyDOMElement()
-    })
-
-    it('marks a transaction with a note in the Note column', () => {
-      const note = faker.lorem.sentence()
-      renderRow({ ...next, transaction: { ...next.transaction, note } })
-
-      const cells = screen.getByTestId('space-queue-row').querySelectorAll('td')
-      expect(within(cells[4]).getByRole('button', { name: `Note: ${note}` })).toBeInTheDocument()
     })
   })
 })
