@@ -201,6 +201,15 @@ describe('TransactionsToolbar', () => {
     expect(options[0]).toHaveTextContent(/2$/)
   })
 
+  it('finds the ready statuses in the Urgency menu by their chip wording', () => {
+    renderToolbar()
+
+    openFilterSection('Urgency')
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search urgency' }), { target: { value: 'ready' } })
+
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual(['Execute1', 'Sign10'])
+  })
+
   it('shows no matches in the Urgency menu when the search names no status', () => {
     renderToolbar()
 

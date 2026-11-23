@@ -62,7 +62,7 @@ const StatusOptions = ({ statuses, flags, counts, selected, onToggle }: StatusOp
     <SearchableOptions
       items={[...statuses, ...flags]}
       noun="urgency"
-      getText={(option) => STATUS_OPTION_LABELS[option].menu}
+      getText={(option) => `${STATUS_OPTION_LABELS[option].menu} ${STATUS_OPTION_LABELS[option].chip}`}
     >
       {(shown) => {
         const shownStatuses = statuses.filter((option) => shown.includes(option))

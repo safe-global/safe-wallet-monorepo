@@ -75,7 +75,7 @@ describe('SearchableOptions', () => {
     await user.type(screen.getByRole('searchbox', { name: 'Search networks' }), 'solana')
 
     expect(optionNames()).toEqual([])
-    expect(screen.getByText('No matches')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('No matches')
   })
 
   it('keeps the selection while the search changes', async () => {
@@ -105,8 +105,20 @@ describe('SearchableOptions', () => {
     const search = screen.getByRole('searchbox', { name: 'Search networks' })
 
     screen.getByRole('menuitemcheckbox', { name: 'Ethereum' }).focus()
-    await user.keyboard('po')
+    await user.keyboard('o')
     expect(search).toHaveFocus()
+    expect(search).toHaveValue('o')
+    expect(optionNames()).toEqual(['Polygon', 'Gnosis Chain'])
+
+    await user.keyboard('{ArrowDown}{ArrowDown}')
+    expect(screen.getByRole('menuitemcheckbox', { name: 'Gnosis Chain' })).toHaveFocus()
+
+    await user.keyboard('{Backspace}')
+    expect(search).toHaveFocus()
+    expect(search).toHaveValue('')
+
+    screen.getByRole('menuitemcheckbox', { name: 'Ethereum' }).focus()
+    await user.keyboard('po')
     expect(search).toHaveValue('po')
     expect(optionNames()).toEqual(['Polygon'])
 
