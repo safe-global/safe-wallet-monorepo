@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { ReactElement } from 'react'
-import { ArrowRight, Info, Lock } from 'lucide-react'
+import { Lock } from 'lucide-react'
+import AddIcon from '@/public/images/common/add.svg'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { ProHighlight, highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
 import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -15,14 +17,14 @@ const FEATURE = {
     intro:
       'Proposers can suggest transactions but cannot approve or execute them. Signers should review and approve transactions first.',
     name: 'proposers',
-    Name: 'Proposers',
+    add: 'Add proposer',
   },
   spendingLimits: {
     heading: 'Spending limits',
     intro:
       'You can set rules for specific beneficiaries to access funds from this Safe account without having to collect all signatures.',
     name: 'spending limits',
-    Name: 'Spending limits',
+    add: 'Add spending limit',
   },
 } as const
 
@@ -59,22 +61,15 @@ const StarterMessage = ({ feature }: { feature: Feature }) => (
 )
 
 const BusinessMessage = ({ feature }: { feature: Feature }) => (
-  <Alert variant="subtle">
-    <Info />
-    <AlertTitle>
-      <Typography variant="paragraph-bold">{FEATURE[feature].Name} moved to Policies</Typography>
-    </AlertTitle>
-    <AlertDescription>
-      <Typography>
-        Add and manage {FEATURE[feature].name} for all your Safe accounts from your Workspace. Existing ones stay
-        active.
-      </Typography>
-      <Button size="action">
-        Go to Policies
-        <ArrowRight className="size-4" />
-      </Button>
-    </AlertDescription>
-  </Alert>
+  <div>
+    <Button variant="outline" size="lg">
+      <AddIcon className="size-4" />
+      {FEATURE[feature].add}
+      <span className="block h-5 w-8" role="img" aria-label="Safe Pro">
+        <ProChip className="size-full" />
+      </span>
+    </Button>
+  </div>
 )
 
 const MESSAGE: Record<Plan, (props: { feature: Feature }) => ReactElement> = {
@@ -123,7 +118,11 @@ export const AllPlans: Story = {
       {(['free', 'starter', 'business'] as const).map((plan) => (
         <div key={plan} className="flex flex-col gap-2">
           <Typography variant="paragraph-small" color="muted">
-            {plan === 'free' ? 'Not on Pro (live today)' : plan === 'starter' ? 'Starter plan' : 'Business plan'}
+            {plan === 'free'
+              ? 'Not on Pro (live today)'
+              : plan === 'starter'
+                ? 'Starter plan'
+                : 'Business plan (live today)'}
           </Typography>
           <SettingsSection plan={plan} feature={feature} />
         </div>
