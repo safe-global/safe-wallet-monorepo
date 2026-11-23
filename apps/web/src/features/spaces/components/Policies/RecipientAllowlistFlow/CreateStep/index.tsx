@@ -1,5 +1,6 @@
 import { useContext, useMemo, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -10,6 +11,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
+import { useGetTokenApprovalsQuery } from '@/store/api/gateway/tokenApprovals'
 import SafeAccountSelector from '../../SafeAccountSelector'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import SafeIdentity from '../../../../public/components/SafeIdentity'
@@ -79,6 +81,8 @@ const CreateRecipientAllowlistPolicy = ({
       ? { chainId: selectedSafe.chainId, safeAddress: selectedSafe.address }
       : undefined
   const { guard, guardAddress, retry } = useGuardStatus(target)
+  // Loaded ahead for the review of a first setup, which revokes them
+  useGetTokenApprovalsQuery(!isEditMode && target ? target : skipToken)
   const guardDelay = formatPolicyChangeDelay(usePolicyGuardDelay(target?.chainId ?? '', guardAddress))
 
   const heldTokens = useHeldTokenAddresses()

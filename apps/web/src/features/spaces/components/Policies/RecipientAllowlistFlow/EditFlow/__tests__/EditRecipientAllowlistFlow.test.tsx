@@ -1,4 +1,5 @@
 import { Children, useState, type ReactNode } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxFlowType } from '@/services/analytics/types'
@@ -18,6 +19,10 @@ import EditRecipientAllowlistFlow from '..'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 
 const mockScope: { safeLoaded: boolean; safeError?: string } = { safeLoaded: true }
+const mockApprovalsQuery = jest.fn()
+jest.mock('@/store/api/gateway/tokenApprovals', () => ({
+  useGetTokenApprovalsQuery: (...args: unknown[]) => mockApprovalsQuery(...args),
+}))
 const mockRefetchSafe = jest.fn()
 const mockFlowProps = jest.fn()
 
@@ -194,6 +199,13 @@ describe('EditRecipientAllowlistFlow', () => {
     rerender(<EditRecipientAllowlistFlow policy={policy} />)
 
     expect(screen.getByTestId('recipient-allowlist-create-step')).toBeInTheDocument()
+  })
+
+  it('should not load token approvals, when the live allowlist is edited', () => {
+    renderFlow()
+
+    expect(mockApprovalsQuery).toHaveBeenCalled()
+    expect(mockApprovalsQuery.mock.calls.every(([args]) => args === skipToken)).toBe(true)
   })
 
   it('should open titled Edit policy, prefilled with the live allowlist on its fixed Safe', () => {

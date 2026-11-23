@@ -3,13 +3,14 @@ import {
   GUARD_NOT_SUPPORTED_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState } from '../types'
+import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState, TokenApprovalToRevoke } from '../types'
 import { MAX_POLICY_CONFIGURATIONS } from './allowlistConfigurations'
 import { withFirstSetupDefaults } from '../../services/firstSetupDefaults'
 import { getTokenCallbackHandlerAddress, isTokenCallbackHandler } from './fallbackHandlers'
 import {
   createFirstSetupTxs,
   createRequestConfigurationTx,
+  createRevokeApprovalTx,
   createSetGuardTx,
   createSetModuleGuardTx,
   getConfigurationRoot,
@@ -22,6 +23,7 @@ export const createAllowlistSetupTxs = ({
   guardState,
   configurations,
   currentFallbackHandler,
+  revokedApprovals = [],
 }: {
   chainId: string
   safeAddress: string
@@ -29,6 +31,8 @@ export const createAllowlistSetupTxs = ({
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
   currentFallbackHandler?: string
+  /** Set to zero at the start of a first setup. */
+  revokedApprovals?: TokenApprovalToRevoke[]
 }): AllowlistSetup => {
   if (guardState.status === 'unknown' || guardState.status === 'unsupported') {
     throw new Error(GUARD_NOT_SUPPORTED_ERROR)
@@ -44,7 +48,10 @@ export const createAllowlistSetupTxs = ({
     const fallbackHandler = isTokenCallbackHandler(chainId, currentFallbackHandler) ? undefined : tokenCallbackHandler
     return {
       ...setup,
-      txs: createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed, fallbackHandler }),
+      txs: [
+        ...revokedApprovals.map(createRevokeApprovalTx),
+        ...createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed, fallbackHandler }),
+      ],
     }
   }
 

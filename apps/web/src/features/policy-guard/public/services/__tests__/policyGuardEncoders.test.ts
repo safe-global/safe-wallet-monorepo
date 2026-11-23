@@ -9,6 +9,7 @@ import {
   createFirstSetupTxs,
   createRemoveGuardTxs,
   createRequestConfigurationTx,
+  createRevokeApprovalTx,
   createSetFallbackHandlerTx,
   createSetGuardTx,
   createSetModuleGuardTx,
@@ -81,6 +82,20 @@ describe('createSetGuardTx / createSetModuleGuardTx', () => {
     expect(safeIface.parseTransaction({ data: guardTx.data })?.name).toBe('setGuard')
     expect(safeIface.parseTransaction({ data: moduleTx.data })?.name).toBe('setModuleGuard')
     expect(safeIface.parseTransaction({ data: moduleTx.data })?.args[0]).toBe(guardAddress)
+  })
+})
+
+describe('createRevokeApprovalTx', () => {
+  it('should approve zero to the spender on the token, when an approval is revoked', () => {
+    const tokenAddress = getAddress(faker.finance.ethereumAddress())
+    const spender = getAddress(faker.finance.ethereumAddress())
+
+    const tx = createRevokeApprovalTx({ tokenAddress, spender })
+
+    const approve = new Interface(['function approve(address spender, uint256 amount)'])
+    expect(tx.to).toBe(tokenAddress)
+    expect(tx.value).toBe('0')
+    expect(approve.parseTransaction({ data: tx.data })?.args.toArray()).toEqual([spender, 0n])
   })
 })
 
@@ -188,6 +203,17 @@ describe('describeSetupCall', () => {
       method: 'setFallbackHandler',
       target: 'safe',
       param: { name: 'handler', value: handler },
+    })
+  })
+
+  it('should name approve with its spender, when the call revokes a token approval', () => {
+    const tokenAddress = getAddress(faker.finance.ethereumAddress())
+    const spender = getAddress(faker.finance.ethereumAddress())
+
+    expect(describeSetupCall(createRevokeApprovalTx({ tokenAddress, spender }))).toEqual({
+      method: 'approve',
+      target: 'token',
+      param: { name: 'spender', value: spender },
     })
   })
 

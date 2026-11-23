@@ -12,7 +12,12 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePolicyGuard } from '@/features/policy-guard/public/hooks/usePolicyGuard'
-import type { AllowlistSetup, PolicyGuardState, PolicyGuardTarget } from '@/features/policy-guard/public/types'
+import type {
+  AllowlistSetup,
+  PolicyGuardState,
+  PolicyGuardTarget,
+  TokenApprovalToRevoke,
+} from '@/features/policy-guard/public/types'
 import {
   buildAllowlistChangeConfigurations,
   buildAllowlistConfigurations,
@@ -29,11 +34,15 @@ import { toFormBaseline } from '../utils/allowlistEdit'
 
 type BuiltAllowlist = AllowlistSetup & { guardState: PolicyGuardState }
 
-/** Returns the installed setup only once its tx is set, so the review and the CGW save always match it. With `baseline`, only the edit's changes. */
+/**
+ * Returns the installed setup only once its tx is set, so the review and the CGW save always match it. With `baseline`,
+ * only the edit's changes. A first setup waits until `revokedApprovals` is given.
+ */
 export const useBuildAllowlistTransaction = (
   rules: AllowlistRule[],
   baseline?: AllowlistRule[],
   baselineGuard?: string,
+  revokedApprovals?: TokenApprovalToRevoke[],
 ): Partial<BuiltAllowlist> => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
@@ -60,6 +69,11 @@ export const useBuildAllowlistTransaction = (
   const baselineKey = baseline ? JSON.stringify(baseline) : undefined
   // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by value, as the rules are
   const formBaseline = useMemo(() => (baseline ? toFormBaseline(baseline) : undefined), [baselineKey])
+  // Only a first setup revokes approvals, so only it waits for them and is rebuilt when they change.
+  const revokedApprovalsKey =
+    state?.status === 'none' && revokedApprovals
+      ? JSON.stringify(revokedApprovals.map(({ tokenAddress, spender }) => ({ tokenAddress, spender })))
+      : undefined
 
   useEffect(() => {
     // The transaction only describes the inputs it was built from, so any change drops it and any old error.
@@ -89,6 +103,7 @@ export const useBuildAllowlistTransaction = (
     }
     const guardAddress = state.status === 'known' || state.status === 'partial' ? state.guardAddress : configuredGuard
     if (!isAllowlistEnabled || !sdk || !chainId || !safeAddress || !guardAddress) return
+    if (state.status === 'none' && !revokedApprovalsKey) return
 
     let setup: AllowlistSetup
     try {
@@ -103,6 +118,7 @@ export const useBuildAllowlistTransaction = (
         guardState: state,
         configurations,
         currentFallbackHandler,
+        revokedApprovals: revokedApprovalsKey ? JSON.parse(revokedApprovalsKey) : undefined,
       })
     } catch (e) {
       setSafeTxError(asError(e))
@@ -134,6 +150,7 @@ export const useBuildAllowlistTransaction = (
     chainId,
     safeAddress,
     currentFallbackHandler,
+    revokedApprovalsKey,
     isAllowlistEnabled,
     setSafeTx,
     setSafeTxError,

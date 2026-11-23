@@ -55,7 +55,7 @@ const setUp = (status: 'none' | 'known') => {
 }
 
 const buildAndSave = async () => {
-  const build = renderHook(() => useBuildAllowlistTransaction(rules), { wrapper })
+  const build = renderHook(() => useBuildAllowlistTransaction(rules, undefined, undefined, []), { wrapper })
   await waitFor(() => expect(build.result.current.configurations).toBeDefined())
   const { configurations, root } = build.result.current
   const save = renderHook(() => useSaveAllowlistConfiguration(), { wrapper })

@@ -1,4 +1,5 @@
 import { useContext, useMemo, useRef, useState, type ReactElement } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -32,9 +33,11 @@ import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/Revie
 import { usePolicyGuardDelay } from '@/features/policy-guard/public/hooks/usePolicyGuardDelay'
 import { decodeErc20TransferPolicyData } from '@/features/policy-guard/public/services/allowlistConfigurations'
 import { describeSetupCall } from '@/features/policy-guard/public/services/policyGuardEncoders'
+import type { TokenApprovalToRevoke } from '@/features/policy-guard/public/types'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useGetTokenApprovalsQuery } from '@/store/api/gateway/tokenApprovals'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { joinNames, spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import useSpendingLimitTokenOptions from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
@@ -43,8 +46,11 @@ import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlis
 import { useSaveBeforeSubmit } from '../hooks/useSaveBeforeSubmit'
 import AllowlistPolicyDetails from './AllowlistPolicyDetails'
 import AllowlistSetupActions from './AllowlistSetupActions'
+import OpenTokenApprovals from './OpenTokenApprovals'
 import { getInstalledFallback } from './ruleKind'
 import { useBuildAllowlistTransaction } from './useBuildAllowlistTransaction'
+
+const NO_APPROVALS: TokenApprovalToRevoke[] = []
 
 /** Step 2, "Confirm policy": the allowlist as the prototype's summary, then the setup calls rule by rule. */
 const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransactionProps): ReactElement => {
@@ -52,6 +58,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const { safeTxError } = useContext(SafeTxContext)
   const scope = useSafeScope()
   const chainId = scope?.chainId
+  const safeAddress = scope?.safeAddress
   const { accounts } = useRecipientAllowlistSafeAccounts()
   const { options: tokenOptions } = useSpendingLimitTokenOptions()
   const resolveName = useSafeNameResolver()
@@ -61,10 +68,17 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const rules = data?.rules
   const baseline = data?.baseline
   const baselineRules = useMemo(() => (baseline ? toAllowlistRules(baseline) : undefined), [baseline])
+  // Started on the create step, so the review usually finds it loaded
+  const approvals = useGetTokenApprovalsQuery(
+    !baseline && chainId && safeAddress ? { chainId, safeAddress } : skipToken,
+  )
+  const revokedApprovals =
+    baseline || approvals.isError ? NO_APPROVALS : approvals.isFetching ? undefined : approvals.currentData?.approvals
   const { guardState, configurations, root, txs } = useBuildAllowlistTransaction(
     rules ?? [],
     baselineRules,
     data?.baselineGuard,
+    revokedApprovals,
   )
 
   const installedGuard =
@@ -182,6 +196,15 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           fallback={chainId && configurations ? getInstalledFallback(chainId, configurations) : undefined}
           hasNativeRule={Boolean(rules?.some(({ tokenAddress }) => sameAddress(tokenAddress, ZERO_ADDRESS)))}
           isEdit={Boolean(baseline)}
+        />
+      )}
+
+      {hasSummary && chainId && guardState?.status === 'none' && (
+        <OpenTokenApprovals
+          chainId={chainId}
+          approvals={approvals.currentData}
+          isError={approvals.isError}
+          onRetry={approvals.refetch}
         />
       )}
 

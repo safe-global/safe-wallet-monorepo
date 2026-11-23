@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { render, screen, fireEvent } from '@/tests/test-utils'
@@ -42,6 +43,10 @@ jest.mock('@/features/policy-guard/store/guardDelayApi', () => ({
 }))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
+const mockApprovalsQuery = jest.fn()
+jest.mock('@/store/api/gateway/tokenApprovals', () => ({
+  useGetTokenApprovalsQuery: (...args: unknown[]) => mockApprovalsQuery(...args),
+}))
 jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
@@ -212,6 +217,20 @@ describe('CreateRecipientAllowlistPolicy', () => {
 
     expect(screen.getByTestId('selector')).toHaveAttribute('data-value', buildSafeAccountId(SEPOLIA, SAFE_A))
     expect(mockUseGuardStatus).toHaveBeenLastCalledWith({ chainId: SEPOLIA, safeAddress: SAFE_A })
+  })
+
+  it('should start loading the token approvals of the picked Safe, when a Safe is picked', () => {
+    accounts([option(SAFE_A)])
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    expect(mockApprovalsQuery).toHaveBeenLastCalledWith({ chainId: SEPOLIA, safeAddress: SAFE_A })
+  })
+
+  it('should not load token approvals, when no Safe is picked', () => {
+    accounts([option(SAFE_A)])
+    renderStep()
+
+    expect(mockApprovalsQuery).toHaveBeenLastCalledWith(skipToken)
   })
 
   it('does not check the guards before a Safe is picked', () => {

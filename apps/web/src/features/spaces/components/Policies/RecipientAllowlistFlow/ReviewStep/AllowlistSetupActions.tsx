@@ -47,14 +47,16 @@ type AllowlistSetupActionsProps = {
 
 const CONFIGURING_METHODS = ['configureImmediately', 'requestConfiguration', 'applyConfiguration']
 
+const GUARD_PARAMS = ['guard', 'moduleGuard']
+
 const nameSetterParam = (
   chainId: string,
   { name, value }: { name: string; value: string },
   getAddressInfo: (address: string) => AllowlistAddressInfo,
-): string | undefined => {
+): AllowlistAddressInfo['name'] => {
   // Removing the guard sets the slot to the zero address, which isn't the guard
   if (sameAddress(value, ZERO_ADDRESS)) return undefined
-  if (name !== 'handler') return POLICY_GUARD_NAME
+  if (GUARD_PARAMS.includes(name)) return POLICY_GUARD_NAME
   return isTokenCallbackHandler(chainId, value) ? TOKEN_CALLBACK_HANDLER_NAME : getAddressInfo(value).name
 }
 
