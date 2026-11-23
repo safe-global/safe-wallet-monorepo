@@ -75,7 +75,7 @@ const meta = {
     framing: { control: 'inline-radio', options: ['treasury', 'defi'] },
     nudge: { control: 'inline-radio', options: ['home', 'assets', 'off'] },
     plan: { control: 'inline-radio', options: ['free', 'pro'] },
-    setup: { control: 'inline-radio', options: ['dialog', 'drawer', 'stepper'], if: { arg: 'milestone', eq: 'm2' } },
+    setup: { control: 'inline-radio', options: ['dialog', 'drawer', 'stepper'], description: 'M2 only' },
     milestone: {
       control: { type: 'inline-radio', labels: { m1: 'M1 · ships soon', m2: 'M2 · later' } },
       options: ['m1', 'm2'],
