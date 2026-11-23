@@ -12,7 +12,9 @@ import QueueGroupRow, {
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueGroupRow'
 import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
 import QueueSkeletonRow from '@safe-global/views/features/spaces/components/SpaceQueue/QueueSkeletonRow'
-import QueueTableHeader from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTableHeader'
+import QueueTableHeader, {
+  QUEUE_TABLE_MIN_WIDTH,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTableHeader'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains from '@/hooks/useChains'
@@ -77,7 +79,7 @@ const ScopedRow = ({ item, rowProps }: { item: ScopedItem; rowProps: RowProps })
       status={item.status}
       nextNonce={item.nextNonce}
       canReject={item.canReject}
-      safeAddress={item.showSafe ? item.safeAddress : undefined}
+      safeAddress={item.safeAddress}
       rowProps={rowProps}
     />
   )
@@ -232,14 +234,9 @@ const SpaceQueueTable = ({
         <ScopePool targets={scopeTargets} store={scopeStore} />
         <table
           aria-label="Pending transactions"
-          className={cn(
-            tableVariants({ variant: 'panel' }),
-            'table-fixed',
-            groups ? 'min-w-[1192px]' : 'min-w-[1128px]',
-          )}
+          className={cn(tableVariants({ variant: 'panel' }), 'table-fixed [&_td]:px-4', QUEUE_TABLE_MIN_WIDTH)}
         >
           <QueueTableHeader
-            namesSafes={!!groups}
             collapseAll={
               collapseUnit && collapsibleIds.length > 0
                 ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }

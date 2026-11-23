@@ -54,8 +54,6 @@ export type QueueListItem =
       nextNonce?: number
       conflict?: ConflictOption
       canReject: boolean
-      /** Where rows of several Safes share a list, the row names its Safe */
-      showSafe?: boolean
     }
 
 const SUMMARY_LABELS: Record<QueueStatus, string> = {
@@ -169,7 +167,6 @@ const toUnitRows = (unit: QueueUnit): QueueListItem[] => {
       nextNonce,
       conflict: option,
       canReject,
-      showSafe: true,
     })),
   ]
 }

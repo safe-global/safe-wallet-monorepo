@@ -6,7 +6,7 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import type { RootState } from '@/store'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { server } from '@/tests/server'
-import { fakerChecksummedAddress, fireEvent, render, screen } from '@/tests/test-utils'
+import { fakerChecksummedAddress, fireEvent, render, screen, within } from '@/tests/test-utils'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -51,12 +51,11 @@ jest.mock('../SpaceQueueRow', () => ({
     item: TransactionQueuedItem
     status: string
     chainId: string
-    safeAddress?: string
+    safeAddress: string
   }) => (
     <tr data-testid="space-queue-row">
       <td>
-        {item.transaction.id} {status} {chainId}
-        {safeAddress && ` of ${safeAddress}`}
+        {item.transaction.id} {status} {chainId} of {safeAddress}
       </td>
     </tr>
   ),
@@ -139,30 +138,50 @@ describe('SpaceQueueTable', () => {
 
     expect(screen.getByText(shortenAddress(safeA))).toBeInTheDocument()
     expect(screen.getByText(shortenAddress(safeB))).toBeInTheDocument()
-    expect(screen.getByText(`${next.transaction.id} execute ${chainId}`)).toBeInTheDocument()
-    expect(screen.getByText(`${queued.transaction.id} blocked ${chainId}`)).toBeInTheDocument()
+    expect(screen.getByText(`${next.transaction.id} execute ${chainId} of ${safeA}`)).toBeInTheDocument()
+    expect(screen.getByText(`${queued.transaction.id} blocked ${chainId} of ${safeA}`)).toBeInTheDocument()
     expect(mockScopeProps).toHaveBeenCalledWith({ initial: { chainId, safeAddress: safeA }, pollSafeInfo: false })
     expect(mockScopeProps).toHaveBeenCalledWith({ initial: { chainId, safeAddress: safeB }, pollSafeInfo: false })
   })
 
-  it('has a To column with a screen-reader-only header', () => {
-    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+  it.each(['safe', 'status', 'next', 'network'] as const)(
+    'titles every column visibly, in layout B order, when grouped by %s',
+    (groupBy) => {
+      render(<SpaceQueueTable sections={sections} groupBy={groupBy} />)
 
-    const header = screen.getByRole('columnheader', { name: 'To' })
-    expect(header.querySelector('.sr-only')).toHaveTextContent('To')
-  })
+      const headers = screen.getAllByRole('columnheader').slice(0, 6)
+      expect(headers.map((header) => header.textContent)).toEqual([
+        'Nonce',
+        'Safe',
+        'Transaction',
+        'Details',
+        'Note',
+        'Status',
+      ])
+      headers.forEach((header) => expect(header.querySelector('.sr-only')).toBeNull())
+    },
+  )
 
-  it('has no Note column', () => {
-    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+  it('keeps the same column widths and floor in every grouping', () => {
+    const layout = (groupBy: 'safe' | 'status') => {
+      const { container, unmount } = render(<SpaceQueueTable sections={sections} groupBy={groupBy} />)
+      const table = container.querySelector('table')
+      const result = {
+        table: table?.className,
+        cols: [...container.querySelectorAll('col')].map((col) => col.className),
+      }
+      unmount()
+      return result
+    }
 
-    expect(screen.queryByRole('columnheader', { name: 'Note' })).not.toBeInTheDocument()
+    expect(layout('status')).toEqual(layout('safe'))
   })
 
   it("renders each chain of a multichain Safe in that chain's scope, with its own Next", () => {
     render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
 
-    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId}`)).toBeInTheDocument()
-    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId}`)).toBeInTheDocument()
+    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId} of ${safeA}`)).toBeInTheDocument()
+    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId} of ${safeA}`)).toBeInTheDocument()
     expect(mockScopeProps).toHaveBeenCalledWith({ initial: { chainId, safeAddress: safeA }, pollSafeInfo: false })
     expect(mockScopeProps).toHaveBeenCalledWith({
       initial: { chainId: otherChainId, safeAddress: safeA },
@@ -188,14 +207,14 @@ describe('SpaceQueueTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${chainName}` }))
 
-    expect(screen.queryByText(`${onChainA.transaction.id} execute ${chainId}`)).not.toBeInTheDocument()
-    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId}`)).toBeInTheDocument()
+    expect(screen.queryByText(`${onChainA.transaction.id} execute ${chainId} of ${safeA}`)).not.toBeInTheDocument()
+    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId} of ${safeA}`)).toBeInTheDocument()
     expect(screen.getByText(chainName)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: `Expand ${chainName}` })).toHaveAttribute('aria-expanded', 'false')
 
     fireEvent.click(screen.getByRole('button', { name: `Expand ${chainName}` }))
 
-    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId}`)).toBeInTheDocument()
+    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId} of ${safeA}`)).toBeInTheDocument()
   })
 
   it('hides every chain of a collapsed Safe, headers included', () => {
@@ -213,7 +232,7 @@ describe('SpaceQueueTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(safeA)}` }))
 
-    expect(screen.queryByText(`${next.transaction.id} execute ${chainId}`)).not.toBeInTheDocument()
+    expect(screen.queryByText(`${next.transaction.id} execute ${chainId} of ${safeA}`)).not.toBeInTheDocument()
     expect(screen.getByText('1 to execute · 1 blocked')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: `Expand ${shortenAddress(safeA)}` })).toHaveAttribute(
       'aria-expanded',
@@ -413,7 +432,7 @@ describe('SpaceQueueTable', () => {
         <DeleteTxDialogProvider>
           <Table>
             <TableBody>
-              <SpaceQueueRow item={next} chainId={chainId} status="execute" />
+              <SpaceQueueRow item={next} safeAddress={safeA} chainId={chainId} status="execute" />
             </TableBody>
           </Table>
         </DeleteTxDialogProvider>,
@@ -424,6 +443,34 @@ describe('SpaceQueueTable', () => {
 
       expect(row).not.toHaveAttribute('aria-expanded')
       expect(screen.queryByTestId('space-queue-row-details')).not.toBeInTheDocument()
+    })
+
+    const renderRow = (item: TransactionQueuedItem) =>
+      render(
+        <DeleteTxDialogProvider>
+          <Table>
+            <TableBody>
+              <SpaceQueueRow item={item} safeAddress={safeA} chainId={chainId} status="execute" />
+            </TableBody>
+          </Table>
+        </DeleteTxDialogProvider>,
+      )
+
+    it('fills one cell per column, with the Safe in its own column', () => {
+      renderRow(next)
+
+      const cells = screen.getByTestId('space-queue-row').querySelectorAll('td')
+      expect(cells).toHaveLength(7)
+      expect(cells[1]).toHaveTextContent(shortenAddress(safeA))
+      expect(cells[4]).toBeEmptyDOMElement()
+    })
+
+    it('marks a transaction with a note in the Note column', () => {
+      const note = faker.lorem.sentence()
+      renderRow({ ...next, transaction: { ...next.transaction, note } })
+
+      const cells = screen.getByTestId('space-queue-row').querySelectorAll('td')
+      expect(within(cells[4]).getByRole('button', { name: `Note: ${note}` })).toBeInTheDocument()
     })
   })
 })

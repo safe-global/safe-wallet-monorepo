@@ -3,13 +3,13 @@ import { QUEUE_COLUMNS } from './columns'
 
 // A transaction row's placeholder bars: [left offset, width], laid out like the columns
 const SKELETON_BARS: Array<[string, number]> = [
-  ['20px', 24],
-  ['72px', 180],
-  ['416px', 140],
-  ['calc(100% - 552px)', 72],
-  ['calc(100% - 408px)', 40],
-  ['calc(100% - 296px)', 64],
-  ['calc(100% - 120px)', 72],
+  ['22px', 24],
+  ['80px', 120],
+  ['240px', 88],
+  ['400px', 140],
+  ['572px', 120],
+  ['calc(100% - 400px)', 48],
+  ['calc(100% - 92px)', 72],
 ]
 const BAR_HEIGHT = 12
 

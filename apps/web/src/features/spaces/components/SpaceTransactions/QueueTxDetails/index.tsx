@@ -36,7 +36,9 @@ const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
     return (
       <>
         <TxTypeIcon tx={tx} />
-        <TxTypeText tx={tx} />
+        <span className="min-w-0 truncate">
+          <TxTypeText tx={tx} />
+        </span>
       </>
     )
   }
@@ -46,7 +48,7 @@ const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
       <span className={css.txType}>
         <Icon className="size-4" strokeWidth={ICON_STROKE} />
       </span>
-      {label}
+      <span className="min-w-0 truncate">{label}</span>
     </>
   )
 }

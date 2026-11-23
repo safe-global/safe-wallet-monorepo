@@ -1,9 +1,11 @@
-import type { ComponentProps, ReactElement } from 'react'
+import type { ComponentProps, ReactElement, ReactNode } from 'react'
+import { StickyNote } from 'lucide-react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
+import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
@@ -57,6 +59,24 @@ const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: s
   )
 }
 
+// The transaction type: a grey tag on the row, white while the row is hovered
+const TYPE_TAG =
+  'flex min-w-0 max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card'
+
+const NoteMark = ({ note }: { note: string }): ReactElement => (
+  <Tooltip delay={150}>
+    <TooltipTrigger aria-label={`Note: ${note}`} className="flex text-muted-foreground hover:text-foreground">
+      <StickyNote className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
+    </TooltipTrigger>
+    <TooltipContent className="max-w-sm whitespace-normal">{note}</TooltipContent>
+  </Tooltip>
+)
+
+// Same basis on every row, and they shrink together, so each part of Details lines up down the table
+const DetailsSlot = ({ className, children }: { className: string; children?: ReactNode }): ReactElement => (
+  <span className={`flex min-w-0 items-center ${className}`}>{children}</span>
+)
+
 type SpaceQueueRowProps = {
   item: TransactionQueuedItem
   chainId: string
@@ -65,8 +85,7 @@ type SpaceQueueRowProps = {
   conflict?: ConflictOption
   /** False when a rejection already holds this nonce */
   canReject?: boolean
-  /** Set where rows of several Safes share a list, to name the row's Safe */
-  safeAddress?: string
+  safeAddress: string
   rowProps?: ComponentProps<'tr'>
 }
 
@@ -96,56 +115,70 @@ const SpaceQueueRow = ({
       </TableCell>
 
       <TableCell className="py-2">
-        <div className="flex min-h-10 min-w-0 items-center gap-2">
-          {safeAddress && <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />}
-          {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
-          <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card">
-            <QueueTxDetails.Type tx={tx} />
-          </span>
-          <span className="min-w-0 text-sm">
-            <QueueTxDetails.Summary tx={tx} />
-          </span>
-        </div>
+        <span className="flex min-w-0">
+          <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />
+        </span>
       </TableCell>
 
       <TableCell className="py-2">
-        <Counterparty txInfo={tx.txInfo} chainId={chainId} />
+        <span className="flex min-w-0">
+          <span className={TYPE_TAG}>
+            <QueueTxDetails.Type tx={tx} />
+          </span>
+        </span>
       </TableCell>
 
-      <TableCell className="text-sm">
-        <Tooltip delay={150}>
-          <TooltipTrigger className="truncate">{formatTimeInWords(tx.timestamp)}</TooltipTrigger>
-          <TooltipContent>{formatDateTime(tx.timestamp)}</TooltipContent>
-        </Tooltip>
+      <TableCell className="py-2">
+        <span className="flex min-h-10 min-w-0 items-center gap-3">
+          <DetailsSlot className="shrink basis-40 gap-1.5 text-sm">
+            <span className="min-w-0">
+              <QueueTxDetails.Summary tx={tx} />
+            </span>
+            {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
+          </DetailsSlot>
+          <DetailsSlot className="shrink basis-52">
+            <Counterparty txInfo={tx.txInfo} chainId={chainId} />
+          </DetailsSlot>
+          <DetailsSlot className="flex-1 text-sm text-muted-foreground">
+            <Tooltip delay={150}>
+              <TooltipTrigger className="truncate">{formatTimeInWords(tx.timestamp)}</TooltipTrigger>
+              <TooltipContent>{formatDateTime(tx.timestamp)}</TooltipContent>
+            </Tooltip>
+          </DetailsSlot>
+        </span>
       </TableCell>
+
+      <TableCell>{tx.note && <NoteMark note={tx.note} />}</TableCell>
 
       <TableCell className="py-1">
-        {executionInfo && (
-          <SignersTooltip
-            chainId={chainId}
-            txId={tx.id}
-            submitted={executionInfo.confirmationsSubmitted}
-            required={executionInfo.confirmationsRequired}
-          >
-            <span className="flex w-fit items-center gap-1.5 text-sm tabular-nums">
-              <SignatureGauge
-                count={executionInfo.confirmationsSubmitted}
-                threshold={executionInfo.confirmationsRequired}
-              />
-              {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
-            </span>
-          </SignersTooltip>
-        )}
-      </TableCell>
-
-      <TableCell>
-        {expiredSwap ? (
-          <StatusLabel status="expired" />
-        ) : isPending ? (
-          <TxStatusLabel tx={tx} />
-        ) : (
-          <StatusChip status={status} nextNonce={nextNonce} />
-        )}
+        <span className="flex min-w-0 items-center gap-2">
+          {executionInfo && (
+            <SignersTooltip
+              chainId={chainId}
+              txId={tx.id}
+              submitted={executionInfo.confirmationsSubmitted}
+              required={executionInfo.confirmationsRequired}
+            >
+              <span className="flex w-fit shrink-0 items-center gap-1.5 text-sm tabular-nums">
+                <SignatureGauge
+                  count={executionInfo.confirmationsSubmitted}
+                  threshold={executionInfo.confirmationsRequired}
+                />
+                {/* Fixed width, up to 10/10, so the chip after it lines up whatever the count */}
+                <span className="w-[5ch]">
+                  {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
+                </span>
+              </span>
+            </SignersTooltip>
+          )}
+          {expiredSwap ? (
+            <StatusLabel status="expired" />
+          ) : isPending ? (
+            <TxStatusLabel tx={tx} />
+          ) : (
+            <StatusChip status={status} nextNonce={nextNonce} />
+          )}
+        </span>
       </TableCell>
 
       <TableCell>

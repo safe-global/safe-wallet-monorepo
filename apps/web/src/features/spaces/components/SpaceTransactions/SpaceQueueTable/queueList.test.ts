@@ -128,7 +128,6 @@ describe('buildGroupedQueueList', () => {
       'transaction',
     ])
     expect(list[0]).toMatchObject({ kind: 'group', group: 'network', chainId: '1', count: 2, collapsed: false })
-    expect(list.filter((item) => item.kind === 'transaction').every((item) => item.showSafe)).toBe(true)
   })
 
   it('lists the Status view without bands', () => {
