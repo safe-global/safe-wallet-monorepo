@@ -1,4 +1,3 @@
-import { Wallet } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
 import { test, expect } from '../../src/fixtures/journey.fixture'
@@ -23,8 +22,8 @@ test.describe('Bulk execute queued transactions', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice', 'bob', 'carol'], threshold: 2 })
+    const recipient = journey.newAddress()
     await seedSignedTransfer(journey, safe, { nonce: 0, recipient, amount: AMOUNT })
     await seedSignedTransfer(journey, safe, { nonce: 1, recipient, amount: AMOUNT })
     await seedQueuedTransfer(safe, { nonce: 2, recipient, amount: AMOUNT })

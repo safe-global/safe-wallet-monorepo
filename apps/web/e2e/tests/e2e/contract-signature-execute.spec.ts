@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import { balanceOf } from '../../src/chain/balances'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedTransferWithContractSignature } from '../../src/seed/signatures'
@@ -13,7 +13,7 @@ test.describe('Execute a transaction that an owner Safe confirmed', { tag: '@e2e
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
+    const recipient = journey.newAddress()
     const safe = await seedTransferWithContractSignature(journey, { recipient, amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)

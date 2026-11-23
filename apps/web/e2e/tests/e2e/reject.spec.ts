@@ -1,4 +1,3 @@
-import { Wallet } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
@@ -20,8 +19,8 @@ test.describe('Reject a queued transaction', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const recipient = journey.newAddress()
     const transfer = await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: '0.001' })
 
     const queue = new TxQueuePage(safePage)
