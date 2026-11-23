@@ -1,7 +1,10 @@
 // The guard needs the module guard slot, which Safe added in v1.5.0, so every policy shares this floor
 export const MIN_POLICY_GUARD_SAFE_VERSION = '1.5.0'
 
-const DEFAULT_POLICY_GUARD_DELAY_SECONDS = 180
+const IS_PRODUCTION =
+  process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true' || process.env.EXPO_PUBLIC_IS_PRODUCTION === 'true'
+// Guards with both delays are deployed on every chain the policy indexer supports
+const DEFAULT_POLICY_GUARD_DELAY_SECONDS = IS_PRODUCTION ? 86_400 : 60
 const configuredPolicyGuardDelay = Number(
   process.env.NEXT_PUBLIC_POLICY_GUARD_DELAY_SECONDS ||
     process.env.EXPO_PUBLIC_POLICY_GUARD_DELAY_SECONDS ||

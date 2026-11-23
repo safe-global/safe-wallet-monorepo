@@ -434,6 +434,7 @@ describe('ReviewRecipientAllowlist', () => {
   })
 
   it('should say the changes wait 3 minutes, when the guard is already enabled', () => {
+    mockGuardDelay(180)
     built({ status: 'known', guardAddress })
     renderReview()
 
@@ -706,6 +707,7 @@ describe('ReviewRecipientAllowlist', () => {
   })
 
   it('should ask the owner to confirm what the Safe can still do and the delay of later changes, when the review opens', () => {
+    mockGuardDelay(180)
     built({ status: 'none' })
     renderReview()
 

@@ -10,16 +10,16 @@ import {
 import type * as PolicyEngineDeployments from '../policyEngineDeployments'
 
 describe('policyEngineDeployments', () => {
-  it('should return the 3-minute-delay policy guard, when the chain is Sepolia', () => {
-    expect(getPolicyGuardAddress('11155111')).toBe('0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f')
+  it('should return the one-minute policy guard, when the app is not built for production and the chain is Sepolia', () => {
+    expect(getPolicyGuardAddress('11155111')).toBe('0xC83bC185770ac0Da8A970f35695064eEe62e236c')
   })
 
-  it('should return the 3-minute-delay policy guard, when the chain is Polygon', () => {
-    expect(getPolicyGuardAddress('137')).toBe('0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f')
+  it('should return the one-minute policy guard, when the app is not built for production and the chain is Polygon', () => {
+    expect(getPolicyGuardAddress('137')).toBe('0xC83bC185770ac0Da8A970f35695064eEe62e236c')
   })
 
-  it('should return no policy guard, when the chain is Ethereum, where the 3-minute guard is not indexed', () => {
-    expect(getPolicyGuardAddress('1')).toBeUndefined()
+  it('should return the one-minute policy guard, when the app is not built for production and the chain is Ethereum', () => {
+    expect(getPolicyGuardAddress('1')).toBe('0xC83bC185770ac0Da8A970f35695064eEe62e236c')
   })
 
   it.each(['1', '137', '11155111'])('returns the indexer-watched policies on chain %s', (chainId) => {
@@ -95,8 +95,8 @@ describe('the policy guard of the configured delay', () => {
     expect(loadWithDelay('300').getPolicyGuardAddress('11155111')).toBeUndefined()
   })
 
-  it('should fall back to the 3-minute guard, when the env sets something that is not a number', () => {
-    expect(loadWithDelay('soon').getPolicyGuardAddress('11155111')).toBe('0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f')
+  it('should fall back to the one-minute guard, when the env sets something that is not a number', () => {
+    expect(loadWithDelay('soon').getPolicyGuardAddress('11155111')).toBe('0xC83bC185770ac0Da8A970f35695064eEe62e236c')
   })
 })
 

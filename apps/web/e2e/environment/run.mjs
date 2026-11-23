@@ -51,6 +51,8 @@ export function walletEnvironment(manifest, env = process.env) {
     NEXT_PUBLIC_IS_PRODUCTION: 'false',
     NEXT_PUBLIC_IS_TEST_E2E: 'true',
     NEXT_PUBLIC_POLLING_INTERVAL: '2000',
+    // The fork holds the code of the 3-minute policy guard only, see e2e/src/seed/policy-guard.ts
+    NEXT_PUBLIC_POLICY_GUARD_DELAY_SECONDS: '180',
     NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',
     NEXT_PUBLIC_GATEWAY_URL_STAGING: gatewayUrl,
     NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: gatewayUrl,

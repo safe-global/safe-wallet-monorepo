@@ -56,7 +56,7 @@ describe('usePolicyGuardDelay', () => {
   it('should skip the read, when the chain has no guard and none is given', () => {
     const query = mockGuardDelay(undefined)
 
-    const { result } = renderHook(() => usePolicyGuardDelay('1'))
+    const { result } = renderHook(() => usePolicyGuardDelay('100'))
 
     expect(query).toHaveBeenCalledWith(skipToken)
     expect(result.current).toBe(POLICY_GUARD_DELAY_SECONDS)
