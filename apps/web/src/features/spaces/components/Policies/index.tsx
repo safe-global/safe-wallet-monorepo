@@ -19,6 +19,7 @@ import type { PolicyLock } from '@safe-global/views/features/spaces/components/P
 import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import RecipientAllowlistFlow from './RecipientAllowlistFlow'
+import { useRecipientAllowlistSafeAccounts } from './RecipientAllowlistFlow/hooks/useRecipientAllowlistSafeAccounts'
 import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
 import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
@@ -97,8 +98,14 @@ const Policies = ({
   locked,
 }: PoliciesProps): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
+  const allowlistSafes = useRecipientAllowlistSafeAccounts()
+  const hasNoAllowlistSafe =
+    allowlistSafes.hasWallet &&
+    !allowlistSafes.isLoading &&
+    !allowlistSafes.isError &&
+    !allowlistSafes.hasSelectableAccount
   // Existing allowlists stay listed with the experimental toggle off; only creating one needs it on.
-  const canCreateAllowlist = useIsAllowlistActiveInSpace() === true
+  const canCreateAllowlist = useIsAllowlistActiveInSpace() === true && !hasNoAllowlistSafe
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 

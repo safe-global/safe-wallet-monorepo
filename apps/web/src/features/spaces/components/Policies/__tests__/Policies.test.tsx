@@ -337,6 +337,16 @@ describe('Policies', () => {
       expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
     })
 
+    it('should, when the connected wallet has no Safe account that can take an allowlist, not offer it', async () => {
+      mockIsAllowlistActive = true
+      mockWallet()
+
+      await openAddPolicyDialog()
+
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
+    })
+
     it('is not in the catalogue when the experimental toggle is off', () => {
       render(<Policies policies={[]} />)
 
