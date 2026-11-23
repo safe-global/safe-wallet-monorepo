@@ -1,12 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import SpaceSafeAccounts from '../index'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 const mockUseSpaceSafes = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/address-poisoning', () => ({
-  useSimilarityClusters: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
+jest.mock('@/features/address-poisoning/public/hooks/useSimilarityClusters', () => ({
+  __esModule: true,
+  default: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
 }))
 
 jest.mock('../../AddAccountsChooser', () => ({
@@ -24,10 +25,47 @@ jest.mock('@/components/common/Track', () => {
   return Track
 })
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
+}))
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
   useIsInvited: () => false,
   useIsAdmin: () => mockUseIsAdmin(),
+}))
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => 'space-1',
 }))
 
@@ -43,15 +81,23 @@ jest.mock('@/components/common/SafeListSortToggle', () => ({
   default: () => <div data-testid="safe-list-sort-toggle" />,
 }))
 
-jest.mock('@/hooks/safes', () => ({
-  useAllOwnedSafes: () => [{}, undefined, false],
+jest.mock('@/hooks/safes/useAllOwnedSafes', () => ({
+  __esModule: true,
+  default: () => [{}, undefined, false],
+}))
+jest.mock('@/hooks/safes/useSafeOrderComparator', () => ({
   useSafeOrderComparator: () => () => 0,
+}))
+jest.mock('@/hooks/safes/useSaveManualOrder', () => ({
   useSaveManualOrder: () => jest.fn(),
-  // Mirrors the real helper: unwraps multi-chain groups, otherwise passes the item through. The page
-  // relies on this to keep the names useSpaceSafes already resolved instead of rebuilding them.
+}))
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   flattenSafeItems: (items: Array<SafeItem & { safes?: SafeItem[] }>): SafeItem[] =>
     items.flatMap((item) => (item.safes ? item.safes : [item])),
   _groupAndSort: (items: SafeItem[], cmp: (a: SafeItem, b: SafeItem) => number) => [...items].sort(cmp),
+}))
+jest.mock('@/hooks/safes/useSafesSearch', () => ({
   useSafesSearch: (safes: Array<{ name?: string }>, query: string) =>
     query ? safes.filter((safe) => safe.name?.toLowerCase().includes(query.toLowerCase())) : [],
 }))
@@ -73,14 +119,22 @@ jest.mock('@/store/orderByPreferenceSlice', () => ({
   OrderByOption: { NAME: 'name', LAST_VISITED: 'lastVisited', MANUAL: 'manual' },
 }))
 jest.mock('@/store/addedSafesSlice', () => ({ selectAllAddedSafes: jest.fn() }))
-jest.mock('@/store/slices', () => ({
+jest.mock('@/store/addressBookSlice', () => ({
+  ...jest.requireActual('@/store/addressBookSlice'),
   selectAllAddressBooks: jest.fn(),
+}))
+jest.mock('@/store/visitedSafesSlice', () => ({
+  ...jest.requireActual('@/store/visitedSafesSlice'),
   selectAllVisitedSafes: jest.fn(),
+}))
+jest.mock('@/features/counterfactual/public/store/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/store/undeployedSafesSlice'),
   selectUndeployedSafes: jest.fn(),
 }))
 
-jest.mock('@/features/myAccounts', () => ({
-  SafeAccountsTable: ({ items }: { items: Array<{ name?: string; address: string; chainId?: string }> }) => (
+jest.mock('@/features/myAccounts/public/components/SafeAccountsTable', () => ({
+  __esModule: true,
+  default: ({ items }: { items: Array<{ name?: string; address: string; chainId?: string }> }) => (
     <div data-testid="safe-accounts-table">
       {items.map((item) => (
         <div key={`${item.chainId}:${item.address}`}>{item.name}</div>

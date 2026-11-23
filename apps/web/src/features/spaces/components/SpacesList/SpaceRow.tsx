@@ -11,7 +11,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { SpaceSummary } from '@safe-global/views/features/spaces/components/SpaceCard'
 import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip'
-import { isUserActiveAdmin } from '@/features/spaces/utils'
+import { isUserActiveAdmin } from '../../utils'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useEntitlementsGetAllEntitlementsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
@@ -38,10 +38,15 @@ const SpaceRow = ({
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
   const billingSpaceId = useBillingSpaceId(space.uuid)
   // All rows share the one cached request of all Workspaces' entitlements
-  const { plan } = useEntitlementsGetAllEntitlementsV1Query(billingSpaceId ? undefined : skipToken, {
+  const { plan, hasEntitlements } = useEntitlementsGetAllEntitlementsV1Query(billingSpaceId ? undefined : skipToken, {
     ...SPACE_REFRESH_OPTIONS,
-    selectFromResult: ({ currentData }) => ({ plan: currentData?.[space.uuid]?.plan }),
+    selectFromResult: ({ currentData }) => ({
+      plan: currentData?.[space.uuid]?.plan,
+      hasEntitlements: currentData !== undefined,
+    }),
   })
+  // Without Safe Pro, or until the plans load, "no plan" is unknown rather than an unfinished setup.
+  const isSetupPending = hasEntitlements && !plan && space.setupStatus === 'pending'
   const badgeLabel = plan?.status === 'trialing' ? 'Free access' : (plan?.name ?? undefined)
 
   return (
@@ -79,6 +84,11 @@ const SpaceRow = ({
                   <ProChip className="size-full" />
                 </span>
                 {badgeLabel && `· ${badgeLabel}`}
+              </Badge>
+            )}
+            {isSetupPending && (
+              <Badge variant="subtle" size="status" shape="status" data-testid="space-row-setup-badge">
+                Setup not finished
               </Badge>
             )}
           </Link>

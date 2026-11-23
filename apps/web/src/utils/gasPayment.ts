@@ -1,13 +1,13 @@
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import type { GasPaymentOption } from '@safe-global/utils/utils/gasPaymentOptions'
 import type { ExecutionMethod } from '@/components/tx/ExecutionMethodSelector'
-import type { SafeSponsoredTxs } from '@/features/spaces'
+import type { SafeSponsoredTxs } from '@/features/spaces/public/hooks/useSafeSponsoredTxs'
 
 export type SponsoredOption = Exclude<GasPaymentOption, 'PAY_FROM_SAFE'>
 
 export const SPONSORED_OPTIONS: SponsoredOption[] = ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION']
 
-export type GasPayer = SponsoredOption | 'WALLET'
+export type GasPayer = SponsoredOption | 'PAY_FROM_SAFE' | 'WALLET'
 
 export type SponsoredOffer =
   | {

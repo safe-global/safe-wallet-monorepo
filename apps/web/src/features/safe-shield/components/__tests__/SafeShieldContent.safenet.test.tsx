@@ -12,7 +12,6 @@ import * as useChainsModule from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 // The real lazy feature chunk mounts inside the widget; only the chain read is mocked.
-// A missing feature.tsx registry member cannot be caught by the stubbed widget test.
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
   useSafenetCheck: jest.fn(),

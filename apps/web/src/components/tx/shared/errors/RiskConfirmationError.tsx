@@ -1,5 +1,5 @@
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 
 const RiskConfirmationError = () => {
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()

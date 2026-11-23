@@ -3,7 +3,10 @@ import WorkspaceLockModal, { _memberCopy, _PLAN_ERROR_COPY } from '../WorkspaceL
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
@@ -13,13 +16,22 @@ jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
 const mockUseCurrentMembership = jest.fn()
 const mockUseIsAdmin = jest.fn()
 const mockPush = jest.fn()
+const mockReplace = jest.fn()
 let mockPathname = '/spaces'
 
-jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, pathname: mockPathname }) }))
+jest.mock('next/router', () => ({
+  useRouter: () => ({ push: mockPush, replace: mockReplace, pathname: mockPathname }),
+}))
+let mockSafeProFlag: boolean | undefined = true
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => mockSafeProFlag === true,
+  useSafeProFlag: () => mockSafeProFlag,
+}))
+jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => true }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: (spaceId?: string) => mockUseWorkspaceLock(spaceId),
 }))
-jest.mock('../../../hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   useCurrentMembership: (spaceId?: string) => mockUseCurrentMembership(spaceId),
   useIsAdmin: (spaceId?: string) => mockUseIsAdmin(spaceId),
 }))
@@ -27,6 +39,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
 }))
 jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => ({
+  SafeProPendingModal: ({ title }: { title: string }) => <div data-testid="lock-pending-modal">{title}</div>,
   SafeProNoticeModal: ({
     title,
     body,
@@ -83,6 +96,7 @@ describe('WorkspaceLockModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockPathname = '/spaces'
+    mockSafeProFlag = true
     mockUseWorkspaceLock.mockReturnValue(lock({}))
     mockUseCurrentMembership.mockReturnValue({ id: 1 })
     mockUseIsAdmin.mockReturnValue(true)
@@ -96,6 +110,35 @@ describe('WorkspaceLockModal', () => {
     mockUseCheckoutReturn.mockReturnValue({ isReturning: true, status: 'timeout' })
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
     expect(screen.getByTestId('claim-trial-modal')).toBeInTheDocument()
+  })
+
+  it('sends the admin of a Workspace whose onboarding stopped at the checkout back to its last step', () => {
+    mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'setup-pending' }))
+
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('lock-pending-modal')).toHaveTextContent('Opening your Workspace setup')
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/survey', query: { spaceId: SPACE_ID } })
+  })
+
+  it('explains an unfinished onboarding to a member, who cannot finish it, without counting a plan lock', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'setup-pending' }))
+
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent('locked until an admin claims free access')
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  it('waits for the flags before it picks the last step of an unfinished onboarding', () => {
+    mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'setup-pending' }))
+    mockSafeProFlag = undefined
+
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(mockReplace).not.toHaveBeenCalled()
   })
 
   it('shows the lock right away when the user came back from an abandoned checkout', () => {

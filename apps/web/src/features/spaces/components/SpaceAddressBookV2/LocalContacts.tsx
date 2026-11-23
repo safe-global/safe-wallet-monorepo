@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Download, FileUp } from 'lucide-react'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge } from '@safe-global/views/components/ui/badge'
+import { ButtonGroup } from '@safe-global/views/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
@@ -15,10 +16,17 @@ import { useAppDispatch, type AppThunk } from '@/store'
 import { removeAddressBookEntry, selectAllAddressBooks, type AddressBookState } from '@/store/addressBookSlice'
 import AddLocalContact from '../SpaceAddressBook/AddLocalContact'
 import AddToWorkspaceButton from '../SpaceAddressBook/AddToWorkspaceButton'
+import LocalContactsCsvActions, { type CsvActionIcons } from '../SpaceAddressBook/LocalContactsCsvActions'
 import RequestToAddButton from '../SpaceAddressBook/RequestToAddButton'
 import DeleteLocalContactDialog from './DeleteLocalContactDialog'
 import useAddressCellProps from './useAddressCellProps'
 import { staleCasingKeys } from './utils'
+
+// Same icons as the Workspace contacts tab
+const CSV_ICONS: CsvActionIcons = {
+  import: <FileUp aria-hidden="true" data-icon="inline-start" />,
+  export: <Download aria-hidden="true" data-icon="inline-start" />,
+}
 
 type OpenDialog =
   | { type: 'edit'; contact: AddressBookContact; before: AddressBookState }
@@ -102,18 +110,38 @@ const LocalContacts = ({
   if (contacts.length === 0) {
     return (
       <TableCard>
-        <AddressBookEmptyState kind="empty" book="local" actions={<AddLocalContact />} />
+        <AddressBookEmptyState
+          kind="empty"
+          book="local"
+          actions={
+            <>
+              <LocalContactsCsvActions hasContacts={false} icons={CSV_ICONS} />
+              <AddLocalContact />
+            </>
+          }
+        />
       </TableCard>
     )
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <AddressBookToolbar query={query} onQueryChange={setQuery} actions={<AddLocalContact />} />
+      <AddressBookToolbar
+        query={query}
+        onQueryChange={setQuery}
+        actions={
+          <>
+            <ButtonGroup aria-label="Import and export">
+              <LocalContactsCsvActions hasContacts size="lg" icons={CSV_ICONS} />
+            </ButtonGroup>
+            <AddLocalContact size="lg" />
+          </>
+        }
+      />
 
       <TableCard>
         {visibleContacts.length === 0 ? (
-          <AddressBookEmptyState kind="no-results" onClearSearch={() => setQuery('')} />
+          <AddressBookEmptyState kind="no-results" book="local" onClear={() => setQuery('')} />
         ) : (
           <AddressBookTable
             contacts={visibleContacts}

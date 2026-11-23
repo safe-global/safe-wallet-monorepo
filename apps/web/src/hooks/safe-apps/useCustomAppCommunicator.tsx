@@ -9,7 +9,9 @@ import {
   type SafeSettings,
   type SendTransactionRequestParams,
 } from '@safe-global/safe-apps-sdk'
-import { SafeAppsTxFlow, SignMessageFlow, SignMessageOnChainFlow } from '@/components/tx-flow/flows'
+import { SafeAppsTxFlow } from '@/components/tx-flow/flows/SafeAppsTxFlow'
+import { SignMessageFlow } from '@/components/tx-flow/flows/SignMessageFlow'
+import { SignMessageOnChainFlow } from '@/components/tx-flow/flows/SignMessageOnChainFlow'
 import { isOffchainEIP1271Supported } from '@safe-global/utils/utils/safe-messages'
 import { cgwApi, useMessagesGetMessagesBySafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { getTransactionDetails } from '@/utils/transactions'
@@ -21,7 +23,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import { selectOnChainSigning, selectTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useAppSelector } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { trackSafeAppEvent, SAFE_APPS_EVENTS } from '@/services/analytics'
+import { trackSafeAppEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS } from '@/services/analytics/events/safeApps'
 import { safeMsgSubscribe, SafeMsgEvent } from '@/services/safe-messages/safeMsgEvents'
 import { txSubscribe, TxEvent } from '@/services/tx/txEvents'
 import type { Chain as WebCoreChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -31,11 +34,13 @@ import useBalances from '@/hooks/useBalances'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useLazyBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { buildDeclared, type DeclaredChannel } from '@safe-global/utils/utils/declaredAttribution'
 
 export const useCustomAppCommunicator = (
   iframeRef: MutableRefObject<HTMLIFrameElement | null>,
   app: SafeAppData,
   chain: WebCoreChainInfo | undefined,
+  declaredSource: { channel: Extract<DeclaredChannel, 'SAFE_APP' | 'WIDGET'>; listedAppId?: number },
   overrideHandlers?: Partial<UseAppCommunicatorHandlers>,
 ): AppCommunicator | undefined => {
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>()
@@ -51,6 +56,11 @@ export const useCustomAppCommunicator = (
     offChainSigning: true,
   })
   const appData = app
+  const declared = buildDeclared(declaredSource.channel, {
+    name: app.name,
+    url: app.url,
+    listedAppId: declaredSource.listedAppId,
+  })
   const onTxFlowClose = () => {
     setCurrentRequestId((prevId) => {
       if (prevId) {
@@ -76,7 +86,7 @@ export const useCustomAppCommunicator = (
 
       setCurrentRequestId(requestId)
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_TRANSACTION_MODAL, label: appData.name })
-      setTxFlow(<SafeAppsTxFlow data={data} />, onTxFlowClose)
+      setTxFlow(<SafeAppsTxFlow data={data} declared={declared} />, onTxFlowClose)
     },
     onSignMessage: (
       message: string | EIP712TypedData,
@@ -97,6 +107,7 @@ export const useCustomAppCommunicator = (
             message={message as string | TypedData}
             origin={appData?.url}
             requestId={requestId}
+            declared={declared}
           />,
           onTxFlowClose,
         )
@@ -109,6 +120,7 @@ export const useCustomAppCommunicator = (
               message,
               method,
             }}
+            declared={declared}
           />,
         )
       }

@@ -11,12 +11,18 @@ const mockTrackEvent = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: { SIDEBAR_CLICKED: { action: 'Sidebar clicked' } },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement', ENTRY_POINT: 'entryPoint' },
 }))
 
 const mockTrackPlanSelectionStarted = jest.fn()
-jest.mock('../../../../Plans/planSelection', () => ({
+jest.mock('../../../../../public/services/planSelection', () => ({
   trackPlanSelectionStarted: (p: unknown) => mockTrackPlanSelectionStarted(p),
 }))
 

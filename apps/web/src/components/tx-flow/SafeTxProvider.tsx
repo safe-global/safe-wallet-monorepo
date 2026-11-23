@@ -3,17 +3,13 @@ import { useState, useEffect, useCallback } from 'react'
 import type { ReactNode, ReactElement } from 'react'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { selectFeePaymentSourcePreference, setFeePaymentSourcePreference } from '@/features/fee-payment/store'
-import type { FeePaymentMode } from '@/features/fee-payment/types'
-import useWallet from '@/hooks/wallets/useWallet'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 
-export { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 export type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
@@ -27,16 +23,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [safeTxGas, setSafeTxGas] = useState<string>()
   const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
     typeof window !== 'undefined' ? getTxOrigin({ url: window.location.origin, name: '' }) : undefined,
-  )
-  const dispatch = useAppDispatch()
-  const signerAddress = useWallet()?.address
-  const feePaymentMode = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress)) ?? 'safe'
-  const setFeePaymentMode = useCallback(
-    (source: FeePaymentMode) => {
-      if (!signerAddress) return
-      dispatch(setFeePaymentSourcePreference({ signerAddress, source }))
-    },
-    [dispatch, signerAddress],
   )
   const [feeGasToken, setFeeGasToken] = useState<string>()
 
@@ -53,7 +39,9 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const recommendedNonce = useRecommendedNonce()
   const recommendedSafeTxGas = useSafeTxGas(safeTx)
 
-  const canEdit = !isSigned
+  // A payload the Safe pays for carries a fee quoted for its safeTxGas and nonce: changing either breaks the
+  // quote and the hash a proposer already signed.
+  const canEdit = !isSigned && !(safeTx && isPaidFromSafe(safeTx.data))
   const isReadOnly = !canEdit
 
   // Priority to external nonce, then to the recommended one
@@ -100,8 +88,6 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         txOrigin,
         setTxOrigin,
         isReadOnly,
-        feePaymentMode,
-        setFeePaymentMode,
         feeGasToken,
         setFeeGasToken,
       }}

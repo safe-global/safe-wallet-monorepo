@@ -7,8 +7,11 @@ import type {
   SpaceMemberDto,
   SpaceAddressBookItemDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MemberStatus, MemberRole } from './hooks/useSpaceMembers'
+import { MemberStatus } from './public/hooks/useSpaceMembers'
+import { MemberRole } from './memberRole'
 import type { AddressBookState } from '@/store/addressBookSlice'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 
 // TODO: Currently also checks for 404 because the /v1/spaces/<orgId> endpoint does not return 401
 export const isUnauthorized = (error: FetchBaseQueryError | SerializedError | undefined) => {
@@ -88,3 +91,11 @@ export function formatDate(dateStr: string): string {
 export function getChainIdsParam(safes: Array<{ chainId: string }>): string {
   return Array.from(new Set(safes.map((safe) => safe.chainId))).join(',')
 }
+
+export const toChainInfos = (chainIds: string[], configs: Chain[]): ChainInfo[] =>
+  chainIds.map((chainId) => {
+    const chain = configs.find((config) => config.chainId === chainId)
+    return chain
+      ? { chainId, chainName: chain.chainName, chainLogoUri: chain.chainLogoUri ?? null, shortName: chain.shortName }
+      : { chainId, chainName: chainId, chainLogoUri: null, shortName: chainId }
+  })

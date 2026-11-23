@@ -11,7 +11,7 @@ import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { createHandlers } from '@/stories/mocks'
+import { createHandlers } from '@/stories/mocks/handlers'
 
 faker.seed(1)
 

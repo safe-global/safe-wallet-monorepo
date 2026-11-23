@@ -1,21 +1,22 @@
 import { useState, useCallback, useMemo, Suspense } from 'react'
 import dynamic from '@/utils/dynamic'
-import { flattenSafeItems, type SafeItem } from '@/hooks/safes'
-import { useSpaceSafes } from '@/features/spaces'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectUndeployedSafes } from '@/store/slices'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import {
   ESafeAction,
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
   closeSafeActionsModal,
-} from '@/features/spaces/store'
+} from '../../public/store/safeActionsModalSlice'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
+import SafeCardReadOnly from '../../public/components/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'

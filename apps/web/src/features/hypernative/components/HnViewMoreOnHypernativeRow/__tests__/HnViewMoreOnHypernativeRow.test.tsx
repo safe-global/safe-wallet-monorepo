@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { HnViewMoreOnHypernativeRow } from '..'
+import { HnViewMoreOnHypernativeRow } from '../../../public/components/HnViewMoreOnHypernativeRow'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 
 const trackEventMock = jest.fn()

@@ -3,15 +3,15 @@ import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
-import { NetworkLogosPill } from '@/features/multichain'
+import NetworkLogosPill from '@/components/common/NetworkLogosPill'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { HardDrive } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import LocalContactActions from './LocalContactActions'
-import { formatDate } from '@/features/spaces/utils'
+import { formatDate } from '../../utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
+import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
 import PaginatedDataTable, {
   type DataTableColumn,
   type ColumnWidth,

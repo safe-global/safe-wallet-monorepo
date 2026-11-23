@@ -4,15 +4,11 @@ import { highlightSafePro } from '@safe-global/views/components/common/ProHighli
 import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import {
-  MixpanelEventParams,
-  PlanSelectionEntryPoint,
-  UpgradeLocation,
-  type UpgradeFeature,
-} from '@/services/analytics'
+import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeLocation } from '@/services/analytics/mixpanel-events'
+import type { UpgradeFeature } from '@/services/analytics/mixpanel-events'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { trackPlanSelectionStarted } from '@/features/spaces'
+import { trackPlanSelectionStarted } from '@/features/spaces/public/services/planSelection'
 
 /** Safe Pro upsell replacing an add-policy action (proposer, spending limit) when `usePlanGate` requires an upgrade. */
 const SafeProLock = ({ title, href, feature }: { title: string; href: LinkProps['href']; feature: UpgradeFeature }) => {

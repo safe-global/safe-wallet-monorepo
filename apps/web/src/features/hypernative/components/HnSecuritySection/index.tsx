@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useHnQueueAssessmentResult } from '../../hooks/useHnQueueAssessmentResult'
-import { useShowHypernativeAssessment } from '../../hooks/useShowHypernativeAssessment'
-import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
-import { useIsHypernativeQueueScanFeature } from '../../hooks/useIsHypernativeQueueScanFeature'
-import { HnQueueAssessmentBanner } from '../HnQueueAssessmentBanner'
+import { useHnQueueAssessmentResult } from '../../public/hooks/useHnQueueAssessmentResult'
+import { useShowHypernativeAssessment } from '../../public/hooks/useShowHypernativeAssessment'
+import { useHypernativeOAuth } from '../../public/hooks/useHypernativeOAuth'
+import { useIsHypernativeQueueScanFeature } from '../../public/hooks/useIsHypernativeQueueScanFeature'
+import { HnQueueAssessmentBanner } from '../HnQueueAssessmentBanner/HnQueueAssessmentBanner'
 import HnSecurityReportBtnForTxDetails from '../HnSecurityReportBtn/HnSecurityReportBtnForTxDetails'
 
 interface HnSecuritySectionProps {

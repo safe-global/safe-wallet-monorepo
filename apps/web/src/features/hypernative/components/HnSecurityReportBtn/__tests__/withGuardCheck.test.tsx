@@ -1,8 +1,8 @@
 import { render, screen } from '@/tests/test-utils'
 import { withGuardCheck } from '../withGuardCheck'
-import { useIsHypernativeGuard } from '../../../hooks/useIsHypernativeGuard'
+import { useIsHypernativeGuard } from '../../../public/hooks/useIsHypernativeGuard'
 
-jest.mock('../../../hooks/useIsHypernativeGuard')
+jest.mock('../../../public/hooks/useIsHypernativeGuard')
 
 const mockUseIsHypernativeGuard = useIsHypernativeGuard as jest.MockedFunction<typeof useIsHypernativeGuard>
 

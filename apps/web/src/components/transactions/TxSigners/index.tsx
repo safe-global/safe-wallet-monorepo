@@ -5,7 +5,8 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/c
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
-import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader, COPIED_TOOLTIP_MS } from '@/components/common/AuditLog'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -23,15 +24,15 @@ import useTransactionStatus from '@/hooks/useTransactionStatus'
 import useAddressBook from '@/hooks/useAddressBook'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { CopyDeeplinkLabels } from '@/services/analytics'
+import { CopyDeeplinkLabels } from '@/services/analytics/events/txList'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
-import { useLoadFeature } from '@/features/__core__'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import SafenetAuditRow from '@/features/safenet-checks/public/components/SafenetAuditRow'
 
 const WAITING_STATUSES = new Set([
   'Awaiting confirmations',
@@ -50,7 +51,7 @@ type TxSignersProps = {
 }
 
 const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
-  const [copied, handleCopy] = useCopyToClipboard(txHash)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
 
   if (!txHash) {
     return (
@@ -78,7 +79,7 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
   }
 
   return (
-    <Tooltip>
+    <Tooltip closeOnClick={false}>
       <TooltipTrigger
         render={
           <Button
@@ -86,7 +87,7 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
             variant="ghost"
             size="icon-xs"
             className="text-inherit"
-            onClick={handleCopy}
+            onClick={() => copy(txHash)}
             // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
             // all, so an icon-only trigger needs its own name or it announces as just "button".
             aria-label="Copy transaction hash"
@@ -158,7 +159,6 @@ const TxSigners = ({
   const { safe } = useSafeInfo()
   const addressBook = useAddressBook()
   const chain = useCurrentChain()
-  const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
@@ -296,9 +296,9 @@ const TxSigners = ({
       ))}
 
       {/* Safenet check step (PRD: between the signatures and execution). The
-          feature registry stubs this to null while the flag is off; the row
+          gated public wrapper renders nothing while the flag is off; the row
           itself renders nothing unless a check was observed for this hash. */}
-      <safenet.SafenetAuditRow
+      <SafenetAuditRow
         safeTxHash={multisigInfo.safeTxHash}
         chainId={safe.chainId}
         timestampMs={submittedAt}

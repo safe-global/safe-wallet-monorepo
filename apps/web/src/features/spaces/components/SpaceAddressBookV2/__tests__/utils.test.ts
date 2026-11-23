@@ -1,22 +1,21 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
-import { staleCasingKeys, storedKeysOf, toLocalContacts, toWorkspaceContacts } from '../utils'
+import {
+  spaceAddressBookItemBuilder,
+  spaceAddressBookRequestBuilder,
+  spaceAddressBookTagBuilder,
+} from '@/tests/builders/space'
+import {
+  staleCasingKeys,
+  storedKeysOf,
+  tagNamesOf,
+  toLocalContacts,
+  toPendingRequests,
+  toWorkspaceContacts,
+} from '../utils'
 
-const itemBuilder = () =>
-  Builder.new<SpaceAddressBookItemDto>().with({
-    name: faker.person.fullName(),
-    address: faker.finance.ethereumAddress(),
-    chainIds: ['1'],
-    createdBy: faker.internet.email(),
-    createdByUserId: faker.number.int(),
-    lastUpdatedBy: faker.internet.email(),
-    lastUpdatedByUserId: faker.number.int(),
-    createdAt: faker.date.past().toISOString(),
-    updatedAt: faker.date.recent().toISOString(),
-  })
+const itemBuilder = spaceAddressBookItemBuilder
 
 const mainnet = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png' }).build()
 const gnosis = chainBuilder().with({ chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null }).build()
@@ -30,7 +29,7 @@ describe('toWorkspaceContacts', () => {
       .with({ chainIds: ['1', '100'] })
       .build()
 
-    const [contact] = toWorkspaceContacts([item], configs, noMember)
+    const [contact] = toWorkspaceContacts([item], [], configs, noMember)
 
     expect(contact.chains).toEqual([
       { chainId: '1', chainName: 'Ethereum', chainLogoUri: 'https://logo/1.png', shortName: mainnet.shortName },
@@ -43,7 +42,7 @@ describe('toWorkspaceContacts', () => {
       .with({ chainIds: ['999'] })
       .build()
 
-    const [contact] = toWorkspaceContacts([item], configs, noMember)
+    const [contact] = toWorkspaceContacts([item], [], configs, noMember)
 
     expect(contact.chains).toEqual([{ chainId: '999', chainName: '999', chainLogoUri: null, shortName: '999' }])
   })
@@ -51,7 +50,7 @@ describe('toWorkspaceContacts', () => {
   it('resolves who added the contact from its creator', () => {
     const item = itemBuilder().with({ createdByUserId: 7 }).build()
 
-    const [contact] = toWorkspaceContacts([item], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
+    const [contact] = toWorkspaceContacts([item], [], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
 
     expect(contact).toEqual(expect.objectContaining({ name: item.name, address: item.address, addedBy: 'Maya Chen' }))
   })
@@ -60,15 +59,50 @@ describe('toWorkspaceContacts', () => {
     ['wallet address', faker.finance.ethereumAddress()],
     ['email', 'alice@example.com'],
   ])('falls back to the %s the contact was added with', (_, createdBy) => {
-    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy }).build()], configs, noMember)
+    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy }).build()], [], configs, noMember)
 
     expect(contact.addedBy).toBe(createdBy)
   })
 
+  it('gives each contact its tags in its own order, with their names and colours', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1 }).build()
+    const payroll = spaceAddressBookTagBuilder().with({ id: 2 }).build()
+    const item = itemBuilder()
+      .with({ tagIds: [2, 1] })
+      .build()
+
+    const [contact] = toWorkspaceContacts([item], [vendor, payroll], configs, noMember)
+
+    expect(contact.tags).toEqual([
+      { id: 2, name: payroll.name, color: payroll.color },
+      { id: 1, name: vendor.name, color: vendor.color },
+    ])
+  })
+
+  it('leaves out a tag id the workspace no longer has', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1 }).build()
+    const item = itemBuilder()
+      .with({ tagIds: [1, 99] })
+      .build()
+
+    const [contact] = toWorkspaceContacts([item], [vendor], configs, noMember)
+
+    expect(contact.tags?.map((tag) => tag.id)).toEqual([1])
+  })
+
   it('knows nobody added the contact when neither is set', () => {
-    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy: '' }).build()], configs, noMember)
+    const [contact] = toWorkspaceContacts([itemBuilder().with({ createdBy: '' }).build()], [], configs, noMember)
 
     expect(contact.addedBy).toBeUndefined()
+  })
+})
+
+describe('tagNamesOf', () => {
+  it('names the tags in the given order and leaves out an id the workspace no longer has', () => {
+    const vendor = spaceAddressBookTagBuilder().with({ id: 1 }).build()
+    const payroll = spaceAddressBookTagBuilder().with({ id: 2 }).build()
+
+    expect(tagNamesOf([2, 99, 1], [vendor, payroll])).toEqual([payroll.name, vendor.name])
   })
 })
 
@@ -191,5 +225,46 @@ describe('staleCasingKeys', () => {
     }
 
     expect(staleCasingKeys(books, after, address, ['1', '100'])).toEqual([{ chainId: '100', address: lower }])
+  })
+})
+
+describe('toPendingRequests', () => {
+  it('gives each request its id, name, address and chains', () => {
+    const request = spaceAddressBookRequestBuilder()
+      .with({ chainIds: ['1', '100'] })
+      .build()
+
+    const [row] = toPendingRequests([request], [], configs, noMember)
+
+    expect(row).toEqual(
+      expect.objectContaining({ id: request.id, name: request.name, address: request.address, isInWorkspace: false }),
+    )
+    expect(row.chains.map((chain) => chain.chainName)).toEqual(['Ethereum', 'Gnosis Chain'])
+  })
+
+  it('names the requester by their member name', () => {
+    const request = spaceAddressBookRequestBuilder().with({ requestedByUserId: 7 }).build()
+
+    const [row] = toPendingRequests([request], [], configs, (userId) => (userId === 7 ? 'Maya Chen' : undefined))
+
+    expect(row.requestedBy).toBe('Maya Chen')
+  })
+
+  it('falls back to the email or wallet the requester signed in with', () => {
+    const request = spaceAddressBookRequestBuilder().with({ requestedBy: 'alice@example.com' }).build()
+
+    const [row] = toPendingRequests([request], [], configs, noMember)
+
+    expect(row.requestedBy).toBe('alice@example.com')
+  })
+
+  it('marks a request whose address the Workspace has in another casing', () => {
+    const address = checksumAddress(faker.finance.ethereumAddress())
+    const request = spaceAddressBookRequestBuilder().with({ address }).build()
+    const saved = itemBuilder().with({ address: address.toLowerCase() }).build()
+
+    const [row] = toPendingRequests([request], [saved], configs, noMember)
+
+    expect(row.isInWorkspace).toBe(true)
   })
 })

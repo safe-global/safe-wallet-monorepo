@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { selectCurrency } from '@/store/settingsSlice'
-import { flattenSafeItems } from '@/hooks/safes'
-import { useSpaceSafes } from './useSpaceSafes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { useSpaceSafes } from '../public/hooks/useSpaceSafes'
 
 type SafePair = { chainId: string; address: string }
 

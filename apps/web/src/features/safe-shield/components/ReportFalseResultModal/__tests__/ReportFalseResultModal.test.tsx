@@ -5,7 +5,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 
 const mockReportFalseResult = jest.fn()
-jest.mock('@/features/safe-shield/hooks/useReportFalseResult', () => ({
+jest.mock('../../../hooks/useReportFalseResult', () => ({
   useReportFalseResult: () => ({
     reportFalseResult: mockReportFalseResult,
     isLoading: false,

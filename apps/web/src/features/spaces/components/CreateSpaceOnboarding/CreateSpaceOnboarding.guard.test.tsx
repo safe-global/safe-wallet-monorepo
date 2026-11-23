@@ -7,12 +7,12 @@ import { act, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
-import { WalletContext } from '@/components/common/WalletProvider'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import CreateSpaceOnboarding from './index'
 
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true, useSafeProFlag: () => true }))
 
 type Location = { pathname: string; query: Record<string, string> }
 type Url = string | { pathname?: string; query?: Record<string, string> }
@@ -68,6 +68,7 @@ const App = ({ initialPath }: { initialPath: string }): ReactElement => {
       connectedWallet: null,
       signer: null,
       setSignerAddress: jest.fn(),
+      getParentSafeNonce: () => undefined,
       setParentSafeNonce: jest.fn(),
       clearParentSafeNonce: jest.fn(),
       isReady: isWalletReady,

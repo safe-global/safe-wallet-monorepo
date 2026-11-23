@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Check } from 'lucide-react'
-import { DrawerFooter } from '@/components/common/Drawer'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { Button } from '@safe-global/views/components/ui/button'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 

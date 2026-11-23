@@ -13,11 +13,15 @@ import { act, render, renderHook, screen, fireEvent, waitFor } from '@/tests/tes
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
-import type { SafePermissions } from '@/hooks/safe-apps/permissions'
+import type { SafePermissions } from '@/hooks/safe-apps/permissions/useSafePermissions'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import useChainId from '@/hooks/useChainId'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import * as safeAppFromBackend from '@/hooks/safe-apps/useSafeAppFromBackend'
+import * as customAppCommunicator from '@/hooks/safe-apps/useCustomAppCommunicator'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 const emptySafeApp = getEmptySafeApp()
 
@@ -126,6 +130,70 @@ describe('AppFrame permission requests', () => {
         expect.objectContaining({ id: requestId, success: true, data: stored }),
         APP_ORIGIN,
       ),
+    )
+  })
+})
+
+describe('AppFrame declared source', () => {
+  const listedApp = { ...getEmptySafeApp(APP_ORIGIN), id: faker.number.int({ min: 1, max: 10_000 }) }
+  const chain = chainBuilder().build()
+
+  const renderAppFrame = ({ listed, isNativeEmbed }: { listed: boolean; isNativeEmbed?: boolean }) => {
+    jest
+      .spyOn(safeAppFromBackend, 'useSafeAppFromBackend')
+      .mockReturnValue([listed ? listedApp : undefined, undefined, false])
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chain)
+    const communicatorSpy = jest.spyOn(customAppCommunicator, 'useCustomAppCommunicator')
+
+    render(
+      <AppFrame
+        appUrl={APP_ORIGIN}
+        allowedFeaturesList=""
+        safeAppFromManifest={permissionsTestApp}
+        isNativeEmbed={isNativeEmbed}
+      />,
+    )
+
+    return communicatorSpy
+  }
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('declares a listed Safe App with its id', () => {
+    const communicatorSpy = renderAppFrame({ listed: true })
+
+    expect(communicatorSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      listedApp,
+      chain,
+      { channel: 'SAFE_APP', listedAppId: listedApp.id },
+      expect.anything(),
+    )
+  })
+
+  it('declares a native embed as a widget', () => {
+    const communicatorSpy = renderAppFrame({ listed: true, isNativeEmbed: true })
+
+    expect(communicatorSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      listedApp,
+      chain,
+      { channel: 'WIDGET', listedAppId: listedApp.id },
+      expect.anything(),
+    )
+  })
+
+  it('does not take the app id from the manifest of an unlisted app', () => {
+    const communicatorSpy = renderAppFrame({ listed: false })
+
+    expect(communicatorSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      permissionsTestApp,
+      chain,
+      { channel: 'SAFE_APP', listedAppId: undefined },
+      expect.anything(),
     )
   })
 })

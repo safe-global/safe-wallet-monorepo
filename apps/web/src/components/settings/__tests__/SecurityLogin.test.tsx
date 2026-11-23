@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import SecurityLogin from '../SecurityLogin'
-import * as useIsRecoverySupportedHook from '@/features/recovery'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import * as useChainsHooks from '@/hooks/useChains'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
-import * as useIsOutreachSafeHook from '@/features/targeted-features'
+import * as useIsOutreachSafeHook from '@/features/targeted-features/public/hooks/useIsOutreachSafe'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
-import * as featureCore from '@/features/__core__'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 // Mock the hypernative hooks at their source modules so internal (relative-import) callers
@@ -15,41 +15,42 @@ const mockUseIsHypernativeFeature = jest.fn()
 const mockUseIsHypernativeGuard = jest.fn()
 const mockUseBannerStorage = jest.fn()
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeFeature', () => ({
-  ...jest.requireActual('@/features/hypernative/hooks/useIsHypernativeFeature'),
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeFeature', () => ({
+  ...jest.requireActual('@/features/hypernative/public/hooks/useIsHypernativeFeature'),
   useIsHypernativeFeature: () => mockUseIsHypernativeFeature(),
 }))
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard', () => ({
-  ...jest.requireActual('@/features/hypernative/hooks/useIsHypernativeGuard'),
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeGuard', () => ({
+  ...jest.requireActual('@/features/hypernative/public/hooks/useIsHypernativeGuard'),
   useIsHypernativeGuard: () => mockUseIsHypernativeGuard(),
 }))
 
-jest.mock('@/features/hypernative/hooks/useBannerStorage', () => ({
-  ...jest.requireActual('@/features/hypernative/hooks/useBannerStorage'),
+jest.mock('@/features/hypernative/public/hooks/useBannerStorage', () => ({
+  ...jest.requireActual('@/features/hypernative/public/hooks/useBannerStorage'),
   useBannerStorage: (...args: unknown[]) => mockUseBannerStorage(...args),
 }))
 
-// Mock HnBannerForSettings from the public API with simulated HOC behavior
-jest.mock('@/features/hypernative', () => {
-  const actual = jest.requireActual('@/features/hypernative')
+// Mock HnBannerForSettings with simulated HOC behavior
+jest.mock('@/features/hypernative/public/components/HnBanner', () => {
+  const actual = jest.requireActual('@/features/hypernative/public/components/HnBanner')
+  const { useBannerVisibility, BannerType } = jest.requireActual(
+    '@/features/hypernative/public/hooks/useBannerVisibility',
+  )
   return {
     ...actual,
     HnBannerForSettings: () => {
-      const { showBanner, loading } = actual.useBannerVisibility(actual.BannerType.Settings)
+      const { showBanner, loading } = useBannerVisibility(BannerType.Settings)
       if (loading || !showBanner) return null
       return <div data-testid="hn-banner-for-settings">HnBannerForSettings</div>
     },
   }
 })
 
-// Mock useLoadFeature to return HnActivatedSettingsBanner with simulated HOC behavior
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(),
+// The public banner renders the component below, which simulates the HOC behavior
+jest.mock('@/features/hypernative/public/components/HnActivatedSettingsBanner', () => ({
+  __esModule: true,
+  default: () => MockHnActivatedSettingsBanner(),
 }))
-
-const mockUseLoadFeature = featureCore.useLoadFeature as jest.Mock
 
 // Mock SecuritySettings to avoid rendering the full component
 jest.mock('../SecuritySettings', () => ({
@@ -81,15 +82,8 @@ describe('SecurityLogin', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    // Setup useLoadFeature mock to return our mock component
-    mockUseLoadFeature.mockReturnValue({
-      $isDisabled: false,
-      $isReady: true,
-      HnActivatedSettingsBanner: MockHnActivatedSettingsBanner,
-    })
-
     // Default mocks - feature enabled, wallet connected, owner, sufficient balance, not targeted
-    jest.spyOn(useIsRecoverySupportedHook, 'useIsRecoverySupported').mockReturnValue(false)
+    jest.spyOn(useChainsHooks, 'useHasFeature').mockReturnValue(false)
     mockUseIsHypernativeFeature.mockReturnValue(true)
     jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
     jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
@@ -237,7 +231,7 @@ describe('SecurityLogin', () => {
     })
 
     it('shows the recovery settings on a chain that supports recovery', async () => {
-      jest.spyOn(useIsRecoverySupportedHook, 'useIsRecoverySupported').mockReturnValue(true)
+      jest.spyOn(useChainsHooks, 'useHasFeature').mockImplementation((feature) => feature === FEATURES.RECOVERY)
 
       render(<SecurityLogin />, { routerProps: safeQuery })
 

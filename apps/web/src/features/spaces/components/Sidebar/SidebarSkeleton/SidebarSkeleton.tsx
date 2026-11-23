@@ -9,7 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@safe-global/views/components/ui/sidebar'
-import { SidebarTopBar } from '../SidebarTopBar'
+import { SidebarTopBar } from '../SidebarTopBar/SidebarTopBar'
 import css from '../styles.module.css'
 
 const SIDEBAR_CONTAINER_CLASSNAME = '!p-0 border-r-0 group-data-[side=left]:border-r-0'

@@ -3,13 +3,11 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
+import WorkspaceOnboardingStep from '@/features/spaces/public/components/WorkspaceOnboardingStep'
 
 const SurveyPage = () => {
   const router = useRouter()
-  const { SurveyOnboarding } = useLoadFeature(SpacesFeature)
   const isEnabled = useIsSurveyEnabled()
 
   // Dead-end safety net: only redirect once we have a definitive `false`.
@@ -31,7 +29,7 @@ const SurveyPage = () => {
         <title>{`${BRAND_NAME} – How will you use Safe?`}</title>
       </Head>
 
-      <SurveyOnboarding />
+      <WorkspaceOnboardingStep step="survey" />
     </>
   )
 }

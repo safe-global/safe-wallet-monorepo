@@ -35,56 +35,35 @@ import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
-import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } from '@/features/spaces'
-import { RecoveryFeature } from '@/features/recovery'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { useLoadFeature } from '@/features/__core__'
-
-/**
- * Wrapper that lazy-loads Recovery via the feature system.
- */
-const RecoveryLoader = () => {
-  const { Recovery } = useLoadFeature(RecoveryFeature)
-  return <Recovery />
-}
-
-/**
- * Wrapper that lazy-loads CounterfactualHooks via the feature system.
- * This ensures the entire counterfactual feature loads as a single chunk
- * through handle.ts rather than scattered dynamic() imports.
- */
-const CounterfactualHooksLoader = () => {
-  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
-  return <CounterfactualHooks />
-}
-
-/**
- * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
- */
-const SpendingLimitsLoaderWrapper = () => {
-  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
-  return <SpendingLimitsLoader />
-}
+import CounterfactualHooks from '@/features/counterfactual/public/components/CounterfactualHooks'
+import useCounterfactualSafeSync from '@/features/counterfactual/public/hooks/useCounterfactualSafeSync'
+import { useInviteNotification } from '@/features/spaces/public/hooks/useInviteNotification'
+import { useSafeWorkspaceAttach } from '@/features/spaces/public/hooks/useSafeWorkspaceAttach'
+import { useSafeWorkspaceCheck } from '@/features/spaces/public/hooks/useSafeWorkspaceCheck'
+import Recovery from '@/features/recovery/public/components/Recovery'
 
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts'
-import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
+import { useVisitedSafes } from '@/features/myAccounts/public/hooks/useVisitedSafes'
+import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/hooks/usePortfolioRefetchOnTxHistory'
+import useClearPortfolioOnTx from '@/features/portfolio/public/hooks/useClearPortfolioOnTx'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureRenderError, initObservability } from '@/services/observability'
 import { DatadogProvider } from '@/services/observability/providers/datadog'
-import { MixpanelTracingProvider } from '@/services/observability/providers/mixpanel'
+import { MixpanelTracingProvider } from '@/services/observability/providers/mixpanel/provider'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
-import { CaptchaProvider } from '@/components/common/Captcha'
-import { HnQueueAssessmentProvider, useHypernativeTokenRefresh } from '@/features/hypernative'
-import { useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
+import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
+import { HnQueueAssessmentProvider } from '@/features/hypernative/public/components/HnQueueAssessmentProvider'
+import { useHypernativeTokenRefresh } from '@/features/hypernative/public/hooks/useHypernativeTokenRefresh'
+import { useOidcLoginCallback } from '@/features/oidc-auth/public/hooks/useOidcLoginCallback'
+import { useStepUpRecovery } from '@/features/oidc-auth/public/hooks/useStepUpRecovery'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+import SpendingLimitsLoader from '@/features/spending-limits/public/components/SpendingLimitsLoader'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -110,6 +89,7 @@ export const SafeScopedSubscriptions = (): null => {
   useTxTracking()
   useSafeMsgTracking()
   usePortfolioRefetchOnTxHistory()
+  useClearPortfolioOnTx()
   useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   useInviteNotification()
@@ -194,11 +174,11 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <AppChrome />
 
-          <RecoveryLoader />
+          <Recovery />
 
-          <CounterfactualHooksLoader />
+          <CounterfactualHooks />
 
-          <SpendingLimitsLoaderWrapper />
+          <SpendingLimitsLoader />
         </CaptchaProvider>
       </AppProviders>
     </Provider>

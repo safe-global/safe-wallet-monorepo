@@ -2,11 +2,11 @@ import { renderWithUserEvent } from '@/tests/test-utils'
 import { mockCurrentChain, mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole, type TestRole } from '@/tests/mocks/roles'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
+import { RecoveryAttemptFlow } from '@/components/tx-flow/flows/RecoveryAttemptFlow'
 import ExecuteRecoveryButton from '.'
 import { useClock } from '../../hooks/useClock'
-import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../test-helpers'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/utils/test-helpers'
+import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('../../hooks/useClock')
 jest.mock('@/hooks/wallets/useWallet')
@@ -17,9 +17,10 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChains')
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 const REVIEW_WINDOW_REASON = 'You can execute the recovery after the specified review window'

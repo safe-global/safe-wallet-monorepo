@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactElement } from 'react'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -11,17 +11,20 @@ import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { MODALS_EVENTS } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import Track from '@/components/common/Track'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
 
-type Props = {
+type ContentProps = {
   txId: string
 }
-const NestedTxSuccessScreen = ({ txId }: Props) => {
+
+const NestedTxSuccessScreenContent = ({ txId }: ContentProps) => {
   const addressBook = useAddressBook()
   const spaceId = useUrlSpaceId()
 
@@ -119,5 +122,19 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
     </div>
   )
 }
+
+type Props = ContentProps & {
+  /** Set by a Space-level flow: the flow's own SafeScope unmounts with it, so the screen re-mounts one. */
+  scope?: SafeScopeTarget
+}
+
+const NestedTxSuccessScreen = ({ scope, ...props }: Props): ReactElement =>
+  scope ? (
+    <SafeScopeProvider initial={scope}>
+      <NestedTxSuccessScreenContent {...props} />
+    </SafeScopeProvider>
+  ) : (
+    <NestedTxSuccessScreenContent {...props} />
+  )
 
 export default NestedTxSuccessScreen

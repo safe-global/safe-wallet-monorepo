@@ -1,75 +1,60 @@
-import { useState, useEffect, useCallback } from 'react'
-import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { getTransactionQueue } from '@/services/transactions'
-import { getLatestTransactions } from '@/utils/tx-list'
-import { useSpaceSafesWithQueue } from './useSpaceSafesWithQueue'
+import { useMemo } from 'react'
+import { useSpaceTransactionsGetTransactionQueueV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { isTransactionQueuedItem } from '@/utils/transaction-guards'
+import { useCurrentSpaceId } from '../public/hooks/useCurrentSpaceId'
+import { usePerSafePendingTransactions, type SpacePendingTxItem } from './usePerSafePendingTransactions'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
-type SpacePendingTxItem = TransactionQueuedItem & { safeAddress: string; chainId: string }
-type SafeQueueResult = { chainId: string; address: string; transactions: TransactionQueuedItem[] }
+const NO_TRANSACTIONS: SpacePendingTxItem[] = []
 
-const BATCH_SIZE = 3
-const BATCH_DELAY_MS = 300
+// Without `count`, a page that reached the limit may hide more transactions, so the total is unknown
+const toTotalCount = (count: number | null, shown: number, limit: number): number | undefined => {
+  if (count !== null) return Math.max(count, shown)
+  return shown < limit ? shown : undefined
+}
 
 export const useSpacePendingTransactions = (limit = 3) => {
-  const { safesWithQueue, isLoading: isLoadingQueue } = useSpaceSafesWithQueue()
-  const [allTransactions, setAllTransactions] = useState<SpacePendingTxItem[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string>()
+  const spaceId = useCurrentSpaceId()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  // Chain flag that rolls out the Space queue; undefined until the chains load
+  const hasSpaceQueue = useHasFeature(FEATURES.SPACE_TRANSACTIONS)
+  const skipSpaceQueue = hasSpaceQueue !== true || !isUserSignedIn || !spaceId
 
-  const fetchAll = useCallback(async () => {
-    if (safesWithQueue.length === 0) {
-      setAllTransactions([])
-      return
-    }
+  // The gateway cuts by nonce, so the list is still sorted by age below
+  const spaceQueue = useSpaceTransactionsGetTransactionQueueV1Query(
+    { spaceId: spaceId ?? '', limit },
+    { skip: skipSpaceQueue, ...SPACE_REFRESH_OPTIONS },
+  )
+  const perSafe = usePerSafePendingTransactions(limit, hasSpaceQueue !== false)
 
-    setIsLoading(true)
-    setError(undefined)
+  const page = spaceQueue.currentData
+  const transactions = useMemo<SpacePendingTxItem[]>(() => {
+    if (!page) return NO_TRANSACTIONS
 
-    try {
-      const results: SafeQueueResult[] = []
+    return Object.entries(page.results)
+      .flatMap(([safeAddress, chainItems]) =>
+        Object.entries(chainItems).flatMap(([chainId, items]) =>
+          items.filter(isTransactionQueuedItem).map((tx) => ({ ...tx, safeAddress, chainId })),
+        ),
+      )
+      .sort((a, b) => a.transaction.timestamp - b.transaction.timestamp)
+      .slice(0, limit)
+  }, [page, limit])
 
-      for (let i = 0; i < safesWithQueue.length; i += BATCH_SIZE) {
-        if (i > 0) {
-          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS))
-        }
-
-        const batch = safesWithQueue.slice(i, i + BATCH_SIZE)
-        const batchResults = await Promise.all(
-          batch.map(async ({ chainId, address }) => {
-            const page = await getTransactionQueue(chainId, address, {
-              trusted: true,
-              cursor: `limit=${limit}&offset=0`,
-            })
-            return { chainId, address, transactions: getLatestTransactions(page.results) }
-          }),
-        )
-        results.push(...batchResults)
-      }
-
-      const merged = results
-        .flatMap(({ chainId, address, transactions }) =>
-          transactions.map((tx) => ({ ...tx, safeAddress: address, chainId })),
-        )
-        .sort((a, b) => a.transaction.timestamp - b.transaction.timestamp)
-        .slice(0, limit)
-
-      setAllTransactions(merged)
-    } catch {
-      setError('Failed to load pending transactions')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [safesWithQueue, limit])
-
-  useEffect(() => {
-    fetchAll()
-  }, [fetchAll])
+  if (hasSpaceQueue === false) return { ...perSafe, totalCount: undefined }
 
   return {
-    transactions: allTransactions,
-    count: allTransactions.length,
-    isLoading: isLoadingQueue || isLoading,
-    error,
-    refetch: fetchAll,
+    transactions,
+    count: transactions.length,
+    totalCount: page ? toTotalCount(page.count, transactions.length, limit) : undefined,
+    isLoading: hasSpaceQueue === undefined || !spaceId || (spaceQueue.isFetching && !page),
+    error: spaceQueue.isError ? 'Failed to load pending transactions' : undefined,
+    refetch: () => {
+      if (!skipSpaceQueue) spaceQueue.refetch()
+    },
   }
 }

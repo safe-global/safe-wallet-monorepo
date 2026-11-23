@@ -8,12 +8,12 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
+import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/public/constants'
 import {
   addressIsNotSmartContract,
   usesV1DelegateEndpoint,
   signProposerDelegation,
-} from '@/features/proposers/utils/utils'
+} from '@/features/proposers/public/utils/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
@@ -22,7 +22,8 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
@@ -33,7 +34,7 @@ import type { ProposerRoleFormValues } from '../ProposerRoleForm'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../../../../constants'
 import { formatContactLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { useAddOrRequestWorkspaceContact } from '../../../../hooks/useAddOrRequestWorkspaceContact'
-import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
+import { useIsAdmin } from '../../../../public/hooks/useSpaceMembers'
 
 export type GrantProposer = {
   grantProposerRole: (values: ProposerRoleFormValues, safeLabel?: string) => Promise<boolean>
@@ -81,7 +82,7 @@ export const useGrantProposer = (): GrantProposer => {
   const safeAddress = useSafeAddress()
   const provider = useWeb3ReadOnly()
   const dispatch = useAppDispatch()
-  const addOrRequestContact = useAddOrRequestWorkspaceContact(SPACE_LABELS.proposer_role_flow)
+  const addOrRequestContact = useAddOrRequestWorkspaceContact({ source: SPACE_LABELS.proposer_role_flow })
   const isAdmin = useIsAdmin()
   const { get: getContact } = useMergedAddressBooks(chainId)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()

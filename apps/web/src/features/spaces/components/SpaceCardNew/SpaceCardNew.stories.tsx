@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SpaceCardNew from './index'
-import { MemberRole, MemberStatus } from '../../hooks/useSpaceMembers'
+import { MemberStatus } from '../../public/hooks/useSpaceMembers'
+import { MemberRole } from '../../memberRole'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { withMockProvider } from '@/storybook/decorators'
-import { MOCK_SPACE_ID } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 
 const meta: Meta<typeof SpaceCardNew> = {
   title: 'Features/Spaces/SpaceCardNew',
@@ -24,6 +25,7 @@ const mockSpace: GetSpaceResponse = {
   safeCount: 5,
   memberCount: 3,
   experimentalFeatures: [],
+  setupStatus: null,
   members: [
     {
       name: 'Admin User',

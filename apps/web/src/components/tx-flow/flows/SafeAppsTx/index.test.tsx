@@ -4,7 +4,8 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAppsTxFlow from '.'
 
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
   createTx: jest.fn(),
   createMultiSendCallOnlyTx: jest.fn(),
 }))
@@ -19,6 +20,7 @@ const app = { name: 'Transaction Builder', iconUrl: faker.image.url() }
 const renderFlow = () =>
   render(
     <SafeAppsTxFlow
+      declared={{ channel: 'SAFE_APP' }}
       data={{
         app,
         requestId: faker.string.uuid(),

@@ -1,12 +1,13 @@
-import type { DelegationOrigin } from '@/features/proposers/types'
+import type { DelegationOrigin } from '../types'
 import type { CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { parseDelegation, parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
-import { PendingDelegationConflictError } from '@/features/proposers/utils/proposerErrors'
+import { parseDelegation, parseDelegationOrigin } from '../utils/delegationParsing'
+import { PendingDelegationConflictError } from '../public/utils/proposerErrors'
 import { normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { DelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
+import { buildDeclared } from '@safe-global/utils/utils/declaredAttribution'
 
 /**
  * Builds the origin metadata JSON string for a delegation off-chain message.
@@ -52,6 +53,7 @@ export async function createDelegationMessage(
     signature,
     safeAppId: null,
     origin,
+    declared: buildDeclared('NATIVE_TRANSFER'),
   }
 
   try {

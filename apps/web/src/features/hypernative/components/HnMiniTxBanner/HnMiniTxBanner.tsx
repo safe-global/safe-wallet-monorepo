@@ -4,7 +4,8 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import Track from '@/components/common/Track'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
-import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE, MixpanelEventParams } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 export interface HnMiniTxBannerProps extends WithHnSignupFlowProps {
   onDismiss: () => void

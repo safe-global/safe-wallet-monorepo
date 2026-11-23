@@ -21,6 +21,12 @@ describe('AddressBookToolbar', () => {
     expect(onQueryChange).toHaveBeenCalledWith('')
   })
 
+  it('names what the search matches', () => {
+    render(<AddressBookToolbar query="" onQueryChange={jest.fn()} searchScope="name, address or tag" />)
+
+    expect(screen.getByPlaceholderText('Search by name, address or tag')).toBeInTheDocument()
+  })
+
   it('renders the filters and the actions it is given', () => {
     render(
       <AddressBookToolbar
