@@ -685,6 +685,26 @@ describe('ReviewRecipientAllowlist', () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
+  it('should neither save nor continue, when the Safe account is not loaded yet, so nobody could confirm what the allowlist blocks', async () => {
+    built({ status: 'none' })
+    mockUseAccounts.mockReturnValue({
+      accounts: [],
+      isLoading: true,
+      isError: false,
+      hasWallet: true,
+      signersOnly: false,
+      refetch: jest.fn(),
+      hasSelectableAccount: false,
+    })
+    renderReview()
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
+    await waitFor(() => expect(mockSave).not.toHaveBeenCalled())
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
   it('should ask the owner to confirm what the Safe can still do and the delay of later changes, when the review opens', () => {
     built({ status: 'none' })
     renderReview()

@@ -159,7 +159,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   // Signing locks the Safe to the allowlist, so the owner confirms that before continuing
   const submitWithConsent: SubmitCallback = (args) => {
-    if (hasSummary && !isConsentGiven) {
+    if (!isConsentGiven) {
       setShowConsentError(true)
       consentRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
       return
