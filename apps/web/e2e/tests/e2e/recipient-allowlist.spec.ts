@@ -125,7 +125,7 @@ async function confirmFromPoliciesAsSecondOwner(
   const allowlist = new RecipientAllowlistPage(page)
   await journey.connectAs('bob')
   await new PoliciesPage(page).goto(workspaceId)
-  await allowlist.openPendingPanel(safe.address)
+  await allowlist.openPanel(safe.address)
   await expect(allowlist.panel).toContainText('1 of 2 signatures')
   await allowlist.reviewTransactionButton.click()
   await expectReviewedCalls(allowlist, calls)
@@ -219,7 +219,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       // CGW can still serve the policies it cached before the request was registered, so reload until it doesn't.
       await expect(async () => {
         await policies.goto(workspaceId)
-        await allowlist.openPendingPanel(safe.address)
+        await allowlist.openPanel(safe.address)
         await expect(allowlist.disabledPanelAction).toBeVisible({ timeout: 5_000 })
       }).toPass({ timeout: 90_000 })
       await expect(allowlist.reviewTransactionButton).toHaveCount(0)
@@ -228,7 +228,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       // Fakes the browser clock from here on; the panel reads the time when it renders, so it is opened again.
       await safePage.clock.setSystemTime(new Date((readyAt + 1) * 1000))
       await allowlist.closePanel()
-      await allowlist.openPendingPanel(safe.address)
+      await allowlist.openPanel(safe.address)
       await expect(allowlist.reviewTransactionButton).toBeEnabled()
       await expect(allowlist.disabledPanelAction).toHaveCount(0)
 
@@ -239,7 +239,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       } else {
         await new TxReviewPage(safePage).sign()
         await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
-        // The queued apply is a row of its own until it executes, with the signatures it still needs.
+        // The queued apply shows on the allowlist's row until it executes, with the signatures it still needs.
         await confirmFromPoliciesAsSecondOwner(safePage, signing, APPLY_CALLS)
       }
 

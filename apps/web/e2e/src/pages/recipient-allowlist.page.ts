@@ -108,15 +108,6 @@ export class RecipientAllowlistPage {
     await this.page.getByRole('button', { name: `Open Allowlist for ${short(safeAddress)}` }).click()
   }
 
-  /** The row of a requested change, queued or waiting out the delay; it is listed next to the live allowlist */
-  pendingRow(safeAddress: string): Locator {
-    return this.row(safeAddress).filter({ has: this.page.getByTestId('policy-cell-status').getByText('Pending') })
-  }
-
-  async openPendingPanel(safeAddress: string): Promise<void> {
-    await this.pendingRow(safeAddress).getByTestId('policy-open-button').click()
-  }
-
   async closePanel(): Promise<void> {
     await this.page.keyboard.press('Escape')
   }
