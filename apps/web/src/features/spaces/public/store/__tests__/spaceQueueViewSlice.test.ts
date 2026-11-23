@@ -3,6 +3,12 @@ import { HYDRATE_ACTION } from '@/store/hydrateAction'
 import local from '@/services/local-storage/local'
 import { selectQueueGroupBy, setQueueGroupBy, spaceQueueViewSlice } from '../spaceQueueViewSlice'
 
+const reload = () => {
+  const store = makeStore()
+  store.dispatch({ type: HYDRATE_ACTION, payload: getPersistedState() })
+  return store
+}
+
 describe('spaceQueueViewSlice', () => {
   afterEach(() => {
     localStorage.clear()
@@ -14,21 +20,31 @@ describe('spaceQueueViewSlice', () => {
     expect(selectQueueGroupBy(store.getState())).toBe('status')
   })
 
-  it('keeps the picked grouping for the session without saving it to localStorage', () => {
-    const store = makeStore()
-
-    store.dispatch(setQueueGroupBy('network'))
-
-    expect(selectQueueGroupBy(store.getState())).toBe('network')
-    expect(local.getItem(spaceQueueViewSlice.name)).toBeNull()
+  it('lists the queue by status on a first visit, with nothing saved', () => {
+    expect(selectQueueGroupBy(reload().getState())).toBe('status')
   })
 
-  it('lists by status again after a reload', () => {
+  it('keeps the picked grouping after a reload', () => {
     makeStore().dispatch(setQueueGroupBy('next'))
 
-    const reloaded = makeStore()
-    reloaded.dispatch({ type: HYDRATE_ACTION, payload: getPersistedState() })
+    expect(selectQueueGroupBy(reload().getState())).toBe('next')
+  })
 
-    expect(selectQueueGroupBy(reloaded.getState())).toBe('status')
+  it('saves only the grouping, not the queue filters', () => {
+    makeStore().dispatch(setQueueGroupBy('network'))
+
+    expect(local.getItem(spaceQueueViewSlice.name)).toStrictEqual({ groupBy: 'network' })
+  })
+
+  it('falls back to status when the saved grouping is no longer an option', () => {
+    local.setItem(spaceQueueViewSlice.name, { groupBy: 'removed-option' })
+
+    expect(selectQueueGroupBy(reload().getState())).toBe('status')
+  })
+
+  it('falls back to status when the saved value is not a grouping object', () => {
+    local.setItem(spaceQueueViewSlice.name, 'network')
+
+    expect(selectQueueGroupBy(reload().getState())).toBe('status')
   })
 })
