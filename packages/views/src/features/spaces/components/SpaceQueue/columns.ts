@@ -14,7 +14,8 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   // Fits 165px of content whole, the gauge with 10/10 then "Submitting" and its spinner; longer labels truncate
   // TODO(WA-4166): back to layout B width (128px) once the executing and expired labels leave this column
   Status: 200,
-  Action: 176,
+  // Fits "Blocked by #nnnn" and its arrow (146px at the widest digits) beside the More button
+  Action: 216,
 }
 
 /** The queue table's floor: below it, the table scrolls sideways */

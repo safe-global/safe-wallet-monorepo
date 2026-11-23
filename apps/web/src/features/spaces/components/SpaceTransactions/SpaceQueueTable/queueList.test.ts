@@ -152,3 +152,46 @@ describe('buildGroupedQueueList', () => {
     expect(new Set(list.map((item) => item.key)).size).toBe(list.length)
   })
 })
+
+describe("the next nonce's status on each row", () => {
+  const safeAddress = checksumAddress(faker.finance.ethereumAddress())
+  const sections: SpaceQueueSection[] = [
+    {
+      safeAddress,
+      chains: [
+        {
+          chainId: '1',
+          items: [
+            { type: 'LABEL', label: 'Next' },
+            transactionItem(3),
+            { type: 'LABEL', label: 'Queued' },
+            transactionItem(4),
+          ],
+        },
+      ],
+    },
+  ]
+  const signers = new Set<string>()
+  const transactions = (list: ReturnType<typeof buildQueueList>) =>
+    list.flatMap((item) => (item.kind === 'transaction' ? [[item.status, item.nextNonce, item.nextStatus]] : []))
+
+  it('tells a blocked row what the next nonce waits on, in the Safe list and in a grouping', () => {
+    const expected = [
+      ['execute', 3, 'execute'],
+      ['blocked', 3, 'execute'],
+    ]
+    const none = new Set<string>()
+
+    expect(transactions(buildQueueList({ sections, collapsedSafes: none, collapsedChains: none, signers }))).toEqual(
+      expected,
+    )
+    expect(
+      transactions(
+        buildGroupedQueueList({
+          groups: getQueueGroups(getQueueUnits(sections, signers), 'network'),
+          collapsedGroups: none,
+        }),
+      ),
+    ).toEqual(expected)
+  })
+})

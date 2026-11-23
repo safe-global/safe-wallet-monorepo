@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactElement, ReactNode } from 'react'
+import { useCallback, useEffect, useRef, type ComponentProps, type ReactElement, type ReactNode } from 'react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
@@ -18,11 +18,14 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
+import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
-import { getCounterparty, getNonce } from './utils'
+import { cn } from '@safe-global/views/utils/cn'
+import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
+import { getBlockedByHint, getCounterparty, getNonce } from './utils'
 
 export const Counterparty = ({
   txInfo,
@@ -94,11 +97,20 @@ const StatusLabelSlot = ({ label, children }: { label: string; children: ReactNo
   </Tooltip>
 )
 
+// Painted on the cells like the hover pill, so it sits inside the row's insets with the same rounded ends
+const HIGHLIGHT_CLASSES: Record<HighlightPhase, string> = {
+  on: '[&>td]:bg-accent [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg',
+  fading:
+    '[&>td]:transition-colors [&>td]:duration-700 motion-reduce:[&>td]:transition-none [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg',
+}
+
 type SpaceQueueRowProps = {
   item: TransactionQueuedItem
   chainId: string
   status: QueueStatus
   nextNonce?: number
+  /** Where the Safe's next nonce stands for the user: what a blocked row waits on */
+  nextStatus?: QueueStatus
   conflict?: ConflictOption
   /** False when a rejection already holds this nonce */
   canReject?: boolean
@@ -111,6 +123,7 @@ const SpaceQueueRow = ({
   chainId,
   status,
   nextNonce,
+  nextStatus,
   conflict,
   canReject = true,
   safeAddress,
@@ -125,9 +138,37 @@ const SpaceQueueRow = ({
   const nonce = getNonce(tx)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const showWarning = isImitation(tx) || (hasDefaultTokenlist && !isTrustedTx(tx))
+  const goTo = useQueueGoTo()
+  const blockedBy = status === 'blocked' && !isPending ? nextNonce : undefined
+
+  const { phase, takeFocus } = useRowHighlight(tx.id)
+  const rowRef = useRef<HTMLTableRowElement | null>(null)
+  const measureRef = rowProps?.ref
+  const setRowRef = useCallback(
+    (element: HTMLTableRowElement | null) => {
+      rowRef.current = element
+      if (typeof measureRef === 'function') measureRef(element)
+      else if (measureRef) measureRef.current = element
+    },
+    [measureRef],
+  )
+  useEffect(() => {
+    if (phase && takeFocus()) rowRef.current?.focus({ preventScroll: true })
+  }, [phase, takeFocus])
 
   return (
-    <TableRow data-testid="space-queue-row" className="group/transaction h-14" {...rowProps}>
+    <TableRow
+      data-testid="space-queue-row"
+      {...rowProps}
+      ref={setRowRef}
+      tabIndex={-1}
+      data-highlighted={phase}
+      data-no-hover={phase === 'on' ? '' : undefined}
+      className={cn(
+        'group/transaction h-14 outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+        phase && HIGHLIGHT_CLASSES[phase],
+      )}
+    >
       <TableCell className="relative py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground">
         {conflict ? <ConflictBracket {...conflict} nonce={nonce} /> : nonce}
       </TableCell>
@@ -194,7 +235,15 @@ const SpaceQueueRow = ({
 
       <TableCell>
         <div className="flex items-center justify-end gap-1">
-          {!expiredSwap && <QueueActions tx={tx} dense />}
+          {expiredSwap ? null : blockedBy !== undefined ? (
+            <BlockedByButton
+              nonce={blockedBy}
+              hint={getBlockedByHint(blockedBy, nextStatus)}
+              onClick={() => goTo?.({ safeAddress, chainId, nonce: blockedBy })}
+            />
+          ) : (
+            <QueueActions tx={tx} dense />
+          )}
           <RowActionsMenu tx={tx} canReject={canReject} />
         </div>
       </TableCell>

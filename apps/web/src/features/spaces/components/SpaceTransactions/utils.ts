@@ -176,3 +176,27 @@ export const getNextNonce = (rows: QueueRowData[]): number | undefined => {
   const next = rows.find((row) => row.kind === 'transaction' && row.isNext)
   return next?.kind === 'transaction' ? getNonce(next.item.transaction) : undefined
 }
+
+/**
+ * Where the Safe's next nonce stands for the user: `execute` when an option there can execute, else `sign` when they
+ * can sign one, else `waiting`. Undefined when no loaded row is next. `statuses` lines up with `rows`.
+ */
+export const getNextStatus = (
+  rows: QueueRowData[],
+  statuses: Array<QueueStatus | undefined>,
+): QueueStatus | undefined => {
+  const next = statuses.filter((_, index) => {
+    const row = rows[index]
+    return row.kind === 'transaction' && row.isNext
+  })
+  if (next.length === 0) return undefined
+  if (next.includes('execute')) return 'execute'
+  return next.includes('sign') ? 'sign' : 'waiting'
+}
+
+/** The Blocked by button's tooltip: what the user has to do about the nonce holding the row back */
+export const getBlockedByHint = (nonce: number, nextStatus?: QueueStatus): string => {
+  if (nextStatus === 'execute') return `#${nonce} is fully signed. Execute it first.`
+  if (nextStatus === 'sign') return `#${nonce} needs your signature first.`
+  return `#${nonce} is waiting on other signers.`
+}

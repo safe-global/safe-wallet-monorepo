@@ -88,6 +88,40 @@ export const QUEUE_SECTIONS: SpaceQueueSection[] = [
   },
 ]
 
+/** Fully signed rows behind the next nonce: Safe A waits on a #1233 to execute, Safe B on a #16 the story wallet signs */
+export const BLOCKED_SECTIONS: SpaceQueueSection[] = [
+  {
+    safeAddress: SAFE_B,
+    chains: [
+      {
+        chainId: '1',
+        items: [
+          { type: TransactionListItemType.LABEL, label: 'Next' },
+          transfer('b-1-16', 16, 1),
+          { type: TransactionListItemType.LABEL, label: 'Queued' },
+          transfer('b-1-17', 17, 2, TransactionStatus.AWAITING_EXECUTION),
+        ],
+      },
+    ],
+  },
+  {
+    safeAddress: SAFE_A,
+    chains: [
+      {
+        chainId: '1',
+        items: [
+          { type: TransactionListItemType.LABEL, label: 'Next' },
+          transfer('a-1-1233', 1233, 2, TransactionStatus.AWAITING_EXECUTION),
+          { type: TransactionListItemType.LABEL, label: 'Queued' },
+          ...Array.from({ length: 24 }, (_, index) =>
+            transfer(`a-1-${1234 + index}`, 1234 + index, 2, TransactionStatus.AWAITING_EXECUTION),
+          ),
+        ],
+      },
+    ],
+  },
+]
+
 const countTransactions = (sections: SpaceQueueSection[]): number =>
   sections
     .flatMap((section) => section.chains.flatMap((chain) => chain.items))
@@ -125,10 +159,12 @@ export const toQueuePage = (sections: SpaceQueueSection[]): SpaceQueuedItemPage 
 /** The details behind each queued transaction, signed by as many owners as its summary counts */
 export const TX_DETAILS_HANDLER = http.get(/\/v1\/chains\/[^/]+\/transactions\/([^/]+)$/, ({ request }) => {
   const id = decodeURIComponent(new URL(request.url).pathname.split('/').pop() ?? '')
-  const item = QUEUE_SECTIONS.flatMap(({ chains }) => chains.flatMap(({ items }) => items)).find(
-    (entry): entry is TransactionQueuedItem =>
-      entry.type === TransactionListItemType.TRANSACTION && entry.transaction.id === id,
-  )
+  const item = [...QUEUE_SECTIONS, ...BLOCKED_SECTIONS]
+    .flatMap(({ chains }) => chains.flatMap(({ items }) => items))
+    .find(
+      (entry): entry is TransactionQueuedItem =>
+        entry.type === TransactionListItemType.TRANSACTION && entry.transaction.id === id,
+    )
   const executionInfo = item?.transaction.executionInfo
   if (!item || executionInfo?.type !== DetailedExecutionInfoType.MULTISIG)
     return new HttpResponse(null, { status: 404 })

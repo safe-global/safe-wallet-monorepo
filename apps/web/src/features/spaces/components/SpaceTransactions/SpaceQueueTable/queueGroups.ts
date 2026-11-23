@@ -9,6 +9,7 @@ import type {
 import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import {
   getNextNonce,
+  getNextStatus,
   getNonce,
   getQueueStatus,
   getRejectedNonces,
@@ -35,6 +36,8 @@ export type QueueUnit = {
   order: number
   isNext: boolean
   nextNonce?: number
+  /** Where the Safe's next nonce stands for the user: what a blocked transaction waits on */
+  nextStatus?: QueueStatus
   /** Set when options share a nonce: their header goes first */
   conflict?: { nonce?: number; size: number }
   transactions: QueueTransaction[]
@@ -71,7 +74,11 @@ const toUnits = (sections: SpaceQueueSection[], signers: SignerWallets): QueueUn
   for (const { safeAddress, chains } of sections) {
     for (const { chainId, items } of chains) {
       const rows = getSectionRows(items)
+      const statuses = rows.map((row) =>
+        row.kind === 'transaction' ? getQueueStatus(row.item.transaction, row.isNext, signers) : undefined,
+      )
       const nextNonce = getNextNonce(rows)
+      const nextStatus = getNextStatus(rows, statuses)
       const rejectedNonces = getRejectedNonces(rows)
       const scopeKey = getChainKey(safeAddress, chainId)
       const start = (key: string, conflict?: QueueUnit['conflict']): QueueUnit => {
@@ -83,6 +90,7 @@ const toUnits = (sections: SpaceQueueSection[], signers: SignerWallets): QueueUn
           order: units.length,
           isNext: false,
           nextNonce,
+          nextStatus,
           conflict,
           transactions: [],
           rank: 0,
@@ -102,7 +110,7 @@ const toUnits = (sections: SpaceQueueSection[], signers: SignerWallets): QueueUn
         unit.isNext = row.isNext
         unit.transactions.push({
           item: row.item,
-          status: getQueueStatus(transaction, row.isNext, signers),
+          status: statuses[index] ?? 'waiting',
           conflict: row.conflict,
           canReject: !rejectedNonces.has(getNonce(transaction) ?? -1),
         })

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import { QUEUE_SECTIONS, TX_DETAILS_HANDLER } from '../SpaceTransactionQueue.storyData'
+import { BLOCKED_SECTIONS, QUEUE_SECTIONS, TX_DETAILS_HANDLER } from '../SpaceTransactionQueue.storyData'
 import SpaceQueueTable from '.'
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', layout: 'paper', shadcn: true })
@@ -28,3 +28,12 @@ export const ByNetwork: Story = { args: { groupBy: 'network' } }
 
 /** Up next: the next transaction of each Safe on each network, then the ones behind it. */
 export const UpNext: Story = { args: { groupBy: 'next' } }
+
+/**
+ * Rows behind the next nonce read "Blocked by #n": Safe B's #17 waits on a #16 the wallet signs, Safe A's rows on a #1233
+ * to execute. A click scrolls up to #n and highlights it, expanding its band when collapsed.
+ */
+export const BlockedBy: Story = { args: { sections: BLOCKED_SECTIONS } }
+
+/** Up next: the blocked rows sit behind it, so a click opens Next in line when it is collapsed. */
+export const BlockedByUpNext: Story = { args: { sections: BLOCKED_SECTIONS, groupBy: 'next' } }

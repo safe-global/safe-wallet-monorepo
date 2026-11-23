@@ -17,10 +17,12 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import type { SpaceQueueChain, SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import SpaceQueueTable from '.'
 import { buildGroupedQueueList, buildQueueList } from './queueList'
+import { createHighlightStore, QueueNavigationContext } from './queueNavigation'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
 import type SpaceQueueRowType from '../SpaceQueueRow'
@@ -60,25 +62,52 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
     return <>{props.children}</>
   },
 }))
+const mockScrollToIndex = jest.fn()
+jest.mock('@tanstack/react-virtual', () => {
+  const actual = jest.requireActual('@tanstack/react-virtual')
+  return {
+    ...actual,
+    useWindowVirtualizer: (options: unknown) => {
+      const virtualizer = actual.useWindowVirtualizer(options)
+      virtualizer.scrollToIndex = mockScrollToIndex
+      return virtualizer
+    },
+  }
+})
 jest.mock('../SpaceQueueRow', () => ({
   __esModule: true,
-  default: ({
+  default: function MockRow({
     item,
     status,
     chainId,
     safeAddress,
+    nextNonce,
   }: {
     item: TransactionQueuedItem
     status: string
     chainId: string
     safeAddress: string
-  }) => (
-    <tr data-testid="space-queue-row">
-      <td>
-        {item.transaction.id} {status} {chainId} of {safeAddress}
-      </td>
-    </tr>
-  ),
+    nextNonce?: number
+  }) {
+    const navigation = jest.requireActual('./queueNavigation')
+    const goTo = navigation.useQueueGoTo()
+    const { phase } = navigation.useRowHighlight(item.transaction.id)
+    return (
+      <tr data-testid="space-queue-row" data-highlighted={phase}>
+        <td>
+          {item.transaction.id} {status} {chainId} of {safeAddress}
+        </td>
+        {status === 'blocked' && nextNonce !== undefined && (
+          <td>
+            <button
+              aria-label={`Go from ${item.transaction.id}`}
+              onClick={() => goTo({ safeAddress, chainId, nonce: nextNonce })}
+            />
+          </td>
+        )}
+      </tr>
+    )
+  },
 }))
 jest.mock('@/hooks/useSafeDisplayName', () => ({ useSafeDisplayName: () => '' }))
 jest.mock('@/components/transactions/TxSummary/QueueActions', () => ({ __esModule: true, default: () => null }))
@@ -568,6 +597,111 @@ describe('SpaceQueueTable', () => {
     })
   })
 
+  describe('Blocked by', () => {
+    const blockerOnB = transactionItem('AWAITING_EXECUTION', 3)
+    const blockerOnOtherChain = transactionItem('AWAITING_EXECUTION', 3)
+    const blocker = transactionItem('AWAITING_EXECUTION', 3)
+    const blocked = transactionItem('AWAITING_EXECUTION', 4)
+    // The same nonce on another Safe and on another chain of the same Safe come first
+    const sameNonceElsewhere = [
+      section(safeB, [{ chainId, items: [{ type: 'LABEL', label: 'Next' }, blockerOnB] }]),
+      section(safeA, [
+        { chainId: otherChainId, items: [{ type: 'LABEL', label: 'Next' }, blockerOnOtherChain] },
+        { chainId, items: [{ type: 'LABEL', label: 'Next' }, blocker, { type: 'LABEL', label: 'Queued' }, blocked] },
+      ]),
+    ]
+    const rowOf = (item: TransactionQueuedItem) =>
+      renderedRows().find((row) => row.textContent?.startsWith(item.transaction.id))
+    const goFromBlocked = () =>
+      fireEvent.click(screen.getByRole('button', { name: `Go from ${blocked.transaction.id}` }))
+
+    beforeEach(() => mockScrollToIndex.mockClear())
+    afterEach(() => jest.useRealTimers())
+
+    it('scrolls to the transaction of that Safe and chain, not just that nonce, and highlights it', () => {
+      render(<SpaceQueueTable sections={sameNonceElsewhere} groupBy="safe" />)
+
+      goFromBlocked()
+
+      // Safe B band, its chain, its #3, Safe A band, its other chain, that chain's #3, the chain, then the blocker
+      expect(mockScrollToIndex).toHaveBeenCalledTimes(1)
+      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'smooth' })
+      expect(rowOf(blocker)).toHaveAttribute('data-highlighted', 'on')
+      expect(rowOf(blockerOnB)).not.toHaveAttribute('data-highlighted')
+      expect(rowOf(blockerOnOtherChain)).not.toHaveAttribute('data-highlighted')
+    })
+
+    it('fades the highlight out after two seconds', () => {
+      jest.useFakeTimers()
+      render(<SpaceQueueTable sections={sameNonceElsewhere} groupBy="safe" />)
+
+      goFromBlocked()
+      act(() => jest.advanceTimersByTime(2000))
+      expect(rowOf(blocker)).toHaveAttribute('data-highlighted', 'fading')
+
+      act(() => jest.advanceTimersByTime(700))
+      expect(rowOf(blocker)).not.toHaveAttribute('data-highlighted')
+    })
+
+    it('jumps without the smooth scroll when the user prefers reduced motion', () => {
+      jest
+        .spyOn(window, 'matchMedia')
+        .mockImplementation((query) => ({ matches: query === '(prefers-reduced-motion: reduce)' }) as MediaQueryList)
+      render(<SpaceQueueTable sections={sameNonceElsewhere} groupBy="safe" />)
+
+      goFromBlocked()
+
+      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'auto' })
+    })
+
+    it('goes to the first option when transactions share the nonce', () => {
+      const first = transactionItem('AWAITING_CONFIRMATIONS', 3, 'HasNext')
+      const second = transactionItem('AWAITING_EXECUTION', 3, 'End')
+      render(
+        <SpaceQueueTable
+          sections={[
+            section(safeA, [
+              {
+                chainId,
+                items: [
+                  { type: 'LABEL', label: 'Next' },
+                  { type: 'CONFLICT_HEADER', nonce: 3 },
+                  first,
+                  second,
+                  { type: 'LABEL', label: 'Queued' },
+                  blocked,
+                ],
+              },
+            ]),
+          ]}
+          groupBy="safe"
+        />,
+      )
+
+      goFromBlocked()
+
+      // The Safe band, the chain, the conflict header, then the first option
+      expect(mockScrollToIndex).toHaveBeenCalledWith(3, expect.anything())
+      expect(rowOf(first)).toHaveAttribute('data-highlighted', 'on')
+      expect(rowOf(second)).not.toHaveAttribute('data-highlighted')
+    })
+
+    it('expands the collapsed band holding the transaction, without changing the saved Collapse all', () => {
+      render(<SpaceQueueTable sections={sameNonceElsewhere} groupBy="next" />)
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Expand Behind it' }))
+      expect(rowOf(blocker)).toBeUndefined()
+
+      goFromBlocked()
+
+      expect(rowOf(blocker)).toHaveAttribute('data-highlighted', 'on')
+      expect(screen.getByRole('button', { name: 'Collapse Next in line' })).toBeInTheDocument()
+      expect(getStoreInstance().getState()[spaceQueueViewSlice.name]).toMatchObject({ collapseAll: true })
+      // The Next in line band, its three rows, then the blocker's
+      expect(mockScrollToIndex).toHaveBeenCalledWith(3, expect.anything())
+    })
+  })
+
   describe('rows', () => {
     const { default: SpaceQueueRow } = jest.requireActual<{ default: typeof SpaceQueueRowType }>('../SpaceQueueRow')
 
@@ -600,20 +734,116 @@ describe('SpaceQueueTable', () => {
         </DeleteTxDialogProvider>,
       )
 
-    it('shows the status in the gauge, without a status chip', () => {
+    const renderBlockedRow = (nextNonce: number, nextStatus?: QueueStatus) =>
       render(
         <DeleteTxDialogProvider>
           <Table>
             <TableBody>
-              <SpaceQueueRow item={next} safeAddress={safeA} chainId={chainId} status="blocked" nextNonce={3} />
+              <SpaceQueueRow
+                item={next}
+                safeAddress={safeA}
+                chainId={chainId}
+                status="blocked"
+                nextNonce={nextNonce}
+                nextStatus={nextStatus}
+              />
             </TableBody>
           </Table>
         </DeleteTxDialogProvider>,
       )
 
+    const hoverBlockedBy = async (nonce: number) => {
+      const button = screen.getByRole('button', { name: `Blocked by #${nonce}` })
+      fireEvent.focus(button)
+      fireEvent.pointerEnter(button)
+      fireEvent.mouseEnter(button)
+    }
+
+    it('shows the status in the gauge, without a status chip, and "Blocked" only in the action', () => {
+      renderBlockedRow(3)
+
       expect(screen.getByRole('button', { name: /^Blocked by #3\. \d+ of \d+ signatures?$/ })).toBeInTheDocument()
-      expect(screen.queryByText('Blocked by #3')).not.toBeInTheDocument()
+      const cells = screen.getByTestId('space-queue-row').querySelectorAll('td')
+      expect([...cells].filter((cell) => cell.textContent?.includes('Blocked'))).toEqual([cells[cells.length - 1]])
       expect(screen.getByTestId('space-queue-row').querySelector('[data-slot="badge-dot"]')).toBeNull()
+    })
+
+    it('replaces the action of a blocked row with "Blocked by #n" and an arrow, a four-digit nonce included', () => {
+      renderBlockedRow(1234)
+
+      const button = screen.getByRole('button', { name: 'Blocked by #1234' })
+      expect(button).toHaveTextContent(/^Blocked by #1234$/)
+      expect(button.querySelector('svg.lucide-arrow-right')).toBeInTheDocument()
+      expect(button).toHaveClass('whitespace-nowrap')
+      expect(screen.queryByRole('button', { name: 'Execute' })).not.toBeInTheDocument()
+    })
+
+    it.each<[QueueStatus, string]>([
+      ['sign', '#3 needs your signature first.'],
+      ['execute', '#3 is fully signed. Execute it first.'],
+    ])('says what the blocking transaction needs when it is to %s', async (nextStatus, hint) => {
+      renderBlockedRow(3, nextStatus)
+
+      await hoverBlockedBy(3)
+
+      expect(await screen.findByText(hint)).toBeInTheDocument()
+    })
+
+    it.each<QueueStatus>(['execute', 'sign', 'waiting'])('keeps the row action of a transaction to %s', (status) => {
+      render(
+        <DeleteTxDialogProvider>
+          <Table>
+            <TableBody>
+              <SpaceQueueRow item={next} safeAddress={safeA} chainId={chainId} status={status} nextNonce={3} />
+            </TableBody>
+          </Table>
+        </DeleteTxDialogProvider>,
+      )
+
+      expect(screen.queryByRole('button', { name: /^Blocked by #3$/ })).not.toBeInTheDocument()
+    })
+
+    it('asks the table to go to the blocking nonce of its own Safe and chain', () => {
+      const goTo = jest.fn()
+      render(
+        <QueueNavigationContext.Provider value={{ goTo, highlights: createHighlightStore() }}>
+          <DeleteTxDialogProvider>
+            <Table>
+              <TableBody>
+                <SpaceQueueRow item={queued} safeAddress={safeA} chainId={chainId} status="blocked" nextNonce={3} />
+              </TableBody>
+            </Table>
+          </DeleteTxDialogProvider>
+        </QueueNavigationContext.Provider>,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: 'Blocked by #3' }))
+
+      expect(goTo).toHaveBeenCalledWith({ safeAddress: safeA, chainId, nonce: 3 })
+    })
+
+    it('takes the focus and a highlight when the table goes to it', () => {
+      const highlights = createHighlightStore()
+      render(
+        <QueueNavigationContext.Provider value={{ goTo: jest.fn(), highlights }}>
+          <DeleteTxDialogProvider>
+            <Table>
+              <TableBody>
+                <SpaceQueueRow item={next} safeAddress={safeA} chainId={chainId} status="execute" />
+              </TableBody>
+            </Table>
+          </DeleteTxDialogProvider>
+        </QueueNavigationContext.Provider>,
+      )
+      const row = screen.getByTestId('space-queue-row')
+      expect(row).not.toHaveAttribute('data-highlighted')
+
+      act(() => highlights.highlight(next.transaction.id))
+
+      expect(row).toHaveAttribute('data-highlighted', 'on')
+      expect(row).toHaveClass('[&>td]:bg-accent')
+      expect(row).toHaveFocus()
+      highlights.dispose()
     })
 
     it('truncates a pending label, with the full text in a tooltip', async () => {

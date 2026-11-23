@@ -5,8 +5,10 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import {
+  getBlockedByHint,
   getCounterparty,
   getNextNonce,
+  getNextStatus,
   getQueueStatus,
   getQueueTypeLabel,
   getRejectedNonces,
@@ -69,6 +71,47 @@ describe('getSectionRows', () => {
     expect(rows.slice(1).map((row) => (row.kind === 'transaction' ? row.item : undefined))).toEqual(
       expect.arrayContaining([optionA, optionB]),
     )
+  })
+})
+
+describe('getNextStatus', () => {
+  const nextRows = (size: number) =>
+    getSectionRows([
+      { type: 'LABEL', label: 'Next' },
+      ...(size > 1 ? [conflictHeader(7)] : []),
+      ...Array.from({ length: size }, () => transactionItem(7, size > 1 ? 'HasNext' : 'None')),
+      { type: 'LABEL', label: 'Queued' },
+      transactionItem(8),
+    ])
+
+  it('is execute when an option at the next nonce can execute, over one the user can sign', () => {
+    const rows = nextRows(2)
+    expect(getNextStatus(rows, [undefined, 'sign', 'execute', 'blocked'])).toBe('execute')
+  })
+
+  it('is sign when the user can sign the next nonce', () => {
+    const rows = nextRows(1)
+    expect(getNextStatus(rows, ['sign', 'blocked'])).toBe('sign')
+  })
+
+  it('is waiting when the next nonce waits on others', () => {
+    const rows = nextRows(1)
+    expect(getNextStatus(rows, ['waiting', 'blocked'])).toBe('waiting')
+  })
+
+  it('is undefined when no loaded row is next', () => {
+    const rows = getSectionRows([{ type: 'LABEL', label: 'Queued' }, transactionItem(8)])
+    expect(getNextStatus(rows, ['blocked'])).toBeUndefined()
+  })
+})
+
+describe('getBlockedByHint', () => {
+  it.each([
+    ['execute', '#1234 is fully signed. Execute it first.'],
+    ['sign', '#1234 needs your signature first.'],
+    ['waiting', '#1234 is waiting on other signers.'],
+  ] as const)('says what #n needs when it is to %s', (status, hint) => {
+    expect(getBlockedByHint(1234, status)).toBe(hint)
   })
 })
 

@@ -1,4 +1,4 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { TableBody, tableVariants } from '@safe-global/views/components/ui/table'
 import { cn } from '@safe-global/views/utils/cn'
@@ -22,9 +22,16 @@ import { selectQueueCollapseAll, setQueueCollapseAll } from '../../../public/sto
 import { toChainInfos } from '../../../utils'
 import SpaceQueueRow from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
-import { getGroupId, getQueueGroups, getQueueUnits } from './queueGroups'
+import { getChainKey, getGroupId, getQueueGroups, getQueueUnits } from './queueGroups'
 import { buildGroupedQueueList, buildQueueList, type QueueListItem } from './queueList'
 import SafeTitle from './SafeTitle'
+import {
+  createHighlightStore,
+  findTargetGroupId,
+  findTargetIndex,
+  QueueNavigationContext,
+  type QueueTarget,
+} from './queueNavigation'
 import { createScopeStore, PooledScope, ScopePool, type ScopeStore, type ScopeTarget } from './scopePool'
 
 // First guesses only: each row is measured once rendered
@@ -86,6 +93,7 @@ const ScopedRow = ({ item, rowProps }: { item: ScopedItem; rowProps: RowProps })
       conflict={item.conflict}
       status={item.status}
       nextNonce={item.nextNonce}
+      nextStatus={item.nextStatus}
       canReject={item.canReject}
       safeAddress={item.safeAddress}
       rowProps={rowProps}
@@ -165,6 +173,8 @@ const VirtualRow = memo(function VirtualRow({
       )
   }
 })
+
+const prefersReducedMotion = (): boolean => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
 const SpaceQueueTable = ({
   sections,
@@ -249,6 +259,40 @@ const SpaceQueueTable = ({
       ? virtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1].end - scrollMargin)
       : 0
 
+  // The go-to reads the latest bands through a ref, so the context value, and the rows reading it, stay the same
+  const [highlights] = useState(createHighlightStore)
+  useEffect(() => highlights.dispose, [highlights])
+  const [goToTarget, setGoToTarget] = useState<QueueTarget>()
+  const latest = useRef({ groups, collapsedGroups, collapsedSafes })
+  latest.current = { groups, collapsedGroups, collapsedSafes }
+
+  const goTo = useCallback((target: QueueTarget) => {
+    const { groups, collapsedGroups, collapsedSafes } = latest.current
+    // Expanded with the one-by-one toggles, so the saved Collapse all pick stays as it is
+    if (groups) {
+      const groupId = findTargetGroupId(groups, target)
+      if (groupId && collapsedGroups.has(groupId)) setToggledGroups((prev) => toggle(prev, groupId))
+    } else {
+      const safeKey = getSafeKey(target.safeAddress)
+      if (collapsedSafes.has(safeKey)) setToggledSafes((prev) => toggle(prev, safeKey))
+      const chainKey = getChainKey(target.safeAddress, target.chainId)
+      setCollapsedChains((prev) => (prev.has(chainKey) ? toggle(prev, chainKey) : prev))
+    }
+    setGoToTarget(target)
+  }, [])
+  const navigation = useMemo(() => ({ goTo, highlights }), [goTo, highlights])
+
+  // Once the target's band is open, its row is in `items`: scroll it into view and highlight it
+  useEffect(() => {
+    if (!goToTarget) return
+    setGoToTarget(undefined)
+    const index = findTargetIndex(items, goToTarget)
+    const item = items[index]
+    if (item?.kind !== 'transaction') return
+    virtualizer.scrollToIndex(index, { align: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+    highlights.highlight(item.item.transaction.id)
+  }, [goToTarget, items, virtualizer, highlights])
+
   const toggleAll = () => {
     setToggledSafes(new Set())
     setToggledGroups(new Set())
@@ -264,44 +308,46 @@ const SpaceQueueTable = ({
   const scopeTargets = getScopeTargets(virtualItems.map((virtualItem) => items[virtualItem.index]))
 
   return (
-    <DeleteTxDialogProvider>
-      {/* Same panel surface as the Space accounts table, so the two line up */}
-      <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
-        <ScopePool targets={scopeTargets} store={scopeStore} />
-        <table
-          aria-label="Pending transactions"
-          className={cn(tableVariants({ variant: 'panel' }), 'table-fixed [&_td]:px-4', QUEUE_TABLE_MIN_WIDTH)}
-        >
-          <QueueTableHeader
-            collapseAll={
-              collapseUnit && collapsibleIds.length > 0
-                ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
-                : undefined
-            }
-          />
-          <TableBody ref={bodyRef}>
-            <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
-            {virtualItems.map((virtualItem) => {
-              const item = items[virtualItem.index]
-              return (
-                <VirtualRow
-                  key={item.key}
-                  item={item}
-                  index={virtualItem.index}
-                  scopeStore={scopeStore}
-                  measureRef={virtualizer.measureElement}
-                  chainConfigs={configs}
-                  onToggleSafe={onToggleSafe}
-                  onToggleChain={onToggleChain}
-                  onToggleGroup={onToggleGroup}
-                />
-              )
-            })}
-            <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
-          </TableBody>
-        </table>
-      </div>
-    </DeleteTxDialogProvider>
+    <QueueNavigationContext.Provider value={navigation}>
+      <DeleteTxDialogProvider>
+        {/* Same panel surface as the Space accounts table, so the two line up */}
+        <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
+          <ScopePool targets={scopeTargets} store={scopeStore} />
+          <table
+            aria-label="Pending transactions"
+            className={cn(tableVariants({ variant: 'panel' }), 'table-fixed [&_td]:px-4', QUEUE_TABLE_MIN_WIDTH)}
+          >
+            <QueueTableHeader
+              collapseAll={
+                collapseUnit && collapsibleIds.length > 0
+                  ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
+                  : undefined
+              }
+            />
+            <TableBody ref={bodyRef}>
+              <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+              {virtualItems.map((virtualItem) => {
+                const item = items[virtualItem.index]
+                return (
+                  <VirtualRow
+                    key={item.key}
+                    item={item}
+                    index={virtualItem.index}
+                    scopeStore={scopeStore}
+                    measureRef={virtualizer.measureElement}
+                    chainConfigs={configs}
+                    onToggleSafe={onToggleSafe}
+                    onToggleChain={onToggleChain}
+                    onToggleGroup={onToggleGroup}
+                  />
+                )
+              })}
+              <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+            </TableBody>
+          </table>
+        </div>
+      </DeleteTxDialogProvider>
+    </QueueNavigationContext.Provider>
   )
 }
 
