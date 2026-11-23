@@ -13,8 +13,7 @@ test.describe('Execute a transaction that an owner Safe confirmed', { tag: '@e2e
     safeApiClient,
     journey,
   }) => {
-    const recipient = journey.newAddress()
-    const safe = await seedTransferWithContractSignature(journey, { recipient, amount: AMOUNT })
+    const { safe, recipient } = await seedTransferWithContractSignature(journey, AMOUNT)
 
     const queue = new TxQueuePage(safePage)
     const review = new TxReviewPage(safePage)
