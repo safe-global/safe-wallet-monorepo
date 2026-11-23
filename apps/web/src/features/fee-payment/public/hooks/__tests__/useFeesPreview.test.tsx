@@ -717,6 +717,14 @@ describe('useFeesPreview', () => {
 
         expect(render().result.current.safeHasEnoughGas).toBeUndefined()
       })
+
+      it('is unknown when the balances fail to load', () => {
+        jest
+          .spyOn(useBalancesModule, 'default')
+          .mockReturnValue({ ...buildBalances([]), loaded: false, loading: false, error: 'Failed to fetch' })
+
+        expect(render().result.current.safeHasEnoughGas).toBeUndefined()
+      })
     })
 
     it('renders totalOutgoing as gas-only for a reject-shape signed safeTx with native gas', () => {
