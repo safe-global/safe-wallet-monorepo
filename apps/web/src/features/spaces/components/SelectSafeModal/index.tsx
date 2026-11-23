@@ -42,7 +42,8 @@ const SelectSafeModal = () => {
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
   const isNewTxAction = actionType === ESafeAction.NewTransaction
-  // Counterfactual Safes are out of scope for Space flows (see SafeScopeProvider)
+  // Counterfactual Safes are out of scope for Space flows (see SafeScopeProvider). Only the local
+  // undeployedSafes store knows them, so one created on another device still shows (known limitation).
   const selectableSafes = useMemo(
     () => flatSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
     [flatSafes, undeployedSafes],

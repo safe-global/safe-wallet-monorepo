@@ -33,7 +33,7 @@ const overviews = [
   overview(strangerSafe.address, ['0x0000000000000000000000000000000000000b0b']),
 ]
 
-type QueryState = { currentData?: unknown; isError?: boolean; isUninitialized?: boolean }
+type QueryState = { currentData?: unknown; isError?: boolean; isUninitialized?: boolean; isLoading?: boolean }
 
 const mockUseWallet = jest.fn()
 jest.mock('@/hooks/wallets/useWallet', () => ({
@@ -57,10 +57,9 @@ jest.mock('@/store', () => ({
   useAppSelector: () => 'USD',
 }))
 
-const mockUseAllOwnedSafes = jest.fn()
-jest.mock('@/hooks/safes/useAllOwnedSafes', () => ({
-  __esModule: true,
-  default: (address: string) => mockUseAllOwnedSafes(address),
+const mockOwnedSafesQuery = jest.fn<QueryState, [unknown]>()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/owners', () => ({
+  useOwnersGetAllSafesByOwnerV2Query: (arg: unknown) => mockOwnedSafesQuery(arg),
 }))
 
 const renderCheck = (enabled = true) => renderHook(() => useSafeSignerCheck(safes, enabled)).result.current
@@ -71,7 +70,7 @@ describe('useSafeSignerCheck', () => {
     mockUseWallet.mockReturnValue({ address: WALLET })
     mockOverviewsQuery.mockReturnValue({ currentData: overviews })
     mockProposerSafesQuery.mockReturnValue({ currentData: { '1': [proposerSafe.address] } })
-    mockUseAllOwnedSafes.mockReturnValue([{ '1': [NESTED_OWNER_SAFE] }, undefined, false])
+    mockOwnedSafesQuery.mockReturnValue({ currentData: { '1': [NESTED_OWNER_SAFE] } })
   })
 
   it('resolves owners, proposers and nested-Safe owners as signers and others as not signers', () => {
@@ -85,12 +84,22 @@ describe('useSafeSignerCheck', () => {
 
   it('enables an owned Safe right away while the other checks are pending', () => {
     mockProposerSafesQuery.mockReturnValue({})
-    mockUseAllOwnedSafes.mockReturnValue([undefined, undefined, true])
+    mockOwnedSafesQuery.mockReturnValue({ isLoading: true })
 
     const getStatus = renderCheck()
 
     expect(getStatus(ownedSafe)).toBe('signer')
     expect(getStatus(proposerSafe)).toBe('pending')
+    expect(getStatus(strangerSafe)).toBe('pending')
+  })
+
+  it('keeps a nested-owner Safe pending while only the owned-Safes query is loading', () => {
+    mockOwnedSafesQuery.mockReturnValue({ isLoading: true })
+
+    const getStatus = renderCheck()
+
+    expect(getStatus(proposerSafe)).toBe('pending')
+    expect(getStatus(nestedSafe)).toBe('pending')
     expect(getStatus(strangerSafe)).toBe('pending')
   })
 
@@ -104,7 +113,7 @@ describe('useSafeSignerCheck', () => {
   })
 
   it('treats a failed owned-Safes query as no nested-owner role', () => {
-    mockUseAllOwnedSafes.mockReturnValue([undefined, new Error('failed'), false])
+    mockOwnedSafesQuery.mockReturnValue({ isError: true })
 
     const getStatus = renderCheck()
 
@@ -116,7 +125,7 @@ describe('useSafeSignerCheck', () => {
     renderCheck()
 
     expect(mockProposerSafesQuery).toHaveBeenCalledWith({ chains: [{ chainId: '1', features: [] }], delegate: WALLET })
-    expect(mockUseAllOwnedSafes).toHaveBeenCalledWith(WALLET)
+    expect(mockOwnedSafesQuery).toHaveBeenCalledWith({ ownerAddress: WALLET })
   })
 
   it('skips the requests when disabled', () => {
@@ -124,6 +133,6 @@ describe('useSafeSignerCheck', () => {
 
     expect(mockProposerSafesQuery.mock.calls.every(([arg]) => typeof arg === 'symbol')).toBe(true)
     expect(mockOverviewsQuery.mock.calls.every(([arg]) => typeof arg === 'symbol')).toBe(true)
-    expect(mockUseAllOwnedSafes).toHaveBeenCalledWith('')
+    expect(mockOwnedSafesQuery.mock.calls.every(([arg]) => typeof arg === 'symbol')).toBe(true)
   })
 })
