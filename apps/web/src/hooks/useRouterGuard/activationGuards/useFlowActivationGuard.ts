@@ -12,6 +12,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
 import { useSafeProFlag } from '@/hooks/useIsSafeProEnabled'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
+import { buildCurrentNextUrl } from '@/utils/nextUrl'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -52,12 +53,13 @@ const guardRules: GuardRule[] = [
     match: ({ isSiweAuthenticated }) => {
       return !isSiweAuthenticated
     },
-    action: ({ isSpacesPath, query }) => {
+    action: ({ isSpacesPath, query, currentUrl }) => {
       const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
       // Keep the Workspace too, so that the welcome page opens it after sign-in
       const params = new URLSearchParams()
       if (typeof query.safe === 'string') params.set('safe', query.safe)
       if (typeof query.spaceId === 'string') params.set('spaceId', query.spaceId)
+      if (isSpacesPath) params.set('next', currentUrl)
       const search = params.toString()
       return redirect(search ? `${target}?${search}` : target)
     },
@@ -99,6 +101,9 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
+  const isSpacesPath = pathname.startsWith('/spaces')
+  // Signed out only: otherwise any query change would re-run the guard and refetch spaces (#9482)
+  const currentUrl = !isSiweAuthenticated && isSpacesPath ? buildCurrentNextUrl(pathname, query) : ''
   const isSpaceRoute = useIsSpaceRoute()
   const isWorkspaceWizardEnabled = useIsWorkspaceWizardEnabled()
   const isSafePro = useSafeProFlag()
@@ -139,13 +144,13 @@ export const useFlowActivationGuard: UseGuard = () => {
       }
     }
 
-    const isSpacesPath = pathname.startsWith('/spaces')
     const isOnboardingRoute = ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
 
     return evaluateGuard(
       {
         pathname,
         query: guardQuery,
+        currentUrl,
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
@@ -161,7 +166,9 @@ export const useFlowActivationGuard: UseGuard = () => {
   }, [
     isPlanStepEnabled,
     pathname,
+    isSpacesPath,
     guardQuery,
+    currentUrl,
     spaceId,
     isReady,
     isWalletReady,

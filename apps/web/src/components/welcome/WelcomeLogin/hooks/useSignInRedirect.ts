@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import { parseSpaceReturnUrl } from '@/utils/nextUrl'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending } from '@/store/authSlice'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
@@ -56,7 +57,8 @@ export const useSignInRedirect = ({
     if (hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
       if (requestedSpaceId) {
         setRedirectLoading(true)
-        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: requestedSpaceId } })
+        const returnUrl = parseSpaceReturnUrl(router.query.next, requestedSpaceId)
+        router.push(returnUrl ?? { pathname: AppRoutes.spaces.index, query: { spaceId: requestedSpaceId } })
         return
       }
 
