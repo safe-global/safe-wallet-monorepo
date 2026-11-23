@@ -18,7 +18,6 @@ import {
 } from '@/services/tx/nestedTxEnvelope'
 import { withChildDeclared } from '@/services/tx/nestedSignerDeclared'
 import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
-import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 jest.mock('@/services/tx/proposeTransaction', () => ({
   __esModule: true,
@@ -321,16 +320,6 @@ describe('getNestedWallet send', () => {
   })
 
   describe('child flow attribution', () => {
-    const expectProposedWithDeclared = (declared: DeclaredAttribution | undefined) =>
-      expect(jest.requireMock('@/services/tx/proposeTransaction').default).toHaveBeenCalledWith(
-        safeInfo.chainId,
-        PARENT_SAFE,
-        SIGNER,
-        expect.anything(),
-        expect.anything(),
-        expect.objectContaining({ declared }),
-      )
-
     it('proposes an approveHash with envelope with the attribution of the approved child tx', async () => {
       const declared = declaredAttributionBuilder().build()
       const approvedHash = deriveEnvelopeSafeTxHash(childEnvelope)
@@ -338,7 +327,14 @@ describe('getNestedWallet send', () => {
 
       await withChildDeclared(approvedHash, declared, () => sendTransaction(data))
 
-      expectProposedWithDeclared(declared)
+      expect(jest.requireMock('@/services/tx/proposeTransaction').default).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ declared: declared }),
+      )
     })
 
     it('proposes an approveHash without envelope with the attribution of the approved child tx', async () => {
@@ -349,7 +345,14 @@ describe('getNestedWallet send', () => {
         sendTransaction(concat([APPROVE_HASH_SELECTOR, approvedHash])),
       )
 
-      expectProposedWithDeclared(declared)
+      expect(jest.requireMock('@/services/tx/proposeTransaction').default).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ declared: declared }),
+      )
     })
 
     it('attributes the off-chain signed parent tx of an EOA owner', async () => {
@@ -361,7 +364,14 @@ describe('getNestedWallet send', () => {
         sendTransaction(concat([APPROVE_HASH_SELECTOR, approvedHash])),
       )
 
-      expectProposedWithDeclared(declared)
+      expect(jest.requireMock('@/services/tx/proposeTransaction').default).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ declared: declared }),
+      )
     })
 
     it('does not attribute an approveHash of a different child tx', async () => {
@@ -369,7 +379,14 @@ describe('getNestedWallet send', () => {
         sendTransaction(concat([APPROVE_HASH_SELECTOR, keccak256('0x01')])),
       )
 
-      expectProposedWithDeclared(undefined)
+      expect(jest.requireMock('@/services/tx/proposeTransaction').default).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ declared: undefined }),
+      )
     })
 
     it('does not attribute a call that approves no child tx', async () => {
@@ -377,7 +394,14 @@ describe('getNestedWallet send', () => {
         sendTransaction('0xdeadbeef'),
       )
 
-      expectProposedWithDeclared(undefined)
+      expect(jest.requireMock('@/services/tx/proposeTransaction').default).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ declared: undefined }),
+      )
     })
   })
 

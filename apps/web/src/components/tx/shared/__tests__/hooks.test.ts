@@ -30,7 +30,6 @@ import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
-import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
@@ -837,50 +836,24 @@ describe('SignOrExecute hooks', () => {
       const SIGNER_ADDRESS = zeroPadValue('0x0456', 20)
       const SAFE_ADDRESS = zeroPadValue('0x0000', 20)
 
-      const expectSignedOnChainWith = (
-        spy: ReturnType<typeof mockOnChainSigning>,
-        { txId, viaSafe, expected }: { txId?: string; viaSafe: boolean; expected?: DeclaredAttribution },
-      ) =>
-        expect(spy).toHaveBeenCalledWith(
-          expect.anything(),
-          txId,
-          MockEip1193Provider,
-          '1',
-          SIGNER_ADDRESS,
-          SAFE_ADDRESS,
-          viaSafe,
-          expect.any(Boolean),
-          '1.3.0',
-          undefined,
-          expected,
-        )
-
-      const expectExecutedWith = (
-        spy: ReturnType<typeof mockExecution>,
-        { txId, viaSafe, expected }: { txId?: string; viaSafe: boolean; expected?: DeclaredAttribution },
-      ) =>
-        expect(spy).toHaveBeenCalledWith(
-          '1',
-          expect.anything(),
-          { gasPrice: 1 },
-          txId,
-          MockEip1193Provider,
-          SIGNER_ADDRESS,
-          SAFE_ADDRESS,
-          viaSafe,
-          expect.any(Boolean),
-          viaSafe,
-          '1.3.0',
-          undefined,
-          expected,
-        )
-
       it('should pass it when the parent Safe signs a new tx', async () => {
         const signSpy = mockOnChainSigning()
 
         await renderWithDeclared().signTx(createSafeTx())
 
-        expectSignedOnChainWith(signSpy, { viaSafe: true, expected: declared })
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          declared,
+        )
       })
 
       it('should pass it when the parent Safe signs a tx already in the queue', async () => {
@@ -888,7 +861,19 @@ describe('SignOrExecute hooks', () => {
 
         await renderWithDeclared().signTx(createSafeTx(), '456')
 
-        expectSignedOnChainWith(signSpy, { txId: '456', viaSafe: true, expected: declared })
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          '456',
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          declared,
+        )
       })
 
       it('should not pass it when a smart contract wallet that is not a Safe signs', async () => {
@@ -901,7 +886,19 @@ describe('SignOrExecute hooks', () => {
 
         await renderWithDeclared(smartAccountSigner as SignerWallet).signTx(createSafeTx())
 
-        expectSignedOnChainWith(signSpy, { txId: '123', viaSafe: false })
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          '123',
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          false,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          undefined,
+        )
       })
 
       const walletConnectSafe = {
@@ -917,7 +914,19 @@ describe('SignOrExecute hooks', () => {
 
         await renderWithDeclared(walletConnectSafe).signTx(createSafeTx())
 
-        expectSignedOnChainWith(signSpy, { viaSafe: true })
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          undefined,
+        )
       })
 
       it('should not pass it when a Safe connected over WalletConnect executes', async () => {
@@ -925,7 +934,21 @@ describe('SignOrExecute hooks', () => {
 
         await renderWithDeclared(walletConnectSafe).executeTx({ gasPrice: 1 }, createSafeTx())
 
-        expectExecutedWith(executeSpy, { viaSafe: true })
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          undefined,
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          true,
+          '1.3.0',
+          undefined,
+          undefined,
+        )
       })
 
       it('should pass it when the parent Safe executes a new tx', async () => {
@@ -933,7 +956,21 @@ describe('SignOrExecute hooks', () => {
 
         await renderWithDeclared().executeTx({ gasPrice: 1 }, createSafeTx())
 
-        expectExecutedWith(executeSpy, { viaSafe: true, expected: declared })
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          undefined,
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          true,
+          '1.3.0',
+          undefined,
+          declared,
+        )
       })
 
       it('should pass it when the parent Safe executes a tx already in the queue', async () => {
@@ -941,7 +978,21 @@ describe('SignOrExecute hooks', () => {
 
         await renderWithDeclared().executeTx({ gasPrice: 1 }, createSafeTx(), '456')
 
-        expectExecutedWith(executeSpy, { txId: '456', viaSafe: true, expected: declared })
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          '456',
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          true,
+          '1.3.0',
+          undefined,
+          declared,
+        )
       })
 
       it('should not pass it when an EOA executes', async () => {
@@ -954,7 +1005,21 @@ describe('SignOrExecute hooks', () => {
 
         await renderWithDeclared(eoaSigner as SignerWallet).executeTx({ gasPrice: 1 }, createSafeTx())
 
-        expectExecutedWith(executeSpy, { txId: '123', viaSafe: false })
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          '123',
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          false,
+          expect.any(Boolean),
+          false,
+          '1.3.0',
+          undefined,
+          undefined,
+        )
       })
     })
 
