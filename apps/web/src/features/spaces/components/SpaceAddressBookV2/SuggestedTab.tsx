@@ -1,5 +1,4 @@
-import { useMemo, useState } from 'react'
-import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useState } from 'react'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import AddSuggestionsDialog, {
@@ -30,8 +29,6 @@ type SuggestedTabProps = {
   isAdmin: boolean
   isInvited: boolean
   isPrivateAddressBookEnabled: boolean
-  pendingRequests: AddressBookRequestItemDto[]
-  isRequestsSettled: boolean
 }
 
 type AddDialog = { suggestions: SuggestedContact[]; location: SuggestionAddLocation }
@@ -49,8 +46,6 @@ const SuggestedTab = ({
   isAdmin,
   isInvited,
   isPrivateAddressBookEnabled,
-  pendingRequests,
-  isRequestsSettled,
 }: SuggestedTabProps) => {
   const [dialog, setDialog] = useState<AddDialog>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -59,11 +54,6 @@ const SuggestedTab = ({
   const upsertNames = useUpsertWorkspaceSafeNames()
   const bookLabel = useWorkspaceAddressBookLabel()
   const dispatch = useAppDispatch()
-
-  const pendingAddresses = useMemo(
-    () => new Set(pendingRequests.map((request) => request.address.toLowerCase())),
-    [pendingRequests],
-  )
 
   if (isLoading) {
     return (
@@ -117,14 +107,13 @@ const SuggestedTab = ({
     setDialog(undefined)
   }
 
-  const canRequest = !isAdmin && isPrivateAddressBookEnabled && isRequestsSettled && !isInvited
+  const canRequest = !isAdmin && isPrivateAddressBookEnabled && !isInvited
 
   const renderRequestAction = (suggestion: SuggestedContact, { isCompact }: { isCompact: boolean }) => (
     <RequestToAddButton
       address={suggestion.address}
       name={suggestion.suggestedName}
       chainIds={suggestion.chains.map((chain) => chain.chainId)}
-      alreadyRequested={pendingAddresses.has(suggestion.address.toLowerCase())}
       location="suggested"
       isCompact={isCompact}
     />
