@@ -4,6 +4,7 @@ import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { QUEUE_COLUMNS } from './columns'
+import { ConflictBracketStart } from './ConflictBracket'
 
 const ConflictHeaderRow = ({
   nonce,
@@ -15,7 +16,10 @@ const ConflictHeaderRow = ({
   rowProps?: ComponentProps<'tr'>
 }): ReactElement => (
   <TableRow data-no-hover data-no-divider {...rowProps}>
-    <TableCell className="pt-4 pb-1 text-center text-sm tabular-nums text-muted-foreground">{nonce}</TableCell>
+    <TableCell className="relative pt-4 pb-1 text-center text-sm tabular-nums text-muted-foreground">
+      {nonce}
+      <ConflictBracketStart />
+    </TableCell>
     <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="pt-4 pb-1">
       <span className="flex items-center gap-2 text-xs">
         <Badge variant="warning">Conflicting</Badge>
