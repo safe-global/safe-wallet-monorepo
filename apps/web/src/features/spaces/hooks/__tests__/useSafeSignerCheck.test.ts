@@ -135,4 +135,23 @@ describe('useSafeSignerCheck', () => {
     expect(mockOverviewsQuery.mock.calls.every(([arg]) => typeof arg === 'symbol')).toBe(true)
     expect(mockOwnedSafesQuery.mock.calls.every(([arg]) => typeof arg === 'symbol')).toBe(true)
   })
+
+  it('goes back to pending on a wallet switch until the owned Safes of the new wallet load', () => {
+    const WALLET_B = '0x000000000000000000000000000000000000b0b2'
+    const { result, rerender } = renderHook(() => useSafeSignerCheck(safes, true))
+
+    expect(result.current(nestedSafe)).toBe('signer')
+
+    mockUseWallet.mockReturnValue({ address: WALLET_B })
+    mockOwnedSafesQuery.mockReturnValue({ isLoading: true })
+    rerender()
+
+    expect(mockOwnedSafesQuery).toHaveBeenLastCalledWith({ ownerAddress: WALLET_B })
+    expect(result.current(nestedSafe)).toBe('pending')
+
+    mockOwnedSafesQuery.mockReturnValue({ currentData: { '1': [] } })
+    rerender()
+
+    expect(result.current(nestedSafe)).toBe('not-signer')
+  })
 })
