@@ -16,6 +16,8 @@ export interface GuardResult {
 export interface GuardContext {
   pathname: string
   query: ParsedUrlQuery
+  /** The current page as a relative URL (path and query) */
+  currentUrl: string
   isPublicRoute: boolean
   isOnboardingRoute: boolean
   isSpacesPath: boolean

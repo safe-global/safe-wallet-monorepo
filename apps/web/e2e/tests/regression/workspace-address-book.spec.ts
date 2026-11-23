@@ -124,7 +124,6 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
       await page.tab('Suggested').click()
       await page.requestToAdd(ALICE_SUGGESTION)
 
-      await expect(page.row(ALICE_SUGGESTION)).toContainText('Requested')
       await expect
         .poll(async () => {
           const requests = (await gatewayRequest(
@@ -135,6 +134,7 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
           return requests.data.find((request) => sameAddress(request.address, owners.alice.address))?.name
         })
         .toBe(ALICE_SUGGESTION)
+      await expect(page.row(ALICE_SUGGESTION)).toBeHidden()
     })
 
     test('should save the tags a member sets on a Workspace contact', async ({ safePage }) => {
