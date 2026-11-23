@@ -34,7 +34,7 @@ export const getGaugeTone = (status: QueueStatus): SignatureGaugeTone =>
 export const getStatusTitle = (status: QueueStatus, nextNonce?: number): string => {
   if (status === 'execute') return 'Ready to execute'
   if (status === 'sign') return 'Ready to sign'
-  if (status === 'waiting') return 'Signing'
+  if (status === 'waiting') return 'Waiting on others'
   return nextNonce === undefined ? 'Blocked' : `Blocked by #${nextNonce}`
 }
 
@@ -54,6 +54,7 @@ type StatusHintArgs = {
 }
 
 const getWaitingHint = (missing: number, waitingOn?: string[]): string => {
+  if (missing <= 0) return 'Fully signed.'
   if (!waitingOn?.length) return `Waiting on ${plural(missing, 'more signature')}.`
   const who = missing < waitingOn.length ? `${missing} more from ${people(waitingOn)}` : people(waitingOn)
   return `Waiting on ${who}.`

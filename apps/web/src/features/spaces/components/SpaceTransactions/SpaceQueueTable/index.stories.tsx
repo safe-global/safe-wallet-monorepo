@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import { QUEUE_SECTIONS } from '../SpaceTransactionQueue.storyData'
+import { QUEUE_SECTIONS, TX_DETAILS_HANDLER } from '../SpaceTransactionQueue.storyData'
 import SpaceQueueTable from '.'
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', layout: 'paper', shadcn: true })
@@ -9,7 +9,8 @@ const meta = {
   title: 'Features/Spaces/Transactions/SpaceQueueTable',
   component: SpaceQueueTable,
   args: { sections: QUEUE_SECTIONS, groupBy: 'safe' },
-  parameters: { ...setup.parameters },
+  // Ahead of the defaults, which already answer every transaction details request
+  parameters: { ...setup.parameters, msw: { handlers: [TX_DETAILS_HANDLER, ...setup.handlers] } },
   decorators: [setup.decorator],
 } satisfies Meta<typeof SpaceQueueTable>
 

@@ -26,6 +26,16 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   useSafeNameResolver: () => mockResolveName,
 }))
 
+let mockLinkedWallets: string[] = []
+jest.mock('../../../hooks/useSignerWallets', () => ({
+  useSignerWallets: () =>
+    new Set(
+      [...mockLinkedWallets, mockUseWallet()?.address]
+        .filter((address): address is string => Boolean(address))
+        .map((address) => address.toLowerCase()),
+    ),
+}))
+
 jest.mock('@/hooks/useSafeDisplayName', () => ({ useSafeDisplayName: () => 'Treasury' }))
 
 const CHAIN_ID = '1'
@@ -100,6 +110,7 @@ describe('SignersTooltip', () => {
     jest.clearAllMocks()
     setBaseUrl(GATEWAY_URL)
     mockUseWallet.mockReturnValue(null)
+    mockLinkedWallets = []
     mockResolveName.mockReturnValue('')
   })
 
@@ -237,7 +248,7 @@ describe('SignersTooltip', () => {
     it.each<[QueueStatus, number, string]>([
       ['sign', 0, 'Ready to sign. 0 of 2 signatures'],
       ['execute', 2, 'Ready to execute. 2 of 2 signatures'],
-      ['waiting', 1, 'Signing. 1 of 2 signatures'],
+      ['waiting', 1, 'Waiting on others. 1 of 2 signatures'],
       ['blocked', 2, 'Blocked by #4. 2 of 2 signatures'],
     ])('names a "%s" gauge by its status and count', (status, submitted, label) => {
       respondWith('pending')
@@ -276,7 +287,7 @@ describe('SignersTooltip', () => {
       ],
       ['it can execute', 'execute', 2, {}, 'Ready to execute', 'Fully signed and next in line. Execute it.'],
       ['it is blocked', 'blocked', 2, { nonce: 7, nextNonce: 5 }, 'Blocked by #5', 'Fully signed. Executes after #5.'],
-      ['it waits on others', 'waiting', 1, {}, 'Signing', 'Waiting on 1 more signature.'],
+      ['it waits on others', 'waiting', 1, {}, 'Waiting on others', 'Waiting on 1 more signature.'],
     ])('shows the title and the next step when %s', async (_, status, submitted, options, title, hint) => {
       respondWith('pending')
       const { user, trigger } = renderTooltip(submitted, 2, { status, ...options })
@@ -307,6 +318,30 @@ describe('SignersTooltip', () => {
 
       await screen.findByText('You')
       expect(rowNames()).toEqual(['You', 'Max', 'Ana'])
+    })
+
+    it('says fully signed rather than waiting on no one', async () => {
+      const [ana, max] = [owner('Ana'), owner('Max')]
+      respondWith(detailsWith([ana, max], [ana, max], 2))
+      const { user, trigger } = renderTooltip(1, 2)
+
+      await user.hover(trigger)
+
+      expect(await screen.findByText('Fully signed.')).toBeInTheDocument()
+      expect(screen.queryByText(/Waiting on 0/)).not.toBeInTheDocument()
+    })
+
+    it('names only the connected wallet "You" and marks the other linked wallets with their address', async () => {
+      const [ana, me, linked] = [owner('Ana'), owner('Me'), owner('Linked')]
+      connect(me.value)
+      mockLinkedWallets = [linked.value]
+      respondWith(detailsWith([ana, linked, me], [ana], 2))
+      const { user, trigger } = renderTooltip(1, 2, { status: 'sign' })
+
+      await user.hover(trigger)
+
+      await screen.findByText('You')
+      expect(rowNames()).toEqual(['You · ' + shortenAddress(linked.value), 'You', 'Ana'])
     })
 
     it("says when the user isn't a signer of the Safe", async () => {

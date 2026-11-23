@@ -12,6 +12,7 @@ import StatusLabel from '@/features/swap/public/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import { useHasFeature } from '@/hooks/useChains'
 import useIsPending from '@/hooks/useIsPending'
+import useTransactionStatus from '@/hooks/useTransactionStatus'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
@@ -83,6 +84,16 @@ export const ProposedTime = ({ timestamp }: { timestamp: number }): ReactElement
   </Tooltip>
 )
 
+/** A label that may not fit the Status column: it truncates, with the full text in the tooltip */
+const StatusLabelSlot = ({ label, children }: { label: string; children: ReactNode }): ReactElement => (
+  <Tooltip delay={150}>
+    <TooltipTrigger render={<span data-testid="queue-row-status-label" className="flex min-w-0 overflow-hidden" />}>
+      {children}
+    </TooltipTrigger>
+    <TooltipContent>{label}</TooltipContent>
+  </Tooltip>
+)
+
 type SpaceQueueRowProps = {
   item: TransactionQueuedItem
   chainId: string
@@ -109,6 +120,7 @@ const SpaceQueueRow = ({
   const tx = item.transaction
   const isPending = useIsPending(tx.id)
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
+  const txStatusLabel = useTransactionStatus(tx)
 
   const nonce = getNonce(tx)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
@@ -166,7 +178,17 @@ const SpaceQueueRow = ({
             />
           )}
           {/* The everyday status is in the gauge: only these exceptions keep a label */}
-          {expiredSwap ? <StatusLabel status="expired" /> : isPending && <TxStatusLabel tx={tx} />}
+          {expiredSwap ? (
+            <StatusLabelSlot label="Expired">
+              <StatusLabel status="expired" />
+            </StatusLabelSlot>
+          ) : (
+            isPending && (
+              <StatusLabelSlot label={txStatusLabel}>
+                <TxStatusLabel tx={tx} />
+              </StatusLabelSlot>
+            )
+          )}
         </span>
       </TableCell>
 

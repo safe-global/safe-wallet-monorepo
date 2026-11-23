@@ -6,7 +6,8 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import type { RootState } from '@/store'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { server } from '@/tests/server'
-import { fakerChecksummedAddress, fireEvent, render, screen } from '@/tests/test-utils'
+import { fakerChecksummedAddress, fireEvent, render, screen, within } from '@/tests/test-utils'
+import { PendingStatus } from '@/store/pendingTxsSlice'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -470,6 +471,41 @@ describe('SpaceQueueTable', () => {
       expect(screen.getByRole('button', { name: /^Blocked by #3\. \d+ of \d+ signatures?$/ })).toBeInTheDocument()
       expect(screen.queryByText('Blocked by #3')).not.toBeInTheDocument()
       expect(screen.getByTestId('space-queue-row').querySelector('[data-slot="badge-dot"]')).toBeNull()
+    })
+
+    it('truncates a pending label, with the full text in a tooltip', async () => {
+      render(
+        <DeleteTxDialogProvider>
+          <Table>
+            <TableBody>
+              <SpaceQueueRow item={next} safeAddress={safeA} chainId={chainId} status="execute" />
+            </TableBody>
+          </Table>
+        </DeleteTxDialogProvider>,
+        {
+          initialReduxState: {
+            pendingTxs: {
+              [next.transaction.id]: {
+                chainId,
+                safeAddress: safeA,
+                nonce: 3,
+                status: PendingStatus.SIGNING,
+                signerAddress: fakerChecksummedAddress(),
+              },
+            },
+          },
+        },
+      )
+
+      const slot = screen.getByTestId('queue-row-status-label')
+      expect(slot).toHaveClass('min-w-0', 'overflow-hidden')
+      expect(within(slot).getByText('Signing')).toHaveClass('truncate')
+
+      fireEvent.focus(slot)
+      fireEvent.pointerEnter(slot)
+      fireEvent.mouseEnter(slot)
+
+      expect(await screen.findAllByText('Signing')).toHaveLength(2)
     })
 
     it('fills one cell per column, with the Safe in its own column', () => {

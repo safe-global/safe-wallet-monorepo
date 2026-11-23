@@ -4,9 +4,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
 import SignersList from '@safe-global/views/features/spaces/components/SpaceQueue/SignersList'
 import type { QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import useWallet from '@/hooks/wallets/useWallet'
 import { useSignerWallets } from '../../../hooks/useSignerWallets'
 import { getGaugeLabel, getGaugeTone, getSignersHeader, getStatusHint, getStatusTitle, sortSigners } from './utils'
 
@@ -41,6 +43,7 @@ const SignersTooltipContent = ({
     { refetchOnMountOrArgChange: true },
   )
   const wallets = useSignerWallets()
+  const connected = useWallet()?.address
   const resolveName = useSafeNameResolver()
   const safeName = useSafeDisplayName(safeAddress, chainId) || shortenAddress(safeAddress)
   const isYou = (address: string) => wallets.has(address.toLowerCase())
@@ -50,7 +53,11 @@ const SignersTooltipContent = ({
   const rows = signers.map(({ value, name, signed }) => ({
     address: value,
     signed,
-    name: isYou(value) ? 'You' : resolveName(value, chainId) || name || shortenAddress(value),
+    name: sameAddress(value, connected)
+      ? 'You'
+      : isYou(value)
+        ? `You · ${shortenAddress(value)}`
+        : resolveName(value, chainId) || name || shortenAddress(value),
   }))
   const unsigned = rows.filter(({ signed }) => !signed)
 
