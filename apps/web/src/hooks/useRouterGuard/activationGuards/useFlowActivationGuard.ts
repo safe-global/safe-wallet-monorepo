@@ -12,6 +12,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
 import { useSafeProFlag } from '@/hooks/useIsSafeProEnabled'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
+import { buildCurrentNextUrl } from '@/utils/nextUrl'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -52,12 +53,14 @@ const guardRules: GuardRule[] = [
     match: ({ isSiweAuthenticated }) => {
       return !isSiweAuthenticated
     },
-    action: ({ isSpacesPath, query }) => {
+    action: ({ isSpacesPath, query, currentUrl }) => {
       const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
       // Keep the Workspace too, so that the welcome page opens it after sign-in
       const params = new URLSearchParams()
       if (typeof query.safe === 'string') params.set('safe', query.safe)
       if (typeof query.spaceId === 'string') params.set('spaceId', query.spaceId)
+      // And the Workspace page itself, so that sign-in returns there (validated by useSignInRedirect)
+      if (isSpacesPath) params.set('next', currentUrl)
       const search = params.toString()
       return redirect(search ? `${target}?${search}` : target)
     },
@@ -95,6 +98,8 @@ export const useFlowActivationGuard: UseGuard = () => {
   // Next builds a new query object on every route render; the rules read only these values
   const { safe, spaceId } = query
   const guardQuery = useMemo(() => ({ safe, spaceId }), [safe, spaceId])
+  // A string, so it only changes the guard when the URL does
+  const currentUrl = buildCurrentNextUrl(pathname, query)
   const walletContext = useWalletContext()
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
@@ -146,6 +151,7 @@ export const useFlowActivationGuard: UseGuard = () => {
       {
         pathname,
         query: guardQuery,
+        currentUrl,
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
@@ -162,6 +168,7 @@ export const useFlowActivationGuard: UseGuard = () => {
     isPlanStepEnabled,
     pathname,
     guardQuery,
+    currentUrl,
     spaceId,
     isReady,
     isWalletReady,

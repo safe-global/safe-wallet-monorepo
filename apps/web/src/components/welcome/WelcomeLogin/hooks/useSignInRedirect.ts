@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import { parseSpaceReturnUrl } from '@/utils/nextUrl'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending } from '@/store/authSlice'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
@@ -19,6 +20,8 @@ interface UseSignInRedirectProps {
   singleSpaceId?: string | null
   // The `spaceId` URL param if the user is an active member (e.g. a Workspace link sent here for
   // sign-in by the route guard). It wins over singleSpaceId and pending invites.
+  // The guard also passes the page that was opened as `next`; when it is a page of this
+  // Workspace, the user goes back to it instead of the Workspace home.
   requestedSpaceId?: string | null
 }
 
@@ -56,7 +59,8 @@ export const useSignInRedirect = ({
     if (hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
       if (requestedSpaceId) {
         setRedirectLoading(true)
-        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: requestedSpaceId } })
+        const returnUrl = parseSpaceReturnUrl(router.query.next, requestedSpaceId)
+        router.push(returnUrl ?? { pathname: AppRoutes.spaces.index, query: { spaceId: requestedSpaceId } })
         return
       }
 

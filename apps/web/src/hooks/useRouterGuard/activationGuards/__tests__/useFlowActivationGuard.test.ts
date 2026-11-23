@@ -236,7 +236,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({ success: false, redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces` })
     })
 
     it('should redirect to welcome/spaces when not authenticated on /spaces/settings', async () => {
@@ -251,7 +251,10 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces%2Fsettings`,
+      })
     })
 
     it('should redirect to welcome/spaces when not authenticated on /spaces/members', async () => {
@@ -266,7 +269,10 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces%2Fmembers`,
+      })
     })
 
     it('should allow when store is not hydrated even on /spaces (no redirect before hydration)', async () => {
@@ -299,7 +305,7 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({
         success: false,
-        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef`,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&next=%2Fspaces%2Fmembers%3Fsafe%3D1%253A0xdeadbeef`,
       })
     })
 
@@ -319,8 +325,26 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({
         success: false,
-        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}&next=${encodeURIComponent(
+          `/spaces/members?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
+        )}`,
       })
+    })
+
+    it('should pass the opened Workspace page as next, so that sign-in returns to it', async () => {
+      setupMocks({
+        pathname: '/spaces/transactions',
+        query: { spaceId: MOCK_SPACE_UUID, tab: 'history' },
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      const redirectUrl = new URL(guardResult.redirectTo!, 'http://localhost')
+      expect(redirectUrl.pathname).toBe(AppRoutes.welcome.spaces)
+      expect(redirectUrl.searchParams.get('spaceId')).toBe(MOCK_SPACE_UUID)
+      expect(redirectUrl.searchParams.get('next')).toBe(`/spaces/transactions?spaceId=${MOCK_SPACE_UUID}&tab=history`)
     })
 
     it('should preserve ?safe= in the welcome redirect when unauthenticated on a non-spaces route', async () => {
@@ -356,7 +380,9 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      const redirectUrl = new URL(guardResult.redirectTo!, 'http://localhost')
+      expect(redirectUrl.pathname).toBe(AppRoutes.welcome.spaces)
+      expect(redirectUrl.searchParams.has('safe')).toBe(false)
     })
   })
 
