@@ -17,6 +17,8 @@ import { QUEUE_TABLE_MIN_WIDTH } from '@safe-global/views/features/spaces/compon
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains from '@/hooks/useChains'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { selectQueueCollapseAll, setQueueCollapseAll } from '../../../public/store/spaceQueueViewSlice'
 import { toChainInfos } from '../../../utils'
 import SpaceQueueRow from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
@@ -42,6 +44,13 @@ const toggle = (set: ReadonlySet<string>, id: string): Set<string> => {
   if (!next.delete(id)) next.add(id)
   return next
 }
+
+/** The ids that end up collapsed: the saved Collapse all / Expand all pick, flipped for each id toggled since */
+const applyToggles = (
+  collapseAll: boolean,
+  ids: readonly string[],
+  toggled: ReadonlySet<string>,
+): ReadonlySet<string> => (collapseAll ? new Set(ids.filter((id) => !toggled.has(id))) : toggled)
 
 const COLLAPSE_UNITS: Record<QueueGroupBy, [string, string] | undefined> = {
   status: undefined,
@@ -167,11 +176,30 @@ const SpaceQueueTable = ({
   const signers = useSignerWallets()
   const { configs } = useChains()
   const [scopeStore] = useState(createScopeStore)
-  const [collapsedSafes, setCollapsedSafes] = useState<ReadonlySet<string>>(new Set())
+  const dispatch = useAppDispatch()
+  // Saved, so a reload opens the queue with every group collapsed or expanded as last picked
+  const collapseAll = useAppSelector(selectQueueCollapseAll)
+  // Safes and groups toggled one by one since that pick. Not saved: a reload goes back to the pick
+  const [toggledSafes, setToggledSafes] = useState<ReadonlySet<string>>(new Set())
+  const [toggledGroups, setToggledGroups] = useState<ReadonlySet<string>>(new Set())
   const [collapsedChains, setCollapsedChains] = useState<ReadonlySet<string>>(new Set())
-  const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set())
+
+  // The pick changed (here or in another tab), so the one-by-one toggles made against the old one no longer apply
+  const [togglesPick, setTogglesPick] = useState(collapseAll)
+  if (togglesPick !== collapseAll) {
+    setTogglesPick(collapseAll)
+    setToggledSafes(new Set())
+    setToggledGroups(new Set())
+  }
 
   const groups = groupBy === 'safe' ? undefined : getQueueGroups(getQueueUnits(sections, signers), groupBy)
+  const safeKeys = useMemo(() => sections.map((section) => getSafeKey(section.safeAddress)), [sections])
+  const collapsedSafes = useMemo(
+    () => applyToggles(collapseAll, safeKeys, toggledSafes),
+    [collapseAll, safeKeys, toggledSafes],
+  )
+  const groupIds = groups?.filter((group) => group.kind !== 'all').map(getGroupId)
+  const collapsedGroups = groupIds ? applyToggles(collapseAll, groupIds, toggledGroups) : toggledGroups
   const items = useMemo(
     () =>
       groups
@@ -180,9 +208,7 @@ const SpaceQueueTable = ({
     [groups, sections, collapsedGroups, collapsedSafes, collapsedChains, signers],
   )
 
-  const collapsibleIds = groups
-    ? groups.filter((group) => group.kind !== 'all').map(getGroupId)
-    : sections.map((section) => getSafeKey(section.safeAddress))
+  const collapsibleIds = groupIds ?? safeKeys
   const collapsedIds = groups ? collapsedGroups : collapsedSafes
   const allCollapsed = collapsibleIds.every((id) => collapsedIds.has(id))
   const collapseUnit = COLLAPSE_UNITS[groupBy]
@@ -216,13 +242,17 @@ const SpaceQueueTable = ({
       ? virtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1].end - scrollMargin)
       : 0
 
-  const toggleAll = () => (groups ? setCollapsedGroups : setCollapsedSafes)(new Set(allCollapsed ? [] : collapsibleIds))
+  const toggleAll = () => {
+    setToggledSafes(new Set())
+    setToggledGroups(new Set())
+    dispatch(setQueueCollapseAll(!allCollapsed))
+  }
   const onToggleSafe = useCallback(
-    (safeAddress: string) => setCollapsedSafes((prev) => toggle(prev, getSafeKey(safeAddress))),
+    (safeAddress: string) => setToggledSafes((prev) => toggle(prev, getSafeKey(safeAddress))),
     [],
   )
   const onToggleChain = useCallback((scopeKey: string) => setCollapsedChains((prev) => toggle(prev, scopeKey)), [])
-  const onToggleGroup = useCallback((id: string) => setCollapsedGroups((prev) => toggle(prev, id)), [])
+  const onToggleGroup = useCallback((id: string) => setToggledGroups((prev) => toggle(prev, id)), [])
 
   const scopeTargets = getScopeTargets(virtualItems.map((virtualItem) => items[virtualItem.index]))
 

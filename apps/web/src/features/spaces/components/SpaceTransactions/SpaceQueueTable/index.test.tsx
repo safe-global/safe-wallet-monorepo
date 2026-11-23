@@ -6,7 +6,10 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import type { RootState } from '@/store'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { server } from '@/tests/server'
-import { fakerChecksummedAddress, fireEvent, render, screen, within } from '@/tests/test-utils'
+import { act, fakerChecksummedAddress, fireEvent, render, screen, within } from '@/tests/test-utils'
+import local from '@/services/local-storage/local'
+import { getStoreInstance } from '@/store'
+import { setQueueCollapseAll, spaceQueueViewSlice } from '../../../public/store/spaceQueueViewSlice'
 import { PendingStatus } from '@/store/pendingTxsSlice'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -137,6 +140,8 @@ describe('SpaceQueueTable', () => {
 
   afterEach(() => {
     jest.restoreAllMocks()
+    // The Collapse all / Expand all pick is saved to localStorage and read back by the next render
+    localStorage.clear()
   })
 
   it('renders a band per Safe and its rows inside the Safe scope, without polling', () => {
@@ -252,6 +257,106 @@ describe('SpaceQueueTable', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Expand all' }))
 
     expect(renderedRows()).toHaveLength(3)
+  })
+
+  describe('saved Collapse all / Expand all', () => {
+    const saveView = (view: { groupBy?: string; collapseAll?: boolean }) =>
+      local.setItem(spaceQueueViewSlice.name, { groupBy: 'safe', ...view })
+    const savedView = () => local.getItem(spaceQueueViewSlice.name)
+
+    it('saves Collapse all, so the queue opens collapsed after a reload', () => {
+      const { unmount } = render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
+      expect(savedView()).toMatchObject({ collapseAll: true })
+      unmount()
+
+      render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+
+      expect(renderedRows()).toHaveLength(0)
+      expect(screen.getByRole('button', { name: 'Expand all' })).toBeInTheDocument()
+    })
+
+    it('saves Expand all, so the queue opens expanded after a reload', () => {
+      saveView({ collapseAll: true })
+      const { unmount } = render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+      fireEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+      expect(savedView()).toMatchObject({ collapseAll: false })
+      unmount()
+
+      render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+
+      expect(renderedRows()).toHaveLength(3)
+    })
+
+    it('expands one Safe after Collapse all without saving it, so a reload collapses it again', () => {
+      saveView({ collapseAll: true })
+      const { unmount } = render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+
+      fireEvent.click(screen.getByRole('button', { name: `Expand ${shortenAddress(safeB)}` }))
+
+      expect(renderedRows()).toHaveLength(1)
+      expect(screen.getByRole('button', { name: `Collapse ${shortenAddress(safeB)}` })).toBeInTheDocument()
+      expect(savedView()).toMatchObject({ collapseAll: true })
+      unmount()
+
+      render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+
+      expect(renderedRows()).toHaveLength(0)
+    })
+
+    it('does not save collapsing a single network band, so a reload expands it again', () => {
+      const { unmount } = render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
+
+      fireEvent.click(screen.getByRole('button', { name: `Collapse ${chainName}` }))
+
+      expect(renderedRows()).toHaveLength(1)
+      expect(savedView()).toBeNull()
+      unmount()
+
+      render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
+
+      expect(renderedRows()).toHaveLength(2)
+    })
+
+    it('drops the one-by-one toggles on Collapse all, collapsing every Safe', () => {
+      render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+      fireEvent.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(safeA)}` }))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
+
+      expect(renderedRows()).toHaveLength(0)
+      fireEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+      expect(renderedRows()).toHaveLength(3)
+    })
+
+    it('follows a Collapse all made in another tab', () => {
+      render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
+      fireEvent.click(screen.getByRole('button', { name: `Collapse ${chainName}` }))
+
+      act(() => {
+        getStoreInstance().dispatch(setQueueCollapseAll(true))
+      })
+
+      expect(renderedRows()).toHaveLength(0)
+      expect(screen.getByRole('button', { name: 'Expand all' })).toHaveTextContent('Expand 2 networks')
+    })
+
+    it('applies the saved pick to the grouping on screen', () => {
+      saveView({ groupBy: 'network', collapseAll: true })
+
+      render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
+
+      expect(renderedRows()).toHaveLength(0)
+    })
+
+    it('lists every transaction when grouped by status, which has no Collapse all', () => {
+      saveView({ groupBy: 'status', collapseAll: true })
+
+      render(<SpaceQueueTable sections={sections} groupBy="status" />)
+
+      expect(renderedRows()).toHaveLength(3)
+      expect(screen.queryByRole('button', { name: /all$/ })).not.toBeInTheDocument()
+    })
   })
 
   it('puts a conflict header before transactions that share a nonce', () => {
