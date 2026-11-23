@@ -47,6 +47,7 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
     SEPOLIA_FORK_RPC_URL: 'sepolia-secret',
     PATH: '/bin',
     NEXT_PUBLIC_IS_PRODUCTION: 'true',
+    NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN: 'https://safe-wallet-web.dev.5afe.dev',
     ELECTRON_RUN_AS_NODE: '1',
   })
   assert.equal(env.FORK_RPC_URL, undefined)
@@ -54,6 +55,7 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
   assert.equal(env.ELECTRON_RUN_AS_NODE, undefined)
   assert.equal(env.NEXT_PUBLIC_CONFIG_SERVICE_KEY, 'WALLET_WEB')
   assert.equal(env.NEXT_PUBLIC_IS_PRODUCTION, 'false')
+  assert.equal(env.NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN, '')
   assert.equal(env.NEXT_PUBLIC_POLLING_INTERVAL, '2000')
   assert.equal(env.NEXT_PUBLIC_POLICY_GUARD_DELAY_SECONDS, '180')
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_STAGING, manifest.gatewayUrl)

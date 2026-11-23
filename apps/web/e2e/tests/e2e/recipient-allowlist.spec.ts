@@ -45,8 +45,8 @@ test.use({ video: 'on' })
 const newRecipient = (name: string): Recipient => ({ name, address: Wallet.createRandom().address })
 
 /**
- * A Safe 1.5.0 with 10 USDC and 1 ETH in a Business Workspace that opted into the allowlist; with `allowlisted`, it
- * already enforces an allowlist of USDC to those recipients.
+ * A Safe 1.5.0 with 10 USDC and 1 ETH in a Business Workspace; with `allowlisted`, it already enforces an allowlist
+ * of USDC to those recipients.
  */
 async function seedAllowlistSafe(
   page: Page,
@@ -62,11 +62,7 @@ async function seedAllowlistSafe(
     const allowlist = { token: SEPOLIA_USDC.address, recipients: allowlisted.map(({ address }) => address) }
     await seedAllowlist(journey, safe, allowlist, { cosigners: owners.slice(1, threshold) })
   }
-  const { id } = await seedBusinessWorkspace(
-    page,
-    { [SAFE_NAME]: safe },
-    { experimentalFeatures: ['POLICY_RECIPIENT_ALLOWLIST'] },
-  )
+  const { id } = await seedBusinessWorkspace(page, { [SAFE_NAME]: safe })
   return { safe, workspaceId: id }
 }
 

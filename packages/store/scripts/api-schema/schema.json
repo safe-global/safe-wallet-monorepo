@@ -8110,7 +8110,10 @@
             "description": "Device registered successfully for notifications"
           },
           "400": {
-            "description": "Invalid device data, expired timestamp, or invalid signature"
+            "description": "Expired timestamp"
+          },
+          "422": {
+            "description": "Invalid device data or malformed signature"
           }
         },
         "summary": "Register device for notifications (deprecated)",
@@ -8430,7 +8433,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-b435613",
+    "version": "main-1fd3a47",
     "contact": {}
   },
   "tags": [],
@@ -19974,10 +19977,7 @@
         },
         "required": [
           "cloudMessagingToken",
-          "buildNumber",
-          "bundle",
           "deviceType",
-          "version",
           "safeRegistrations"
         ]
       },

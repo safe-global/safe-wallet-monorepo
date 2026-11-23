@@ -12,7 +12,6 @@ import type {
   SpacePoliciesGetPendingPoliciesV1ApiResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { SpaceExperimentalFeature } from '@safe-global/store/gateway/types'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { RootState } from '@/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -47,7 +46,7 @@ export type AllowlistWorkspace = {
   guardAddress: string
 }
 
-/** A signed-in signer of one Safe on a chain and in a Workspace that both have the allowlist switched on. */
+/** A signed-in signer of one Safe in a Workspace, on a chain that has the allowlist switched on. */
 export const buildAllowlistWorkspace = (): AllowlistWorkspace => {
   const wallet = connectedWalletBuilder()
     .with({ address: fakerChecksummedAddress(), chainId: ALLOWLIST_CHAIN_ID })
@@ -59,7 +58,7 @@ export const buildAllowlistWorkspace = (): AllowlistWorkspace => {
       chainName: 'Sepolia',
       l2: false,
       zk: false,
-      features: [FEATURES.WORKSPACES_EXPERIMENTAL_FEATURES, FEATURES.POLICY_RECIPIENT_ALLOWLIST],
+      features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST],
       rpcUri: { authentication: 'NO_AUTHENTICATION', value: ALLOWLIST_RPC_URL },
     })
     .build()
@@ -133,7 +132,6 @@ export const serveAllowlistWorkspace = (
           .with({ user: spaceMemberUserBuilder().with({ id: userId }).build() })
           .build(),
       ],
-      experimentalFeatures: [SpaceExperimentalFeature.POLICY_RECIPIENT_ALLOWLIST],
     })
     .build()
   const overview: SafeOverview = {

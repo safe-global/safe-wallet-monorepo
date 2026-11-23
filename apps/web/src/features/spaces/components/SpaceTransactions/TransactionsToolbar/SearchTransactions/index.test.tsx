@@ -84,6 +84,12 @@ describe('SearchTransactions', () => {
     expect(onSearch).toHaveBeenCalledWith('')
   })
 
+  it('names what the gateway search matches: Safes, networks, urgency and the signers still to sign', () => {
+    render(<SearchTransactions onSearch={jest.fn()} />)
+
+    expect(searchbox()).toHaveAttribute('placeholder', 'Safes, networks, urgency, pending signers…')
+  })
+
   it('accepts at most 100 characters, the gateway limit', () => {
     render(<SearchTransactions onSearch={jest.fn()} />)
 

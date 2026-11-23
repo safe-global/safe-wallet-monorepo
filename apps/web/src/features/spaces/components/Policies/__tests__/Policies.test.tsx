@@ -58,12 +58,11 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   }),
 }))
 
-let mockIsAllowlistActive: boolean | undefined = false
+let mockIsAllowlistAvailable = false
 
-jest.mock('@/features/policy-guard/public/hooks/useIsAllowlistActiveInSpace', () => ({
-  useIsAllowlistActiveInSpace: () => mockIsAllowlistActive,
-  usePolicyGuardDelay: () =>
-    jest.requireActual('@safe-global/utils/features/policy-guard/constants').POLICY_GUARD_DELAY_SECONDS,
+jest.mock('@/features/policy-guard/public/hooks/useAllowlistAvailability', () => ({
+  ...jest.requireActual('@/features/policy-guard/public/hooks/useAllowlistAvailability'),
+  useIsAllowlistAvailableInSpace: () => mockIsAllowlistAvailable,
 }))
 
 jest.mock('../RecipientAllowlistFlow', () => ({
@@ -122,7 +121,7 @@ describe('Policies', () => {
     mockHasSeenSpendingLimitIntro = false
     mockHasSeenProposerIntro = false
     mockHasSeenAllowlistIntro = false
-    mockIsAllowlistActive = false
+    mockIsAllowlistAvailable = false
     jest.clearAllMocks()
     mockUseWallet.mockReturnValue(null)
     mockUseSpaceSafes.mockReturnValue({
@@ -323,23 +322,15 @@ describe('Policies', () => {
       return { ...utils, setTxFlow }
     }
 
-    it('is not offered when the experimental toggle is off', async () => {
+    it('should, when no chain enables the allowlist, leave it out of the add policy dialog', async () => {
       await openAddPolicyDialog()
 
       expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
       expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
     })
 
-    it('is not offered while the experimental toggle is still loading', async () => {
-      mockIsAllowlistActive = undefined
-
-      await openAddPolicyDialog()
-
-      expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
-    })
-
     it('should, when the connected wallet has no Safe account that can take an allowlist, not offer it', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       mockWallet()
 
       await openAddPolicyDialog()
@@ -348,14 +339,14 @@ describe('Policies', () => {
       expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
     })
 
-    it('is not in the catalogue when the experimental toggle is off', () => {
+    it('should, when no chain enables the allowlist, leave it out of the catalogue', () => {
       render(<Policies policies={[]} />)
 
       expect(screen.queryByRole('button', { name: 'Set policy: Recipient allowlist' })).not.toBeInTheDocument()
     })
 
-    it('is offered first, in one column, when the experimental toggle is on', async () => {
-      mockIsAllowlistActive = true
+    it('should, when a chain enables the allowlist, offer it first in one column', async () => {
+      mockIsAllowlistAvailable = true
 
       await openAddPolicyDialog()
 
@@ -365,7 +356,7 @@ describe('Policies', () => {
     })
 
     it('explains the allowlist before the flow starts', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
@@ -375,7 +366,7 @@ describe('Policies', () => {
     })
 
     it('starts the flow from the intro and records that the intro was shown', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
@@ -389,7 +380,7 @@ describe('Policies', () => {
     })
 
     it('starts nothing when the intro is dismissed', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
@@ -401,7 +392,7 @@ describe('Policies', () => {
     })
 
     it('can be set up from the catalogue when the Space has no policies yet', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       const { user } = renderWithUserEvent(<Policies policies={[]} />)
 
       await user.click(screen.getByRole('button', { name: 'Set policy: Recipient allowlist' }))
@@ -410,7 +401,7 @@ describe('Policies', () => {
     })
 
     it('should open the intro again, when it has been seen, so the owner confirms every setup', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       mockHasSeenAllowlistIntro = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
@@ -864,7 +855,7 @@ describe('Policies', () => {
     })
 
     it('should, when the plan does not include the recipient allowlist, disable it in the add policy dialog', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       const onUpgrade = jest.fn()
       const { user } = renderWithUserEvent(
         <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
@@ -878,7 +869,7 @@ describe('Policies', () => {
     })
 
     it('should, when the plan does not include the recipient allowlist, lead its catalogue tile to the upgrade', async () => {
-      mockIsAllowlistActive = true
+      mockIsAllowlistAvailable = true
       const onUpgrade = jest.fn()
       const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
 

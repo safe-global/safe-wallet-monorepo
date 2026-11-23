@@ -18,17 +18,8 @@ import type { SeededSafe } from './safe'
 
 export type BusinessWorkspace = { id: string; session: EmailSession }
 
-export type WorkspaceExperimentalFeature = 'POLICY_RECIPIENT_ALLOWLIST'
-
-/**
- * Signs the page in by email and creates a Workspace that holds the named Safes, opted into `experimentalFeatures`
- * as an admin opts in on the Workspace's experimental settings.
- */
-export async function seedBusinessWorkspace(
-  page: Page,
-  safes: Record<string, SeededSafe>,
-  { experimentalFeatures = [] }: { experimentalFeatures?: WorkspaceExperimentalFeature[] } = {},
-): Promise<BusinessWorkspace> {
+/** Signs the page in by email and creates a Workspace that holds the named Safes. */
+export async function seedBusinessWorkspace(page: Page, safes: Record<string, SeededSafe>): Promise<BusinessWorkspace> {
   const session = await signInWithEmail(page, uniqueEmail('business-workspace'))
   const { uuid } = await createWorkspace(session, 'Business workspace')
   const entries = Object.entries(safes)
@@ -37,9 +28,6 @@ export async function seedBusinessWorkspace(
     addressBookItems: entries.map(([name, { address }]) => ({ name, address, chainIds: [CHAIN_IDS.sepolia] })),
   })
   await storeSubscription(session, uuid)
-  if (experimentalFeatures.length > 0) {
-    await gatewayRequest(session, 'PATCH', `/v1/spaces/${uuid}`, { experimentalFeatures })
-  }
   await waitForOverviews(entries.map(([, safe]) => safe))
   return { id: uuid, session }
 }
