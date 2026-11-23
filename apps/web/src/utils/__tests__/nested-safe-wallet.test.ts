@@ -16,6 +16,9 @@ import {
   deriveEnvelopeSafeTxHash,
   encodeNestedTxPayload,
 } from '@/services/tx/nestedTxEnvelope'
+import { withChildDeclared } from '@/services/tx/nestedSignerDeclared'
+import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 jest.mock('@/services/tx/proposeTransaction', () => ({
   __esModule: true,
@@ -232,6 +235,23 @@ describe('getNestedWallet send', () => {
       expect(proposeTxMock.mock.calls[0][5].nestedTransaction).toBeUndefined()
     })
 
+    it('cannot attribute an execTransaction without envelope, as the child safeTxHash is not derivable', async () => {
+      const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+
+      await withChildDeclared(deriveEnvelopeSafeTxHash(childEnvelope), declaredAttributionBuilder().build(), () =>
+        sendTransaction(execCalldata),
+      )
+
+      expect(proposeTxMock).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        { nestedTransaction: undefined, declared: undefined },
+      )
+    })
+
     it('throws when the envelope does not match the executed tx', async () => {
       const data = concat([execCalldata, encodeNestedTxPayload([{ ...childEnvelope, value: '1' }])])
 
@@ -265,6 +285,23 @@ describe('getNestedWallet send', () => {
         { nestedTransaction: childEnvelope, declared: undefined },
       )
     })
+
+    it("proposes the parent tx with the child flow's attribution", async () => {
+      const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+      const declared = declaredAttributionBuilder().build()
+      const data = concat([execCalldata, encodeNestedTxPayload([childEnvelope])])
+
+      await withChildDeclared(deriveEnvelopeSafeTxHash(childEnvelope), declared, () => sendTransaction(data))
+
+      expect(proposeTxMock).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        { nestedTransaction: childEnvelope, declared },
+      )
+    })
   })
 
   it('proposes the parent tx without a child tx when there is no envelope', async () => {
@@ -281,6 +318,67 @@ describe('getNestedWallet send', () => {
       expect.anything(),
       { nestedTransaction: undefined, declared: undefined },
     )
+  })
+
+  describe('child flow attribution', () => {
+    const expectProposedWithDeclared = (declared: DeclaredAttribution | undefined) =>
+      expect(jest.requireMock('@/services/tx/proposeTransaction').default).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ declared }),
+      )
+
+    it('proposes an approveHash with envelope with the attribution of the approved child tx', async () => {
+      const declared = declaredAttributionBuilder().build()
+      const approvedHash = deriveEnvelopeSafeTxHash(childEnvelope)
+      const data = concat([APPROVE_HASH_SELECTOR, approvedHash, encodeNestedTxPayload([childEnvelope])])
+
+      await withChildDeclared(approvedHash, declared, () => sendTransaction(data))
+
+      expectProposedWithDeclared(declared)
+    })
+
+    it('proposes an approveHash without envelope with the attribution of the approved child tx', async () => {
+      const declared = declaredAttributionBuilder().build()
+      const approvedHash = keccak256('0x01')
+
+      await withChildDeclared(approvedHash, declared, () =>
+        sendTransaction(concat([APPROVE_HASH_SELECTOR, approvedHash])),
+      )
+
+      expectProposedWithDeclared(declared)
+    })
+
+    it('attributes the off-chain signed parent tx of an EOA owner', async () => {
+      jest.spyOn(wallets, 'isSmartContractWallet').mockResolvedValue(false)
+      const declared = declaredAttributionBuilder().build()
+      const approvedHash = keccak256('0x01')
+
+      await withChildDeclared(approvedHash, declared, () =>
+        sendTransaction(concat([APPROVE_HASH_SELECTOR, approvedHash])),
+      )
+
+      expectProposedWithDeclared(declared)
+    })
+
+    it('does not attribute an approveHash of a different child tx', async () => {
+      await withChildDeclared(keccak256('0x02'), declaredAttributionBuilder().build(), () =>
+        sendTransaction(concat([APPROVE_HASH_SELECTOR, keccak256('0x01')])),
+      )
+
+      expectProposedWithDeclared(undefined)
+    })
+
+    it('does not attribute a call that approves no child tx', async () => {
+      await withChildDeclared(keccak256('0x01'), declaredAttributionBuilder().build(), () =>
+        sendTransaction('0xdeadbeef'),
+      )
+
+      expectProposedWithDeclared(undefined)
+    })
   })
 
   it('only proposes the signed parent tx without executing it, even at threshold 1', async () => {
