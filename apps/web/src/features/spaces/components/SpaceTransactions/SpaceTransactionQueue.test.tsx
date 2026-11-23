@@ -161,7 +161,7 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByText("2 Safe accounts couldn't be loaded")).toBeInTheDocument()
+    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safes not loaded')
     expect(screen.getByTestId('space-queue-safe')).toBeInTheDocument()
   })
 
@@ -188,7 +188,7 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByText("1 Safe account couldn't be loaded")).toBeInTheDocument()
+    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe not loaded')
     expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
     expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
   })

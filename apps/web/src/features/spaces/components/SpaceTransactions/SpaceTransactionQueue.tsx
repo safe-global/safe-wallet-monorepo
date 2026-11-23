@@ -41,14 +41,25 @@ const QueueBody = memo(function QueueBody({
   onClearFilters: () => void
 }): ReactElement {
   const { sections, unavailableSafes } = queue
+  const hasUnavailableSafes = unavailableSafes.length > 0
 
   return (
     <>
-      {unavailableSafes.length > 0 && (
-        <UnavailableSafesAlert spaceId={spaceId} safes={unavailableSafes} onRetry={onRetry} isRetrying={isFetching} />
+      {(hasUnavailableSafes || !queue.isComplete) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {!queue.isComplete && <QueueTruncatedNotice shown={queue.shownCount} total={queue.totalCount} />}
+          {hasUnavailableSafes && (
+            <div className="ml-auto">
+              <UnavailableSafesAlert
+                spaceId={spaceId}
+                safes={unavailableSafes}
+                onRetry={onRetry}
+                isRetrying={isFetching}
+              />
+            </div>
+          )}
+        </div>
       )}
-
-      {!queue.isComplete && <QueueTruncatedNotice shown={queue.shownCount} total={queue.totalCount} />}
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} groupBy={groupBy} />

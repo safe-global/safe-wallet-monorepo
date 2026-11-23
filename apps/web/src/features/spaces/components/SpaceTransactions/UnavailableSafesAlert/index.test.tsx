@@ -44,19 +44,22 @@ describe('UnavailableSafesAlert', () => {
     mockNames.set(named, 'Treasury')
   })
 
-  it('counts the unavailable Safe accounts in the title', () => {
+  const openList = (count = 2) =>
+    fireEvent.click(screen.getByRole('button', { name: `${count} ${count === 1 ? 'Safe' : 'Safes'} not loaded` }))
+
+  it('shows a chip that counts the unavailable Safe accounts, with the list closed', () => {
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
-    expect(screen.getByText("2 Safe accounts couldn't be loaded")).toBeInTheDocument()
+    expect(screen.getByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safes not loaded')
     expect(screen.queryByText('Treasury')).not.toBeInTheDocument()
   })
 
-  it('names each Safe account and its network once expanded', () => {
+  it('names each Safe account and its network once opened', async () => {
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Show Safe accounts' }))
+    openList()
 
-    const list = screen.getByRole('list', { name: "Safe accounts that couldn't be loaded" })
+    const list = await screen.findByRole('list', { name: "Safe accounts that couldn't be loaded" })
     const items = within(list).getAllByRole('listitem')
     expect(items[0]).toHaveTextContent('Treasury')
     expect(items[0]).toHaveTextContent('on Ethereum')
@@ -64,45 +67,60 @@ describe('UnavailableSafesAlert', () => {
     expect(items[1]).toHaveTextContent('on Polygon')
   })
 
-  it('explains the limit when the Workspace holds more Safe accounts than the queue reads', async () => {
+  it('says the transactions are not shown when the Workspace is within the limit', async () => {
+    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
+
+    openList()
+
+    expect(await screen.findByText("Transactions aren't shown in the table.")).toBeInTheDocument()
+    expect(screen.queryByText(/covers up to/)).not.toBeInTheDocument()
+  })
+
+  it('explains the limit and offers no reload when the Workspace holds more Safe accounts than the queue reads', async () => {
     respondWithSpaceSafes({ '1': Array.from({ length: SPACE_QUEUE_MAX_SAFES + 1 }, address) })
 
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
+    openList()
+
     expect(await screen.findByText(/covers up to 100 Safe accounts/)).toBeInTheDocument()
-    expect(screen.getByText(/may not be deployed on that network yet/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Reload/ })).not.toBeInTheDocument()
   })
 
-  it('suggests why when the Workspace is within the limit', async () => {
-    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
-
-    expect(await screen.findByText(/may not be deployed on that network yet/)).toBeInTheDocument()
-    expect(screen.queryByText(/covers up to/)).not.toBeInTheDocument()
-  })
-
-  it('tries again', () => {
+  it('reloads the whole queue', async () => {
     const onRetry = jest.fn()
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={onRetry} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    openList()
+    fireEvent.click(await screen.findByRole('button', { name: 'Reload all 2' }))
 
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
 
-  it('disables trying again while a retry is running', () => {
+  it('says Reload for a single Safe account', async () => {
+    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes.slice(0, 1)} onRetry={jest.fn()} />)
+
+    openList(1)
+
+    expect(await screen.findByRole('button', { name: 'Reload' })).toBeInTheDocument()
+  })
+
+  it('disables reloading while a reload is running', async () => {
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} isRetrying />)
 
-    expect(screen.getByRole('button', { name: 'Try again' })).toBeDisabled()
+    openList()
+
+    expect(await screen.findByRole('button', { name: /Reload all 2/ })).toBeDisabled()
   })
 })
 
 describe('getUnavailableTitle', () => {
-  it('uses the singular for one Safe account', () => {
-    expect(getUnavailableTitle(1)).toBe("1 Safe account couldn't be loaded")
+  it('uses the singular for one Safe', () => {
+    expect(getUnavailableTitle(1)).toBe('1 Safe not loaded')
   })
 
-  it('uses the plural for several Safe accounts', () => {
-    expect(getUnavailableTitle(3)).toBe("3 Safe accounts couldn't be loaded")
+  it('uses the plural for several Safes', () => {
+    expect(getUnavailableTitle(3)).toBe('3 Safes not loaded')
   })
 })
 
