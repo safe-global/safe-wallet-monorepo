@@ -36,8 +36,9 @@ const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: s
       <span className="flex w-12 shrink-0 justify-center rounded-md bg-muted py-1 capitalize group-hover/transaction:bg-card">
         {counterparty.join}
       </span>
-      {/* Grayscale only tints the avatar: the name is already a neutral colour */}
-      <span className="min-w-0 truncate grayscale group-hover/transaction:grayscale-0">
+      {/* Grayscale only tints the avatar: the name is already a neutral colour. EthHashInfo's name box doesn't shrink
+        on its own, so it is let shrink here to end in an ellipsis. */}
+      <span className="min-w-0 truncate grayscale group-hover/transaction:grayscale-0 [&_.ethHashInfo-name]:min-w-0">
         {'protocol' in counterparty ? (
           counterparty.protocol
         ) : (
@@ -72,7 +73,8 @@ const NoteMark = ({ note }: { note: string }): ReactElement => (
   </Tooltip>
 )
 
-// Same basis on every row, and they shrink together, so each part of Details lines up down the table
+// Layout B's widths as the basis, the same on every row: when Details is narrower, the summary and the counterparty
+// shrink by the same amount on every row and truncate, so each part still lines up down the table
 const DetailsSlot = ({ className, children }: { className: string; children?: ReactNode }): ReactElement => (
   <span className={`flex min-w-0 items-center ${className}`}>{children}</span>
 )
@@ -131,15 +133,15 @@ const SpaceQueueRow = ({
       <TableCell className="py-2">
         <span className="flex min-h-10 min-w-0 items-center gap-3">
           <DetailsSlot className="shrink basis-40 gap-1.5 text-sm">
-            <span className="min-w-0">
+            <span className="min-w-0 truncate">
               <QueueTxDetails.Summary tx={tx} />
             </span>
             {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
           </DetailsSlot>
-          <DetailsSlot className="shrink basis-52">
+          <DetailsSlot className="shrink basis-44">
             <Counterparty txInfo={tx.txInfo} chainId={chainId} />
           </DetailsSlot>
-          <DetailsSlot className="flex-1 text-sm text-muted-foreground">
+          <DetailsSlot className="w-16 shrink-0 text-sm text-muted-foreground">
             <Tooltip delay={150}>
               <TooltipTrigger className="truncate">{formatTimeInWords(tx.timestamp)}</TooltipTrigger>
               <TooltipContent>{formatDateTime(tx.timestamp)}</TooltipContent>

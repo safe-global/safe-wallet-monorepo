@@ -168,7 +168,7 @@ describe('SpaceQueueTable', () => {
       const table = container.querySelector('table')
       const result = {
         table: table?.className,
-        cols: [...container.querySelectorAll('col')].map((col) => col.className),
+        cols: [...container.querySelectorAll('col')].map((col) => col.getAttribute('style')),
       }
       unmount()
       return result

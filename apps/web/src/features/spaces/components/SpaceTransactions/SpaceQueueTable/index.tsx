@@ -12,9 +12,8 @@ import QueueGroupRow, {
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueGroupRow'
 import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
 import QueueSkeletonRow from '@safe-global/views/features/spaces/components/SpaceQueue/QueueSkeletonRow'
-import QueueTableHeader, {
-  QUEUE_TABLE_MIN_WIDTH,
-} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTableHeader'
+import QueueTableHeader from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTableHeader'
+import { QUEUE_TABLE_MIN_WIDTH } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains from '@/hooks/useChains'

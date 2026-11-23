@@ -4,6 +4,7 @@ import { fn } from 'storybook/test'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import ChainHeaderRow from './ChainHeaderRow'
+import { QUEUE_TABLE_MIN_WIDTH } from './columns'
 import CollapseAllButton from './CollapseAllButton'
 import ConflictHeaderRow from './ConflictHeaderRow'
 import QueueSkeletonRow from './QueueSkeletonRow'
@@ -120,7 +121,7 @@ export const CollapseAll: Story = {
 
 export const TableHeaderRow: Story = {
   render: () => (
-    <Table className="table-fixed min-w-[1128px]">
+    <Table className={`table-fixed ${QUEUE_TABLE_MIN_WIDTH}`}>
       <QueueTableHeader collapseAll={{ allCollapsed: false, count: 3, onToggle: fn() }} />
     </Table>
   ),
@@ -130,7 +131,7 @@ export const TableHeaderRow: Story = {
 export const SkeletonRows: Story = {
   tags: ['skip-visual-test'],
   render: () => (
-    <Table className="table-fixed min-w-[1128px]">
+    <Table className={`table-fixed ${QUEUE_TABLE_MIN_WIDTH}`}>
       <TableBody>
         <QueueSkeletonRow height={168} rowHeight={56} />
       </TableBody>

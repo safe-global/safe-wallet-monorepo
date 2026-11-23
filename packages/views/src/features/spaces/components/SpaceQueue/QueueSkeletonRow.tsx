@@ -1,16 +1,21 @@
 import type { ReactElement } from 'react'
-import { QUEUE_COLUMNS } from './columns'
+import { getQueueColumnStart, QUEUE_COLUMN_WIDTHS, QUEUE_COLUMNS, type QueueColumn } from './columns'
 
-// A transaction row's placeholder bars: [left offset, width], laid out like the columns
-const SKELETON_BARS: Array<[string, number]> = [
-  ['22px', 24],
-  ['80px', 120],
-  ['240px', 88],
-  ['400px', 140],
-  ['572px', 120],
-  ['calc(100% - 400px)', 48],
-  ['calc(100% - 92px)', 72],
+// A transaction row's placeholder bars: [column, px from the column's left edge, width]. Details' bars fit its
+// narrowest width, at the table's floor.
+const BARS: Array<[QueueColumn, number, number]> = [
+  ['Nonce', 22, 24],
+  ['Safe', 16, 112],
+  ['Transaction', 16, 88],
+  ['Details', 16, 88],
+  ['Details', 120, 96],
+  ['Status', 16, 48],
+  ['Action', (QUEUE_COLUMN_WIDTHS.Action ?? 0) - 92, 72],
 ]
+const SKELETON_BARS: Array<[string, number]> = BARS.map(([column, offset, width]) => [
+  `calc(${getQueueColumnStart(column)} + ${offset}px)`,
+  width,
+])
 const BAR_HEIGHT = 12
 
 const getSkeletonStyle = (rowHeight: number) => {
