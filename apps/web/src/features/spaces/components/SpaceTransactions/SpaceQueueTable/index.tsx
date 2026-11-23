@@ -192,14 +192,21 @@ const SpaceQueueTable = ({
     setToggledGroups(new Set())
   }
 
-  const groups = groupBy === 'safe' ? undefined : getQueueGroups(getQueueUnits(sections, signers), groupBy)
+  // Memoized down to `items`, so a scroll render reuses the list instead of rebuilding it
+  const groups = useMemo(
+    () => (groupBy === 'safe' ? undefined : getQueueGroups(getQueueUnits(sections, signers), groupBy)),
+    [groupBy, sections, signers],
+  )
   const safeKeys = useMemo(() => sections.map((section) => getSafeKey(section.safeAddress)), [sections])
   const collapsedSafes = useMemo(
     () => applyToggles(collapseAll, safeKeys, toggledSafes),
     [collapseAll, safeKeys, toggledSafes],
   )
-  const groupIds = groups?.filter((group) => group.kind !== 'all').map(getGroupId)
-  const collapsedGroups = groupIds ? applyToggles(collapseAll, groupIds, toggledGroups) : toggledGroups
+  const groupIds = useMemo(() => groups?.filter((group) => group.kind !== 'all').map(getGroupId), [groups])
+  const collapsedGroups = useMemo(
+    () => (groupIds ? applyToggles(collapseAll, groupIds, toggledGroups) : toggledGroups),
+    [groupIds, collapseAll, toggledGroups],
+  )
   const items = useMemo(
     () =>
       groups

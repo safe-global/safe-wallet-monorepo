@@ -6,6 +6,7 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import type { RootState } from '@/store'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { server } from '@/tests/server'
+import { useState } from 'react'
 import { act, fakerChecksummedAddress, fireEvent, render, screen, within } from '@/tests/test-utils'
 import local from '@/services/local-storage/local'
 import { getStoreInstance } from '@/store'
@@ -19,6 +20,7 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import type { SpaceQueueChain, SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import SpaceQueueTable from '.'
+import { buildGroupedQueueList, buildQueueList } from './queueList'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
 import type SpaceQueueRowType from '../SpaceQueueRow'
@@ -27,6 +29,15 @@ import {
   QUEUE_COLUMNS,
   QUEUE_TABLE_MIN_WIDTH,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+
+jest.mock('./queueList', () => {
+  const actual = jest.requireActual('./queueList')
+  return {
+    ...actual,
+    buildQueueList: jest.fn(actual.buildQueueList),
+    buildGroupedQueueList: jest.fn(actual.buildGroupedQueueList),
+  }
+})
 
 const mockChainNames: Record<string, string> = {}
 const mockScopeProps = jest.fn()
@@ -347,6 +358,33 @@ describe('SpaceQueueTable', () => {
       render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
 
       expect(renderedRows()).toHaveLength(0)
+    })
+
+    describe('re-rendering with Collapse all saved', () => {
+      const multichainSections = [multichain]
+      // Re-renders the table with the same props, as a scroll of the virtualizer does
+      const Rerenderer = ({ groupBy }: { groupBy: 'safe' | 'network' }) => {
+        const [count, setCount] = useState(0)
+        return (
+          <>
+            <button onClick={() => setCount(count + 1)}>Rerender</button>
+            <SpaceQueueTable sections={groupBy === 'safe' ? sections : multichainSections} groupBy={groupBy} />
+          </>
+        )
+      }
+
+      it.each([
+        ['network', buildGroupedQueueList],
+        ['safe', buildQueueList],
+      ] as const)('reuses the rows when grouped by %s', (groupBy, build) => {
+        saveView({ groupBy, collapseAll: true })
+        render(<Rerenderer groupBy={groupBy} />)
+        const calls = jest.mocked(build).mock.calls.length
+
+        fireEvent.click(screen.getByRole('button', { name: 'Rerender' }))
+
+        expect(jest.mocked(build).mock.calls.length).toBe(calls)
+      })
     })
 
     it('lists every transaction when grouped by status, which has no Collapse all', () => {
