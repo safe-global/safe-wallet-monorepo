@@ -15,10 +15,6 @@ jest.mock('@/features/transactions/public/utils', () => ({
   getTxStatus: () => 'Awaiting confirmations',
 }))
 
-jest.mock('@safe-global/utils/utils/date', () => ({
-  formatTimeInWords: () => '2 hours ago',
-}))
-
 jest.mock('@/components/transactions/TxType', () => ({
   TxTypeIcon: () => <span data-testid="tx-type-icon" />,
   TxTypeText: () => <span data-testid="tx-type-text">Send</span>,
@@ -194,5 +190,18 @@ describe('PendingTxWidget – View all', () => {
     render(<PendingTxWidget transactions={[]} error="boom" onViewAll={jest.fn()} />)
 
     expect(screen.queryByText('View all')).not.toBeInTheDocument()
+  })
+})
+
+describe('PendingTxWidget – proposed time', () => {
+  afterEach(() => jest.useRealTimers())
+
+  it('shows the same short time as the queue table', () => {
+    jest.useFakeTimers({ now: 1705852800000 + 5 * 60 * 60 * 1000 })
+
+    render(<PendingTxWidget transactions={[createMockTx('tx-1', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID)]} />)
+
+    expect(screen.getByText('5h ago')).toBeInTheDocument()
+    expect(screen.queryByText(/about|hours/)).not.toBeInTheDocument()
   })
 })

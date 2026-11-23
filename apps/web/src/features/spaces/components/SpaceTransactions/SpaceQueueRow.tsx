@@ -5,7 +5,7 @@ import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
+import { formatDateTime, formatShortTimeAgo } from '@safe-global/utils/utils/date'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import StatusLabel from '@/features/swap/public/components/StatusLabel'
@@ -77,6 +77,14 @@ const DetailsSlot = ({ className, children }: { className: string; children?: Re
   <span className={`flex min-w-0 items-center ${className}`}>{children}</span>
 )
 
+/** Short proposed time ("5h ago"), with the full date and time in the tooltip */
+export const ProposedTime = ({ timestamp }: { timestamp: number }): ReactElement => (
+  <Tooltip delay={150}>
+    <TooltipTrigger className="truncate">{formatShortTimeAgo(timestamp)}</TooltipTrigger>
+    <TooltipContent>{formatDateTime(timestamp)}</TooltipContent>
+  </Tooltip>
+)
+
 type SpaceQueueRowProps = {
   item: TransactionQueuedItem
   chainId: string
@@ -139,12 +147,8 @@ const SpaceQueueRow = ({
           <DetailsSlot className="shrink basis-44">
             <Counterparty txInfo={tx.txInfo} chainId={chainId} />
           </DetailsSlot>
-          {/* TODO(WA-4172): back to w-16 once the short time format lands */}
-          <DetailsSlot className="w-24 shrink-0 text-sm text-muted-foreground">
-            <Tooltip delay={150}>
-              <TooltipTrigger className="truncate">{formatTimeInWords(tx.timestamp)}</TooltipTrigger>
-              <TooltipContent>{formatDateTime(tx.timestamp)}</TooltipContent>
-            </Tooltip>
+          <DetailsSlot className="w-16 shrink-0 text-sm text-muted-foreground group-hover/transaction:text-foreground">
+            <ProposedTime timestamp={tx.timestamp} />
           </DetailsSlot>
         </span>
       </TableCell>

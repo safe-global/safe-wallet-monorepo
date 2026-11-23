@@ -1,4 +1,12 @@
-import { format, formatDistanceToNow, formatRelative } from 'date-fns'
+import {
+  differenceInHours,
+  differenceInMinutes,
+  differenceInMonths,
+  differenceInYears,
+  format,
+  formatDistanceToNow,
+  formatRelative,
+} from 'date-fns'
 import { maybePlural } from './formatters'
 
 export const currentMinutes = (): number => Math.floor(Date.now() / (1000 * 60))
@@ -30,6 +38,25 @@ export const formatTime = (timestamp: number): string => formatWithSchema(timest
 export const formatDateTime = (timestamp: number): string => formatWithSchema(timestamp, 'MMM d, yyyy - h:mm:ss a')
 
 export const formatTimeInWords = (timestamp: number): string => formatDistanceToNow(timestamp, { addSuffix: true })
+
+/**
+ * Short relative time for tight spaces, e.g. "5h ago", "3d ago", "11mo ago".
+ * The longest value ("11mo ago") fits a 64px column at text-sm. Future times read as "just now".
+ */
+export const formatShortTimeAgo = (timestamp: number, now: number = Date.now()): string => {
+  const minutes = differenceInMinutes(now, timestamp)
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes}m ago`
+
+  const hours = differenceInHours(now, timestamp)
+  if (hours < 24) return `${hours}h ago`
+
+  const months = differenceInMonths(now, timestamp)
+  if (months < 1) return `${Math.floor(hours / 24)}d ago`
+
+  const years = differenceInYears(now, timestamp)
+  return years < 1 ? `${months}mo ago` : `${years}y ago`
+}
 
 export function getCountdown(seconds: number): { days: number; hours: number; minutes: number } {
   const MINUTE_IN_SECONDS = 60
