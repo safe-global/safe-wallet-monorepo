@@ -48,8 +48,8 @@ const useResumeOffer = (step: WizardStepId) => {
   }, [dispatch, step])
 
   useEffect(() => {
-    const onRouteChangeStart = (url: string) => {
-      const pathname = url.split(/[?#]/)[0]
+    const onRouteChangeStart = (url: unknown) => {
+      const pathname = String(url).split(/[?#]/)[0]
       if (!WIZARD_ROUTES.has(pathname)) dispatch(wizardLeft())
     }
     router.events.on('routeChangeStart', onRouteChangeStart)

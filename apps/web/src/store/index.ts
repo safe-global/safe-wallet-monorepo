@@ -117,6 +117,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.feePaymentSourcePreferenceSlice.name,
   slices.featureFlagOverridesSlice.name,
   slices.workspaceDraftSlice.name,
+  slices.spaceQueueViewSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -197,6 +198,13 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
         // Only the default sort direction is reset — the user's custom drag order is preserved.
         manualOrder: orderByState.manualOrder ?? {},
       }
+    }
+
+    // A saved Group by that is no longer an option falls back to the default
+    if (nextState[slices.spaceQueueViewSlice.name]) {
+      nextState[slices.spaceQueueViewSlice.name] = slices.migrateSpaceQueueView(
+        nextState[slices.spaceQueueViewSlice.name],
+      )
     }
 
     // Mark the store as hydrated so guards wait for persisted auth state.

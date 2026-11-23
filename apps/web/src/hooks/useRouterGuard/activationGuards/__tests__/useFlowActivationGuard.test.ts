@@ -1,5 +1,6 @@
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { useFlowActivationGuard } from '../useFlowActivationGuard'
+import { useRouterGuard } from '../..'
 import * as router from 'next/router'
 import * as store from '@/store'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
@@ -236,7 +237,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({ success: false, redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces` })
     })
 
     it('should redirect to welcome/spaces when not authenticated on /spaces/settings', async () => {
@@ -251,7 +252,10 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces%2Fsettings`,
+      })
     })
 
     it('should redirect to welcome/spaces when not authenticated on /spaces/members', async () => {
@@ -266,7 +270,10 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces%2Fmembers`,
+      })
     })
 
     it('should allow when store is not hydrated even on /spaces (no redirect before hydration)', async () => {
@@ -299,7 +306,7 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({
         success: false,
-        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef`,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&next=%2Fspaces%2Fmembers%3Fsafe%3D1%253A0xdeadbeef`,
       })
     })
 
@@ -319,8 +326,26 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({
         success: false,
-        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}&next=${encodeURIComponent(
+          `/spaces/members?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
+        )}`,
       })
+    })
+
+    it('should pass the opened Workspace page as next, so that sign-in returns to it', async () => {
+      setupMocks({
+        pathname: '/spaces/transactions',
+        query: { spaceId: MOCK_SPACE_UUID, tab: 'history' },
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      const redirectUrl = new URL(guardResult.redirectTo!, 'http://localhost')
+      expect(redirectUrl.pathname).toBe(AppRoutes.welcome.spaces)
+      expect(redirectUrl.searchParams.get('spaceId')).toBe(MOCK_SPACE_UUID)
+      expect(redirectUrl.searchParams.get('next')).toBe(`/spaces/transactions?spaceId=${MOCK_SPACE_UUID}&tab=history`)
     })
 
     it('should preserve ?safe= in the welcome redirect when unauthenticated on a non-spaces route', async () => {
@@ -356,7 +381,9 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      const redirectUrl = new URL(guardResult.redirectTo!, 'http://localhost')
+      expect(redirectUrl.pathname).toBe(AppRoutes.welcome.spaces)
+      expect(redirectUrl.searchParams.has('safe')).toBe(false)
     })
   })
 
@@ -652,11 +679,15 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('guard identity', () => {
-    const mockRouterOnEachRender = (query: () => Record<string, string>) => {
+    const mockRouterOnEachRender = (
+      query: () => Record<string, string>,
+      pathname: string = AppRoutes.welcome.createSpace,
+    ) => {
       ;(router.useRouter as jest.Mock).mockImplementation(() => ({
-        pathname: AppRoutes.welcome.createSpace,
+        pathname,
         query: query(),
         isReady: true,
+        replace: jest.fn(),
       }))
     }
 
@@ -679,6 +710,35 @@ describe('useFlowActivationGuard', () => {
       const { result, rerender } = renderHook(() => useFlowActivationGuard())
       const firstGuard = result.current.activationGuard
       spaceId = MOCK_SPACE_UUID_ALT
+      rerender()
+
+      expect(result.current.activationGuard).not.toBe(firstGuard)
+    })
+
+    it('should keep the same guard and not refetch spaces when an unrelated query param changes', async () => {
+      setupMocks()
+      let tab = 'queue'
+      mockRouterOnEachRender(() => ({ spaceId: MOCK_SPACE_UUID, tab }), '/spaces/transactions')
+
+      // Through useRouterGuard, whose effect runs the guard again whenever it changes
+      const { rerender } = renderHook(() => useRouterGuard({ useGuard: useFlowActivationGuard }))
+      await waitFor(() => expect(mockFetchSpaces).toHaveBeenCalledTimes(1))
+      tab = 'history'
+      rerender()
+      // Let a re-run, if any, start
+      await act(async () => {})
+
+      expect(mockFetchSpaces).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return a new guard when the query changes while signed out on a Workspace page', () => {
+      setupMocks({ isAuthenticated: false })
+      let tab = 'queue'
+      mockRouterOnEachRender(() => ({ spaceId: MOCK_SPACE_UUID, tab }), '/spaces/transactions')
+
+      const { result, rerender } = renderHook(() => useFlowActivationGuard())
+      const firstGuard = result.current.activationGuard
+      tab = 'history'
       rerender()
 
       expect(result.current.activationGuard).not.toBe(firstGuard)
