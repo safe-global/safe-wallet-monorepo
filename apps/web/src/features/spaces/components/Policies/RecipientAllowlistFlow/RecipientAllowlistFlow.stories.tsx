@@ -18,10 +18,8 @@ import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/public/consta
 import { getPolicyGuardAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import {
   ADDRESS_BOOK_TRIGGER_LABEL,
-  ALLOWLIST_GAPS_TITLE,
   RECIPIENT_NAME_LABEL,
   RECIPIENT_REMOVE_LABEL,
-  REVIEW_FALLBACK_ALLOW,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { mockAllowlistPolicy } from '../../../public/utils/allowlistPolicies'
 import { asActivePolicy } from '../../../public/utils/policies'
@@ -346,9 +344,6 @@ export const Review: Story = {
   play: async ({ canvasElement }) => {
     await createAllowlist(canvasElement)
     await goToReview(canvasElement)
-    const canvas = within(canvasElement)
-    await expect(canvas.getByText(REVIEW_FALLBACK_ALLOW)).toBeVisible()
-    await expect(canvas.getByText(ALLOWLIST_GAPS_TITLE)).toBeVisible()
   },
 }
 

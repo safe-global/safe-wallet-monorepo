@@ -8,14 +8,6 @@ import {
   withFirstSetupDefaults,
 } from '../firstSetupDefaults'
 
-let mockDefaultFallback = 'allow'
-jest.mock('@/config/constants', () => ({
-  ...jest.requireActual('@/config/constants'),
-  get POLICY_DEFAULT_FALLBACK() {
-    return mockDefaultFallback
-  },
-}))
-
 const CHAIN_ID = '11155111'
 const ALLOW_POLICY = '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2'
 const DENY_POLICY = '0x348d9F0B2fECb0bF88655C74Ed3eFD5052A9E436'
@@ -43,7 +35,7 @@ const binding = (target: string): PolicyConfiguration => ({
   data: '0x',
 })
 
-const fallback = (operation: OperationType, policy = ALLOW_POLICY): PolicyConfiguration => ({
+const fallback = (operation: OperationType, policy = DENY_POLICY): PolicyConfiguration => ({
   target: ZERO_ADDRESS,
   selector: '0x00000000',
   operation,
@@ -67,15 +59,11 @@ describe('getOfficialMultiSendCallOnlyAddresses', () => {
 })
 
 describe('withFirstSetupDefaults', () => {
-  beforeEach(() => {
-    mockDefaultFallback = 'allow'
-  })
-
   it('derives the multiSend selector from its ABI', () => {
     expect(MULTI_SEND_SELECTOR).toBe('0x8d80ff0a')
   })
 
-  it('appends a MultiSendPolicy binding per official MultiSendCallOnly, then the CALL and DELEGATECALL fallbacks', () => {
+  it('appends a MultiSendPolicy binding per official MultiSendCallOnly, then the CALL and DELEGATECALL deny fallbacks', () => {
     const installed = withFirstSetupDefaults(CHAIN_ID, [transfer])
 
     expect(installed).toEqual([
@@ -86,35 +74,16 @@ describe('withFirstSetupDefaults', () => {
     ])
   })
 
-  it('installs DenyPolicy as the fallback when the env says deny', () => {
-    mockDefaultFallback = 'deny'
+  it('should, when the caller configured a fallback that allows, install the two deny fallbacks in its place', () => {
+    const own = fallback(OperationType.Call, ALLOW_POLICY)
 
-    const installed = withFirstSetupDefaults(CHAIN_ID, [transfer])
+    const installed = withFirstSetupDefaults(CHAIN_ID, [transfer, own])
 
-    expect(installed.slice(-2)).toEqual([
+    expect(installed.filter(({ target }) => target === ZERO_ADDRESS)).toEqual([
       fallback(OperationType.Call, DENY_POLICY),
       fallback(OperationType.DelegateCall, DENY_POLICY),
     ])
   })
-
-  it('takes an explicit fallback over the env', () => {
-    mockDefaultFallback = 'deny'
-
-    expect(withFirstSetupDefaults(CHAIN_ID, [transfer], 'allow').slice(-1)).toEqual([
-      fallback(OperationType.DelegateCall, ALLOW_POLICY),
-    ])
-  })
-
-  it.each([OperationType.Call, OperationType.DelegateCall])(
-    'adds no fallback when the caller already configured one for operation %s',
-    (operation) => {
-      const own = fallback(operation, DENY_POLICY)
-
-      const installed = withFirstSetupDefaults(CHAIN_ID, [transfer, own])
-
-      expect(installed.filter(({ target }) => target === ZERO_ADDRESS)).toEqual([own])
-    },
-  )
 
   it('does not duplicate a MultiSend access the caller already configured', () => {
     const own = { ...binding(MULTI_SEND_CALL_ONLY['1.5.0'].toLowerCase()), policy: ALLOW_POLICY }

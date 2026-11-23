@@ -51,13 +51,6 @@ const mockResolveName = (address: string): string => ({ [RECIPIENT]: 'Alice', [T
 const PRIYA = checksumAddress(faker.finance.ethereumAddress())
 
 jest.mock('../useBuildAllowlistTransaction', () => ({ useBuildAllowlistTransaction: jest.fn() }))
-let mockDefaultFallback = 'allow'
-jest.mock('@/config/constants', () => ({
-  ...jest.requireActual('@/config/constants'),
-  get POLICY_DEFAULT_FALLBACK() {
-    return mockDefaultFallback
-  },
-}))
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   ...jest.requireActual('@safe-global/views/components/ui/tooltip'),
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -257,7 +250,6 @@ const mockGuardDelay = (delay = POLICY_GUARD_DELAY_SECONDS) => mockPolicyGuardDe
 const actionLabels = () => screen.getAllByTestId('action-item').map((item) => item.textContent)
 
 beforeEach(() => {
-  mockDefaultFallback = 'allow'
   jest.clearAllMocks()
   mockGuardDelay()
   mockSave.mockResolvedValue(true)
@@ -451,7 +443,7 @@ describe('ReviewRecipientAllowlist', () => {
     const fallbacks = defaults.slice(-2)
     defaults.slice(0, -2).forEach((rule) => expect(within(rule).getByText('Batched transactions')).toBeInTheDocument())
     fallbacks.forEach((rule) => {
-      expect(within(rule).getByText('Allow everything else')).toBeInTheDocument()
+      expect(within(rule).getByText('Block everything else')).toBeInTheDocument()
       expect(within(rule).getByText('Any address')).toBeInTheDocument()
       expect(within(rule).queryByText('ETH')).not.toBeInTheDocument()
     })
@@ -479,27 +471,11 @@ describe('ReviewRecipientAllowlist', () => {
     expect(within(fallbackRule).getByText('Any address')).toBeInTheDocument()
   })
 
-  it('says everything else stays allowed on a first setup and lists the gaps', () => {
+  it('should say every other action is blocked and list no gaps, when the first setup installs the guard', () => {
     built({ status: 'none' })
     renderReview()
 
-    const summary = within(screen.getByTestId('allowlist-review-summary'))
-    expect(summary.getByText('Every other action')).toBeInTheDocument()
-    expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent(
-      'Stays allowed. Only transfers of the selected tokens to recipients not on the list are blocked.',
-    )
-    const gaps = within(screen.getByTestId('allowlist-gaps'))
-    expect(gaps.getByText("What this allowlist doesn't cover")).toBeInTheDocument()
-    expect(gaps.getByText(/Token approvals are not restricted/)).toBeInTheDocument()
-    expect(gaps.getByText(/Native token transfers to recipients not on the list stay allowed/)).toBeInTheDocument()
-    expect(gaps.getByText(/Delegate calls are not restricted/)).toBeInTheDocument()
-  })
-
-  it('says everything else is blocked when the first setup installs the deny fallback', () => {
-    mockDefaultFallback = 'deny'
-    built({ status: 'none' })
-    renderReview()
-
+    expect(within(screen.getByTestId('allowlist-review-summary')).getByText('Every other action')).toBeInTheDocument()
     expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent('Blocked')
     expect(screen.queryByTestId('allowlist-gaps')).not.toBeInTheDocument()
   })
