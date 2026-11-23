@@ -124,6 +124,7 @@ describe('Policies', () => {
     mockHasSeenAllowlistIntro = false
     mockIsAllowlistActive = false
     jest.clearAllMocks()
+    mockUseWallet.mockReturnValue(null)
     mockUseSpaceSafes.mockReturnValue({
       allSafes: [],
       isLoading: false,

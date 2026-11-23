@@ -6,6 +6,7 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
+import { buildGuardRemovalCleanupConfigurations } from '@/features/policy-guard/public/services/guardRemoval'
 import { mockActiveAllowlist } from '../../../../public/utils/allowlistPolicies'
 import { getApplicableCleanup, mergeDelayedGuardRequests } from '../mapDelayedGuardRequests'
 
@@ -160,7 +161,7 @@ describe('mergeDelayedGuardRequests', () => {
   it("should, when a removal's cleanup root waits, leave the live row as it is and keep the root for the guard removal", () => {
     const live = mockActiveAllowlist()
     const request = makeRequest(live.safe, {
-      configurations: [removalConfiguration(live.safe.address, '0x0000000000000000000000000000000000000000')],
+      configurations: buildGuardRemovalCleanupConfigurations(live.safe.chainId, live.safe.address),
     })
 
     const { policies, applyRequests, guardRemovalCleanups } = mergeDelayedGuardRequests([request], [live], resolveToken)
@@ -178,7 +179,7 @@ describe('mergeDelayedGuardRequests', () => {
     const live = mockActiveAllowlist()
     const request = makeRequest(live.safe, {
       status: 'expired',
-      configurations: [removalConfiguration(live.safe.address, '0x0000000000000000000000000000000000000000')],
+      configurations: buildGuardRemovalCleanupConfigurations(live.safe.chainId, live.safe.address),
     })
 
     const { policies, guardRemovalCleanups } = mergeDelayedGuardRequests([request], [live], resolveToken)
