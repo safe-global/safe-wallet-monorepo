@@ -6,13 +6,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatShortTimeAgo } from '@safe-global/utils/utils/date'
-import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import StatusLabel from '@/features/swap/public/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import { useHasFeature } from '@/hooks/useChains'
-import useIsPending from '@/hooks/useIsPending'
-import useTransactionStatus from '@/hooks/useTransactionStatus'
+import { useAppSelector } from '@/store'
+import { selectPendingTxById } from '@/store/pendingTxsSlice'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
@@ -26,6 +25,7 @@ import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
 import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce } from './utils'
+import { NonceTakenAction, PendingRowAction, useIsNonceExecutingElsewhere } from './PendingRowAction'
 
 export const Counterparty = ({
   txInfo,
@@ -87,16 +87,6 @@ export const ProposedTime = ({ timestamp }: { timestamp: number }): ReactElement
   </Tooltip>
 )
 
-/** A label that may not fit the Status column: it truncates, with the full text in the tooltip */
-const StatusLabelSlot = ({ label, children }: { label: string; children: ReactNode }): ReactElement => (
-  <Tooltip delay={150}>
-    <TooltipTrigger render={<span data-testid="queue-row-status-label" className="flex min-w-0 overflow-hidden" />}>
-      {children}
-    </TooltipTrigger>
-    <TooltipContent>{label}</TooltipContent>
-  </Tooltip>
-)
-
 // Painted on the cells like the hover pill, so it sits inside the row's insets with the same rounded ends
 const HIGHLIGHT_CLASSES: Record<HighlightPhase, string> = {
   on: '[&>td]:bg-accent [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg',
@@ -131,15 +121,15 @@ const SpaceQueueRow = ({
 }: SpaceQueueRowProps): ReactElement => {
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
-  const isPending = useIsPending(tx.id)
+  const pendingTx = useAppSelector((state) => selectPendingTxById(state, tx.id))
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
-  const txStatusLabel = useTransactionStatus(tx)
 
   const nonce = getNonce(tx)
+  const nonceTaken = useIsNonceExecutingElsewhere(tx.id, chainId, safeAddress, nonce)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const showWarning = isImitation(tx) || (hasDefaultTokenlist && !isTrustedTx(tx))
   const goTo = useQueueGoTo()
-  const blockedBy = isPending ? undefined : getBlockedBy(status, nonce, nextNonce)
+  const blockedBy = pendingTx ? undefined : getBlockedBy(status, nonce, nextNonce)
 
   const { phase, seq, takeFocus } = useRowHighlight(tx.id)
   const rowRef = useRef<HTMLTableRowElement | null>(null)
@@ -205,7 +195,7 @@ const SpaceQueueRow = ({
       </TableCell>
 
       <TableCell className="py-1">
-        <span className="flex min-w-0 items-center gap-2">
+        <span className="flex min-w-0 items-center">
           {executionInfo && (
             <SignersTooltip
               chainId={chainId}
@@ -218,24 +208,19 @@ const SpaceQueueRow = ({
               required={executionInfo.confirmationsRequired}
             />
           )}
-          {/* The everyday status is in the gauge: only these exceptions keep a label */}
-          {expiredSwap ? (
-            <StatusLabelSlot label="Expired">
-              <StatusLabel status="expired" />
-            </StatusLabelSlot>
-          ) : (
-            isPending && (
-              <StatusLabelSlot label={txStatusLabel}>
-                <TxStatusLabel tx={tx} />
-              </StatusLabelSlot>
-            )
-          )}
         </span>
       </TableCell>
 
       <TableCell>
         <div className="flex items-center justify-end gap-1">
-          {expiredSwap ? null : blockedBy !== undefined ? (
+          {/* The status is in the gauge: what the gauge can't show takes the place of the button */}
+          {pendingTx ? (
+            <PendingRowAction txId={tx.id} pendingTx={pendingTx} />
+          ) : expiredSwap ? (
+            <StatusLabel status="expired" />
+          ) : nonceTaken && nonce !== undefined ? (
+            <NonceTakenAction tx={tx} nonce={nonce} />
+          ) : blockedBy !== undefined ? (
             <BlockedByButton
               nonce={blockedBy}
               hint={getBlockedByHint(blockedBy, nextStatus)}

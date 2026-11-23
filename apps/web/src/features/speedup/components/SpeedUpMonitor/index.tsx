@@ -1,47 +1,29 @@
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import SpeedUpModal from '../SpeedUpModal'
 import Rocket from '@/public/images/common/rocket.svg'
-import { useCounter } from '@/components/common/Notifications/useCounter'
-import type { MouseEventHandler } from 'react'
+import type { MouseEventHandler, ReactNode } from 'react'
 import { useState } from 'react'
 import type { PendingProcessingTx } from '@/store/pendingTxsSlice'
-import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { isSmartContract } from '@/utils/wallets'
-import useWallet from '@/hooks/wallets/useWallet'
-import { isSpeedableTx } from '../../services/isSpeedableTx'
 import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { trackEvent } from '@/services/analytics'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import useIsSpeedUpAvailable from '../../public/hooks/useIsSpeedUpAvailable'
 
 type SpeedUpMonitorProps = {
   txId: string
   pendingTx: PendingProcessingTx
-  modalTrigger: 'alertBox' | 'alertButton'
+  /** `rowButton`: the Space queue table's 24px row action, with `hint` in its tooltip */
+  modalTrigger: 'alertBox' | 'alertButton' | 'rowButton'
+  hint?: ReactNode
 }
 
-const SPEED_UP_THRESHOLD_IN_SECONDS = 15
-
-const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpMonitorProps) => {
+const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox', hint }: SpeedUpMonitorProps) => {
   const [openSpeedUpModal, setOpenSpeedUpModal] = useState(false)
-  const wallet = useWallet()
-  const counter = useCounter(pendingTx.submittedAt)
-  const web3ReadOnly = useWeb3ReadOnly()
-  const isFeatureEnabled = useHasFeature(FEATURES.SPEED_UP_TX)
+  const isAvailable = useIsSpeedUpAvailable(pendingTx)
 
-  const [smartContract] = useAsync(async () => {
-    if (!pendingTx.signerAddress || !web3ReadOnly) return false
-    return isSmartContract(pendingTx.signerAddress)
-  }, [pendingTx.signerAddress, web3ReadOnly])
-
-  if (!isFeatureEnabled || !isSpeedableTx(pendingTx, smartContract, wallet?.address ?? '')) {
-    return null
-  }
-
-  if (!counter || counter < SPEED_UP_THRESHOLD_IN_SECONDS) {
+  if (!isAvailable) {
     return null
   }
 
@@ -74,6 +56,17 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
             <Button variant="outline" className="text-foreground" onClick={onOpen}>{`Speed up >`}</Button>
           </AlertAction>
         </Alert>
+      ) : modalTrigger === 'rowButton' ? (
+        <Tooltip delay={150}>
+          <TooltipTrigger
+            render={
+              <Button variant="default" size="2xs" className="w-20" onClick={onOpen}>
+                Speed up
+              </Button>
+            }
+          />
+          <TooltipContent>{hint}</TooltipContent>
+        </Tooltip>
       ) : (
         <Button variant="outline" size="sm" onClick={onOpen}>
           Speed up

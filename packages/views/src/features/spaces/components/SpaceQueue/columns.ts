@@ -11,10 +11,9 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Safe: 160,
   Transaction: 160,
   Details: undefined,
-  // Fits 165px of content whole, the gauge with 10/10 then "Submitting" and its spinner; longer labels truncate
-  // TODO(WA-4166): back to layout B width (128px) once the executing and expired labels leave this column
-  Status: 200,
-  // Fits "Blocked by #nnnn" and its arrow (146px at the widest digits) beside the More button
+  // Only the gauge with 10/10 (about 70px): pending and expired states sit in the Action column
+  Status: 128,
+  // Fits "Blocked by #nnnn" and its arrow (146px at the widest digits), or "Processing mm:ss", beside the More button
   Action: 216,
 }
 

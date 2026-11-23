@@ -8,6 +8,7 @@ import {
 } from '@safe-global/store/gateway/types'
 import { http, HttpResponse } from 'msw'
 import { getFixtureData } from '@/stories/mocks/handlers'
+import { PendingStatus, PendingTxType, type PendingTxsState } from '@/store/pendingTxsSlice'
 import type { SpaceQueueSection } from '../../hooks/useSpaceQueue'
 
 export const SPACE_QUEUE_URL = /\/v1\/spaces\/[^/]+\/transactions\/queued/
@@ -133,6 +134,72 @@ export const BLOCKED_SECTIONS: SpaceQueueSection[] = [
   },
 ]
 
+/** Executing: Safe A #42 and its other option, Safe A on Sepolia indexing, Safe B #4 slow enough to speed up */
+export const PENDING_SECTIONS: SpaceQueueSection[] = [
+  {
+    safeAddress: SAFE_A,
+    chains: [
+      {
+        chainId: '1',
+        items: [
+          { type: TransactionListItemType.LABEL, label: 'Next' },
+          { type: TransactionListItemType.CONFLICT_HEADER, nonce: 42 },
+          transfer('p-1-42a', 42, 2, TransactionStatus.AWAITING_EXECUTION, 'HasNext'),
+          transfer('p-1-42b', 42, 1, TransactionStatus.AWAITING_CONFIRMATIONS, 'End'),
+        ],
+      },
+      {
+        chainId: '11155111',
+        items: [
+          { type: TransactionListItemType.LABEL, label: 'Next' },
+          transfer('p-11155111-12', 12, 2, TransactionStatus.AWAITING_EXECUTION),
+        ],
+      },
+    ],
+  },
+  {
+    safeAddress: SAFE_B,
+    chains: [
+      {
+        chainId: '1',
+        items: [
+          { type: TransactionListItemType.LABEL, label: 'Next' },
+          transfer('p-b-1-4', 4, 2, TransactionStatus.AWAITING_EXECUTION),
+        ],
+      },
+    ],
+  },
+]
+
+/** What this browser is executing in PENDING_SECTIONS, relative to `now` so the counters start where described */
+export const getPendingTxs = (now: number): PendingTxsState => ({
+  'p-1-42a': {
+    chainId: '1',
+    safeAddress: SAFE_A,
+    nonce: 42,
+    status: PendingStatus.PROCESSING,
+    txType: PendingTxType.SAFE_TX,
+    txHash: `0x${'1'.repeat(64)}`,
+    submittedAt: now - 82_000,
+    signerNonce: 3,
+    // Another signer executed it, so the story wallet can't speed it up
+    signerAddress: RECIPIENT,
+  },
+  'p-11155111-12': { chainId: '11155111', safeAddress: SAFE_A, nonce: 12, status: PendingStatus.INDEXING },
+  'p-b-1-4': {
+    chainId: '1',
+    safeAddress: SAFE_B,
+    nonce: 4,
+    status: PendingStatus.PROCESSING,
+    txType: PendingTxType.SAFE_TX,
+    txHash: `0x${'2'.repeat(64)}`,
+    submittedAt: now - 5 * 60_000,
+    signerNonce: 7,
+    signerAddress: STORY_WALLET.value,
+    gasLimit: '150000',
+  },
+})
+
 const countTransactions = (sections: SpaceQueueSection[]): number =>
   sections
     .flatMap((section) => section.chains.flatMap((chain) => chain.items))
@@ -170,7 +237,7 @@ export const toQueuePage = (sections: SpaceQueueSection[]): SpaceQueuedItemPage 
 /** The details behind each queued transaction, signed by as many owners as its summary counts */
 export const TX_DETAILS_HANDLER = http.get(/\/v1\/chains\/[^/]+\/transactions\/([^/]+)$/, ({ request }) => {
   const id = decodeURIComponent(new URL(request.url).pathname.split('/').pop() ?? '')
-  const item = [...QUEUE_SECTIONS, ...BLOCKED_SECTIONS]
+  const item = [...QUEUE_SECTIONS, ...BLOCKED_SECTIONS, ...PENDING_SECTIONS]
     .flatMap(({ chains }) => chains.flatMap(({ items }) => items))
     .find(
       (entry): entry is TransactionQueuedItem =>

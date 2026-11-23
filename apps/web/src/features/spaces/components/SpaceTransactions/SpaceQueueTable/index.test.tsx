@@ -11,7 +11,7 @@ import { act, fakerChecksummedAddress, fireEvent, render, screen, within } from 
 import local from '@/services/local-storage/local'
 import { getStoreInstance } from '@/store'
 import { setQueueCollapseAll, spaceQueueViewSlice } from '../../../public/store/spaceQueueViewSlice'
-import { PendingStatus } from '@/store/pendingTxsSlice'
+import { PendingStatus, PendingTxType } from '@/store/pendingTxsSlice'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -902,39 +902,66 @@ describe('SpaceQueueTable', () => {
       expect(screen.getByTestId('space-queue-row')).not.toHaveClass('outline-none')
     })
 
-    it('truncates a pending label, with the full text in a tooltip', async () => {
+    const renderPendingRows = (pendingTxs: RootState['pendingTxs']) =>
       render(
         <DeleteTxDialogProvider>
           <Table>
             <TableBody>
               <SpaceQueueRow item={next} safeAddress={safeA} chainId={chainId} status="execute" />
+              <SpaceQueueRow item={conflicting} safeAddress={safeA} chainId={chainId} status="execute" />
             </TableBody>
           </Table>
         </DeleteTxDialogProvider>,
-        {
-          initialReduxState: {
-            pendingTxs: {
-              [next.transaction.id]: {
-                chainId,
-                safeAddress: safeA,
-                nonce: 3,
-                status: PendingStatus.SIGNING,
-                signerAddress: fakerChecksummedAddress(),
-              },
-            },
-          },
-        },
+        { initialReduxState: { pendingTxs } },
       )
+    const conflicting = transactionItem('AWAITING_EXECUTION', 3)
+    const cellsOf = (index: number) => screen.getAllByTestId('space-queue-row')[index].querySelectorAll('td')
 
-      const slot = screen.getByTestId('queue-row-status-label')
-      expect(slot).toHaveClass('min-w-0', 'overflow-hidden')
-      expect(within(slot).getByText('Signing')).toHaveClass('truncate')
+    it('shows the executing state in the action column, not in Status, and disables the other option at its nonce', () => {
+      jest.useFakeTimers({ now: 1_800_000_000_000 })
+      renderPendingRows({
+        [next.transaction.id]: {
+          chainId,
+          safeAddress: safeA,
+          nonce: 3,
+          status: PendingStatus.PROCESSING,
+          txType: PendingTxType.SAFE_TX,
+          txHash: '0x1',
+          submittedAt: 1_800_000_000_000 - 82_000,
+          signerNonce: 1,
+          signerAddress: fakerChecksummedAddress(),
+        },
+      })
 
-      fireEvent.focus(slot)
-      fireEvent.pointerEnter(slot)
-      fireEvent.mouseEnter(slot)
+      const executing = cellsOf(0)
+      expect(within(executing[5]).getByTestId('queue-row-pending-chip')).toHaveTextContent(/^Processing 1:22$/)
+      expect(executing[4]).not.toHaveTextContent(/Processing/)
 
-      expect(await screen.findAllByText('Signing')).toHaveLength(2)
+      const other = cellsOf(1)
+      expect(within(other[5]).getByRole('button', { name: 'Execute' })).toBeDisabled()
+      expect(within(other[5]).getByTestId('queue-row-nonce-taken')).toBeInTheDocument()
+      expect(screen.queryByText(/Locked/)).not.toBeInTheDocument()
+      jest.useRealTimers()
+    })
+
+    it('shows a signature being saved in the action column and leaves the other option at its nonce alone', () => {
+      renderPendingRows({
+        [next.transaction.id]: {
+          chainId,
+          safeAddress: safeA,
+          nonce: 3,
+          status: PendingStatus.SIGNING,
+          signerAddress: fakerChecksummedAddress(),
+        },
+      })
+
+      expect(within(cellsOf(0)[5]).getByTestId('queue-row-pending-chip')).toHaveTextContent(/^Signing$/)
+      expect(cellsOf(0)[4]).not.toHaveTextContent(/Signing/)
+      expect(screen.queryByTestId('queue-row-nonce-taken')).not.toBeInTheDocument()
+    })
+
+    it('keeps only the gauge in the 128px Status column', () => {
+      expect(QUEUE_COLUMN_WIDTHS.Status).toBe(128)
     })
 
     it('fills one cell per column, with the Safe in its own column', () => {

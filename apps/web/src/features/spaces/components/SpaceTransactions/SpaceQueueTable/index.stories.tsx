@@ -1,6 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { http, HttpResponse } from 'msw'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { createChainData, createChainsPageData, createChainsPageDataV2 } from '@/stories/mocks/chains'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import { BLOCKED_SECTIONS, QUEUE_SECTIONS, TX_DETAILS_HANDLER } from '../SpaceTransactionQueue.storyData'
+import {
+  BLOCKED_SECTIONS,
+  getPendingTxs,
+  PENDING_SECTIONS,
+  QUEUE_SECTIONS,
+  TX_DETAILS_HANDLER,
+} from '../SpaceTransactionQueue.storyData'
 import SpaceQueueTable from '.'
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', layout: 'paper', shadcn: true })
@@ -38,3 +47,31 @@ export const BlockedBy: Story = { args: { sections: BLOCKED_SECTIONS } }
 
 /** Up next: the blocked rows sit behind it, so a click opens Next in line when it is collapsed. */
 export const BlockedByUpNext: Story = { args: { sections: BLOCKED_SECTIONS, groupBy: 'next' } }
+
+// Speed up is off in the default chain config
+const speedUpChain = createChainData()
+speedUpChain.features = [...speedUpChain.features, FEATURES.SPEED_UP_TX]
+const executing = createMockStory({
+  scenario: 'efSafe',
+  wallet: 'owner',
+  layout: 'paper',
+  shadcn: true,
+  store: { pendingTxs: getPendingTxs(Date.now()) },
+  handlers: [
+    http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(speedUpChain)),
+    http.get(/\/v1\/chains$/, () => HttpResponse.json(createChainsPageData(speedUpChain))),
+    http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(speedUpChain))),
+  ],
+})
+
+/**
+ * Executing: Safe A #42 shows "Processing 1:22" where its button was, and the other option at #42 a disabled Sign
+ * ("Available if #42 fails."). Safe A on Sepolia #12 is in a block, "Indexing". Safe B #4, sent by the story wallet
+ * 5 minutes ago, offers Speed up. The counters tick, so it is kept out of the visual snapshots.
+ */
+export const Executing: Story = {
+  args: { sections: PENDING_SECTIONS },
+  parameters: { ...executing.parameters, msw: { handlers: [TX_DETAILS_HANDLER, ...executing.handlers] } },
+  decorators: [executing.decorator],
+  tags: ['skip-visual-test'],
+}
