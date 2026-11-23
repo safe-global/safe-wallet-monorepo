@@ -118,7 +118,7 @@ const withBalances = (handler: Parameters<typeof http.get>[1]) => ({
 })
 
 const meta = {
-  title: 'Features/Spaces/Policies/TokenSelector',
+  title: 'Components/Common/TokenSelector',
   component: TokenSelector,
   parameters: {
     layout: 'centered',

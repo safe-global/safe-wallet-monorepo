@@ -16,8 +16,8 @@ import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import { makeStore } from '@/store'
 import { POPULAR_TOKEN_ADDRESSES } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/popularTokens'
 import useSpendingLimitTokenOptions, { buildIdentityKey } from '../useSpendingLimitTokenOptions'
-import { CustomTokensProvider, useAddCustomToken } from '../../CustomTokensProvider'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { CustomTokensProvider, useAddCustomToken } from '@/components/common/CustomTokensProvider'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: jest.fn() }))

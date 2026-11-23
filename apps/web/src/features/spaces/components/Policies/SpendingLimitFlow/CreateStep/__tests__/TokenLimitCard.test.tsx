@@ -4,9 +4,9 @@ import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/public/services/spendingLimitValidation'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import {
   DUPLICATE_TOKEN_ERROR,
   EXISTING_LIMIT_ERROR,
@@ -58,7 +58,7 @@ const mockTokens = [
 
 // A plain <select> keeps these tests about the row. It still renders `helperText`, since that slot is
 // where the row's balance and token error reach the user.
-jest.mock('../../TokenSelector', () => ({
+jest.mock('@/components/common/TokenSelector', () => ({
   __esModule: true,
   default: ({
     value,
@@ -95,7 +95,7 @@ jest.mock('@safe-global/utils/utils/formatNumber', () => ({
   ...jest.requireActual('@safe-global/utils/utils/formatNumber'),
   getLocalDecimalSeparator: jest.fn(() => '.'),
 }))
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 jest.mock('../../ExistingSpendingLimitsProvider', () => ({
   useExistingSpendingLimits: jest.fn(() => ({ loading: false })),

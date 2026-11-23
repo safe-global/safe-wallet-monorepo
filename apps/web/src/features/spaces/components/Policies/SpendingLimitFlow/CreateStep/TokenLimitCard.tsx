@@ -13,12 +13,12 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
-import TokenSelector from '../TokenSelector'
+import TokenSelector from '@/components/common/TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
+import { findTokenOption, tokenOptionLabel, type TokenOption } from '@/utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
 import {
   existingTokensForSpender,
@@ -203,6 +203,7 @@ const TokenLimitCard = ({
                   value={field.value || undefined}
                   onChange={(next) => field.onChange(next ?? '')}
                   excludeAddresses={excludeAddresses}
+                  extraTokens={extraTokens}
                   disabledAddresses={existingTokens}
                   disabledAddressReason={EXISTING_LIMIT_TOOLTIP}
                   name={field.name}

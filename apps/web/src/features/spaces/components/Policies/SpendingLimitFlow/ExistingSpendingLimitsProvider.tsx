@@ -9,8 +9,8 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
-import useSpendingLimitTokenOptions from './hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from './utils/tokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
+import type { TokenOption } from '@/utils/tokenOptions'
 
 export type ExistingSpendingLimits = {
   /** Undefined until loaded for the selected Safe, or while no Safe is selected. */
