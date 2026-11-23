@@ -6,6 +6,8 @@ import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
+import useWallet from '@/hooks/wallets/useWallet'
+import { Message as CheckWalletMessage } from '@/components/common/CheckWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import {
@@ -19,7 +21,7 @@ import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import SafeCardReadOnly from '../../public/components/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
-import { safeModalTitles } from './constants'
+import { NO_ACTIVATED_SAFES_MESSAGE, safeModalTitles } from './constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
@@ -39,7 +41,16 @@ const SelectSafeModal = () => {
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
-  const filteredSafes = useSearchFilter(flatSafes, query, matchSafe)
+  const isNewTxAction = actionType === ESafeAction.NewTransaction
+  // Counterfactual Safes can't create transactions from a Space flow (see SafeScopeProvider), so they
+  // are hidden from the New transaction picker rather than failing on submit.
+  const selectableSafes = useMemo(
+    () => (isNewTxAction ? flatSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]) : flatSafes),
+    [isNewTxAction, flatSafes, undeployedSafes],
+  )
+  const hasHiddenUndeployedSafes = selectableSafes.length < flatSafes.length
+  const filteredSafes = useSearchFilter(selectableSafes, query, matchSafe)
+  const wallet = useWallet()
   const { actionMapper, resetActiveSafe } = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
@@ -60,6 +71,13 @@ const SelectSafeModal = () => {
     },
     [isSwapAction, chains, undeployedSafes],
   )
+
+  // Same gate as the Safe-level New transaction button (CheckWallet)
+  const getNewTxDisabledTooltip = useCallback((): string | undefined => {
+    if (!isNewTxAction) return undefined
+    if (!wallet) return CheckWalletMessage.WalletNotConnected
+    return undefined
+  }, [isNewTxAction, wallet])
 
   const handleClose = useCallback(() => {
     dispatch(closeSafeActionsModal())
@@ -98,11 +116,15 @@ const SelectSafeModal = () => {
                   <Skeleton className="h-[72px] w-full rounded-3xl" />
                 </div>
               ) : filteredSafes.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">No safes found</p>
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  {hasHiddenUndeployedSafes && selectableSafes.length === 0
+                    ? NO_ACTIVATED_SAFES_MESSAGE
+                    : 'No safes found'}
+                </p>
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {filteredSafes.map((safe) => {
-                    const disabledTooltip = getSwapDisabledTooltip(safe)
+                    const disabledTooltip = getSwapDisabledTooltip(safe) ?? getNewTxDisabledTooltip()
                     return (
                       <SafeCardReadOnly
                         key={`${safe.chainId}:${safe.address}`}

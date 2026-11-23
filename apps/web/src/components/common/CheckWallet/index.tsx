@@ -20,7 +20,7 @@ export type CheckWalletProps = {
   allowProposer?: boolean
 }
 
-enum Message {
+export enum Message {
   WalletNotConnected = 'Please connect your wallet',
   SDKNotInitialized = 'Still loading. Try again in a moment.',
   NotSafeOwner = 'Your connected wallet is not a signer of this Safe account',

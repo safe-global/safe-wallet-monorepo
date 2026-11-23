@@ -3,6 +3,7 @@ import SelectSafeModal from '../index'
 import { ESafeAction } from '../../../public/store/safeActionsModalSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { NO_ACTIVATED_SAFES_MESSAGE } from '../constants'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
 const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
@@ -51,6 +52,12 @@ jest.mock('@/hooks/useChains', () => ({
   default: () => mockUseChains(),
 }))
 
+const mockUseWallet = jest.fn()
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: () => mockUseWallet(),
+}))
+
 const renderModal = (actionType: ESafeAction, undeployedSafes: Record<string, Record<string, unknown>> = {}) =>
   render(<SelectSafeModal />, {
     initialReduxState: {
@@ -80,6 +87,7 @@ const cfState = (safe: SafeItem) => ({ [safe.chainId]: { [safe.address]: { statu
 describe('SelectSafeModal swap disabling', () => {
   beforeEach(() => {
     cardProps.length = 0
+    mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
     mockUseChains.mockReturnValue({ configs: [chainWithSwap, chainWithoutSwap] })
     mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
   })
@@ -117,5 +125,49 @@ describe('SelectSafeModal swap disabling', () => {
     const card = getCardFor(cfSafe)
     expect(card?.disabled).toBe(false)
     expect(card?.disabledTooltip).toBeUndefined()
+  })
+})
+
+describe('SelectSafeModal new transaction gating', () => {
+  beforeEach(() => {
+    cardProps.length = 0
+    mockUseChains.mockReturnValue({ configs: [chainWithSwap] })
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
+    mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
+  })
+
+  it('hides counterfactual safes from the new transaction picker', () => {
+    renderModal(ESafeAction.NewTransaction, cfState(cfSafe))
+
+    expect(getCardFor(cfSafe)).toBeUndefined()
+    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
+  })
+
+  it('shows an empty state when every safe is counterfactual', () => {
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [cfSafe], isLoading: false })
+
+    const { getByText } = renderModal(ESafeAction.NewTransaction, cfState(cfSafe))
+
+    expect(cardProps).toHaveLength(0)
+    expect(getByText(NO_ACTIVATED_SAFES_MESSAGE)).toBeInTheDocument()
+  })
+
+  it('disables every safe with the connect-wallet tooltip when no wallet is connected', () => {
+    mockUseWallet.mockReturnValue(null)
+
+    renderModal(ESafeAction.NewTransaction, cfState(cfSafe))
+
+    const card = getCardFor(deployedSafe)
+    expect(card?.disabled).toBe(true)
+    expect(card?.disabledTooltip).toBe('Please connect your wallet')
+  })
+
+  it('keeps counterfactual safes visible for other actions', () => {
+    mockUseWallet.mockReturnValue(null)
+
+    renderModal(ESafeAction.Send, cfState(cfSafe))
+
+    expect(getCardFor(cfSafe)?.disabled).toBe(false)
+    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
   })
 })
