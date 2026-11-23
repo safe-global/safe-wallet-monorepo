@@ -3,11 +3,7 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/c
 import { WalletContext, type WalletContextType } from './WalletContext'
 import { useSignerWallet } from './useSignerWallet'
 
-/**
- * Re-resolves the signer on the scoped Safe's chain. The app-wide WalletProvider sits above every
- * SafeScope, so it resolves a picked parent Safe on the URL/wallet chain, which is wrong in a Space-level flow.
- * The signer selection and parent Safe nonce stay in the app-wide provider.
- */
+// The app-wide WalletProvider sits above every SafeScope, so it can't resolve a parent Safe on the scoped chain
 const ScopedWalletProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const parent = useContext(WalletContext)
   const scope = useSafeScope()

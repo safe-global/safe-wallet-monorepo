@@ -11,6 +11,9 @@ import * as safesApi from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import * as useChainsHooks from '@/hooks/useChains'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as web3 from '@/hooks/wallets/web3'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
+import { useSigner } from '@/hooks/wallets/useWallet'
+import { connectedWalletBuilder, walletContextBuilder } from '@/tests/builders/wallet'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/safes'),
@@ -177,6 +180,38 @@ describe('SafeScopeProvider', () => {
 
     const mismatched = seen.filter(({ chainId, providerChainId }) => providerChainId && providerChainId !== chainId)
     expect(mismatched).toEqual([])
+  })
+
+  it('resolves the picked parent Safe signer on the scoped chain for its children', async () => {
+    const parentSafe = safeInfoBuilder().with({ chainId: polygon.chainId }).build()
+    const defaultQuery = mockQuery.getMockImplementation()!
+    mockQuery.mockImplementation((args: { chainId: string; safeAddress: string } | symbol) =>
+      typeof args !== 'symbol' && args.safeAddress === parentSafe.address.value
+        ? {
+            currentData: args.chainId === polygon.chainId ? parentSafe : undefined,
+            isLoading: false,
+            isFetching: false,
+          }
+        : defaultQuery(args),
+    )
+    // The app-wide context sits outside the scope, with the wallet on another chain
+    const wallet = connectedWalletBuilder().with({ chainId: sepolia.chainId }).build()
+    const appWallet = walletContextBuilder()
+      .with({ connectedWallet: wallet, signer: wallet, signerAddress: parentSafe.address.value })
+      .build()
+
+    const { result } = renderHook(useSigner, {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <WalletContext.Provider value={appWallet}>
+          <SafeScopeProvider initial={{ chainId: safeB.chainId, safeAddress: safeB.address.value }}>
+            {children}
+          </SafeScopeProvider>
+        </WalletContext.Provider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current?.isSafe).toBe(true))
+    expect(result.current).toMatchObject({ address: parentSafe.address.value, chainId: polygon.chainId })
   })
 
   it('reports safeLoading=true while a mid-flow switch is in flight, even though isLoading alone is false', async () => {
