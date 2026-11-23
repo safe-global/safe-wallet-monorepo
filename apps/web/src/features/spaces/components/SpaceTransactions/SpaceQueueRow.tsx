@@ -25,13 +25,19 @@ import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { getCounterparty, getNonce } from './utils'
 
-const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: string }): ReactElement | null => {
+export const Counterparty = ({
+  txInfo,
+  chainId,
+}: {
+  txInfo: TransactionInfo
+  chainId: string
+}): ReactElement | null => {
   const counterparty = getCounterparty(txInfo)
   if (!counterparty) return null
   return (
     <span className="flex min-w-0 items-center gap-2 text-sm">
-      {/* Fixed width so the names line up whichever word the pill says */}
-      <span className="flex w-12 shrink-0 justify-center rounded-md bg-muted py-1 capitalize group-hover/transaction:bg-card">
+      {/* A plain word in the sentence. Fixed width, the widest being "from", so the names line up whichever it is */}
+      <span data-testid="counterparty-join" className="w-8 shrink-0 text-muted-foreground">
         {counterparty.join}
       </span>
       {/* Grayscale only tints the avatar: the name is already a neutral colour. EthHashInfo's name box doesn't shrink

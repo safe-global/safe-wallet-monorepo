@@ -11,7 +11,7 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Safe: 160,
   Transaction: 160,
   Details: undefined,
-  // Fits the gauge and the widest urgency chip, "Blocked by #12345"
+  // Fits the gauge and the urgency chip up to "Blocked by #1234": a 5-digit nonce runs 6px into the cell padding
   // TODO(WA-4164/WA-4165): back to layout B width (128px) once the status chip leaves this column
   Status: 240,
   Action: 176,
