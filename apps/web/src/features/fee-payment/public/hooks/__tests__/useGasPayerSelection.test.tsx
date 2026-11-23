@@ -457,6 +457,42 @@ describe('useGasPayerSelection', () => {
     })
   })
 
+  describe('executing a tx signed with the Safe paying', () => {
+    const safePaidTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
+    Object.assign(safePaidTx.data, {
+      safeTxGas: '2409',
+      baseGas: '68568',
+      gasPrice: '741064438',
+      refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
+    })
+    safePaidTx.addSignature({ signer: SIGNER, data: '0x1234', staticPart: () => '0x', dynamicPart: () => '' } as never)
+
+    const renderExecution = () =>
+      renderHook(() => useGasPayerSelection({ safeTx: safePaidTx, offer: null, step: 'execute' }))
+
+    it('warns and flags it when the Safe cannot cover the fee', () => {
+      mockUseFeesPreview.mockReturnValue(buildFees({ isConfirmation: true, safeHasEnoughGas: false }))
+
+      const { result } = renderExecution()
+
+      expect(result.current.isLocked).toBe(true)
+      expect(result.current.view?.safeHasEnoughGas).toBe(false)
+      expect(result.current.safeCannotCoverFee).toBe(true)
+    })
+
+    it('does not flag it when the Safe covers the fee', () => {
+      mockUseFeesPreview.mockReturnValue(buildFees({ isConfirmation: true, safeHasEnoughGas: true }))
+
+      expect(renderExecution().result.current.safeCannotCoverFee).toBe(false)
+    })
+
+    it('does not flag it while the balance is unknown', () => {
+      mockUseFeesPreview.mockReturnValue(buildFees({ isConfirmation: true, safeHasEnoughGas: undefined }))
+
+      expect(renderExecution().result.current.safeCannotCoverFee).toBe(false)
+    })
+  })
+
   describe('sponsor at execution', () => {
     const signedTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
     signedTx.addSignature({ signer: SIGNER, data: '0x1234', staticPart: () => '0x', dynamicPart: () => '' } as never)

@@ -81,7 +81,7 @@ export const useFeesPreview = ({
   const { isProposing } = useContext(TxFlowContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
-  const { balances } = useBalances()
+  const { balances, loading: balancesLoading } = useBalances()
   const currency = useAppSelector(selectCurrency)
 
   const nativeSymbol = chain?.nativeCurrency.symbol ?? 'ETH'
@@ -245,9 +245,12 @@ export const useFeesPreview = ({
     const gasFiatUsd = gasTokenBalance
       ? Number(formatUnits(gasFeeBaseUnits, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
       : 0
+    // Unknown until the balances load: a missing token then means the Safe holds none of it.
     const safeHasEnoughGas = gasTokenBalance
       ? BigInt(gasTokenBalance.balance) >= gasFeeBaseUnits + getSendInGasToken(safeTx, selectedAddress)
-      : false
+      : balancesLoading
+        ? undefined
+        : false
 
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
