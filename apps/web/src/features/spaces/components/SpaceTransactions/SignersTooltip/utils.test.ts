@@ -46,3 +46,14 @@ describe('sortSigners', () => {
     expect(sortSigners([owner], [confirmation])).toEqual([{ ...owner, signed: true }])
   })
 })
+
+describe('sortSigners with the user', () => {
+  it('lists the user first, then the signed owners, then the rest', () => {
+    const [a, b, me] = [addressInfo(), addressInfo(), addressInfo()]
+    const confirmations = [b].map((signer) => multisigConfirmationBuilder().with({ signer }).build())
+
+    const sorted = sortSigners([a, b, me], confirmations, (address) => address === me.value)
+
+    expect(sorted.map(({ value }) => value)).toEqual([me.value, b.value, a.value])
+  })
+})

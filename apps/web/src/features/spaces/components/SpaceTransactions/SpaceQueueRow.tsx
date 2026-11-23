@@ -18,8 +18,6 @@ import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
-import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
-import StatusChip from '@safe-global/views/features/spaces/components/SpaceQueue/StatusChip'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
@@ -159,28 +157,16 @@ const SpaceQueueRow = ({
             <SignersTooltip
               chainId={chainId}
               txId={tx.id}
+              safeAddress={safeAddress}
+              status={status}
+              nonce={nonce}
+              nextNonce={nextNonce}
               submitted={executionInfo.confirmationsSubmitted}
               required={executionInfo.confirmationsRequired}
-            >
-              <span className="flex w-fit shrink-0 items-center gap-1.5 text-sm tabular-nums">
-                <SignatureGauge
-                  count={executionInfo.confirmationsSubmitted}
-                  threshold={executionInfo.confirmationsRequired}
-                />
-                {/* Fixed width, up to 10/10, so the chip after it lines up whatever the count */}
-                <span className="w-[5ch]">
-                  {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
-                </span>
-              </span>
-            </SignersTooltip>
+            />
           )}
-          {expiredSwap ? (
-            <StatusLabel status="expired" />
-          ) : isPending ? (
-            <TxStatusLabel tx={tx} />
-          ) : (
-            <StatusChip status={status} nextNonce={nextNonce} />
-          )}
+          {/* The everyday status is in the gauge: only these exceptions keep a label */}
+          {expiredSwap ? <StatusLabel status="expired" /> : isPending && <TxStatusLabel tx={tx} />}
         </span>
       </TableCell>
 

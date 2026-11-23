@@ -456,6 +456,22 @@ describe('SpaceQueueTable', () => {
         </DeleteTxDialogProvider>,
       )
 
+    it('shows the status in the gauge, without a status chip', () => {
+      render(
+        <DeleteTxDialogProvider>
+          <Table>
+            <TableBody>
+              <SpaceQueueRow item={next} safeAddress={safeA} chainId={chainId} status="blocked" nextNonce={3} />
+            </TableBody>
+          </Table>
+        </DeleteTxDialogProvider>,
+      )
+
+      expect(screen.getByRole('button', { name: /^Blocked by #3\. \d+ of \d+ signatures?$/ })).toBeInTheDocument()
+      expect(screen.queryByText('Blocked by #3')).not.toBeInTheDocument()
+      expect(screen.getByTestId('space-queue-row').querySelector('[data-slot="badge-dot"]')).toBeNull()
+    })
+
     it('fills one cell per column, with the Safe in its own column', () => {
       renderRow(next)
 

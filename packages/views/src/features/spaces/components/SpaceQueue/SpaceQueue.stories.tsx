@@ -11,8 +11,6 @@ import QueueSkeletonRow from './QueueSkeletonRow'
 import QueueTableHeader from './QueueTableHeader'
 import SafeBandRow from './SafeBandRow'
 import SafeTitle from './SafeTitle'
-import SignatureGauge from './SignatureGauge'
-import StatusChip from './StatusChip'
 
 const SAFE = '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 const ETHEREUM: ChainInfo = { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }
@@ -76,31 +74,6 @@ export const ConflictHeader: Story = {
       <ConflictHeaderRow nonce={57} size={2} />
       <ConflictHeaderRow nonce={58} size={3} />
     </InTable>
-  ),
-}
-
-export const Statuses: Story = {
-  render: () => (
-    <div className="flex flex-wrap gap-2">
-      <StatusChip status="execute" />
-      <StatusChip status="sign" />
-      <StatusChip status="waiting" />
-      <StatusChip status="blocked" nextNonce={56} />
-      <StatusChip status="blocked" />
-    </div>
-  ),
-}
-
-export const SignatureGauges: Story = {
-  render: () => (
-    <div className="flex items-center gap-3">
-      {[0, 1, 2, 3].map((count) => (
-        <span key={count} className="flex items-center gap-1.5 text-sm tabular-nums">
-          <SignatureGauge count={count} threshold={3} />
-          {count}/3
-        </span>
-      ))}
-    </div>
   ),
 }
 
