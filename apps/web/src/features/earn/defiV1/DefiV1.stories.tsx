@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import type { Decorator, Meta, StoryObj } from '@storybook/react'
 import { within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks/createMockStory'
+import { spaceWithSafesHandler } from '@/stories/mocks/handlers'
 import { localItem } from '@/services/local-storage/local'
 import Home from '@/pages/home'
 import Earn from '@/pages/earn'
@@ -34,6 +35,20 @@ const setup = createMockStory({
   shadcn: true,
 })
 
+const workspaceSetup = createMockStory({
+  scenario: 'efSafe',
+  wallet: 'owner',
+  layout: 'fullPage',
+  pathname: '/spaces',
+  query: { spaceId: '1' },
+  authenticated: true,
+  features: { earn: true },
+  shadcn: true,
+})
+
+const withLayout: Decorator<Args> = (Story, context) =>
+  (context.args.scope === 'workspace' ? workspaceSetup : setup).decorator(Story, context)
+
 const withPrototype: Decorator<Args> = (Story, { args }) => (
   <DefiV1Context.Provider
     value={{
@@ -58,7 +73,7 @@ const withPrototype: Decorator<Args> = (Story, { args }) => (
 const meta = {
   title: 'Prototypes/DeFi V1',
   parameters: { layout: 'fullscreen', ...setup.parameters },
-  decorators: [setup.decorator, withPrototype],
+  decorators: [withLayout, withPrototype],
   beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).set(true),
   args: {
     page: 'earn',
@@ -133,7 +148,11 @@ export const TreasuryPro: Story = {
 }
 
 export const TreasuryWorkspace: Story = {
-  ...at('earn', { plan: 'pro', scope: 'workspace' }),
+  args: { page: 'earn', plan: 'pro', scope: 'workspace' },
+  parameters: {
+    ...workspaceSetup.parameters,
+    msw: { handlers: [spaceWithSafesHandler, ...workspaceSetup.handlers] },
+  },
   play: async ({ canvasElement }) => {
     await within(canvasElement).findByTestId('safe-filter')
   },

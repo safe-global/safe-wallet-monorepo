@@ -17,8 +17,7 @@ import type {
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
-// eslint-disable-next-line no-restricted-imports -- prototype only, not for merge
-import { useDefiV1 } from '@/features/earn/defiV1/context'
+import { useDefiV1 } from '@/features/earn/public/hooks/useDefiV1'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
