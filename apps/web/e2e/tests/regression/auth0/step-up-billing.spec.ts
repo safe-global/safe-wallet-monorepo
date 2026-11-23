@@ -88,6 +88,7 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       await storeSubscription(setup, workspaceId, { status: 'canceled' })
       await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
+      await safePage.getByRole('tab', { name: '20 Safe accounts' }).click()
       await safePage.getByRole('button', { name: 'Continue with Business' }).click()
       await completeStepUp(safePage)
 
@@ -112,7 +113,7 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       await storeSubscription(setup, workspaceId, { plan: 'starter' })
       await safePage.goto(`/spaces/plans?spaceId=${workspaceId}`)
 
-      await safePage.getByRole('button', { name: 'Upgrade to Business' }).click()
+      await safePage.getByRole('button', { name: 'Switch to Business' }).click()
       await safePage.getByRole('button', { name: 'Confirm change' }).click()
       await completeStepUp(safePage)
 
