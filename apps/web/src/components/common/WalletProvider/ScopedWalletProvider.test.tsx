@@ -134,11 +134,55 @@ describe('ScopedWalletProvider', () => {
     expect(root.current?.signerAddress).toBe(parentSafeAddress)
     expect(root.current?.getParentSafeNonce()).toBe(7)
 
+    await waitFor(() => expect(result.current?.signer?.isSafe).toBe(true))
+
     // Closing the flow resets the selection from the app root
     act(() => root.current?.setSignerAddress(undefined))
     await settle()
     expect(result.current?.signer?.isSafe).toBeUndefined()
     expect(result.current?.getParentSafeNonce()).toBeUndefined()
+  })
+
+  it('does not take a parent Safe that only exists on the app-wide chain as the scoped signer', async () => {
+    const ownerAddress = fakerChecksummedAddress()
+    const parentSafeAddress = fakerChecksummedAddress()
+    mockOnboard([walletState(ownerAddress, ROOT_CHAIN_ID)])
+    const lookups = mockCgwSafes([safeAt(parentSafeAddress, ROOT_CHAIN_ID, 2)])
+
+    const { result, root } = renderScoped()
+    act(() => result.current?.setSignerAddress(parentSafeAddress))
+
+    await waitFor(() => expect(root.current?.signer?.isSafe).toBe(true))
+    await waitFor(() => expect(lookups).toContainEqual({ chainId: SCOPE_CHAIN_ID, address: parentSafeAddress }))
+    await settle()
+    expect(result.current?.signer?.isSafe).toBeUndefined()
+    expect(result.current?.signer?.address).toBe(ownerAddress)
+  })
+
+  it('marks a connected wallet that is a Safe on the scoped chain as a connected Safe', async () => {
+    const address = fakerChecksummedAddress()
+    mockOnboard([walletState(address, SCOPE_CHAIN_ID)])
+    mockCgwSafes([safeAt(address, SCOPE_CHAIN_ID, 3)])
+
+    const { result, root } = renderScoped()
+
+    await waitFor(() => expect(result.current?.signer?.isConnectedSafe).toBe(true))
+    expect(result.current?.signer?.threshold).toBe(3)
+    // The app-wide chain differs from the wallet chain, so the root doesn't flag it
+    expect(root.current?.signer?.isConnectedSafe).toBeUndefined()
+  })
+
+  it('does not mark a connected wallet that is a Safe only on the app-wide chain as a connected Safe', async () => {
+    const address = fakerChecksummedAddress()
+    mockOnboard([walletState(address, ROOT_CHAIN_ID)])
+    mockCgwSafes([safeAt(address, ROOT_CHAIN_ID, 3)])
+
+    const { result, root } = renderScoped()
+
+    await waitFor(() => expect(root.current?.signer?.isConnectedSafe).toBe(true))
+    await settle()
+    expect(result.current?.signer?.isConnectedSafe).toBeUndefined()
+    expect(result.current?.signer?.address).toBe(address)
   })
 
   it('passes the app-wide context through unchanged until a Safe is scoped', async () => {

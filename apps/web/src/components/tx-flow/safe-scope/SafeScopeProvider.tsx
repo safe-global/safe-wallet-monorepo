@@ -64,16 +64,20 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
   const chain = useChain(target?.chainId ?? '')
   const customRpc = useAppSelector(selectRpc)
   const customRpcUrl = chain ? customRpc?.[chain.chainId] : undefined
-  const [web3ReadOnly, setWeb3ReadOnly] = useState<JsonRpcProvider>()
+  // Tagged with its chain: the reset below runs after the render that switches chains, so without the
+  // tag that render would hand the old chain's provider to signers and the SDK for the new chain.
+  const [providerState, setProviderState] = useState<{ chainId: string; provider: JsonRpcProvider }>()
+  const web3ReadOnly = providerState?.chainId === target?.chainId ? providerState?.provider : undefined
 
   useEffect(() => {
-    setWeb3ReadOnly(undefined)
+    setProviderState(undefined)
     if (!chain) return
     let cancelled = false
     // Dynamic import keeps ethers out of the main bundle, same as `useInitWeb3`.
     import('@/hooks/wallets/web3').then(({ createWeb3ReadOnly }) => {
       if (cancelled) return
-      setWeb3ReadOnly(createWeb3ReadOnly(chain, customRpcUrl))
+      const provider = createWeb3ReadOnly(chain, customRpcUrl)
+      setProviderState(provider ? { chainId: chain.chainId, provider } : undefined)
     })
     return () => {
       cancelled = true

@@ -159,6 +159,26 @@ describe('SafeScopeProvider', () => {
     )
   })
 
+  it('never serves the previous chain provider for the new chain, not even for one render', async () => {
+    const seen: { chainId?: string; providerChainId?: string }[] = []
+    const { result } = renderHook(
+      () => {
+        const probe = useProbe()
+        const provider = probe.scope?.web3ReadOnly as { chainId: string } | undefined
+        seen.push({ chainId: probe.scope?.chainId, providerChainId: provider?.chainId })
+        return probe
+      },
+      { wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }) },
+    )
+    await waitFor(() => expect(result.current.scope?.web3ReadOnly).toEqual({ chainId: sepolia.chainId }))
+
+    act(() => result.current.controls.setScope(safeB.chainId, safeB.address.value))
+    await waitFor(() => expect(result.current.scope?.web3ReadOnly).toEqual({ chainId: polygon.chainId }))
+
+    const mismatched = seen.filter(({ chainId, providerChainId }) => providerChainId && providerChainId !== chainId)
+    expect(mismatched).toEqual([])
+  })
+
   it('reports safeLoading=true while a mid-flow switch is in flight, even though isLoading alone is false', async () => {
     const { result } = renderHook(useProbe, {
       wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
