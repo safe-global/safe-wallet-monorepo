@@ -54,6 +54,12 @@ describe('SponsoredTxsCounter', () => {
     ).toBeInTheDocument()
   })
 
+  it('says "transaction" when one free transaction is left', () => {
+    render(<SponsoredTxsCounter left={1} quota={5} resetsAt={null} isSubscription={false} isPro={false} />)
+
+    expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('1 free transaction left today')
+  })
+
   it('keeps the daily copy with the PRO chip on a Safe Pro Safe sponsored by the free daily limit', () => {
     render(<SponsoredTxsCounter left={3} quota={5} resetsAt={null} isSubscription={false} isPro />)
 

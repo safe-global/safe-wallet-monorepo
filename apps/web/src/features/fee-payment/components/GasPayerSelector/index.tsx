@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import NextLink from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import ProChip from '@safe-global/views/assets/images/safe-pro/pro-chip.svg'
 import GasPayerSelectorView, {
@@ -54,6 +55,7 @@ const ProUpsell = (): ReactElement => {
             <span className="block h-4 w-6" aria-label="Safe Pro">
               <ProChip className="size-full" />
             </span>
+            <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
           </Button>
         </Track>
       }

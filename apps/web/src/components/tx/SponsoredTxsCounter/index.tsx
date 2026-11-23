@@ -73,7 +73,7 @@ const SponsoredTxsCounter = ({
         ) : (
           <span className="inline-flex items-center gap-1">
             <span data-testid="sponsored-txs-left">
-              <span className="font-semibold">{left}</span> free transactions left today
+              <span className="font-semibold">{left}</span> free transaction{maybePlural(left)} left today
             </span>
             {quota !== null && (
               <Tooltip>

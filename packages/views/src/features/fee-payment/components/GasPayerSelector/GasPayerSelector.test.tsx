@@ -43,24 +43,44 @@ describe('GasPayerSelector view', () => {
     expect(onChoiceChange).toHaveBeenCalledWith('PAY_FROM_SAFE')
   })
 
-  it('shows a locked payer with why it is locked', async () => {
-    renderCard({ view: view({ payer: { kind: 'locked', value: 'WALLET' } }) })
+  it('explains a Safe account locked at signing', async () => {
+    renderCard({ view: view({ payer: { kind: 'locked', value: 'PAY_FROM_SAFE' } }) })
 
     expect(screen.queryByTestId('fee-payer-selector')).not.toBeInTheDocument()
     await userEvent.hover(screen.getByTestId('fee-payer-locked'))
 
-    expect(await screen.findByText('Whoever executes pays the gas fee.')).toBeInTheDocument()
+    expect(await screen.findByText("Set at signing and can't be changed.")).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="tooltip-content"]')).toBeInTheDocument()
+  })
+
+  it.each(['WALLET', 'SPONSORED'] as const)('shows a locked %s payer without a tooltip', async (value) => {
+    renderCard({ view: view({ payer: { kind: 'locked', value } }) })
+
+    await userEvent.hover(screen.getByTestId('fee-payer-locked'))
+
+    expect(document.querySelector('[data-slot="tooltip-content"]')).not.toBeInTheDocument()
   })
 
   it.each([
     ['SET_AT_SIGNING', "Set at signing and can't be changed."],
-    ['SPONSORED', 'Covered by your sponsored transactions.'],
+    ['SPONSORED', 'Covered by your Pro plan.'],
     ['NATIVE_ONLY', 'Fees are paid in ETH for now. More tokens are coming soon.'],
     [undefined, 'Fees will be paid from the connected signer wallet when executing this transaction.'],
   ] as const)('explains a fee token locked for %s', (lockedReason, text) => {
     renderCard({ view: view({ gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason } }) })
 
     expect(screen.getByLabelText(text)).toBeInTheDocument()
+  })
+
+  it('explains a fee token covered by a free transaction', () => {
+    renderCard({
+      view: view({
+        gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: 'SPONSORED' },
+        sponsorKind: 'free',
+      }),
+    })
+
+    expect(screen.getByLabelText('Covered by a free transaction.')).toBeInTheDocument()
   })
 
   it('labels a sponsor as "Free transaction" when the chain sponsors it', () => {
