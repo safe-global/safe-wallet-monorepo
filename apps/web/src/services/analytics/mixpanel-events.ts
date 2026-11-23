@@ -37,6 +37,7 @@ export enum MixpanelEvent {
   TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
   TRANSACTION_SAFENET_SUBMITTED = 'Transaction Safenet Submitted',
+  TRANSACTION_SAFENET_NOT_SUBMITTED = 'Transaction Safenet Not Submitted',
   TRANSACTION_SAFENET_CHECKED = 'Transaction Safenet Checked',
   TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
@@ -204,6 +205,35 @@ export enum SafenetCheckResult {
   RISK_DETECTED = 'risk_detected',
   UNAVAILABLE = 'unavailable',
   NO_RULING = 'no_ruling',
+}
+
+/** Why a check reads as unavailable; sent with the UNAVAILABLE result only. */
+export enum SafenetUnavailableReason {
+  TIMED_OUT = 'timed_out',
+  SIGNATURE_INVALID = 'signature_invalid',
+  READ_FAILED = 'read_failed',
+  /** No check in a read window that cannot prove there is none: usually a transaction that never had one. */
+  NOT_FOUND = 'not_found',
+}
+
+/** Why a first signature on a Safenet chain started no check. */
+export enum SafenetNotSubmittedReason {
+  NO_WORKSPACE = 'no_workspace',
+  NOT_SIGNED_IN = 'not_signed_in',
+  /** CGW 402: the Workspace plan does not include Safenet checks. */
+  NO_ENTITLEMENT = 'no_entitlement',
+  /** CGW 403: the Workspace may not request checks for this Safe. */
+  WORKSPACE_REFUSED = 'workspace_refused',
+  /** CGW 429 with a JSON body: the Workspace used its daily checks. */
+  DAILY_LIMIT = 'daily_limit',
+  /** CGW 501: CGW does not offer checks on this chain. */
+  CHAIN_DISABLED = 'chain_disabled',
+  FAILED = 'failed',
+}
+
+export enum SafenetCheckLocation {
+  SIGNING_FLOW = 'signing_flow',
+  TRANSACTION_DETAILS = 'transaction_details',
 }
 
 export enum SafenetSignerRole {

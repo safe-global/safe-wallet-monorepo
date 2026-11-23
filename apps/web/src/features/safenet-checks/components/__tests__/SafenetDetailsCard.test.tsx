@@ -27,7 +27,13 @@ import useWallet from '@/hooks/wallets/useWallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import SafenetChecksSection from '../SafenetChecksSection'
-import { MixpanelEventParams, SafenetCheckResult, SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import {
+  MixpanelEventParams,
+  SafenetCheckLocation,
+  SafenetCheckResult,
+  SafenetSignerRole,
+  SafenetUnavailableReason,
+} from '@/services/analytics/mixpanel-events'
 import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 import { trackEvent } from '@/services/analytics'
 
@@ -294,6 +300,7 @@ describe('SafenetDetailsCard Mixpanel tracking', () => {
       [MixpanelEventParams.RESULT]: SafenetCheckResult.RISK_DETECTED,
       [MixpanelEventParams.RULES_FLAGGED]: ['R-4.2'],
       [MixpanelEventParams.SENTINELS_FLAGGED]: '1 of 2',
+      [MixpanelEventParams.LOCATION]: SafenetCheckLocation.TRANSACTION_DETAILS,
       ...(role && { [MixpanelEventParams.SIGNER_ROLE]: role }),
     })
   })
@@ -314,7 +321,7 @@ describe('SafenetDetailsCard Mixpanel tracking', () => {
     expect(rolesTracked()).toEqual([undefined, SafenetSignerRole.CO_SIGNER])
   })
 
-  it('tracks a check that could not be read as unavailable', () => {
+  it('tracks a check that could not be read as unavailable, with its reason', () => {
     const hash = newHash()
     jest.mocked(useSafenetCheck).mockReturnValue(buildCheckView({ unavailableReason: 'READ_FAILED' }))
 
@@ -326,6 +333,8 @@ describe('SafenetDetailsCard Mixpanel tracking', () => {
       expect.objectContaining({
         [MixpanelEventParams.SAFE_TX_HASH]: hash,
         [MixpanelEventParams.RESULT]: SafenetCheckResult.UNAVAILABLE,
+        [MixpanelEventParams.LOCATION]: SafenetCheckLocation.TRANSACTION_DETAILS,
+        [MixpanelEventParams.FAILURE_REASON]: SafenetUnavailableReason.READ_FAILED,
       }),
     )
   })

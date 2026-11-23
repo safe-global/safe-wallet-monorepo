@@ -8,7 +8,7 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { Errors, logError } from '@/services/exceptions'
 import { getLocationSpaceId, isLegacySpaceId, parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { getStoreInstance, type RootState } from '@/store'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams, SafenetNotSubmittedReason } from '@/services/analytics/mixpanel-events'
 import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 import { trackEvent } from '@/services/analytics'
 import { isAuthenticated } from '@/store/authSlice'
@@ -32,6 +32,18 @@ const hasJsonBody = (error: unknown): boolean =>
   error.data !== null
 
 type Failure = 'refusal' | 'transient' | 'fault'
+
+const REFUSAL_REASONS: Partial<Record<number, SafenetNotSubmittedReason>> = {
+  402: SafenetNotSubmittedReason.NO_ENTITLEMENT,
+  403: SafenetNotSubmittedReason.WORKSPACE_REFUSED,
+  429: SafenetNotSubmittedReason.DAILY_LIMIT,
+  501: SafenetNotSubmittedReason.CHAIN_DISABLED,
+}
+
+const notSubmittedReason = (error: unknown, failure: Failure): SafenetNotSubmittedReason => {
+  const status = failure === 'refusal' ? getHttpStatusFromError(error) : undefined
+  return (status !== undefined && REFUSAL_REASONS[status]) || SafenetNotSubmittedReason.FAILED
+}
 
 const classifyFailure = (error: unknown): Failure => {
   const status = getHttpStatusFromError(error)
@@ -61,6 +73,17 @@ const isEnabledOnChain = (state: RootState, chainId: string): boolean => {
   return chain !== undefined && hasFeature(chain, FEATURES.SAFENET_CHECKS)
 }
 
+type Submission = { safeTxHash: string; isFirstSignature: boolean }
+
+// Only the first signature reports, so each eligible transaction gets one Submitted or one Not Submitted
+const trackSubmission = ({ safeTxHash, isFirstSignature }: Submission, reason?: SafenetNotSubmittedReason): void => {
+  if (!isFirstSignature) return
+  trackEvent(reason ? SAFENET_EVENTS.NOT_SUBMITTED : SAFENET_EVENTS.SUBMITTED, {
+    [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash,
+    ...(reason && { [MixpanelEventParams.FAILURE_REASON]: reason }),
+  })
+}
+
 /**
  * Asks CGW to start a check paid by the Workspace in the page URL.
  * Never rejects: signing must not depend on it. Retries transient failures in the
@@ -77,20 +100,31 @@ export const requestSafenetCheck = async ({
   safeTxHash: string
   isFirstSignature: boolean
 }): Promise<void> => {
+  const submission = { safeTxHash, isFirstSignature }
   try {
     const store = getStoreInstance()
     const state = store.getState()
+    if (!isEnabledOnChain(state, chainId)) return
+
     const spaceId = parseSpaceId(getLocationSpaceId())
     // CGW accepts only a Workspace UUID in the route
-    if (!spaceId || isLegacySpaceId(spaceId)) return
-    if (!isAuthenticated(state) || !isEnabledOnChain(state, chainId)) return
+    if (!spaceId || isLegacySpaceId(spaceId)) {
+      trackSubmission(submission, SafenetNotSubmittedReason.NO_WORKSPACE)
+      return
+    }
+    if (!isAuthenticated(state)) {
+      trackSubmission(submission, SafenetNotSubmittedReason.NOT_SIGNED_IN)
+      return
+    }
 
     const { initiate } = safenetApi.endpoints.safenetChecksRequestCheckV1
     const check = { spaceId, chainId, safeAddress, createSafenetCheckDto: { safeTxHash } }
     await sendWithRetry(() => store.dispatch(initiate(check)).unwrap())
     store.dispatch(recordCheckRequest({ chainId, safeAddress, safeTxHash, requestedAtMs: Date.now() }))
-    if (isFirstSignature) trackEvent(SAFENET_EVENTS.SUBMITTED, { [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash })
+    trackSubmission(submission)
   } catch (error) {
-    if (classifyFailure(error) !== 'refusal') logError(Errors._652, error)
+    const failure = classifyFailure(error)
+    if (failure !== 'refusal') logError(Errors._652, error)
+    trackSubmission(submission, notSubmittedReason(error, failure))
   }
 }

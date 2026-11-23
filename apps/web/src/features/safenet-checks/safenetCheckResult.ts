@@ -1,11 +1,12 @@
 import {
+  AttestationVerificationStatus,
   CheckEventType,
   CheckStatus,
   type NormalizedCheckEvent,
   type PublicCheckStatus,
   type UnavailableReason,
 } from '@safe-global/utils/features/safenet-checks'
-import { SafenetCheckResult } from '@/services/analytics/mixpanel-events'
+import { SafenetCheckResult, SafenetUnavailableReason } from '@/services/analytics/mixpanel-events'
 
 const NO_RULING_EVENTS = [CheckEventType.ARBITRATION_TIMED_OUT, CheckEventType.DISPUTE_OUT_OF_SCOPE]
 
@@ -41,4 +42,25 @@ export const toSafenetCheckResult = (
       return _exhaustive
     }
   }
+}
+
+const READ_REASONS: Partial<Record<UnavailableReason, SafenetUnavailableReason>> = {
+  READ_FAILED: SafenetUnavailableReason.READ_FAILED,
+  WINDOW_UNCERTAIN: SafenetUnavailableReason.NOT_FOUND,
+}
+
+/** Why an UNAVAILABLE result has no verdict; `undefined` for every other status. */
+export const toSafenetUnavailableReason = (
+  publicStatus: PublicCheckStatus,
+  unavailableReason: UnavailableReason | undefined,
+  attestationStatus: AttestationVerificationStatus | undefined,
+): SafenetUnavailableReason | undefined => {
+  // A failed FROST verification reads publicly as TIMED_OUT
+  if (publicStatus === CheckStatus.TIMED_OUT) {
+    return attestationStatus === AttestationVerificationStatus.INVALID
+      ? SafenetUnavailableReason.SIGNATURE_INVALID
+      : SafenetUnavailableReason.TIMED_OUT
+  }
+  if (publicStatus !== CheckStatus.UNAVAILABLE || !unavailableReason) return undefined
+  return READ_REASONS[unavailableReason]
 }

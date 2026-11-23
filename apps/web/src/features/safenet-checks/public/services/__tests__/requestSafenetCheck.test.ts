@@ -11,7 +11,7 @@ import { getStoreInstance, makeStore, setStoreInstance } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { server } from '@/tests/server'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { MixpanelEventParams, SafenetNotSubmittedReason } from '@/services/analytics/mixpanel-events'
 import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 import { trackEvent } from '@/services/analytics'
 import { requestSafenetCheck as requestCheck } from '../requestSafenetCheck'
@@ -84,6 +84,12 @@ const requestSafenetCheck = (
   isFirstSignature = true,
 ) => requestCheck({ ...args, isFirstSignature })
 
+const notSubmitted = (reason: SafenetNotSubmittedReason) =>
+  [
+    SAFENET_EVENTS.NOT_SUBMITTED,
+    { [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash, [MixpanelEventParams.FAILURE_REASON]: reason },
+  ] as const
+
 describe('requestSafenetCheck', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -149,7 +155,7 @@ describe('requestSafenetCheck', () => {
   it.each([
     ['outside a Workspace', `safe=gno:${safeAddress}`],
     ['for a legacy numeric Workspace id', `safe=gno:${safeAddress}&spaceId=42`],
-  ])('sends nothing %s', async (_title, query) => {
+  ])('sends nothing and tracks a first signature as not submitted %s', async (_title, query) => {
     const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
     const received = mockCheckRoute(chainId)
     openPage(query)
@@ -157,21 +163,31 @@ describe('requestSafenetCheck', () => {
     await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
 
     expect(received).not.toHaveBeenCalled()
-    expect(trackEvent).not.toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(...notSubmitted(SafenetNotSubmittedReason.NO_WORKSPACE))
     expect(logError).not.toHaveBeenCalled()
   })
 
-  it('sends nothing without a Workspace session', async () => {
+  it('sends nothing and tracks a first signature as not submitted without a Workspace session', async () => {
     const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS], signedIn: false })
     const received = mockCheckRoute(chainId)
 
     await requestSafenetCheck({ chainId, safeAddress, safeTxHash })
 
     expect(received).not.toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledWith(...notSubmitted(SafenetNotSubmittedReason.NOT_SIGNED_IN))
+  })
+
+  it('tracks nothing for a co-signature that starts no check', async () => {
+    const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS], signedIn: false })
+    mockCheckRoute(chainId)
+
+    await requestSafenetCheck({ chainId, safeAddress, safeTxHash }, false)
+
     expect(trackEvent).not.toHaveBeenCalled()
   })
 
-  it('sends once, logs once and tracks nothing when CGW rejects the request for good', async () => {
+  it('sends once, logs once and tracks a failed submission when CGW rejects the request for good', async () => {
     const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
     const received = mockCheckRoute(chainId, 404)
 
@@ -180,15 +196,16 @@ describe('requestSafenetCheck', () => {
     expect(received).toHaveBeenCalledTimes(1)
     expect(logError).toHaveBeenCalledTimes(1)
     expect(logError).toHaveBeenCalledWith(Errors._652, expect.objectContaining({ status: 404 }))
-    expect(trackEvent).not.toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(...notSubmitted(SafenetNotSubmittedReason.FAILED))
   })
 
-  it.each<[string, Reply]>([
-    ['lacks the plan entitlement', 402],
-    ['refuses the Workspace (membership or Safe)', 403],
-    ['does not offer checks on the chain', 501],
-    ['reports the Workspace daily limit as used', dailyLimitReached],
-  ])('sends once and logs nothing when CGW %s', async (_title, reply) => {
+  it.each<[string, Reply, SafenetNotSubmittedReason]>([
+    ['lacks the plan entitlement', 402, SafenetNotSubmittedReason.NO_ENTITLEMENT],
+    ['refuses the Workspace (membership or Safe)', 403, SafenetNotSubmittedReason.WORKSPACE_REFUSED],
+    ['does not offer checks on the chain', 501, SafenetNotSubmittedReason.CHAIN_DISABLED],
+    ['reports the Workspace daily limit as used', dailyLimitReached, SafenetNotSubmittedReason.DAILY_LIMIT],
+  ])('sends once, logs nothing and tracks the refusal when CGW %s', async (_title, reply, reason) => {
     const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
     const received = mockCheckRoute(chainId, reply)
 
@@ -196,7 +213,8 @@ describe('requestSafenetCheck', () => {
 
     expect(received).toHaveBeenCalledTimes(1)
     expect(logError).not.toHaveBeenCalled()
-    expect(trackEvent).not.toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(...notSubmitted(reason))
   })
 
   describe('transient failures', () => {
@@ -231,7 +249,7 @@ describe('requestSafenetCheck', () => {
       expect(logError).not.toHaveBeenCalled()
     })
 
-    it('retries a 429 that is not CGW JSON three times with backoff, then logs once', async () => {
+    it('retries a 429 that is not CGW JSON three times with backoff, then logs and tracks a failure', async () => {
       const chainId = await setupStore({ features: [FEATURES.SAFENET_CHECKS] })
       const received = mockCheckRoute(chainId, htmlTooManyRequests)
 
@@ -243,6 +261,7 @@ describe('requestSafenetCheck', () => {
       expect(jest.mocked(delay).mock.calls).toEqual([[2_000], [5_000], [15_000]])
       expect(logError).toHaveBeenCalledTimes(1)
       expect(logError).toHaveBeenCalledWith(Errors._652, parseError)
+      expect(trackEvent).toHaveBeenCalledWith(...notSubmitted(SafenetNotSubmittedReason.FAILED))
     })
 
     it('records no request time when the retries run out', async () => {

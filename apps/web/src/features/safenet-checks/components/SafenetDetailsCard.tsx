@@ -27,6 +27,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import { detailsSignerRole } from '../safenetSignerRole'
 import { useTrackSafenetChecked } from '../useTrackSafenetChecked'
+import { SafenetCheckLocation } from '@/services/analytics/mixpanel-events'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL, SafenetOutboundLink } from './SafenetLinks'
 import { SafenetDetailsPanel, SafenetDetailsPanelStack } from './SafenetBlocks'
@@ -324,9 +325,11 @@ const SafenetDetailsCard = ({
     identity: { chainId, safeAddress, safeTxHash },
     publicStatus: display?.publicStatus,
     unavailableReason: display && 'unavailableReason' in display ? display.unavailableReason : undefined,
+    attestationStatus: snapshot?.attestation.status,
     events: snapshot?.events,
     snapshotTxHash: snapshot?.safeTxHash,
     signerRole: detailsSignerRole(executionInfo, wallet?.address, isQueued),
+    location: SafenetCheckLocation.TRANSACTION_DETAILS,
     isShown: !!display,
   })
 
