@@ -42,12 +42,19 @@ export type Opportunity = {
 export type DefiV1Framing = 'treasury' | 'defi'
 export type DefiV1Nudge = 'home' | 'assets' | 'off'
 export type DefiV1Plan = 'free' | 'pro'
+/** M1 ships first: deposits from this Safe only. M2 adds nested Safes, swap and bridge. */
+export type DefiV1Milestone = 'm1' | 'm2'
+/** One Safe, or every Safe in the workspace. */
+export type DefiV1Scope = 'safe' | 'workspace'
 
 export type DefiV1Config = {
   framing: DefiV1Framing
   nudge: DefiV1Nudge
   plan: DefiV1Plan
   setup: DefiV1Setup
+  milestone: DefiV1Milestone
+  scope: DefiV1Scope
+  empty?: boolean
 }
 
 /** How set up investment opens: one form in a dialog, a stepper in a side panel, or a stepper in a dialog. */
@@ -58,7 +65,13 @@ export type Sort = { key: SortKey; direction: 'asc' | 'desc' }
 
 export type GroupBy = 'none' | 'asset' | 'type' | 'network'
 
-export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
+export type Position = {
+  opportunity: Opportunity
+  principal: number
+  earned: number
+  pending: boolean
+  safe?: string
+}
 
 /** A separate Safe with its own budget and signers, so investing never touches the main Safe. */
 export type Operation = {

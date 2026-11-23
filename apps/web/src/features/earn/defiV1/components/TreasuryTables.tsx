@@ -9,8 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
-import { CHAIN_IDS, IDLE_CASH } from '../opportunities'
-import { budgetLeft, depositRoute } from '../shelf'
+import { CHAIN_IDS } from '../opportunities'
+import { budgetLeft } from '../shelf'
 import type { Holding, Operation, Opportunity, Sort, SortKey } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
@@ -201,6 +201,16 @@ const alertFor = (holding?: Holding, operation?: Operation): { label: string; de
   return undefined
 }
 
+/** Paid placement has to be disclosed; the tooltip says what it means. */
+export const SponsoredBadge = () => (
+  <Tooltip delay={150}>
+    <TooltipTrigger render={<span className="flex shrink-0" onClick={(event) => event.stopPropagation()} />}>
+      <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>
+    </TooltipTrigger>
+    <TooltipContent className="max-w-64">{DEFI_V1_COPY.sponsoredHint}</TooltipContent>
+  </Tooltip>
+)
+
 const NameCell = ({
   opportunity,
   operation,
@@ -219,7 +229,7 @@ const NameCell = ({
       <div className="flex min-w-0 flex-col">
         <span className="flex min-w-0 items-center gap-2">
           <span className="truncate font-medium text-foreground">{opportunity.name}</span>
-          {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
+          {opportunity.placement === 'sponsored' && <SponsoredBadge />}
           {alert && (
             <Tooltip delay={150}>
               <TooltipTrigger render={<span className="flex shrink-0" />}>
@@ -282,7 +292,7 @@ const NetworkLogos = ({ chains }: { chains: string[] }) => (
 
 const Empty = () => <span className="text-muted-foreground">—</span>
 
-const PositionCell = ({ holding }: { holding?: Holding }) => {
+const PositionCell = ({ holding, safes }: { holding?: Holding; safes?: string[] }) => {
   if (!holding) return <Empty />
   return (
     <span className="flex min-w-0 flex-col gap-0.5 tabular-nums">
@@ -306,6 +316,9 @@ const PositionCell = ({ holding }: { holding?: Holding }) => {
           {DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}
         </span>
       )}
+      {safes && safes.length > 0 && (
+        <span className="truncate text-xs text-muted-foreground">{DEFI_V1_COPY.workspace.inSafes(safes)}</span>
+      )}
     </span>
   )
 }
@@ -320,7 +333,9 @@ const OpportunityRow = ({
   isLocked,
   onSelect,
   onInvest,
+  actionLabel,
   holding,
+  safes,
   heldIn,
   selection,
 }: {
@@ -328,7 +343,9 @@ const OpportunityRow = ({
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   onInvest?: (item: Opportunity) => void
+  actionLabel: (item: Opportunity) => string
   holding?: Holding
+  safes?: string[]
   heldIn?: Operation
   selection: Selection
 }) => {
@@ -359,7 +376,7 @@ const OpportunityRow = ({
         <NetworkLogos chains={opportunity.chains} />
       </TableCell>
       <TableCell>
-        <PositionCell holding={holding} />
+        <PositionCell holding={holding} safes={safes} />
       </TableCell>
       <TableCell className="text-right">
         {locked ? (
@@ -387,7 +404,7 @@ const OpportunityRow = ({
           </Button>
         ) : (
           <Button variant="outline" size="xs" onClick={stop(() => onSelect(opportunity))}>
-            {DEFI_V1_COPY.action.rowLabel[depositRoute(opportunity, IDLE_CASH)]}
+            {actionLabel(opportunity)}
           </Button>
         )}
       </TableCell>
@@ -416,6 +433,8 @@ export const OpportunitiesTable = ({
   isLocked,
   onSelect,
   onInvest,
+  actionLabel,
+  safesOf,
   sort,
   onSort,
   holdingOf,
@@ -427,6 +446,8 @@ export const OpportunitiesTable = ({
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   onInvest?: (item: Opportunity) => void
+  actionLabel: (item: Opportunity) => string
+  safesOf?: (item: Opportunity) => string[]
   sort: Sort | null
   onSort: (key: SortKey) => void
   holdingOf: (item: Opportunity) => Holding | undefined
@@ -462,7 +483,9 @@ export const OpportunitiesTable = ({
                 isLocked={isLocked}
                 onSelect={onSelect}
                 onInvest={onInvest}
+                actionLabel={actionLabel}
                 holding={holdingOf(item)}
+                safes={safesOf?.(item)}
                 heldIn={heldInOf(item)}
                 selection={selection}
               />
