@@ -16,12 +16,13 @@ const NonceTakenButton = ({ label, nonce }: NonceTakenButtonProps): ReactElement
       render={
         <span
           tabIndex={0}
+          aria-label={`${label}. Available if #${nonce} fails.`}
           data-testid="queue-row-nonce-taken"
           className="flex rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       }
     >
-      <Button variant="row-hover-primary" size="2xs" className="w-20" disabled>
+      <Button variant="outline" size="2xs" className="w-20" disabled>
         {label}
       </Button>
     </TooltipTrigger>

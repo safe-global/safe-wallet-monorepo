@@ -5,6 +5,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { PendingStatus, PendingTxType, type PendingTx } from '@/store/pendingTxsSlice'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
+import { isSmartContract } from '@/utils/wallets'
 import useIsSpeedUpAvailable from '../useIsSpeedUpAvailable'
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: jest.fn() }))
@@ -61,6 +62,16 @@ describe('useIsSpeedUpAvailable', () => {
     const { result } = renderHook(() => useIsSpeedUpAvailable(processing(NOW - 60_000)))
     await act(() => jest.advanceTimersByTimeAsync(0))
 
+    expect(result.current).toBe(false)
+  })
+
+  it('is false when the signer is a smart contract wallet', async () => {
+    ;(isSmartContract as jest.Mock).mockResolvedValueOnce(true)
+
+    const { result } = renderHook(() => useIsSpeedUpAvailable(processing(NOW - 60_000)))
+    await act(() => jest.advanceTimersByTimeAsync(1_000))
+
+    expect(isSmartContract).toHaveBeenCalledWith(signerAddress)
     expect(result.current).toBe(false)
   })
 

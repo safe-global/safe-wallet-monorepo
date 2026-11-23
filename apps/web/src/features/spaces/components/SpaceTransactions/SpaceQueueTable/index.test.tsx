@@ -934,7 +934,9 @@ describe('SpaceQueueTable', () => {
       })
 
       const executing = cellsOf(0)
-      expect(within(executing[5]).getByTestId('queue-row-pending-chip')).toHaveTextContent(/^Processing 1:22$/)
+      expect(
+        within(within(executing[5]).getByTestId('queue-row-pending-chip')).getByText('Processing 1:22'),
+      ).toBeVisible()
       expect(executing[4]).not.toHaveTextContent(/Processing/)
 
       const other = cellsOf(1)
@@ -955,7 +957,7 @@ describe('SpaceQueueTable', () => {
         },
       })
 
-      expect(within(cellsOf(0)[5]).getByTestId('queue-row-pending-chip')).toHaveTextContent(/^Signing$/)
+      expect(within(within(cellsOf(0)[5]).getByTestId('queue-row-pending-chip')).getByText('Signing')).toBeVisible()
       expect(cellsOf(0)[4]).not.toHaveTextContent(/Signing/)
       expect(screen.queryByTestId('queue-row-nonce-taken')).not.toBeInTheDocument()
     })

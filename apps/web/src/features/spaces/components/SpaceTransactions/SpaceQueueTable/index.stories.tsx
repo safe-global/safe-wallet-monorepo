@@ -51,17 +51,18 @@ export const BlockedByUpNext: Story = { args: { sections: BLOCKED_SECTIONS, grou
 // Speed up is off in the default chain config
 const speedUpChain = createChainData()
 speedUpChain.features = [...speedUpChain.features, FEATURES.SPEED_UP_TX]
+// Ahead of the defaults: MSW answers with the first matching handler
+const speedUpChainHandlers = [
+  http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(speedUpChain)),
+  http.get(/\/v1\/chains$/, () => HttpResponse.json(createChainsPageData(speedUpChain))),
+  http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(speedUpChain))),
+]
 const executing = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   layout: 'paper',
   shadcn: true,
   store: { pendingTxs: getPendingTxs(Date.now()) },
-  handlers: [
-    http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(speedUpChain)),
-    http.get(/\/v1\/chains$/, () => HttpResponse.json(createChainsPageData(speedUpChain))),
-    http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(speedUpChain))),
-  ],
 })
 
 /**
@@ -71,7 +72,10 @@ const executing = createMockStory({
  */
 export const Executing: Story = {
   args: { sections: PENDING_SECTIONS },
-  parameters: { ...executing.parameters, msw: { handlers: [TX_DETAILS_HANDLER, ...executing.handlers] } },
+  parameters: {
+    ...executing.parameters,
+    msw: { handlers: [TX_DETAILS_HANDLER, ...speedUpChainHandlers, ...executing.handlers] },
+  },
   decorators: [executing.decorator],
   tags: ['skip-visual-test'],
 }

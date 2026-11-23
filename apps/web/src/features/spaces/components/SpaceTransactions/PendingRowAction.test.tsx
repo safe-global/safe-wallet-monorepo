@@ -1,16 +1,27 @@
 import { faker } from '@faker-js/faker'
+import { useEffect } from 'react'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { formatTime } from '@safe-global/utils/utils/date'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import { advanceClock, render, renderOnFakeClock, screen } from '@/tests/test-utils'
+import { act, advanceClock, render, renderOnFakeClock, screen, within } from '@/tests/test-utils'
 import { PendingStatus, PendingTxType, type PendingTx, type PendingTxsState } from '@/store/pendingTxsSlice'
 import useIsSpeedUpAvailable from '@/features/speedup/public/hooks/useIsSpeedUpAvailable'
 import { isNonceExecutingElsewhere, NonceTakenAction, PendingRowAction } from './PendingRowAction'
 
 jest.mock('@/features/speedup/public/hooks/useIsSpeedUpAvailable', () => ({ __esModule: true, default: jest.fn() }))
+const mockMonitor = { loaded: true, props: jest.fn() }
 jest.mock('@/features/speedup/public/components/SpeedUpMonitor', () => ({
   __esModule: true,
-  default: ({ hint }: { hint: string }) => <button aria-label={`Speed up. ${hint}`}>Speed up</button>,
+  default: function MockSpeedUpMonitor(props: { hint: string; available?: boolean; onShow?: () => void }) {
+    mockMonitor.props(props)
+    const { onShow } = props
+    const { loaded } = mockMonitor
+    useEffect(() => {
+      if (loaded) onShow?.()
+    }, [onShow, loaded])
+    return loaded ? <button aria-label={`Speed up. ${props.hint}`}>Speed up</button> : null
+  },
 }))
 
 const mockSpeedUp = useIsSpeedUpAvailable as jest.MockedFunction<typeof useIsSpeedUpAvailable>
@@ -31,6 +42,8 @@ const processing = (submittedAt: number): PendingTx => ({
   signerAddress,
 })
 
+const chipLabel = (label: string) => within(screen.getByTestId('queue-row-pending-chip')).getByText(label)
+
 const hover = async (user: ReturnType<typeof renderOnFakeClock>['user'], element: HTMLElement) => {
   await user.hover(element)
   await advanceClock(200)
@@ -40,6 +53,7 @@ describe('PendingRowAction', () => {
   beforeEach(() => {
     jest.useFakeTimers({ now: NOW })
     mockSpeedUp.mockReturnValue(false)
+    mockMonitor.loaded = true
   })
   afterEach(() => jest.useRealTimers())
 
@@ -88,7 +102,9 @@ describe('PendingRowAction', () => {
     const { user } = renderOnFakeClock(<PendingRowAction txId="tx" pendingTx={pendingTx} />)
 
     const chip = screen.getByTestId('queue-row-pending-chip')
-    expect(chip).toHaveTextContent(new RegExp(`^${label}$`))
+    expect(chipLabel(label).closest('[aria-hidden="true"]')).toBeInTheDocument()
+    expect(within(chip).getByText(`${label}. ${hint}`)).toHaveClass('sr-only')
+    expect(chip).not.toHaveAttribute('aria-live')
     expect(chip).toHaveAttribute('tabindex', '0')
 
     await hover(user, chip)
@@ -118,29 +134,49 @@ describe('PendingRowAction', () => {
   })
 
   it('counts the time since submission, "Processing m:ss", and says when it was submitted', async () => {
-    const { user } = renderOnFakeClock(<PendingRowAction txId="tx" pendingTx={processing(NOW - 82_000)} />)
+    const submittedAt = NOW - 82_000
+    const { user } = renderOnFakeClock(<PendingRowAction txId="tx" pendingTx={processing(submittedAt)} />)
 
-    const chip = screen.getByTestId('queue-row-pending-chip')
-    expect(chip).toHaveTextContent(/^Processing 1:22$/)
+    expect(chipLabel('Processing 1:22')).toBeInTheDocument()
 
     await advanceClock(3_000)
-    expect(chip).toHaveTextContent(/^Processing 1:25$/)
+    expect(chipLabel('Processing 1:25')).toBeInTheDocument()
 
-    await hover(user, chip)
-    expect(await screen.findByText('Submitted 1:25 ago and waiting to be included in a block.')).toBeInTheDocument()
+    await hover(user, screen.getByTestId('queue-row-pending-chip'))
+    expect(
+      await screen.findByText(
+        `Submitted at ${formatTime(submittedAt)} (1:25 ago) and waiting to be included in a block.`,
+      ),
+    ).toBeInTheDocument()
   })
 
-  it('shows Speed up instead of the chip when the fee may be too low, and says why', () => {
+  it('shows Speed up instead of the chip when the fee may be too low, says why, and skips a second check', () => {
     mockSpeedUp.mockReturnValue(true)
+    const submittedAt = NOW - 20_000
 
-    render(<PendingRowAction txId="tx" pendingTx={processing(NOW - 20_000)} />)
+    render(<PendingRowAction txId="tx" pendingTx={processing(submittedAt)} />)
 
     expect(screen.queryByTestId('queue-row-pending-chip')).not.toBeInTheDocument()
     expect(
       screen.getByRole('button', {
-        name: 'Speed up. Submitted 0:20 ago and waiting to be included in a block. The network fee may be too low. Speed up resubmits it with a higher fee.',
+        name: `Speed up. Submitted at ${formatTime(submittedAt)} (0:20 ago) and waiting to be included in a block. The network fee may be too low. Speed up resubmits it with a higher fee.`,
       }),
     ).toBeInTheDocument()
+    expect(mockMonitor.props).toHaveBeenCalledWith(expect.objectContaining({ available: true }))
+  })
+
+  it('keeps the chip until Speed up has loaded', () => {
+    mockSpeedUp.mockReturnValue(true)
+    mockMonitor.loaded = false
+
+    const { rerender } = render(<PendingRowAction txId="tx" pendingTx={processing(NOW - 20_000)} />)
+    expect(chipLabel('Processing 0:20')).toBeInTheDocument()
+
+    mockMonitor.loaded = true
+    act(() => rerender(<PendingRowAction txId="tx" pendingTx={processing(NOW - 21_000)} />))
+
+    expect(screen.queryByTestId('queue-row-pending-chip')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Speed up\./ })).toBeInTheDocument()
   })
 
   it('keeps the chip once it is in a block', () => {
@@ -148,7 +184,7 @@ describe('PendingRowAction', () => {
 
     render(<PendingRowAction txId="tx" pendingTx={{ ...common, status: PendingStatus.INDEXING }} />)
 
-    expect(screen.getByTestId('queue-row-pending-chip')).toHaveTextContent(/^Indexing$/)
+    expect(chipLabel('Indexing')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Speed up/ })).not.toBeInTheDocument()
   })
 
@@ -172,6 +208,10 @@ describe('NonceTakenAction', () => {
     const { user } = renderOnFakeClock(<NonceTakenAction tx={tx} nonce={42} />)
 
     expect(screen.getByRole('button', { name: label })).toBeDisabled()
+    expect(screen.getByTestId('queue-row-nonce-taken')).toHaveAttribute(
+      'aria-label',
+      `${label}. Available if #42 fails.`,
+    )
     expect(screen.queryByText(/Locked/)).not.toBeInTheDocument()
 
     await user.tab()

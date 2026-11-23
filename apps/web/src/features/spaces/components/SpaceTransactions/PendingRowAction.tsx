@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useCallback, useState, type ReactElement } from 'react'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import PendingChip, {
@@ -69,21 +69,28 @@ export const PendingRowAction = ({ txId, pendingTx }: { txId: string; pendingTx:
   const phase = getPendingPhase(pendingTx)
   const processing = pendingTx.status === PendingStatus.PROCESSING
   const now = useNow(processing)
-  const elapsedMs = processing ? now - pendingTx.submittedAt : 0
+  const timing = processing ? { submittedAt: pendingTx.submittedAt, now } : undefined
   const canSpeedUp = useIsSpeedUpAvailable(pendingTx)
+  // SpeedUpMonitor loads lazily: the chip holds the cell until it shows
+  const [speedUpShown, setSpeedUpShown] = useState(false)
+  const onSpeedUpShown = useCallback(() => setSpeedUpShown(true), [])
+  const speedUp = processing && canSpeedUp
 
-  if (processing && canSpeedUp) {
-    return (
-      <SpeedUpMonitor
-        txId={txId}
-        pendingTx={pendingTx}
-        modalTrigger="rowButton"
-        hint={getPendingHint(phase, elapsedMs, true)}
-      />
-    )
-  }
-
-  return <PendingChip phase={phase} elapsedMs={elapsedMs} />
+  return (
+    <>
+      {!(speedUp && speedUpShown) && <PendingChip phase={phase} timing={timing} />}
+      {speedUp && (
+        <SpeedUpMonitor
+          txId={txId}
+          pendingTx={pendingTx}
+          modalTrigger="rowButton"
+          hint={getPendingHint(phase, timing, true)}
+          available
+          onShow={onSpeedUpShown}
+        />
+      )}
+    </>
+  )
 }
 
 /** The row's action, disabled while another transaction at its nonce is executing */

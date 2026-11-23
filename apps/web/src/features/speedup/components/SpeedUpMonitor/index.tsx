@@ -5,7 +5,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import SpeedUpModal from '../SpeedUpModal'
 import Rocket from '@/public/images/common/rocket.svg'
 import type { MouseEventHandler, ReactNode } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { PendingProcessingTx } from '@/store/pendingTxsSlice'
 import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { trackEvent } from '@/services/analytics'
@@ -17,11 +17,27 @@ type SpeedUpMonitorProps = {
   /** `rowButton`: the Space queue table's 24px row action, with `hint` in its tooltip */
   modalTrigger: 'alertBox' | 'alertButton' | 'rowButton'
   hint?: ReactNode
+  /** The caller already ran useIsSpeedUpAvailable: skips a second check of the signer */
+  available?: boolean
+  /** Called once this lazy component has loaded and rendered */
+  onShow?: () => void
 }
 
-const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox', hint }: SpeedUpMonitorProps) => {
+const SpeedUpMonitor = ({
+  txId,
+  pendingTx,
+  modalTrigger = 'alertBox',
+  hint,
+  available,
+  onShow,
+}: SpeedUpMonitorProps) => {
   const [openSpeedUpModal, setOpenSpeedUpModal] = useState(false)
-  const isAvailable = useIsSpeedUpAvailable(pendingTx)
+  const checked = useIsSpeedUpAvailable(available === undefined ? pendingTx : undefined)
+  const isAvailable = available ?? checked
+
+  useEffect(() => {
+    if (isAvailable) onShow?.()
+  }, [isAvailable, onShow])
 
   if (!isAvailable) {
     return null
@@ -60,7 +76,13 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox', hint }: Sp
         <Tooltip delay={150}>
           <TooltipTrigger
             render={
-              <Button variant="default" size="2xs" className="w-20" onClick={onOpen}>
+              <Button
+                variant="default"
+                size="2xs"
+                className="w-20"
+                aria-label={`Speed up #${pendingTx.nonce}`}
+                onClick={onOpen}
+              >
                 Speed up
               </Button>
             }
