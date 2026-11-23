@@ -5,7 +5,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import SpeedUpModal from '../SpeedUpModal'
 import Rocket from '@/public/images/common/rocket.svg'
 import type { MouseEventHandler, ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import type { PendingProcessingTx } from '@/store/pendingTxsSlice'
 import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { trackEvent } from '@/services/analytics'
@@ -35,7 +35,8 @@ const SpeedUpMonitor = ({
   const checked = useIsSpeedUpAvailable(available === undefined ? pendingTx : undefined)
   const isAvailable = available ?? checked
 
-  useEffect(() => {
+  // Before paint, so the caller's placeholder and this button never show together
+  useLayoutEffect(() => {
     if (isAvailable) onShow?.()
   }, [isAvailable, onShow])
 
