@@ -40,6 +40,18 @@ jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({
   },
 }))
 
+const mockAlertProps = jest.fn()
+jest.mock('./UnavailableSafesAlert', () => {
+  const { default: UnavailableSafesAlert } = jest.requireActual('./UnavailableSafesAlert')
+  return {
+    __esModule: true,
+    default: (props: { isRetrying?: boolean }) => {
+      mockAlertProps(props)
+      return <UnavailableSafesAlert {...props} />
+    },
+  }
+})
+
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
   default: ({ sections, groupBy }: { sections: SpaceQueueSection[]; groupBy: string }) => (
@@ -468,6 +480,8 @@ describe('SpaceTransactionQueue', () => {
 
       await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
       expect(screen.getByTestId('space-queue-body')).toHaveClass('opacity-50')
+      // Row actions such as Sign or Execute can't be used on the stale rows
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('inert')
       // The same table stays mounted, so its rows and logos don't reload
       expect(screen.getByTestId('space-queue-table')).toBe(table)
       expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeA)
@@ -475,6 +489,75 @@ describe('SpaceTransactionQueue', () => {
       release()
 
       await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+      expect(screen.getByTestId('space-queue-body')).not.toHaveClass('opacity-50')
+      expect(screen.getByTestId('space-queue-body')).not.toHaveAttribute('inert')
+    })
+
+    it('does not spin the Reload of unloaded Safes while a filter loads', async () => {
+      const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
+      const release = respondSlowlyToFilters(
+        page({ [safeA]: { '1': transactions(1) } }, { unavailableSafes }),
+        page({ [safeA]: { '1': transactions(1) } }, { unavailableSafes }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('unavailable-safes-alert')
+      expect(mockAlertProps).toHaveBeenLastCalledWith(expect.objectContaining({ isRetrying: false }))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+
+      expect(mockAlertProps).not.toHaveBeenLastCalledWith(expect.objectContaining({ isRetrying: true }))
+      release()
+    })
+
+    it('shows the latest query when an earlier one answers after it', async () => {
+      let releaseB: () => void = () => {}
+      const bReleased = new Promise<void>((resolve) => (releaseB = resolve))
+      server.use(
+        http.get(queueUrl, async ({ request }) => {
+          const search = new URL(request.url).searchParams.get('search')
+          if (search === 'b') {
+            await bReleased
+            return HttpResponse.json(page({ [safeB]: { '1': transactions(1) } }))
+          }
+          if (search === 'c') return HttpResponse.json(page({ [otherSafe]: { '1': transactions(1) } }))
+          return HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }))
+        }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'b' } })
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'c' } })
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
+
+      releaseB()
+
+      await new Promise((resolve) => setTimeout(resolve, 50))
+      expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe)
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+    })
+
+    it('shows a query loaded before at once, without dimming', async () => {
+      const requests: Request[] = []
+      server.use(
+        http.get(queueUrl, async ({ request }) => {
+          requests.push(request)
+          const isSearched = new URL(request.url).searchParams.has('search')
+          // Only the first unfiltered request answers, so the unfiltered queue shown later comes from the cache
+          if (!isSearched && requests.length > 1) await delay('infinite')
+          return HttpResponse.json(page({ [isSearched ? otherSafe : safeA]: { '1': transactions(1) } }))
+        }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'c' } })
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
+
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: '' } })
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeA))
       expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
       expect(screen.getByTestId('space-queue-body')).not.toHaveClass('opacity-50')
     })

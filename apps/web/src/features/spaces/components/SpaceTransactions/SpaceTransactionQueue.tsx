@@ -112,17 +112,19 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
       />
 
       {queue ? (
-        // The last queue stays mounted and dimmed while a new search or filter loads, so the table doesn't flicker
+        // The last queue stays mounted and dimmed while a new search or filter loads, so the table doesn't flicker.
+        // Inert, so nobody signs or executes from rows that may no longer match
         <div
           data-testid="space-queue-body"
           aria-busy={isStale}
+          inert={isStale}
           className={cn('flex flex-col gap-6 transition-opacity', isStale && 'opacity-50')}
         >
           <QueueBody
             spaceId={spaceId}
             queue={queue}
             groupBy={tableGroupBy}
-            isFetching={isFetching}
+            isFetching={isFetching && !isStale}
             isFiltered={hasSpaceQueueFilters(queueQuery.filters)}
             isSearching={!!queueQuery.search}
             onRetry={refetch}
