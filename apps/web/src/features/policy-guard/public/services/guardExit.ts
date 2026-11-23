@@ -4,6 +4,7 @@ import type { PolicyConfiguration } from '../types'
 
 export const SET_GUARD_SELECTOR = '0xe19a9dd9'
 export const SET_MODULE_GUARD_SELECTOR = '0xe068df37'
+export const SET_FALLBACK_HANDLER_SELECTOR = '0xf08a0323'
 
 /** The Safe's own `setGuard`: only a removal lets it through the guard, so a rule on it marks one. */
 export const isSetGuardAccess = (
@@ -19,3 +20,15 @@ export const isAllowlistRemoval = (
   configurations.some(
     (configuration) => isSetGuardAccess(configuration, safeAddress) && !sameAddress(configuration.policy, ZERO_ADDRESS),
   )
+
+/**
+ * Whether the configurations are the second root of a removal: they only unbind rules, and unbinding the Safe's
+ * `setGuard` is what no other change does.
+ */
+export const isGuardRemovalCleanup = (
+  configurations: readonly Pick<PolicyConfiguration, 'target' | 'selector' | 'policy'>[],
+  safeAddress: string,
+): boolean =>
+  configurations.length > 0 &&
+  configurations.every(({ policy }) => sameAddress(policy, ZERO_ADDRESS)) &&
+  configurations.some((configuration) => isSetGuardAccess(configuration, safeAddress))

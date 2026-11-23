@@ -55,7 +55,14 @@ const AllowlistDetails = ({
       onApply={onApply}
       onEdit={() => setTxFlow(<EditRecipientAllowlistFlow policy={policy} />)}
       onRemove={onRemove}
-      onRemoveGuard={() => setTxFlow(<RemoveGuardFlow chainId={chainId} safeAddress={safeAddress} />)}
+      onRemoveGuard={
+        enforcement.via === 'guard'
+          ? () =>
+              setTxFlow(
+                <RemoveGuardFlow chainId={chainId} safeAddress={safeAddress} guardAddress={enforcement.guardAddress} />,
+              )
+          : undefined
+      }
     />
   )
 }

@@ -1,5 +1,5 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { isAllowlistRemoval, isSetGuardAccess } from '../guardExit'
+import { isAllowlistRemoval, isGuardRemovalCleanup, isSetGuardAccess } from '../guardExit'
 
 const SAFE = '0x5afe5afE5afE5afE5afE5aFe5afe5Afe5afE5AFe'
 const OTHER_SAFE = '0x1111111111111111111111111111111111111111'
@@ -30,5 +30,34 @@ describe('isAllowlistRemoval', () => {
 
   it('should not be a removal, when no configuration touches setGuard', () => {
     expect(isAllowlistRemoval([{ target: OTHER_SAFE, selector: '0xa9059cbb', policy: ALLOW_POLICY }], SAFE)).toBe(false)
+  })
+})
+
+describe('isGuardRemovalCleanup', () => {
+  it("should match, when every configuration unbinds a rule and one of them is the Safe's setGuard", () => {
+    expect(
+      isGuardRemovalCleanup(
+        [
+          { target: SAFE, selector: '0xe19a9dd9', policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xe068df37', policy: ZERO_ADDRESS },
+          { target: ZERO_ADDRESS, selector: '0x00000000', policy: ZERO_ADDRESS },
+        ],
+        SAFE,
+      ),
+    ).toBe(true)
+  })
+
+  it("should not match, when a configuration binds a policy to the Safe's setGuard", () => {
+    expect(isGuardRemovalCleanup([{ target: SAFE, selector: '0xe19a9dd9', policy: ALLOW_POLICY }], SAFE)).toBe(false)
+  })
+
+  it("should not match, when the configurations unbind rules but not the Safe's setGuard", () => {
+    expect(isGuardRemovalCleanup([{ target: OTHER_SAFE, selector: '0xa9059cbb', policy: ZERO_ADDRESS }], SAFE)).toBe(
+      false,
+    )
+  })
+
+  it('should not match, when there are no configurations', () => {
+    expect(isGuardRemovalCleanup([], SAFE)).toBe(false)
   })
 })
