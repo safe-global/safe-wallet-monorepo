@@ -7,7 +7,9 @@ import RemoveAllowlistFlow from '../RemoveAllowlistFlow'
 import RemoveGuardFlow from '../RemoveGuardFlow'
 import EditRecipientAllowlistFlow from '../RecipientAllowlistFlow/EditFlow'
 import { toAllowlistRules } from '../RecipientAllowlistFlow/utils/allowlistEdit'
+import { getApplicableCleanup, type GuardRemovalCleanup } from '../utils/mapDelayedGuardRequests'
 import { useAllowlistDetails } from './hooks/useAllowlistDetails'
+import { useDiscardAllowlistRequest } from './hooks/useDiscardAllowlistRequest'
 
 export type AllowlistDetailsProps = {
   policy: ActiveAllowlistPolicy
@@ -17,6 +19,8 @@ export type AllowlistDetailsProps = {
   justActivated?: boolean
   /** Set once the guard's delay is over: opens the apply flow. */
   onApply?: () => void
+  /** The removal's second root, which the guard removal applies with it while its window is open. */
+  guardRemovalCleanup?: GuardRemovalCleanup
 }
 
 /** Active allowlists only: pending ones are not wired to CGW yet. */
@@ -26,8 +30,10 @@ const AllowlistDetails = ({
   onClose,
   justActivated,
   onApply,
+  guardRemovalCleanup,
 }: AllowlistDetailsProps): ReactElement => {
   const content = useAllowlistDetails(policy, policies)
+  const onDiscard = useDiscardAllowlistRequest(policy)
   const { txFlow, setTxFlow } = useContext(TxModalContext)
   const { chainId, address: safeAddress } = policy.safe
   const { enforcement } = policy
@@ -55,11 +61,17 @@ const AllowlistDetails = ({
       onApply={onApply}
       onEdit={() => setTxFlow(<EditRecipientAllowlistFlow policy={policy} />)}
       onRemove={onRemove}
+      onDiscard={onDiscard}
       onRemoveGuard={
         enforcement.via === 'guard'
           ? () =>
               setTxFlow(
-                <RemoveGuardFlow chainId={chainId} safeAddress={safeAddress} guardAddress={enforcement.guardAddress} />,
+                <RemoveGuardFlow
+                  chainId={chainId}
+                  safeAddress={safeAddress}
+                  guardAddress={enforcement.guardAddress}
+                  cleanupConfigurations={getApplicableCleanup(guardRemovalCleanup, Date.now())}
+                />,
               )
           : undefined
       }

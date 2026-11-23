@@ -3,7 +3,12 @@ import Fuse from 'fuse.js'
 import useChains from '@/hooks/useChains'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { getPolicyTokens } from '../utils/policyTokens'
-import { isSpendingLimitPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
+import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
+import {
+  isAllowlistPolicy,
+  isSpendingLimitPolicy,
+  type Policy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 
 type SafeNameResolver = ReturnType<typeof useSafeNameResolver>
 
@@ -13,7 +18,7 @@ type SearchablePolicy = {
   /** Kept apart from `names` so a hit can be traced back to the spender. */
   spenderNames: string[]
   safeAddress: string
-  /** The spenders or proposers a policy grants something to. */
+  /** The spenders, proposers or recipients a policy grants something to. */
   parties: string
   network: string
   tokens: string
@@ -30,6 +35,12 @@ const getSpenders = (policy: Policy): string[] =>
 const getProposers = (policy: Policy): string[] =>
   policy.type === 'proposer' ? policy.data.proposers.map((proposer) => proposer.proposer) : []
 
+// A change's recipients include the ones it removes, which the panel still lists.
+const getRecipients = (policy: Policy): string[] => {
+  if (!isAllowlistPolicy(policy)) return []
+  return policy.data.changes?.recipients.map(({ address }) => address) ?? getAllowlistRecipients(policy.data)
+}
+
 const getProposerLabels = (policy: Policy): string[] => {
   if (policy.type !== 'proposer') return []
   return policy.data.proposers.flatMap((proposer) => proposer.delegatedBy.map((grant) => grant.label))
@@ -41,6 +52,7 @@ const getSearchableNames = (policy: Policy, resolveName: SafeNameResolver): stri
   return [
     resolveName(policy.safe.address, chainId),
     ...getProposers(policy).map((proposer) => resolveName(proposer, chainId)),
+    ...getRecipients(policy).map((recipient) => resolveName(recipient, chainId)),
     ...getProposerLabels(policy),
   ]
 }
@@ -56,7 +68,7 @@ const toSearchable = (
     .map((spender) => resolveName(spender, policy.safe.chainId))
     .filter(Boolean),
   safeAddress: policy.safe.address,
-  parties: [...getSpenders(policy), ...getProposers(policy)].join(' '),
+  parties: [...getSpenders(policy), ...getProposers(policy), ...getRecipients(policy)].join(' '),
   network: [chainNames.get(policy.safe.chainId), policy.safe.chainId].filter(Boolean).join(' '),
   tokens: getPolicyTokens(policy)
     .map((token) => token.symbol)

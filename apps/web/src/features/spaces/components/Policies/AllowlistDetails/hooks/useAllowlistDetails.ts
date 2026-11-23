@@ -17,7 +17,7 @@ export type AllowlistDetailsContent = PolicyDetailsBase & {
   overview: { enforcedBy: string }
   /** Counted per spender and token. */
   uncoveredSpendingLimitCount?: number
-  /** Only read while a delayed change waits to be applied, whose banner names them. */
+  /** Only read while a delayed change waits to be applied, or the guard to be removed, where the panel names them. */
   signatures?: { threshold: number; owners: number }
 }
 
@@ -46,7 +46,7 @@ export const useAllowlistDetails = (policy: ActiveAllowlistPolicy, policies: Pol
   }, [policy.spendingLimitsCovered, policies, chainId, safeAddress])
 
   const { currentData: safeOverview } = useGetSafeOverviewQuery(
-    policy.scheduledChange ? { chainId, safeAddress } : skipToken,
+    policy.scheduledChange || policy.awaitingGuardRemoval ? { chainId, safeAddress } : skipToken,
   )
   const signatures = safeOverview
     ? { threshold: safeOverview.threshold, owners: safeOverview.owners.length }

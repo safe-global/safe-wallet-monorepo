@@ -10,7 +10,8 @@ import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/com
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import PolicyRule from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
-import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
+import AllowlistStatusCell from './components/AllowlistStatusCell'
+import PolicyStatusCell from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyStatusCell'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { getPendingStatusDetail } from '../utils/policyStatusDetail'
 import { AppRoutes } from '@/config/routes'
@@ -18,6 +19,7 @@ import { buildSafeHref } from '../../../utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import {
   getPolicyStatus,
+  isAllowlistPolicy,
   isProposerPolicy,
   type Policy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -153,20 +155,12 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       width: 'fit',
       minWidth: 140,
       cellTestId: 'policy-cell-status',
-      cell: (policy) => {
-        const chip = <PolicyStatusChip status={getPolicyStatus(policy)} />
-        const detail = getPendingStatusDetail(policy)
-        if (!detail) return chip
-
-        return (
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>{chip}</TooltipTrigger>
-            <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
-              <span data-testid="policy-status-detail">{detail}</span>
-            </TooltipContent>
-          </Tooltip>
-        )
-      },
+      cell: (policy) =>
+        isAllowlistPolicy(policy) ? (
+          <AllowlistStatusCell policy={policy} />
+        ) : (
+          <PolicyStatusCell chip={{ status: getPolicyStatus(policy) }} detail={getPendingStatusDetail(policy)} />
+        ),
     },
     {
       id: 'open',

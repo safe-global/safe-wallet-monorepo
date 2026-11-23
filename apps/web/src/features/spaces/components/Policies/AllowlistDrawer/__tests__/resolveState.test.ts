@@ -145,6 +145,39 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
+  it('should say the new rules apply, when the executed transaction applied an edit', () => {
+    const apply = mockPendingAllowlist({ operation: 'update', step: 'apply' })
+
+    const state = resolveAllowlistDrawerState(apply, MOCK_VIEWERS.signer, 'Payroll', 'executed')
+
+    expect(state).toMatchObject({
+      kind: 'closed',
+      bannerLine2: 'The new rules apply now. It can take a moment to show here.',
+    })
+  })
+
+  it('should say the rules are removed and the guard is next, when the executed transaction applied a removal', () => {
+    const apply = mockPendingAllowlist({ operation: 'remove', step: 'apply' })
+
+    const state = resolveAllowlistDrawerState(apply, MOCK_VIEWERS.signer, 'Payroll', 'executed')
+
+    expect(state).toMatchObject({
+      kind: 'closed',
+      bannerLine2: 'The rules are removed. Remove the guard to finish. It can take a moment to show here.',
+    })
+  })
+
+  it('should say the guard is removed, when the executed transaction took the guard off', () => {
+    const guardRemoval = mockPendingAllowlist({ operation: 'remove', step: 'remove-guard' })
+
+    const state = resolveAllowlistDrawerState(guardRemoval, MOCK_VIEWERS.signer, 'Payroll', 'executed')
+
+    expect(state).toMatchObject({
+      kind: 'closed',
+      bannerLine2: 'The guard is removed. It can take a moment to show here.',
+    })
+  })
+
   it('should say the given delay, when an executed transaction waits out the installed guard', () => {
     expect(
       resolveAllowlistDrawerState(mockPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll', 'executed', 0, '10 minutes'),

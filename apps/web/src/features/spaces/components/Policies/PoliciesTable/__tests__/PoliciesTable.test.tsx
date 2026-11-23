@@ -18,6 +18,7 @@ import {
   mockActiveAllowlist,
   mockAllowlistChangePending,
   mockFailedAllowlist,
+  mockPendingAllowlistUpdate,
 } from '../../../../public/utils/allowlistPolicies'
 import PoliciesTable from '../index'
 
@@ -153,10 +154,30 @@ describe('PoliciesTable', () => {
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signatures')
   })
 
-  it('should, when an allowlist change waits out the delay, show it as pending', () => {
+  it('should, when an allowlist edit waits out the delay, show it as in delay and say from when it can be applied', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockAllowlistChangePending()]} />)
 
-    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+    await user.hover(screen.getByTestId('policy-status-edit-in-delay'))
+    act(() => jest.runOnlyPendingTimers())
+
+    expect(screen.getByTestId('policy-status-edit-in-delay')).toHaveTextContent('Edit in delay')
+    expect(screen.getByTestId('policy-status-detail')).toHaveTextContent(
+      /^Can be applied in (1 day|23 hours 5[89] minutes), from .+ UTC\. Expires on .+ UTC\.$/,
+    )
+  })
+
+  it('should, when an allowlist edit waits for signatures, show it as edit pending with the signatures it has', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+    render(<PoliciesTable policies={[mockPendingAllowlistUpdate()]} />)
+
+    await user.hover(screen.getByTestId('policy-status-edit-pending'))
+    act(() => jest.runOnlyPendingTimers())
+
+    expect(screen.getByTestId('policy-status-edit-pending')).toHaveTextContent('Edit pending · 1/2')
+    expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('Waiting for signatures: 1 of 2.')
   })
 
   it('should, when an allowlist setup failed, show it as failed', () => {

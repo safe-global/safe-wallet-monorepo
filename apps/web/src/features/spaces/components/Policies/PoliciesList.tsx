@@ -10,6 +10,7 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import PoliciesTable from './PoliciesTable'
 import { PoliciesNoSearchResults } from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates'
 import usePolicySearch from './hooks/usePolicySearch'
+import { resolveAllowlistState } from './utils/allowlistStatus'
 import {
   DEFAULT_POLICY_SORT,
   POLICY_SORT_OPTIONS,
@@ -49,6 +50,7 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
     return {
       getSafeName: (safe) => resolveSafeName(safe.address, safe.chainId),
       getChainName: (chainId) => chainNames.get(chainId) ?? chainId,
+      getAllowlistState: (policy) => resolveAllowlistState(policy, Date.now()),
     }
   }, [configs, resolveSafeName])
 

@@ -26,10 +26,13 @@ import {
   PENDING_BANNER_TITLE,
   APPLY_CONNECT_HELPER,
   APPLY_NOT_A_SIGNER_HELPER,
+  APPLY_EXECUTED_LINE,
   APPLY_SIGNER_HELPER,
   EXPIRED_HELPER,
   GUARD_REMOVAL_BANNER_LINE,
   GUARD_REMOVAL_BANNER_TITLE,
+  GUARD_REMOVAL_PENDING_BANNER_TITLE,
+  GUARD_REMOVED_LINE,
   REMOVE_GUARD_CONNECT_HELPER,
   REMOVE_GUARD_NOT_A_SIGNER_HELPER,
   UNENFORCED_BANNER_LINE,
@@ -165,7 +168,8 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
   const base = {
     kind: 'pending',
     operation: policy.operation,
-    bannerTitle: PENDING_BANNER_TITLE[policy.operation],
+    bannerTitle:
+      policy.step === 'remove-guard' ? GUARD_REMOVAL_PENDING_BANNER_TITLE : PENDING_BANNER_TITLE[policy.operation],
     signed: policy.confirmationsSubmitted,
     required: policy.confirmationsRequired,
   } as const
@@ -192,6 +196,14 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
 }
 
+const executedLine = (policy: PendingAllowlistPolicy, changeDelay: string): string => {
+  if (policy.appliesOnExecution) return APPLIED_ON_EXECUTION_LINE
+  if (policy.step === 'apply') return APPLY_EXECUTED_LINE[policy.operation]
+  if (policy.step === 'remove-guard') return GUARD_REMOVED_LINE
+
+  return outcomeLine('executed', policy.operation, changeDelay)
+}
+
 const resolveClosed = (
   policy: PendingAllowlistPolicy,
   outcome: AllowlistTxOutcome,
@@ -202,9 +214,7 @@ const resolveClosed = (
   action: 'none',
   bannerTitle: OUTCOME_TITLE[outcome],
   bannerLine2:
-    outcome === 'executed' && policy.appliesOnExecution
-      ? APPLIED_ON_EXECUTION_LINE
-      : outcomeLine(outcome, policy.operation, changeDelay),
+    outcome === 'executed' ? executedLine(policy, changeDelay) : outcomeLine(outcome, policy.operation, changeDelay),
 })
 
 export const resolveAllowlistDrawerState = (

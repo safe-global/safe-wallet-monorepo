@@ -15,7 +15,7 @@ const LOCKED_POLICIES: PolicyId[] = ['spending-limit', 'proposer', 'recipient-al
 
 const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
   const router = useRouter()
-  const { policies, allowlistApplyRequests, isLoading, isError, refetch } = useSpacePolicies()
+  const { policies, allowlistApplyRequests, guardRemovalCleanups, isLoading, isError, refetch } = useSpacePolicies()
   // The page follows the plan alone; the per-feature gating flags only apply to the Safe settings.
   const planGate = usePlanGate(FEATURES.SAFE_PRO)
   const isLocked = planGate.mustUpgradeToSafePro
@@ -29,6 +29,7 @@ const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
       key={spaceId}
       policies={policies}
       allowlistApplyRequests={allowlistApplyRequests}
+      guardRemovalCleanups={guardRemovalCleanups}
       isLoading={isLoading || planGate.isLoading || (isLocked && isPlanLoading)}
       isError={isError}
       onRetry={refetch}
