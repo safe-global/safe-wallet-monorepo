@@ -349,3 +349,27 @@ export const OPERATIONS: Operation[] = [
     opportunityIds: ['lido-steth'],
   },
 ]
+
+export type WorkspaceSafe = {
+  name: string
+  total: number
+  positions: { opportunityId: string; principal: number; earned: number }[]
+}
+
+/** Mock workspace: the Safe the stories open on comes first. */
+export const WORKSPACE_SAFES: WorkspaceSafe[] = [
+  { name: 'Main treasury', total: TREASURY_TOTAL, positions: EXISTING_POSITIONS },
+  {
+    name: 'Reserves',
+    total: 4_200_000,
+    positions: [
+      { opportunityId: 'aave-usdc', principal: 800_000, earned: 9_120 },
+      { opportunityId: 'tbill-fund', principal: 2_000_000, earned: 41_300 },
+    ],
+  },
+  {
+    name: 'Grants',
+    total: 900_000,
+    positions: [{ opportunityId: 'kiln-eth', principal: 250_000, earned: 2_040 }],
+  },
+]

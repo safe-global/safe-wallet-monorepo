@@ -30,7 +30,7 @@ import { AppsTable } from './AppsTable'
 import { AppsToolbar } from './AppsToolbar'
 
 const COPY = APPS_V1_COPY
-const IDLE_BALANCES = idleByAsset(summariseTreasury(TREASURY_TOTAL, initialPositions()).idle, IDLE_MIX)
+const IDLE_BALANCES = idleByAsset(summariseTreasury(TREASURY_TOTAL, initialPositions({ scope: 'safe' })).idle, IDLE_MIX)
 const INVEST_OPTIONS = OPPORTUNITIES.filter((item) => item.access === 'all')
 
 /** DES-201 prototype: the Apps list on the Treasury table, grouped by job, with built-in features listed first. */

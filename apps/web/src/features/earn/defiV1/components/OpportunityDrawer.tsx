@@ -8,10 +8,10 @@ import { DrawerBody } from '@safe-global/views/components/common/Drawer/componen
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
-import type { Holding, Operation, Opportunity } from '../types'
+import type { DefiV1Milestone, Holding, Operation, Opportunity } from '../types'
 import { ActionPanel, type ActionResult } from './ActionPanel'
 import { SigningBlock } from './SigningBlock'
-import { OpportunityMark, Tag } from './TreasuryTables'
+import { OpportunityMark, SponsoredBadge, Tag } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.drawer
 
@@ -62,6 +62,9 @@ export const OpportunityDrawer = ({
   locked,
   operations,
   canCreate,
+  milestone,
+  safes,
+  onGoTo,
   onCustomise,
   holding,
   onClose,
@@ -74,6 +77,9 @@ export const OpportunityDrawer = ({
   locked: boolean
   operations: Operation[]
   canCreate: boolean
+  milestone: DefiV1Milestone
+  safes?: string[]
+  onGoTo: (route: 'swap' | 'bridge') => void
   onCustomise: () => void
   holding?: Holding
   onClose: () => void
@@ -112,7 +118,7 @@ export const OpportunityDrawer = ({
                 {opportunity.chains.map((chain) => (
                   <Tag key={chain}>{chain}</Tag>
                 ))}
-                {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
+                {opportunity.placement === 'sponsored' && <SponsoredBadge />}
               </div>
 
               {canCreate && !locked && (holding || operations[0]) && (
@@ -231,6 +237,9 @@ export const OpportunityDrawer = ({
             locked={locked}
             operations={operations}
             canCreate={canCreate}
+            milestone={milestone}
+            safes={safes}
+            onGoTo={onGoTo}
             onCustomise={onCustomise}
             onDeposited={onDeposited}
             onWithdrawn={onWithdrawn}

@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { CheckCircle2, Lock, ShieldCheck } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Info, Lock, ShieldCheck } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -11,6 +11,7 @@ import {
 } from '@safe-global/views/components/ui/input-group'
 import { Label } from '@safe-global/views/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { DrawerActions } from '@safe-global/views/components/common/Drawer/components/DrawerActions'
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
@@ -19,7 +20,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { DEFI_V1_COPY, formatAmount, formatCompactUsd, formatUsd } from '../copy'
 import { IDLE_CASH } from '../opportunities'
 import { budgetLeft, dedicatedSafeName, depositRoute, depositSteps } from '../shelf'
-import type { Holding, Operation, Opportunity } from '../types'
+import type { DefiV1Milestone, Holding, Operation, Opportunity } from '../types'
 
 const COPY = DEFI_V1_COPY.action
 
@@ -31,6 +32,7 @@ export type ActionResult = {
   pending: boolean
   operationId?: string
   created?: Operation
+  safe?: string
 }
 
 const MAIN = 'main'
@@ -73,6 +75,9 @@ export const ActionPanel = ({
   locked,
   operations,
   canCreate,
+  milestone,
+  safes,
+  onGoTo,
   onCustomise,
   onDeposited,
   onWithdrawn,
@@ -82,6 +87,9 @@ export const ActionPanel = ({
   locked: boolean
   operations: Operation[]
   canCreate: boolean
+  milestone: DefiV1Milestone
+  safes?: string[]
+  onGoTo: (route: 'swap' | 'bridge') => void
   onCustomise: () => void
   onDeposited: (result: ActionResult) => void
   onWithdrawn: (result: ActionResult) => void
@@ -93,6 +101,9 @@ export const ActionPanel = ({
   const [done, setDone] = useState<{ mode: Mode; pending: boolean } | null>(null)
   const amount = Number(value.replace(/[^0-9.]/g, '')) || 0
   const [from, setFrom] = useState(canCreate ? (operations[0]?.id ?? NEW) : MAIN)
+  const [safeName, setSafeName] = useState(safes?.[0])
+  const route = depositRoute(opportunity, IDLE_CASH)
+  const blockedBy = milestone === 'm1' && mode === 'deposit' && route !== 'deposit' ? route : undefined
   const operation = mode === 'deposit' ? operations.find((item) => item.id === from) : undefined
   const isNew = mode === 'deposit' && canCreate && from === NEW
   const newName = dedicatedSafeName(opportunity)
@@ -141,7 +152,7 @@ export const ActionPanel = ({
           opportunityIds: [opportunity.id],
         }
       : undefined
-    const result = { opportunity, amount, pending: needsMore, operationId: operation?.id, created }
+    const result = { opportunity, amount, pending: needsMore, operationId: operation?.id, created, safe: safeName }
     setDone({ mode, pending: result.pending })
     if (mode === 'deposit') onDeposited(result)
     else onWithdrawn(result)
@@ -244,6 +255,39 @@ export const ActionPanel = ({
           </div>
         )}
 
+        {mode === 'deposit' && safes && safes.length > 1 && (
+          <div className="flex flex-col gap-1.5">
+            <Label>{DEFI_V1_COPY.workspace.depositFrom}</Label>
+            <Select value={safeName} onValueChange={(next) => setSafeName(String(next))}>
+              <SelectTrigger aria-label={DEFI_V1_COPY.workspace.depositFrom} className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {safes.map((name) => (
+                  <SelectItem key={name} value={name}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {blockedBy && (
+          <div className="flex flex-col items-start gap-2 rounded-lg bg-card p-3" data-testid="needs-route">
+            <Typography variant="paragraph-small" className="flex gap-2">
+              <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+              {blockedBy === 'swap'
+                ? DEFI_V1_COPY.m1.needsSwap(opportunity.asset, IDLE_CASH.asset)
+                : DEFI_V1_COPY.m1.needsBridge(opportunity.chains[0])}
+            </Typography>
+            <Button variant="outline" size="sm" onClick={() => onGoTo(blockedBy)}>
+              {blockedBy === 'swap' ? DEFI_V1_COPY.m1.goToSwap : DEFI_V1_COPY.m1.goToBridge}
+              <ArrowRight />
+            </Button>
+          </div>
+        )}
+
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="defi-amount">{DEFI_V1_COPY.deposit.amount}</Label>
           <InputGroup>
@@ -251,7 +295,7 @@ export const ActionPanel = ({
               id="defi-amount"
               inputMode="decimal"
               value={value}
-              disabled={locked}
+              disabled={locked || Boolean(blockedBy)}
               aria-invalid={tooMuch || undefined}
               onChange={(event) => setValue(event.target.value)}
             />
@@ -287,8 +331,8 @@ export const ActionPanel = ({
             ))}
           </ol>
           <Typography variant="paragraph-mini" color="muted">
-            {mode === 'deposit' ? COPY.settles[depositRoute(opportunity, IDLE_CASH)] : COPY.settles.deposit}{' '}
-            {COPY.simulated}
+            {mode === 'deposit' ? COPY.settles[route] : COPY.settles.deposit} {COPY.simulated}
+            {milestone === 'm1' && ` ${DEFI_V1_COPY.m1.review}`}
           </Typography>
           <Typography variant="paragraph-mini" color="muted" className="flex items-center gap-1.5">
             <ShieldCheck className="size-3.5 shrink-0" aria-hidden />
@@ -321,10 +365,16 @@ export const ActionPanel = ({
             )
           }
           primary={
-            <Button size="lg" disabled={locked || amount <= 0 || tooMuch} onClick={submit}>
-              {locked && <Lock />}
-              {locked ? DEFI_V1_COPY.locked : !needsMore ? COPY.submitNow[mode] : DEFI_V1_COPY.deposit.createProposal}
-            </Button>
+            locked ? (
+              <Button size="lg" data-testid="see-pro">
+                <Lock />
+                {DEFI_V1_COPY.seePro}
+              </Button>
+            ) : (
+              <Button size="lg" disabled={amount <= 0 || tooMuch || Boolean(blockedBy)} onClick={submit}>
+                {!needsMore ? COPY.submitNow[mode] : DEFI_V1_COPY.deposit.createProposal}
+              </Button>
+            )
           }
         />
       </div>

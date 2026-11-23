@@ -8,7 +8,7 @@ import Earn from '@/pages/earn'
 import { EARN_CONSENT_STORAGE_KEY } from '../public/constants'
 import { DefiV1Context } from './context'
 import { PartnerView } from './components/PartnerView'
-import type { DefiV1Framing, DefiV1Nudge, DefiV1Plan, DefiV1Setup } from './types'
+import type { DefiV1Framing, DefiV1Milestone, DefiV1Nudge, DefiV1Plan, DefiV1Scope, DefiV1Setup } from './types'
 
 type Page = 'home' | 'earn' | 'partner'
 type Args = {
@@ -17,6 +17,9 @@ type Args = {
   nudge: DefiV1Nudge
   plan: DefiV1Plan
   setup: DefiV1Setup
+  milestone: DefiV1Milestone
+  scope: DefiV1Scope
+  empty: boolean
 }
 
 const PATHNAMES: Record<Page, string> = { home: '/home', earn: '/earn', partner: '/earn' }
@@ -32,28 +35,53 @@ const setup = createMockStory({
 })
 
 const withPrototype: Decorator<Args> = (Story, { args }) => (
-  <DefiV1Context.Provider value={{ framing: args.framing, nudge: args.nudge, plan: args.plan, setup: args.setup }}>
+  <DefiV1Context.Provider
+    value={{
+      framing: args.framing,
+      nudge: args.nudge,
+      plan: args.plan,
+      setup: args.setup,
+      milestone: args.milestone,
+      scope: args.scope,
+      empty: args.empty,
+    }}
+  >
     <Story />
   </DefiV1Context.Provider>
 )
 
 /**
  * DES-201 prototype: the DeFi story on the production Home and Earn pages, with mock opportunities.
- * Controls switch the variants under review: framing, where the idle-cash prompt sits, how a deposit
- * is signed, Free vs Pro, and operations (separate Safes with their own budget and signers).
+ * Controls switch the variants under review. `milestone` shows M1 (ships first: deposits from this Safe)
+ * or M2 (later: nested Safes, swap and bridge). `scope` shows one Safe or the whole workspace.
  */
 const meta = {
   title: 'Prototypes/DeFi V1',
   parameters: { layout: 'fullscreen', ...setup.parameters },
   decorators: [setup.decorator, withPrototype],
   beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).set(true),
-  args: { page: 'earn', framing: 'treasury', nudge: 'home', plan: 'free', setup: 'stepper' },
+  args: {
+    page: 'earn',
+    framing: 'treasury',
+    nudge: 'home',
+    plan: 'free',
+    setup: 'stepper',
+    milestone: 'm1',
+    scope: 'safe',
+    empty: false,
+  },
   argTypes: {
     page: { control: 'inline-radio', options: ['home', 'earn', 'partner'] },
     framing: { control: 'inline-radio', options: ['treasury', 'defi'] },
     nudge: { control: 'inline-radio', options: ['home', 'assets', 'off'] },
     plan: { control: 'inline-radio', options: ['free', 'pro'] },
-    setup: { control: 'inline-radio', options: ['dialog', 'drawer', 'stepper'] },
+    setup: { control: 'inline-radio', options: ['dialog', 'drawer', 'stepper'], if: { arg: 'milestone', eq: 'm2' } },
+    milestone: {
+      control: { type: 'inline-radio', labels: { m1: 'M1 · ships soon', m2: 'M2 · later' } },
+      options: ['m1', 'm2'],
+    },
+    scope: { control: 'inline-radio', options: ['safe', 'workspace'] },
+    empty: { control: 'boolean' },
   },
   render: ({ page }) => {
     const PageComponent = PAGES[page]
@@ -100,12 +128,33 @@ export const DefiList: Story = {
 export const TreasuryPro: Story = {
   ...at('earn', { plan: 'pro' }),
   play: async ({ canvasElement }) => {
+    await within(canvasElement).findByTestId('deposit-button')
+  },
+}
+
+export const TreasuryWorkspace: Story = {
+  ...at('earn', { plan: 'pro', scope: 'workspace' }),
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByTestId('safe-filter')
+  },
+}
+
+export const TreasuryEmpty: Story = {
+  ...at('earn', { empty: true }),
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByTestId('treasury-empty')
+  },
+}
+
+export const TreasuryM2: Story = {
+  ...at('earn', { plan: 'pro', milestone: 'm2' }),
+  play: async ({ canvasElement }) => {
     await within(canvasElement).findByTestId('invest-button')
   },
 }
 
-export const TreasuryProSetupDrawer: Story = at('earn', { plan: 'pro', setup: 'drawer' })
+export const TreasuryM2SetupDrawer: Story = at('earn', { plan: 'pro', milestone: 'm2', setup: 'drawer' })
 
-export const TreasuryProSetupStepper: Story = at('earn', { plan: 'pro', setup: 'stepper' })
+export const TreasuryM2SetupDialog: Story = at('earn', { plan: 'pro', milestone: 'm2', setup: 'dialog' })
 
 export const Partner: Story = at('partner')
