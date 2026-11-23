@@ -678,9 +678,12 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('guard identity', () => {
-    const mockRouterOnEachRender = (query: () => Record<string, string>) => {
+    const mockRouterOnEachRender = (
+      query: () => Record<string, string>,
+      pathname: string = AppRoutes.welcome.createSpace,
+    ) => {
       ;(router.useRouter as jest.Mock).mockImplementation(() => ({
-        pathname: AppRoutes.welcome.createSpace,
+        pathname,
         query: query(),
         isReady: true,
       }))
@@ -705,6 +708,34 @@ describe('useFlowActivationGuard', () => {
       const { result, rerender } = renderHook(() => useFlowActivationGuard())
       const firstGuard = result.current.activationGuard
       spaceId = MOCK_SPACE_UUID_ALT
+      rerender()
+
+      expect(result.current.activationGuard).not.toBe(firstGuard)
+    })
+
+    it('should keep the same guard and not refetch spaces when an unrelated query param changes', async () => {
+      setupMocks()
+      let tab = 'queue'
+      mockRouterOnEachRender(() => ({ spaceId: MOCK_SPACE_UUID, tab }), '/spaces/transactions')
+
+      const { result, rerender } = renderHook(() => useFlowActivationGuard())
+      const firstGuard = result.current.activationGuard
+      await firstGuard()
+      tab = 'history'
+      rerender()
+
+      expect(result.current.activationGuard).toBe(firstGuard)
+      expect(mockFetchSpaces).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return a new guard when the query changes while signed out on a Workspace page', () => {
+      setupMocks({ isAuthenticated: false })
+      let tab = 'queue'
+      mockRouterOnEachRender(() => ({ spaceId: MOCK_SPACE_UUID, tab }), '/spaces/transactions')
+
+      const { result, rerender } = renderHook(() => useFlowActivationGuard())
+      const firstGuard = result.current.activationGuard
+      tab = 'history'
       rerender()
 
       expect(result.current.activationGuard).not.toBe(firstGuard)

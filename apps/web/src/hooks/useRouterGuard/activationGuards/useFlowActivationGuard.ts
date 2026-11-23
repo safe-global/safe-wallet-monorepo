@@ -98,12 +98,13 @@ export const useFlowActivationGuard: UseGuard = () => {
   // Next builds a new query object on every route render; the rules read only these values
   const { safe, spaceId } = query
   const guardQuery = useMemo(() => ({ safe, spaceId }), [safe, spaceId])
-  // A string, so it only changes the guard when the URL does
-  const currentUrl = buildCurrentNextUrl(pathname, query)
   const walletContext = useWalletContext()
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
+  // The return URL for sign-in, only needed when signed out on a Workspace page. Building it from
+  // the whole query elsewhere would re-run the guard (and refetch spaces) on every query change.
+  const currentUrl = !isSiweAuthenticated && pathname.startsWith('/spaces') ? buildCurrentNextUrl(pathname, query) : ''
   const isSpaceRoute = useIsSpaceRoute()
   const isWorkspaceWizardEnabled = useIsWorkspaceWizardEnabled()
   const isSafePro = useSafeProFlag()

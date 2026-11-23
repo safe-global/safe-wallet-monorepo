@@ -140,8 +140,22 @@ describe('parseSpaceReturnUrl', () => {
     ['a path traversal out of /spaces', `/spaces/../settings?spaceId=${spaceId}`],
     ['another Workspace', '/spaces/transactions?spaceId=22222222-2222-2222-2222-222222222222'],
     ['no Workspace', '/spaces/transactions'],
+    ['an upper-case path', `/SPACES?spaceId=${spaceId}`],
+    ['an encoded-slash traversal', `/spaces%2F..%2Fsettings?spaceId=${spaceId}`],
+    ['an encoded-dot traversal', `/spaces/%2e%2e/settings?spaceId=${spaceId}`],
+    ['a traversal to a protocol-relative path', `/spaces/..//evil.com?spaceId=${spaceId}`],
+    ['a backslash traversal', `/spaces\\..\\settings?spaceId=${spaceId}`],
+    ['a repeated spaceId', `/spaces/transactions?spaceId=${spaceId}&spaceId=${spaceId}`],
   ])('rejects %s', (_, next) => {
     expect(parseSpaceReturnUrl(next, spaceId)).toBeNull()
+  })
+
+  it('keeps a hash that looks like a URL as a same-origin hash', () => {
+    expect(parseSpaceReturnUrl(`/spaces?spaceId=${spaceId}#//evil.com`, spaceId)).toEqual({
+      pathname: '/spaces',
+      query: { spaceId },
+      hash: '#//evil.com',
+    })
   })
 
   it('keeps only the path of a URL that the parser resolves to another host', () => {
