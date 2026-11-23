@@ -7,7 +7,6 @@ import {
   createEmailSession,
   createWorkspace,
   planName,
-  removeSubscription,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
@@ -16,8 +15,10 @@ import {
   type EmailSession,
 } from '../../../src/fixtures/email-session'
 import { completeStepUp, expectActionCompleted } from '../../../src/fixtures/step-up'
+import { WorkspacePage } from '../../../src/pages/workspace.page'
 
 const WORKSPACE_NAME = 'Step-up billing'
+const STARTER_SEATS = 2
 
 // The plan card at the top of the Plans page names the plan in force.
 const currentPlan = (page: Page) => page.getByRole('main').getByRole('heading', { level: 4 }).first()
@@ -46,31 +47,24 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
     user = await signInWithEmail(safePage, email, { secondFactor: false })
   })
 
-  test('should open the checkout of the chosen trial when the step-up in the creation wizard succeeds', async ({
+  test('should reopen the checkout of the same Workspace when the user comes back from it and the step-up succeeds', async ({
     safePage,
   }) => {
-    let workspaceId = ''
-    // A new Workspace has no plan in production; the local billing service would give it a trial on the first read.
-    await safePage.route('**/v1/spaces', async (route) => {
-      if (route.request().method() !== 'POST') return route.fallback()
-      const response = await route.fetch()
-      workspaceId = String(((await response.json()) as { uuid: string }).uuid)
-      await removeSubscription(workspaceId)
-      await route.fulfill({ response })
-    })
+    const workspace = new WorkspacePage(safePage)
+    const createdSetup = safePage.waitForResponse(
+      (response) => response.request().method() === 'POST' && response.url().endsWith('/v1/spaces/setup'),
+    )
     await safePage.goto('/welcome/create-space')
-    await safePage.getByRole('textbox', { name: 'Workspace name' }).fill(WORKSPACE_NAME)
-    await safePage.getByRole('button', { name: 'Next' }).click()
+    await workspace.startTrialViaWizard(WORKSPACE_NAME, STARTER_SEATS)
+    const { spaceId: workspaceId } = (await (await createdSetup).json()) as { spaceId: string }
+    await expectLocalCheckout(safePage, workspaceId, 'Starter')
+    await workspace.checkoutBackLink.click()
 
-    const offer = safePage.getByRole('dialog', { name: /^Safe Pro/ })
-    await offer.getByRole('tab', { name: '2 Safes' }).click()
-    await offer.getByRole('button', { name: 'Start free trial' }).click()
+    await workspace.finishSurveyButton.click()
     await completeStepUp(safePage)
 
-    // The checkout returns to the next step of the wizard.
     await expectLocalCheckout(safePage, workspaceId, 'Starter')
     await expect(safePage.getByText('30 days free')).toBeVisible()
-    await expect(safePage.getByText(`/welcome/select-safes?spaceId=${workspaceId}`)).toBeVisible()
   })
 
   test.describe('in an existing Workspace', () => {
