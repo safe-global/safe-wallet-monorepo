@@ -8,6 +8,7 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { initSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import ScopedWalletProvider from '@/components/common/WalletProvider/ScopedWalletProvider'
 import { useChain } from '@/hooks/useChains'
 import { trackError } from '@/services/exceptions'
 import { useAppSelector } from '@/store'
@@ -148,7 +149,11 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
 
   const value = useMemo<SafeScopeContextValue>(() => ({ scope, setScope, clearScope }), [scope, setScope, clearScope])
 
-  return <SafeScopeContext.Provider value={value}>{children}</SafeScopeContext.Provider>
+  return (
+    <SafeScopeContext.Provider value={value}>
+      <ScopedWalletProvider>{children}</ScopedWalletProvider>
+    </SafeScopeContext.Provider>
+  )
 }
 
 export default SafeScopeProvider
