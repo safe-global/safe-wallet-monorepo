@@ -1,15 +1,13 @@
 import { useCallback, useMemo } from 'react'
-import { skipToken } from '@reduxjs/toolkit/query'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
-import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/store/api/gateway'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
-import { selectCurrency } from '@/store/settingsSlice'
 import { useSpaceSafes } from '../../../../public/hooks/useSpaceSafes'
+import { useSafeRoleQueries } from '../../../../hooks/useSafeRoleQueries'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
 import type { ChainInfo } from '../../../../public/types'
 import type {
@@ -43,26 +41,12 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
     isUninitialized: isSpaceSafesUninitialized,
   } = useSpaceSafes()
   const { address: wallet = '' } = useWallet() || {}
-  const currency = useAppSelector(selectCurrency)
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { configs: chains, loading: isChainsLoading } = useChains()
 
   const safeItems = useMemo(() => flattenSafeItems(allSafes), [allSafes])
 
-  // Same args as `useSpaceSafeOverviews`, so this shares its cache entry instead of costing a request.
-  const overviewSafes = useMemo(() => safeItems.map(({ chainId, address }) => ({ chainId, address })), [safeItems])
-  const overviewsQuery = useGetMultipleSafeOverviewsQuery(
-    overviewSafes.length > 0 ? { safes: overviewSafes, currency } : skipToken,
-  )
-
-  // One delegates request per distinct chain the Space actually uses, not one per Safe.
-  const proposerChains = useMemo(() => {
-    const spaceChainIds = new Set(safeItems.map((item) => item.chainId))
-    return chains.filter((chain) => spaceChainIds.has(chain.chainId))
-  }, [chains, safeItems])
-  const proposerSafesQuery = useGetProposerSafesQuery(
-    wallet && !signersOnly && proposerChains.length > 0 ? { chains: proposerChains, delegate: wallet } : skipToken,
-  )
+  const { overviewsQuery, proposerSafesQuery } = useSafeRoleQueries(safeItems, { skipProposers: signersOnly })
 
   // A delegates failure only under-reports proposer access, so it degrades instead of failing the field.
   const isError = isSafesError || overviewsQuery.isError
@@ -71,7 +55,7 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
   const overviews = overviewsQuery.currentData
   const proposerSafes = proposerSafesQuery.currentData
 
-  const isOverviewsResolved = overviewSafes.length === 0 || overviews !== undefined || overviewsQuery.isError
+  const isOverviewsResolved = safeItems.length === 0 || overviews !== undefined || overviewsQuery.isError
   // A skipped query only means "no proposer Safes" once the chain configs it is built from have loaded.
   const isProposerStatusResolved =
     proposerSafes !== undefined ||
