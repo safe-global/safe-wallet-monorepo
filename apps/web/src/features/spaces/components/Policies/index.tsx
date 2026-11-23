@@ -20,6 +20,7 @@ import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import RecipientAllowlistFlow from './RecipientAllowlistFlow'
 import { useRecipientAllowlistSafeAccounts } from './RecipientAllowlistFlow/hooks/useRecipientAllowlistSafeAccounts'
+import { hasAllowlistCandidate } from './RecipientAllowlistFlow/utils/safeAccounts'
 import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
 import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
@@ -103,7 +104,7 @@ const Policies = ({
     allowlistSafes.hasWallet &&
     !allowlistSafes.isLoading &&
     !allowlistSafes.isError &&
-    !allowlistSafes.hasSelectableAccount
+    !hasAllowlistCandidate(allowlistSafes.accounts)
   // Existing allowlists stay listed with the experimental toggle off; only creating one needs it on.
   const canCreateAllowlist = useIsAllowlistActiveInSpace() === true && !hasNoAllowlistSafe
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)

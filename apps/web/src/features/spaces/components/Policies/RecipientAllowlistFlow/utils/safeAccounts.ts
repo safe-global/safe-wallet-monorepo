@@ -39,3 +39,9 @@ export const markAllowlistIneligibility = (
 
 export const hasSelectableSafeAccount = (entries: readonly SafeAccountEntry[]): boolean =>
   flattenSafeAccounts([...entries]).some((option) => !option.ineligibleReason)
+
+/** Whether the setup has a Safe to show: one the user can pick, or one that only needs a version update. */
+export const hasAllowlistCandidate = (entries: readonly SafeAccountEntry[]): boolean =>
+  flattenSafeAccounts([...entries]).some(
+    (option) => !option.ineligibleReason || option.ineligibleReason === 'unsupported-safe-version',
+  )
