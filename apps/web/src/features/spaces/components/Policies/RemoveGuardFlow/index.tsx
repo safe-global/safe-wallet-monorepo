@@ -16,13 +16,14 @@ export type RemoveGuardFlowProps = {
 }
 
 /** Opened from the allowlist panel once a removal is applied. The Safe is fixed, so the flow starts at review. */
-const RemoveGuardFlow = ({ chainId, safeAddress }: RemoveGuardFlowProps): ReactElement => (
-  <SafeScopeProvider initial={{ chainId, safeAddress }}>
-    <TxFlow
+const RemoveGuardFlow = (props: RemoveGuardFlowProps): ReactElement => (
+  <SafeScopeProvider initial={{ chainId: props.chainId, safeAddress: props.safeAddress }}>
+    <TxFlow<RemoveGuardFlowProps>
       icon={RecipientAllowlistIcon}
       subtitle={FLOW_SUBTITLE}
       ReviewTransactionComponent={ReviewRemoveGuard}
       eventCategory={TxFlowType.REMOVE_SPACE_POLICY_GUARD}
+      initialData={props}
     />
   </SafeScopeProvider>
 )

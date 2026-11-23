@@ -39,7 +39,8 @@ import { getRuleKind, type RuleKind } from './ruleKind'
 type AllowlistSetupActionsProps = {
   chainId: string
   calls: MetaTransactionData[]
-  configurations: PolicyConfiguration[]
+  /** The rules a configuring call sets. */
+  getConfigurations: (call: MetaTransactionData) => PolicyConfiguration[] | undefined
   describeCall: (call: MetaTransactionData) => SetupCallDescription | undefined
   decodeRecipients: (data: string) => string[]
   getAddressInfo: (address: string) => AllowlistAddressInfo
@@ -168,7 +169,7 @@ const PolicyRuleRows = ({
 const AllowlistSetupActions = ({
   chainId,
   calls,
-  configurations,
+  getConfigurations,
   describeCall,
   decodeRecipients,
   getAddressInfo,
@@ -185,6 +186,7 @@ const AllowlistSetupActions = ({
             <div className="flex flex-col divide-y divide-border overflow-hidden rounded-sm">
               {calls.map((call, index) => {
                 const description = describeCall(call)
+                const configurations = getConfigurations(call)
                 const method = description?.method ?? call.data.slice(0, 10)
                 const isGuardCall = description?.target === 'guard'
                 const contractName = isGuardCall ? POLICY_GUARD_NAME : getAddressInfo(call.to).name
@@ -202,7 +204,7 @@ const AllowlistSetupActions = ({
                       <MethodCall contractAddress={call.to} contractName={contractName} method={method} />
 
                       {CONFIGURING_METHODS.includes(method) &&
-                        configurations.map((configuration, ruleIndex) => (
+                        configurations?.map((configuration, ruleIndex) => (
                           <PolicyRuleRows
                             key={`${ruleIndex}-${configuration.target}-${configuration.selector}-${configuration.operation}`}
                             configuration={configuration}

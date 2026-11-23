@@ -12,7 +12,7 @@ import {
   ZERO_ADDRESS_RECIPIENT_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration } from '../types'
-import { SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR } from './guardExit'
+import { SET_FALLBACK_HANDLER_SELECTOR, SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR } from './guardExit'
 import { getAllowlistPairKeys, pairKey } from './allowlistPairs'
 import { getPolicyEngineAddress, type PolicyEngineContract } from './policyEngineDeployments'
 
@@ -56,6 +56,13 @@ const guardExitConfigurations = (safeAddress: string, allowPolicy: string): Poli
     policy: allowPolicy,
     data: '0x',
   },
+  {
+    target: safeAddress,
+    selector: SET_FALLBACK_HANDLER_SELECTOR,
+    operation: OperationType.Call,
+    policy: allowPolicy,
+    data: '0x',
+  },
 ]
 
 /** Unbinds what a removal leaves behind, so a new allowlist can't be taken off without waiting out the delay. */
@@ -63,8 +70,8 @@ export const clearGuardExitConfigurations = (safeAddress: string): PolicyConfigu
   guardExitConfigurations(safeAddress, ZERO_ADDRESS)
 
 /**
- * Deletes every rule of the allowlist and allows the Safe's two guard setters, which the first setup's MultiSend
- * bindings let through in one batch. ERC-20 recipients are revoked before their rule is unbound, since the policy
+ * The first root of a removal: deletes every rule of the allowlist and allows the Safe's guard and fallback handler
+ * setters, which the first setup's MultiSend bindings let through in one batch. ERC-20 recipients are revoked before their rule is unbound, since the policy
  * keeps them and a later rule on the token would let them through again.
  */
 export const buildAllowlistRemovalConfigurations = ({

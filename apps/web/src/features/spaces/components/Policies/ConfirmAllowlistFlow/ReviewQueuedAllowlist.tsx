@@ -21,7 +21,10 @@ const ReviewQueuedAllowlist = ({
   return (
     <ConfirmProposedTx {...props} withDecodedData={false} withMultisend={false}>
       {children}
-      <AllowlistTransactionCalls safeTx={safeTx} requestedConfigurations={requestedConfigurations} />
+      <AllowlistTransactionCalls
+        safeTx={safeTx}
+        requestedConfigurations={requestedConfigurations && [requestedConfigurations]}
+      />
     </ConfirmProposedTx>
   )
 }

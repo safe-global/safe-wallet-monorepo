@@ -4,21 +4,25 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
-import { ALLOWLIST_UNAVAILABLE_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import {
+  ALLOWLIST_UNAVAILABLE_ERROR,
+  TOO_MANY_RECIPIENTS_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { buildAllowlistRemovalConfigurations } from '@/features/policy-guard/public/services/allowlistConfigurations'
+import { buildGuardRemovalCleanupConfigurations } from '@/features/policy-guard/public/services/guardRemoval'
 import {
   createRequestConfigurationTx,
   getConfigurationRoot,
 } from '@/features/policy-guard/public/services/policyGuardEncoders'
 import * as useChainsModule from '@/hooks/useChains'
-import { createTx } from '@/services/tx/tx-sender/create'
+import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 import { useBuildRemoveAllowlistTransaction } from '../useBuildRemoveAllowlistTransaction'
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
-jest.mock('@/services/tx/tx-sender/create', () => ({ createTx: jest.fn() }))
+jest.mock('@/services/tx/tx-sender/create', () => ({ createMultiSendCallOnlyTx: jest.fn() }))
 
 const CHAIN_ID = '11155111'
 const SAFE = faker.finance.ethereumAddress()
@@ -43,28 +47,35 @@ describe('useBuildRemoveAllowlistTransaction', () => {
     jest.clearAllMocks()
     ;(useSafeScope as jest.Mock).mockReturnValue(scope)
     jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
-    ;(createTx as jest.Mock).mockResolvedValue(builtTx)
+    ;(createMultiSendCallOnlyTx as jest.Mock).mockResolvedValue(builtTx)
   })
 
-  it('should request the root of the removal and return what CGW stores, when the Safe SDK is ready', async () => {
-    const configurations = buildAllowlistRemovalConfigurations({
-      chainId: CHAIN_ID,
-      safeAddress: SAFE,
-      rules,
-    })
-    const root = getConfigurationRoot(configurations)
+  it('should request the deletion and the clean-up in one batch and return both for CGW, when the Safe SDK is ready', async () => {
+    const deletion = buildAllowlistRemovalConfigurations({ chainId: CHAIN_ID, safeAddress: SAFE, rules })
+    const cleanup = buildGuardRemovalCleanupConfigurations(CHAIN_ID, SAFE)
     const { result } = renderHook(() => useBuildRemoveAllowlistTransaction(GUARD, rules), { wrapper })
 
-    await waitFor(() => expect(result.current).toEqual({ root, configurations }))
+    await waitFor(() =>
+      expect(result.current).toEqual([
+        { configurations: deletion, root: getConfigurationRoot(deletion) },
+        { configurations: cleanup, root: getConfigurationRoot(cleanup) },
+      ]),
+    )
     expect(setSafeTx).toHaveBeenCalledWith(builtTx)
-    expect(createTx).toHaveBeenCalledWith(createRequestConfigurationTx(GUARD, root), undefined, scope)
+    expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(
+      [
+        createRequestConfigurationTx(GUARD, getConfigurationRoot(deletion)),
+        createRequestConfigurationTx(GUARD, getConfigurationRoot(cleanup)),
+      ],
+      scope,
+    )
   })
 
   it('should not build, when the Safe SDK is not ready', () => {
     ;(useSafeScope as jest.Mock).mockReturnValue({ ...scope, sdk: undefined })
     const { result } = renderHook(() => useBuildRemoveAllowlistTransaction(GUARD, rules), { wrapper })
 
-    expect(createTx).not.toHaveBeenCalled()
+    expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
     expect(result.current).toBeUndefined()
   })
 
@@ -73,13 +84,25 @@ describe('useBuildRemoveAllowlistTransaction', () => {
     const { result } = renderHook(() => useBuildRemoveAllowlistTransaction(GUARD, rules), { wrapper })
 
     expect(setSafeTxError).toHaveBeenCalledWith(new Error(ALLOWLIST_UNAVAILABLE_ERROR))
-    expect(createTx).not.toHaveBeenCalled()
+    expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
+    expect(result.current).toBeUndefined()
+  })
+
+  it('should set the error and return nothing, when a token has more recipients than one rule can revoke', () => {
+    const recipients = Array.from({ length: 1024 }, () => faker.finance.ethereumAddress())
+    const { result } = renderHook(
+      () => useBuildRemoveAllowlistTransaction(GUARD, [{ tokenAddress: faker.finance.ethereumAddress(), recipients }]),
+      { wrapper },
+    )
+
+    expect(setSafeTxError).toHaveBeenCalledWith(new Error(TOO_MANY_RECIPIENTS_ERROR))
+    expect(createMultiSendCallOnlyTx).not.toHaveBeenCalled()
     expect(result.current).toBeUndefined()
   })
 
   it('should report the failure and return nothing, when the transaction cannot be built', async () => {
     const error = new Error('Could not encode')
-    ;(createTx as jest.Mock).mockRejectedValue(error)
+    ;(createMultiSendCallOnlyTx as jest.Mock).mockRejectedValue(error)
     const { result } = renderHook(() => useBuildRemoveAllowlistTransaction(GUARD, rules), { wrapper })
 
     await waitFor(() => expect(setSafeTxError).toHaveBeenCalledWith(error))

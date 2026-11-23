@@ -19,8 +19,8 @@ import { useBuildRemoveAllowlistTransaction } from './useBuildRemoveAllowlistTra
 const ReviewRemoveAllowlist = ({ onSubmit, children, ...props }: ReviewTransactionProps): ReactElement => {
   const { data } = useContext<TxFlowContextType<RemoveAllowlistFlowData>>(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
-  const request = useBuildRemoveAllowlistTransaction(data?.guardAddress ?? '', data?.rules ?? [])
-  const handleSubmit = useSaveBeforeSubmit(request, onSubmit)
+  const requests = useBuildRemoveAllowlistTransaction(data?.guardAddress ?? '', data?.rules ?? [])
+  const handleSubmit = useSaveBeforeSubmit(requests, onSubmit)
   const changeDelay = formatPolicyChangeDelay(usePolicyGuardDelay(data?.chainId ?? '', data?.guardAddress))
 
   return (
@@ -38,7 +38,10 @@ const ReviewRemoveAllowlist = ({ onSubmit, children, ...props }: ReviewTransacti
         data-testid="remove-allowlist-summary"
       />
       {children}
-      <AllowlistTransactionCalls safeTx={safeTx} requestedConfigurations={request?.configurations} />
+      <AllowlistTransactionCalls
+        safeTx={safeTx}
+        requestedConfigurations={requests?.map(({ configurations }) => configurations)}
+      />
     </ReviewTransaction>
   )
 }

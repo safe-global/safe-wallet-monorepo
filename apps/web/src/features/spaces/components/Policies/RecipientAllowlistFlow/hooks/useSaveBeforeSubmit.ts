@@ -4,9 +4,9 @@ import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { useSaveAllowlistConfiguration } from './useSaveAllowlistConfiguration'
 
-/** Stores the configurations in CGW before the transaction is signed; submit waits for a built request and the save. */
+/** Stores the configurations in CGW before the transaction is signed; submit waits for the built requests and every save. */
 export const useSaveBeforeSubmit = (
-  request: CreatePolicyConfigurationRequestDto | undefined,
+  requests: CreatePolicyConfigurationRequestDto[] | undefined,
   onSubmit: SubmitCallback,
 ): SubmitCallback => {
   const { save, isSaving } = useSaveAllowlistConfiguration()
@@ -17,8 +17,8 @@ export const useSaveBeforeSubmit = (
   }, [isSaving, setIsSubmitLoading])
 
   useEffect(() => {
-    setIsSubmitDisabled(!request || isSaving)
-  }, [request, isSaving, setIsSubmitDisabled])
+    setIsSubmitDisabled(!requests || isSaving)
+  }, [requests, isSaving, setIsSubmitDisabled])
 
   useEffect(
     () => () => {
@@ -33,14 +33,15 @@ export const useSaveBeforeSubmit = (
 
   return useCallback<SubmitCallback>(
     async (args) => {
-      if (!request || isSubmittingRef.current) return
+      if (!requests || isSubmittingRef.current) return
       isSubmittingRef.current = true
       try {
-        if (await save(request)) onSubmit(args)
+        const saved = await Promise.all(requests.map((request) => save(request)))
+        if (saved.every(Boolean)) onSubmit(args)
       } finally {
         isSubmittingRef.current = false
       }
     },
-    [request, save, onSubmit],
+    [requests, save, onSubmit],
   )
 }

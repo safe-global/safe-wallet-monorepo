@@ -1,5 +1,9 @@
 import { faker } from '@faker-js/faker'
-import { getTokenCallbackHandlerAddress, isTokenCallbackHandler } from '../fallbackHandlers'
+import {
+  getDefaultFallbackHandlerAddress,
+  getTokenCallbackHandlerAddress,
+  isTokenCallbackHandler,
+} from '../fallbackHandlers'
 
 const TOKEN_CALLBACK_HANDLER = '0x54e86d004d71a8D2112ec75FaCE57D730b0433F3'
 
@@ -32,5 +36,15 @@ describe('isTokenCallbackHandler', () => {
 
   it('should be false, when the Safe has no fallback handler', () => {
     expect(isTokenCallbackHandler('11155111', undefined)).toBe(false)
+  })
+})
+
+describe('getDefaultFallbackHandlerAddress', () => {
+  it('should return the 1.5.0 CompatibilityFallbackHandler, when the Safe is an L2 Safe of version 1.5.0', () => {
+    expect(getDefaultFallbackHandlerAddress('11155111', '1.5.0+L2')).toBe('0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4')
+  })
+
+  it('should return nothing, when the version has no deployment', () => {
+    expect(getDefaultFallbackHandlerAddress('11155111', '9.9.9')).toBeUndefined()
   })
 })

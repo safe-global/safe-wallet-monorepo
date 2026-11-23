@@ -63,10 +63,25 @@ export const createRevokeApprovalTx = ({ tokenAddress, spender }: TokenApprovalT
   data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, 0]),
 })
 
-/** Takes the guard off both slots, once an applied removal lets the two setters and their batch through. */
-export const createRemoveGuardTxs = (safeAddress: string): MetaTransactionData[] => [
+/**
+ * Takes the guard off both slots and sets the fallback handler back, once an applied removal lets the three setters and
+ * their batch through. Applies the removal's second root last, while the guard still checks the batch.
+ */
+export const createRemoveGuardTxs = ({
+  safeAddress,
+  guardAddress,
+  fallbackHandler,
+  cleanupConfigurations,
+}: {
+  safeAddress: string
+  guardAddress: string
+  fallbackHandler: string
+  cleanupConfigurations?: PolicyConfiguration[]
+}): MetaTransactionData[] => [
   createSetGuardTx(safeAddress, ZERO_ADDRESS),
   createSetModuleGuardTx(safeAddress, ZERO_ADDRESS),
+  createSetFallbackHandlerTx(safeAddress, fallbackHandler),
+  ...(cleanupConfigurations ? [createApplyConfigurationTx(guardAddress, cleanupConfigurations)] : []),
 ]
 
 // configureImmediately reverts once our guard is in either slot, so it must run before both setters

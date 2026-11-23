@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from 'react'
+import { useCallback, useMemo, type ReactElement } from 'react'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
@@ -13,8 +13,8 @@ import AllowlistSetupActions from './AllowlistSetupActions'
 
 type AllowlistTransactionCallsProps = {
   safeTx?: SafeTransaction
-  /** What CGW stored for a request, whose calldata carries only their root. */
-  requestedConfigurations?: PolicyConfiguration[]
+  /** What CGW stored for each request, whose calldata carries only its root. */
+  requestedConfigurations?: PolicyConfiguration[][]
 }
 
 const toCalls = ({ to, value, data, operation }: SafeTransaction['data']): MetaTransactionData[] => {
@@ -37,21 +37,20 @@ const AllowlistTransactionCalls = ({
   const chainId = useSafeScope()?.chainId
 
   const calls = useMemo(() => (safeTx ? toCalls(safeTx.data) : undefined), [safeTx])
-  const configurations = useMemo(
-    () =>
-      calls && isAllowlistEnabled
-        ? (calls.map((call) => getCallConfigurations(call, requestedConfigurations)).find(Boolean) ?? [])
-        : undefined,
-    [calls, isAllowlistEnabled, requestedConfigurations],
+  const getConfigurations = useCallback(
+    (call: MetaTransactionData) =>
+      requestedConfigurations?.map((requested) => getCallConfigurations(call, requested)).find(Boolean) ??
+      getCallConfigurations(call),
+    [requestedConfigurations],
   )
 
-  if (!chainId || !calls || !configurations) return null
+  if (!chainId || !calls || !isAllowlistEnabled) return null
 
   return (
     <AllowlistSetupActions
       chainId={chainId}
       calls={calls}
-      configurations={configurations}
+      getConfigurations={getConfigurations}
       describeCall={describeSetupCall}
       decodeRecipients={decodeErc20TransferPolicyData}
       getAddressInfo={getAddressInfo}

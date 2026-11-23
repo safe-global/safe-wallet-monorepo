@@ -10,6 +10,7 @@ import {
   buildAllowlistRemovalConfigurations,
   encodeErc20TransferPolicyData,
 } from '@/features/policy-guard/public/services/allowlistConfigurations'
+import { buildGuardRemovalCleanupConfigurations } from '@/features/policy-guard/public/services/guardRemoval'
 import { getPolicyEngineAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import * as encoders from '@/features/policy-guard/public/services/policyGuardEncoders'
 import * as useChainsModule from '@/hooks/useChains'
@@ -106,7 +107,7 @@ describe('AllowlistTransactionCalls', () => {
   it('should list the requested rules, when they hash to the root of the request', () => {
     const configurations = [configurationFor([RECIPIENT])]
     const request = encoders.createRequestConfigurationTx(GUARD, encoders.getConfigurationRoot(configurations))
-    render(<AllowlistTransactionCalls safeTx={safeTxOf(request)} requestedConfigurations={configurations} />)
+    render(<AllowlistTransactionCalls safeTx={safeTxOf(request)} requestedConfigurations={[configurations]} />)
 
     fireEvent.click(screen.getByTestId('action-item'))
 
@@ -119,7 +120,7 @@ describe('AllowlistTransactionCalls', () => {
       encoders.getConfigurationRoot([configurationFor([RECIPIENT])]),
     )
     render(
-      <AllowlistTransactionCalls safeTx={safeTxOf(request)} requestedConfigurations={[configurationFor([OTHER])]} />,
+      <AllowlistTransactionCalls safeTx={safeTxOf(request)} requestedConfigurations={[[configurationFor([OTHER])]]} />,
     )
 
     expect(actionLabels()).toEqual(['1SafePolicyGuard: requestConfiguration'])
@@ -147,10 +148,37 @@ describe('AllowlistTransactionCalls', () => {
     expect(allowSetModuleGuard).toHaveTextContent('Always allowed')
   })
 
-  it('should not name the zero address the guard, when the batch takes the guard off', () => {
-    render(<AllowlistTransactionCalls safeTx={multiSendOf(encoders.createRemoveGuardTxs(SAFE))} />)
+  it('should list the rules of each request with its own root, when a removal requests two roots', () => {
+    const deletion = [configurationFor([RECIPIENT])]
+    const cleanup = buildGuardRemovalCleanupConfigurations(CHAIN_ID, SAFE)
+    const safeTx = multiSendOf(
+      [deletion, cleanup].map((requested) =>
+        encoders.createRequestConfigurationTx(GUARD, encoders.getConfigurationRoot(requested)),
+      ),
+    )
+    render(<AllowlistTransactionCalls safeTx={safeTx} requestedConfigurations={[deletion, cleanup]} />)
 
-    expect(actionLabels()).toEqual(['1setGuard', '2setModuleGuard'])
+    const [deletionCall, cleanupCall] = screen.getAllByTestId('action-item')
+    fireEvent.click(deletionCall)
+    fireEvent.click(cleanupCall)
+
+    const rules = screen.getAllByTestId('allowlist-rule')
+    expect(rules).toHaveLength(deletion.length + cleanup.length)
+    expect(rules[0]).toHaveTextContent('Rule 1 of 1')
+    expect(rules[1]).toHaveTextContent(`Rule 1 of ${cleanup.length}`)
+  })
+
+  it('should not name the zero address the guard, when the batch takes the guard off', () => {
+    const handler = checksumAddress(faker.finance.ethereumAddress())
+    render(
+      <AllowlistTransactionCalls
+        safeTx={multiSendOf(
+          encoders.createRemoveGuardTxs({ safeAddress: SAFE, guardAddress: GUARD, fallbackHandler: handler }),
+        )}
+      />,
+    )
+
+    expect(actionLabels()).toEqual(['1setGuard', '2setModuleGuard', '3setFallbackHandler'])
 
     fireEvent.click(screen.getAllByTestId('action-item')[0])
 

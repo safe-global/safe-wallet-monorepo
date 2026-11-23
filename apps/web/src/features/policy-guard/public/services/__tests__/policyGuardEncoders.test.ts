@@ -113,14 +113,36 @@ describe('createSetFallbackHandlerTx', () => {
 })
 
 describe('createRemoveGuardTxs', () => {
-  it('should set both guard slots of the Safe to the zero address, when the guard comes off', () => {
-    const [guardTx, moduleTx] = createRemoveGuardTxs(safeAddress)
+  it('should set both guard slots of the Safe to the zero address and the fallback handler back, when the guard comes off', () => {
+    const fallbackHandler = getAddress(faker.finance.ethereumAddress())
 
-    expect([guardTx.to, moduleTx.to]).toEqual([safeAddress, safeAddress])
-    expect(safeIface.parseTransaction({ data: guardTx.data })?.name).toBe('setGuard')
-    expect(safeIface.parseTransaction({ data: guardTx.data })?.args[0]).toBe(ZERO_ADDRESS)
-    expect(safeIface.parseTransaction({ data: moduleTx.data })?.name).toBe('setModuleGuard')
-    expect(safeIface.parseTransaction({ data: moduleTx.data })?.args[0]).toBe(ZERO_ADDRESS)
+    const txs = createRemoveGuardTxs({ safeAddress, guardAddress, fallbackHandler })
+
+    expect(txs.map((tx) => tx.to)).toEqual([safeAddress, safeAddress, safeAddress])
+    expect(txs.map((tx) => safeIface.parseTransaction({ data: tx.data })?.name)).toEqual([
+      'setGuard',
+      'setModuleGuard',
+      'setFallbackHandler',
+    ])
+    expect(txs.map((tx) => safeIface.parseTransaction({ data: tx.data })?.args[0])).toEqual([
+      ZERO_ADDRESS,
+      ZERO_ADDRESS,
+      fallbackHandler,
+    ])
+  })
+
+  it('should apply the clean-up configurations last, when they are given', () => {
+    const fallbackHandler = getAddress(faker.finance.ethereumAddress())
+
+    const txs = createRemoveGuardTxs({
+      safeAddress,
+      guardAddress,
+      fallbackHandler,
+      cleanupConfigurations: configurations,
+    })
+
+    expect(txs).toHaveLength(4)
+    expect(txs[3]).toEqual(createApplyConfigurationTx(guardAddress, configurations))
   })
 })
 

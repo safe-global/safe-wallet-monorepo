@@ -38,6 +38,7 @@ export const ROOT_EXPIRY_SECONDS = 604_800
 const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
 const SET_GUARD_SELECTOR = '0xe19a9dd9'
 const SET_MODULE_GUARD_SELECTOR = '0xe068df37'
+const SET_FALLBACK_HANDLER_SELECTOR = '0xf08a0323'
 const CALL = 0
 const PERMISSION_ALWAYS = 2
 const CONFIGURATION = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
@@ -65,9 +66,9 @@ function configurationOf({ token, recipients }: TokenAllowlist): Configuration {
   }
 }
 
-/** The unbinding of the guard setters a removal allows, which the wallet puts before every allowlist */
+/** The unbinding of the Safe setters a removal allows, which the wallet puts before every allowlist */
 function clearedGuardExitOf(safe: string): Configuration[] {
-  return [SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR].map((selector) => ({
+  return [SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR, SET_FALLBACK_HANDLER_SELECTOR].map((selector) => ({
     target: getAddress(safe),
     selector,
     operation: CALL,

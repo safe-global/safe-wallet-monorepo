@@ -143,9 +143,10 @@ describe('buildAllowlistRemovalConfigurations', () => {
   const guardExit = [
     { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: allowPolicy, data: '0x' },
     { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: allowPolicy, data: '0x' },
+    { target: SAFE, selector: '0xf08a0323', operation: OperationType.Call, policy: allowPolicy, data: '0x' },
   ]
 
-  it('should revoke the recipients, then unbind the token rule, then allow the guard setters, when a token is allowlisted', () => {
+  it('should revoke the recipients, then unbind the token rule, then allow the Safe setters, when a token is allowlisted', () => {
     expect(
       buildAllowlistRemovalConfigurations({
         chainId: CHAIN_ID,
@@ -191,10 +192,11 @@ describe('buildAllowlistRemovalConfigurations', () => {
 })
 
 describe('clearGuardExitConfigurations', () => {
-  it('should unbind both guard setters, when a setup clears what a removal left', () => {
+  it('should unbind both guard setters and the fallback handler setter, when a setup clears what a removal left', () => {
     expect(clearGuardExitConfigurations(SAFE)).toEqual([
       { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
       { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
+      { target: SAFE, selector: '0xf08a0323', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
     ])
   })
 })

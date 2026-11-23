@@ -86,8 +86,11 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const delaySeconds = usePolicyGuardDelay(chainId ?? '', installedGuard)
   const changeDelay = formatPolicyChangeDelay(delaySeconds)
 
-  const request = useMemo(() => (configurations && root ? { configurations, root } : undefined), [configurations, root])
-  const handleSubmit = useSaveBeforeSubmit(request, onSubmit)
+  const requests = useMemo(
+    () => (configurations && root ? [{ configurations, root }] : undefined),
+    [configurations, root],
+  )
+  const handleSubmit = useSaveBeforeSubmit(requests, onSubmit)
   const [isConsentGiven, setIsConsentGiven] = useState(false)
   const [showConsentError, setShowConsentError] = useState(false)
   const consentRef = useRef<HTMLDivElement>(null)
@@ -230,7 +233,7 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
         <AllowlistSetupActions
           chainId={chainId}
           calls={txs}
-          configurations={configurations}
+          getConfigurations={() => configurations}
           describeCall={describeSetupCall}
           decodeRecipients={decodeErc20TransferPolicyData}
           getAddressInfo={getAddressInfo}
