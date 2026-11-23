@@ -130,6 +130,16 @@ async function confirmFromPoliciesAsSecondOwner(
   await review.waitForExecution()
 }
 
+/** Reloads until CGW serves the registered change; it can serve its cached policy state for up to a minute */
+async function expectServedRow(page: Page, workspaceId: string, safe: SeededSafe, text: string): Promise<void> {
+  const policies = new PoliciesPage(page)
+  const allowlist = new RecipientAllowlistPage(page)
+  await expect(async () => {
+    await policies.goto(workspaceId)
+    await expect(allowlist.row(safe.address)).toContainText(text, { timeout: 5_000 })
+  }).toPass({ timeout: 90_000 })
+}
+
 const permissionOf = (journey: Journey, safe: SeededSafe, recipient: Recipient) =>
   readRecipientPermission(journey.env, {
     policy: ERC20_TRANSFER_POLICY,
@@ -166,8 +176,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       expect(await permissionOf(journey, safe, recipient)).toBe(RECIPIENT_PERMISSION.ALWAYS)
 
       await registerAllowlist(safe, { allowlist: { token: SEPOLIA_USDC.address, recipients: [recipient.address] } })
-      await policies.goto(workspaceId)
-      await expect(allowlist.row(safe.address)).toContainText('1 recipient')
+      await expectServedRow(safePage, workspaceId, safe, '1 recipient')
       await allowlist.openPanel(safe.address)
       await expect(allowlist.panel).toContainText('1 recipient')
       await expect(allowlist.panel.getByRole('button', { name: 'Remove' })).toBeEnabled()
@@ -245,8 +254,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
       expect(await permissionOf(journey, safe, added)).toBe(RECIPIENT_PERMISSION.ALWAYS)
 
       await registerAllowlist(safe, { allowlist: changed, roots: [{ root: request.root, readyAt, status: 'APPLIED' }] })
-      await policies.goto(workspaceId)
-      await expect(allowlist.row(safe.address)).toContainText('2 recipients')
+      await expectServedRow(safePage, workspaceId, safe, '2 recipients')
       await allowlist.openPanel(safe.address)
       await expect(allowlist.panel).toContainText('2 recipients')
     })
