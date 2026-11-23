@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
-import type { SpaceSetupDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as spacesApi, type SpaceSetupDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
 import { selectIsResumeOffered } from '../../../public/store/workspaceWizardSlice'
@@ -12,7 +12,7 @@ import { spaceBuilder } from '@/tests/builders/space'
 import { trialPaymentLinkBuilder } from '@/tests/builders/trialPaymentLink'
 import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
 import { trialPlansHandler, userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
-import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { act, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { MemberRole } from '../../../memberRole'
 import type { WizardStepId } from '../steps'
 import WorkspaceWizard from '../index'
@@ -123,6 +123,43 @@ describe('WorkspaceWizard', () => {
     )
 
     expect(screen.queryByText("We couldn't find your new Workspace")).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: AppRoutes.spaces.index, query: expect.objectContaining({ spaceId }) }),
+      ),
+    )
+  })
+
+  it('keeps the Workspace of a first checkout when its setup is applied before the user is back', async () => {
+    const spaceId = faker.string.uuid()
+    let setupStatus: SpaceSetupDto['status'] = 'pending'
+    const polledSpaceIds: string[] = []
+    server.use(
+      sessionHandler('complete'),
+      http.get<{ id: string }>(`${GATEWAY_URL}/v1/spaces/:id/setup`, ({ params }) => {
+        polledSpaceIds.push(params.id)
+        return HttpResponse.json(pendingSetup({ status: setupStatus }))
+      }),
+    )
+    const { replace } = renderWizard(
+      'survey',
+      { sessionId: `cs_${faker.string.alphanumeric(24)}` },
+      { createdSpaceId: spaceId },
+    )
+    await waitFor(() => expect(polledSpaceIds).toContain(spaceId))
+
+    // The billing webhook won the race: the Workspace list already reports the setup as applied.
+    server.use(workspacesHandler([spaceBuilder().with({ uuid: spaceId, setupStatus: 'applied' }).build()]))
+    await getStoreInstance().dispatch(spacesApi.endpoints.spacesGetV1.initiate(undefined, { forceRefetch: true }))
+    await waitFor(() => expect(storedDraft().createdSpaceId).toBeNull())
+
+    expect(screen.queryByText("We couldn't find your new Workspace")).not.toBeInTheDocument()
+    setupStatus = 'applied'
+    await act(() =>
+      getStoreInstance().dispatch(
+        spacesApi.endpoints.spacesGetSetupV1.initiate({ id: spaceId }, { forceRefetch: true }),
+      ),
+    )
     await waitFor(() =>
       expect(replace).toHaveBeenCalledWith(
         expect.objectContaining({ pathname: AppRoutes.spaces.index, query: expect.objectContaining({ spaceId }) }),

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactElement } from 'react'
+import { useEffect, useRef, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useBillingGetCheckoutSessionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
@@ -122,10 +122,14 @@ const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
   const isCheckoutCancelled = session !== undefined && session.status !== 'complete'
   const isReturning = sessionId !== null && !isCheckoutCancelled
   const resume = useResumeSetup(urlSpaceId, isReturning)
+  const knownSpaceId = urlSpaceId ?? draft.createdSpaceId
+  // The draft can be cleared once the setup is applied, before the return screen has opened the Workspace.
+  const [returnSpaceId, setReturnSpaceId] = useState<string | null>(null)
+  if (isReturning && knownSpaceId && returnSpaceId === null) setReturnSpaceId(knownSpaceId)
   useResumeOffer(step)
 
   if (isReturning) {
-    const spaceId = urlSpaceId ?? draft.createdSpaceId
+    const spaceId = returnSpaceId ?? knownSpaceId
     // A first checkout names its Workspace only in the draft, which loads with the user.
     if (!spaceId && isUserError) {
       return (
