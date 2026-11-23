@@ -1,3 +1,5 @@
+import { AppRoutes } from '@/config/routes'
+
 // Paths whose only job is to redirect to /welcome/spaces. Storing them as
 // `next` produces meaningless round-trips (or loops).
 const SELF_REDIRECTING_PATHS = new Set(['/', '/welcome', '/welcome/spaces'])
@@ -73,6 +75,22 @@ export const parseNextUrlForRouter = (next: unknown): ParsedNextUrl | null => {
 
   const hash = url.hash ? url.hash : undefined
   return hash ? { pathname: url.pathname, query, hash } : { pathname: url.pathname, query }
+}
+
+/**
+ * Parse a `next` URL that may only lead to a page of the given Workspace:
+ * `/spaces` or `/spaces/*`, with a `spaceId` param equal to `spaceId`.
+ *
+ * Used to return a signed-out user to the Workspace page they opened, once they
+ * sign in. Returns `null` for anything else, including every URL that
+ * `parseNextUrlForRouter` rejects, so callers fall back to their default.
+ */
+export const parseSpaceReturnUrl = (next: unknown, spaceId: string): ParsedNextUrl | null => {
+  const parsed = parseNextUrlForRouter(next)
+  if (!parsed) return null
+  const isSpacesPage =
+    parsed.pathname === AppRoutes.spaces.index || parsed.pathname.startsWith(`${AppRoutes.spaces.index}/`)
+  return isSpacesPage && parsed.query.spaceId === spaceId ? parsed : null
 }
 
 /**
