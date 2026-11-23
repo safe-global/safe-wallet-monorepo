@@ -125,7 +125,9 @@ async function confirmFromPoliciesAsSecondOwner(
   await expect(allowlist.panel).toContainText('1 of 2 signatures')
   await allowlist.reviewTransactionButton.click()
   await expectReviewedCalls(allowlist, calls)
-  await new TxReviewPage(page).signAndExecute()
+  const review = new TxReviewPage(page)
+  await review.continueAndExecute()
+  await review.waitForExecution()
 }
 
 const permissionOf = (journey: Journey, safe: SeededSafe, recipient: Recipient) =>
