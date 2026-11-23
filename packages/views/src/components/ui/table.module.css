@@ -49,6 +49,7 @@
 }
 /* Inset the hover pill off the row separator with transparent borders. The 5/8 split centres it: the
    row background paints the 1px line ~1px above the row's bottom edge. */
+/* ConflictBracket's segment offsets (top-[-6px] bottom-[-8px]) depend on these 5px/8px borders. */
 .table tbody td {
   border-top: 5px solid transparent;
   border-bottom: 8px solid transparent;

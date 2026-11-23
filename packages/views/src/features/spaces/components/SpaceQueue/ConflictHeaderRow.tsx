@@ -16,6 +16,7 @@ const ConflictHeaderRow = ({
   rowProps?: ComponentProps<'tr'>
 }): ReactElement => (
   <TableRow data-no-hover data-no-divider {...rowProps}>
+    {/* ConflictBracketStart's top-[calc(50%+20px)] depends on this cell's pt-4 pb-1 text-sm */}
     <TableCell className="relative pt-4 pb-1 text-center text-sm tabular-nums text-muted-foreground">
       {nonce}
       <ConflictBracketStart />
