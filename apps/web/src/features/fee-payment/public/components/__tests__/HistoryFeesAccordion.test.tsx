@@ -8,7 +8,7 @@ jest.mock('@/hooks/useChains')
 const SIGNER_PAID: HistoryFeesData = {
   totalFee: { amount: '0.0001', currency: 'ETH' },
   executionFee: { label: 'Execution fee', isFree: true },
-  gasFee: { label: 'Max gas fee', amount: '0.0001', currency: 'ETH' },
+  gasFee: { label: 'Gas fee', amount: '0.0001', currency: 'ETH' },
   paidFrom: 'signer',
 }
 

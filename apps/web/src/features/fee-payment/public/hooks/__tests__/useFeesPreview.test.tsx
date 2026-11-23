@@ -243,7 +243,7 @@ describe('useFeesPreview', () => {
 
     // Multi-sig signer mode (threshold 2): execution fee stays free, gas is not quoted.
     expect(result.current.executionFee).toEqual({ label: 'Execution fee', isFree: true })
-    expect(result.current.gasFee).toEqual({ label: 'Max gas fee', note: 'Calculated at execution' })
+    expect(result.current.gasFee).toEqual({ label: 'Gas fee', note: 'Calculated at execution' })
     expect(result.current.loading).toBe(false)
     // No candidates and no change handler → the UI takes the locked signer-pays notice
     // (PLA-1435) instead of offering a "Pay fees from: Safe" choice that can never work.
