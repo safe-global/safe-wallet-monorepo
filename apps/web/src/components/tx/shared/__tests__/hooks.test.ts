@@ -841,12 +841,12 @@ describe('SignOrExecute hooks', () => {
         expect(signSpy.mock.calls[0][10]).toEqual(declared)
       })
 
-      it('should not pass it when the parent Safe signs a tx already in the queue', async () => {
+      it('should pass it when the parent Safe signs a tx already in the queue', async () => {
         const signSpy = mockOnChainSigning()
 
         await renderWithDeclared().signTx(createSafeTx(), '456')
 
-        expect(signSpy.mock.calls[0][10]).toBeUndefined()
+        expect(signSpy.mock.calls[0][10]).toEqual(declared)
       })
 
       it('should not pass it when a smart contract wallet that is not a Safe signs', async () => {
@@ -899,12 +899,12 @@ describe('SignOrExecute hooks', () => {
         expect(executeSpy.mock.calls[0][12]).toEqual(declared)
       })
 
-      it('should not pass it when the parent Safe executes a tx already in the queue', async () => {
+      it('should pass it when the parent Safe executes a tx already in the queue', async () => {
         const executeSpy = mockExecution()
 
         await renderWithDeclared().executeTx({ gasPrice: 1 }, createSafeTx(), '456')
 
-        expect(executeSpy.mock.calls[0][12]).toBeUndefined()
+        expect(executeSpy.mock.calls[0][12]).toEqual(declared)
       })
 
       it('should not pass it when an EOA executes', async () => {
