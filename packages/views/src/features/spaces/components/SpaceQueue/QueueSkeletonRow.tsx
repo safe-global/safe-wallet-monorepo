@@ -7,8 +7,8 @@ const BARS: Array<[QueueColumn, number, number]> = [
   ['Nonce', 22, 24],
   ['Safe', 16, 112],
   ['Transaction', 16, 88],
-  ['Details', 16, 88],
-  ['Details', 120, 96],
+  ['Details', 16, 56],
+  ['Details', 90, 56],
   ['Status', 16, 48],
   ['Action', (QUEUE_COLUMN_WIDTHS.Action ?? 0) - 92, 72],
 ]

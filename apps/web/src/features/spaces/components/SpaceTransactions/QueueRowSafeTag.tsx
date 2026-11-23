@@ -11,7 +11,8 @@ const QueueRowSafeTag = ({ safeAddress, chainId }: { safeAddress: string; chainI
   return (
     <QueueSafeTag
       address={safeAddress}
-      name={name || shortenAddress(safeAddress)}
+      // Short enough to fit the Safe column whole, so the address suffix stays readable
+      name={name || shortenAddress(safeAddress, 3)}
       chain={toChainInfos([chainId], configs)[0]}
     />
   )

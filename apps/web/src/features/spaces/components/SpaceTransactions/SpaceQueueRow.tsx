@@ -141,7 +141,8 @@ const SpaceQueueRow = ({
           <DetailsSlot className="shrink basis-44">
             <Counterparty txInfo={tx.txInfo} chainId={chainId} />
           </DetailsSlot>
-          <DetailsSlot className="w-16 shrink-0 text-sm text-muted-foreground">
+          {/* TODO(WA-4172): back to w-16 once the short time format lands */}
+          <DetailsSlot className="w-24 shrink-0 text-sm text-muted-foreground">
             <Tooltip delay={150}>
               <TooltipTrigger className="truncate">{formatTimeInWords(tx.timestamp)}</TooltipTrigger>
               <TooltipContent>{formatDateTime(tx.timestamp)}</TooltipContent>

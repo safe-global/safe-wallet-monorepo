@@ -12,8 +12,9 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Transaction: 160,
   Details: undefined,
   Note: 68,
-  // Holds the urgency chip after the signature gauge until WA-4164 removes it; layout B's is 128
-  Status: 208,
+  // Fits the gauge and the widest urgency chip, "Blocked by #12345"
+  // TODO(WA-4164/WA-4165): back to layout B width (128px) once the status chip leaves this column
+  Status: 240,
   Action: 176,
 }
 

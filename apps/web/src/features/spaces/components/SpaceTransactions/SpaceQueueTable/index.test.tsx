@@ -18,6 +18,11 @@ import SpaceQueueTable from '.'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
 import type SpaceQueueRowType from '../SpaceQueueRow'
+import {
+  QUEUE_COLUMN_WIDTHS,
+  QUEUE_COLUMNS,
+  QUEUE_TABLE_MIN_WIDTH,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 
 const mockChainNames: Record<string, string> = {}
 const mockScopeProps = jest.fn()
@@ -162,20 +167,20 @@ describe('SpaceQueueTable', () => {
     },
   )
 
-  it('keeps the same column widths and floor in every grouping', () => {
-    const layout = (groupBy: 'safe' | 'status') => {
-      const { container, unmount } = render(<SpaceQueueTable sections={sections} groupBy={groupBy} />)
-      const table = container.querySelector('table')
-      const result = {
-        table: table?.className,
-        cols: [...container.querySelectorAll('col')].map((col) => col.getAttribute('style')),
-      }
-      unmount()
-      return result
-    }
+  it.each(['safe', 'status', 'next', 'network'] as const)(
+    'keeps the same column widths and floor when grouped by %s',
+    (groupBy) => {
+      const { container } = render(<SpaceQueueTable sections={sections} groupBy={groupBy} />)
 
-    expect(layout('status')).toEqual(layout('safe'))
-  })
+      expect(container.querySelector('table')).toHaveClass(QUEUE_TABLE_MIN_WIDTH)
+      expect([...container.querySelectorAll('col')].map((col) => col.style.width)).toEqual(
+        QUEUE_COLUMNS.map((column) => {
+          const width = QUEUE_COLUMN_WIDTHS[column]
+          return width === undefined ? '' : `${width}px`
+        }),
+      )
+    },
+  )
 
   it("renders each chain of a multichain Safe in that chain's scope, with its own Next", () => {
     render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
@@ -461,7 +466,7 @@ describe('SpaceQueueTable', () => {
 
       const cells = screen.getByTestId('space-queue-row').querySelectorAll('td')
       expect(cells).toHaveLength(7)
-      expect(cells[1]).toHaveTextContent(shortenAddress(safeA))
+      expect(cells[1]).toHaveTextContent(shortenAddress(safeA, 3))
       expect(cells[4]).toBeEmptyDOMElement()
     })
 
