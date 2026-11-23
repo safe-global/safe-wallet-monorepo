@@ -93,8 +93,8 @@ describe('formatShortTimeAgo', () => {
   const ago = (ms: number) => formatShortTimeAgo(now - ms, now)
 
   it.each([
-    ['just now', 0],
-    ['just now', 59_999],
+    ['Just now', 0],
+    ['Just now', 59_999],
     ['1m ago', MINUTE],
     ['59m ago', HOUR - 1],
     ['1h ago', HOUR],
@@ -115,8 +115,14 @@ describe('formatShortTimeAgo', () => {
     expect(formatShortTimeAgo(new Date(date).getTime(), now)).toBe(expected)
   })
 
-  it('reads a time in the future as just now', () => {
-    expect(formatShortTimeAgo(now + HOUR, now)).toBe('just now')
+  it('never shows 12mo ago at month end', () => {
+    const feb28 = new Date('2026-02-28T00:00:00.000Z').getTime()
+    expect(formatShortTimeAgo(new Date('2025-02-28T23:00:00.000Z').getTime(), feb28)).toBe('11mo ago')
+    expect(formatShortTimeAgo(new Date('2025-02-27T23:00:00.000Z').getTime(), feb28)).toBe('1y ago')
+  })
+
+  it('reads a time in the future as Just now', () => {
+    expect(formatShortTimeAgo(now + HOUR, now)).toBe('Just now')
   })
 
   it('defaults to the current time', () => {
