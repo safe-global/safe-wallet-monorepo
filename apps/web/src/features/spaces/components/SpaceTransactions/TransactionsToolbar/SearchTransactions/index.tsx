@@ -31,7 +31,7 @@ const SearchTransactions = ({ onSearch }: SearchTransactionsProps): ReactElement
   return (
     <SearchInput
       aria-label="Search transactions"
-      placeholder="Search Safes, networks, status, and signers…"
+      placeholder="Safes, networks, urgency, pending signers…"
       value={value}
       maxLength={MAX_SEARCH_LENGTH}
       onChange={(event) => setValue(event.target.value)}
