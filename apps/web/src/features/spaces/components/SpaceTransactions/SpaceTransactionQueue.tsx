@@ -7,6 +7,7 @@ import {
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import { cn } from '@safe-global/views/utils/cn'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
@@ -85,7 +86,7 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
-  const { queue, counts, isError, isFetching, refetch } = useSpaceQueue(
+  const { queue, queueQuery, isStale, counts, isError, isFetching, refetch } = useSpaceQueue(
     spaceId,
     { filters: queryFilters, search: querySearch },
     { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
@@ -111,16 +112,23 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
       />
 
       {queue ? (
-        <QueueBody
-          spaceId={spaceId}
-          queue={queue}
-          groupBy={tableGroupBy}
-          isFetching={isFetching}
-          isFiltered={hasSpaceQueueFilters(queryFilters)}
-          isSearching={querySearch !== ''}
-          onRetry={refetch}
-          onClearFilters={clearFilters}
-        />
+        // The last queue stays mounted and dimmed while a new search or filter loads, so the table doesn't flicker
+        <div
+          data-testid="space-queue-body"
+          aria-busy={isStale}
+          className={cn('flex flex-col gap-6 transition-opacity', isStale && 'opacity-50')}
+        >
+          <QueueBody
+            spaceId={spaceId}
+            queue={queue}
+            groupBy={tableGroupBy}
+            isFetching={isFetching}
+            isFiltered={hasSpaceQueueFilters(queueQuery.filters)}
+            isSearching={!!queueQuery.search}
+            onRetry={refetch}
+            onClearFilters={clearFilters}
+          />
+        </div>
       ) : isError ? (
         <QueueLoadError onRetry={refetch} />
       ) : (

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { SubscriptionOptions } from '@reduxjs/toolkit/query'
 import {
   useSpaceTransactionsGetTransactionQueueV1Query,
@@ -75,7 +75,7 @@ const REFETCH_EVENTS = [
   TxEvent.DELETED,
 ] as const
 
-type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
+export type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
@@ -113,10 +113,28 @@ export const useSpaceQueue = (
   }, [skip, refetch])
 
   const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
-  const queue = useMemo(
+  const currentQueue = useMemo(
     () => (currentData ? toSpaceQueue(currentData, isNarrowed) : undefined),
     [currentData, isNarrowed],
   )
-  // The last answer's counts stay while a new filter loads, so the menus keep them
-  return { queue, counts: data?.counts, isError, isFetching, refetch }
+
+  // The last queue loaded, kept with the Space and the query it answered
+  const [lastQueue, setLastQueue] = useState<{ spaceId: string; query: SpaceQueueQuery; queue: SpaceQueue }>()
+  if (currentQueue && lastQueue?.queue !== currentQueue) {
+    setLastQueue({ spaceId, query, queue: currentQueue })
+  }
+  // While a new search or filter loads, the last queue stays on screen instead of a skeleton. Never another Space's
+  const stale = !currentQueue && !skip && !isError && lastQueue?.spaceId === spaceId ? lastQueue : undefined
+
+  return {
+    queue: currentQueue ?? stale?.queue,
+    /** The query the returned queue answers: an earlier one while `isStale` */
+    queueQuery: stale?.query ?? query,
+    isStale: !!stale,
+    // The last answer's counts stay while a new filter loads, so the menus keep them
+    counts: data?.counts,
+    isError,
+    isFetching,
+    refetch,
+  }
 }

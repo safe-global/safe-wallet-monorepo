@@ -435,7 +435,116 @@ describe('SpaceTransactionQueue', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    await waitFor(() => expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
     expect(mockToolbarProps).toHaveBeenLastCalledWith(expect.objectContaining({ counts }))
+  })
+
+  describe('while a new query loads', () => {
+    const otherSafe = checksumAddress(faker.finance.ethereumAddress())
+
+    const respondSlowlyToFilters = (filtered: SpaceQueuedItemPage, unfiltered: SpaceQueuedItemPage) => {
+      let release: () => void = () => {}
+      const released = new Promise<void>((resolve) => (release = resolve))
+      server.use(
+        http.get(queueUrl, async ({ request }) => {
+          if (!new URL(request.url).searchParams.has('status')) return HttpResponse.json(unfiltered)
+          await released
+          return HttpResponse.json(filtered)
+        }),
+      )
+      return () => release()
+    }
+
+    it('keeps the last queue on screen, dimmed, instead of the skeleton', async () => {
+      const release = respondSlowlyToFilters(
+        page({ [otherSafe]: { '1': transactions(1) } }),
+        page({ [safeA]: { '1': transactions(1) } }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      const table = await screen.findByTestId('space-queue-table')
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+      expect(screen.getByTestId('space-queue-body')).toHaveClass('opacity-50')
+      // The same table stays mounted, so its rows and logos don't reload
+      expect(screen.getByTestId('space-queue-table')).toBe(table)
+      expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeA)
+
+      release()
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+      expect(screen.getByTestId('space-queue-body')).not.toHaveClass('opacity-50')
+    })
+
+    it('keeps the cap notice of the last queue until the new one arrives', async () => {
+      const release = respondSlowlyToFilters(
+        page({ [safeA]: { '1': transactions(1) } }, { count: 1 }),
+        page({ [safeA]: { '1': transactions(3) } }, { count: 742 }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByText('Showing 3 of 742 pending transactions.')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+
+      expect(screen.getByText('Showing 3 of 742 pending transactions.')).toBeInTheDocument()
+
+      release()
+      await waitFor(() => expect(screen.queryByText(/^Showing/)).not.toBeInTheDocument())
+    })
+
+    it('keeps the empty queue state, not a no-match state, while a filter loads', async () => {
+      const release = respondSlowlyToFilters(page({}, { count: 0 }), page({}, { count: 0 }))
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByText('Pending transactions of your Safe accounts will appear here')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+
+      expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+      expect(screen.queryByText('No proposals match these filters')).not.toBeInTheDocument()
+
+      release()
+      expect(await screen.findByText('No proposals match these filters')).toBeInTheDocument()
+    })
+
+    it('shows the error, not the last queue, when the new query fails', async () => {
+      server.use(
+        http.get(queueUrl, ({ request }) =>
+          new URL(request.url).searchParams.has('status')
+            ? new HttpResponse(null, { status: 500 })
+            : HttpResponse.json(page({ [safeA]: { '1': transactions(1) } })),
+        ),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+
+      expect(await screen.findByText("Couldn't load the queue")).toBeInTheDocument()
+      expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+    })
+
+    it("never shows another Workspace's queue while the new one loads", async () => {
+      const otherSpaceId = faker.string.uuid()
+      respondWith(page({ [safeA]: { '1': transactions(1) } }))
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/spaces/${otherSpaceId}/safes`, () => HttpResponse.json({ safes: {} })),
+        http.get(`${GATEWAY_URL}/v1/spaces/${otherSpaceId}/transactions/queued`, async () => {
+          await delay('infinite')
+          return HttpResponse.json(page({}))
+        }),
+      )
+      const { rerender } = render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      rerender(<SpaceTransactionQueue spaceId={otherSpaceId} />)
+
+      await waitFor(() => expect(screen.queryByTestId('space-queue-body')).not.toBeInTheDocument())
+      expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+    })
   })
 })
