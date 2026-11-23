@@ -13,6 +13,8 @@ export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
   update: 'The current recipients still apply until the change is executed.',
 }
 
+export const GUARD_REMOVAL_PENDING_BANNER_TITLE = "This Safe account can't send anything until the guard is removed."
+
 export const NOT_A_SIGNER_EDIT_HELPER = 'Only signers of this Safe account can edit this allowlist.'
 
 // Every change to the allowlist waits out the guard's delay after execution.
@@ -23,6 +25,14 @@ const EXECUTED_LINE: Record<PendingPolicyOperation, (changeDelay: string) => str
 }
 
 export const APPLIED_ON_EXECUTION_LINE = 'The allowlist is active now. It can take a moment to show here.'
+
+export const APPLY_EXECUTED_LINE: Record<PendingPolicyOperation, string> = {
+  create: APPLIED_ON_EXECUTION_LINE,
+  update: 'The new rules apply now. It can take a moment to show here.',
+  remove: 'The rules are removed. Remove the guard to finish. It can take a moment to show here.',
+}
+
+export const GUARD_REMOVED_LINE = 'The guard is removed. It can take a moment to show here.'
 
 export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
   ...PENDING_OUTCOME_TITLE,
@@ -169,6 +179,8 @@ export const APPLY_CONNECT_HELPER = 'Connect a signer wallet to apply the allowl
 export const APPLY_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can apply this allowlist.'
 
 export const DISCARD_LABEL = 'Discard'
+
+export const DISCARD_ERROR = "Couldn't discard the request. Try again."
 
 export const EXPIRED_HELPER: Record<ApplyOperation, string> = {
   create: 'To use an allowlist, set it up again.',

@@ -342,7 +342,7 @@ describe('AllowlistDrawer', () => {
     ).toBeInTheDocument()
   })
 
-  it('says an executed transaction applies after the delay and offers no action', () => {
+  it('says an executed transaction applies after the delay, shows it as processing and offers no action', () => {
     render(
       <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="executed" />,
     )
@@ -351,8 +351,16 @@ describe('AllowlistDrawer', () => {
     expect(
       screen.getByText('After 3 minutes, a second transaction needs to be executed to activate the allowlist.'),
     ).toBeInTheDocument()
-    expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-processing')).toHaveTextContent('Processing')
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
+  })
+
+  it("should, when a guard removal waits for signatures, say the Safe account can't send anything until it executes", () => {
+    setup(mockPendingAllowlist({ operation: 'remove', step: 'remove-guard', data: { entries: [] } }))
+
+    expect(screen.getByText("This Safe account can't send anything until the guard is removed.")).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-guard-removal-pending')).toHaveTextContent('Guard removal pending · 1/2')
+    expect(screen.getByText('Pending signatures')).toBeInTheDocument()
   })
 
   it('reports a failed transaction in red and marks the policy as failed', () => {
@@ -441,7 +449,7 @@ describe('AllowlistDrawer', () => {
       expect(screen.getByText('Oct 27, 2026 · 11:59 UTC')).toBeInTheDocument()
       expect(screen.getByText('Can be applied from')).toBeInTheDocument()
       expect(screen.getByText('Apply by')).toBeInTheDocument()
-      expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+      expect(screen.getByTestId('policy-status-edit-in-delay')).toHaveTextContent('Edit in delay')
       expect(screen.getByRole('button', { name: 'Apply in 23 hours 59 minutes' })).toBeDisabled()
       expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
     })
@@ -529,7 +537,7 @@ describe('AllowlistDrawer', () => {
       expect(screen.getByText('Only signers of this Safe account can apply this allowlist.')).toBeInTheDocument()
     })
 
-    it('reports an expired request in red with an Expired chip, and offers to discard it', async () => {
+    it('reports an expired request in red with an Edit expired chip, and offers to discard it', async () => {
       const onDiscard = jest.fn()
       const { user } = renderWithUserEvent(
         <AllowlistDrawer
@@ -547,8 +555,8 @@ describe('AllowlistDrawer', () => {
         ),
       ).toBeInTheDocument()
       expect(screen.getByText('Request')).toBeInTheDocument()
-      expect(screen.getAllByText('Expired')).toHaveLength(2)
-      expect(screen.getByTestId('policy-status-expired')).toHaveTextContent('Expired')
+      expect(screen.getByText('Expired')).toBeInTheDocument()
+      expect(screen.getByTestId('policy-status-edit-expired')).toHaveTextContent('Edit expired')
       expect(screen.getByText('To make these changes, edit the allowlist again.')).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: /Apply|Review transaction/ })).not.toBeInTheDocument()
 
@@ -602,7 +610,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled()
   })
 
-  it('should say the allowlist is removed, show it as blocking and offer to remove the guard, when an applied removal waits for it', async () => {
+  it('should say the allowlist is removed, show the guard removal as pending and offer to remove the guard, when an applied removal waits for it', async () => {
     const onRemoveGuard = jest.fn()
     const { user } = renderWithUserEvent(
       <AllowlistDrawer
@@ -617,13 +625,26 @@ describe('AllowlistDrawer', () => {
     expect(
       screen.getByText("Remove the guard to finish. Until then, this Safe account can't send anything."),
     ).toBeInTheDocument()
-    expect(screen.getByTestId('policy-status-blocking')).toHaveTextContent('Blocking')
+    expect(screen.getByTestId('policy-status-guard-removal-pending')).toHaveTextContent('Guard removal pending')
     expect(screen.queryByText('Who can receive funds')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Remove guard' }))
 
     expect(onRemoveGuard).toHaveBeenCalledTimes(1)
+  })
+
+  it("should, when an applied removal waits for the guard to come off, count none of the Safe's signatures in the status", () => {
+    render(
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockAllowlistAwaitingGuardRemoval()}
+        viewer={MOCK_VIEWERS.signer}
+        signatures={{ threshold: 2, owners: 3 }}
+      />,
+    )
+
+    expect(screen.getByTestId('policy-status-guard-removal-pending')).toHaveTextContent('Guard removal pending · 0/2')
   })
 
   it('should disable Remove guard and say why, when the wallet is not a signer', () => {

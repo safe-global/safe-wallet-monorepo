@@ -1,10 +1,10 @@
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import type { PolicyStatus } from '../types'
+import type { AllowlistStatusBadge } from '../allowlistStatus'
 
-const BADGE_BY_STATUS: Record<
-  PolicyStatus,
-  { label: string; variant: 'success' | 'warning' | 'secondary' | 'destructive' }
-> = {
+export type PolicyStatusVariant = 'success' | 'warning' | 'info' | 'secondary' | 'destructive'
+
+const BADGE_BY_STATUS: Record<PolicyStatus, { label: string; variant: PolicyStatusVariant }> = {
   active: { label: 'Active', variant: 'success' },
   pending: { label: 'Pending', variant: 'warning' },
   activating: { label: 'Activating', variant: 'warning' },
@@ -20,12 +20,15 @@ const BADGE_BY_STATUS: Record<
   blocking: { label: 'Blocking', variant: 'destructive' },
 }
 
+export type PolicyStatusChipProps = { status: PolicyStatus } | { badge: AllowlistStatusBadge }
+
 /** Status of a policy, matching the 2FA status badges on the Team table. */
-const PolicyStatusChip = ({ status }: { status: PolicyStatus }) => {
-  const { label, variant } = BADGE_BY_STATUS[status]
+const PolicyStatusChip = (props: PolicyStatusChipProps) => {
+  const { label, variant } = 'badge' in props ? props.badge : BADGE_BY_STATUS[props.status]
+  const testId = 'badge' in props ? props.badge.state : props.status
 
   return (
-    <Badge variant={variant} size="status" shape="status" data-testid={`policy-status-${status}`}>
+    <Badge variant={variant} size="status" shape="status" data-testid={`policy-status-${testId}`}>
       <BadgeDot />
       {label}
     </Badge>

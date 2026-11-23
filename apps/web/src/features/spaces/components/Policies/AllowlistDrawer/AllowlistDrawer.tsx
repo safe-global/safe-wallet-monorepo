@@ -12,12 +12,16 @@ import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Po
 import { getPolicyTokens } from '../utils/policyTokens'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
-import {
-  getPolicyStatus,
-  type FailedAllowlistPolicy,
-  type PolicyStatus,
-  type QueuedAllowlistPolicy,
+import type {
+  FailedAllowlistPolicy,
+  QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
+import {
+  ALLOWLIST_STATUS,
+  formatAllowlistStatus,
+  type AllowlistState,
+  type AllowlistStatusBadge,
+} from '@safe-global/views/features/spaces/components/Policies/allowlistStatus'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
   ACTIVATED_BANNER_TITLE,
@@ -32,6 +36,7 @@ import { formatPolicyChangeDelay } from '@safe-global/views/features/spaces/comp
 import PolicyDrawerHeader from '../components/PolicyDrawerHeader/PolicyDrawerHeader'
 import PendingSignatures from '../SpendingLimitDrawer/components/PendingSignatures/PendingSignatures'
 import PolicyOverview from '../SpendingLimitDrawer/components/PolicyOverview/PolicyOverview'
+import { getAllowlistStatus } from '../utils/allowlistStatus'
 import {
   inferAllowlistOutcome,
   resolveAllowlistDrawerState,
@@ -99,14 +104,20 @@ const APPLY_STAGE: Partial<Record<AllowlistDrawerState['kind'], ApplyStage>> = {
   'expired-request': 'expired',
 }
 
-/** Executed reads Pending while it waits out the delay; replaced and deleted can never execute, so they read Failed. */
-const OUTCOME_STATUS: Record<AllowlistTxOutcome, PolicyStatus | null> = {
-  executed: 'pending',
+/** Executed reads Processing until CGW serves it; replaced and deleted can never execute, so they read Failed. */
+const OUTCOME_STATE: Record<AllowlistTxOutcome, AllowlistState | null> = {
+  executed: 'processing',
   failed: 'failed',
   replaced: 'failed',
   deleted: 'failed',
   expired: null,
 }
+
+const toBadge = (state: AllowlistState): AllowlistStatusBadge => ({
+  state,
+  label: formatAllowlistStatus(state),
+  variant: ALLOWLIST_STATUS[state].variant,
+})
 
 const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const { open, onClose, policy, viewer, safe, overview, names, onConnectWallet } = props
@@ -120,11 +131,10 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const outcome = isPendingDrawer(props) ? (props.outcome ?? inferAllowlistOutcome(props.policy, now)) : undefined
   const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome, now, changeDelay)
   const Icon = getPolicyIcon(policy.type)
-  const status = outcome
-    ? OUTCOME_STATUS[outcome]
-    : state.kind === 'expired-request'
-      ? 'expired'
-      : getPolicyStatus(policy)
+  const outcomeState = outcome ? OUTCOME_STATE[outcome] : undefined
+  const threshold = isPendingDrawer(props) ? undefined : props.signatures?.threshold
+  const status =
+    outcomeState === undefined ? getAllowlistStatus(policy, now, threshold) : outcomeState && toBadge(outcomeState)
   const scheduledChange = policy.status === 'active' ? policy.scheduledChange : undefined
   const applyStage = scheduledChange ? APPLY_STAGE[state.kind] : undefined
   const isRemoved = 'operation' in state && state.operation === 'remove'
@@ -178,7 +188,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
             />
           )}
           {state.kind === 'closed' &&
-            (status === 'failed' ? (
+            (outcomeState === 'failed' ? (
               <FailedBanner title={state.bannerTitle} line2={state.bannerLine2} />
             ) : (
               <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />

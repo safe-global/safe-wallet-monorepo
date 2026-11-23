@@ -128,6 +128,8 @@ export type AllowlistScheduledChange = {
   expiresAt?: number
   /** Unix SECONDS the wallet first stored the change (CGW `createdAt`); unset for a root requested elsewhere. */
   requestedAt?: number
+  /** The configuration root the change commits to, which a discard deletes from CGW. */
+  root?: string
 }
 
 type PolicyBase = {
@@ -172,6 +174,8 @@ type PendingPolicyBase = PolicyBase & {
   proposedAt: number
 }
 
+export type AllowlistTransactionStep = 'request' | 'apply' | 'remove-guard'
+
 /** A proposer grant is granted off chain and takes effect at once, so it is never pending. */
 export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
@@ -185,6 +189,10 @@ export type PendingAllowlistPolicy = Omit<PendingPolicyBase, 'status'> & {
   expiresAt?: number
   /** A first setup (`configureImmediately`): its rules apply as it executes, without the guard's delay. */
   appliesOnExecution?: boolean
+  /** What the queued transaction does to a live allowlist: request a change, apply it, or take the guard off. */
+  step?: AllowlistTransactionStep
+  /** The configuration root a request or an apply commits to. */
+  root?: string
 }
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy | PendingAllowlistPolicy
 

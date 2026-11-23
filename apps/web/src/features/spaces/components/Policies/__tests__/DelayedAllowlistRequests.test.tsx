@@ -1,6 +1,9 @@
 import { faker } from '@faker-js/faker'
 import { TxModalProvider } from '@/components/tx-flow'
 import useWallet from '@/hooks/wallets/useWallet'
+import { http, HttpResponse } from 'msw'
+import { GATEWAY_URL } from '@/config/gateway'
+import { server } from '@/tests/server'
 import { fakerChecksummedAddress, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { mockErc20TransferDto } from '../mocks/activePolicies'
 import {
@@ -119,7 +122,7 @@ describe('Policies page with delayed allowlist requests', () => {
     expect(within(drawer).queryByRole('button', { name: /Apply|Review transaction/ })).not.toBeInTheDocument()
   })
 
-  it('shows an apply in signing as a pending row whose panel counts the signatures', async () => {
+  it('shows an apply in signing as apply pending with its signatures, and its panel counts them', async () => {
     serveAllowlistWorkspace(workspace, {
       pending: [
         delayedGuardRequest(workspace, {
@@ -139,14 +142,14 @@ describe('Policies page with delayed allowlist requests', () => {
     })
     const view = renderPage(workspace)
 
-    expect(await screen.findByTestId('policy-cell-status')).toHaveTextContent('Pending')
+    expect(await screen.findByTestId('policy-cell-status')).toHaveTextContent('Edit apply pending · 1/2')
     const drawer = await openOnlyRow(view)
 
     expect(within(drawer).getByText('Pending signatures')).toBeInTheDocument()
     expect(within(drawer).getByText('1 of 2 signatures')).toBeInTheDocument()
   })
 
-  it("should keep the Safe's allowlist active and list the request as its own pending row, when the Safe already has an allowlist", async () => {
+  it("should show the request on the Safe's one allowlist row as an edit in delay, when the Safe already has an allowlist", async () => {
     serveAllowlistWorkspace(workspace, {
       active: [liveAllowlistDto(workspace, fakerChecksummedAddress())],
       pending: [
@@ -155,16 +158,14 @@ describe('Policies page with delayed allowlist requests', () => {
     })
     const view = renderPage(workspace)
 
-    const drawer = await openRowWithStatus(view, 'Pending')
+    const drawer = await openOnlyRow(view)
 
-    expect(screen.getAllByTestId('policy-cell-status').map((cell) => cell.textContent)).toEqual(
-      expect.arrayContaining(['Active', 'Pending']),
-    )
+    expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Edit in delay')
     expect(within(drawer).getByText(/^Your changes can be applied in (9|10) minutes$/)).toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: /^Apply in (9|10) minutes$/ })).toBeDisabled()
   })
 
-  it('should strike through the live recipients on the pending row, when the request removes the allowlist', async () => {
+  it("should strike through the live recipients on the allowlist's row, when the request removes the allowlist", async () => {
     const recipient = fakerChecksummedAddress()
     serveAllowlistWorkspace(workspace, {
       active: [liveAllowlistDto(workspace, recipient)],
@@ -186,12 +187,46 @@ describe('Policies page with delayed allowlist requests', () => {
     })
     const view = renderPage(workspace)
 
-    const drawer = await openRowWithStatus(view, 'Pending')
+    const drawer = await openRowWithStatus(view, 'Removal in delay')
     await view.user.click(within(drawer).getByRole('button', { name: 'Show recipient details' }))
     const [listed, ...others] = within(drawer).getAllByTestId('allowlist-recipient')
 
     expect(others).toHaveLength(0)
     expect(listed).toHaveTextContent(recipient.slice(0, 6))
     expect(within(listed).getByText('Removed')).toBeInTheDocument()
+  })
+
+  it('should, when an expired edit is discarded, delete its stored request and show the allowlist as active again', async () => {
+    const expired = delayedGuardRequest(workspace, {
+      status: 'expired',
+      readyAt: nowSeconds() - 8 * DAY,
+      expiresAt: nowSeconds() - DAY,
+    })
+    serveAllowlistWorkspace(workspace, {
+      active: [liveAllowlistDto(workspace, fakerChecksummedAddress())],
+      pending: [expired],
+    })
+    const deletedRoots: string[] = []
+    server.use(
+      http.delete(
+        `${GATEWAY_URL}/v1/spaces/:spaceId/chains/:chainId/safes/:safeAddress/policies/requests/:root`,
+        ({ params }) => {
+          deletedRoots.push(String(params.root))
+          server.use(
+            http.get(`${GATEWAY_URL}/v1/spaces/:spaceId/policies/pending`, () =>
+              HttpResponse.json([{ ...expired, configurations: null }]),
+            ),
+          )
+          return new HttpResponse(null, { status: 204 })
+        },
+      ),
+    )
+    const view = renderPage(workspace)
+
+    const drawer = await openRowWithStatus(view, 'Edit expired')
+    await view.user.click(within(drawer).getByRole('button', { name: 'Discard' }))
+
+    await waitFor(() => expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Active'))
+    expect(deletedRoots).toEqual([expired.root])
   })
 })

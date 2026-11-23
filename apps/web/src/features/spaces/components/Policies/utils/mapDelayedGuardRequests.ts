@@ -12,7 +12,8 @@ import {
   type PolicyTokenInfo,
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import { isAllowlistRemoval } from '@/features/policy-guard/public/services/guardExit'
+import { isAllowlistRemoval, isGuardRemovalCleanup } from '@/features/policy-guard/public/services/guardExit'
+import type { PolicyConfiguration } from '@/features/policy-guard/public/types'
 import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
 import {
@@ -94,6 +95,7 @@ export const mapDelayedGuardRequest = (
           appliesAt: dto.readyAt,
           expiresAt: dto.expiresAt ?? undefined,
           requestedAt: dto.createdAt ?? undefined,
+          root: dto.root,
         },
       }
 
@@ -111,6 +113,8 @@ export const mapDelayedGuardRequest = (
         confirmationsRequired: dto.transaction.confirmationsRequired,
         proposedAt: dto.transaction.proposedAt,
         expiresAt: dto.expiresAt ?? undefined,
+        step: dto.status === 'configuration-in-signing' ? 'request' : 'apply',
+        root: dto.root,
       }
 
     default:
@@ -129,28 +133,70 @@ export const getApplyAllowlistRequest = (dto: PendingDelayedGuardPoliciesDto): A
       }
     : undefined
 
+/** A removal's second root, which the guard removal applies in the same batch while its window is open. */
+export type GuardRemovalCleanup = {
+  configurations: PolicyConfiguration[]
+  /** Unix SECONDS. */
+  readyAt: number
+  /** Unix SECONDS. */
+  expiresAt: number
+}
+
+/** The cleanup's configurations while they can be applied; outside its window `applyConfiguration` would revert. */
+export const getApplicableCleanup = (
+  cleanup: GuardRemovalCleanup | undefined,
+  nowMs: number,
+): PolicyConfiguration[] | undefined =>
+  cleanup && cleanup.readyAt * 1_000 <= nowMs && nowMs < cleanup.expiresAt * 1_000 ? cleanup.configurations : undefined
+
 export type MergedDelayedGuardRequests = {
-  /** Rows of their own beside the live allowlist: a request waiting for its apply, or any queued transaction. */
-  added: Policy[]
+  /** The active rows, each live allowlist showing the change it waits for, then a first allowlist's rows. */
+  policies: Policy[]
   /** What the apply flow replays, keyed by the row id that offers it. */
   applyRequests: ReadonlyMap<string, ApplyAllowlistFlowData>
+  /** A removal's second root, keyed by the row id of the allowlist it removes. */
+  guardRemovalCleanups: ReadonlyMap<string, GuardRemovalCleanup>
 }
+
+// When a Safe has several requests, the one closest to running on chain is the change its row shows.
+const STATUS_RANK: Record<PendingDelayedGuardPoliciesDto['status'], number> = {
+  'application-ready': 5,
+  'application-in-signing': 4,
+  'pending-application': 3,
+  'configuration-in-signing': 2,
+  expired: 1,
+  draft: 0,
+}
+
+const toGuardRemovalCleanup = (dto: PendingDelayedGuardPoliciesDto): GuardRemovalCleanup | undefined =>
+  dto.status === 'pending-application' && dto.configurations && dto.readyAt !== null && dto.expiresAt !== null
+    ? { configurations: dto.configurations, readyAt: dto.readyAt, expiresAt: dto.expiresAt }
+    : undefined
 
 export const mergeDelayedGuardRequests = (
   dtos: readonly PendingDelayedGuardPoliciesDto[],
   active: readonly Policy[],
   resolveToken: (chainId: string, address: string) => PolicyTokenInfo,
 ): MergedDelayedGuardRequests => {
+  const changed = new Map<string, Policy>()
   const added: Policy[] = []
   const applyRequests = new Map<string, ApplyAllowlistFlowData>()
+  const guardRemovalCleanups = new Map<string, GuardRemovalCleanup>()
 
-  for (const dto of dtos) {
+  for (const dto of [...dtos].sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status])) {
     const live = active.find(
       (policy): policy is ActiveAllowlistPolicy =>
         isActiveAllowlistPolicy(policy) &&
         policy.safe.chainId === dto.safe.chainId &&
         sameAddress(policy.safe.address, dto.safe.address),
     )
+    if (dto.configurations && isGuardRemovalCleanup(dto.configurations, dto.safe.address)) {
+      const cleanup = toGuardRemovalCleanup(dto)
+      if (live && cleanup) guardRemovalCleanups.set(live.id, cleanup)
+      continue
+    }
+    if (live && changed.has(live.id)) continue
+
     const isRemoval = !!dto.configurations && isAllowlistRemoval(dto.configurations, dto.safe.address)
     const resolveRequestToken = (address: string) => resolveToken(dto.safe.chainId, address)
     const row = mapDelayedGuardRequest(dto, {
@@ -164,10 +210,19 @@ export const mergeDelayedGuardRequests = (
       // A removal's configurations name no recipients, so its row lists the live ones it takes away.
       data = isRemoval ? live.data : applyAllowlistRequest(live.data, dto.configurations, resolveRequestToken)
     }
-    added.push({ ...row, data })
+    let merged: Policy = { ...row, data }
+    if (live && row.status === 'active') merged = { ...live, data, scheduledChange: row.scheduledChange }
+    if (live && row.status === 'pending') merged = { ...row, id: live.id, data }
+
+    if (live) changed.set(live.id, merged)
+    else added.push(merged)
     const request = getApplyAllowlistRequest(dto)
-    if (request) applyRequests.set(row.id, request)
+    if (request) applyRequests.set(merged.id, request)
   }
 
-  return { added, applyRequests }
+  return {
+    policies: [...active.map((policy) => changed.get(policy.id) ?? policy), ...added],
+    applyRequests,
+    guardRemovalCleanups,
+  }
 }

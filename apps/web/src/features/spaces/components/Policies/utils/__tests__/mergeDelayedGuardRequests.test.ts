@@ -7,7 +7,7 @@ import type {
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 import { mockActiveAllowlist } from '../../../../public/utils/allowlistPolicies'
-import { mergeDelayedGuardRequests } from '../mapDelayedGuardRequests'
+import { getApplicableCleanup, mergeDelayedGuardRequests } from '../mapDelayedGuardRequests'
 
 const encodeErc20TransferPolicyData = (recipients: string[]): string =>
   AbiCoder.defaultAbiCoder().encode(
@@ -65,7 +65,7 @@ const queuedTransaction = () => ({
 })
 
 describe('mergeDelayedGuardRequests', () => {
-  it('should add a waiting request as its own row with the resulting entries and its changes, when the Safe has a live allowlist', () => {
+  it('should, when the Safe has a live allowlist, show a waiting request on its row with the resulting entries and its changes', () => {
     const live = mockActiveAllowlist()
     const recipient = faker.finance.ethereumAddress()
     const token = faker.finance.ethereumAddress()
@@ -81,10 +81,11 @@ describe('mergeDelayedGuardRequests', () => {
       ],
     })
 
-    const { added, applyRequests } = mergeDelayedGuardRequests([request], [live], resolveToken)
+    const { policies, applyRequests } = mergeDelayedGuardRequests([request], [live], resolveToken)
 
-    expect(added).toEqual([
+    expect(policies).toEqual([
       expect.objectContaining({
+        id: live.id,
         status: 'active',
         data: {
           entries: [
@@ -99,33 +100,42 @@ describe('mergeDelayedGuardRequests', () => {
             tokens: [...live.data.entries.map((entry) => entry.token), { ...resolveToken('', token), change: 'added' }],
           },
         },
-        scheduledChange: { operation: 'update', appliesAt: 1_800_000_000, expiresAt: 1_800_604_800 },
+        scheduledChange: {
+          operation: 'update',
+          appliesAt: 1_800_000_000,
+          expiresAt: 1_800_604_800,
+          root: request.root,
+        },
       }),
     ])
-    expect(added[0].id).not.toBe(live.id)
-    expect(applyRequests.get(added[0].id)).toMatchObject({ guardAddress: request.guard })
-    expect(applyRequests.has(live.id)).toBe(false)
+    expect(applyRequests.get(live.id)).toMatchObject({ guardAddress: request.guard })
   })
 
-  it("should list the live allowlist's entries on a waiting removal's own row, when the request binds its setGuard", () => {
+  it("should, when a waiting request binds the Safe's setGuard, show the removal on the live row with its entries", () => {
     const live = mockActiveAllowlist()
     const request = makeRequest(live.safe, {
       configurations: [removalConfiguration(live.safe.address, faker.finance.ethereumAddress())],
     })
 
-    const { added, applyRequests } = mergeDelayedGuardRequests([request], [live], resolveToken)
+    const { policies, applyRequests } = mergeDelayedGuardRequests([request], [live], resolveToken)
 
-    expect(added).toEqual([
+    expect(policies).toEqual([
       expect.objectContaining({
+        id: live.id,
         status: 'active',
         data: live.data,
-        scheduledChange: { operation: 'remove', appliesAt: 1_800_000_000, expiresAt: 1_800_604_800 },
+        scheduledChange: {
+          operation: 'remove',
+          appliesAt: 1_800_000_000,
+          expiresAt: 1_800_604_800,
+          root: request.root,
+        },
       }),
     ])
-    expect(applyRequests.get(added[0].id)).toMatchObject({ guardAddress: request.guard })
+    expect(applyRequests.get(live.id)).toMatchObject({ guardAddress: request.guard })
   })
 
-  it("should list the live allowlist's entries on a queued removal, when the removal is still in signing", () => {
+  it('should, when a removal is still in signing, show it as a queued request on the live row with the live entries', () => {
     const live = mockActiveAllowlist()
     const request = makeRequest(live.safe, {
       status: 'configuration-in-signing',
@@ -133,34 +143,82 @@ describe('mergeDelayedGuardRequests', () => {
       configurations: [removalConfiguration(live.safe.address, faker.finance.ethereumAddress())],
     })
 
-    const { added } = mergeDelayedGuardRequests([request], [live], resolveToken)
+    const { policies } = mergeDelayedGuardRequests([request], [live], resolveToken)
 
-    expect(added).toEqual([expect.objectContaining({ status: 'pending', operation: 'remove', data: live.data })])
+    expect(policies).toEqual([
+      expect.objectContaining({
+        id: live.id,
+        status: 'pending',
+        operation: 'remove',
+        step: 'request',
+        root: request.root,
+        data: live.data,
+      }),
+    ])
   })
 
-  it('should add a waiting request as an update, when it only unbinds the setGuard rule a removal left', () => {
+  it("should, when a removal's cleanup root waits, leave the live row as it is and keep the root for the guard removal", () => {
     const live = mockActiveAllowlist()
     const request = makeRequest(live.safe, {
       configurations: [removalConfiguration(live.safe.address, '0x0000000000000000000000000000000000000000')],
     })
 
-    const { added } = mergeDelayedGuardRequests([request], [live], resolveToken)
+    const { policies, applyRequests, guardRemovalCleanups } = mergeDelayedGuardRequests([request], [live], resolveToken)
 
-    expect(added).toEqual([
-      expect.objectContaining({ scheduledChange: expect.objectContaining({ operation: 'update' }) }),
-    ])
+    expect(policies).toEqual([live])
+    expect(applyRequests.size).toBe(0)
+    expect(guardRemovalCleanups.get(live.id)).toEqual({
+      configurations: request.configurations,
+      readyAt: 1_800_000_000,
+      expiresAt: 1_800_604_800,
+    })
   })
 
-  it('should add a first allowlist as its own row, when the Safe has none', () => {
+  it("should, when a removal's cleanup root has expired, keep neither a row nor the root", () => {
+    const live = mockActiveAllowlist()
+    const request = makeRequest(live.safe, {
+      status: 'expired',
+      configurations: [removalConfiguration(live.safe.address, '0x0000000000000000000000000000000000000000')],
+    })
+
+    const { policies, guardRemovalCleanups } = mergeDelayedGuardRequests([request], [live], resolveToken)
+
+    expect(policies).toEqual([live])
+    expect(guardRemovalCleanups.size).toBe(0)
+  })
+
+  it('should, when the Safe has no live allowlist, add a first allowlist as a row of its own', () => {
     const safe = { chainId: '11155111', address: faker.finance.ethereumAddress() }
+    const request = makeRequest(safe)
 
-    const { added, applyRequests } = mergeDelayedGuardRequests([makeRequest(safe)], [], resolveToken)
+    const { policies, applyRequests } = mergeDelayedGuardRequests([request], [], resolveToken)
 
-    expect(added).toEqual([
-      expect.objectContaining({ status: 'active', scheduledChange: expect.objectContaining({ operation: 'create' }) }),
+    expect(policies).toEqual([
+      expect.objectContaining({
+        id: `${safe.chainId}:${safe.address}:${request.root}`,
+        status: 'active',
+        scheduledChange: expect.objectContaining({ operation: 'create' }),
+      }),
     ])
-    expect(added[0].data).not.toHaveProperty('changes')
-    expect(applyRequests.get(added[0].id)).toBeDefined()
+    expect(policies[0].data).not.toHaveProperty('changes')
+    expect(applyRequests.get(policies[0].id)).toBeDefined()
+  })
+
+  it('should, when an expired request and a new one in signing wait on the same Safe, show the new one on the live row', () => {
+    const live = mockActiveAllowlist()
+    const expired = makeRequest(live.safe, { status: 'expired', readyAt: 1_700_000_000, expiresAt: 1_700_604_800 })
+    const requestedAgain = makeRequest(live.safe, {
+      status: 'configuration-in-signing',
+      readyAt: null,
+      expiresAt: null,
+      transaction: queuedTransaction(),
+    })
+
+    const { policies } = mergeDelayedGuardRequests([expired, requestedAgain], [live], resolveToken)
+
+    expect(policies).toEqual([
+      expect.objectContaining({ id: live.id, status: 'pending', step: 'request', root: requestedAgain.root }),
+    ])
   })
 
   it('should mark the recipients a queued update revokes as removed, when the Safe has a live allowlist', () => {
@@ -191,10 +249,11 @@ describe('mergeDelayedGuardRequests', () => {
       ],
     })
 
-    const { added } = mergeDelayedGuardRequests([request], [live], resolveToken)
+    const { policies } = mergeDelayedGuardRequests([request], [live], resolveToken)
 
-    expect(added).toEqual([
+    expect(policies).toEqual([
       expect.objectContaining({
+        id: live.id,
         status: 'pending',
         operation: 'update',
         data: {
@@ -212,22 +271,67 @@ describe('mergeDelayedGuardRequests', () => {
     ])
   })
 
-  it('should add a queued apply as a pending update row, when the Safe has a live allowlist', () => {
+  it('should, when the Safe has a live allowlist, show a queued apply as a pending update on its row', () => {
     const live = mockActiveAllowlist()
 
-    const { added } = mergeDelayedGuardRequests(
+    const { policies } = mergeDelayedGuardRequests(
       [makeRequest(live.safe, { status: 'application-in-signing', transaction: queuedTransaction() })],
       [live],
       resolveToken,
     )
 
-    expect(added).toEqual([expect.objectContaining({ status: 'pending', operation: 'update' })])
+    expect(policies).toEqual([
+      expect.objectContaining({ id: live.id, status: 'pending', operation: 'update', step: 'apply' }),
+    ])
   })
 
-  it('should add no rows, when no request is waiting', () => {
-    const { added, applyRequests } = mergeDelayedGuardRequests([], [mockActiveAllowlist()], resolveToken)
+  it('should, when no request is waiting, return the active rows as they are', () => {
+    const live = mockActiveAllowlist()
 
-    expect(added).toEqual([])
+    const { policies, applyRequests } = mergeDelayedGuardRequests([], [live], resolveToken)
+
+    expect(policies).toEqual([live])
     expect(applyRequests.size).toBe(0)
+  })
+})
+
+describe('getApplicableCleanup', () => {
+  it('should, when the cleanup root is in its apply window, return its configurations', () => {
+    const configurations = [
+      removalConfiguration(faker.finance.ethereumAddress(), '0x0000000000000000000000000000000000000000'),
+    ]
+
+    const applicable = getApplicableCleanup(
+      { configurations, readyAt: 1_800_000_000, expiresAt: 1_800_604_800 },
+      1_800_000_000 * 1_000,
+    )
+
+    expect(applicable).toBe(configurations)
+  })
+
+  it('should, when the cleanup root has expired, return nothing', () => {
+    const configurations = [
+      removalConfiguration(faker.finance.ethereumAddress(), '0x0000000000000000000000000000000000000000'),
+    ]
+
+    const applicable = getApplicableCleanup(
+      { configurations, readyAt: 1_800_000_000, expiresAt: 1_800_604_800 },
+      1_800_604_800 * 1_000,
+    )
+
+    expect(applicable).toBeUndefined()
+  })
+
+  it('should, when the delay of the cleanup root is not over, return nothing', () => {
+    const configurations = [
+      removalConfiguration(faker.finance.ethereumAddress(), '0x0000000000000000000000000000000000000000'),
+    ]
+
+    const applicable = getApplicableCleanup(
+      { configurations, readyAt: 1_800_000_000, expiresAt: 1_800_604_800 },
+      1_799_999_999 * 1_000,
+    )
+
+    expect(applicable).toBeUndefined()
   })
 })

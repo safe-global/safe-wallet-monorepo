@@ -1,5 +1,6 @@
 import { getPolicyLabel } from './policyLabel'
-import { getPolicyStatus, type Policy, type PolicySafe } from '../types'
+import { getPolicyStatus, isAllowlistPolicy, type Policy, type PolicySafe } from '../types'
+import type { AllowlistState } from '../allowlistStatus'
 
 export const POLICY_SORT_OPTIONS = [
   { value: 'rule', label: 'Rule A–Z' },
@@ -17,6 +18,7 @@ export const DEFAULT_POLICY_SORT: PolicySortOption = 'status'
 export type PolicySortContext = {
   getSafeName: (safe: PolicySafe) => string
   getChainName: (chainId: string) => string
+  getAllowlistState: (policy: Extract<Policy, { type: 'allowlist' }>) => AllowlistState
 }
 
 // Pending and blocking are first because they are where the user has something to do.
@@ -32,6 +34,31 @@ const STATUS_ORDER = {
   active: 3,
 } as const
 
+const ALLOWLIST_STATE_ORDER: Record<AllowlistState, number> = {
+  'setup-pending': 0,
+  'setup-ready-to-execute': 0,
+  'edit-pending': 0,
+  'edit-ready-to-execute': 0,
+  'edit-ready-to-apply': 0,
+  'edit-apply-pending': 0,
+  'edit-apply-ready-to-execute': 0,
+  'removal-pending': 0,
+  'removal-ready-to-execute': 0,
+  'removal-ready-to-apply': 0,
+  'removal-apply-pending': 0,
+  'removal-apply-ready-to-execute': 0,
+  'guard-removal-pending': 0,
+  'guard-removal-ready-to-execute': 0,
+  'edit-in-delay': 1,
+  'removal-in-delay': 1,
+  processing: 1,
+  'edit-expired': 2,
+  'removal-expired': 2,
+  unenforced: 2,
+  failed: 2,
+  active: 3,
+}
+
 // A named Safe is listed before an unnamed one, which only has its address to sort by.
 const compareSafes = (a: PolicySafe, b: PolicySafe, getSafeName: PolicySortContext['getSafeName']): number => {
   const nameA = getSafeName(a)
@@ -44,8 +71,11 @@ const compareSafes = (a: PolicySafe, b: PolicySafe, getSafeName: PolicySortConte
 
 const getComparator = (
   sort: PolicySortOption,
-  { getSafeName, getChainName }: PolicySortContext,
+  { getSafeName, getChainName, getAllowlistState }: PolicySortContext,
 ): ((a: Policy, b: Policy) => number) => {
+  const getStatusOrder = (policy: Policy): number =>
+    isAllowlistPolicy(policy) ? ALLOWLIST_STATE_ORDER[getAllowlistState(policy)] : STATUS_ORDER[getPolicyStatus(policy)]
+
   switch (sort) {
     case 'rule':
       return (a, b) => getPolicyLabel(a).localeCompare(getPolicyLabel(b))
@@ -54,7 +84,7 @@ const getComparator = (
     case 'network':
       return (a, b) => getChainName(a.safe.chainId).localeCompare(getChainName(b.safe.chainId))
     case 'status':
-      return (a, b) => STATUS_ORDER[getPolicyStatus(a)] - STATUS_ORDER[getPolicyStatus(b)]
+      return (a, b) => getStatusOrder(a) - getStatusOrder(b)
   }
 }
 

@@ -1,7 +1,10 @@
 import { act, renderHook } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import { AbiCoder } from 'ethers'
-import type { PendingImmediateGuardPoliciesDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type {
+  PendingGuardInstallationDto,
+  PendingImmediateGuardPoliciesDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -188,11 +191,11 @@ describe('useSpacePolicies', () => {
     expect(policy.data.spenders[0].allowances[0].token).toEqual(MOCK_TOKENS.usdc)
   })
 
-  it('should ask for the pending spending limits of the space', () => {
+  it('should ask for the pending policies of the space, with the queued guard changes', () => {
     renderHook(() => useSpacePolicies())
 
     expect(mockPendingQuery).toHaveBeenCalledWith(
-      { spaceId: SPACE_ID, types: PENDING_POLICY_TYPES },
+      { spaceId: SPACE_ID, types: PENDING_POLICY_TYPES, includeGuardInstallation: true },
       { skip: false, ...SPACE_REFRESH_OPTIONS, pollingInterval: 0, skipPollingIfUnfocused: true },
     )
   })
@@ -283,10 +286,24 @@ describe('useSpacePolicies', () => {
     renderHook(() => useSpacePolicies())
 
     expect(mockUseActivatingPolicies).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
-      refetchActive: idle.refetch,
+      refetch: expect.any(Function),
       resetKey: SPACE_ID,
       enabled: false,
     })
+  })
+
+  it('should, while rows are held, refetch both the active and the pending policies', () => {
+    const refetchActive = jest.fn()
+    const refetchPending = jest.fn()
+    mockPoliciesQuery.mockReturnValue({ ...idle, refetch: refetchActive })
+    mockPendingQuery.mockReturnValue({ ...idle, refetch: refetchPending })
+    renderHook(() => useSpacePolicies())
+    const [, , { refetch }] = mockUseActivatingPolicies.mock.lastCall
+
+    refetch()
+
+    expect(refetchActive).toHaveBeenCalledTimes(1)
+    expect(refetchPending).toHaveBeenCalledTimes(1)
   })
 
   it('should, when a Safe transaction is proposed, refetch the pending rows', () => {
@@ -411,6 +428,55 @@ describe('useSpacePolicies', () => {
 
       renderHook(() => useSpacePolicies())
 
+      expect(mockPendingQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+      )
+    })
+
+    it("should, while an executed allowlist change is processed, show its held row in place of the allowlist's row", () => {
+      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockErc20TransferDto({ safe: MOCK_SAFES.grants })] })
+      const { result: before } = renderHook(() => useSpacePolicies())
+      const [live] = before.current.policies
+      const held = { ...live, status: 'activating' }
+      mockUseActivatingPolicies.mockReturnValue([held])
+
+      const { result } = renderHook(() => useSpacePolicies())
+
+      expect(result.current.policies).toEqual([held])
+    })
+
+    it("should, when a queued transaction takes the guard off both slots, show it on the allowlist's row", () => {
+      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockErc20TransferDto({ safe: MOCK_SAFES.grants })] })
+      const guardRemoval: PendingGuardInstallationDto & { kind: 'guard-installation' } = {
+        kind: 'guard-installation',
+        status: 'ready',
+        safe: MOCK_SAFES.grants,
+        changes: [
+          { kind: 'set-guard', from: faker.finance.ethereumAddress(), to: null },
+          { kind: 'set-module-guard', from: faker.finance.ethereumAddress(), to: null },
+        ],
+        transaction: {
+          safeTxHash: faker.string.hexadecimal({ length: 64 }),
+          nonce: 4,
+          confirmations: 2,
+          confirmationsRequired: 2,
+          proposedAt: 1_800_000_000,
+          proposer: null,
+        },
+      }
+      mockPendingQuery.mockReturnValue({ ...idle, currentData: [guardRemoval] })
+
+      const { result } = renderHook(() => useSpacePolicies())
+
+      expect(result.current.policies).toEqual([
+        expect.objectContaining({
+          type: 'allowlist',
+          status: 'pending',
+          step: 'remove-guard',
+          safeTxHash: guardRemoval.transaction.safeTxHash,
+        }),
+      ])
       expect(mockPendingQuery).toHaveBeenLastCalledWith(
         expect.anything(),
         expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),

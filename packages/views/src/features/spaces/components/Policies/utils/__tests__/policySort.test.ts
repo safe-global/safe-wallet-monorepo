@@ -12,16 +12,21 @@ import {
   mockActiveAllowlist,
   mockAllowlistAwaitingGuardRemoval,
   mockAllowlistChangePending,
+  mockExpiredRequestAllowlist,
   mockFailedAllowlist,
+  mockPendingAllowlist,
+  mockReadyToApplyAllowlist,
 } from '@/features/spaces/public/utils/allowlistPolicies'
 import { sortPolicies, type PolicySortContext } from '../policySort'
-import { getPolicyStatus } from '../../types'
+import { getPolicyStatus, type PendingAllowlistPolicy } from '../../types'
+import type { AllowlistState } from '../../allowlistStatus'
 
 const CHAIN_NAMES: Record<string, string> = { '1': 'Ethereum', '137': 'Polygon', '11155111': 'Sepolia' }
 
 const context: PolicySortContext = {
   getSafeName: () => '',
   getChainName: (chainId) => CHAIN_NAMES[chainId] ?? chainId,
+  getAllowlistState: () => 'active',
 }
 
 describe('sortPolicies', () => {
@@ -130,24 +135,46 @@ describe('getPolicyStatus', () => {
 })
 
 describe('sortPolicies with allowlist statuses', () => {
-  it('should, when sorting by status, put a change pending with activating and a failed one with the unenforced', () => {
+  it('should, when sorting by status, put the allowlists that need the user first, then in delay, then expired, then active', () => {
     const active = mockActiveAllowlist()
-    const failed = mockFailedAllowlist()
-    const changePending = mockAllowlistChangePending()
-    const pending = mockPendingPolicy()
+    const expired = mockExpiredRequestAllowlist('update')
+    const inDelay = mockAllowlistChangePending()
+    const readyToApply = mockReadyToApplyAllowlist('update')
+    const states: Record<string, AllowlistState> = {
+      [active.id]: 'active',
+      [expired.id]: 'edit-expired',
+      [inDelay.id]: 'edit-in-delay',
+      [readyToApply.id]: 'edit-ready-to-apply',
+    }
 
-    const sorted = sortPolicies([active, failed, changePending, pending], 'status', context)
+    const sorted = sortPolicies([active, expired, inDelay, readyToApply], 'status', {
+      ...context,
+      getAllowlistState: (policy) => states[policy.id],
+    })
 
-    expect(sorted.map(getPolicyStatus)).toEqual(['pending', 'change-pending', 'failed', 'active'])
+    expect(sorted).toEqual([readyToApply, inDelay, expired, active])
   })
 
-  it('should, when sorting by status, put a blocking allowlist first with the pending rows', () => {
+  it('should, when sorting by status, put a guard removal with the pending rows and a processing allowlist with the activating ones', () => {
+    const awaitingGuardRemoval = mockAllowlistAwaitingGuardRemoval()
+    const processing: PendingAllowlistPolicy = { ...mockPendingAllowlist(), status: 'activating' }
+    const activeSpendingLimit = asActivePolicy(mockSpendingLimitPolicy())
+    const activating = mockActivatingPolicy({ id: 'activating' })
+    const pending = mockPendingPolicy()
+    const states: Record<string, AllowlistState> = {
+      [awaitingGuardRemoval.id]: 'guard-removal-pending',
+      [processing.id]: 'processing',
+    }
+
     const sorted = sortPolicies(
-      [mockActiveAllowlist(), mockAllowlistAwaitingGuardRemoval(), mockAllowlistChangePending()],
+      [activeSpendingLimit, processing, activating, awaitingGuardRemoval, pending],
       'status',
-      context,
+      {
+        ...context,
+        getAllowlistState: (policy) => states[policy.id],
+      },
     )
 
-    expect(sorted.map(getPolicyStatus)).toEqual(['blocking', 'change-pending', 'active'])
+    expect(sorted).toEqual([awaitingGuardRemoval, pending, processing, activating, activeSpendingLimit])
   })
 })

@@ -1,5 +1,5 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { POLLING_INTERVAL } from '@/config/constants'
@@ -8,6 +8,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type {
   ActivePolicyDto,
   PendingDelayedGuardPoliciesDto,
+  PendingGuardInstallationDto,
   PendingImmediateGuardPoliciesDto,
   PendingPolicyDto,
   SpacePoliciesGetActivePoliciesV1ApiArg,
@@ -25,13 +26,18 @@ import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { toPolicyToken } from '../utils/toPolicyToken'
-import { mergeDelayedGuardRequests } from '../utils/mapDelayedGuardRequests'
+import { mergeDelayedGuardRequests, type GuardRemovalCleanup } from '../utils/mapDelayedGuardRequests'
 import { mapImmediateGuardPolicies } from '../utils/mapImmediateGuardPolicies'
+import { mergeGuardRemovals } from '../utils/mapGuardRemovals'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
-import { useActivatingPolicies } from './useActivatingPolicies'
+import { useActivatingPolicies, type QueuedPolicy } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import { usePollAfterTx } from './usePollAfterTx'
-import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
+import {
+  isAllowlistPolicy,
+  type Policy,
+  type QueuedAllowlistPolicy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The types the table renders, plus `allow`, whose rule on `setGuard` marks an allowlist waiting for its guard to come off. */
 export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
@@ -64,6 +70,10 @@ const NO_POLICIES: ActivePolicyDto[] = []
 const NO_PENDING: PendingPolicyDto[] = []
 const NO_DELAYED: PendingDelayedGuardPoliciesDto[] = []
 const NO_IMMEDIATE: PendingImmediateGuardPoliciesDto[] = []
+const NO_GUARD_INSTALLATIONS: PendingGuardInstallationDto[] = []
+
+const isQueuedAllowlist = (policy: Policy): policy is QueuedAllowlistPolicy =>
+  isAllowlistPolicy(policy) && policy.status === 'pending'
 
 /** CGW sends no metadata with a native-transfer policy, so the coin comes from the chain config. */
 const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
@@ -77,7 +87,8 @@ const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
   }
 }
 
-const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[]): Policy[] => {
+/** The active rows the table shows: an allowlist only on a chain that supports it. */
+export const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[]): Policy[] => {
   const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
 
   return mapActivePolicies(dtos, toNativeTokenResolver(chains)).filter(
@@ -89,6 +100,8 @@ export type SpacePoliciesResult = {
   policies: Policy[]
   /** What the apply flow replays for an allowlist row whose guard delay has passed, keyed by row id. */
   allowlistApplyRequests: ReadonlyMap<string, ApplyAllowlistFlowData>
+  /** A removal's second root, which the guard removal applies with it, keyed by the allowlist's row id. */
+  guardRemovalCleanups: ReadonlyMap<string, GuardRemovalCleanup>
   isLoading: boolean
   isError: boolean
   refetch: () => void
@@ -114,7 +127,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
   const pending = useSpacePoliciesGetPendingPoliciesV1Query(
-    { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES },
+    { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES, includeGuardInstallation: true },
     {
       skip,
       ...SPACE_REFRESH_OPTIONS,
@@ -154,12 +167,22 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     [pending.currentData],
   )
 
+  const guardInstallationDtos = useMemo(
+    () =>
+      pending.currentData?.filter(
+        (dto): dto is PendingGuardInstallationDto & { kind: 'guard-installation' } => dto.kind === 'guard-installation',
+      ) ?? NO_GUARD_INSTALLATIONS,
+    [pending.currentData],
+  )
+
   useEffect(() => {
     setHasExecutable(
       pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired) ||
-        immediateDtos.some((dto) => dto.status === 'ready'),
+        immediateDtos.some((dto) => dto.status === 'ready') ||
+        delayedDtos.some((dto) => dto.status === 'application-ready') ||
+        guardInstallationDtos.some((dto) => dto.status === 'ready'),
     )
-  }, [pendingDtos, immediateDtos])
+  }, [pendingDtos, immediateDtos, delayedDtos, guardInstallationDtos])
 
   const activeRows = useMemo(() => toActiveRows(dtos, chains), [dtos, chains])
   const resolveGuardToken = useMemo(() => {
@@ -189,6 +212,10 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     () => mergeDelayedGuardRequests(delayedDtos, activeRows, resolveGuardToken),
     [delayedDtos, activeRows, resolveGuardToken],
   )
+  const allowlistRows = useMemo(
+    () => mergeGuardRemovals(guardInstallationDtos, delayed.policies),
+    [guardInstallationDtos, delayed.policies],
+  )
   const setupRows = useMemo(
     () =>
       immediateDtos.flatMap((dto) => {
@@ -198,16 +225,36 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     [immediateDtos, resolveGuardToken],
   )
   const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
-  const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
-    refetchActive: active.refetch,
+  const listed = useMemo(
+    () => [...allowlistRows, ...setupRows, ...pendingRows],
+    [allowlistRows, setupRows, pendingRows],
+  )
+  const queuedRows = useMemo<QueuedPolicy[]>(
+    () => [...pendingRows, ...listed.filter(isQueuedAllowlist)],
+    [pendingRows, listed],
+  )
+  const { refetch: refetchActive } = active
+  const { refetch: refetchPending } = pending
+  // An allowlist change shows in the pending requests as well as in the active rules.
+  const refetchHeld = useCallback(() => {
+    refetchActive()
+    refetchPending()
+  }, [refetchActive, refetchPending])
+  const activatingRows = useActivatingPolicies(queuedRows, listed, {
+    refetch: refetchHeld,
     resetKey: spaceId,
     enabled: !skip,
   })
 
-  const policies = useMemo(
-    () => [...activeRows, ...delayed.added, ...setupRows, ...pendingRows, ...activatingRows],
-    [activeRows, delayed, setupRows, pendingRows, activatingRows],
-  )
+  // An allowlist keeps one row: while its executed transaction is processed, the held row stands in for it.
+  const policies = useMemo(() => {
+    const held = new Map<string, Policy>(activatingRows.map((policy) => [policy.id, policy]))
+    const listedIds = new Set(listed.map((policy) => policy.id))
+    return [
+      ...listed.map((policy) => held.get(policy.id) ?? policy),
+      ...activatingRows.filter((policy) => !listedIds.has(policy.id)),
+    ]
+  }, [listed, activatingRows])
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
   const isLoadingActive = active.isFetching && !active.currentData
@@ -220,6 +267,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   return {
     policies,
     allowlistApplyRequests: delayed.applyRequests,
+    guardRemovalCleanups: delayed.guardRemovalCleanups,
     isLoading: isLoadingActive,
     isError: active.isError,
     refetch,

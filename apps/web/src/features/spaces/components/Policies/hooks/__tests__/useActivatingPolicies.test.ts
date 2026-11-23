@@ -5,8 +5,9 @@ import {
   mockPendingPolicy,
   mockSpendingLimitPolicy,
 } from '../../../../public/utils/policies'
+import { mockActiveAllowlist, mockPendingAllowlist } from '../../../../public/utils/allowlistPolicies'
 import type { PendingSpendingLimitPolicy, Policy } from '@safe-global/views/features/spaces/components/Policies/types'
-import { useActivatingPolicies } from '../useActivatingPolicies'
+import { useActivatingPolicies, type QueuedPolicy } from '../useActivatingPolicies'
 
 const mockGetTransaction = jest.fn()
 
@@ -19,7 +20,7 @@ type Props = { pending: PendingSpendingLimitPolicy[]; active: Policy[]; resetKey
 const NOT_INDEXED: Policy[] = [asActivePolicy(mockSpendingLimitPolicy({ data: { spenders: [] } }))]
 const INDEXED: Policy[] = [asActivePolicy(mockSpendingLimitPolicy())]
 
-const setup = (refetchActive = jest.fn()) => {
+const setup = (refetch = jest.fn()) => {
   const initialProps: Props = {
     pending: [mockPendingPolicy({ safe: MOCK_SAFES.treasury })],
     active: NOT_INDEXED,
@@ -28,10 +29,10 @@ const setup = (refetchActive = jest.fn()) => {
   }
   const hook = renderHook(
     ({ pending, active, resetKey, enabled }: Props) =>
-      useActivatingPolicies(pending, active, { refetchActive, resetKey, enabled }),
+      useActivatingPolicies(pending, active, { refetch, resetKey, enabled }),
     { initialProps },
   )
-  return { ...hook, refetchActive, initialProps }
+  return { ...hook, refetch, initialProps }
 }
 
 describe('useActivatingPolicies', () => {
@@ -165,13 +166,13 @@ describe('useActivatingPolicies', () => {
   })
 
   it('should, while a row is held, refetch active every 15 seconds', async () => {
-    const { result, rerender, initialProps, refetchActive } = setup()
+    const { result, rerender, initialProps, refetch } = setup()
     rerender({ ...initialProps, pending: [] })
     await waitFor(() => expect(result.current).toHaveLength(1))
 
     act(() => jest.advanceTimersByTime(30_000))
 
-    expect(refetchActive).toHaveBeenCalledTimes(2)
+    expect(refetch).toHaveBeenCalledTimes(2)
   })
 
   it('should, when one transaction changes two modules, hold both rows', async () => {
@@ -187,6 +188,37 @@ describe('useActivatingPolicies', () => {
     rerender({ ...initialProps, pending: [] })
 
     await waitFor(() => expect(result.current.map((row) => row.id)).toEqual([allowanceRow.id, otherModuleRow.id]))
+  })
+
+  it("should, when an allowlist's queued apply executes and its row stays listed, hold it until the applied root leaves the row", async () => {
+    const root = '0x1111111111111111111111111111111111111111111111111111111111111111'
+    const live = mockActiveAllowlist()
+    const queuedApply = mockPendingAllowlist({
+      id: live.id,
+      safe: live.safe,
+      operation: 'update',
+      step: 'apply',
+      root,
+    })
+    const stillReadyToApply: Policy = {
+      ...live,
+      scheduledChange: { operation: 'update', appliesAt: 1_800_000_000, root },
+    }
+    const initialProps: { pending: QueuedPolicy[]; listed: Policy[] } = {
+      pending: [queuedApply],
+      listed: [queuedApply],
+    }
+    const { result, rerender } = renderHook(
+      ({ pending, listed }: typeof initialProps) =>
+        useActivatingPolicies(pending, listed, { refetch: jest.fn(), resetKey: 'space-1', enabled: true }),
+      { initialProps },
+    )
+
+    rerender({ pending: [], listed: [stillReadyToApply] })
+    await waitFor(() => expect(result.current).toEqual([{ ...queuedApply, status: 'activating' }]))
+    rerender({ pending: [], listed: [live] })
+
+    expect(result.current).toEqual([])
   })
 
   it('should, when the space changes, clear the held rows', async () => {
@@ -212,13 +244,13 @@ describe('useActivatingPolicies', () => {
   })
 
   it('should, while disabled, not refetch active', async () => {
-    const { result, rerender, initialProps, refetchActive } = setup()
+    const { result, rerender, initialProps, refetch } = setup()
     rerender({ ...initialProps, pending: [] })
     await waitFor(() => expect(result.current).toHaveLength(1))
 
     rerender({ ...initialProps, pending: [], enabled: false })
     act(() => jest.advanceTimersByTime(30_000))
 
-    expect(refetchActive).not.toHaveBeenCalled()
+    expect(refetch).not.toHaveBeenCalled()
   })
 })

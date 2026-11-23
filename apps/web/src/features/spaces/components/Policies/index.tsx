@@ -25,6 +25,7 @@ import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/comp
 import AllowlistDetails from './AllowlistDetails'
 import PendingAllowlistDetails from './AllowlistDetails/PendingAllowlistDetails'
 import ApplyAllowlistFlow, { type ApplyAllowlistFlowData } from './ApplyAllowlistFlow'
+import type { GuardRemovalCleanup } from './utils/mapDelayedGuardRequests'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
@@ -54,6 +55,8 @@ interface PoliciesProps {
   policies?: Policy[]
   /** What the apply flow replays for an allowlist whose guard delay has passed, keyed by row id. */
   allowlistApplyRequests?: ReadonlyMap<string, ApplyAllowlistFlowData>
+  /** A removal's second root, which the guard removal applies with it, keyed by row id. */
+  guardRemovalCleanups?: ReadonlyMap<string, GuardRemovalCleanup>
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
@@ -85,6 +88,7 @@ const openRequestPolicyForm = () => {
 const Policies = ({
   policies = [],
   allowlistApplyRequests,
+  guardRemovalCleanups,
   isLoading = false,
   isError = false,
   onRetry,
@@ -289,6 +293,7 @@ const Policies = ({
           onClose={closeDetails}
           justActivated={newAllowlistIds.has(openedPolicy.id)}
           onApply={applyAllowlist(openedPolicy.id)}
+          guardRemovalCleanup={guardRemovalCleanups?.get(openedPolicy.id)}
         />
       )}
 

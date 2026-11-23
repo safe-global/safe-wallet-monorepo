@@ -16,12 +16,16 @@ import {
 import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
+  mockAllowlistAwaitingGuardRemoval,
   mockAllowlistChangePending,
+  mockAllowlistRemovalScheduled,
   mockCgwAllowlist,
   mockCgwUnenforcedAllowlist,
+  mockExpiredRequestAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
+  mockReadyToApplyAllowlist,
 } from '../../public/utils/allowlistPolicies'
 import PoliciesList from './PoliciesList'
 
@@ -91,9 +95,34 @@ export const AllowlistActivating: Story = {
   args: { policies: [mockActivatingAllowlist()] },
 }
 
-/** The live allowlist stays active; the executed change waits out the delay on a row of its own. */
+/** The executed edit waits out the delay on the allowlist's own row. */
 export const AllowlistChangePending: Story = {
-  args: { policies: [mockActiveAllowlist(), mockAllowlistChangePending()] },
+  args: { policies: [mockAllowlistChangePending()] },
+}
+
+/** One allowlist in each state that has a status, sorted with the ones that need the user first. */
+export const AllowlistStatuses: Story = {
+  args: {
+    policies: [
+      mockActiveAllowlist(),
+      mockPendingAllowlist({ id: 'setup-pending', appliesOnExecution: true }),
+      mockPendingAllowlist({ id: 'setup-ready', appliesOnExecution: true, confirmationsSubmitted: 2 }),
+      mockPendingAllowlist({ id: 'edit-pending', operation: 'update', step: 'request' }),
+      mockAllowlistChangePending(),
+      mockReadyToApplyAllowlist('update'),
+      mockPendingAllowlist({ id: 'edit-apply-pending', operation: 'update', step: 'apply' }),
+      mockExpiredRequestAllowlist('update'),
+      mockAllowlistRemovalScheduled(),
+      mockAllowlistAwaitingGuardRemoval(),
+      mockPendingAllowlist({
+        id: 'guard-removal-ready',
+        operation: 'remove',
+        step: 'remove-guard',
+        confirmationsSubmitted: 2,
+      }),
+      { ...mockPendingAllowlist({ id: 'processing', operation: 'update', step: 'apply' }), status: 'activating' },
+    ],
+  },
 }
 
 export const AllowlistFailed: Story = {
