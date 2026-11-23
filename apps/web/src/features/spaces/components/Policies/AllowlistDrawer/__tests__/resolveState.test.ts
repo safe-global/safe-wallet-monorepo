@@ -190,7 +190,7 @@ describe('resolveAllowlistDrawerState', () => {
     [
       'executed',
       'The transaction was executed.',
-      'After 3 minutes, a second transaction needs to be executed to activate the allowlist.',
+      'After 1 minute, a second transaction needs to be executed to activate the allowlist.',
     ],
     [
       'failed',

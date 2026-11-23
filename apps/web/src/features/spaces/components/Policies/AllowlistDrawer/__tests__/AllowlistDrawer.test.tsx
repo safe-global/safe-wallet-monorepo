@@ -349,7 +349,7 @@ describe('AllowlistDrawer', () => {
 
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
     expect(
-      screen.getByText('After 3 minutes, a second transaction needs to be executed to activate the allowlist.'),
+      screen.getByText('After 1 minute, a second transaction needs to be executed to activate the allowlist.'),
     ).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-processing')).toHaveTextContent('Processing')
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
@@ -409,7 +409,7 @@ describe('AllowlistDrawer', () => {
     )
 
     expect(
-      screen.getByText('After 3 minutes, a second transaction needs to be executed to remove the allowlist.'),
+      screen.getByText('After 1 minute, a second transaction needs to be executed to remove the allowlist.'),
     ).toBeInTheDocument()
     expect(screen.getAllByText('Removed')).toHaveLength(2)
   })
@@ -674,7 +674,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Your allowlist is now active')
     expect(
       screen.getByText(
-        'Treasury can only send the allowed tokens to the 3 allowed recipients. Further changes will take 3 minutes to apply.',
+        'Treasury can only send the allowed tokens to the 3 allowed recipients. Further changes will take 1 minute to apply.',
       ),
     ).toBeInTheDocument()
   })

@@ -24,7 +24,7 @@ describe('RecipientAllowlistIntroDialog', () => {
       screen.getByText("It's checked onchain, so a blocked action fails even if every signer approves it."),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('Every change needs a transaction and waits 3 minutes before it applies.'),
+      screen.getByText('Every change needs a transaction and waits 1 minute before it applies.'),
     ).toBeInTheDocument()
   })
 
