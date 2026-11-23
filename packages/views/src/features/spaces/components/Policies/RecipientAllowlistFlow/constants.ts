@@ -182,9 +182,6 @@ export const APPLY_REMOVAL_SUMMARY_DESCRIPTION =
   "The waiting period is over. Once this transaction is executed, the allowlist's rules are deleted and the guard can be removed. Until it is, this Safe account can't send anything."
 export const REMOVE_GUARD_REVIEW_STEP_TITLE = 'Remove guard'
 export const REMOVE_GUARD_SUMMARY_TITLE = 'Take the Safe policy guard off.'
-export const DEFAULT_FALLBACK_HANDLER_TITLE =
-  'The fallback handler the Safe account had before the setup could not be read.'
-export const DEFAULT_FALLBACK_HANDLER_DESCRIPTION = 'It is set to the default fallback handler.'
 export const REMOVE_GUARD_SUMMARY_DESCRIPTION =
   'Once this transaction is executed, transactions are no longer checked against a policy. You can set up a new allowlist at any time.'
 
