@@ -10,7 +10,7 @@ const meta = {
   component: UnavailableSafesAlertView,
   parameters: { layout: 'padded' },
   args: {
-    title: '2 Safes not loaded',
+    title: '2 Safe accounts not loaded',
     maxSafes: 100,
     isOverLimit: false,
     onRetry: fn(),
@@ -28,7 +28,7 @@ export const Default: Story = {}
 
 const openList: Story['play'] = async ({ canvasElement }) => {
   const canvas = within(canvasElement.ownerDocument.body)
-  await userEvent.click(canvas.getByRole('button', { name: '2 Safes not loaded' }))
+  await userEvent.click(canvas.getByRole('button', { name: '2 Safe accounts not loaded' }))
   await expect(await canvas.findByText('Treasury')).toBeInTheDocument()
 }
 

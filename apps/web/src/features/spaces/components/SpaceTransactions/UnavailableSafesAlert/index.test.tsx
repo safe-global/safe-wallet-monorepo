@@ -45,12 +45,14 @@ describe('UnavailableSafesAlert', () => {
   })
 
   const openList = (count = 2) =>
-    fireEvent.click(screen.getByRole('button', { name: `${count} ${count === 1 ? 'Safe' : 'Safes'} not loaded` }))
+    fireEvent.click(
+      screen.getByRole('button', { name: `${count} ${count === 1 ? 'Safe account' : 'Safe accounts'} not loaded` }),
+    )
 
   it('shows a chip that counts the unavailable Safe accounts, with the list closed', () => {
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
-    expect(screen.getByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safes not loaded')
+    expect(screen.getByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safe accounts not loaded')
     expect(screen.queryByText('Treasury')).not.toBeInTheDocument()
   })
 
@@ -72,7 +74,11 @@ describe('UnavailableSafesAlert', () => {
 
     openList()
 
-    expect(await screen.findByText("Transactions aren't shown in the table.")).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        "Their transactions aren't shown in the table. They may not be deployed on that network yet, or the network may be unreachable.",
+      ),
+    ).toBeInTheDocument()
     expect(screen.queryByText(/covers up to/)).not.toBeInTheDocument()
   })
 
@@ -87,7 +93,7 @@ describe('UnavailableSafesAlert', () => {
     expect(
       await screen.findByText(/covers up to 100 Safe accounts, so some of these may not be included/),
     ).toBeInTheDocument()
-    expect(screen.getByText(/Transactions aren't shown in the table\./)).toBeInTheDocument()
+    expect(screen.getByText(/Their transactions aren't shown in the table\./)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Reload all/ })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reload' }))
     expect(onRetry).toHaveBeenCalledTimes(1)
@@ -122,11 +128,11 @@ describe('UnavailableSafesAlert', () => {
 
 describe('getUnavailableTitle', () => {
   it('uses the singular for one Safe', () => {
-    expect(getUnavailableTitle(1)).toBe('1 Safe not loaded')
+    expect(getUnavailableTitle(1)).toBe('1 Safe account not loaded')
   })
 
   it('uses the plural for several Safes', () => {
-    expect(getUnavailableTitle(3)).toBe('3 Safes not loaded')
+    expect(getUnavailableTitle(3)).toBe('3 Safe accounts not loaded')
   })
 })
 
