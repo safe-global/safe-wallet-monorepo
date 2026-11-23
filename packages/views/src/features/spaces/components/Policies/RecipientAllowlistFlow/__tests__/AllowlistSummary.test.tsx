@@ -26,8 +26,21 @@ describe('AllowlistSummary', () => {
         'To create an allowlist policy on Payments on Sepolia, select at least one token and one recipient.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText('Anything you leave out will be blocked.')).toBeInTheDocument()
+    expect(screen.getByText('Transfers of these tokens to anyone else will be blocked.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'When this takes effect' })).toBeInTheDocument()
+  })
+
+  it('should show the summary in red, when the review asks for the error tone', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments on Sepolia"
+        tokenSymbols={['A']}
+        recipientNames={['Alice']}
+        tone="error"
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Payments on Sepolia will be able to send A only to Alice.')
   })
 
   it('lists up to three tokens by symbol and a single recipient by name', () => {
@@ -35,14 +48,14 @@ describe('AllowlistSummary', () => {
       <AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A', 'B', 'C']} recipientNames={['Alice']} />,
     )
 
-    expect(screen.getByText('Payments on Sepolia will only be able to send A, B and C to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send A, B and C only to Alice.')).toBeInTheDocument()
   })
 
   it('uses a single symbol as is and counts four tokens and several recipients', () => {
     const { rerender } = render(
       <AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A']} recipientNames={['Alice']} />,
     )
-    expect(screen.getByText('Payments on Sepolia will only be able to send A to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send A only to Alice.')).toBeInTheDocument()
 
     rerender(
       <AllowlistSummary
@@ -52,7 +65,7 @@ describe('AllowlistSummary', () => {
       />,
     )
     expect(
-      screen.getByText('Payments on Sepolia will only be able to send 4 tokens to 2 recipients.'),
+      screen.getByText('Payments on Sepolia will be able to send 4 tokens only to 2 recipients.'),
     ).toBeInTheDocument()
   })
 
@@ -65,13 +78,13 @@ describe('AllowlistSummary', () => {
       />,
     )
 
-    expect(screen.getByText('Payments on Sepolia will only be able to send 2 tokens to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send 2 tokens only to Alice.')).toBeInTheDocument()
   })
 
   it('joins two tokens with "and"', () => {
     render(<AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A', 'B']} recipientNames={['Alice']} />)
 
-    expect(screen.getByText('Payments on Sepolia will only be able to send A and B to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send A and B only to Alice.')).toBeInTheDocument()
   })
 
   it('says the changes apply on execution when the policy guard is not enabled yet', () => {
@@ -82,11 +95,49 @@ describe('AllowlistSummary', () => {
     )
   })
 
-  it('says the changes wait 24 hours and need activation when the policy guard is already enabled', () => {
-    render(<AllowlistSummary accountLabel="Payments" tokenSymbols={['A']} recipientNames={['Alice']} isGuardEnabled />)
+  it('should say the changes wait the installed guard delay and need activation, when the policy guard is already enabled', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments"
+        tokenSymbols={['A']}
+        recipientNames={['Alice']}
+        installedGuardDelay="10 minutes"
+      />,
+    )
 
     expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
-      'The Safe policy guard is already enabled, so these changes wait 24 hours after execution, then need an activation step before they apply.',
+      'The Safe policy guard is already enabled, so these changes wait 10 minutes after execution, then need an activation step before they apply.',
+    )
+  })
+
+  it('shows the given description instead of the default one', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments"
+        tokenSymbols={['A']}
+        recipientNames={['Alice']}
+        description="Check the details below before you sign."
+      />,
+    )
+
+    expect(screen.getByText('Check the details below before you sign.')).toBeInTheDocument()
+    expect(screen.queryByText('Transfers of these tokens to anyone else will be blocked.')).not.toBeInTheDocument()
+  })
+
+  it('should show the given title and details, when they are passed in', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments"
+        tokenSymbols={['A']}
+        recipientNames={['Alice']}
+        title="You're editing the allowlist on Payments."
+        details="Any signer can cancel the change before it applies."
+      />,
+    )
+
+    expect(screen.getByText("You're editing the allowlist on Payments.")).toBeInTheDocument()
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
+      'Any signer can cancel the change before it applies.',
     )
   })
 })

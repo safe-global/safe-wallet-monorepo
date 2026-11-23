@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowType } from '@/services/analytics/types'
 import { createDefaultAllowlistValues } from '../types'
+import ReviewRecipientAllowlist from '../ReviewStep'
 import RecipientAllowlistFlow from '..'
 
 jest.mock('@/components/tx-flow/TxFlow', () => ({
@@ -19,12 +20,15 @@ jest.mock('../CreateStep', () => ({
   default: ({
     dismissedCallouts,
     onDismissCallout,
+    onSpendingLimitImpact,
   }: {
     dismissedCallouts: { tokens: boolean; recipients: boolean }
     onDismissCallout: (section: 'tokens' | 'recipients') => void
+    onSpendingLimitImpact: (affectsSpendingLimits: boolean) => void
   }) => (
     <div data-testid="create-step" data-dismissed={JSON.stringify(dismissedCallouts)}>
       <button onClick={() => onDismissCallout('recipients')}>dismiss recipients</button>
+      <button onClick={() => onSpendingLimitImpact(true)}>affect spending limits</button>
     </div>
   ),
 }))
@@ -45,6 +49,30 @@ describe('RecipientAllowlistFlow', () => {
     render(<RecipientAllowlistFlow />)
 
     expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ eventCategory: TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST })
+  })
+
+  it('reviews through the allowlist review step', () => {
+    render(<RecipientAllowlistFlow />)
+
+    expect(mockTxFlow.mock.calls[0][0].ReviewTransactionComponent).toBe(ReviewRecipientAllowlist)
+  })
+
+  it('should pass TxFlow only the Create step, when no spending limit is affected', () => {
+    render(<RecipientAllowlistFlow />)
+
+    expect(mockTxFlow.mock.calls[0][0].children).toEqual([expect.objectContaining({ key: 'create' })])
+  })
+
+  it('should pass TxFlow the Existing policies step after Create, when a spending limit is affected', () => {
+    render(<RecipientAllowlistFlow />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'affect spending limits' }))
+
+    const { children } = mockTxFlow.mock.calls[mockTxFlow.mock.calls.length - 1][0]
+    expect(children).toEqual([
+      expect.objectContaining({ key: 'create' }),
+      expect.objectContaining({ key: 'existing-policies' }),
+    ])
   })
 
   it('seeds the flow with an empty allowlist form', () => {

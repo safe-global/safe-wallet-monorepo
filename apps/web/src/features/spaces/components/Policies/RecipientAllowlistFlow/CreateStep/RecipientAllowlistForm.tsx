@@ -1,9 +1,18 @@
 import { useMemo, type ReactElement, type ReactNode } from 'react'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import {
+  EDIT_SUMMARY_DESCRIPTION,
+  EDIT_SUMMARY_DESCRIPTION_ALLOW_FALLBACK,
+  EDIT_SUMMARY_DETAILS,
+  getEditSummaryTitle,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { POLICY_DEFAULT_FALLBACK } from '@/config/constants'
 import type { RecipientAllowlistFormValues } from '../types'
-import { getAllowedTokenAddresses, getSelectedRecipients } from '../utils/allowlistForm'
-import { findTokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
+import { getAllowedTokenAddresses } from '../utils/allowlistForm'
+import { toAllowlistRecipients, toAllowlistTokens } from '../utils/allowlistDisplay'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokensSection from './TokensSection'
 import RecipientsSection from './RecipientsSection'
@@ -17,8 +26,8 @@ export type RecipientAllowlistFormProps = {
   account?: { chainId: string; address: string; label: string }
   /** False when the picked Safe cannot take an allowlist: only `children` show. */
   showSections: boolean
-  /** The policy guard is already installed, so changes wait out the delay before they apply. */
-  isGuardEnabled?: boolean
+  /** The delay of the policy guard the Safe already has, which changes wait out before they apply. */
+  installedGuardDelay?: string
   dismissedCallouts: Record<CalloutSection, boolean>
   onDismissCallout: (section: CalloutSection) => void
   /** Between the summary and the sections: the account field and its banners. */
@@ -31,23 +40,23 @@ const RecipientAllowlistForm = ({
   heldTokens,
   account,
   showSections,
-  isGuardEnabled,
+  installedGuardDelay,
   dismissedCallouts,
   onDismissCallout,
   children,
 }: RecipientAllowlistFormProps): ReactElement => {
   const { addresses, options } = heldTokens
+  const chainId = account?.chainId
+  const resolveName = useSafeNameResolver()
+  const isEditMode = useIsEditMode()
 
   const tokenSymbols = useMemo(
-    () =>
-      getAllowedTokenAddresses(addresses, values).map(
-        (address) => findTokenOption(options, address)?.symbol || shortenAddress(address),
-      ),
+    () => toAllowlistTokens(getAllowedTokenAddresses(addresses, values), options).map(({ symbol }) => symbol),
     [addresses, options, values],
   )
   const recipientNames = useMemo(
-    () => getSelectedRecipients(values).map(({ name, address }) => name || shortenAddress(address)),
-    [values],
+    () => toAllowlistRecipients(values, (address) => resolveName(address, chainId)).map(spenderDisplayName),
+    [values, resolveName, chainId],
   )
 
   return (
@@ -57,7 +66,14 @@ const RecipientAllowlistForm = ({
           accountLabel={account?.label}
           tokenSymbols={tokenSymbols}
           recipientNames={recipientNames}
-          isGuardEnabled={isGuardEnabled}
+          installedGuardDelay={installedGuardDelay}
+          {...(isEditMode &&
+            account && {
+              title: getEditSummaryTitle(account.label),
+              description:
+                POLICY_DEFAULT_FALLBACK === 'deny' ? EDIT_SUMMARY_DESCRIPTION : EDIT_SUMMARY_DESCRIPTION_ALLOW_FALLBACK,
+              details: EDIT_SUMMARY_DETAILS,
+            })}
         />
       )}
 

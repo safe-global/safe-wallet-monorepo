@@ -8,13 +8,14 @@ import {
 import { getPolicyGuardAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import {
   mockErc20TransferDto,
+  mockGuardExitDto,
   mockNativeTransferDto,
   mockProposerDto,
   mockSpendingLimitDto,
   mockTreasuryAllowlistDtos,
 } from '../../mocks/activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../../../public/utils/policies'
-import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../mapActivePolicies'
+import { mapActivePolicies, type NativeTokenResolver } from '../mapActivePolicies'
 
 describe('mapActivePolicies', () => {
   it('should, when given a spending limit, keep the reset in minutes and compute the remaining amount', () => {
@@ -172,7 +173,7 @@ describe('mapActivePolicies', () => {
     }
 
     const usdtDto = (recipients: AllowlistRecipient[]) =>
-      mockErc20TransferDto({ data: { tokenAddress: MOCK_TOKENS.usdt.address, recipients } })
+      mockErc20TransferDto({ data: { tokenAddress: MOCK_TOKENS.usdt.address, tokenMetadata: null, recipients } })
 
     const toAllowlists = (dtos: ActivePolicyDto[], resolver: NativeTokenResolver = resolveNativeToken) =>
       mapActivePolicies(dtos, resolver).filter(isAllowlistPolicy)
@@ -243,16 +244,10 @@ describe('mapActivePolicies', () => {
       ])
     })
 
-    it('names an ERC-20 token from the resolver and keeps the address for one it does not know', () => {
-      const resolveErc20Token: Erc20TokenResolver = (_chainId, address) =>
-        address.toLowerCase() === MOCK_TOKENS.usdc.address.toLowerCase() ? MOCK_TOKENS.usdc : undefined
-
-      const [policy] = mapActivePolicies(mockTreasuryAllowlistDtos(), resolveNativeToken, resolveErc20Token).filter(
-        isAllowlistPolicy,
-      )
+    it('names an ERC-20 token from its metadata and keeps the address for one CGW could not resolve', () => {
+      const [policy] = toAllowlists([mockErc20TransferDto(), usdtDto([])])
 
       expect(policy.data.entries.map((entry) => entry.token)).toEqual([
-        ETH,
         MOCK_TOKENS.usdc,
         { address: MOCK_TOKENS.usdt.address, symbol: '0xdAC1...1ec7', decimals: 0, logoUri: null },
       ])
@@ -304,11 +299,11 @@ describe('mapActivePolicies', () => {
     })
 
     it('takes the guard address from the deployment when no slot holds the guard', () => {
-      const [policy] = toAllowlists([withGuards(mockErc20TransferDto(), {})])
+      const [policy] = toAllowlists([withGuards(mockErc20TransferDto({ safe: MOCK_SAFES.grants }), {})])
 
       expect(policy.enforcement).toEqual({
         via: 'guard',
-        guardAddress: getPolicyGuardAddress(MOCK_SAFES.treasury.chainId),
+        guardAddress: getPolicyGuardAddress(MOCK_SAFES.grants.chainId),
       })
     })
 
@@ -339,6 +334,33 @@ describe('mapActivePolicies', () => {
       ])
 
       expect(policy.enabled).toBe(false)
+    })
+
+    it('should keep a row waiting for the guard to come off, when an applied removal left only the setGuard rule', () => {
+      const [policy, ...rest] = toAllowlists([mockGuardExitDto()])
+
+      expect(rest).toEqual([])
+      expect(policy).toMatchObject({
+        safe: MOCK_SAFES.treasury,
+        enabled: true,
+        awaitingGuardRemoval: true,
+        data: { entries: [] },
+        enforcement: { via: 'guard', guardAddress: GUARD },
+      })
+    })
+
+    it('should leave no row, when the guard came off after the removal', () => {
+      expect(toAllowlists([withGuards(mockGuardExitDto(), {})])).toEqual([])
+    })
+
+    it('should leave no row, when an allow rule is on something other than the Safe setGuard', () => {
+      expect(toAllowlists([withAccess(mockGuardExitDto(), { selector: '0xe068df37' })])).toEqual([])
+    })
+
+    it('should not mark an allowlist as waiting for guard removal, when no setGuard rule is bound', () => {
+      const [policy] = toAllowlists([mockErc20TransferDto()])
+
+      expect(policy).not.toHaveProperty('awaitingGuardRemoval')
     })
 
     it('marks the whole row not covering spending limits when one of its policies lacks the module slot', () => {

@@ -71,6 +71,7 @@ export const mockErc20TransferDto = (overrides: Partial<ActivePolicyDto> = {}): 
   safe: MOCK_SAFES.treasury,
   data: {
     tokenAddress: MOCK_TOKENS.usdc.address,
+    tokenMetadata: mockUsdcMetadata(),
     recipients: [
       { account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' },
       { account: MOCK_ADDRESSES.bob, permission: 'ONCE' },
@@ -89,6 +90,20 @@ export const mockNativeTransferDto = (
     via: 'guard',
     guards: GUARD_SLOTS,
     access: { target: recipient, selector: '0x00000000', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
+/** The `setGuard` rule an applied removal leaves until the guard comes off. */
+export const mockGuardExitDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto => ({
+  type: 'allow',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: MOCK_SAFES.treasury.address, selector: '0xe19a9dd9', operation: 'CALL' },
   },
   enabled: true,
   safe: MOCK_SAFES.treasury,
@@ -117,6 +132,7 @@ export const mockTreasuryAllowlistDtos = (guards: GuardSlotsDto = GUARD_SLOTS): 
       },
       data: {
         tokenAddress: MOCK_TOKENS.usdt.address,
+        tokenMetadata: mockUsdtMetadata(),
         recipients: [{ account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' }],
       },
     }),
@@ -131,5 +147,15 @@ export const mockUsdcMetadata = (): Erc20TokenMetadataDto => ({
   decimals: MOCK_TOKENS.usdc.decimals,
   logoUri: MOCK_TOKENS.usdc.logoUri,
   name: 'USD Coin',
+  trusted: true,
+})
+
+export const mockUsdtMetadata = (): Erc20TokenMetadataDto => ({
+  type: 'ERC20',
+  address: MOCK_TOKENS.usdt.address,
+  symbol: MOCK_TOKENS.usdt.symbol,
+  decimals: MOCK_TOKENS.usdt.decimals,
+  logoUri: MOCK_TOKENS.usdt.logoUri,
+  name: 'Tether USD',
   trusted: true,
 })

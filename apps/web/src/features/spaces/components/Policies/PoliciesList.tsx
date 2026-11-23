@@ -22,6 +22,7 @@ import type { Policy, PolicyType } from '@safe-global/views/features/spaces/comp
 const POLICY_TYPE_FILTERS: { type: PolicyType; label: string }[] = [
   { type: 'spending-limit', label: 'Spending limits' },
   { type: 'proposer', label: 'Proposers' },
+  { type: 'allowlist', label: 'Allowlists' },
 ]
 
 export type PoliciesListProps = {

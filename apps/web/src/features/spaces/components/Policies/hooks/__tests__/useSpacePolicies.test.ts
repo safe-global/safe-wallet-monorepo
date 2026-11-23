@@ -1,4 +1,7 @@
-import { renderHook } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
+import { AbiCoder } from 'ethers'
+import type { PendingImmediateGuardPoliciesDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -22,18 +25,17 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockPoliciesQuery = jest.fn()
 const mockPendingQuery = jest.fn()
 const mockUseActivatingPolicies = jest.fn()
-const mockUseAllowlistTokenResolver = jest.fn()
 let mockIsAuthenticated = true
 
-const mainnet = chainBuilder()
+const sepolia = chainBuilder()
   .with({
-    chainId: MOCK_SAFES.treasury.chainId,
+    chainId: MOCK_SAFES.grants.chainId,
     features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST],
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'eth.png' },
   })
   .build()
 const polygonWithoutAllowlist = chainBuilder().with({ chainId: MOCK_SAFES.payroll.chainId, features: [] }).build()
-const mockChains = [mainnet, polygonWithoutAllowlist]
+const mockChains = [sepolia, polygonWithoutAllowlist]
 
 jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
@@ -61,9 +63,34 @@ jest.mock('../useActivatingPolicies', () => ({
   useActivatingPolicies: (...args: unknown[]) => mockUseActivatingPolicies(...args),
 }))
 
-jest.mock('../useAllowlistTokenResolver', () => ({
-  useAllowlistTokenResolver: (...args: unknown[]) => mockUseAllowlistTokenResolver(...args),
-}))
+const mockQueuedGuardSetup = (
+  status: PendingImmediateGuardPoliciesDto['status'],
+): PendingImmediateGuardPoliciesDto & { kind: 'immediate-guard-policies' } => ({
+  kind: 'immediate-guard-policies',
+  status,
+  safe: MOCK_SAFES.treasury,
+  guard: faker.finance.ethereumAddress(),
+  configurations: [
+    {
+      target: MOCK_TOKENS.usdc.address,
+      selector: '0xa9059cbb',
+      operation: 0,
+      policy: faker.finance.ethereumAddress(),
+      data: AbiCoder.defaultAbiCoder().encode(
+        ['tuple(address recipient, uint8 permission)[]'],
+        [[[faker.finance.ethereumAddress(), 2]]],
+      ),
+    },
+  ],
+  transaction: {
+    safeTxHash: faker.string.hexadecimal({ length: 64 }),
+    nonce: 0,
+    confirmations: status === 'ready' ? 2 : 1,
+    confirmationsRequired: 2,
+    proposedAt: 1_800_000_000,
+    proposer: null,
+  },
+})
 
 const idle = { currentData: undefined, isLoading: false, isFetching: false, isError: false, refetch: jest.fn() }
 
@@ -75,7 +102,6 @@ describe('useSpacePolicies', () => {
     mockPoliciesQuery.mockReturnValue(idle)
     mockPendingQuery.mockReturnValue(idle)
     mockUseActivatingPolicies.mockReturnValue([])
-    mockUseAllowlistTokenResolver.mockReturnValue(() => undefined)
   })
 
   it('should, when signed in with a space, ask for the types the table renders', () => {
@@ -83,7 +109,7 @@ describe('useSpacePolicies', () => {
 
     expect(mockPoliciesQuery).toHaveBeenCalledWith(
       { spaceId: SPACE_ID, types: TABLE_POLICY_TYPES },
-      { skip: false, ...SPACE_REFRESH_OPTIONS },
+      { skip: false, ...SPACE_REFRESH_OPTIONS, pollingInterval: 0, skipPollingIfUnfocused: true },
     )
   })
 
@@ -92,7 +118,12 @@ describe('useSpacePolicies', () => {
 
     renderHook(() => useSpacePolicies())
 
-    expect(mockPoliciesQuery).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
+    expect(mockPoliciesQuery).toHaveBeenCalledWith(expect.anything(), {
+      skip: true,
+      ...SPACE_REFRESH_OPTIONS,
+      pollingInterval: 0,
+      skipPollingIfUnfocused: true,
+    })
   })
 
   it('should, when there is no current space, skip the request', () => {
@@ -100,7 +131,12 @@ describe('useSpacePolicies', () => {
 
     renderHook(() => useSpacePolicies())
 
-    expect(mockPoliciesQuery).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
+    expect(mockPoliciesQuery).toHaveBeenCalledWith(expect.anything(), {
+      skip: true,
+      ...SPACE_REFRESH_OPTIONS,
+      pollingInterval: 0,
+      skipPollingIfUnfocused: true,
+    })
   })
 
   it('should, while the policies load, report loading with no rows', () => {
@@ -273,7 +309,6 @@ describe('useSpacePolicies', () => {
     expect(refetchPending).toHaveBeenCalled()
   })
 
-  // TxEvent.SUCCESS comes from the Safe-level history slice, which a Space route does not load.
   it('should, when a transaction is executed from the page, refetch the pending rows', () => {
     const refetchPending = jest.fn()
     mockPendingQuery.mockReturnValue({ ...idle, currentData: [], refetch: refetchPending })
@@ -290,18 +325,44 @@ describe('useSpacePolicies', () => {
     expect(refetchPending).toHaveBeenCalled()
   })
 
+  it('should, when a transaction is executed from the page, poll both queries until the indexer catches up', () => {
+    renderHook(() => useSpacePolicies())
+
+    act(() => {
+      txDispatch(TxEvent.PROCESSED, {
+        txId: 'multisig_0x1_0xabc',
+        nonce: 1,
+        chainId: '1',
+        safeAddress: '0x1',
+        txHash: '0xhash',
+      })
+    })
+
+    expect(mockPoliciesQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+    )
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+    )
+  })
+
   describe('allowlists', () => {
-    it('should ask for the erc20 and native transfer policies along with the other table types', () => {
+    it('should ask for the transfer policies and the allow rule that marks a removal, along with the other table types', () => {
       renderHook(() => useSpacePolicies())
 
       expect(mockPoliciesQuery).toHaveBeenCalledWith(
-        { spaceId: SPACE_ID, types: ['spending-limit', 'proposer', 'erc20-transfer', 'native-transfer'] },
-        { skip: false, ...SPACE_REFRESH_OPTIONS },
+        { spaceId: SPACE_ID, types: ['spending-limit', 'proposer', 'erc20-transfer', 'native-transfer', 'allow'] },
+        { skip: false, ...SPACE_REFRESH_OPTIONS, pollingInterval: 0, skipPollingIfUnfocused: true },
       )
     })
 
     it('should give the ETH entry the coin from the chain config', () => {
-      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockNativeTransferDto()] })
+      mockPoliciesQuery.mockReturnValue({
+        ...idle,
+        currentData: [mockNativeTransferDto(undefined, { safe: MOCK_SAFES.grants })],
+      })
 
       const { result } = renderHook(() => useSpacePolicies())
       const [policy] = result.current.policies.filter(isAllowlistPolicy)
@@ -314,27 +375,60 @@ describe('useSpacePolicies', () => {
       })
     })
 
-    it('should name the ERC-20 entries with the metadata the token resolver finds for the active policies', () => {
-      const dtos = [mockErc20TransferDto()]
-      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: dtos })
-      mockUseAllowlistTokenResolver.mockReturnValue(() => MOCK_TOKENS.usdc)
+    it('should name the ERC-20 entries with the token metadata of the active policies', () => {
+      mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockErc20TransferDto({ safe: MOCK_SAFES.grants })] })
 
       const { result } = renderHook(() => useSpacePolicies())
       const [policy] = result.current.policies.filter(isAllowlistPolicy)
 
-      expect(mockUseAllowlistTokenResolver).toHaveBeenCalledWith(dtos)
       expect(policy.data.entries[0].token).toEqual(MOCK_TOKENS.usdc)
+    })
+
+    it('should, while a guard setup is queued, return a pending allowlist row for the next owner to sign', () => {
+      const setup = mockQueuedGuardSetup('in-signing')
+      mockPendingQuery.mockReturnValue({ ...idle, currentData: [setup] })
+
+      const { result } = renderHook(() => useSpacePolicies())
+
+      expect(result.current.policies).toEqual([
+        expect.objectContaining({
+          type: 'allowlist',
+          status: 'pending',
+          operation: 'create',
+          safeTxHash: setup.transaction.safeTxHash,
+          confirmationsSubmitted: 1,
+          confirmationsRequired: 2,
+        }),
+      ])
+      expect(mockPendingQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ pollingInterval: 0 }),
+      )
+    })
+
+    it('should, while a queued guard setup has all its signatures, poll for it leaving the queue', () => {
+      mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockQueuedGuardSetup('ready')] })
+
+      renderHook(() => useSpacePolicies())
+
+      expect(mockPendingQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+      )
     })
 
     it('should drop allowlists on a chain without the allowlist feature', () => {
       mockPoliciesQuery.mockReturnValue({
         ...idle,
-        currentData: [mockErc20TransferDto(), mockErc20TransferDto({ safe: MOCK_SAFES.payroll })],
+        currentData: [
+          mockErc20TransferDto({ safe: MOCK_SAFES.grants }),
+          mockErc20TransferDto({ safe: MOCK_SAFES.payroll }),
+        ],
       })
 
       const { result } = renderHook(() => useSpacePolicies())
 
-      expect(result.current.policies.map((policy) => policy.safe)).toEqual([MOCK_SAFES.treasury])
+      expect(result.current.policies.map((policy) => policy.safe)).toEqual([MOCK_SAFES.grants])
     })
   })
 })

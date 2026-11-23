@@ -4,8 +4,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import {
   SUMMARY_DESCRIPTION,
   SUMMARY_DETAILS,
-  SUMMARY_DETAILS_GUARD_ENABLED,
   SUMMARY_DETAILS_LABEL,
+  getSummaryDetailsGuardEnabled,
   SUMMARY_NO_ACCOUNT_DESCRIPTION,
   SUMMARY_NO_ACCOUNT_TITLE,
 } from './constants'
@@ -15,7 +15,14 @@ type AllowlistSummaryProps = {
   accountLabel?: string
   tokenSymbols: string[]
   recipientNames: string[]
-  isGuardEnabled?: boolean
+  /** The delay of the policy guard the Safe already has; unset when it has none yet. */
+  installedGuardDelay?: string
+  title?: string
+  description?: string
+  /** Behind the info icon; defaults to when the setup takes effect. */
+  details?: string
+  /** Red on the review, where signing locks the Safe to what the allowlist allows */
+  tone?: 'info' | 'error'
 }
 
 const MAX_LISTED_TOKENS = 3
@@ -33,24 +40,30 @@ const AllowlistSummary = ({
   accountLabel,
   tokenSymbols,
   recipientNames,
-  isGuardEnabled = false,
+  installedGuardDelay,
+  title: titleOverride,
+  description = SUMMARY_DESCRIPTION,
+  details = installedGuardDelay ? getSummaryDetailsGuardEnabled(installedGuardDelay) : SUMMARY_DETAILS,
+  tone = 'info',
 }: AllowlistSummaryProps): ReactElement => {
   const isComplete = tokenSymbols.length > 0 && recipientNames.length > 0
 
   const title = !accountLabel
     ? SUMMARY_NO_ACCOUNT_TITLE
-    : isComplete
-      ? `${accountLabel} will only be able to send ${describeTokens(tokenSymbols)} to ${describeRecipients(recipientNames)}.`
-      : `To create an allowlist policy on ${accountLabel}, select at least one token and one recipient.`
+    : titleOverride
+      ? titleOverride
+      : isComplete
+        ? `${accountLabel} will be able to send ${describeTokens(tokenSymbols)} only to ${describeRecipients(recipientNames)}.`
+        : `To create an allowlist policy on ${accountLabel}, select at least one token and one recipient.`
 
   return (
     <StatusAlert
-      tone="info"
+      tone={tone}
       title={title}
       description={
         accountLabel ? (
           <>
-            {SUMMARY_DESCRIPTION}
+            {description}
             <Tooltip>
               <TooltipTrigger
                 render={
@@ -63,9 +76,7 @@ const AllowlistSummary = ({
               >
                 <InfoIcon className="size-3.5" aria-hidden />
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                {isGuardEnabled ? SUMMARY_DETAILS_GUARD_ENABLED : SUMMARY_DETAILS}
-              </TooltipContent>
+              <TooltipContent className="max-w-xs">{details}</TooltipContent>
             </Tooltip>
           </>
         ) : (

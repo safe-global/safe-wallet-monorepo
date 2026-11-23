@@ -17,6 +17,7 @@ import {
   getAllowedTokenAddresses,
   getFormTokenAddresses,
   getSelectedRecipients,
+  getUniqueSelectedRecipients,
   isAllowlistComplete,
   validateAllowlistRecipient,
 } from '../allowlistForm'
@@ -63,6 +64,16 @@ describe('allowlistForm', () => {
       const kept = recipient()
 
       expect(getSelectedRecipients(values({ recipients: [kept, recipient({ selected: false })] }))).toEqual([kept])
+    })
+  })
+
+  describe('getUniqueSelectedRecipients', () => {
+    it('keeps the first of recipients that differ only in address case', () => {
+      const first = recipient({ name: 'Alice' })
+      const second = recipient({ address: first.address.toLowerCase(), name: 'Alice (old)' })
+      const other = recipient()
+
+      expect(getUniqueSelectedRecipients(values({ recipients: [first, other, second] }))).toEqual([first, other])
     })
   })
 

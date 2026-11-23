@@ -12,6 +12,13 @@ describe('isAllowlistEnabled', () => {
     expect(isAllowlistEnabled(sepolia)).toBe(true)
   })
 
+  it('is true on a chain with a policy guard of any delay', () => {
+    const chain = chainBuilder()
+      .with({ chainId: '1', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
+      .build()
+    expect(isAllowlistEnabled(chain)).toBe(true)
+  })
+
   it('is false when the flag is off', () => {
     const chain = chainBuilder().with({ chainId: '11155111', features: [] }).build()
     expect(isAllowlistEnabled(chain)).toBe(false)

@@ -1,6 +1,5 @@
 import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import {
   isAllowlistPolicy,
   type AllowlistPolicy,
@@ -55,14 +54,11 @@ const MOCK_ETH: PolicyTokenInfo = {
   logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
 }
 
-const resolveMockToken = (_chainId: string, address: string): PolicyTokenInfo | undefined =>
-  Object.values(MOCK_TOKENS).find((token) => sameAddress(token.address, address))
-
-/** The treasury's allowlist as CGW sends it: ERC20 tokens named by the tokens endpoint, ETH by the chain config. */
+/** The treasury's allowlist as CGW sends it: ERC20 tokens named by their metadata, ETH by the chain config. */
 export const mockCgwAllowlist = (
   dtos: ActivePolicyDto[] = mockTreasuryAllowlistDtos(),
 ): AllowlistPolicy & { status: 'active' } => {
-  const policy = mapActivePolicies(dtos, () => MOCK_ETH, resolveMockToken).find(isAllowlistPolicy)
+  const policy = mapActivePolicies(dtos, () => MOCK_ETH).find(isAllowlistPolicy)
   if (policy?.status !== 'active') throw new Error('The DTOs map to no active allowlist')
 
   return policy
@@ -106,21 +102,119 @@ export const mockPendingAllowlistUpdate = (): QueuedAllowlistPolicy =>
 export const mockPendingAllowlistRemoval = (): QueuedAllowlistPolicy =>
   mockPendingAllowlist({ id: '0xallowlist-pending-remove', operation: 'remove' })
 
+const MOCK_NEW_RECIPIENT = '0x0000000000000000000000000000000000000ca1'
+
+/** An edit of the treasury's allowlist: adds a recipient and a token, drops another of each. */
+export const mockPendingAllowlistEdit = (): QueuedAllowlistPolicy =>
+  mockPendingAllowlist({
+    id: '0xallowlist-pending-edit',
+    safe: MOCK_SAFES.treasury,
+    operation: 'update',
+    data: {
+      entries: [
+        {
+          token: MOCK_TOKENS.usdc,
+          recipients: [...RECIPIENTS.slice(0, 2), { account: MOCK_NEW_RECIPIENT, permission: 'ALWAYS' }],
+        },
+        { token: MOCK_TOKENS.unknown, recipients: RECIPIENTS.slice(0, 1) },
+      ],
+      changes: {
+        recipients: [
+          { address: MOCK_ADDRESSES.alice },
+          { address: MOCK_ADDRESSES.bob },
+          { address: MOCK_NEW_RECIPIENT, change: 'added' },
+          { address: MOCK_ADDRESSES.unresolved, change: 'removed' },
+        ],
+        tokens: [
+          MOCK_TOKENS.usdc,
+          { ...MOCK_TOKENS.unknown, change: 'added' },
+          { ...MOCK_TOKENS.usdt, change: 'removed' },
+        ],
+      },
+    },
+  })
+
 /** A new allowlist, executed and waiting out the guard's delay before it is enforced. */
 export const mockActivatingAllowlist = (): AllowlistPolicy & { status: 'active' } =>
   asActivePolicy(
     mockAllowlistPolicy({
       id: '0xallowlist-activating',
-      scheduledChange: { operation: 'create', appliesAt: secondsFromNow(DAY) },
+      scheduledChange: {
+        operation: 'create',
+        appliesAt: secondsFromNow(DAY - 60),
+        expiresAt: secondsFromNow(8 * DAY - 60),
+        requestedAt: secondsFromNow(-60),
+      },
     }),
   )
 
-/** A live allowlist with an executed edit waiting out the guard's delay. */
+/** The guard's delay is over: the request can be applied until its window closes. */
+export const mockReadyToApplyAllowlist = (
+  operation: 'create' | 'update' = 'create',
+): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: `0xallowlist-ready-${operation}`,
+      scheduledChange: {
+        operation,
+        appliesAt: secondsFromNow(-DAY),
+        expiresAt: secondsFromNow(6 * DAY),
+        requestedAt: secondsFromNow(-2 * DAY),
+      },
+    }),
+  )
+
+/** Nobody applied the request before its window closed. */
+export const mockExpiredRequestAllowlist = (
+  operation: 'create' | 'update' = 'create',
+): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: `0xallowlist-expired-request-${operation}`,
+      scheduledChange: {
+        operation,
+        appliesAt: secondsFromNow(-8 * DAY),
+        expiresAt: secondsFromNow(-DAY),
+        requestedAt: secondsFromNow(-9 * DAY),
+      },
+    }),
+  )
+
+/** An executed change waiting out the guard's delay, listed beside the live allowlist. */
 export const mockAllowlistChangePending = (): AllowlistPolicy & { status: 'active' } =>
   asActivePolicy(
     mockAllowlistPolicy({
       id: '0xallowlist-change-pending',
-      scheduledChange: { operation: 'update', appliesAt: secondsFromNow(DAY) },
+      scheduledChange: {
+        operation: 'update',
+        appliesAt: secondsFromNow(DAY - 60),
+        expiresAt: secondsFromNow(8 * DAY - 60),
+        requestedAt: secondsFromNow(-60),
+      },
+    }),
+  )
+
+/** An executed removal waits out the delay; the allowlist stays active until a second transaction applies it. */
+export const mockAllowlistRemovalScheduled = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: '0xallowlist-removal-scheduled',
+      scheduledChange: {
+        operation: 'remove',
+        appliesAt: secondsFromNow(DAY - 60),
+        expiresAt: secondsFromNow(8 * DAY - 60),
+        requestedAt: secondsFromNow(-60),
+      },
+    }),
+  )
+
+/** The removal is applied: no rule is left, and the guard only lets itself be taken off. */
+export const mockAllowlistAwaitingGuardRemoval = (): AllowlistPolicy & { status: 'active' } =>
+  asActivePolicy(
+    mockAllowlistPolicy({
+      id: '0xallowlist-awaiting-guard-removal',
+      data: { entries: [] },
+      awaitingGuardRemoval: true,
     }),
   )
 
