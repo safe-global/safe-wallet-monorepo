@@ -243,35 +243,33 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
             </Button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          {isWorkspace ? (
-            <>
-              <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="outline" size="sm" data-testid="safe-filter" />}>
-                  {safeFilter === ALL ? DEFI_V1_COPY.workspace.allSafes : safeFilter}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuRadioGroup value={safeFilter} onValueChange={(value) => setSafeFilter(String(value))}>
-                    <DropdownMenuRadioItem value={ALL}>{DEFI_V1_COPY.workspace.allSafes}</DropdownMenuRadioItem>
-                    {SAFE_NAMES.map((name) => (
-                      <DropdownMenuRadioItem key={name} value={name}>
-                        {name}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {safeFilter === ALL && <span>{DEFI_V1_COPY.workspace.across(SAFE_NAMES.length)}</span>}
-            </>
-          ) : (
-            <span>{DEFI_V1_COPY.workspace.thisSafe}</span>
-          )}
-        </div>
-        <TreasurySummary
-          summary={summary}
-          idleAssets={idleByAsset(summary.idle, IDLE_MIX)}
-          earnedBy={earnedByInvestment(positions)}
-        />
+        {isWorkspace && (
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button variant="outline" size="sm" data-testid="safe-filter" />}>
+                {safeFilter === ALL ? DEFI_V1_COPY.workspace.allSafes : safeFilter}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuRadioGroup value={safeFilter} onValueChange={(value) => setSafeFilter(String(value))}>
+                  <DropdownMenuRadioItem value={ALL}>{DEFI_V1_COPY.workspace.allSafes}</DropdownMenuRadioItem>
+                  {SAFE_NAMES.map((name) => (
+                    <DropdownMenuRadioItem key={name} value={name}>
+                      {name}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {safeFilter === ALL && <span>{DEFI_V1_COPY.workspace.across(SAFE_NAMES.length)}</span>}
+          </div>
+        )}
+        {isWorkspace && (
+          <TreasurySummary
+            summary={summary}
+            idleAssets={idleByAsset(summary.idle, IDLE_MIX)}
+            earnedBy={earnedByInvestment(positions)}
+          />
+        )}
       </div>
 
       <section aria-label={DEFI_V1_COPY.sections.opportunities} className="flex flex-col gap-4">

@@ -437,7 +437,6 @@ export const DEFI_V1_COPY = {
     allSafes: 'All Safes',
     safe: 'Safe',
     across: (count: number) => `Across ${count} Safes`,
-    thisSafe: 'This Safe only',
     seeAll: 'See all Safes',
     inSafes: (names: string[]) => `In ${names.join(', ')}`,
     depositFrom: 'Deposit from',
