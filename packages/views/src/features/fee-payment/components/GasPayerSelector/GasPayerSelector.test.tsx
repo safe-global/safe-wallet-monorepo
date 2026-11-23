@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { FeePayerView, GasFeeDetails } from '@safe-global/views/features/fee-payment/types'
-import GasPayerSelector, { type GasPayerSelectorProps } from './index'
+import GasPayerSelector, { SponsoredQuota, type GasPayerSelectorProps } from './index'
 
 const ZERO = '0x0000000000000000000000000000000000000000'
 const ETH = { address: ZERO, symbol: 'ETH', logoUri: '' }
@@ -72,7 +72,7 @@ describe('GasPayerSelector view', () => {
     expect(screen.getByLabelText(text)).toBeInTheDocument()
   })
 
-  it('explains a fee token covered by a free transaction', () => {
+  it('explains a fee token covered by a sponsored transaction', () => {
     renderCard({
       view: view({
         gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: 'SPONSORED' },
@@ -80,10 +80,25 @@ describe('GasPayerSelector view', () => {
       }),
     })
 
-    expect(screen.getByLabelText('Covered by a free transaction.')).toBeInTheDocument()
+    expect(screen.getByLabelText('Covered by a sponsored transaction.')).toBeInTheDocument()
   })
 
-  it('labels a sponsor as "Free transaction" when the chain sponsors it', () => {
+  it.each([
+    ['plan', 'Pro plan'],
+    ['free', 'Sponsored'],
+  ] as const)('labels a %s sponsor "%s"', (sponsorKind, label) => {
+    renderCard({
+      view: view({
+        payer: { kind: 'choice', value: 'SPONSORED', options: ['SPONSORED', 'WALLET'] },
+        sponsored: true,
+        sponsorKind,
+      }),
+    })
+
+    expect(screen.getByTestId('fee-payer-selector')).toHaveTextContent(label)
+  })
+
+  it('shows no Pro chip when the chain sponsors the gas fee', () => {
     renderCard({
       view: view({
         payer: { kind: 'choice', value: 'SPONSORED', options: ['SPONSORED', 'WALLET'] },
@@ -92,7 +107,6 @@ describe('GasPayerSelector view', () => {
       }),
     })
 
-    expect(screen.getByTestId('fee-payer-selector')).toHaveTextContent('Free transaction')
     expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
   })
 
@@ -271,5 +285,14 @@ describe('GasPayerSelector gas fee details', () => {
     expect(summary).not.toHaveTextContent('Refund to')
     expect(summary).toHaveTextContent("Paid from your Safe account. Set at signing, so it can't be changed.")
     expect(screen.queryByTestId('gas-params-editor')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    [30, '30 sponsored transactions left this month'],
+    [1, '1 sponsored transaction left this month'],
+  ])('counts %s sponsored transaction(s) of the Pro plan left this month', (left, text) => {
+    render(<SponsoredQuota left={left} resetsAt="Nov 1, 00:00 UTC" />)
+
+    expect(screen.getByTestId('sponsored-quota')).toHaveTextContent(text)
   })
 })

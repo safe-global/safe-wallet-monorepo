@@ -41,8 +41,9 @@ const PAYER_LABEL: Record<GasPayerChoice, string> = {
 
 type SponsorKind = FeePayerView['sponsorKind']
 
+// Pro users pay for their plan, so it is named; the network's free transactions are just "Sponsored".
 const payerLabel = (choice: GasPayerChoice, sponsorKind: SponsorKind): string =>
-  choice === 'SPONSORED' && sponsorKind === 'free' ? 'Free transaction' : PAYER_LABEL[choice]
+  choice === 'SPONSORED' && sponsorKind === 'free' ? 'Sponsored' : PAYER_LABEL[choice]
 
 const SET_AT_SIGNING_TOOLTIP = "Set at signing and can't be changed."
 
@@ -58,7 +59,7 @@ const gasTokenLockTooltip = (
 ): string | undefined => {
   if (reason === 'SET_AT_SIGNING') return SET_AT_SIGNING_TOOLTIP
   if (reason === 'SPONSORED')
-    return sponsorKind === 'free' ? 'Covered by a free transaction.' : 'Covered by your Pro plan.'
+    return sponsorKind === 'free' ? 'Covered by a sponsored transaction.' : 'Covered by your Pro plan.'
   if (reason === 'NATIVE_ONLY') return `Fees are paid in ${token?.symbol} for now. More tokens are coming soon.`
   return undefined
 }

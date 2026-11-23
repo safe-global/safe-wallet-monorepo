@@ -68,7 +68,7 @@ const FeeCardFooter = ({ footer }: { footer: FeePayerFooter }): ReactElement | n
   if (footer.kind === 'upsell') return <ProUpsell />
   if (footer.kind === 'campaign') return <CampaignQuota left={footer.left} limit={footer.limit} />
   if (footer.isSubscription && footer.left !== null && footer.quota !== null)
-    return <SponsoredQuota left={footer.left} quota={footer.quota} resetsAt={formatResetsAt(footer.resetsAt)} />
+    return <SponsoredQuota left={footer.left} resetsAt={formatResetsAt(footer.resetsAt)} />
   return (
     <SponsoredTxsCounter
       left={footer.left}
