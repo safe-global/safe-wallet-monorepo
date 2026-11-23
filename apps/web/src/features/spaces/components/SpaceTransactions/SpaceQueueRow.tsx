@@ -37,7 +37,10 @@ export const Counterparty = ({
   return (
     <span className="flex min-w-0 items-center gap-2 text-sm">
       {/* A plain word in the sentence. Fixed width, the widest being "from", so the names line up whichever it is */}
-      <span data-testid="counterparty-join" className="w-8 shrink-0 text-muted-foreground">
+      <span
+        data-testid="counterparty-join"
+        className="w-8 shrink-0 text-muted-foreground group-hover/transaction:text-foreground"
+      >
         {counterparty.join}
       </span>
       {/* Grayscale only tints the avatar: the name is already a neutral colour. EthHashInfo's name box doesn't shrink

@@ -28,7 +28,7 @@ describe('Counterparty', () => {
 
     const join = screen.getByTestId('counterparty-join')
     expect(join).toHaveTextContent(new RegExp(`^${word}$`))
-    expect(join).toHaveClass('text-muted-foreground', 'w-8', 'shrink-0')
+    expect(join).toHaveClass('text-muted-foreground', 'group-hover/transaction:text-foreground', 'w-8', 'shrink-0')
     expect(join).not.toHaveClass('capitalize', 'uppercase', 'rounded-md', 'bg-muted')
   })
 
