@@ -104,7 +104,8 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   // The return URL for sign-in, only needed when signed out on a Workspace page. Building it from
   // the whole query elsewhere would re-run the guard (and refetch spaces) on every query change.
-  const currentUrl = !isSiweAuthenticated && pathname.startsWith('/spaces') ? buildCurrentNextUrl(pathname, query) : ''
+  const isSpacesPath = pathname.startsWith('/spaces')
+  const currentUrl = !isSiweAuthenticated && isSpacesPath ? buildCurrentNextUrl(pathname, query) : ''
   const isSpaceRoute = useIsSpaceRoute()
   const isWorkspaceWizardEnabled = useIsWorkspaceWizardEnabled()
   const isSafePro = useSafeProFlag()
@@ -145,7 +146,6 @@ export const useFlowActivationGuard: UseGuard = () => {
       }
     }
 
-    const isSpacesPath = pathname.startsWith('/spaces')
     const isOnboardingRoute = ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
 
     return evaluateGuard(
@@ -168,6 +168,7 @@ export const useFlowActivationGuard: UseGuard = () => {
   }, [
     isPlanStepEnabled,
     pathname,
+    isSpacesPath,
     guardQuery,
     currentUrl,
     spaceId,

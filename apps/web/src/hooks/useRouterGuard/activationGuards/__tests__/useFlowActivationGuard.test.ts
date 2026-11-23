@@ -1,5 +1,6 @@
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { useFlowActivationGuard } from '../useFlowActivationGuard'
+import { useRouterGuard } from '../..'
 import * as router from 'next/router'
 import * as store from '@/store'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
@@ -686,6 +687,7 @@ describe('useFlowActivationGuard', () => {
         pathname,
         query: query(),
         isReady: true,
+        replace: jest.fn(),
       }))
     }
 
@@ -718,13 +720,14 @@ describe('useFlowActivationGuard', () => {
       let tab = 'queue'
       mockRouterOnEachRender(() => ({ spaceId: MOCK_SPACE_UUID, tab }), '/spaces/transactions')
 
-      const { result, rerender } = renderHook(() => useFlowActivationGuard())
-      const firstGuard = result.current.activationGuard
-      await firstGuard()
+      // Through useRouterGuard, whose effect runs the guard again whenever it changes
+      const { rerender } = renderHook(() => useRouterGuard({ useGuard: useFlowActivationGuard }))
+      await waitFor(() => expect(mockFetchSpaces).toHaveBeenCalledTimes(1))
       tab = 'history'
       rerender()
+      // Let a re-run, if any, start
+      await act(async () => {})
 
-      expect(result.current.activationGuard).toBe(firstGuard)
       expect(mockFetchSpaces).toHaveBeenCalledTimes(1)
     })
 
