@@ -228,13 +228,6 @@ export async function storeSubscription(
   await expect.poll(() => offersTrial(session, uuid)).toBe(false)
 }
 
-/** Leaves a Workspace the gateway has not read yet without a plan, as every new Workspace is in production. */
-export async function removeSubscription(uuid: string): Promise<void> {
-  const url = billingSubscriptionsUrl(uuid)
-  const response = await fetch(url, { method: 'DELETE' })
-  if (!response.ok) throw new Error(`DELETE ${url} returned ${response.status}: ${await response.text()}`)
-}
-
 /** The name of the Workspace's plan, as the gateway reports it; null without a subscription. */
 export async function planName(session: EmailSession, uuid: string): Promise<string | null> {
   const subscriptions = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/subscriptions`)

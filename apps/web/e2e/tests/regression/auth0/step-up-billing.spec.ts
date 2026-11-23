@@ -20,14 +20,11 @@ import { WorkspacePage } from '../../../src/pages/workspace.page'
 const WORKSPACE_NAME = 'Step-up billing'
 const STARTER_SEATS = 2
 
-// The plan card at the top of the Plans page names the plan in force.
-const currentPlan = (page: Page) => page.getByRole('main').getByRole('heading', { level: 4 }).first()
-
 /** The Plans page confirms a switch made during the free access, which the local billing service always gives. */
 async function expectPlanSwitched(page: Page, plan: string): Promise<void> {
   await expect(page.getByRole('dialog', { name: new RegExp(`^You're on ${plan}`) })).toBeVisible()
   await page.getByRole('button', { name: 'Get started' }).click()
-  await expect(currentPlan(page)).toHaveText(plan)
+  await expect(new WorkspacePage(page).currentPlanName).toHaveText(plan)
 }
 
 /** The local checkout page, opened for the Workspace (as the billing service names it, without dashes). */
