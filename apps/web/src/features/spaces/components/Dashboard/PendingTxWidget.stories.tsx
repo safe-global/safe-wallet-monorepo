@@ -120,3 +120,19 @@ export const WithAppLogo: Story = {
     transactions: [createMockAppTx('4'), ...MOCK_PENDING_TRANSACTIONS.slice(0, 1)],
   },
 }
+
+export const WithViewAll: Story = {
+  args: {
+    transactions: MOCK_PENDING_TRANSACTIONS,
+    totalCount: 15,
+    onViewAll: () => {},
+  },
+}
+
+export const WithViewAllEverythingShown: Story = {
+  args: {
+    transactions: MOCK_PENDING_TRANSACTIONS,
+    totalCount: MOCK_PENDING_TRANSACTIONS.length,
+    onViewAll: () => {},
+  },
+}

@@ -7,7 +7,8 @@ import type {
   SpaceMemberDto,
   SpaceAddressBookItemDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MemberStatus, MemberRole } from './public/hooks/useSpaceMembers'
+import { MemberStatus } from './public/hooks/useSpaceMembers'
+import { MemberRole } from './memberRole'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'

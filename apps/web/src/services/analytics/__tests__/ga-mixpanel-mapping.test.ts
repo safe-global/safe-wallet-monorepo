@@ -27,6 +27,7 @@ describe('GA to Mixpanel Mapping', () => {
     })
 
     it.each([
+      [SPACE_EVENTS.TRANSACTIONS_HISTORY_TAB_OPENED.action, MixpanelEvent.WORKSPACE_TRANSACTIONS_HISTORY_TAB_OPENED],
       [SPACE_EVENTS.DELETE_SPACE.action, MixpanelEvent.WORKSPACE_DELETED],
       [SPACE_EVENTS.LEAVE_SPACE.action, MixpanelEvent.WORKSPACE_LEFT],
       [SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_RENEWED.action, MixpanelEvent.WORKSPACE_MEMBER_INVITE_RENEWED],
@@ -73,6 +74,12 @@ describe('GA to Mixpanel Mapping', () => {
       )
       expect(GA_TO_MIXPANEL_MAPPING[WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT.action]).toBe(
         MixpanelEvent.WC_SAFE_APP_SUGGESTION_RESULT,
+      )
+    })
+
+    it('should map the Pending widget "View all" click', () => {
+      expect(GA_TO_MIXPANEL_MAPPING[SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED.action]).toBe(
+        MixpanelEvent.PENDING_TX_WIDGET_VIEW_ALL_CLICKED,
       )
     })
   })

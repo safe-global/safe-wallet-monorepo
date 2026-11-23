@@ -10,6 +10,8 @@ import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
+import local from '@/services/local-storage/local'
+import { spaceQueueViewSlice } from '../../public/store/spaceQueueViewSlice'
 import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection } from '../../hooks/useSpaceQueue'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
@@ -108,6 +110,8 @@ describe('SpaceTransactionQueue', () => {
 
   afterEach(() => {
     jest.useRealTimers()
+    // The Group by pick is saved to localStorage and read back by the next render
+    localStorage.clear()
   })
 
   it('requests the queue of the Space and renders one section per Safe', async () => {
@@ -419,6 +423,15 @@ describe('SpaceTransactionQueue', () => {
       })
 
       expect(await screen.findByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'next')
+    })
+
+    it('opens the queue with the grouping saved before a reload', async () => {
+      respondWith(page({ [safeA]: { '1': transactions(1) } }))
+      local.setItem(spaceQueueViewSlice.name, { groupBy: 'safe' })
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+      expect(await screen.findByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'safe')
     })
   })
 

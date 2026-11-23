@@ -8,6 +8,7 @@ const mockBillingSpaceId = jest.fn<string | null, []>()
 const mockRefetch = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/billing'),
   useBillingGetSpacePaymentLinksV1Query: (...args: unknown[]) => mockPaymentLinksQuery(...args),
 }))
 jest.mock('../useBillingSpaceId', () => ({ useBillingSpaceId: () => mockBillingSpaceId() }))

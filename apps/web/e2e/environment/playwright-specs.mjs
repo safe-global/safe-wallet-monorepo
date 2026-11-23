@@ -21,6 +21,7 @@ export const playwrightSpecs = {
   'e2e/delete.spec.ts': {},
   'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
+  'e2e/fees.spec.ts': {},
   'e2e/load-safe.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
   'e2e/multichain-add-network.spec.ts': { chains: [1] },
@@ -28,6 +29,7 @@ export const playwrightSpecs = {
   'e2e/multisig-confirm.spec.ts': {},
   'e2e/nft-transfer.spec.ts': {},
   'e2e/owner-management.spec.ts': {},
+  'e2e/pay-from-safe.spec.ts': {},
   'e2e/policies.spec.ts': {},
   'e2e/workspace.spec.ts': {},
   'e2e/positions.spec.ts': {
@@ -95,6 +97,9 @@ export const playwrightSpecs = {
   'regression/auth0/step-up-workspace-rename.spec.ts': {},
   'regression/auth0/workspace-invite.spec.ts': {},
   'regression/auth0/workspace-trial-checkout.spec.ts': {},
+  'regression/workspace-address-book.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+  },
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],

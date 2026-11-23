@@ -1004,6 +1004,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
     policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
     spaceAuditLog: features.spaceAuditLog ?? false,
+    spaceOnboardingSurvey: features.spaceOnboardingSurvey ?? false,
   }
 
   // Build handlers array

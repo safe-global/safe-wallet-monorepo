@@ -20,12 +20,14 @@ import BatchSidebar from '@/features/batching/public/components/BatchSidebar'
 import SelectSafeModal from '@/features/spaces/public/components/SelectSafeModal'
 import SafeWorkspaceSignInDialog from '@/features/spaces/public/components/SafeWorkspaceSignInDialog'
 import SafeWorkspaceChooserDialog from '@/features/spaces/public/components/SafeWorkspaceChooserDialog'
+import WorkspaceTour from '@/features/spaces/public/components/WorkspaceTour'
 
 const STATIC_PAGE_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
 const NO_HEADER_ROUTES = [
   AppRoutes.welcome.index,
   AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.plan,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
   AppRoutes.welcome.survey,
@@ -125,6 +127,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       <SelectSafeModal />
       <SafeWorkspaceSignInDialog />
       <SafeWorkspaceChooserDialog />
+      <WorkspaceTour />
     </>
   )
 }

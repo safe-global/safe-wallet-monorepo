@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import SelectSafesOnboarding from '@/features/spaces/public/components/SelectSafesOnboarding'
+import WorkspaceOnboardingStep from '@/features/spaces/public/components/WorkspaceOnboardingStep'
 
 const SelectSafesPage = () => {
   return (
@@ -9,7 +9,7 @@ const SelectSafesPage = () => {
         <title>{`${BRAND_NAME} – Select Safe accounts`}</title>
       </Head>
 
-      <SelectSafesOnboarding />
+      <WorkspaceOnboardingStep step="safes" />
     </>
   )
 }
