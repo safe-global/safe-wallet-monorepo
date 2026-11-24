@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, Suspense } from 'react'
+import { Fragment, useState, useCallback, useMemo, Suspense } from 'react'
 import dynamic from '@/utils/dynamic'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
@@ -19,6 +19,7 @@ import {
 } from '../../public/store/safeActionsModalSlice'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import SafeCardReadOnly from '../../public/components/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
@@ -127,17 +128,24 @@ const SelectSafeModal = () => {
                 <div className="flex flex-col gap-1.5">
                   {filteredSafes.map((safe) => {
                     const { disabled, tooltip } = getDisabledState(safe)
-                    return (
+                    const card = (
                       <SafeCardReadOnly
-                        key={`${safe.chainId}:${safe.address}`}
                         safe={safe}
                         hideContextMenu
                         showPending={false}
                         onClick={() => void handleSafeClick(safe)}
                         disabled={disabled}
-                        disabledTooltip={tooltip}
                         className="px-4 sm:px-4"
                       />
+                    )
+                    const key = `${safe.chainId}:${safe.address}`
+                    if (!tooltip) return <Fragment key={key}>{card}</Fragment>
+                    // A block trigger: the card's own tooltip trigger is `display: contents`, which has no box to anchor to
+                    return (
+                      <Tooltip key={key}>
+                        <TooltipTrigger render={<div />}>{card}</TooltipTrigger>
+                        <TooltipContent>{tooltip}</TooltipContent>
+                      </Tooltip>
                     )
                   })}
                 </div>

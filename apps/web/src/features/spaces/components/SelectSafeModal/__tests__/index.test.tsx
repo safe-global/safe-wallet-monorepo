@@ -1,4 +1,4 @@
-import { render } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import SelectSafeModal from '../index'
 import { ESafeAction } from '../../../public/store/safeActionsModalSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -31,8 +31,18 @@ jest.mock('../../../public/components/SafeCardReadOnly', () => ({
   __esModule: true,
   default: (props: { safe: SafeItem; disabled?: boolean; disabledTooltip?: string }) => {
     cardProps.push({ safe: props.safe, disabled: props.disabled, disabledTooltip: props.disabledTooltip })
-    return null
+    return <div data-testid={`card-${props.safe.chainId}:${props.safe.address}`} />
   },
+}))
+
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip">{children}</div>,
+  TooltipTrigger: ({ children, render }: { children: React.ReactNode; render: React.ReactElement }) => (
+    <div data-testid="tooltip-trigger" data-trigger={render.type as string}>
+      {children}
+    </div>
+  ),
+  TooltipContent: ({ children }: { children: React.ReactNode }) => <div role="tooltip">{children}</div>,
 }))
 
 jest.mock('../useSafeActionMapper', () => ({
@@ -86,6 +96,12 @@ const chainWithoutSwap = {
 
 const getCardFor = (safe: SafeItem) => cardProps.find((c) => c.safe.address === safe.address)
 
+const getTooltipFor = (safe: SafeItem) =>
+  screen
+    .getByTestId(`card-${safe.chainId}:${safe.address}`)
+    .closest('[data-testid="tooltip"]')
+    ?.querySelector('[role="tooltip"]')?.textContent ?? undefined
+
 const cfState = (safe: SafeItem) => ({ [safe.chainId]: { [safe.address]: { status: {} } } })
 
 describe('SelectSafeModal swap disabling', () => {
@@ -101,7 +117,7 @@ describe('SelectSafeModal swap disabling', () => {
 
     const card = getCardFor(deployedSafe)
     expect(card?.disabled).toBe(false)
-    expect(card?.disabledTooltip).toBeUndefined()
+    expect(getTooltipFor(deployedSafe)).toBeUndefined()
   })
 
   it('disables a safe on a chain without swaps with the unsupported-chain tooltip', () => {
@@ -112,7 +128,7 @@ describe('SelectSafeModal swap disabling', () => {
 
     const card = getCardFor(safeOnUnsupportedChain)
     expect(card?.disabled).toBe(true)
-    expect(card?.disabledTooltip).toBe(SWAP_DISABLED_TOOLTIP)
+    expect(getTooltipFor(safeOnUnsupportedChain)).toBe(SWAP_DISABLED_TOOLTIP)
   })
 })
 
@@ -158,7 +174,7 @@ describe('SelectSafeModal new transaction gating', () => {
 
     const card = getCardFor(deployedSafe)
     expect(card?.disabled).toBe(true)
-    expect(card?.disabledTooltip).toBe('Please connect your wallet')
+    expect(getTooltipFor(deployedSafe)).toBe('Please connect your wallet')
   })
 
   it('disables a Safe the wallet has no role on with the not-a-signer tooltip', () => {
@@ -168,7 +184,17 @@ describe('SelectSafeModal new transaction gating', () => {
 
     const card = getCardFor(deployedSafe)
     expect(card?.disabled).toBe(true)
-    expect(card?.disabledTooltip).toBe('Your connected wallet is not a signer of this Safe account')
+    expect(getTooltipFor(deployedSafe)).toBe('Your connected wallet is not a signer of this Safe account')
+  })
+
+  it("anchors the tooltip to a block around the card, not to the card's own tooltip", () => {
+    mockGetSignerStatus.mockReturnValue('not-signer')
+
+    renderModal(ESafeAction.NewTransaction)
+
+    const card = screen.getByTestId(`card-${deployedSafe.chainId}:${deployedSafe.address}`)
+    expect(card.closest('[data-testid="tooltip-trigger"]')).toHaveAttribute('data-trigger', 'div')
+    expect(getCardFor(deployedSafe)?.disabledTooltip).toBeUndefined()
   })
 
   it('keeps a Safe disabled without a tooltip while its role checks are pending', () => {
@@ -178,7 +204,7 @@ describe('SelectSafeModal new transaction gating', () => {
 
     const card = getCardFor(deployedSafe)
     expect(card?.disabled).toBe(true)
-    expect(card?.disabledTooltip).toBeUndefined()
+    expect(getTooltipFor(deployedSafe)).toBeUndefined()
   })
 
   it('shows the connect-wallet tooltip before the not-a-signer one', () => {
@@ -187,7 +213,7 @@ describe('SelectSafeModal new transaction gating', () => {
 
     renderModal(ESafeAction.NewTransaction)
 
-    expect(getCardFor(deployedSafe)?.disabledTooltip).toBe('Please connect your wallet')
+    expect(getTooltipFor(deployedSafe)).toBe('Please connect your wallet')
   })
 
   it('does not apply the signer check to send', () => {
