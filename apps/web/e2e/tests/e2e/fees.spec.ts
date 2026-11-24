@@ -1,4 +1,4 @@
-import { Wallet, parseEther, parseUnits } from 'ethers'
+import { parseEther, parseUnits } from 'ethers'
 import { offerGasPaymentOptions } from '../../src/api/chain-config'
 import { balanceOf } from '../../src/chain/balances'
 import { gasFeesOf } from '../../src/chain/transactions'
@@ -22,7 +22,7 @@ test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
 
     const review = new TxReviewPage(safePage)
     await new SendTokensPage(safePage).reviewTransfer(safe, {
-      recipient: Wallet.createRandom().address,
+      recipient: journey.newAddress(),
       amount: AMOUNT,
     })
     await review.sign()
@@ -52,9 +52,9 @@ test.describe('Fees where the relayer does not offer Pay from Safe', { tag: '@e2
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const owner = journey.owners.alice.address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     await offerGasPaymentOptions(safePage, [])
 
     const review = new TxReviewPage(safePage)

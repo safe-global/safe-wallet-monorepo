@@ -19,7 +19,7 @@ describe('PayNowPayLater', () => {
     } as unknown as ReturnType<typeof nativeToken.useNativeTokenDisplay>)
   })
 
-  it('shows "Sponsored free transaction" for Pay now when relay will be used', () => {
+  it('shows "Sponsored transaction" for Pay now when relay will be used', () => {
     render(
       <PayNowPayLater
         totalFee="0.01"
@@ -30,7 +30,7 @@ describe('PayNowPayLater', () => {
       />,
     )
 
-    expect(screen.getByText('Sponsored free transaction')).toBeInTheDocument()
+    expect(screen.getByText('Sponsored transaction')).toBeInTheDocument()
   })
 
   it('shows the fee estimation for Pay now when relay will not be used (connected wallet)', () => {
@@ -44,7 +44,7 @@ describe('PayNowPayLater', () => {
       />,
     )
 
-    expect(screen.queryByText('Sponsored free transaction')).not.toBeInTheDocument()
+    expect(screen.queryByText('Sponsored transaction')).not.toBeInTheDocument()
     expect(screen.getByText(/0\.01 ETH/)).toBeInTheDocument()
   })
 

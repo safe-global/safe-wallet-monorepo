@@ -1,0 +1,9 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "inputs": ["$TURBO_EXTENDS$", "config/**", "$TURBO_ROOT$/packages/utils/src/utils/chains.ts"]
+    }
+  }
+}

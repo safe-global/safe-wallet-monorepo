@@ -1,4 +1,3 @@
-import { Wallet } from 'ethers'
 import { readSafeSetup } from '../../src/chain/recovery'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe } from '../../src/seed/safe'
@@ -22,8 +21,8 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const { alice } = journey.owners
-    const newSigner = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const newSigner = journey.newAddress()
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -47,8 +46,8 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const { alice, bob } = journey.owners
-    const newSigner = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const newSigner = journey.newAddress()
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)

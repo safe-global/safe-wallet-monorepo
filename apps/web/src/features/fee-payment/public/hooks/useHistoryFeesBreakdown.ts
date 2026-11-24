@@ -37,7 +37,7 @@ const buildFees = (
 ): HistoryFeesData => ({
   totalFee: { amount, currency, fiatAmount },
   executionFee: EXECUTION_FEE,
-  gasFee: { label: 'Max gas fee', amount, currency, fiatAmount, isFree: paidFrom === 'sponsored' },
+  gasFee: { label: 'Gas fee', amount, currency, fiatAmount, isFree: paidFrom === 'sponsored' },
   paidFrom,
 })
 

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import { balanceOf } from '../../src/chain/balances'
 import { HomePage } from '../../src/pages/home.page'
 import { test, expect, type Journey } from '../../src/fixtures/journey.fixture'
@@ -29,8 +29,8 @@ test.describe('Proposer', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedProposerSafe(journey, safePage)
+    const recipient = journey.newAddress()
 
     const sendTokens = new SendTokensPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -67,7 +67,7 @@ test.describe('Proposer', { tag: '@e2e' }, () => {
     const queue = new TxQueuePage(safePage)
     const review = new TxReviewPage(safePage)
     await sendTokens.open()
-    await sendTokens.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
+    await sendTokens.fillTransfer({ recipient: journey.newAddress(), amount: AMOUNT })
     await sendTokens.nextButton.click()
     await review.propose()
 

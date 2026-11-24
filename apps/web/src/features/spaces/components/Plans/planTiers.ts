@@ -107,6 +107,13 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
   pick.tier.billingCycle !== current.billingCycle &&
   pick.option.label === current.seatsLabel
 
+/** No paid plan is in force: a trial, or no plan at all. */
+export const isUnpaid = (current: CurrentPlan | undefined): boolean => !current || current.isTrialing
+
+/** "Business 5" for a plan sold in several sizes, "Starter" for a plan with one size. */
+const sizedPlanName = (pick: PlanPick): string =>
+  pick.tier.options.length > 1 && pick.option.seats ? `${pick.tier.name} ${pick.option.seats}` : pick.tier.name
+
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
     const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
@@ -118,18 +125,21 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
         ? { kind: 'billing', label: 'Add payment method' }
         : { kind: 'current', label: 'Current plan' }
     }
+  }
+  if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
+  if (!current) return { kind: 'subscribe', label: `Continue with ${sizedPlanName(pick)}` }
+
+  const direction = getChangeDirection(current, pick)
+  // Nothing is paid during a trial, so every move off it is a switch to a named size.
+  if (current.isTrialing) return { kind: 'change', direction, label: `Switch to ${sizedPlanName(pick)}` }
+  if (pick.tier.isCurrent) {
     // Another seat size of the same plan: a change, worded by seats rather than by plan name.
-    const direction = getChangeDirection(current, pick)
     return {
       kind: 'change',
       direction,
       label: direction === 'upgrade' ? `Upgrade to ${pick.option.label}` : `Switch to ${pick.option.label}`,
     }
   }
-  if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
-  if (!current) return { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
-
-  const direction = getChangeDirection(current, pick)
   if (isCycleSwitch(pick, current)) {
     return {
       kind: 'change',
@@ -264,6 +274,23 @@ export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsL
   )
 }
 
+/** Every size of every plan on the cycle, smallest first; a size two plans share goes to the first plan in order. */
+export const getPlanSizes = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanPick[] => {
+  const byLabel = new Map<string, PlanPick>()
+  for (const tier of getVisibleTiers(tiers, cycle)) {
+    for (const option of tier.options) {
+      if (!byLabel.has(option.label)) byLabel.set(option.label, { tier, option })
+    }
+  }
+  return [...byLabel.values()].sort((a, b) => bySeats(a.option, b.option))
+}
+
+/** The smallest size that holds the given Safes, the largest when none does, the smallest when the count is unknown. */
+export const getFittingSize = (sizes: PlanPick[], seats: number | undefined): PlanPick | undefined => {
+  if (seats === undefined) return sizes[0]
+  return sizes.find(({ option }) => option.seats == null || option.seats >= seats) ?? sizes.at(-1)
+}
+
 export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
   tiers.filter((tier) => {
     if (tier.billingCycle === null || tier.billingCycle === cycle) return true
@@ -346,4 +373,13 @@ export const getCardSaving = (
   if (twelveMonths == null || yearly == null || yearly >= twelveMonths) return undefined
   const saved = twelveMonths - yearly
   return { amount: formatPlanPrice(saved, tier.currency), percent: percentFormat.format(saved / twelveMonths) }
+}
+
+/** The largest yearly saving of any size, as a percentage, for a monthly card that has no size picked yet. */
+export const getBestYearlySaving = (tier: PlanTier, counterpartTier: PlanTier | undefined): string | undefined => {
+  const ratios = tier.options.flatMap((option) => {
+    const yearly = counterpartTier?.options.find((candidate) => candidate.label === option.label)?.price
+    return option.price && yearly != null && yearly < option.price * 12 ? [1 - yearly / (option.price * 12)] : []
+  })
+  return ratios.length > 0 ? percentFormat.format(Math.max(...ratios)) : undefined
 }

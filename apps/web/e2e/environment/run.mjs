@@ -7,12 +7,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { promisify } from 'node:util'
 import { assertProjectName, chainProfiles, localUrl } from './local-stack.mjs'
 import { playwrightSpecs } from './playwright-specs.mjs'
+import { BURN_IN_REPEATS, releaseOutputs } from './flag-release.mjs'
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const playwrightArtifacts = 'e2e/environment/artifacts/playwright'
 const walletActions = ['dev', 'build', 'playwright']
 const actions = new Set(['up', 'down', 'reset', 'status', 'logs', 'config', 'test', 'smoke', 'indexing', 'check'])
-for (const action of [...walletActions, 'plan', 'needs']) actions.add(action)
+for (const action of [...walletActions, 'plan', 'needs', 'release']) actions.add(action)
 
 // Each check gets its own project, so it never touches an interactive stack.
 const defaultProject = (action) => (action === 'check' ? `safe-e2e-${randomUUID()}` : 'safe-e2e-local')
@@ -148,14 +149,23 @@ export async function missingShardCommands(env, manifest, infrastructure) {
   return missingStackCommands(await shardSpecs(env), manifest, infrastructure)
 }
 
-/** The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. */
+/**
+ * The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. `SAFE_E2E_BURN_IN_SPECS` adds a
+ * `burnin` entry that runs those specs several times, for a pull request that releases the flags they cover.
+ */
 export function planMatrix(shardCount, env = process.env, registry = playwrightSpecs) {
   if (!Number.isInteger(shardCount) || shardCount < 1) throw new Error('Shard count must be a positive integer')
   // A sharded Playwright run that matches no test passes, so an unmatched filter must fail here.
   if (!selectPlaywrightSpecs(env, registry).length) {
     throw new Error(`SAFE_E2E_SPECS matches no registered Playwright spec: ${env.SAFE_E2E_SPECS}`)
   }
-  return { include: Array.from({ length: shardCount }, (_, index) => ({ shard: index + 1 })) }
+  const shards = Array.from({ length: shardCount }, (_, index) => ({ shard: String(index + 1), total: shardCount }))
+  const burnInSpecs = env.SAFE_E2E_BURN_IN_SPECS
+  if (!burnInSpecs) return { include: shards }
+  if (!selectPlaywrightSpecs({ SAFE_E2E_SPECS: burnInSpecs }, registry).length) {
+    throw new Error(`SAFE_E2E_BURN_IN_SPECS matches no registered Playwright spec: ${burnInSpecs}`)
+  }
+  return { include: [...shards, { shard: 'burnin', specs: burnInSpecs, repeat: BURN_IN_REPEATS }] }
 }
 
 /** The spec files in a Playwright JSON report of `--list`, by path under e2e/tests */
@@ -184,10 +194,20 @@ const playwrightFilters = (env) => (env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.spli
 /**
  * `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all.
  * `SAFE_E2E_SHARD` (`current/total`) runs one Playwright shard of them.
+ * `SAFE_E2E_REPEAT` runs each test that many times.
  */
 export function playwrightRunArguments(env = process.env) {
   const shard = env.SAFE_E2E_SHARD ? ['--shard', env.SAFE_E2E_SHARD] : []
-  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...shard, ...playwrightFilters(env)]
+  const repeat = env.SAFE_E2E_REPEAT ? ['--repeat-each', env.SAFE_E2E_REPEAT] : []
+  return [
+    'playwright',
+    'test',
+    '--config',
+    'e2e/playwright.isolated.config.ts',
+    ...shard,
+    ...repeat,
+    ...playwrightFilters(env),
+  ]
 }
 
 /** The registered Playwright specs that the `SAFE_E2E_SPECS` filters select, as Playwright matches them */
@@ -305,6 +325,11 @@ async function main() {
   const config = configuration(process.argv.slice(2))
   if (config.action === 'plan') {
     console.log(JSON.stringify(planMatrix(Number(process.env.SAFE_E2E_SHARDS || 1))))
+    return
+  }
+  if (config.action === 'release') {
+    if (!process.env.SAFE_E2E_BASE_DECLARATION) throw new Error('release needs SAFE_E2E_BASE_DECLARATION')
+    console.log(releaseOutputs(process.env.SAFE_E2E_BASE_DECLARATION))
     return
   }
   // GitHub Actions step outputs for the stack of this shard

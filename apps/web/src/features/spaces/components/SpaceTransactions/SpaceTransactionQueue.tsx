@@ -4,10 +4,10 @@ import {
   QueueEmpty,
   QueueLoadError,
   QueueNoMatches,
+  QueueRefreshFailed,
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
-import { POLLING_INTERVAL } from '@/config/constants'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   hasSpaceQueueFilters,
@@ -74,10 +74,10 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
-  const { queue, counts, isError, isFetching, refetch } = useSpaceQueue(
+  const { queue, counts, isError, isFetching, isRefreshFailing, refetch } = useSpaceQueue(
     spaceId,
     { filters: queryFilters, search: querySearch },
-    { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
+    { poll: true },
   )
 
   const clearFilters = useCallback(() => {
@@ -98,6 +98,8 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
         groupBy={groupBy}
         onGroupByChange={changeGroupBy}
       />
+
+      {queue && isRefreshFailing && <QueueRefreshFailed />}
 
       {queue ? (
         <QueueBody

@@ -84,7 +84,13 @@ export default function ClaimTrialModal({
 
   return (
     <Dialog open onOpenChange={() => undefined}>
-      <DialogContent size="xs" surface="card" padding="sm" showCloseButton={false} data-testid="claim-trial-modal">
+      <DialogContent
+        size={step === 'accounts' ? 'md' : 'xs'}
+        surface="card"
+        padding="sm"
+        showCloseButton={false}
+        data-testid="claim-trial-modal"
+      >
         <div className="flex flex-col gap-6 pt-5">
           {step === 'accounts' && size ? (
             <SelectAccountsStep

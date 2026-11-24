@@ -10,9 +10,40 @@ import type { PlanTier } from '@safe-global/views/features/spaces/components/Pla
 import { PlanCard, type PlanCardActions } from './PlanCard'
 import { getCatalogTiers, getVisibleTiers } from './planTiers'
 
-type Cycle = 'month' | 'year'
+export type Cycle = 'month' | 'year'
 
 const READ_ONLY_NOTE = 'Only admins can change the plan. Ask an admin to upgrade, switch or change seats.'
+
+export const CycleTabs = ({ cycle, onChange }: { cycle: Cycle; onChange: (cycle: Cycle) => void }) => (
+  <Tabs value={cycle} onValueChange={(value) => onChange(value as Cycle)}>
+    <TabsList aria-label="Billing cycle">
+      <TabsTrigger value="month">Monthly</TabsTrigger>
+      <TabsTrigger value="year">Yearly</TabsTrigger>
+    </TabsList>
+  </Tabs>
+)
+
+/** The read-only note for members and the terms line, under every plan list. */
+export const PlanFootnotes = ({ readOnly }: { readOnly?: boolean }) => (
+  <>
+    {readOnly && (
+      <Typography variant="paragraph-small" color="muted" align="center">
+        {READ_ONLY_NOTE}
+      </Typography>
+    )}
+
+    <Typography variant="paragraph-mini" color="muted" align="center">
+      Terms apply:{' '}
+      <Link href={SAFE_PRO_TERMS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+        Safe Pro Terms
+      </Link>
+      {' · '}
+      <Link href={SAFE_PRO_SERVICE_DESCRIPTIONS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+        Service Descriptions
+      </Link>
+    </Typography>
+  </>
+)
 
 export function PlanCatalog({
   tiers,
@@ -31,12 +62,7 @@ export function PlanCatalog({
   const catalog = (
     <div className="@container flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
-          <TabsList aria-label="Billing cycle">
-            <TabsTrigger value="month">Monthly</TabsTrigger>
-            <TabsTrigger value="year">Yearly</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <CycleTabs cycle={cycle} onChange={setCycle} />
 
         {!embedded && (
           <Link
@@ -71,22 +97,7 @@ export function PlanCatalog({
         ))}
       </div>
 
-      {actions.readOnly && (
-        <Typography variant="paragraph-small" color="muted" align="center">
-          {READ_ONLY_NOTE}
-        </Typography>
-      )}
-
-      <Typography variant="paragraph-mini" color="muted" align="center">
-        Terms apply:{' '}
-        <Link href={SAFE_PRO_TERMS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-          Safe Pro Terms
-        </Link>
-        {' · '}
-        <Link href={SAFE_PRO_SERVICE_DESCRIPTIONS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-          Service Descriptions
-        </Link>
-      </Typography>
+      <PlanFootnotes readOnly={actions.readOnly} />
     </div>
   )
 
