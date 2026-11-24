@@ -129,9 +129,9 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' })
 })
 
-// Jest installs the fake clock once per file, so each test sets the time back to the configured start
+// Jest installs the fake clock once per file, so each test puts it back and resets it to the configured start
 beforeEach(() => {
-  if (!Object.prototype.hasOwnProperty.call(setTimeout, 'clock')) return
+  if (!Object.prototype.hasOwnProperty.call(setTimeout, 'clock')) jest.useFakeTimers()
   jest.setSystemTime(FAKE_CLOCK_START)
 })
 

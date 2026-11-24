@@ -3,6 +3,7 @@ import CopyButton from '.'
 
 describe('CopyButton', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     mockClipboard()
   })
 
@@ -14,8 +15,6 @@ describe('CopyButton', () => {
   })
 
   it('swaps to a checkmark after clicking, then reverts', async () => {
-    jest.useFakeTimers({ advanceTimers: false })
-
     const { getByTestId, queryByTestId } = render(<CopyButton text="0x123" />)
 
     fireEvent.click(getByTestId('copy-btn-icon'))
@@ -29,7 +28,5 @@ describe('CopyButton', () => {
 
     await waitFor(() => expect(getByTestId('copy-btn-icon')).toBeInTheDocument())
     expect(queryByTestId('copy-btn-check')).not.toBeInTheDocument()
-
-    jest.useRealTimers()
   })
 })

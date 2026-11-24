@@ -113,6 +113,7 @@ mockCookiesRemove.mockImplementation((name: string) => {
 
 describe('useHypernativeOAuth', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     jest.clearAllMocks()
     mockDispatch.mockClear()
 
@@ -177,12 +178,10 @@ describe('useHypernativeOAuth', () => {
   describe('initiateLogin - mock mode', () => {
     beforeEach(() => {
       mockAuthEnabled = true
-      jest.useFakeTimers({ advanceTimers: false })
     })
 
     afterEach(() => {
       mockAuthEnabled = false
-      jest.useRealTimers()
     })
 
     it('should set loading to true during login', () => {
@@ -542,7 +541,6 @@ describe('useHypernativeOAuth', () => {
 
   describe('cleanup', () => {
     it('should cleanup timers on unmount', async () => {
-      jest.useFakeTimers({ advanceTimers: false })
       const mockPopup = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValue(mockPopup)
 
@@ -566,11 +564,9 @@ describe('useHypernativeOAuth', () => {
 
       clearIntervalSpy.mockRestore()
       clearTimeoutSpy.mockRestore()
-      jest.useRealTimers()
     })
 
     it('should cleanup polling interval on unmount', async () => {
-      jest.useFakeTimers({ advanceTimers: false })
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
 
       const { unmount } = renderHook(() => useHypernativeOAuth())
@@ -586,7 +582,6 @@ describe('useHypernativeOAuth', () => {
       expect(clearIntervalSpy).toHaveBeenCalled()
 
       clearIntervalSpy.mockRestore()
-      jest.useRealTimers()
     })
   })
 

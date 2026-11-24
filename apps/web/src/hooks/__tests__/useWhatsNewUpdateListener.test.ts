@@ -19,7 +19,6 @@ describe('useWhatsNewUpdateListener', () => {
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     jest.restoreAllMocks()
   })
 

@@ -103,7 +103,6 @@ describe('useAutoScan', () => {
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     jest.restoreAllMocks()
   })
 

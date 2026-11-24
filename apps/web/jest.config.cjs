@@ -22,7 +22,8 @@ const customJestConfig = {
   // CI runners are several times slower than a laptop; the 5 s default fails tests that pass locally
   testTimeout: process.env.CI ? 15_000 : 5_000,
   // Every test starts at the same instant, so results never depend on when the suite runs
-  fakeTimers: { enableGlobally: true, advanceTimers: true, now: FAKE_CLOCK_START },
+  // A fake queueMicrotask runs at the next clock step, after promises queued later; React and Base UI rely on the order
+  fakeTimers: { enableGlobally: true, advanceTimers: true, now: FAKE_CLOCK_START, doNotFake: ['queueMicrotask'] },
   roots: ['<rootDir>', '<rootDir>/../../packages/views/src'],
 
   moduleNameMapper: {

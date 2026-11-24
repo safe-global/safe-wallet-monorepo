@@ -12,7 +12,6 @@ describe('scheduleWhileVisible', () => {
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     setVisibility('visible')
   })
 

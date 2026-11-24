@@ -36,11 +36,8 @@ jest.mock('@/hooks/useChains', () => ({
 
 describe('PoliciesTable', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     mockResolveSafeName.mockReturnValue('')
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('should, when the Safe has a name in the space, show it in the Safe Account column', () => {
@@ -143,7 +140,6 @@ describe('PoliciesTable', () => {
   })
 
   it('should, when hovering a pending status, say how many signatures are in', async () => {
-    jest.useFakeTimers({ advanceTimers: false })
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 

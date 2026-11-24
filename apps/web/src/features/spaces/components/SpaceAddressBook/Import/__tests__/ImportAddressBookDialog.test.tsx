@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ImportAddressBookDialog from '../ImportAddressBookDialog'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
-import { render } from '@/tests/test-utils'
+import { advanceClock, render } from '@/tests/test-utils'
 import useChains from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -145,7 +145,7 @@ describe('ImportAddressBookDialog', () => {
     })
     expect(handleClose).not.toHaveBeenCalled()
 
-    act(() => jest.advanceTimersByTime(500))
+    await advanceClock(500)
     expect(handleClose).toHaveBeenCalledTimes(1)
   })
 

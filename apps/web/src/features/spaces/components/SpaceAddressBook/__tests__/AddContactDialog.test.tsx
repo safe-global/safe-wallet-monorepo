@@ -385,14 +385,13 @@ describe('AddContactDialog', () => {
       expect(screen.getByRole('button', { name: 'Add contact' })).toBeDisabled()
     })
 
-    it('stays disabled while the address is missing', async () => {
+    it('is disabled once the form is checked while the address is missing', async () => {
       render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
       openDialog()
 
       fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alice' } })
 
-      await waitFor(() => expect(screen.getByLabelText('Name')).toHaveValue('Alice'))
-      expect(screen.getByRole('button', { name: 'Add contact' })).toBeDisabled()
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Add contact' })).toBeDisabled())
     })
 
     it('stays disabled while the name is missing', async () => {

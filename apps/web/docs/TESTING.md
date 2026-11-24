@@ -213,13 +213,14 @@ jsdom makes `window.location` non-configurable, so `Object.defineProperty(window
 
 ### Time and timers
 
-Every test runs on a fake clock (`fakeTimers` in `jest.config.cjs`). It starts at the same instant, `FAKE_CLOCK_START` in `jest.clock.cjs` (2026-01-15 10:30 UTC), and advances with real time, so `waitFor`, `findBy*` and `userEvent` work without setup.
+Every test runs on a fake clock (`fakeTimers` in `jest.config.cjs`). It starts at the same instant, `FAKE_CLOCK_START` in `jest.clock.cjs` (2026-01-15 10:30 UTC), and advances with real time, so `waitFor`, `findBy*` and `userEvent` work without setup. `queueMicrotask` stays real: a fake one runs at the next clock step, after promises queued later, and React and Base UI depend on that order.
 
 - **Set a date:** `jest.setSystemTime(...)`. Seed dates relative to the fixed start, not to today.
 - **Move time:** `jest.advanceTimersByTime(ms)` inside `act`, or `advanceClock(ms)` from `@/tests/test-utils`.
 - **On the default clock, do not assert at an exact boundary** such as `delay - 1` when an `await` sits between the steps: real time also moves the clock by a few milliseconds. Check at half the delay, then after it, or wait with `findBy*` / `waitFor`.
-- **For exact timing, give every test in the file a strict clock:** `beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))`. Without the option, `jest.useFakeTimers()` takes `advanceTimers: true` from the config.
-- **Do not switch clocks for a single test**, and do not call `jest.useRealTimers()` in a file whose other tests use the default clock. React and libraries keep the clock they saw first, and their timers stop firing.
+- **For exact timing, give every test in the file a strict clock:** `beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))`. Without the option, `jest.useFakeTimers()` takes `advanceTimers: true` from the config. A strict clock moves only when the test moves it, so a wait on real time (a `setTimeout` promise, `userEvent` without `renderOnFakeClock`) never ends. Move the clock in those steps, or keep the file on the default clock.
+- **One clock per file, not per test or per block.** A new clock drops the pending timers of the old one, so code that keeps a timer between tests (for example the batcher in `safeOverviews`) waits forever. If the code under test does that, install the clock once in `beforeAll`.
+- **Never call `jest.useRealTimers()`.** ESLint rejects it in tests. If a test removes the fake clock anyway, `jest.setup.js` puts it back before the next test.
 - **Each test starts at the same instant:** `jest.setup.js` sets the clock back to the start before every test, so `setSystemTime` and advances do not carry over. Pending timers are not cleared, because UI libraries keep timers across tests.
 
 ## Templates

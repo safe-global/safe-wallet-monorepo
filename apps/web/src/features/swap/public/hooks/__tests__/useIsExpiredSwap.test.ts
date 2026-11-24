@@ -10,10 +10,6 @@ describe('useIsExpiredSwap', () => {
     jest.clearAllMocks()
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   it('returns false if txInfo is not a swap order', () => {
     jest.spyOn(guards, 'isSwapOrderTxInfo').mockReturnValue(false)
 

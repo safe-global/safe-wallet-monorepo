@@ -21,7 +21,6 @@ describe('useLaunchScreen', () => {
     act(() => {
       jest.runOnlyPendingTimers()
     })
-    jest.useRealTimers()
     jest.clearAllMocks()
   })
 

@@ -46,10 +46,6 @@ describe('WcInput', () => {
     jest.spyOn(walletConnect, 'connect').mockResolvedValue(pairing)
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   const renderInput = async () => {
     render(<Harness walletConnect={walletConnect} />)
     await act(async () => {})

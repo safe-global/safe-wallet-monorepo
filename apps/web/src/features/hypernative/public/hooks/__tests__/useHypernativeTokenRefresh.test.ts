@@ -47,10 +47,6 @@ describe('useHypernativeTokenRefresh', () => {
     setOnline(true)
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   it('does nothing for a session without a refresh token', async () => {
     setAuthCookie({ access_token: 'access-1', token_type: 'Bearer', expires_in: 30 })
 

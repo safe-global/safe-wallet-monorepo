@@ -170,10 +170,6 @@ describe('SignMessage', () => {
     jest.useFakeTimers({ advanceTimers: false })
   })
 
-  afterAll(() => {
-    jest.useRealTimers()
-  })
-
   beforeEach(() => {
     // Restore, not reset: a reset leaves a neutered spy in place, so a test
     // that spied on `safeMsgSender` would silently no-op the real producer for

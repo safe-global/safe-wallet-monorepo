@@ -30,7 +30,6 @@ describe('HnCalendlyStep', () => {
 
   afterEach(() => {
     jest.runOnlyPendingTimers()
-    jest.useRealTimers()
   })
 
   it('should render the Calendly widget container', () => {

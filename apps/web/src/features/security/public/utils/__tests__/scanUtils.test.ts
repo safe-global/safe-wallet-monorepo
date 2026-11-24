@@ -12,6 +12,8 @@ const makeScanResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   ...overrides,
 })
 
+beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
+
 describe('scanKey', () => {
   it('produces address:chainId format with lowercased address', () => {
     expect(scanKey('0xABC', '1')).toBe('0xabc:1')
@@ -175,14 +177,6 @@ describe('computeSummary', () => {
 })
 
 describe('withScannerTimeout', () => {
-  beforeEach(() => {
-    jest.useFakeTimers({ advanceTimers: false })
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   it('resolves with the scanner result when it completes in time', async () => {
     const result = await withScannerTimeout(Promise.resolve('done'))
     expect(result).toBe('done')

@@ -36,7 +36,6 @@ describe('getMultipleSafeOverviews cache key (serializeQueryArgs)', () => {
 
   afterEach(() => {
     jest.clearAllTimers()
-    jest.useRealTimers()
   })
 
   it('shares ONE entry for the same safe set regardless of field values, order, and isReadOnly flips', () => {

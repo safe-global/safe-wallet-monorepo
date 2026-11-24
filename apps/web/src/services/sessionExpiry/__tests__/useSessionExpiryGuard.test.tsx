@@ -73,10 +73,6 @@ describe('useSessionExpiryGuard', () => {
     localStorage.clear()
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   it('does nothing when the user is not signed in (sessionExpiresAt is null)', async () => {
     const { store } = renderGuardWithStore(null)
     await flushMicrotasks()

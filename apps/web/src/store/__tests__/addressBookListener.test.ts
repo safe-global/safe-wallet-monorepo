@@ -22,6 +22,8 @@ const abMessages = (store: ReturnType<typeof setup>) =>
     .map((n) => ({ message: n.message, variant: n.variant }))
 
 describe('addressBookListener', () => {
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
+
   it('notifies "added" for a new entry with notify:true', () => {
     const store = setup()
 
@@ -118,14 +120,6 @@ describe('addressBookListener', () => {
   describe('batch imports', () => {
     // The debounce runs on timers; fake them so the 300ms wait is deterministic
     // and instant instead of a real-clock sleep.
-    beforeEach(() => {
-      jest.useFakeTimers({ advanceTimers: false })
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     // advanceTimersByTimeAsync flushes both the debounce timer and the
     // microtasks that resume the listener's async effect afterwards.
     const flushDebounce = () => jest.advanceTimersByTimeAsync(300)

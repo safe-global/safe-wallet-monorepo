@@ -56,6 +56,8 @@ const openFilterSection = (section: string) => {
 }
 
 describe('TransactionsToolbar', () => {
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
+
   it('has no Urgency or Safe button beside the Filter menu', () => {
     renderToolbar()
 
@@ -267,14 +269,6 @@ describe('TransactionsToolbar', () => {
   })
 
   describe('search', () => {
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it('passes the search on to the queue once typing pauses', () => {
       const onSearchChange = jest.fn()
       render(

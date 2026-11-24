@@ -33,10 +33,6 @@ describe('safeOverviews', () => {
     jest.useFakeTimers({ advanceTimers: false })
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   describe('useGetSafeOverviewQuery', () => {
     it('should return null for empty safe Address', async () => {
       const request = { chainId: '1', safeAddress: '' }

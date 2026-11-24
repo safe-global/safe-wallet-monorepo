@@ -41,8 +41,6 @@ describe('useActivatingPolicies', () => {
     mockGetTransaction.mockResolvedValue({ data: { txStatus: 'SUCCESS' } })
   })
 
-  afterEach(() => jest.useRealTimers())
-
   it('should, when a pending row leaves the queue because it executed, hold it as activating', async () => {
     const { result, rerender, initialProps } = setup()
 

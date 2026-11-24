@@ -25,10 +25,6 @@ describe('ActivityLogFilters', () => {
     ])
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   it('emits an inclusive ISO lower bound for the from date', () => {
     const onFiltersChange = jest.fn()
     render(<ActivityLogFilters filters={EMPTY_FILTERS} onFiltersChange={onFiltersChange} />)
