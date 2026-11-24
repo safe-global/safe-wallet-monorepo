@@ -403,8 +403,13 @@ describe('AuthState', () => {
     expect(queryByTestId('unauthorized')).not.toBeNull()
   })
 
-  it('shows the no-access state when the space query is forbidden', () => {
-    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: { status: 403 }, isLoading: false })
+  it('keeps the page when only the space query is forbidden', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { uuid: 'uuid-1', members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
+      error: { status: 403 },
+      isLoading: false,
+      isFetching: false,
+    })
 
     const { queryByTestId } = render(
       <AuthState spaceId="11111111-1111-1111-1111-111111111111">
@@ -412,8 +417,9 @@ describe('AuthState', () => {
       </AuthState>,
     )
 
-    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
-    expect(queryByTestId('unauthorized')).not.toBeNull()
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('unauthorized')).toBeNull()
+    expect(queryByTestId('children')).not.toBeNull()
   })
 
   it('keeps the page when the space query is rate-limited', () => {
@@ -448,6 +454,45 @@ describe('AuthState', () => {
 
   it('does not check the membership again while the queue polls fine', () => {
     render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockRefetchMembership).not.toHaveBeenCalled()
+  })
+
+  it('checks the membership again once a session check keeps the session', () => {
+    mockIsSessionCheckPending = true
+    const { rerender } = render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+    expect(mockRefetchMembership).not.toHaveBeenCalled()
+
+    mockIsSessionCheckPending = false
+    rerender(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockRefetchMembership).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not ask for the membership again once it was refused', () => {
+    mockIsMembershipRevoked = true
+    mockIsSessionCheckPending = true
+    mockUseSpaceQueuePolling.mockReturnValue(true)
+    const { rerender } = render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    mockIsSessionCheckPending = false
+    rerender(
       <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div />
       </AuthState>,

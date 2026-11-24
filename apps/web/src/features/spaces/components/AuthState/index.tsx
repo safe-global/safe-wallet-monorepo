@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import { isUnauthorized } from '../../utils'
 import UnauthorizedState from '../UnauthorizedState'
@@ -11,7 +11,6 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 import { useSpaceQueuePolling } from '../../hooks/useSpaceQueuePolling'
 import { MemberStatus, useMembershipRevoked } from '../../public/hooks/useSpaceMembers'
-import { isForbidden } from '@/services/sessionExpiry/expireSession'
 import { AppRoutes } from '@/config/routes'
 import TrialEndingModal from '../Plans/TrialEndingModal'
 import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
@@ -35,13 +34,21 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const isCurrentUserActive = currentMembership?.status === MemberStatus.ACTIVE
 
   const isLoadingState = isLoading || isOidcLoginPending || isSessionCheckPending
-  const hasLostAccess = isUserSignedIn && !isLoadingState && (isUnauthorized(error) || isForbidden(error) || isRevoked)
+  const hasLostAccess = isUserSignedIn && !isLoadingState && (isUnauthorized(error) || isRevoked)
   const isInactiveMember = isUserSignedIn && !isLoadingState && hasMembershipLoaded && !isCurrentUserActive
 
   // A refused poll is the first sign of a removal; the member list says whether access is really gone
   useEffect(() => {
-    if (isQueueRefused && isUserSignedIn && spaceId) void refetchMembership()
-  }, [isQueueRefused, isUserSignedIn, spaceId, refetchMembership])
+    if (isQueueRefused && !isRevoked && isUserSignedIn && spaceId) void refetchMembership()
+  }, [isQueueRefused, isRevoked, isUserSignedIn, spaceId, refetchMembership])
+
+  // A session check that kept the session means some request was refused (403): was it the membership?
+  const wasCheckingSession = useRef(isSessionCheckPending)
+  useEffect(() => {
+    const hasCheckPassed = wasCheckingSession.current && !isSessionCheckPending
+    wasCheckingSession.current = isSessionCheckPending
+    if (hasCheckPassed && !isRevoked && isUserSignedIn && spaceId) void refetchMembership()
+  }, [isSessionCheckPending, isRevoked, isUserSignedIn, spaceId, refetchMembership])
 
   useEffect(() => {
     dispatch(setLastUsedSpaceOrigin({ path: router.pathname, spaceId }))

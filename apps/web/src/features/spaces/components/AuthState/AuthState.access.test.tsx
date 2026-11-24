@@ -5,7 +5,7 @@ import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERA
 import { POLLING_INTERVAL } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
 import { useSpaceMembersByStatus } from '../../public/hooks/useSpaceMembers'
 import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressBook'
@@ -55,8 +55,12 @@ const emptyQueue: SpaceQueuedItemPage = {
 /** Stands for a Workspace page: it reads the members and the address book, as the real pages do. */
 const WorkspacePage = () => {
   useSpaceMembersByStatus()
-  useSpaceAddressBookState()
-  return <div data-testid="page" />
+  const { refetch } = useSpaceAddressBookState()
+  return (
+    <button data-testid="page" onClick={refetch}>
+      Reload contacts
+    </button>
+  )
 }
 
 const LATENCY = 200
@@ -153,5 +157,21 @@ describe('AuthState when the member loses access mid-session', () => {
     expect(screen.queryByTestId('unauthorized')).not.toBeInTheDocument()
     expect(requests.slice(settled).every((path) => path.endsWith('/transactions/queued'))).toBe(true)
     expect(requests.length - settled).toBeLessThanOrEqual(4)
+  })
+
+  it('shows the no-access state and stops when the first refusal comes from a page request with polling off', async () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+    renderPage()
+    expect(await screen.findByTestId('page')).toBeInTheDocument()
+
+    status = 403
+    fireEvent.click(screen.getByTestId('page'))
+    await advance(2_000)
+
+    expect(screen.getByTestId('unauthorized')).toBeInTheDocument()
+    const settled = requests.length
+    await advance(4 * POLLING_INTERVAL)
+    expect(requests.slice(settled)).toEqual([])
+    expect(requests.some((path) => path.endsWith('/transactions/queued'))).toBe(false)
   })
 })
