@@ -21,7 +21,7 @@ describe('QueueSafeTag', () => {
     expect(screen.queryByTestId('party-card')).not.toBeInTheDocument()
   })
 
-  it.each(['hover', 'focus'])('shows the party card in a wide tooltip on %s', async (how) => {
+  it.each(['hover', 'Enter'])('shows the party card in a wide popover on %s', async (how) => {
     jest.useFakeTimers()
     const { user } = renderOnFakeClock(<QueueSafeTag address={address} name="Treasury" chain={chain} card={card} />)
 
@@ -32,10 +32,11 @@ describe('QueueSafeTag', () => {
       await user.tab()
       expect(tag).toHaveFocus()
       expect(tag).toHaveClass('outline-hidden', 'focus-visible:ring-[3px]', 'focus-visible:ring-ring/50')
+      await user.keyboard('{Enter}')
     }
     await advanceClock(200)
 
     expect(await screen.findByTestId('party-card')).toBeInTheDocument()
-    expect(screen.getByTestId('party-card').closest('[data-slot="tooltip-content"]')).toHaveClass('max-w-none')
+    expect(screen.getByTestId('party-card').closest('[data-slot="popover-content"]')).toHaveClass('max-w-none')
   })
 })

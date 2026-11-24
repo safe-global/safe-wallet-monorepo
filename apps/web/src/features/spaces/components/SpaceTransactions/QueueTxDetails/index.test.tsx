@@ -4,7 +4,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import userEvent from '@testing-library/user-event'
 import { multisigTransactionBuilder } from '@/tests/builders/queuedTransaction'
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor } from '@/tests/test-utils'
 import QueueTxDetails from '.'
 
 const address = () => checksumAddress(faker.finance.ethereumAddress())
@@ -80,6 +80,20 @@ describe('QueueTxDetails.Summary', () => {
       'href',
       HelpCenterArticle.CANCELLING_TRANSACTIONS,
     )
+  })
+
+  it('lets the keyboard reach the help link of an on-chain rejection', async () => {
+    renderSummary(
+      { type: 'Custom', methodName: null, to: { value: address() }, dataSize: '0', isCancellation: true },
+      { type: 'MULTISIG', nonce: 7, confirmationsRequired: 2, confirmationsSubmitted: 0 },
+    )
+
+    await userEvent.tab()
+    expect(screen.getByText('Cancels #7')).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+
+    const link = await screen.findByRole('link', { name: /Learn more about on-chain rejections/ })
+    await waitFor(() => expect(link).toHaveFocus())
   })
 })
 
