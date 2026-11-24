@@ -369,9 +369,8 @@ describe('AppsPage', () => {
 
     it('Shows an error label if the app doesnt support Safe App functionality', async () => {
       const INVALID_SAFE_APP_URL = 'https://google.com'
-      jest
-        .spyOn(safeAppsService, 'fetchSafeAppFromManifest')
-        .mockRejectedValueOnce(new Error(`Failed to fetch manifest from ${INVALID_SAFE_APP_URL}/manifest.json`))
+      // MSW lets unmatched .json requests through to the network, so the manifest needs its own handler
+      server.use(http.get(`${INVALID_SAFE_APP_URL}/manifest.json`, () => new HttpResponse(null, { status: 404 })))
       render(<CustomSafeAppsPage />, {
         routerProps: {
           pathname: '/apps/custom',
