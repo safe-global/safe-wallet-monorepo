@@ -25,7 +25,8 @@ export const QUEUE_PINNED_COLUMNS: Partial<Record<QueueColumn, 'start' | 'end'>>
 
 // 80px: past the pinned Nonce column and the cell's padding; 100cqw is the panel's width (an @container)
 /** A band's or conflict's label: in view beside the pinned nonce, and as wide as the panel, while the table scrolls */
-export const QUEUE_ROW_LABEL = 'sticky left-[80px] max-w-[calc(100cqw-100px)]'
+// Not the `sticky` class: the web app's globals.css gives `.sticky` a paper background and right: 0 below 600px
+export const QUEUE_ROW_LABEL = '[position:sticky] left-[80px] max-w-[calc(100cqw-100px)]'
 
 /** Where a column starts, as a CSS length from the table's left edge: Details and the columns after it hang off the right */
 export const getQueueColumnStart = (column: QueueColumn): string => {

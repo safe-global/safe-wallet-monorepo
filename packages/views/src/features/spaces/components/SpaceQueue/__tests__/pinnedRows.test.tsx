@@ -33,6 +33,7 @@ describe('queue rows while the table scrolls sideways', () => {
     expect(first).toHaveAttribute('data-pin', 'start')
     expect(label).not.toHaveAttribute('data-pin')
     expect(label.firstElementChild).toHaveClass(...QUEUE_ROW_LABEL.split(' '))
+    expect(label.firstElementChild).not.toHaveClass('sticky')
   })
 
   it('wraps the conflict explanation instead of widening the table, the nonce beside its first line', () => {
