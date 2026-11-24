@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { getAddress, isAddress } from 'ethers'
 import { useTokensGetTokenV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useChainId from '@/hooks/useChainId'
 import { findTokenOption, toCustomTokenOption, type TokenOption } from '../utils/tokenOptions'
 
@@ -25,7 +26,7 @@ const useCustomTokenLookup = (query: string, options: readonly TokenOption[]): C
     { chainId, address: address ?? '' },
     { skip: !address },
   )
-  const token = address ? currentData : undefined
+  const token = address && currentData && sameAddress(currentData.address, address) ? currentData : undefined
   const option = useMemo(() => (token?.type === 'ERC20' ? toCustomTokenOption(token) : undefined), [token])
   const isNotFound = !!error && 'status' in error && error.status === 404
 
