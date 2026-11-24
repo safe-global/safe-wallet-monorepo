@@ -498,22 +498,38 @@ describe('useFeesPreview', () => {
       expect(result.current.canCoverFees).toBe(true)
     })
 
-    it('uses the local EOA gas estimate for single-signer Safes', () => {
-      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
-      const singleSignerSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
-      jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
-        safe: singleSignerSafe,
-        safeAddress: singleSignerSafe.address.value,
-        safeLoaded: true,
-        safeLoading: false,
+    describe('single-signer Safes', () => {
+      beforeEach(() => {
+        jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
+        const singleSignerSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
+        jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
+          safe: singleSignerSafe,
+          safeAddress: singleSignerSafe.address.value,
+          safeLoaded: true,
+          safeLoading: false,
+        })
       })
 
-      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+      it('shows "Calculated at execution" and no total outgoing while signing', () => {
+        const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
 
-      expect(result.current.gasFee.note).toBeUndefined()
-      expect(result.current.gasFee.amount).toBeDefined()
-      expect(result.current.gasFee.currency).toBe('ETH')
-      expect(result.current.canCoverFees).toBe(true)
+        expect(result.current.gasFee.note).toBe('Calculated at execution')
+        expect(result.current.gasFee.amount).toBeUndefined()
+        expect(result.current.totalOutgoing).toBeUndefined()
+        expect(result.current.canCoverFees).toBe(true)
+      })
+
+      it('uses the local EOA gas estimate at execution, with no total outgoing', () => {
+        const { result } = renderHook(() => useFeesPreview({ isExecution: true }), {
+          wrapper: withSafeTx(nativeSafeTx),
+        })
+
+        expect(result.current.gasFee.note).toBeUndefined()
+        expect(result.current.gasFee.amount).toBeDefined()
+        expect(result.current.gasFee.currency).toBe('ETH')
+        expect(result.current.totalOutgoing).toBeUndefined()
+        expect(result.current.canCoverFees).toBe(true)
+      })
     })
   })
 
@@ -582,7 +598,9 @@ describe('useFeesPreview', () => {
       safeLoading: false,
     })
 
-    const { result } = renderHook(() => useFeesPreview({ isPayFromSafe: true }), { wrapper: withSafeTx(undefined) })
+    const { result } = renderHook(() => useFeesPreview({ isExecution: true, isPayFromSafe: true }), {
+      wrapper: withSafeTx(undefined),
+    })
 
     expect(result.current.gasFee.currency).toBe('ETH')
   })
