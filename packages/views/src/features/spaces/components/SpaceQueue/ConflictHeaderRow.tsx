@@ -3,7 +3,7 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { QUEUE_COLUMNS } from './columns'
+import { QUEUE_COLUMNS, QUEUE_ROW_LABEL } from './columns'
 import { ConflictBracketStart } from './ConflictBracket'
 
 const ConflictHeaderRow = ({
@@ -17,12 +17,13 @@ const ConflictHeaderRow = ({
 }): ReactElement => (
   <TableRow data-no-hover data-no-divider {...rowProps}>
     {/* ConflictBracketStart's top-[calc(50%+20px)] depends on this cell's pt-4 pb-1 text-sm */}
-    <TableCell className="relative pt-4 pb-1 text-center text-sm tabular-nums text-muted-foreground">
+    <TableCell data-pin="start" className="relative pt-4 pb-1 text-center text-sm tabular-nums text-muted-foreground">
       {nonce}
       <ConflictBracketStart />
     </TableCell>
-    <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="pt-4 pb-1">
-      <span className="flex items-center gap-2 text-xs">
+    <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="pt-4 pb-1 whitespace-normal">
+      {/* Wraps rather than widening a narrow panel */}
+      <span className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs ${QUEUE_ROW_LABEL}`}>
         <Badge variant="warning">Conflicting</Badge>
         <span className="text-muted-foreground">
           Only 1/{size} transactions can execute. Once it does, the {size === 2 ? 'other becomes' : 'others become'}{' '}

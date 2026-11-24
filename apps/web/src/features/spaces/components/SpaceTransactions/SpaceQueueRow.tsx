@@ -21,7 +21,7 @@ import QueueTxDetails from './QueueTxDetails'
 import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
-import { QUEUE_COLUMNS, QUEUE_STICKY_CELL } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import { QUEUE_COLUMNS, QUEUE_PINNED_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
@@ -109,7 +109,7 @@ type SpaceQueueRowProps = {
   canReject?: boolean
   safeAddress: string
   rowProps?: ComponentProps<'tr'>
-  /** Below the mobile breakpoint: the row is one cell beside the nonce, the gauge and the action under its summary */
+  /** Phones: one cell beside the nonce */
   compact?: boolean
 }
 
@@ -202,11 +202,8 @@ const SpaceQueueRow = ({
       )}
     >
       <TableCell
-        className={cn(
-          'py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground',
-          // A conflict's bracket is drawn off this cell: sticky positions it as relative would
-          compact ? 'relative' : QUEUE_STICKY_CELL.Nonce,
-        )}
+        data-pin={QUEUE_PINNED_COLUMNS.Nonce}
+        className="relative py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground"
       >
         {conflict ? <ConflictBracket {...conflict} nonce={nonce} /> : nonce}
       </TableCell>
@@ -267,7 +264,7 @@ const SpaceQueueRow = ({
             <span className="flex min-w-0 items-center">{gauge}</span>
           </TableCell>
 
-          <TableCell className={QUEUE_STICKY_CELL.Action}>{action}</TableCell>
+          <TableCell data-pin={QUEUE_PINNED_COLUMNS.Action}>{action}</TableCell>
         </>
       )}
     </TableRow>

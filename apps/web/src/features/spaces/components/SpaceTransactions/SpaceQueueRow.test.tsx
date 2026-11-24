@@ -4,7 +4,6 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import { advanceClock, render, renderOnFakeClock, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
-import { QUEUE_STICKY_CELL } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import SpaceQueueRow, { Counterparty, ProposedTime } from './SpaceQueueRow'
@@ -145,10 +144,9 @@ describe('SpaceQueueRow', () => {
 
     const cells = within(screen.getByTestId('space-queue-row')).getAllByRole('cell')
     expect(cells).toHaveLength(6)
-    expect(cells[0]).toHaveClass('sticky', 'left-0')
-    expect(cells[5]).toHaveClass('sticky', 'right-0')
-    expect(cells[0].className).toContain(QUEUE_STICKY_CELL.Nonce)
-    expect(cells[5].className).toContain(QUEUE_STICKY_CELL.Action)
+    expect(cells[0]).toHaveAttribute('data-pin', 'start')
+    expect(cells[5]).toHaveAttribute('data-pin', 'end')
+    cells.slice(1, 5).forEach((cell) => expect(cell).not.toHaveAttribute('data-pin'))
   })
 
   it('puts everything but the nonce in one cell when compact, with no type column or proposed time', () => {
@@ -158,7 +156,6 @@ describe('SpaceQueueRow', () => {
     const cells = within(row).getAllByRole('cell')
     expect(cells).toHaveLength(2)
     expect(cells[1]).toHaveAttribute('colspan', '5')
-    expect(cells[0]).not.toHaveClass('sticky')
     expect(row).not.toHaveClass('h-14')
   })
 

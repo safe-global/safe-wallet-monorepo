@@ -17,19 +17,15 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Action: 204,
 }
 
-/**
- * The queue table's floor, Details at 232px: below it, the table scrolls sideways inside its panel. It fits a 1280px
- * window with the 230px sidebar open (a 1002px panel), with room for a 15px classic scrollbar.
- */
+/** The queue table's floor: Details at 232px, so it fits the 1002px panel of a 1280px window with the sidebar open */
 export const QUEUE_TABLE_MIN_WIDTH = 'min-w-[960px]'
 
-// The panel table's outer cells have a 4px transparent edge: painted the panel's colour, so nothing shows through it.
-// Important, as the table's CSS module isn't in a layer. Its header and hover fills still win over the background.
-/** The Nonce and Action cells stay in view while a panel narrower than the table's floor scrolls under them */
-export const QUEUE_STICKY_CELL: Partial<Record<QueueColumn, string>> = {
-  Nonce: 'sticky left-0 z-[1] bg-[var(--color-background-paper)] border-l-[var(--color-background-paper)]!',
-  Action: 'sticky right-0 z-[1] bg-[var(--color-background-paper)] border-r-[var(--color-background-paper)]!',
-}
+/** The columns that stay in view while the table scrolls sideways in its panel (`data-pin`, see table.module.css) */
+export const QUEUE_PINNED_COLUMNS: Partial<Record<QueueColumn, 'start' | 'end'>> = { Nonce: 'start', Action: 'end' }
+
+// 80px: past the pinned Nonce column and the cell's padding; 100cqw is the panel's width (an @container)
+/** A band's or conflict's label: in view beside the pinned nonce, and as wide as the panel, while the table scrolls */
+export const QUEUE_ROW_LABEL = 'sticky left-[80px] max-w-[calc(100cqw-100px)]'
 
 /** Where a column starts, as a CSS length from the table's left edge: Details and the columns after it hang off the right */
 export const getQueueColumnStart = (column: QueueColumn): string => {

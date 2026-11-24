@@ -200,7 +200,6 @@ const SpaceQueueTable = ({
   groupBy: QueueGroupBy
 }): ReactElement => {
   const signers = useSignerWallets()
-  // Phones get one cell per row beside the nonce, as the prototype's compact list
   const compact = useIsMobile()
   const transactionHeight = compact ? COMPACT_TRANSACTION_HEIGHT : ESTIMATED_HEIGHTS.transaction
   const { configs } = useChains()
@@ -259,6 +258,21 @@ const SpaceQueueTable = ({
     update()
     const observer = new ResizeObserver(update)
     observer.observe(document.body)
+    return () => observer.disconnect()
+  }, [])
+
+  // Pins the Nonce and Action cells only while the table is wider than its panel
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [scrollsX, setScrollsX] = useState(false)
+  useLayoutEffect(() => {
+    const panel = panelRef.current
+    const table = panel?.querySelector('table')
+    if (!panel || !table) return
+    const update = () => setScrollsX(panel.scrollWidth > panel.clientWidth)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(panel)
+    observer.observe(table)
     return () => observer.disconnect()
   }, [])
 
@@ -332,9 +346,12 @@ const SpaceQueueTable = ({
       <DeleteTxDialogProvider>
         {/* Every tooltip in the table opens after the same delay, those of the shared components it renders too */}
         <TooltipDelay delay={QUEUE_TOOLTIP_DELAY}>
-          {/* Same panel surface as the Space accounts table, so the two line up. Its width doesn't count towards the
-            page's (contain), so a table wider than the panel scrolls in it rather than widening the page. */}
-          <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2 [contain:inline-size]">
+          {/* A container, so a wider table scrolls in the panel instead of widening the page */}
+          <div
+            ref={panelRef}
+            data-scrolls-x={scrollsX ? '' : undefined}
+            className="@container w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2 [--table-pin-surface:var(--color-background-paper)]"
+          >
             <ScopePool targets={scopeTargets} store={scopeStore} />
             <table
               aria-label="Pending transactions"
