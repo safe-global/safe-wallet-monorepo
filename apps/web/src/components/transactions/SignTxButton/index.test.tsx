@@ -1,5 +1,5 @@
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { act, fireEvent, render, screen } from '@/tests/test-utils'
 import SignTxButton from '.'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { faker } from '@faker-js/faker'
@@ -82,6 +82,32 @@ describe('SignTxButton', () => {
 
     expect(screen.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign' })).toHaveClass('h-6', 'w-20')
+  })
+
+  it('shows its hint on focus while the wallet can sign', async () => {
+    const wallet = mockRole('owner')
+
+    render(
+      <SignTxButton
+        txSummary={txAwaitingSignatureFrom(wallet?.address ?? '')}
+        compact
+        dense
+        hint="Yours is the last signature. You can execute right after."
+      />,
+    )
+    act(() => screen.getByRole('button', { name: 'Sign' }).focus())
+
+    expect(await screen.findByText('Yours is the last signature. You can execute right after.')).toBeInTheDocument()
+  })
+
+  it('keeps its hint hidden while the wallet cannot sign', async () => {
+    mockRole('nonOwner')
+
+    render(<SignTxButton txSummary={txAwaitingAnotherSigner} compact dense hint="Hint" />)
+    act(() => screen.getByRole('button', { name: 'Sign' }).focus())
+
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(screen.queryByText('Hint')).not.toBeInTheDocument()
   })
 
   it('should be disabled for a proposer who is not a missing signer', () => {

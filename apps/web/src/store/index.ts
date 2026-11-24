@@ -204,7 +204,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       }
     }
 
-    // A saved Group by that is no longer an option falls back to the default
+    // A saved queue view field that is no longer valid falls back to its default, field by field
     if (nextState[slices.spaceQueueViewSlice.name]) {
       nextState[slices.spaceQueueViewSlice.name] = slices.migrateSpaceQueueView(
         nextState[slices.spaceQueueViewSlice.name],

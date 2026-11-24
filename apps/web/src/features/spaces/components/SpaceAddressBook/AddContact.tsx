@@ -6,7 +6,7 @@ import type { WorkspaceTag } from '@safe-global/views/features/spaces/components
 import useGetSpaceAddressBook from '../../public/hooks/useGetSpaceAddressBook'
 import { useWorkspaceAddressBookLabel } from '../../public/hooks/useWorkspaceAddressBookLabel'
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
-import AddContactDialog, { type TriggerSize } from './AddContactDialog'
+import AddContactDialog, { type ContactPrefill, type TriggerSize } from './AddContactDialog'
 
 export type { ContactField } from './AddContactDialog'
 
@@ -16,9 +16,19 @@ type AddContactProps = {
   /** Shows the Tags field; the v2 address book passes them. */
   workspaceTags?: WorkspaceTag[]
   onTagLimitReached?: () => void
+  prefill?: ContactPrefill
+  /** Makes the dialog triggerless: it opens on mount and the caller unmounts it here. */
+  onClose?: () => void
 }
 
-const AddContact = ({ label = 'Add contact', size, workspaceTags, onTagLimitReached }: AddContactProps) => {
+const AddContact = ({
+  label = 'Add contact',
+  size,
+  workspaceTags,
+  onTagLimitReached,
+  prefill,
+  onClose,
+}: AddContactProps) => {
   const addressBookItems = useGetSpaceAddressBook()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -33,6 +43,8 @@ const AddContact = ({ label = 'Add contact', size, workspaceTags, onTagLimitReac
       validateCharset
       workspaceTags={workspaceTags}
       onTagLimitReached={onTagLimitReached}
+      prefill={prefill}
+      onClose={onClose}
       submit={(item, sid) =>
         upsertAddressBook({
           spaceId: sid,

@@ -63,7 +63,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-// The component renders nothing until the pending-time counter first ticks, after 1s
+// The chain config and the signer check load asynchronously before the button shows
 const COUNTER_TICK_WAIT = { timeout: 3000 }
 
 // Warning alert shown next to a pending transaction in the queue.

@@ -464,7 +464,7 @@ describe('SpaceTransactionQueue', () => {
       respondWith(page({ [safeA]: { '1': transactions(1) } }))
 
       render(<SpaceTransactionQueue spaceId={spaceId} />, {
-        initialReduxState: { spaceQueueView: { groupBy: 'next' } },
+        initialReduxState: { spaceQueueView: { groupBy: 'next', collapseAll: false } },
       })
 
       expect(await screen.findByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'next')

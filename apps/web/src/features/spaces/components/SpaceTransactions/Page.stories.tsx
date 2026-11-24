@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { delay, http, HttpResponse } from 'msw'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpaceTransactionsPage from './Page'
-import { QUEUE_SECTIONS, SPACE_QUEUE_URL, toQueuePage } from './SpaceTransactionQueue.storyData'
+import { QUEUE_SECTIONS, SPACE_QUEUE_URL, TX_DETAILS_HANDLER, toQueuePage } from './SpaceTransactionQueue.storyData'
 
 const SPACE_ID = '1'
 
@@ -21,7 +21,8 @@ const meta = {
   title: 'Features/Spaces/Transactions/SpaceTransactionsPage',
   component: SpaceTransactionsPage,
   args: { spaceId: SPACE_ID },
-  parameters: { ...setup.parameters },
+  // Ahead of the defaults, which already answer every transaction details request
+  parameters: { ...setup.parameters, msw: { handlers: [TX_DETAILS_HANDLER, ...setup.handlers] } },
   decorators: [setup.decorator],
 } satisfies Meta<typeof SpaceTransactionsPage>
 
