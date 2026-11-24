@@ -12,6 +12,7 @@ import {
   getNonceHint,
   getNextStatus,
   getQueueStatus,
+  getQueueWarnings,
   getQueueTypeLabel,
   getRejectedNonces,
   getSectionRows,
@@ -511,5 +512,61 @@ describe('getTypeHint', () => {
     expect(getTypeHint(custom({ safeAppInfo: { name: 'Transaction Builder', url: '', logoUri: '' } }))).toBe(
       'Created in the Transaction Builder Safe App. Calls a function on a smart contract.',
     )
+  })
+})
+
+describe('getQueueWarnings', () => {
+  const SAFE = checksumAddress(faker.finance.ethereumAddress())
+  const build = (txInfo: object) =>
+    ({
+      id: '1',
+      timestamp: 0,
+      txStatus: 'AWAITING_CONFIRMATIONS',
+      txInfo,
+      executionInfo: { type: 'MULTISIG', nonce: 1, confirmationsRequired: 1, confirmationsSubmitted: 0 },
+    }) as unknown as Transaction
+  const warn = (txInfo: object, flags: { expired?: boolean; unknownNetwork?: boolean } = {}) =>
+    getQueueWarnings({
+      tx: build(txInfo),
+      safeAddress: SAFE,
+      checksTokens: true,
+      expired: !!flags.expired,
+      unknownNetwork: !!flags.unknownNetwork,
+    })
+  const transfer = (recipient: string, imitation = false) => ({
+    type: 'Transfer',
+    direction: 'OUTGOING',
+    sender: { value: SAFE },
+    recipient: { value: recipient },
+    transferInfo: { type: 'ERC20', tokenAddress: '0x1', value: '1', imitation, trusted: true },
+  })
+
+  it('has none for an ordinary transfer', () => {
+    expect(warn(transfer(checksumAddress(faker.finance.ethereumAddress())))).toEqual([])
+  })
+
+  it('flags a transfer to the Safe itself', () => {
+    expect(warn(transfer(SAFE))).toEqual(['Sends to this Safe'])
+  })
+
+  it('flags an imitation transfer', () => {
+    expect(warn(transfer(checksumAddress(faker.finance.ethereumAddress()), true))).toEqual([
+      'This may be a malicious transaction',
+    ])
+  })
+
+  it('flags a module change as changing who controls funds', () => {
+    expect(
+      warn({
+        type: 'SettingsChange',
+        dataDecoded: { method: 'enableModule' },
+        settingsInfo: { type: 'ENABLE_MODULE' },
+      }),
+    ).toEqual(['Changes who controls funds'])
+  })
+
+  it('lists an expired order and an unknown network the row found', () => {
+    expect(warn({ type: 'SwapOrder' }, { expired: true })).toEqual(['Order expired'])
+    expect(warn({ type: 'SwapAndBridge' }, { unknownNetwork: true })).toEqual(['Unknown network'])
   })
 })

@@ -8,6 +8,8 @@ import type {
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { groupConflictingTxs } from '@/utils/tx-list'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { isImitation, isTrustedTx } from '@/utils/transactions'
 import {
   isAnyStakingTxInfo,
   isAwaitingExecution,
@@ -286,4 +288,42 @@ export const getTypeHint = (tx: Transaction): string | undefined => {
   // A module's call: the queue's own Contract label leaves it to the shared type, which names the contract
   if (isCustomTxInfo(txInfo)) return TYPE_HINTS.Contract
   return undefined
+}
+
+/** Settings changes that can move funds or block transactions without the usual signatures */
+export const POLICY_CHANGES = ['ENABLE_MODULE', 'SET_GUARD', 'SET_FALLBACK_HANDLER', 'CHANGE_MASTER_COPY']
+
+export const WARNING_LABELS = {
+  imitation: 'This may be a malicious transaction',
+  untrustedToken: 'Unverified token',
+  unknownNetwork: 'Unknown network',
+  expired: 'Order expired',
+  policyChange: 'Changes who controls funds',
+  toSelf: 'Sends to this Safe',
+} as const
+
+/** The warnings a row lists behind its warning icon, in order */
+export const getQueueWarnings = (args: {
+  tx: Transaction
+  safeAddress: string
+  /** The chain checks tokens against the default token list */
+  checksTokens: boolean
+  expired: boolean
+  /** A bridge to a chain the app doesn't know */
+  unknownNetwork: boolean
+}): string[] => {
+  const { tx, safeAddress } = args
+  const { txInfo } = tx
+  const isSettingsPolicyChange =
+    isSettingsChangeTxInfo(txInfo) && POLICY_CHANGES.includes(txInfo.settingsInfo?.type ?? '')
+  const isToSelf =
+    isTransferTxInfo(txInfo) && !isIncomingTransfer(txInfo) && sameAddress(txInfo.recipient.value, safeAddress)
+  return [
+    isImitation(tx) && WARNING_LABELS.imitation,
+    args.checksTokens && !isTrustedTx(tx) && WARNING_LABELS.untrustedToken,
+    args.unknownNetwork && WARNING_LABELS.unknownNetwork,
+    args.expired && WARNING_LABELS.expired,
+    isSettingsPolicyChange && WARNING_LABELS.policyChange,
+    isToSelf && WARNING_LABELS.toSelf,
+  ].filter((warning): warning is (typeof WARNING_LABELS)[keyof typeof WARNING_LABELS] => !!warning)
 }

@@ -4,16 +4,19 @@ import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
-import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
+import {
+  QueueProposerMark,
+  QueueWarningMarker,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueRowMarks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatShortTimeAgo } from '@safe-global/utils/utils/date'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import StatusLabel from '@/features/swap/public/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
-import { useHasFeature } from '@/hooks/useChains'
+import useChains, { useHasFeature } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectPendingTxById } from '@/store/pendingTxsSlice'
-import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
+import { isBridgeOrderTxInfo, isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import ImageFallback from '@safe-global/views/components/common/ImageFallback'
 import QueueParty from '@safe-global/views/features/spaces/components/SpaceQueue/QueuePartyCard'
@@ -21,7 +24,6 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import PartyCard from './QueueParty/PartyCard'
-import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
 import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
@@ -33,7 +35,7 @@ import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
-import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce, getNonceHint } from './utils'
+import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce, getNonceHint, getQueueWarnings } from './utils'
 import { NonceTakenAction, PendingRowAction, useIsNonceExecutingElsewhere } from './PendingRowAction'
 
 const PartyAvatar = ({ address, logoUri, size }: { address: string; logoUri?: string | null; size: number }) => {
@@ -166,7 +168,16 @@ const SpaceQueueRow = ({
   const nonce = getNonce(tx)
   const nonceTaken = useIsNonceExecutingElsewhere(tx.id, chainId, safeAddress, nonce)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
-  const showWarning = isImitation(tx) || (hasDefaultTokenlist && !isTrustedTx(tx))
+  const { configs } = useChains()
+  const bridgeTo = isBridgeOrderTxInfo(tx.txInfo) ? tx.txInfo.toChain : undefined
+  const warnings = getQueueWarnings({
+    tx,
+    safeAddress,
+    checksTokens: !!hasDefaultTokenlist,
+    expired: expiredSwap,
+    unknownNetwork: !!bridgeTo && configs.length > 0 && !configs.some((chain) => chain.chainId === bridgeTo),
+  })
+  const proposedOnly = executionInfo?.confirmationsSubmitted === 0
   const goTo = useQueueGoTo()
   const blockedBy = pendingTx ? undefined : getBlockedBy(status, nonce, nextNonce)
 
@@ -255,7 +266,7 @@ const SpaceQueueRow = ({
               <span className="min-w-0 truncate">
                 <QueueTxDetails.Summary tx={tx} />
               </span>
-              {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
+              {warnings.length > 0 && <QueueWarningMarker warnings={warnings} />}
             </span>
             {/* Wraps under the gauge sooner than overflow: the action has to stay in view */}
             <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
@@ -284,13 +295,16 @@ const SpaceQueueRow = ({
                 <span className="min-w-0 truncate">
                   <QueueTxDetails.Summary tx={tx} />
                 </span>
-                {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
+                {warnings.length > 0 && <QueueWarningMarker warnings={warnings} />}
               </DetailsSlot>
               <DetailsSlot className="shrink basis-44">
                 <Counterparty txInfo={tx.txInfo} chainId={chainId} />
               </DetailsSlot>
-              <DetailsSlot className="w-16 shrink-0 text-sm text-muted-foreground group-hover/transaction:text-foreground">
-                <ProposedTime timestamp={tx.timestamp} />
+              <DetailsSlot className="shrink-0 gap-1.5 text-sm text-muted-foreground group-hover/transaction:text-foreground">
+                <span className="flex w-16 min-w-0">
+                  <ProposedTime timestamp={tx.timestamp} />
+                </span>
+                {proposedOnly && executionInfo && <QueueProposerMark threshold={executionInfo.confirmationsRequired} />}
               </DetailsSlot>
             </span>
           </TableCell>

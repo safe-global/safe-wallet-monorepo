@@ -35,7 +35,15 @@ import {
   isStakingTxWithdrawInfo,
   isTwapOrderTxInfo,
 } from '@/utils/transaction-guards'
-import { getNonce, getQueueTypeLabel, getSettingsSummary, getTypeHint, type QueueTypeLabel } from '../utils'
+import {
+  getNonce,
+  getQueueTypeLabel,
+  getSettingsSummary,
+  getTypeHint,
+  POLICY_CHANGES,
+  WARNING_LABELS,
+  type QueueTypeLabel,
+} from '../utils'
 
 const TYPE_ICONS: Record<QueueTypeLabel, LucideIcon> = {
   Settings,
@@ -68,9 +76,6 @@ const ORDER_CLASSES: Record<string, string> = { market: 'Market order', limit: '
 const getOrderHint = (info: OrderTransactionInfo): string | undefined =>
   isTwapOrderTxInfo(info) ? 'TWAP order' : ORDER_CLASSES[info.orderClass]
 
-// Changes the prototype flags as changing who controls the funds
-const POLICY_CHANGES = ['ENABLE_MODULE', 'SET_GUARD', 'SET_FALLBACK_HANDLER', 'CHANGE_MASTER_COPY']
-
 const getSettingsHint = (tx: Transaction, txInfo: SettingsChangeTransaction): string | undefined => {
   const { settingsInfo } = txInfo
   if (!settingsInfo) return undefined
@@ -80,7 +85,7 @@ const getSettingsHint = (tx: Transaction, txInfo: SettingsChangeTransaction): st
   if (settingsInfo.type === 'CHANGE_THRESHOLD' && isMultisigExecutionInfo(tx.executionInfo)) {
     return `Threshold ${tx.executionInfo.confirmationsRequired} → ${settingsInfo.threshold}`
   }
-  return POLICY_CHANGES.includes(settingsInfo.type) ? 'Changes who controls funds' : undefined
+  return POLICY_CHANGES.includes(settingsInfo.type) ? WARNING_LABELS.policyChange : undefined
 }
 
 const Amount = ({ value, token }: { value: string; token: TokenInfo }): ReactElement => (
