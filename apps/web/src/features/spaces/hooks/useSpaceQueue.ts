@@ -109,7 +109,7 @@ export const useSpaceQueue = (
   // A query that failed stays failed while Try again refetches it, so the error view doesn't flash other content
   const argsKey = JSON.stringify(args)
   const [failedArgsKey, setFailedArgsKey] = useState<string>()
-  if (isError && failedArgsKey !== argsKey) setFailedArgsKey(argsKey)
+  if (isError && !currentData && failedArgsKey !== argsKey) setFailedArgsKey(argsKey)
   if (currentData && failedArgsKey === argsKey) setFailedArgsKey(undefined)
   const isRetryingError = !isError && !currentData && !skip && failedArgsKey === argsKey
   const hasError = isError || isRetryingError
