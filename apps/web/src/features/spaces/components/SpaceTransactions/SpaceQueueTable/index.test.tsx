@@ -199,7 +199,6 @@ describe('SpaceQueueTable', () => {
 
   afterEach(() => {
     jest.restoreAllMocks()
-    // The Collapse all / Expand all pick is saved to localStorage and read back by the next render
     localStorage.clear()
   })
 
@@ -525,7 +524,6 @@ describe('SpaceQueueTable', () => {
 
     describe('re-rendering with Collapse all saved', () => {
       const multichainSections = [multichain]
-      // Re-renders the table with the same props, as a scroll of the virtualizer does
       const Rerenderer = ({ groupBy }: { groupBy: 'safe' | 'network' }) => {
         const [count, setCount] = useState(0)
         return (
@@ -736,7 +734,6 @@ describe('SpaceQueueTable', () => {
     const blockerOnOtherChain = transactionItem('AWAITING_EXECUTION', 3)
     const blocker = transactionItem('AWAITING_EXECUTION', 3)
     const blocked = transactionItem('AWAITING_EXECUTION', 4)
-    // The same nonce on another Safe and on another chain of the same Safe come first
     const sameNonceElsewhere = [
       section(safeB, [{ chainId, items: [{ type: 'LABEL', label: 'Next' }, blockerOnB] }]),
       section(safeA, [
@@ -757,7 +754,6 @@ describe('SpaceQueueTable', () => {
 
       goFromBlocked()
 
-      // Safe B band, its chain, its #3, Safe A band, its other chain, that chain's #3, the chain, then the blocker
       expect(mockScrollToIndex).toHaveBeenCalledTimes(1)
       expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'smooth' })
       expect(rowOf(blocker)).toHaveAttribute('data-highlighted', 'on')
@@ -825,7 +821,6 @@ describe('SpaceQueueTable', () => {
 
       goFromBlocked()
 
-      // The Safe band, the chain, the conflict header, the first option, then the second, which can execute
       expect(mockScrollToIndex).toHaveBeenCalledWith(4, expect.anything())
       expect(rowOf(second)).toHaveAttribute('data-highlighted', 'on')
       expect(rowOf(first)).not.toHaveAttribute('data-highlighted')
@@ -842,7 +837,6 @@ describe('SpaceQueueTable', () => {
       expect(rowOf(blocker)).toHaveAttribute('data-highlighted', 'on')
       expect(screen.getByRole('button', { name: 'Collapse Next in line' })).toBeInTheDocument()
       expect(getStoreInstance().getState()[spaceQueueViewSlice.name]).toMatchObject({ collapseAll: true })
-      // The Next in line band, its three rows, then the blocker's
       expect(mockScrollToIndex).toHaveBeenCalledWith(3, expect.anything())
     })
   })
@@ -1024,7 +1018,6 @@ describe('SpaceQueueTable', () => {
       expect(row).toHaveClass('[&>td]:bg-accent')
       expect(row).toHaveFocus()
 
-      // A second go-to while it is still highlighted takes the focus back
       act(() => row.blur())
       expect(row).not.toHaveFocus()
       act(() => highlights.highlight(next.transaction.id))
@@ -1035,7 +1028,6 @@ describe('SpaceQueueTable', () => {
     it('shows a focus ring for keyboard focus', () => {
       renderRow(next)
 
-      // jsdom computes no Tailwind: outline-hidden and outline-2 share --tw-outline-style, so outline-solid must come along
       expect(screen.getByTestId('space-queue-row')).toHaveClass(
         'outline-hidden',
         'focus-visible:outline-solid',

@@ -8,7 +8,6 @@ const Hint = ({ delay }: { delay?: number }) => (
   </Tooltip>
 )
 
-/** Hovers the trigger and says whether the hint is open after `before` ms and after `after` ms */
 const openAt = async (ui: React.ReactElement, before: number, after: number) => {
   const { user } = renderOnFakeClock(ui)
   await user.hover(screen.getByText('Trigger'))

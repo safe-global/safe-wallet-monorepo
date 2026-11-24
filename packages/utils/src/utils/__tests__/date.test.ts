@@ -116,9 +116,6 @@ describe('formatShortTimeAgo', () => {
   })
 
   it('never shows 12mo ago at month end', () => {
-    // date-fns counts months in local time, so build the dates in local time too.
-    // From Feb 28 at month end, Feb 28 23:00 a year earlier is 12 months back but
-    // not a full year, which used to read as "12mo ago".
     const feb28 = new Date(2026, 1, 28).getTime()
     expect(formatShortTimeAgo(new Date(2025, 1, 28, 23).getTime(), feb28)).toBe('1y ago')
     expect(formatShortTimeAgo(new Date(2025, 2, 1).getTime(), feb28)).toBe('11mo ago')
