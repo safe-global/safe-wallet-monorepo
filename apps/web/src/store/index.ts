@@ -79,6 +79,7 @@ const rootReducer = combineReducers({
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.spaceQueueViewSlice.name]: slices.spaceQueueViewSlice.reducer,
+  [slices.spaceQueuePollingSlice.name]: slices.spaceQueuePollingSlice.reducer,
   [slices.workspaceDraftSlice.name]: slices.workspaceDraftSlice.reducer,
   [slices.workspaceWizardSlice.name]: slices.workspaceWizardSlice.reducer,
   [slices.feePaymentSourcePreferenceSlice.name]: slices.feePaymentSourcePreferenceSlice.reducer,

@@ -17,7 +17,6 @@ import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { usePayFromSafeFeePreview } from './usePayFromSafeFeePreview'
 import { useGasTokenCandidates } from '../../hooks/useGasTokenCandidates'
-import { withoutFees } from '../../services/totalOutgoing'
 import { buildFooter, buildPayerControl, resolveChoice } from '../../services/feePayerView'
 import {
   selectFeePaymentSourcePreference,
@@ -36,6 +35,8 @@ export type GasPayerSelection = {
   isQuoteLoading: boolean
   /** Safe account is chosen but could not be quoted: signing would silently fall back to signer-pays. */
   hasQuoteError: boolean
+  /** The signed payload makes the Safe pay, and it holds too little of the gas token: the relay would fail. */
+  safeCannotCoverFee: boolean
   planState: FeePayerPlanState
   fees: FeesPreviewData
   onGasTokenChange?: (address: string) => void
@@ -175,7 +176,8 @@ export const useGasPayerSelection = ({
           currency: fees.executionFee.currency,
           fiatAmount: fees.executionFee.fiatAmount,
         }
-    const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : withoutFees(fees.totalOutgoing)
+    // Only what the Safe pays adds up to a total.
+    const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : undefined
 
     const footer = buildFooter({
       offer,
@@ -195,7 +197,7 @@ export const useGasPayerSelection = ({
       sponsorKind: offer && offer.option !== 'SUBSCRIPTION' ? 'free' : 'plan',
       totalOutgoing,
       footer,
-      safeHasEnoughGas: paysFromSafe && !isLocked ? fees.safeHasEnoughGas : undefined,
+      safeHasEnoughGas: paysFromSafe ? fees.safeHasEnoughGas : undefined,
     }
   }, [
     safeTx,
@@ -242,6 +244,7 @@ export const useGasPayerSelection = ({
     isPayFromSafe,
     isQuoteLoading: isPayFromSafe && !isLocked && (!!fees.loading || !!safeFee.loading),
     hasQuoteError: isPayFromSafe && !isLocked && !!safeFee.error,
+    safeCannotCoverFee: isLocked && fees.safeHasEnoughGas === false,
     planState,
     fees,
     onGasTokenChange: fees.onGasTokenChange,

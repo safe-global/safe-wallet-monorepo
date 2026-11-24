@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import { confirmationsOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { HomePage } from '../../src/pages/home.page'
@@ -17,8 +17,8 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
+    const recipient = journey.newAddress()
 
     const sendTokens = new SendTokensPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -58,7 +58,7 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     journey,
   }) => {
     const safe = await seedSafe(journey, { owners: ['bob', 'alice'], threshold: 2 })
-    await seedQueuedTransfer(safe, { nonce: 0, recipient: Wallet.createRandom().address, amount: AMOUNT })
+    await seedQueuedTransfer(safe, { nonce: 0, recipient: journey.newAddress(), amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)
     const review = new TxReviewPage(safePage)

@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { FeePayerView, GasFeeDetails } from '@safe-global/views/features/fee-payment/types'
-import GasPayerSelector, { type GasPayerSelectorProps } from './index'
+import GasPayerSelector, { SponsoredQuota, type GasPayerSelectorProps } from './index'
 
 const ZERO = '0x0000000000000000000000000000000000000000'
 const ETH = { address: ZERO, symbol: 'ETH', logoUri: '' }
@@ -43,18 +43,27 @@ describe('GasPayerSelector view', () => {
     expect(onChoiceChange).toHaveBeenCalledWith('PAY_FROM_SAFE')
   })
 
-  it('shows a locked payer with why it is locked', async () => {
-    renderCard({ view: view({ payer: { kind: 'locked', value: 'WALLET' } }) })
+  it('explains a Safe account locked at signing', async () => {
+    renderCard({ view: view({ payer: { kind: 'locked', value: 'PAY_FROM_SAFE' } }) })
 
     expect(screen.queryByTestId('fee-payer-selector')).not.toBeInTheDocument()
     await userEvent.hover(screen.getByTestId('fee-payer-locked'))
 
-    expect(await screen.findByText('Whoever executes pays the gas fee.')).toBeInTheDocument()
+    expect(await screen.findByText("Set at signing and can't be changed.")).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="tooltip-content"]')).toBeInTheDocument()
+  })
+
+  it.each(['WALLET', 'SPONSORED'] as const)('shows a locked %s payer without a tooltip', async (value) => {
+    renderCard({ view: view({ payer: { kind: 'locked', value } }) })
+
+    await userEvent.hover(screen.getByTestId('fee-payer-locked'))
+
+    expect(document.querySelector('[data-slot="tooltip-content"]')).not.toBeInTheDocument()
   })
 
   it.each([
     ['SET_AT_SIGNING', "Set at signing and can't be changed."],
-    ['SPONSORED', 'Covered by your sponsored transactions.'],
+    ['SPONSORED', 'Covered by your Pro plan.'],
     ['NATIVE_ONLY', 'Fees are paid in ETH for now. More tokens are coming soon.'],
     [undefined, 'Fees will be paid from the connected signer wallet when executing this transaction.'],
   ] as const)('explains a fee token locked for %s', (lockedReason, text) => {
@@ -63,7 +72,33 @@ describe('GasPayerSelector view', () => {
     expect(screen.getByLabelText(text)).toBeInTheDocument()
   })
 
-  it('labels a sponsor as "Free transaction" when the chain sponsors it', () => {
+  it('explains a fee token covered by a sponsored transaction', () => {
+    renderCard({
+      view: view({
+        gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: 'SPONSORED' },
+        sponsorKind: 'free',
+      }),
+    })
+
+    expect(screen.getByLabelText('Covered by a sponsored transaction.')).toBeInTheDocument()
+  })
+
+  it.each([
+    ['plan', 'Pro plan'],
+    ['free', 'Sponsored'],
+  ] as const)('labels a %s sponsor "%s"', (sponsorKind, label) => {
+    renderCard({
+      view: view({
+        payer: { kind: 'choice', value: 'SPONSORED', options: ['SPONSORED', 'WALLET'] },
+        sponsored: true,
+        sponsorKind,
+      }),
+    })
+
+    expect(screen.getByTestId('fee-payer-selector')).toHaveTextContent(label)
+  })
+
+  it('shows no Pro chip when the chain sponsors the gas fee', () => {
     renderCard({
       view: view({
         payer: { kind: 'choice', value: 'SPONSORED', options: ['SPONSORED', 'WALLET'] },
@@ -72,7 +107,6 @@ describe('GasPayerSelector view', () => {
       }),
     })
 
-    expect(screen.getByTestId('fee-payer-selector')).toHaveTextContent('Free transaction')
     expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
   })
 
@@ -251,5 +285,14 @@ describe('GasPayerSelector gas fee details', () => {
     expect(summary).not.toHaveTextContent('Refund to')
     expect(summary).toHaveTextContent("Paid from your Safe account. Set at signing, so it can't be changed.")
     expect(screen.queryByTestId('gas-params-editor')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    [30, '30 sponsored transactions left this month'],
+    [1, '1 sponsored transaction left this month'],
+  ])('counts %s sponsored transaction(s) of the Pro plan left this month', (left, text) => {
+    render(<SponsoredQuota left={left} resetsAt="Nov 1, 00:00 UTC" />)
+
+    expect(screen.getByTestId('sponsored-quota')).toHaveTextContent(text)
   })
 })

@@ -78,13 +78,16 @@ jest.mock('@/features/no-fee-campaign/public/components/GasTooHighBanner', () =>
 
 // Lets a test take the view away, which is how the form sees an unavailable Fees card.
 const mockFeeCardUnavailable = { current: false }
+// Lets a test say the Safe cannot cover the fee it was signed to pay.
+const mockSafeCannotCoverFee = { current: false }
 jest.mock('@/features/fee-payment/public/hooks/useGasPayerSelection', () => {
   const actual = jest.requireActual('@/features/fee-payment/public/hooks/useGasPayerSelection')
   return {
     ...actual,
     useGasPayerSelection: (...args: Parameters<typeof actual.useGasPayerSelection>) => {
       const selection = actual.useGasPayerSelection(...args)
-      return mockFeeCardUnavailable.current ? { ...selection, view: null } : selection
+      const withFee = mockSafeCannotCoverFee.current ? { ...selection, safeCannotCoverFee: true } : selection
+      return mockFeeCardUnavailable.current ? { ...withFee, view: null } : withFee
     },
   }
 })
@@ -181,6 +184,7 @@ describe('ExecuteForm', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions())
+    mockSafeCannotCoverFee.current = false
     jest.spyOn(walletCanPay, 'default').mockReturnValue(true)
 
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
@@ -613,6 +617,14 @@ describe('ExecuteForm', () => {
 
     expect(button).toBeInTheDocument()
     expect(button).toBeDisabled()
+  })
+
+  it('shows a disabled submit button if the Safe cannot cover the fee it was signed to pay', () => {
+    mockSafeCannotCoverFee.current = true
+
+    const { getByText } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
+
+    expect(getByText('Execute')).toBeDisabled()
   })
 
   it('shows a disabled submit button if the same safe is connected', () => {
