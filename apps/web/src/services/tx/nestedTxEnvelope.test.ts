@@ -1,5 +1,6 @@
 import { concat, dataSlice, getAddress, keccak256, toBeHex, toUtf8Bytes } from 'ethers'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
 import {
   APPROVE_HASH_SELECTOR,
   EXEC_TRANSACTION_SELECTOR,
@@ -77,6 +78,26 @@ describe('nestedTxEnvelope', () => {
       expect(supportsNestedTxEnvelope(null)).toBe(false)
       expect(supportsNestedTxEnvelope(undefined)).toBe(false)
       expect(supportsNestedTxEnvelope('')).toBe(false)
+    })
+  })
+
+  describe('deriveEnvelopeSafeTxHash', () => {
+    it.each(['1.3.0', '1.4.1'])('matches the safeTxHash protocol-kit computes for a %s Safe', (safeVersion) => {
+      const { chainId, safe, ...safeTxData } = {
+        ...childEnvelope,
+        chainId: '137',
+        nonce: 42,
+        operation: 1,
+        safeTxGas: '50000',
+        baseGas: '21000',
+        gasPrice: '1000000000',
+        gasToken: RECIPIENT,
+        refundReceiver: PARENT_SAFE,
+      }
+
+      expect(deriveEnvelopeSafeTxHash({ chainId, safe, ...safeTxData })).toBe(
+        calculateSafeTransactionHash(safe, safeTxData, safeVersion, BigInt(chainId)),
+      )
     })
   })
 

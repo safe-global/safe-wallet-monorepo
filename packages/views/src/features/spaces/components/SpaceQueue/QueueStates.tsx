@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import { Check, CloudOff, History } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import {
   Empty,
   EmptyContent,
@@ -13,7 +15,13 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import NoTransactionsIcon from '@safe-global/views/assets/images/transactions/no-transactions.svg'
 
-export const QueueLoadError = ({ onRetry }: { onRetry: () => void }): ReactElement => (
+export const QueueLoadError = ({
+  onRetry,
+  isRetrying,
+}: {
+  onRetry: () => void
+  isRetrying?: boolean
+}): ReactElement => (
   <Empty role="alert" className="rounded-2xl border border-border bg-card">
     <EmptyHeader>
       <EmptyMedia variant="icon">
@@ -27,7 +35,8 @@ export const QueueLoadError = ({ onRetry }: { onRetry: () => void }): ReactEleme
       </EmptyDescription>
     </EmptyHeader>
     <EmptyContent>
-      <Button variant="outline" onClick={onRetry}>
+      <Button variant="outline" disabled={isRetrying} onClick={onRetry}>
+        {isRetrying && <Spinner className="size-3" aria-hidden />}
         Try again
       </Button>
     </EmptyContent>
@@ -73,6 +82,14 @@ export const QueueTruncatedNotice = ({ shown, total }: { shown: number; total: n
   <Typography variant="paragraph-small" color="muted">
     Showing {shown} of {total} pending transactions.
   </Typography>
+)
+
+export const QueueRefreshFailed = (): ReactElement => (
+  <Alert variant="warning" outlined={false}>
+    <AlertSeverityIcon variant="warning" />
+    <AlertTitle>Couldn&apos;t refresh the queue</AlertTitle>
+    <AlertDescription>Showing the last update. We&apos;ll keep trying in the background.</AlertDescription>
+  </Alert>
 )
 
 export const HistoryComingSoon = (): ReactElement => (

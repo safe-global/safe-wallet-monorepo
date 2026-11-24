@@ -1,4 +1,3 @@
-import { Wallet } from 'ethers'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
 import { test, expect } from '../../src/fixtures/journey.fixture'
@@ -32,9 +31,9 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const newValue = Wallet.createRandom().address
     await seedTransactionBuilderContracts(journey)
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const newValue = journey.newAddress()
 
     const builder = new TxBuilderPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -60,7 +59,7 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     await builder.sendCall({
       contract: BASIC_TYPES_TEST_CONTRACT,
       method: 'testAddressValue',
-      argument: Wallet.createRandom().address,
+      argument: journey.newAddress(),
     })
     await new TxReviewPage(safePage).sign()
 
@@ -88,7 +87,7 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     await builder.acceptPermissionsRequest()
     await expect(builder.permissionsPrompt).toBeHidden()
 
-    const newValue = Wallet.createRandom().address
+    const newValue = journey.newAddress()
     await builder.sendCall({ contract: BASIC_TYPES_TEST_CONTRACT, method: 'testAddressValue', argument: newValue })
     await expect(review.continueButton).toBeVisible()
   })

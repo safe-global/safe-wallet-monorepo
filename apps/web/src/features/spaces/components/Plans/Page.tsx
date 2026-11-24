@@ -12,7 +12,7 @@ import AuthState from '../AuthState'
 import Plans from './index'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { takePlansEntry } from '../../public/services/planSelection'
-import { buildPlanTiers, pickSeatOption, toCurrentPlan } from './planTiers'
+import { buildPlanTiers, isUnpaid, pickSeatOption, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -30,10 +30,11 @@ const PlansSkeleton = () => (
   </div>
 )
 
-/** The seats the recommended card opens on, the same option its card picks first. */
+/** The seats the recommended card opens on; none when it waits for the user to pick a size. */
 const defaultSeats = (tiers: PlanTier[], currentPlan: CurrentPlan | undefined): number | undefined => {
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN && candidate.billingCycle !== 'year')
-  return (tier && pickSeatOption(tier, currentPlan)?.seats) ?? undefined
+  if (!tier || (isUnpaid(currentPlan) && tier.options.length > 1)) return undefined
+  return pickSeatOption(tier, currentPlan)?.seats ?? undefined
 }
 
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {

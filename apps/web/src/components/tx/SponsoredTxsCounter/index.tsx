@@ -63,17 +63,20 @@ const SponsoredTxsCounter = ({
       <Typography variant="paragraph-small" className="flex flex-wrap items-baseline gap-1">
         {left === null ? (
           <span>Unlimited sponsored transactions</span>
-        ) : isSubscription && quota !== null ? (
+        ) : isSubscription ? (
           <span>
             <span className="font-semibold" data-testid="sponsored-txs-left">
               {left}
             </span>
-            <span className="text-muted-foreground">/{quota} sponsored transactions left</span>
+            <span className="text-muted-foreground">
+              {` sponsored transaction${maybePlural(left)} left this month`}
+            </span>
           </span>
         ) : (
           <span className="inline-flex items-center gap-1">
             <span data-testid="sponsored-txs-left">
-              <span className="font-semibold">{left}</span> free transactions left today
+              <span className="font-semibold">{left}</span>
+              {` sponsored transaction${maybePlural(left)} left today`}
             </span>
             {quota !== null && (
               <Tooltip>
@@ -85,7 +88,7 @@ const SponsoredTxsCounter = ({
                   }
                 />
                 <TooltipContent>
-                  {quota} transaction{maybePlural(quota)} per day for free
+                  {quota} sponsored transaction{maybePlural(quota)} per day
                 </TooltipContent>
               </Tooltip>
             )}

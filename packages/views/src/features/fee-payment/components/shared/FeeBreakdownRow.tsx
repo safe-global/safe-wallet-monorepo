@@ -59,8 +59,8 @@ export const FeeBreakdownRow = ({
         <>
           <div className={css.feeAmount}>
             {isFree && (
-              <Typography variant="paragraph-small-bold" as="span" className="text-[var(--color-success-main)]">
-                FREE
+              <Typography variant="paragraph-small" as="span" color="muted">
+                Free
               </Typography>
             )}
             {amount &&

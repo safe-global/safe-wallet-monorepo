@@ -233,7 +233,7 @@ describe('ReviewStep', () => {
       fireEvent.click(screen.getByText('Pay now'))
     })
 
-    expect(screen.getByText(/free transactions left today/)).toBeInTheDocument()
+    expect(screen.getByText(/sponsored transactions left today/)).toBeInTheDocument()
     expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
   })

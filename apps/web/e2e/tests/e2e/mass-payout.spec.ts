@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import { multiSendActionCounts } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { HomePage } from '../../src/pages/home.page'
@@ -16,8 +16,8 @@ test.describe('Mass payout', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const payouts = AMOUNTS.map((amount) => ({ recipient: Wallet.createRandom().address, amount }))
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const payouts = AMOUNTS.map((amount) => ({ recipient: journey.newAddress(), amount }))
 
     const sendTokens = new SendTokensPage(safePage)
     const review = new TxReviewPage(safePage)
