@@ -20,13 +20,6 @@ export type HypernativeRequest = {
   authorization: string | null
 }
 
-/**
- * Answers every POST to a Hypernative API path and records the requests it receives.
- *
- * @param path - The API path, e.g. '/safe/eip712/assessment'
- * @param respond - Builds the response for each request, from its body and abort signal
- * @returns The live list of received requests
- */
 export const answerHypernative = (
   path: string,
   respond: (request: { body: unknown; signal: AbortSignal }) => Response | Promise<Response>,
