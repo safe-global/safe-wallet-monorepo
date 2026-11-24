@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import NextLink from 'next/link'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import ProChip from '@safe-global/views/assets/images/safe-pro/pro-chip.svg'
 import GasPayerSelectorView, {
@@ -54,6 +55,7 @@ const ProUpsell = (): ReactElement => {
             <span className="block h-4 w-6" aria-label="Safe Pro">
               <ProChip className="size-full" />
             </span>
+            <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
           </Button>
         </Track>
       }
@@ -66,7 +68,7 @@ const FeeCardFooter = ({ footer }: { footer: FeePayerFooter }): ReactElement | n
   if (footer.kind === 'upsell') return <ProUpsell />
   if (footer.kind === 'campaign') return <CampaignQuota left={footer.left} limit={footer.limit} />
   if (footer.isSubscription && footer.left !== null && footer.quota !== null)
-    return <SponsoredQuota left={footer.left} quota={footer.quota} resetsAt={formatResetsAt(footer.resetsAt)} />
+    return <SponsoredQuota left={footer.left} resetsAt={formatResetsAt(footer.resetsAt)} />
   return (
     <SponsoredTxsCounter
       left={footer.left}

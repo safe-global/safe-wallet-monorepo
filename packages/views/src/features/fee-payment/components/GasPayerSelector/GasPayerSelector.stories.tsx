@@ -73,7 +73,7 @@ const storyFooter = (footer: FeePayerView['footer']): ReactNode => {
     )
   if (footer.kind === 'campaign') return <CampaignQuota left={footer.left} limit={footer.limit} />
   if (footer.isSubscription && footer.left !== null && footer.quota !== null)
-    return <SponsoredQuota left={footer.left} quota={footer.quota} resetsAt="Nov 11, 00:00 UTC" />
+    return <SponsoredQuota left={footer.left} resetsAt="Nov 11, 00:00 UTC" />
   return <SponsoredTxsCounter {...footer} isPro={footer.isSubscription} />
 }
 
@@ -336,7 +336,7 @@ export const ExecuteProSponsoredLeft: Story = {
 }
 
 export const ExecuteFreeDailyLimit: Story = {
-  name: 'Execute · Free, daily free transactions (Free transaction / Signer wallet)',
+  name: 'Execute · Free, daily sponsored transactions (Sponsored / Signer wallet)',
   args: {
     view: {
       ...base,
@@ -486,7 +486,7 @@ export const ExecuteGasProPlan: Story = {
 }
 
 export const ExecuteGasCampaign: Story = {
-  name: 'Execute · gas campaign (Free transaction / Signer wallet)',
+  name: 'Execute · gas campaign (Sponsored / Signer wallet)',
   args: {
     view: {
       ...base,

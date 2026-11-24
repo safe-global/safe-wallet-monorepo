@@ -50,7 +50,7 @@ export type FeePayerView = {
   executionFee: NetworkFee
   gasFee: NetworkFee
   sponsored: boolean
-  /** The Workspace's plan ("Pro plan") or the chain's free relays ("Free transaction"). */
+  /** The Workspace's plan ("Pro plan") or the chain's free relays ("Sponsored"). */
   sponsorKind: 'plan' | 'free'
   totalOutgoing?: TotalOutgoingView
   footer: FeePayerFooter
