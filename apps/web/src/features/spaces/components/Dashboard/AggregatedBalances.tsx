@@ -1,4 +1,3 @@
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useRouter } from 'next/router'
 import { useContext, useCallback, useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
@@ -15,7 +14,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { DashboardHeader } from '../../public/components/DashboardHeader'
+import { DashboardHeader, DashboardHeaderSkeleton } from '../../public/components/DashboardHeader'
 import QrModal from '@/components/common/QrCodeButton/QrModal'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
@@ -68,7 +67,7 @@ const AggregatedBalance = ({
     })
   }, [router])
 
-  if (isLoading) return <AggregatedBalanceSkeleton />
+  if (isLoading) return <DashboardHeaderSkeleton />
 
   const isDimmed = safeItems.length === 0 || accountsLoading
   const formattedValue = formatCurrencyPrecise(aggregatedBalance, currency)
@@ -120,18 +119,6 @@ const AggregatedBalance = ({
       </div>
       {isReceiveModalOpen && <QrModal onClose={handleReceiveClose} />}
     </>
-  )
-}
-
-const AggregatedBalanceSkeleton = () => {
-  return (
-    <div className="mb-4 flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-[30px] w-[200px]" />
-      </div>
-      <Skeleton className="h-9 w-[400px]" />
-    </div>
   )
 }
 

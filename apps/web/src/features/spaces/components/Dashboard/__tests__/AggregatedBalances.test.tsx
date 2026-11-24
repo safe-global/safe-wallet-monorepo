@@ -23,9 +23,7 @@ jest.mock('@/components/tx-flow', () => ({
 }))
 jest.mock('@/components/tx-flow/flows/TokenTransferFlow', () => ({ TokenTransferFlow: () => null }))
 jest.mock('@/components/common/QrCodeButton/QrModal', () => () => null)
-jest.mock('../../../public/components/DashboardHeader', () => ({
-  DashboardHeader: ({ value }: { value: string }) => <p>{value}</p>,
-}))
+jest.mock('@/features/actions-tray/public/components/ActionsTray', () => () => null)
 
 const mockOverviewsQuery = useGetMultipleSafeOverviewsQuery as jest.Mock
 const mockSummaries = usePortfolioSummaries as jest.Mock
@@ -37,7 +35,7 @@ const overviewOf = (safe: { chainId: string; address: string }, fiatTotal: strin
 })
 
 const expectPlaceholder = () => {
-  expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
+  expect(screen.queryByTestId('space-dashboard-total-value')).not.toBeInTheDocument()
   expect(document.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
 }
 
@@ -73,7 +71,7 @@ describe('AggregatedBalance', () => {
 
     render(<AggregatedBalance safeItems={safes} />)
 
-    expect(screen.getByRole('paragraph').textContent).toBe(formatCurrencyPrecise(15.5, 'USD'))
+    expect(screen.getByTestId('space-dashboard-total-value').textContent).toBe(formatCurrencyPrecise(15.5, 'USD'))
   })
 
   it('keeps the total on screen during a background refresh', () => {
@@ -81,7 +79,7 @@ describe('AggregatedBalance', () => {
 
     render(<AggregatedBalance safeItems={safes} />)
 
-    expect(screen.getByRole('paragraph').textContent).toBe(formatCurrencyPrecise(10, 'USD'))
+    expect(screen.getByTestId('space-dashboard-total-value').textContent).toBe(formatCurrencyPrecise(10, 'USD'))
   })
 
   it('shows $0.00 for a Workspace with no Safes', () => {
@@ -89,6 +87,6 @@ describe('AggregatedBalance', () => {
 
     render(<AggregatedBalance safeItems={[]} />)
 
-    expect(screen.getByRole('paragraph').textContent).toBe(formatCurrencyPrecise(0, 'USD'))
+    expect(screen.getByTestId('space-dashboard-total-value').textContent).toBe(formatCurrencyPrecise(0, 'USD'))
   })
 })
