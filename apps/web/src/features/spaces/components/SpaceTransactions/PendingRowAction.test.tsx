@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { formatTime } from '@safe-global/utils/utils/date'
+import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { act, advanceClock, render, renderOnFakeClock, screen, within } from '@/tests/test-utils'
 import { PendingStatus, PendingTxType, type PendingTx, type PendingTxsState } from '@/store/pendingTxsSlice'
@@ -227,22 +228,24 @@ describe('isNonceExecutingElsewhere', () => {
   it.each([PendingStatus.SUBMITTING, PendingStatus.PROCESSING, PendingStatus.RELAYING, PendingStatus.INDEXING])(
     'is true while another transaction at the nonce is %s',
     (status) => {
-      const pendingTxs = {
-        other: { ...common, safeAddress: safeAddress.toLowerCase(), status },
-      } as unknown as PendingTxsState
+      const pendingTxs: PendingTxsState = {
+        other: pendingTxBuilder()
+          .with({ ...common, safeAddress: safeAddress.toLowerCase(), status })
+          .build(),
+      }
 
       expect(isNonceExecutingElsewhere(pendingTxs, 'tx', at)).toBe(true)
     },
   )
 
   it('is false for the transaction itself, a signature, or another nonce, Safe or chain', () => {
-    const pendingTxs = {
-      tx: { ...common, status: PendingStatus.PROCESSING },
+    const pendingTxs: PendingTxsState = {
+      tx: processing(NOW),
       signing: { ...common, status: PendingStatus.SIGNING, signerAddress },
-      otherNonce: { ...common, nonce: 43, status: PendingStatus.PROCESSING },
-      otherChain: { ...common, chainId: '10', status: PendingStatus.PROCESSING },
-      otherSafe: { ...common, safeAddress: signerAddress, status: PendingStatus.PROCESSING },
-    } as unknown as PendingTxsState
+      otherNonce: { ...processing(NOW), nonce: 43 },
+      otherChain: { ...processing(NOW), chainId: '10' },
+      otherSafe: { ...processing(NOW), safeAddress: signerAddress },
+    }
 
     expect(isNonceExecutingElsewhere(pendingTxs, 'tx', at)).toBe(false)
   })

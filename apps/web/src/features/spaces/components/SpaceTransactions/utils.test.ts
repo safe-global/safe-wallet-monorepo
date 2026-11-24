@@ -4,6 +4,7 @@ import type { ConflictHeaderQueuedItem, TransactionQueuedItem } from '@safe-glob
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
+import { multisigExecutionInfoBuilder, multisigTransactionBuilder } from '@/tests/builders/queuedTransaction'
 import {
   formatQueueAmount,
   getBlockedBy,
@@ -459,18 +460,18 @@ describe('getRejectedNonces', () => {
 })
 
 describe('getTypeHint', () => {
-  const custom = (overrides: object = {}) =>
-    ({
-      id: '1',
-      timestamp: 0,
-      txStatus: 'AWAITING_CONFIRMATIONS',
-      txInfo: {
-        type: 'Custom',
-        methodName: 'approve',
-        to: { value: checksumAddress(faker.finance.ethereumAddress()) },
-      },
-      ...overrides,
-    }) as unknown as Transaction
+  const approve: Transaction['txInfo'] = {
+    type: 'Custom',
+    methodName: 'approve',
+    to: { value: checksumAddress(faker.finance.ethereumAddress()) },
+    dataSize: '68',
+    value: '0',
+    isCancellation: false,
+  }
+  const custom = ({ txInfo, ...overrides }: { txInfo?: object; safeAppInfo?: Transaction['safeAppInfo'] } = {}) =>
+    multisigTransactionBuilder()
+      .with({ ...overrides, txInfo: txInfo ? (txInfo as Transaction['txInfo']) : approve, executionInfo: undefined })
+      .build()
 
   it.each([
     [
@@ -514,7 +515,7 @@ describe('getTypeHint', () => {
   })
 
   it('names the Safe App a transaction was made in', () => {
-    expect(getTypeHint(custom({ safeAppInfo: { name: 'Transaction Builder', url: '', logoUri: '' } }))).toBe(
+    expect(getTypeHint(custom({ safeAppInfo: { id: 1, name: 'Transaction Builder', url: '' } }))).toBe(
       'Created in the Transaction Builder Safe App. Calls a function on a smart contract.',
     )
   })
@@ -523,13 +524,14 @@ describe('getTypeHint', () => {
 describe('getQueueWarnings', () => {
   const SAFE = checksumAddress(faker.finance.ethereumAddress())
   const build = (txInfo: object) =>
-    ({
-      id: '1',
-      timestamp: 0,
-      txStatus: 'AWAITING_CONFIRMATIONS',
-      txInfo,
-      executionInfo: { type: 'MULTISIG', nonce: 1, confirmationsRequired: 1, confirmationsSubmitted: 0 },
-    }) as unknown as Transaction
+    multisigTransactionBuilder()
+      .with({
+        txInfo: txInfo as Transaction['txInfo'],
+        executionInfo: multisigExecutionInfoBuilder()
+          .with({ nonce: 1, confirmationsRequired: 1, confirmationsSubmitted: 0 })
+          .build(),
+      })
+      .build()
   const warn = (txInfo: object, flags: { expired?: boolean; unknownNetwork?: boolean } = {}) =>
     getQueueWarnings({
       tx: build(txInfo),

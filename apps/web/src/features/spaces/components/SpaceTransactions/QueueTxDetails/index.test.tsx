@@ -3,6 +3,7 @@ import type { TokenInfo, Transaction } from '@safe-global/store/gateway/AUTO_GEN
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import userEvent from '@testing-library/user-event'
+import { multisigTransactionBuilder } from '@/tests/builders/queuedTransaction'
 import { render, screen } from '@/tests/test-utils'
 import QueueTxDetails from '.'
 
@@ -16,12 +17,12 @@ const token = (symbol: string, decimals = 18): TokenInfo => ({
   trusted: true,
 })
 
-const renderSummary = (txInfo: object, executionInfo?: object) =>
+const renderSummary = (txInfo: object, executionInfo?: Transaction['executionInfo']) =>
   render(
     <QueueTxDetails.Summary
-      tx={
-        { id: '1', timestamp: 0, txStatus: 'AWAITING_CONFIRMATIONS', txInfo, executionInfo } as unknown as Transaction
-      }
+      tx={multisigTransactionBuilder()
+        .with({ txInfo: txInfo as Transaction['txInfo'], executionInfo })
+        .build()}
     />,
   )
 
