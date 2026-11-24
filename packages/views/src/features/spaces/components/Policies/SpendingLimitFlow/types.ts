@@ -40,7 +40,7 @@ export const limitPath = <F extends keyof LimitFormValues>(spenderIndex: number,
 
 export type RemovalCopy = { title: string; description: string }
 
-export type TokenOptionGroup = 'held' | 'popular'
+export type TokenOptionGroup = 'held' | 'custom' | 'popular'
 
 /** One selectable token. `group` decides which section it renders in and whether a balance is shown. */
 export type TokenOption = {
@@ -57,4 +57,6 @@ export type TokenOption = {
   fiatBalance?: string
   /** Held tokens only: the fiat price of one whole token. */
   fiatConversion?: string
+  /** Custom tokens only: not on any of the Transaction Service's token lists. */
+  untrusted?: boolean
 }

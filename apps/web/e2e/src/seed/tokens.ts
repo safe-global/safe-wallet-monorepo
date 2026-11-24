@@ -3,6 +3,7 @@ import { fundWithToken } from '../../environment/scenarios/chain.mjs'
 import { waitUntil } from '../../environment/scenarios/indexing.mjs'
 import { trustToken } from '../../environment/scenarios/tokens.mjs'
 import { readChain } from '../chain/local-provider'
+import type { JourneyEnvironment } from '../fixtures/journey.fixture'
 import type { SeededSafe } from './safe'
 
 export type SeedToken = { address: string; symbol: string; decimals: number }
@@ -12,6 +13,18 @@ export const SEPOLIA_USDC: SeedToken = {
   address: getAddress('0x1c7d4b196cb0c7b01d743fbc6116a902379c7238'),
   symbol: 'USDC',
   decimals: 6,
+}
+
+/** CoW Protocol's COW on Sepolia: an ERC-20 with 18 decimals that the popular-token list of the policies leaves out. */
+export const SEPOLIA_COW: SeedToken = {
+  address: getAddress('0x0625afb445c3b6b7b929342a04a22599fd5dbb59'),
+  symbol: 'COW',
+  decimals: 18,
+}
+
+/** Lists `token` as trusted in the Transaction Service, which CGW asks for its metadata, without a balance for any Safe. */
+export async function seedKnownToken(env: JourneyEnvironment, token: SeedToken): Promise<void> {
+  await trustToken(env, token.address)
 }
 
 type TxsBalance = { tokenAddress: string | null; balance: string }
