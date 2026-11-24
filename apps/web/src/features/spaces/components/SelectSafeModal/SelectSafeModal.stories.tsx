@@ -105,13 +105,10 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** New transaction with a wallet: owner, proposer and nested-owner Safes are enabled, the Safe with no role is disabled, the counterfactual Safe is hidden. */
 export const NewTransaction: Story = storyFor({ action: ESafeAction.NewTransaction, connected: true })
 
-/** New transaction with no wallet: every Safe is disabled with "Please connect your wallet". */
 export const NewTransactionNoWallet: Story = storyFor({ action: ESafeAction.NewTransaction, connected: false })
 
-/** Send from a Workspace whose only Safe is counterfactual: the empty state. */
 export const OnlyUndeployedSafes: Story = storyFor({
   action: ESafeAction.Send,
   connected: true,
