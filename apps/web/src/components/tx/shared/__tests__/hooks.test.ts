@@ -455,6 +455,7 @@ describe('SignOrExecute hooks', () => {
         true,
         '1.3.0',
         undefined,
+        undefined,
       )
       expect(id).toEqual({ txId: '123', isNestedSigning: false })
     })
@@ -507,6 +508,7 @@ describe('SignOrExecute hooks', () => {
         true,
         false,
         '1.3.0',
+        undefined,
         undefined,
       )
       expect(id).toEqual({ txId: 'derived_id', isNestedSigning: true })
@@ -707,6 +709,7 @@ describe('SignOrExecute hooks', () => {
         false,
         '1.1.1',
         undefined,
+        undefined,
       )
       expect(id).toEqual({ txId: '123', isNestedSigning: true })
     })
@@ -750,6 +753,7 @@ describe('SignOrExecute hooks', () => {
           executed,
           '1.1.1',
           undefined,
+          undefined,
         )
       },
     )
@@ -790,7 +794,233 @@ describe('SignOrExecute hooks', () => {
         false,
         '1.1.1',
         undefined,
+        undefined,
       )
+    })
+
+    describe('parent Safe attribution from the child flow', () => {
+      const declared = declaredAttributionBuilder().build()
+
+      const parentSafeSigner = {
+        chainId: '1',
+        address: zeroPadValue('0x0456', 20),
+        provider: MockEip1193Provider,
+        isSafe: true,
+        threshold: 2,
+      } as unknown as NestedWallet
+
+      const renderWithDeclared = (signer: SignerWallet = parentSafeSigner) => {
+        jest.spyOn(wallet, 'useSigner').mockReturnValue(signer)
+        mockEnvelopelessSafe('1.3.0')
+
+        const ref: { current?: ReturnType<typeof useTxActions> } = {}
+        const Harness = () => {
+          ref.current = useTxActions()
+          return null
+        }
+        const flowContext: TxFlowContextType = { ...initialContext, declared }
+        render(createElement(TxFlowContext.Provider, { value: flowContext }, createElement(Harness)))
+        return ref.current!
+      }
+
+      const mockOnChainSigning = () =>
+        jest
+          .spyOn(txSender, 'dispatchOnChainSigning')
+          .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+      const mockExecution = () =>
+        jest
+          .spyOn(txSender, 'dispatchTxExecution')
+          .mockImplementation((_chainId, _safeTx, _txOptions, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+      const SIGNER_ADDRESS = zeroPadValue('0x0456', 20)
+      const SAFE_ADDRESS = zeroPadValue('0x0000', 20)
+
+      it('should pass it when the parent Safe signs a new tx', async () => {
+        const signSpy = mockOnChainSigning()
+
+        await renderWithDeclared().signTx(createSafeTx())
+
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          declared,
+        )
+      })
+
+      it('should pass it when the parent Safe signs a tx already in the queue', async () => {
+        const signSpy = mockOnChainSigning()
+
+        await renderWithDeclared().signTx(createSafeTx(), '456')
+
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          '456',
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          declared,
+        )
+      })
+
+      it('should not pass it when a smart contract wallet that is not a Safe signs', async () => {
+        const smartAccountSigner = { chainId: '1', address: zeroPadValue('0x0456', 20), provider: MockEip1193Provider }
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(true)
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        const signSpy = mockOnChainSigning()
+
+        await renderWithDeclared(smartAccountSigner as SignerWallet).signTx(createSafeTx())
+
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          '123',
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          false,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          undefined,
+        )
+      })
+
+      const walletConnectSafe = {
+        chainId: '1',
+        address: zeroPadValue('0x0456', 20),
+        provider: MockEip1193Provider,
+        isConnectedSafe: true,
+        threshold: 2,
+      } as unknown as SignerWallet
+
+      it('should not pass it when a Safe connected over WalletConnect signs', async () => {
+        const signSpy = mockOnChainSigning()
+
+        await renderWithDeclared(walletConnectSafe).signTx(createSafeTx())
+
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          undefined,
+          MockEip1193Provider,
+          '1',
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          '1.3.0',
+          undefined,
+          undefined,
+        )
+      })
+
+      it('should not pass it when a Safe connected over WalletConnect executes', async () => {
+        const executeSpy = mockExecution()
+
+        await renderWithDeclared(walletConnectSafe).executeTx({ gasPrice: 1 }, createSafeTx())
+
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          undefined,
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          true,
+          '1.3.0',
+          undefined,
+          undefined,
+        )
+      })
+
+      it('should pass it when the parent Safe executes a new tx', async () => {
+        const executeSpy = mockExecution()
+
+        await renderWithDeclared().executeTx({ gasPrice: 1 }, createSafeTx())
+
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          undefined,
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          true,
+          '1.3.0',
+          undefined,
+          declared,
+        )
+      })
+
+      it('should pass it when the parent Safe executes a tx already in the queue', async () => {
+        const executeSpy = mockExecution()
+
+        await renderWithDeclared().executeTx({ gasPrice: 1 }, createSafeTx(), '456')
+
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          '456',
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          true,
+          expect.any(Boolean),
+          true,
+          '1.3.0',
+          undefined,
+          declared,
+        )
+      })
+
+      it('should not pass it when an EOA executes', async () => {
+        const eoaSigner = { chainId: '1', address: zeroPadValue('0x0456', 20), provider: MockEip1193Provider }
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        const executeSpy = mockExecution()
+
+        await renderWithDeclared(eoaSigner as SignerWallet).executeTx({ gasPrice: 1 }, createSafeTx())
+
+        expect(executeSpy).toHaveBeenCalledWith(
+          '1',
+          expect.anything(),
+          { gasPrice: 1 },
+          '123',
+          MockEip1193Provider,
+          SIGNER_ADDRESS,
+          SAFE_ADDRESS,
+          false,
+          expect.any(Boolean),
+          false,
+          '1.3.0',
+          undefined,
+          undefined,
+        )
+      })
     })
 
     it('should execute a tx without a txId (immediate execution)', async () => {
@@ -876,6 +1106,7 @@ describe('SignOrExecute hooks', () => {
         true,
         '1.3.0',
         undefined,
+        undefined,
       )
       expect(id).toEqual({ txId: 'derived_id', isExecuted: false })
     })
@@ -926,6 +1157,7 @@ describe('SignOrExecute hooks', () => {
         true,
         '1.3.0',
         undefined,
+        undefined,
       )
       expect(id).toEqual({ txId: 'derived_id', isExecuted: false })
     })
@@ -975,6 +1207,7 @@ describe('SignOrExecute hooks', () => {
         true,
         true,
         '1.3.0',
+        undefined,
         undefined,
       )
       expect(id).toEqual({ txId: 'derived_id', isExecuted: true })
