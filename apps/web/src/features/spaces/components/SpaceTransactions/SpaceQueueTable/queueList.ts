@@ -52,6 +52,9 @@ export type QueueListItem =
       chainId: string
       nonce?: number
       size: number
+      /** Where the group's first option stands, for the nonce tooltip */
+      status?: QueueStatus
+      nextNonce?: number
     }
   | {
       kind: 'transaction'
@@ -150,6 +153,8 @@ export const buildQueueList = (args: {
                   chainId,
                   nonce: row.nonce,
                   size: row.size,
+                  status: statuses[index + 1],
+                  nextNonce,
                 }
               : {
                   kind: 'transaction',
@@ -174,7 +179,19 @@ export const buildQueueList = (args: {
 const toUnitRows = (unit: QueueUnit): QueueListItem[] => {
   const { scopeKey, safeAddress, chainId, nextNonce, nextStatus, conflict } = unit
   const header: QueueListItem[] = conflict
-    ? [{ kind: 'conflict', key: unit.key, scopeKey, safeAddress, chainId, nonce: conflict.nonce, size: conflict.size }]
+    ? [
+        {
+          kind: 'conflict',
+          key: unit.key,
+          scopeKey,
+          safeAddress,
+          chainId,
+          nonce: conflict.nonce,
+          size: conflict.size,
+          status: unit.transactions[0]?.status,
+          nextNonce,
+        },
+      ]
     : []
   return [
     ...header,

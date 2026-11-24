@@ -25,7 +25,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectQueueCollapseAll, setQueueCollapseAll } from '../../../public/store/spaceQueueViewSlice'
 import { toChainInfos } from '../../../utils'
 import SpaceQueueRow from '../SpaceQueueRow'
-import { getSafeKey } from '../utils'
+import { getNonceHint, getSafeKey } from '../utils'
 import { getChainKey, getGroupId, getQueueGroups, getQueueUnits } from './queueGroups'
 import { buildGroupedQueueList, buildQueueList, type QueueListItem } from './queueList'
 import SafeTitle from './SafeTitle'
@@ -99,7 +99,12 @@ const ScopedRow = ({
   compact: boolean
 }): ReactElement =>
   item.kind === 'conflict' ? (
-    <ConflictHeaderRow nonce={item.nonce} size={item.size} rowProps={rowProps} />
+    <ConflictHeaderRow
+      nonce={item.nonce}
+      size={item.size}
+      stateHint={item.status && getNonceHint(item.status, item.nonce, item.nextNonce).hint}
+      rowProps={rowProps}
+    />
   ) : (
     <SpaceQueueRow
       item={item.item}

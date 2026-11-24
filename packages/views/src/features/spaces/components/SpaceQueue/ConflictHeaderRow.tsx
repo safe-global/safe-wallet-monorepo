@@ -10,10 +10,13 @@ import QueueNonce from './QueueNonce'
 const ConflictHeaderRow = ({
   nonce,
   size,
+  stateHint,
   rowProps,
 }: {
   nonce?: number
   size: number
+  /** Where the group's first option stands, e.g. "Next in line. Needs your signature." */
+  stateHint?: string
   rowProps?: ComponentProps<'tr'>
 }): ReactElement => (
   <TableRow data-no-hover data-no-divider {...rowProps}>
@@ -25,7 +28,7 @@ const ConflictHeaderRow = ({
       <QueueNonce
         nonce={nonce}
         state="Conflicting transaction"
-        hint={`${size} conflicting transactions share this nonce; only one can execute.`}
+        hint={`${stateHint ? `${stateHint} ` : ''}${size} conflicting transactions share this nonce; only one can execute.`}
       />
       <ConflictBracketStart />
     </TableCell>

@@ -60,6 +60,7 @@ describe('buildQueueList', () => {
       'transaction',
     ])
     expect(list[3]).toMatchObject({ kind: 'transaction', status: 'execute', nextNonce: 3, conflict: { option: 1 } })
+    expect(list[2]).toMatchObject({ kind: 'conflict', status: 'execute', nextNonce: 3 })
   })
 
   it('leaves out every row of a collapsed Safe but its band, which summarises it', () => {
@@ -128,6 +129,7 @@ describe('buildGroupedQueueList', () => {
       'transaction',
     ])
     expect(list[0]).toMatchObject({ kind: 'group', group: 'network', chainId: '1', count: 2, collapsed: false })
+    expect(list[1]).toMatchObject({ kind: 'conflict', status: 'execute', nextNonce: 3 })
   })
 
   it('lists the Status view without bands', () => {

@@ -39,6 +39,24 @@ describe('ConflictHeaderRow', () => {
     ).toBeInTheDocument()
   })
 
+  it("starts with where the group's first option stands", async () => {
+    const { user } = renderWithUserEvent(
+      <table>
+        <tbody>
+          <ConflictHeaderRow nonce={8} size={2} stateHint="Next in line. Needs your signature." />
+        </tbody>
+      </table>,
+    )
+
+    await user.tab()
+
+    expect(
+      await screen.findByText(
+        'Next in line. Needs your signature. 2 conflicting transactions share this nonce; only one can execute. Each Safe runs its nonces in order, one at a time.',
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('still shows the nonce as text', () => {
     render(
       <table>
