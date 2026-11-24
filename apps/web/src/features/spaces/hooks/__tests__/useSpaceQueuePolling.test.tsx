@@ -129,6 +129,8 @@ describe('useSpaceQueuePolling', () => {
   it('requests the queue again at every poll', async () => {
     renderPolling()
     await waitFor(() => expect(requests).toHaveLength(1))
+    // The next poll is scheduled once the first answer reaches the hook
+    await act(() => jest.advanceTimersByTimeAsync(ANIMATION_FRAME_MS))
 
     await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
 

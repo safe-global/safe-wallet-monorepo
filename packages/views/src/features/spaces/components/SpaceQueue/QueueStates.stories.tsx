@@ -1,7 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
-import { HistoryComingSoon, QueueEmpty, QueueLoadError, QueueNoMatches, QueueTruncatedNotice } from './QueueStates'
+import {
+  HistoryComingSoon,
+  QueueEmpty,
+  QueueLoadError,
+  QueueNoMatches,
+  QueueRefreshFailed,
+  QueueTruncatedNotice,
+} from './QueueStates'
 
 const meta = {
   title: 'Features/Spaces/Transactions/QueueStates',
@@ -28,6 +35,11 @@ export const LoadError: Story = {
 /** Try again is refetching the queue that failed */
 export const LoadErrorRetrying: Story = {
   render: () => <QueueLoadError onRetry={fn()} isRetrying />,
+}
+
+/** A poll failed after the queue loaded; the last answer stays */
+export const RefreshFailed: Story = {
+  render: () => <QueueRefreshFailed />,
 }
 
 /** The gateway read only part of the queue */

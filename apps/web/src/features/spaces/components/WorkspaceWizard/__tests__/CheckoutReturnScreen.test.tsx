@@ -2,9 +2,14 @@ import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
+import { getStoreInstance } from '@/store'
 import { server } from '@/tests/server'
-import { advanceClock, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { fakeUserId, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
+import { act, advanceClock, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { EMPTY_WORKSPACE_DRAFT } from '../../../public/store/workspaceDraftSlice'
 import CheckoutReturnScreen from '../CheckoutReturnScreen'
+
+const storedDraft = () => getStoreInstance().getState().workspaceDraft
 
 const SETUP_TIMEOUT_MS = 60_000
 
@@ -43,17 +48,32 @@ describe('CheckoutReturnScreen', () => {
     expect(replace).not.toHaveBeenCalled()
   })
 
-  it('opens the Workspace once its setup is applied', async () => {
+  it('opens the Workspace once its setup is applied, and clears the draft only after the navigation', async () => {
     server.use(sessionHandler('complete'), setupHandler('applied'))
-    const replace = jest.fn(() => Promise.resolve(true))
+    let finishNavigation = () => {}
+    const replace = jest.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          finishNavigation = () => resolve(true)
+        }),
+    )
     const id = sessionId()
     const spaceId = faker.string.uuid()
+    const draft = workspaceDraftBuilder().with({ ownerId: fakeUserId(), createdSpaceId: spaceId }).build()
 
-    render(<CheckoutReturnScreen sessionId={id} spaceId={spaceId} />, { routerProps: { replace } })
+    render(<CheckoutReturnScreen sessionId={id} spaceId={spaceId} />, {
+      routerProps: { replace },
+      initialReduxState: { workspaceDraft: draft },
+    })
 
     await waitFor(() =>
       expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: { spaceId, sessionId: id } }),
     )
+    expect(storedDraft()).toEqual(draft)
+
+    await act(async () => finishNavigation())
+
+    expect(storedDraft()).toEqual(EMPTY_WORKSPACE_DRAFT)
   })
 
   it('stops waiting after a minute and lets the user open the Workspace', async () => {

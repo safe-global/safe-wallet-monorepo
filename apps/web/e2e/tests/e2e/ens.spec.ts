@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { setEnsName } from '../../environment/scenarios/ens.mjs'
 import { transactionsIn } from '../../src/api/transaction-items'
@@ -24,11 +24,11 @@ test.describe('ENS names', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     await setEnsName(journey.env, ENS_NAME, recipient)
     // setEnsName funds the recipient to sign its reverse record, so the transfer is measured from here
     const balanceBefore = await balanceOf(journey.env, recipient)
-    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const sendTokens = new SendTokensPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -48,9 +48,9 @@ test.describe('ENS names', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const newSigner = Wallet.createRandom().address
-    await setEnsName(journey.env, ENS_NAME, newSigner)
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const newSigner = journey.newAddress()
+    await setEnsName(journey.env, ENS_NAME, newSigner)
 
     const owners = new OwnersPage(safePage)
     await owners.goto(safe.prefixedAddress)

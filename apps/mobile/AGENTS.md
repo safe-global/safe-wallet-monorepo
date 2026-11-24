@@ -9,6 +9,7 @@ Mobile-specific guidance for the Expo/React Native app under `apps/mobile/`. For
 - **Component Structure** – Follow container/presentation pattern. See [docs/code-style.md](docs/code-style.md) for detailed component organization.
 - **Font Management** – Use the configured DM Sans font family. Custom icons go through `SafeFontIcon` component.
 - **Expo Plugins** – Custom Expo config plugins are in the `expo-plugins/` directory.
+- **Feature flags** – Read a flag with `useHasFeature` from `src/hooks/useHasFeature.ts`, passing a key from `FEATURES` (`@safe-global/utils/utils/chains`). Declare every flag that mobile code reads in `config/remote-config.json` with `"enabled": false` until a separate PR releases it, and remove it there when the code stops reading it; `config/remote-config.test.ts` fails otherwise ([config/README.md](config/README.md)).
 
 ## Non-obvious commands
 

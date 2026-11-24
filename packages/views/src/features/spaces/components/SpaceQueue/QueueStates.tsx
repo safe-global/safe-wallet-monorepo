@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { Check, CloudOff, History } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import {
@@ -81,6 +82,14 @@ export const QueueTruncatedNotice = ({ shown, total }: { shown: number; total: n
   <Typography variant="paragraph-small" color="muted">
     Showing {shown} of {total} pending transactions.
   </Typography>
+)
+
+export const QueueRefreshFailed = (): ReactElement => (
+  <Alert variant="warning" outlined={false}>
+    <AlertSeverityIcon variant="warning" />
+    <AlertTitle>Couldn&apos;t refresh the queue</AlertTitle>
+    <AlertDescription>Showing the last update. We&apos;ll keep trying in the background.</AlertDescription>
+  </Alert>
 )
 
 export const HistoryComingSoon = (): ReactElement => (

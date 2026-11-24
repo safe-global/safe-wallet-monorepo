@@ -4,12 +4,12 @@ import {
   QueueEmpty,
   QueueLoadError,
   QueueNoMatches,
+  QueueRefreshFailed,
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import QueueUpdatingStatus from '@safe-global/views/features/spaces/components/SpaceQueue/QueueUpdatingStatus'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { cn } from '@safe-global/views/utils/cn'
-import { POLLING_INTERVAL } from '@/config/constants'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   hasSpaceQueueFilters,
@@ -87,11 +87,8 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
-  const { queue, queueQuery, isStale, counts, isError, isRetryingError, isFetching, refetch } = useSpaceQueue(
-    spaceId,
-    { filters: queryFilters, search: querySearch },
-    { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
-  )
+  const { queue, queueQuery, isStale, counts, isError, isRetryingError, isFetching, isRefreshFailing, refetch } =
+    useSpaceQueue(spaceId, { filters: queryFilters, search: querySearch }, { poll: true })
 
   const clearFilters = useCallback(() => {
     setFilters(NO_SPACE_QUEUE_FILTERS)
@@ -111,6 +108,8 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
         groupBy={groupBy}
         onGroupByChange={changeGroupBy}
       />
+
+      {queue && isRefreshFailing && <QueueRefreshFailed />}
 
       {queue ? (
         // Old rows stay to avoid a flicker, but inert: they may no longer match the new search or filter

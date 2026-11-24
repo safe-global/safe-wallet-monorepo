@@ -30,16 +30,17 @@ export async function seedSignedTransfer(
 }
 
 /**
- * Deploys a 2/2 Safe of Alice and a parent Safe (1/1 of Bob), and proposes an ETH transfer signed by Alice.
- * The parent confirms it with an EIP-1271 contract signature, built by protocol-kit as a parent Safe owner would.
- * Waits until the CGW queue shows both signatures.
+ * Deploys a 2/2 Safe of Alice and a parent Safe (1/1 of Bob), and proposes an ETH transfer to a new address signed
+ * by Alice. The parent confirms it with an EIP-1271 contract signature, built by protocol-kit as a parent Safe owner
+ * would. Waits until the CGW queue shows both signatures.
  */
 export async function seedTransferWithContractSignature(
   journey: Journey,
-  transfer: { recipient: string; amount: string },
-): Promise<SeededSafe> {
+  amount: string,
+): Promise<{ safe: SeededSafe; recipient: string }> {
   const parent = await seedSafe(journey, { owners: ['bob'], threshold: 1 })
   const safe = await seedSafe(journey, { owners: ['alice', parent], threshold: 2 })
+  const transfer = { recipient: journey.newAddress(), amount }
   const queued = await seedQueuedTransfer(safe, { nonce: 0, ...transfer })
 
   const transaction = await safe.context.safe.createTransaction({
@@ -56,5 +57,5 @@ export async function seedTransferWithContractSignature(
   await waitUntil(journey.env, `${safe.context.path}/transactions/queued`, (queue: QueuedItemPage) =>
     hasConfirmations(queue, queued.txId, 2),
   )
-  return safe
+  return { safe, recipient: transfer.recipient }
 }
