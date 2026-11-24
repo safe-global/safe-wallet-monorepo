@@ -149,6 +149,21 @@ describe('useSpaceQueuePolling', () => {
     expect(requests).toHaveLength(0)
   })
 
+  it.each([
+    [403, true],
+    [429, false],
+  ])('reports a poll answered with %s as refused: %s', async (status, isRefused) => {
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/spaces/:spaceId/transactions/queued`, () => new HttpResponse(null, { status })),
+    )
+
+    const { result } = renderPolling()
+
+    await waitFor(() => expect(result.current).toBe(isRefused))
+    await act(() => jest.advanceTimersByTimeAsync(ANIMATION_FRAME_MS))
+    expect(result.current).toBe(isRefused)
+  })
+
   it('does not request the queue on a transaction event while inactive', async () => {
     mockHasFeature.mockReturnValue(false)
     renderPolling()

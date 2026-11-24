@@ -8,6 +8,8 @@ const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
 const mockUseSpaceQueuePolling = jest.fn()
+const mockRefetchMembership = jest.fn()
+let mockIsMembershipRevoked = false
 let mockPathname = '/spaces/security'
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
@@ -104,6 +106,7 @@ jest.mock('../../public/hooks/useSpaceMembers', () => ({
   get useIsInvited() {
     return jest.requireActual('../../public/hooks/useSpaceMembers').useIsInvited
   },
+  useMembershipRevoked: () => ({ isRevoked: mockIsMembershipRevoked, refetch: mockRefetchMembership }),
   MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 
@@ -126,6 +129,8 @@ describe('AuthState', () => {
     mockIsAuthenticated = true
     mockIsOidcLoginPending = false
     mockIsSessionCheckPending = false
+    mockIsMembershipRevoked = false
+    mockUseSpaceQueuePolling.mockReturnValue(false)
     mockPathname = '/spaces/security'
     mockIsUnauthorized.mockReturnValue(false)
     mockUseSpacesGetOneV1Query.mockReturnValue({
@@ -382,5 +387,72 @@ describe('AuthState', () => {
 
     expect(mockReplace).not.toHaveBeenCalled()
     expect(queryByTestId('children')).not.toBeNull()
+  })
+
+  it('shows the no-access state when the member list is refused', () => {
+    mockIsMembershipRevoked = true
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('children')).toBeNull()
+    expect(queryByTestId('unauthorized')).not.toBeNull()
+  })
+
+  it('shows the no-access state when the space query is forbidden', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: { status: 403 }, isLoading: false })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('unauthorized')).not.toBeNull()
+  })
+
+  it('keeps the page when the space query is rate-limited', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { uuid: 'uuid-1', members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
+      error: { status: 429 },
+      isLoading: false,
+      isFetching: false,
+    })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('children')).not.toBeNull()
+  })
+
+  it('checks the membership again when a queue poll is refused', () => {
+    mockUseSpaceQueuePolling.mockReturnValue(true)
+
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockRefetchMembership).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not check the membership again while the queue polls fine', () => {
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockRefetchMembership).not.toHaveBeenCalled()
   })
 })

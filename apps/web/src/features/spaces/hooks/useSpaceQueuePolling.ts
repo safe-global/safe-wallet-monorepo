@@ -8,6 +8,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
+import { isForbidden } from '@/services/sessionExpiry/expireSession'
 import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useCurrentSpaceId } from '../public/hooks/useCurrentSpaceId'
@@ -30,8 +31,8 @@ const getTxIdsAwaitingSignature = (queue: SpaceQueue, walletAddress: string, pen
     )
     .map(({ transaction }) => transaction.id)
 
-/** Polls the current Space's queue, which spaceQueueReconciliationListener settles pending txs from. */
-export const useSpaceQueuePolling = (): void => {
+/** Polls the current Space's queue, which spaceQueueReconciliationListener settles pending txs from; true once a poll is refused. */
+export const useSpaceQueuePolling = (): boolean => {
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const isSignedIn = useAppSelector(isAuthenticated)
@@ -42,7 +43,7 @@ export const useSpaceQueuePolling = (): void => {
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
   // The unfiltered queue page asks for the same args, so both share one cache entry and one request per poll
-  const { queue } = useSpaceQueue(
+  const { queue, error } = useSpaceQueue(
     spaceId ?? '',
     {},
     { skip: !isActive, pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
@@ -78,4 +79,6 @@ export const useSpaceQueuePolling = (): void => {
       }),
     )
   }, [isActive, queue, walletAddress, pendingTxs, spaceId, dispatch])
+
+  return isActive && isForbidden(error)
 }

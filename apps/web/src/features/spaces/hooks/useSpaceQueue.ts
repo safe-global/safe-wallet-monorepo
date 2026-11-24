@@ -99,7 +99,7 @@ export const useSpaceQueue = (
   query: SpaceQueueQuery = {},
   options: SubscriptionOptions & { skip?: boolean } = {},
 ) => {
-  const { data, currentData, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
+  const { data, currentData, error, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
     toQueryArgs(spaceId, query),
     options,
   )
@@ -118,5 +118,5 @@ export const useSpaceQueue = (
     [currentData, isNarrowed],
   )
   // The last answer's counts stay while a new filter loads, so the menus keep them
-  return { queue, counts: data?.counts, isError, isFetching, refetch }
+  return { queue, counts: data?.counts, error, isError, isFetching, refetch }
 }

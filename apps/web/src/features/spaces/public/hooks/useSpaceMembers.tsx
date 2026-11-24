@@ -49,14 +49,24 @@ export const isInviteExpired = (member: MemberDto): boolean => {
   return Number.isFinite(expiresAt) && expiresAt <= Date.now()
 }
 
-const useAllMembers = (spaceId?: string) => {
+const useMembersQuery = (spaceId?: string) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data, error } = useMembersGetUsersV1Query(
+  return useMembersGetUsersV1Query(
     { spaceId: actualSpaceId ?? '' },
     { skip: !isUserSignedIn || !actualSpaceId, ...SPACE_REFRESH_OPTIONS },
   )
+}
+
+/** Whether the gateway refused the member list to the caller, i.e. they were removed or the Space was deleted. */
+export const useMembershipRevoked = (spaceId?: string) => {
+  const { error, refetch } = useMembersQuery(spaceId)
+  return { isRevoked: isMembershipRevoked(error), refetch }
+}
+
+const useAllMembers = (spaceId?: string) => {
+  const { data, error } = useMembersQuery(spaceId)
   // RTK keeps the last successful `data` on a failed refetch. When our membership is revoked in
   // another session the refetch 403s, so drop access instead of returning the stale member list.
   if (isMembershipRevoked(error)) return EMPTY_MEMBERS

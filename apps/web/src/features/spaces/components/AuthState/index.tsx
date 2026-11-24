@@ -10,7 +10,8 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 import { useSpaceQueuePolling } from '../../hooks/useSpaceQueuePolling'
-import { MemberStatus } from '../../public/hooks/useSpaceMembers'
+import { MemberStatus, useMembershipRevoked } from '../../public/hooks/useSpaceMembers'
+import { isForbidden } from '@/services/sessionExpiry/expireSession'
 import { AppRoutes } from '@/config/routes'
 import TrialEndingModal from '../Plans/TrialEndingModal'
 import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
@@ -26,15 +27,21 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   )
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
   const isSessionCheckPending = useAppSelector(selectIsSessionCheckPending)
-  useSpaceQueuePolling()
+  const isQueueRefused = useSpaceQueuePolling()
+  const { isRevoked, refetch: refetchMembership } = useMembershipRevoked(spaceId)
 
   const currentMembership = currentData?.members.find((member) => member.user.id === currentUser?.id)
   const hasMembershipLoaded = !!currentData && !!currentUser
   const isCurrentUserActive = currentMembership?.status === MemberStatus.ACTIVE
 
   const isLoadingState = isLoading || isOidcLoginPending || isSessionCheckPending
-  const hasLostAccess = isUserSignedIn && !isLoadingState && isUnauthorized(error)
+  const hasLostAccess = isUserSignedIn && !isLoadingState && (isUnauthorized(error) || isForbidden(error) || isRevoked)
   const isInactiveMember = isUserSignedIn && !isLoadingState && hasMembershipLoaded && !isCurrentUserActive
+
+  // A refused poll is the first sign of a removal; the member list says whether access is really gone
+  useEffect(() => {
+    if (isQueueRefused && isUserSignedIn && spaceId) void refetchMembership()
+  }, [isQueueRefused, isUserSignedIn, spaceId, refetchMembership])
 
   useEffect(() => {
     dispatch(setLastUsedSpaceOrigin({ path: router.pathname, spaceId }))
