@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { getStoreInstance } from '@/store'
 import * as useChains from '@/hooks/useChains'
+import * as transactions from '@/utils/transactions'
 import { chainBuilder } from '@/tests/builders/chains'
 import { CreateSafeOnNewChain, CreateSafeOnSpecificChain } from './index'
 import { persistCounterfactualSafe } from '@/features/counterfactual/public/services/persistCounterfactualSafe'
@@ -348,5 +349,26 @@ describe('CreateSafeOnNewChain', () => {
 
     expect(screen.getByTestId('added-network')).toHaveTextContent('Gnosis Chain')
     expect(screen.getByTestId('modal-add-network-btn')).toBeEnabled()
+  })
+
+  it('offers Cancel and a disabled Add network instead of Got it while the creation data loads', async () => {
+    const pendingCreation = new Promise<never>(() => {})
+    const getCreation = jest.spyOn(transactions, 'getCreationTransaction').mockReturnValue(pendingCreation)
+
+    render(
+      <CreateSafeOnNewChain
+        safeAddress={SAFE_ADDRESS}
+        deployedChainIds={[deployedChain.chainId]}
+        currentName="My Safe"
+        open
+        onClose={jest.fn()}
+      />,
+    )
+
+    expect(await screen.findByText('Loading Safe data')).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'Got it' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeEnabled()
+    expect(screen.getByTestId('modal-add-network-btn')).toBeDisabled()
+    getCreation.mockRestore()
   })
 })
