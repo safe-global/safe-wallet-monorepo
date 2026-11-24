@@ -5,7 +5,6 @@
 import type { Page } from '@playwright/test'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { waitUntil } from '../../environment/scenarios/indexing.mjs'
-import { CHAIN_IDS } from '../data/constants'
 import {
   createWorkspace,
   type EmailSession,
@@ -18,14 +17,16 @@ import type { SeededSafe } from './safe'
 
 export type BusinessWorkspace = { id: string; session: EmailSession }
 
-/** Signs the page in by email and creates a Workspace that holds the named Safes. */
+const chainOf = (safe: SeededSafe): string => String(safe.context.chainId)
+
+/** Signs the page in by email and creates a Workspace that holds the named Safes, each on its own network. */
 export async function seedBusinessWorkspace(page: Page, safes: Record<string, SeededSafe>): Promise<BusinessWorkspace> {
   const session = await signInWithEmail(page, uniqueEmail('business-workspace'))
   const { uuid } = await createWorkspace(session, 'Business workspace')
   const entries = Object.entries(safes)
   await gatewayRequest(session, 'POST', `/v1/spaces/${uuid}/safes`, {
-    safes: entries.map(([, { address }]) => ({ chainId: CHAIN_IDS.sepolia, address })),
-    addressBookItems: entries.map(([name, { address }]) => ({ name, address, chainIds: [CHAIN_IDS.sepolia] })),
+    safes: entries.map(([, safe]) => ({ chainId: chainOf(safe), address: safe.address })),
+    addressBookItems: entries.map(([name, safe]) => ({ name, address: safe.address, chainIds: [chainOf(safe)] })),
   })
   await storeSubscription(session, uuid)
   await waitForOverviews(entries.map(([, safe]) => safe))
@@ -35,7 +36,7 @@ export async function seedBusinessWorkspace(page: Page, safes: Record<string, Se
 /** The dashboard reads the CGW overview once; right after seeding it can still leave out a Safe it fails to load. */
 async function waitForOverviews(safes: SeededSafe[]): Promise<void> {
   const { env } = safes[0].context
-  const ids = safes.map(({ address }) => `${CHAIN_IDS.sepolia}:${address}`).join(',')
+  const ids = safes.map((safe) => `${chainOf(safe)}:${safe.address}`).join(',')
   await waitUntil(
     env,
     // Same variant as the dashboard request: CGW caches each query string on its own
