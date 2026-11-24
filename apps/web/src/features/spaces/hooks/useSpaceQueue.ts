@@ -83,8 +83,9 @@ type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
 
 const MAX_POLLING_INTERVAL = 5 * 60_000
 
-const getPollingInterval = (failures: number): number =>
-  Math.min(POLLING_INTERVAL * 2 ** failures, MAX_POLLING_INTERVAL)
+/** Doubles the wait per failed poll, up to 5 minutes or the healthy interval when that is configured longer */
+export const getPollingInterval = (failures: number, healthyInterval = POLLING_INTERVAL): number =>
+  Math.min(healthyInterval * 2 ** failures, Math.max(MAX_POLLING_INTERVAL, healthyInterval))
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 

@@ -79,6 +79,37 @@ describe('spaceQueuePollingSlice', () => {
     expect(failuresOf(store, unfiltered)).toBe(0)
   })
 
+  it.each([
+    [503, 'text/html', '<html><body>Service Unavailable</body></html>'],
+    [429, 'text/plain', 'Too Many Requests'],
+  ])('counts a %i whose %s body is not JSON', async (status, contentType, body) => {
+    server.use(
+      http.get(
+        `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`,
+        () => new HttpResponse(body, { status, headers: { 'Content-Type': contentType } }),
+      ),
+    )
+    const store = makeStore()
+
+    await request(store, unfiltered)
+
+    expect(failuresOf(store, unfiltered)).toBe(1)
+  })
+
+  it('does not count a 403 whose body is not JSON', async () => {
+    server.use(
+      http.get(
+        `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`,
+        () => new HttpResponse('Forbidden', { status: 403, headers: { 'Content-Type': 'text/plain' } }),
+      ),
+    )
+    const store = makeStore()
+
+    await request(store, unfiltered)
+
+    expect(failuresOf(store, unfiltered)).toBe(0)
+  })
+
   it('counts a request that never reached the service', async () => {
     server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, () => HttpResponse.error()))
     const store = makeStore()

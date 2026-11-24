@@ -13,9 +13,14 @@ const initialState: Record<string, QueuePolling> = {}
 
 const NOT_POLLED: QueuePolling = { failures: 0, lastStartedAt: 0 }
 
+const isBusyStatus = (status: number): boolean => status === 429 || status >= 500
+
+/** A 429 or 5xx, or a request that never reached the gateway. A 401, 403 or 404 is an access problem, not load. */
 const isServiceBusy = (error?: FetchBaseQueryError): boolean => {
   if (!error) return false
-  if (typeof error.status === 'number') return error.status === 429 || error.status >= 500
+  if (typeof error.status === 'number') return isBusyStatus(error.status)
+  // A proxy's HTML 503 or plain-text 429 fails JSON parsing, so its status only survives here
+  if (error.status === 'PARSING_ERROR') return isBusyStatus(error.originalStatus)
   return error.status === 'FETCH_ERROR' || error.status === 'TIMEOUT_ERROR'
 }
 

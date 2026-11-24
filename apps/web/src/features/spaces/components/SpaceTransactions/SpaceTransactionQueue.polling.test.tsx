@@ -187,7 +187,8 @@ describe('SpaceTransactionQueue live updates', () => {
 
   describe('when the service is busy', () => {
     const SECOND = 1_000
-    let status: number
+    const HTML_503 = 'html 503'
+    let status: number | typeof HTML_503
     let requestTimes: number[]
 
     const serveQueue = () => {
@@ -196,7 +197,11 @@ describe('SpaceTransactionQueue live updates', () => {
       server.use(
         http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, () => {
           requestTimes.push(Date.now())
-          return status === 200 ? HttpResponse.json(queuePage(1)) : new HttpResponse(null, { status })
+          if (status === 200) return HttpResponse.json(queuePage(1))
+          // What a proxy in front of the gateway sends when it is down
+          if (status === HTML_503)
+            return HttpResponse.html('<html><body>503 Service Unavailable</body></html>', { status: 503 })
+          return new HttpResponse(null, { status })
         }),
       )
     }
@@ -232,6 +237,17 @@ describe('SpaceTransactionQueue live updates', () => {
       expect(await screen.findByText("Couldn't refresh the queue")).toBeInTheDocument()
       expect(screen.getByText('1 of 3 signatures')).toBeInTheDocument()
       expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    })
+
+    it('backs off and shows a notice when a proxy answers a poll with an HTML 503', async () => {
+      await renderQueue()
+
+      status = HTML_503
+      await runPolls(3)
+
+      expect(await screen.findByText("Couldn't refresh the queue")).toBeInTheDocument()
+      expect(screen.getByText('1 of 3 signatures')).toBeInTheDocument()
+      expect(gapsInSeconds(requestTimes)).toEqual([15, 30, 60])
     })
 
     it('doubles the wait after each failed poll, from 15s up to 5 minutes', async () => {
