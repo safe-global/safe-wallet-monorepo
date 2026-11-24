@@ -13,6 +13,8 @@ import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import local from '@/services/local-storage/local'
 import { spaceQueueViewSlice } from '../../public/store/spaceQueueViewSlice'
 import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection } from '../../hooks/useSpaceQueue'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getStoreInstance } from '@/store'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
 const mockToolbarProps = jest.fn()
@@ -41,6 +43,18 @@ jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({
     )
   },
 }))
+
+const mockAlertProps = jest.fn()
+jest.mock('./UnavailableSafesAlert', () => {
+  const { default: UnavailableSafesAlert } = jest.requireActual('./UnavailableSafesAlert')
+  return {
+    __esModule: true,
+    default: (props: { isRetrying?: boolean }) => {
+      mockAlertProps(props)
+      return <UnavailableSafesAlert {...props} />
+    },
+  }
+})
 
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
@@ -168,7 +182,7 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByText("2 Safe accounts couldn't be loaded")).toBeInTheDocument()
+    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safe accounts not loaded')
     expect(screen.getByTestId('space-queue-safe')).toBeInTheDocument()
   })
 
@@ -195,8 +209,39 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByText("1 Safe account couldn't be loaded")).toBeInTheDocument()
+    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe account not loaded')
     expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+    expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+  })
+
+  it('keeps the error view, with Try again loading, while it retries a failed filter', async () => {
+    let failFilter = true
+    let releaseRetry: () => void = () => {}
+    const retryReleased = new Promise<void>((resolve) => (releaseRetry = resolve))
+    server.use(
+      http.get(queueUrl, async ({ request }) => {
+        if (!new URL(request.url).searchParams.has('status')) {
+          return HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }))
+        }
+        if (failFilter) return new HttpResponse(null, { status: 500 })
+        await retryReleased
+        return HttpResponse.json(page({ [safeB]: { '1': transactions(1) } }))
+      }),
+    )
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+    await screen.findByText("Couldn't load the queue")
+    failFilter = false
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Try again' })).toBeDisabled())
+    expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+
+    releaseRetry()
+
+    await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeB))
     expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
   })
 
@@ -450,7 +495,193 @@ describe('SpaceTransactionQueue', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    await waitFor(() => expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
     expect(mockToolbarProps).toHaveBeenLastCalledWith(expect.objectContaining({ counts }))
+  })
+
+  describe('while a new query loads', () => {
+    const otherSafe = checksumAddress(faker.finance.ethereumAddress())
+
+    const respondSlowlyToFilters = (filtered: SpaceQueuedItemPage, unfiltered: SpaceQueuedItemPage) => {
+      let release: () => void = () => {}
+      const released = new Promise<void>((resolve) => (release = resolve))
+      server.use(
+        http.get(queueUrl, async ({ request }) => {
+          if (!new URL(request.url).searchParams.has('status')) return HttpResponse.json(unfiltered)
+          await released
+          return HttpResponse.json(filtered)
+        }),
+      )
+      return () => release()
+    }
+
+    it('keeps the last queue on screen, dimmed, instead of the skeleton', async () => {
+      const release = respondSlowlyToFilters(
+        page({ [otherSafe]: { '1': transactions(1) } }),
+        page({ [safeA]: { '1': transactions(1) } }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      const table = await screen.findByTestId('space-queue-table')
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+      expect(screen.getByTestId('space-queue-body')).toHaveClass('opacity-50')
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('inert')
+      expect(screen.getByRole('status')).toHaveTextContent('Updating results…')
+      expect(screen.getByTestId('space-queue-table')).toBe(table)
+      expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeA)
+
+      release()
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+      expect(screen.getByTestId('space-queue-body')).not.toHaveClass('opacity-50')
+      expect(screen.getByTestId('space-queue-body')).not.toHaveAttribute('inert')
+      expect(screen.getByRole('status')).toBeEmptyDOMElement()
+    })
+
+    it('does not spin the Reload of unloaded Safes while a filter loads', async () => {
+      const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
+      const release = respondSlowlyToFilters(
+        page({ [safeA]: { '1': transactions(1) } }, { unavailableSafes }),
+        page({ [safeA]: { '1': transactions(1) } }, { unavailableSafes }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('unavailable-safes-alert')
+      expect(mockAlertProps).toHaveBeenLastCalledWith(expect.objectContaining({ isRetrying: false }))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+
+      expect(mockAlertProps).not.toHaveBeenLastCalledWith(expect.objectContaining({ isRetrying: true }))
+      release()
+    })
+
+    it('shows the latest query when an earlier one answers after it', async () => {
+      let receiveB: () => void = () => {}
+      const bReceived = new Promise<void>((resolve) => (receiveB = resolve))
+      let releaseB: () => void = () => {}
+      const bReleased = new Promise<void>((resolve) => (releaseB = resolve))
+      server.use(
+        http.get(queueUrl, async ({ request }) => {
+          const search = new URL(request.url).searchParams.get('search')
+          if (search === 'b') {
+            receiveB()
+            await bReleased
+            return HttpResponse.json(page({ [safeB]: { '1': transactions(1) } }))
+          }
+          if (search === 'c') return HttpResponse.json(page({ [otherSafe]: { '1': transactions(1) } }))
+          return HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }))
+        }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'b' } })
+      await act(() => bReceived)
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'c' } })
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
+
+      releaseB()
+      const isBAnswered = () =>
+        Object.entries(getStoreInstance().getState()[cgwApi.reducerPath].queries).some(
+          ([cacheKey, entry]) => cacheKey.includes('"search":"b"') && entry?.status === 'fulfilled',
+        )
+      await waitFor(() => expect(isBAnswered()).toBe(true))
+
+      expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe)
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+    })
+
+    it('shows a query loaded before at once, without dimming', async () => {
+      const requests: Request[] = []
+      server.use(
+        http.get(queueUrl, async ({ request }) => {
+          requests.push(request)
+          const isSearched = new URL(request.url).searchParams.has('search')
+          if (!isSearched && requests.length > 1) await delay('infinite')
+          return HttpResponse.json(page({ [isSearched ? otherSafe : safeA]: { '1': transactions(1) } }))
+        }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'c' } })
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(otherSafe))
+
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: '' } })
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-safe')).toHaveTextContent(safeA))
+      expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'false')
+      expect(screen.getByTestId('space-queue-body')).not.toHaveClass('opacity-50')
+    })
+
+    it('keeps the cap notice of the last queue until the new one arrives', async () => {
+      const release = respondSlowlyToFilters(
+        page({ [safeA]: { '1': transactions(1) } }, { count: 1 }),
+        page({ [safeA]: { '1': transactions(3) } }, { count: 742 }),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByText('Showing 3 of 742 pending transactions.')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+
+      expect(screen.getByText('Showing 3 of 742 pending transactions.')).toBeInTheDocument()
+
+      release()
+      await waitFor(() => expect(screen.queryByText(/^Showing/)).not.toBeInTheDocument())
+    })
+
+    it('keeps the empty queue state, not a no-match state, while a filter loads', async () => {
+      const release = respondSlowlyToFilters(page({}, { count: 0 }), page({}, { count: 0 }))
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByText('Pending transactions of your Safe accounts will appear here')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
+
+      expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+      expect(screen.queryByText('No proposals match these filters')).not.toBeInTheDocument()
+
+      release()
+      expect(await screen.findByText('No proposals match these filters')).toBeInTheDocument()
+    })
+
+    it('shows the error, not the last queue, when the new query fails', async () => {
+      server.use(
+        http.get(queueUrl, ({ request }) =>
+          new URL(request.url).searchParams.has('status')
+            ? new HttpResponse(null, { status: 500 })
+            : HttpResponse.json(page({ [safeA]: { '1': transactions(1) } })),
+        ),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+
+      expect(await screen.findByText("Couldn't load the queue")).toBeInTheDocument()
+      expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+    })
+
+    it("never shows another Workspace's queue while the new one loads", async () => {
+      const otherSpaceId = faker.string.uuid()
+      respondWith(page({ [safeA]: { '1': transactions(1) } }))
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/spaces/${otherSpaceId}/safes`, () => HttpResponse.json({ safes: {} })),
+        http.get(`${GATEWAY_URL}/v1/spaces/${otherSpaceId}/transactions/queued`, async () => {
+          await delay('infinite')
+          return HttpResponse.json(page({}))
+        }),
+      )
+      const { rerender } = render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      rerender(<SpaceTransactionQueue spaceId={otherSpaceId} />)
+
+      await waitFor(() => expect(screen.queryByTestId('space-queue-body')).not.toBeInTheDocument())
+      expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+    })
   })
 })

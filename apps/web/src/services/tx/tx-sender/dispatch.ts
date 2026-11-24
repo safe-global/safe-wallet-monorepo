@@ -51,6 +51,7 @@ import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-s
 import { concat, dataLength } from 'ethers'
 import { encodeNestedTxPayload, supportsNestedTxEnvelope, type NestedTxEnvelope } from '../nestedTxEnvelope'
 import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
+import { withChildDeclared } from '../nestedSignerDeclared'
 
 /**
  * Propose a new transaction
@@ -230,6 +231,7 @@ export const dispatchOnChainSigning = async (
   executed: boolean,
   safeVersion?: SafeState['version'],
   scope?: TxSenderScope,
+  declared?: DeclaredAttribution,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
   const safeTxHash = await sdk.getTransactionHash(safeTx)
@@ -260,12 +262,8 @@ export const dispatchOnChainSigning = async (
     // Note: SafeWalletProvider returns transaction hash if it exists, otherwise the safeTxHash
     // If the parent immediately executes, this will be the transaction hash of the approveHash
     // otherwise the safeTxHash of it
-    txHashOrParentSafeTxHash = await sendApproveHashTx(
-      encodedApproveHashTx,
-      provider,
-      chainId,
-      signerAddress,
-      safeAddress,
+    txHashOrParentSafeTxHash = await withChildDeclared(safeTxHash, declared, () =>
+      sendApproveHashTx(encodedApproveHashTx, provider, chainId, signerAddress, safeAddress),
     )
 
     txDispatch(TxEvent.ONCHAIN_SIGNATURE_REQUESTED, eventParams)
@@ -324,12 +322,8 @@ export const dispatchNestedTxCreation = async ({
   const signedTx = await dispatchProposerTxSigning(safeTx, wallet, scope)
 
   const encodedApproveHashTx = await prepareApproveTxHash(safeTxHash, parentProvider, scope)
-  const txHashOrParentSafeTxHash = await sendApproveHashTx(
-    encodedApproveHashTx,
-    parentProvider,
-    chainId,
-    parentSafeAddress,
-    safeAddress,
+  const txHashOrParentSafeTxHash = await withChildDeclared(safeTxHash, declared, () =>
+    sendApproveHashTx(encodedApproveHashTx, parentProvider, chainId, parentSafeAddress, safeAddress),
   )
 
   const { txId } = await dispatchTxProposal({
@@ -466,6 +460,7 @@ export const dispatchTxExecution = async (
   isSafeSigner = false,
   safeVersion?: SafeState['version'],
   scope?: TxSenderScope,
+  declared?: DeclaredAttribution,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
   // Never proposed to CGW, so derive the id CGW will assign
@@ -493,10 +488,12 @@ export const dispatchTxExecution = async (
         })
       }
 
-      const txHash = await provider.request({
-        method: 'eth_sendTransaction',
-        params: [{ from: signerAddress, to: safeAddress, data: encodedTx }],
-      })
+      const txHash = await withChildDeclared(safeTxHash, declared, () =>
+        provider.request({
+          method: 'eth_sendTransaction',
+          params: [{ from: signerAddress, to: safeAddress, data: encodedTx }],
+        }),
+      )
 
       result = {
         hash: txHash,
