@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { createNonOwnerWallet } from '@/stories/mocks/wallets'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 import { ESafeAction } from '../../public/store/safeActionsModalSlice'
 import SelectSafeModal from './index'
 
@@ -79,15 +80,21 @@ const storyFor = ({
     authenticated: true,
     wallet: connected ? createNonOwnerWallet(CHAIN_ID, { address: WALLET }) : 'disconnected',
     pathname: '/spaces/transactions',
-    query: { spaceId: '1' },
+    query: { spaceId: MOCK_SPACE_ID },
     shadcn: true,
     store: {
       safeActionsModal: { opened: true, type: action },
       undeployedSafes,
     } as never,
-    handlers: [spaceSafesHandler(addresses), ...roleHandlers],
   })
-  return { parameters: { ...setup.parameters }, decorators: [setup.decorator] }
+  // MSW is first-match-wins and createMockStory's defaults answer these routes too, so ours go first
+  return {
+    parameters: {
+      ...setup.parameters,
+      msw: { handlers: [spaceSafesHandler(addresses), ...roleHandlers, ...setup.handlers] },
+    },
+    decorators: [setup.decorator],
+  }
 }
 
 const meta = {
