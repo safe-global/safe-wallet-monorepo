@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { act } from 'react'
+import { act, useState } from 'react'
 import { delay, http, HttpResponse } from 'msw'
 import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { POLLING_INTERVAL } from '@/config/constants'
@@ -57,12 +57,28 @@ const WorkspacePage = () => {
   )
 }
 
+/** Lets a test leave the Workspace and open it again in the same session, keeping the RTK cache. */
+const WorkspaceRoute = () => {
+  const [isOpen, setIsOpen] = useState(true)
+  return (
+    <>
+      <button data-testid="toggle-route" onClick={() => setIsOpen((open) => !open)} />
+      {isOpen && (
+        <AuthState spaceId={spaceId}>
+          <WorkspacePage />
+        </AuthState>
+      )}
+    </>
+  )
+}
+
 const LATENCY = 200
 const spaceUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}`
 
 describe('AuthState when the member loses access mid-session', () => {
   let status: 200 | 403 | 429
   let requests: string[]
+  let replace: jest.Mock
 
   const respond = (body: unknown) => async () => {
     await delay(LATENCY)
@@ -72,6 +88,7 @@ describe('AuthState when the member loses access mid-session', () => {
   beforeEach(() => {
     status = 200
     requests = []
+    replace = jest.fn(() => Promise.resolve(true))
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
     server.events.on('request:start', ({ request }) => {
@@ -97,23 +114,19 @@ describe('AuthState when the member loses access mid-session', () => {
   })
 
   const renderPage = () =>
-    render(
-      <AuthState spaceId={spaceId}>
-        <WorkspacePage />
-      </AuthState>,
-      {
-        initialReduxState: {
-          auth: {
-            sessionExpiresAt: Date.now() + 10 * 24 * 60 * 60 * 1000,
-            landingSpaceHint: null,
-            isStoreHydrated: true,
-            cfSafeSynced: false,
-            isOidcLoginPending: false,
-            isSessionCheckPending: false,
-          },
+    render(<WorkspaceRoute />, {
+      routerProps: { replace },
+      initialReduxState: {
+        auth: {
+          sessionExpiresAt: Date.now() + 10 * 24 * 60 * 60 * 1000,
+          landingSpaceHint: null,
+          isStoreHydrated: true,
+          cfSafeSynced: false,
+          isOidcLoginPending: false,
+          isSessionCheckPending: false,
         },
       },
-    )
+    })
 
   const advance = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms))
 
@@ -167,5 +180,57 @@ describe('AuthState when the member loses access mid-session', () => {
     await advance(4 * POLLING_INTERVAL)
     expect(requests.slice(settled)).toEqual([])
     expect(requests.some((path) => path.endsWith('/transactions/queued'))).toBe(false)
+  })
+
+  describe('when a removed member is invited again and reopens the Workspace', () => {
+    const reopen = async () => {
+      fireEvent.click(screen.getByTestId('toggle-route'))
+      status = 200
+      replace.mockClear()
+      fireEvent.click(screen.getByTestId('toggle-route'))
+      await advance(LATENCY / 2)
+      expect(screen.queryByTestId('unauthorized')).not.toBeInTheDocument()
+      await advance(2_000)
+    }
+
+    it('shows the page, not the cached refusal, while the member list reloads', async () => {
+      await loadThenRespondWith(403)
+      expect(screen.getByTestId('unauthorized')).toBeInTheDocument()
+
+      await reopen()
+
+      expect(screen.getByTestId('page')).toBeInTheDocument()
+      expect(screen.queryByTestId('unauthorized')).not.toBeInTheDocument()
+      expect(replace).not.toHaveBeenCalled()
+    })
+
+    it('reloads the member list when the refusal is cached within the 30s refetch window', async () => {
+      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+      renderPage()
+      expect(await screen.findByTestId('page')).toBeInTheDocument()
+      status = 403
+      fireEvent.click(screen.getByTestId('page'))
+      await advance(2_000)
+      expect(screen.getByTestId('unauthorized')).toBeInTheDocument()
+      const settled = requests.length
+
+      await reopen()
+
+      expect(requests.slice(settled).some((path) => path.endsWith('/members'))).toBe(true)
+      expect(screen.getByTestId('page')).toBeInTheDocument()
+      expect(replace).not.toHaveBeenCalled()
+    })
+
+    it('still shows the no-access state when the member list is refused again', async () => {
+      await loadThenRespondWith(403)
+      fireEvent.click(screen.getByTestId('toggle-route'))
+      replace.mockClear()
+
+      fireEvent.click(screen.getByTestId('toggle-route'))
+      await advance(2_000)
+
+      expect(screen.getByTestId('unauthorized')).toBeInTheDocument()
+      expect(replace).toHaveBeenCalled()
+    })
   })
 })

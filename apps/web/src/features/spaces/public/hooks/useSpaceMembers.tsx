@@ -3,7 +3,7 @@ import {
   useMembersGetUsersV1Query,
   type MemberDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MemberRole } from '../../memberRole'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
@@ -61,8 +61,17 @@ const useMembersQuery = (spaceId?: string) => {
 
 /** Whether the gateway refused the member list to the caller, i.e. they were removed or the Space was deleted. */
 export const useMembershipRevoked = (spaceId?: string) => {
-  const { error, refetch } = useMembersQuery(spaceId)
-  return { isRevoked: isMembershipRevoked(error), refetch }
+  const [mountedAt] = useState(Date.now)
+  const { error, isFetching, startedTimeStamp = 0, refetch } = useMembersQuery(spaceId)
+  const isRefused = isMembershipRevoked(error) && !isFetching
+  // A refusal cached before this mount may predate a new invite, so it is asked again instead of trusted
+  const isRefusalStale = isRefused && startedTimeStamp < mountedAt
+
+  useEffect(() => {
+    if (isRefusalStale) void refetch()
+  }, [isRefusalStale, refetch])
+
+  return { isRevoked: isRefused && !isRefusalStale, refetch }
 }
 
 const useAllMembers = (spaceId?: string) => {
