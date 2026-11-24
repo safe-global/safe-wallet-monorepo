@@ -60,7 +60,7 @@ const gasTokenLockTooltip = (
   if (reason === 'SET_AT_SIGNING') return SET_AT_SIGNING_TOOLTIP
   if (reason === 'SPONSORED')
     return sponsorKind === 'free' ? 'Covered by a sponsored transaction.' : 'Covered by your Pro plan.'
-  if (reason === 'NATIVE_ONLY') return `Fees are paid in ${token?.symbol} for now. More tokens are coming soon.`
+  if (reason === 'ONLY_TOKEN') return `${token?.symbol} is the only token in this Safe account that can pay fees.`
   return undefined
 }
 

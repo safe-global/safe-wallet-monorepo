@@ -33,7 +33,7 @@ export type OutgoingLine = { amount: string; currency: string }
 export type TotalOutgoingView = { primary: OutgoingLine[]; fees?: OutgoingLine; fiatTotal: string }
 
 /** Why the fee token is locked. Without one the view explains the signer-pays case. */
-export type GasTokenLockReason = 'SET_AT_SIGNING' | 'NATIVE_ONLY' | 'SPONSORED'
+export type GasTokenLockReason = 'SET_AT_SIGNING' | 'ONLY_TOKEN' | 'SPONSORED'
 
 export type FeePayerControl =
   { kind: 'choice'; value: GasPayerChoice; options: GasPayerChoice[] } | { kind: 'locked'; value: GasPayerChoice }
