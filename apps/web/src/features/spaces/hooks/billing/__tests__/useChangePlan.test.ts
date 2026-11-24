@@ -8,6 +8,7 @@ const mockUseSpaceSubscription = jest.fn()
 const mockBillingSpaceId = jest.fn<string | null, []>()
 let mockPreviewState: Record<string, unknown> = { data: undefined, isFetching: false, error: undefined }
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/billing'),
   useLazyBillingPreviewSubscriptionUpdateV1Query: () => [mockTriggerPreview, mockPreviewState],
   useBillingUpdateSubscriptionV1Mutation: () => [mockUpdate, { isLoading: false, error: undefined }],
 }))

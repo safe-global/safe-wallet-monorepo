@@ -1,4 +1,5 @@
-import { render, screen } from '@/tests/test-utils'
+import { useState } from 'react'
+import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PlanLocation } from '@/services/analytics/mixpanel-events'
 import { PlanCard } from '../PlanCard'
@@ -42,6 +43,8 @@ const BUSINESS: PlanTier = {
   features: [],
 }
 
+const selectedSize = () => screen.getByRole('tab', { selected: true })
+
 describe('PlanCard', () => {
   it('opens on the plan in force even when it is not the first Safe count', () => {
     render(
@@ -52,7 +55,7 @@ describe('PlanCard', () => {
       />,
     )
 
-    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('10 Safe accounts')
+    expect(selectedSize()).toHaveAccessibleName('10 Safe accounts')
     expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
   })
 
@@ -60,13 +63,13 @@ describe('PlanCard', () => {
     const { rerender } = render(
       <PlanCard location={PlanLocation.PLANS_PAGE} tier={{ ...currentTier(''), currentPriceId: undefined }} />,
     )
-    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('5 Safe accounts')
+    expect(screen.queryByRole('tab', { selected: true })).not.toBeInTheDocument()
 
     rerender(
       <PlanCard location={PlanLocation.PLANS_PAGE} tier={currentTier('price_b20m')} currentPlan={businessPlan()} />,
     )
 
-    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
+    expect(selectedSize()).toHaveAccessibleName('20 Safe accounts')
   })
 
   it('marks only the plan in force as current', () => {
@@ -101,7 +104,75 @@ describe('PlanCard', () => {
       />,
     )
 
-    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
+    expect(selectedSize()).toHaveAccessibleName('20 Safe accounts')
+  })
+
+  describe('without a paid plan', () => {
+    const trial = businessPlan({ isTrialing: true, price: 669, seatsLabel: '5 Safe accounts' })
+
+    it('shows a custom price and only sales until a size is picked, then the price and a switch', async () => {
+      const onCta = jest.fn()
+      const Picker = () => {
+        const [seatsLabel, setSeatsLabel] = useState<string>()
+        return (
+          <PlanCard
+            location={PlanLocation.PLANS_PAGE}
+            tier={currentTier('price_b5m')}
+            currentPlan={trial}
+            seatsLabel={seatsLabel}
+            onSeatsChange={setSeatsLabel}
+            onCta={onCta}
+          />
+        )
+      }
+      const { user } = renderWithUserEvent(<Picker />)
+
+      expect(screen.getByText('Custom')).toBeInTheDocument()
+      expect(screen.queryByText('€669')).not.toBeInTheDocument()
+      expect(screen.queryByRole('tab', { selected: true })).not.toBeInTheDocument()
+      expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
+      expect(within(screen.getByTestId('plan-ctas')).getAllByRole('link')).toHaveLength(1)
+      expect(screen.getByRole('link', { name: 'Talk to sales' })).toBeInTheDocument()
+
+      await user.click(screen.getByRole('tab', { name: '10 Safe accounts' }))
+
+      expect(selectedSize()).toHaveAccessibleName('10 Safe accounts')
+      expect(screen.getByText('€1,099')).toBeInTheDocument()
+      expect(screen.queryByText('Custom')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Switch to Business 10' })).toBeInTheDocument()
+    })
+
+    it('offers the best yearly saving before a size is picked', () => {
+      const yearly: PlanTier = {
+        ...BUSINESS,
+        id: 'Business-year',
+        billingCycle: 'year',
+        options: [option(5, 762_800), option(20, 1_799_000)],
+      }
+      render(
+        <PlanCard
+          location={PlanLocation.LOCKED_MODAL}
+          tier={BUSINESS}
+          counterpartTier={yearly}
+          onSwitchToYearly={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('button', { name: 'Save up to 10.2% with yearly' })).toBeInTheDocument()
+    })
+
+    it('prices a plan with a single size right away', () => {
+      render(
+        <PlanCard
+          location={PlanLocation.LOCKED_MODAL}
+          tier={{ ...BUSINESS, name: 'Starter', options: [option(2, 18_900)] }}
+        />,
+      )
+
+      expect(screen.getByText('€189')).toBeInTheDocument()
+      expect(screen.getByTestId('plan-seats-fixed')).toHaveTextContent('2 Safes')
+      expect(screen.getByRole('button', { name: 'Continue with Starter' })).toBeInTheDocument()
+    })
   })
 
   it('shows the subtitle and support line from the plan copy, and nothing when it is empty', () => {

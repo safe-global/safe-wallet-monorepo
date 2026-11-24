@@ -7,26 +7,25 @@ import {
   createEmailSession,
   createWorkspace,
   planName,
-  removeSubscription,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
+  workspaceIdNamed,
   workspaceResource,
   workspaceUrl,
   type EmailSession,
 } from '../../../src/fixtures/email-session'
 import { completeStepUp, expectActionCompleted } from '../../../src/fixtures/step-up'
+import { WorkspacePage } from '../../../src/pages/workspace.page'
 
 const WORKSPACE_NAME = 'Step-up billing'
-
-// The plan card at the top of the Plans page names the plan in force.
-const currentPlan = (page: Page) => page.getByRole('main').getByRole('heading', { level: 4 }).first()
+const STARTER_SEATS = 2
 
 /** The Plans page confirms a switch made during the free access, which the local billing service always gives. */
 async function expectPlanSwitched(page: Page, plan: string): Promise<void> {
   await expect(page.getByRole('dialog', { name: new RegExp(`^You're on ${plan}`) })).toBeVisible()
   await page.getByRole('button', { name: 'Get started' }).click()
-  await expect(currentPlan(page)).toHaveText(plan)
+  await expect(new WorkspacePage(page).currentPlanName).toHaveText(plan)
 }
 
 /** The local checkout page, opened for the Workspace (as the billing service names it, without dashes). */
@@ -46,31 +45,21 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
     user = await signInWithEmail(safePage, email, { secondFactor: false })
   })
 
-  test('should open the checkout of the chosen trial when the step-up in the creation wizard succeeds', async ({
+  test('should reopen the checkout of the same Workspace when the user comes back from it and the step-up succeeds', async ({
     safePage,
   }) => {
-    let workspaceId = ''
-    // A new Workspace has no plan in production; the local billing service would give it a trial on the first read.
-    await safePage.route('**/v1/spaces', async (route) => {
-      if (route.request().method() !== 'POST') return route.fallback()
-      const response = await route.fetch()
-      workspaceId = String(((await response.json()) as { uuid: string }).uuid)
-      await removeSubscription(workspaceId)
-      await route.fulfill({ response })
-    })
+    const workspace = new WorkspacePage(safePage)
     await safePage.goto('/welcome/create-space')
-    await safePage.getByRole('textbox', { name: 'Workspace name' }).fill(WORKSPACE_NAME)
-    await safePage.getByRole('button', { name: 'Next' }).click()
+    await workspace.startTrialViaWizard(WORKSPACE_NAME, STARTER_SEATS)
+    const workspaceId = await workspaceIdNamed(user, WORKSPACE_NAME)
+    await expectLocalCheckout(safePage, workspaceId, 'Starter')
+    await workspace.checkoutBackLink.click()
 
-    const offer = safePage.getByRole('dialog', { name: 'Workspaces run on Safe Pro' })
-    await offer.getByRole('radio', { name: /^Starter/ }).click()
-    await offer.getByRole('button', { name: 'Claim free access' }).click()
+    await workspace.finishSurveyButton.click()
     await completeStepUp(safePage)
 
-    // The checkout returns to the next step of the wizard.
     await expectLocalCheckout(safePage, workspaceId, 'Starter')
     await expect(safePage.getByText('30 days free')).toBeVisible()
-    await expect(safePage.getByText(`/welcome/select-safes?spaceId=${workspaceId}`)).toBeVisible()
   })
 
   test.describe('in an existing Workspace', () => {
@@ -88,6 +77,7 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       await storeSubscription(setup, workspaceId, { status: 'canceled' })
       await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
+      await safePage.getByRole('tab', { name: '20 Safe accounts' }).click()
       await safePage.getByRole('button', { name: 'Continue with Business' }).click()
       await completeStepUp(safePage)
 
@@ -112,7 +102,7 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
       await storeSubscription(setup, workspaceId, { plan: 'starter' })
       await safePage.goto(`/spaces/plans?spaceId=${workspaceId}`)
 
-      await safePage.getByRole('button', { name: 'Upgrade to Business' }).click()
+      await safePage.getByRole('button', { name: 'Switch to Business' }).click()
       await safePage.getByRole('button', { name: 'Confirm change' }).click()
       await completeStepUp(safePage)
 

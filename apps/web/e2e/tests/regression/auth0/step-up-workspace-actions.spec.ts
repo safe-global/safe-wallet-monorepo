@@ -3,10 +3,12 @@ import type { Page } from '@playwright/test'
 import { test, expect } from '../../../src/fixtures/test.fixture'
 import { CHAIN_IDS, TEST_ADDRESSES, safeAddress } from '../../../src/data/constants'
 import {
+  acceptInvite,
   addWorkspaceSafes,
   createWorkspace,
   createEmailSession,
   gatewayRequest,
+  inviteMember,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
@@ -28,12 +30,10 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
   /** Invites a new user, who accepts; returns that member's session. */
   async function joinAsMember(name: string): Promise<EmailSession> {
-    const memberEmail = uniqueEmail('member')
-    await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/members/invite`, {
-      users: [{ type: 'email', email: memberEmail, role: 'MEMBER', name }],
-    })
-    const member = await createEmailSession(memberEmail, { secondFactor: false })
-    await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/members/accept`, { name })
+    const email = uniqueEmail('member')
+    await inviteMember(setup, workspaceId, { email, name })
+    const member = await createEmailSession(email, { secondFactor: false })
+    await acceptInvite(member, workspaceId, name)
     return member
   }
 
@@ -153,7 +153,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   test('should add the contact to the Workspace address book when the step-up succeeds', async ({ safePage }) => {
     await safePage.goto(`/spaces/address-book?spaceId=${workspaceId}`)
 
-    await safePage.getByRole('button', { name: 'Add shared contact' }).click()
+    await safePage.getByRole('button', { name: 'Add contact' }).click()
     const dialog = safePage.getByRole('dialog')
     await dialog.getByRole('textbox', { name: 'Name' }).fill(CONTACT.name)
     await dialog.getByRole('textbox', { name: 'Address or ENS' }).fill(CONTACT.address)
@@ -170,11 +170,8 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     })
     await safePage.goto(`/spaces/address-book?spaceId=${workspaceId}`)
 
-    await safePage
-      .getByRole('row')
-      .filter({ hasText: CONTACT.name })
-      .getByRole('button', { name: 'Delete entry' })
-      .click()
+    await safePage.getByRole('button', { name: `Actions for ${CONTACT.name}` }).click()
+    await safePage.getByRole('menuitem', { name: 'Delete contact' }).click()
     await safePage.getByRole('dialog').getByRole('button', { name: 'Remove' }).click()
     await completeStepUp(safePage)
 

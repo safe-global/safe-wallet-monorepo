@@ -1,4 +1,4 @@
-import { buildCurrentNextUrl, parseNextUrlForRouter, sanitizeNextUrl } from '../nextUrl'
+import { buildCurrentNextUrl, parseNextUrlForRouter, parseSpaceReturnUrl, sanitizeNextUrl } from '../nextUrl'
 
 describe('sanitizeNextUrl', () => {
   it('returns the path when it is a same-origin relative URL', () => {
@@ -110,5 +110,59 @@ describe('buildCurrentNextUrl', () => {
 
   it('ignores undefined query values', () => {
     expect(buildCurrentNextUrl('/foo', { a: '1', b: undefined })).toBe('/foo?a=1')
+  })
+})
+
+describe('parseSpaceReturnUrl', () => {
+  const spaceId = '11111111-1111-1111-1111-111111111111'
+
+  it('returns a Workspace page of the given Workspace with its query', () => {
+    expect(parseSpaceReturnUrl(`/spaces/transactions?spaceId=${spaceId}&tab=history`, spaceId)).toEqual({
+      pathname: '/spaces/transactions',
+      query: { spaceId, tab: 'history' },
+    })
+    expect(parseSpaceReturnUrl(`/spaces?spaceId=${spaceId}`, spaceId)).toEqual({
+      pathname: '/spaces',
+      query: { spaceId },
+    })
+  })
+
+  it.each([
+    ['an absolute URL', `https://evil.com/spaces?spaceId=${spaceId}`],
+    ['a protocol-relative URL', `//evil.com/spaces?spaceId=${spaceId}`],
+    ['a backslash URL', `/\\evil.com/spaces?spaceId=${spaceId}`],
+    ['a javascript: URL', 'javascript:alert(document.cookie)'],
+    ['a data: URL', 'data:text/html,<script>alert(1)</script>'],
+    ['a non-string', [`/spaces?spaceId=${spaceId}`]],
+    ['a missing value', undefined],
+    ['a non-Workspace page', `/settings?spaceId=${spaceId}`],
+    ['a look-alike path', `/spacesevil?spaceId=${spaceId}`],
+    ['a path traversal out of /spaces', `/spaces/../settings?spaceId=${spaceId}`],
+    ['another Workspace', '/spaces/transactions?spaceId=22222222-2222-2222-2222-222222222222'],
+    ['no Workspace', '/spaces/transactions'],
+    ['an upper-case path', `/SPACES?spaceId=${spaceId}`],
+    ['an encoded-slash traversal', `/spaces%2F..%2Fsettings?spaceId=${spaceId}`],
+    ['an encoded-dot traversal', `/spaces/%2e%2e/settings?spaceId=${spaceId}`],
+    ['a traversal to a protocol-relative path', `/spaces/..//evil.com?spaceId=${spaceId}`],
+    ['a backslash traversal', `/spaces\\..\\settings?spaceId=${spaceId}`],
+    ['a repeated spaceId', `/spaces/transactions?spaceId=${spaceId}&spaceId=${spaceId}`],
+  ])('rejects %s', (_, next) => {
+    expect(parseSpaceReturnUrl(next, spaceId)).toBeNull()
+  })
+
+  it('keeps a hash that looks like a URL as a same-origin hash', () => {
+    expect(parseSpaceReturnUrl(`/spaces?spaceId=${spaceId}#//evil.com`, spaceId)).toEqual({
+      pathname: '/spaces',
+      query: { spaceId },
+      hash: '#//evil.com',
+    })
+  })
+
+  it('keeps only the path of a URL that the parser resolves to another host', () => {
+    // A tab is stripped by the URL parser, so this resolves to //evil.com/spaces — only the path is kept
+    expect(parseSpaceReturnUrl(`/\t/evil.com/spaces?spaceId=${spaceId}`, spaceId)).toEqual({
+      pathname: '/spaces',
+      query: { spaceId },
+    })
   })
 })

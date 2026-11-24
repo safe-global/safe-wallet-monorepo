@@ -47,6 +47,7 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
     SEPOLIA_FORK_RPC_URL: 'sepolia-secret',
     PATH: '/bin',
     NEXT_PUBLIC_IS_PRODUCTION: 'true',
+    NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN: 'https://safe-wallet-web.dev.5afe.dev',
     ELECTRON_RUN_AS_NODE: '1',
   })
   assert.equal(env.FORK_RPC_URL, undefined)
@@ -54,6 +55,7 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
   assert.equal(env.ELECTRON_RUN_AS_NODE, undefined)
   assert.equal(env.NEXT_PUBLIC_CONFIG_SERVICE_KEY, 'WALLET_WEB')
   assert.equal(env.NEXT_PUBLIC_IS_PRODUCTION, 'false')
+  assert.equal(env.NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN, '')
   assert.equal(env.NEXT_PUBLIC_POLLING_INTERVAL, '2000')
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_STAGING, manifest.gatewayUrl)
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION, manifest.gatewayUrl)
@@ -147,7 +149,12 @@ test('reads the spec files of a Playwright --list report, including nested descr
 
 test('plans one matrix entry per Playwright shard', () => {
   const registry = { 'e2e/sepolia.spec.ts': {} }
-  assert.deepEqual(planMatrix(2, {}, registry), { include: [{ shard: 1 }, { shard: 2 }] })
+  assert.deepEqual(planMatrix(2, {}, registry), {
+    include: [
+      { shard: '1', total: 2 },
+      { shard: '2', total: 2 },
+    ],
+  })
   for (const count of [0, -1, 1.5, NaN]) {
     assert.throws(() => planMatrix(count, {}, registry), /positive integer/)
   }
@@ -157,6 +164,14 @@ test('refuses to plan a run whose SAFE_E2E_SPECS filter matches no registered sp
   const registry = { 'e2e/batch.spec.ts': {} }
   assert.deepEqual(planMatrix(3, { SAFE_E2E_SPECS: 'batch' }, registry).include.length, 3)
   assert.throws(() => planMatrix(3, { SAFE_E2E_SPECS: 'no-such-spec' }, registry), /matches no registered/)
+})
+
+test('adds a burn-in entry that repeats the specs of the released flags', () => {
+  const registry = { 'e2e/batch.spec.ts': {}, 'e2e/ens.spec.ts': {} }
+  const { include } = planMatrix(2, { SAFE_E2E_BURN_IN_SPECS: 'e2e/ens\\.spec\\.ts' }, registry)
+  assert.deepEqual(include.at(-1), { shard: 'burnin', specs: 'e2e/ens\\.spec\\.ts', repeat: 5 })
+  assert.equal(include.length, 3)
+  assert.throws(() => planMatrix(2, { SAFE_E2E_BURN_IN_SPECS: 'no-such-spec' }, registry), /BURN_IN.*matches no/)
 })
 
 test('selects the Playwright specs that SAFE_E2E_SPECS matches, as Playwright does', () => {
@@ -186,6 +201,16 @@ test('runs one Playwright shard when SAFE_E2E_SHARD names it', () => {
     ...config,
     '--shard',
     '1/3',
+    'batch',
+  ])
+})
+
+test('repeats each test when SAFE_E2E_REPEAT names a count', () => {
+  const config = ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts']
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_REPEAT: '5', SAFE_E2E_SPECS: 'batch' }), [
+    ...config,
+    '--repeat-each',
+    '5',
     'batch',
   ])
 })

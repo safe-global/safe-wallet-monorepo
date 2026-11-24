@@ -28,9 +28,9 @@ export class TxReviewPage {
   readonly maxPriorityFeeInput: Locator
   readonly maxFeeInput: Locator
   readonly saveGasSettingsButton: Locator
-  /** "<n> free transactions left today" in the fee card */
+  /** "<n> sponsored transactions left today" in the fee card */
   readonly remainingRelays: Locator
-  /** The sponsored transactions left: the free daily ones, or "<left>/<quota>" of a Workspace plan */
+  /** The sponsored transactions left: the free daily ones, or the ones left this month on a Workspace plan */
   readonly sponsoredTxsCounter: Locator
   readonly executeButton: Locator
   /** The spending-limit review has no signing step, only this button */
@@ -79,7 +79,7 @@ export class TxReviewPage {
     this.maxPriorityFeeInput = page.getByTestId('gas-param-maxPriorityFeePerGas')
     this.maxFeeInput = page.getByTestId('gas-param-maxFeePerGas')
     this.saveGasSettingsButton = page.getByTestId('gas-params-save')
-    this.remainingRelays = page.getByText(/free transactions? left today/)
+    this.remainingRelays = page.getByText(/sponsored transactions? left today/)
     this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter').or(page.getByTestId('sponsored-quota'))
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
@@ -154,7 +154,7 @@ export class TxReviewPage {
     await this.waitForExecution()
   }
 
-  /** Execute a fully signed transaction with the relay, which pays the gas (Pro plan or Free transaction) */
+  /** Execute a fully signed transaction with the relay, which pays the gas (the Pro plan or the chain's free transactions) */
   async executeWithRelay(): Promise<void> {
     await this.feePayerSelector.click()
     await this.sponsoredOption.click()

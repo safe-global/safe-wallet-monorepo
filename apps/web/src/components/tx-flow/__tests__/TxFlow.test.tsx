@@ -45,10 +45,6 @@ jest.mock('@/components/tx-flow/features/BalanceChanges', () => ({
   __esModule: true,
   default: () => null,
 }))
-jest.mock('@/components/tx-flow/features/FeeInfoBanner', () => ({
-  __esModule: true,
-  default: () => null,
-}))
 jest.mock('@/components/tx-flow/features/FeeCard', () => ({
   __esModule: true,
   default: () => null,

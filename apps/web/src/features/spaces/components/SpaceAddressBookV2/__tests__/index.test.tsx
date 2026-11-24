@@ -34,9 +34,6 @@ jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
   },
-  get MemberRole() {
-    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
-  },
   get MEMBER_ALIAS_MAX_LENGTH() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
@@ -867,16 +864,52 @@ describe('SpaceAddressBookV2', () => {
       expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
     })
 
-    it('shows members which suggestions they already requested', async () => {
-      const signer = signerBuilder().build()
-      mockRole('member')
-      mockSigners({ signers: [signer] })
-      mockRequests({ items: [spaceAddressBookRequestBuilder().with({ address: signer.address }).build()] })
+    it.each(['admin', 'member'] as const)('hides suggestions with a pending request from the %s', async (role) => {
+      const [requested, open] = [signerBuilder().build(), signerBuilder().build()]
+      mockRole(role)
+      mockSigners({ signers: [requested, open] })
+      mockRequests({ items: [spaceAddressBookRequestBuilder().with({ address: requested.address }).build()] })
 
       renderAddressBook()
       await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
 
-      expect(screen.getByRole('button', { name: `${signer.safes[0].name} signer 1 requested` })).toBeInTheDocument()
+      expect(screen.getByText(`${open.safes[0].name} signer 1`)).toBeInTheDocument()
+      expect(screen.queryByText(`${requested.safes[0].name} signer 1`)).not.toBeInTheDocument()
+    })
+
+    it('keeps suggestions with a pending request without the private address book', () => {
+      const signer = signerBuilder().build()
+      mockPrivateAddressBook(false)
+      mockSigners({ signers: [signer] })
+      mockRequests({ items: [spaceAddressBookRequestBuilder().with({ address: signer.address }).build()] })
+
+      renderAddressBook()
+
+      expect(screen.getByRole('tab', { name: 'Suggested (1)' })).toBeInTheDocument()
+    })
+
+    it('waits for the pending requests before showing suggestions', async () => {
+      mockSigners({ signers: [signerBuilder().build()] })
+      mockRequests({ isLoading: true })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested' }))
+
+      expect(screen.getByTestId('suggestions-loading')).toBeInTheDocument()
+    })
+
+    it('reloads the pending requests when they failed to load on the Suggested tab', async () => {
+      const signersRefetch = jest.fn()
+      const requestsRefetch = jest.fn()
+      mockSigners({ signers: [signerBuilder().build()], refetch: signersRefetch })
+      mockRequests({ isError: true, refetch: requestsRefetch })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested' }))
+      await userEvent.click(within(screen.getByTestId('suggestions-error')).getByRole('button', { name: 'Reload' }))
+
+      expect(requestsRefetch).toHaveBeenCalledTimes(1)
+      expect(signersRefetch).not.toHaveBeenCalled()
     })
 
     it('shows the pending requests', async () => {

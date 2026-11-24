@@ -22,6 +22,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import GasTooHighBanner from '@/features/no-fee-campaign/public/components/GasTooHighBanner'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const enum ExecutionMethod {
   RELAY = 'RELAY',
@@ -135,7 +136,8 @@ const SponsoredStrip = ({
     case 'NO_FEE_CAMPAIGN':
       return isRelay ? (
         <Typography variant="paragraph-small" className={css.transactionCounter}>
-          <span className={css.counterNumber}>{offer.remaining}</span> free transactions left
+          <span className={css.counterNumber}>{offer.remaining}</span>
+          {` sponsored transaction${maybePlural(offer.remaining)} left`}
         </Typography>
       ) : (
         balance

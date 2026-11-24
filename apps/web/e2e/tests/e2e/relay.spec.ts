@@ -62,7 +62,7 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT }, workspace.id)
     await review.sign()
     await expect(review.sponsoredTxsCounter).toContainText(
-      `${BUSINESS_PLAN_RELAYS}/${BUSINESS_PLAN_RELAYS} sponsored transactions left`,
+      `${BUSINESS_PLAN_RELAYS} sponsored transactions left this month`,
     )
     await review.executeWithRelay()
     await review.waitForExecution()

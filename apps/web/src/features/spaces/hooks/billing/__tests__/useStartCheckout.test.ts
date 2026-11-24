@@ -6,6 +6,7 @@ const mockTrigger = jest.fn()
 const mockBillingSpaceId = jest.fn<string | null, []>()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/billing'),
   useLazyBillingGetCheckoutUrlV1Query: () => [mockTrigger, { isFetching: false, isError: false }],
 }))
 jest.mock('@/utils/navigation')

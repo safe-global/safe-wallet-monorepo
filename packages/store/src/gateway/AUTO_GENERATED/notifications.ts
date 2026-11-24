@@ -156,10 +156,10 @@ export type SafeRegistration = {
 export type RegisterDeviceDto = {
   uuid?: string | null
   cloudMessagingToken: string
-  buildNumber: string
-  bundle: string
+  buildNumber?: string
+  bundle?: string
   deviceType: string
-  version: string
+  version?: string
   timestamp?: string | null
   safeRegistrations: SafeRegistration[]
 }
