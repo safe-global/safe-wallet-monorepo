@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { CalendarClock } from 'lucide-react'
-import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
+import { safeFormatUnits, safeParseUnits, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength } from '@safe-global/utils/utils/validation'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -10,6 +10,7 @@ import { cn } from '@safe-global/views/utils/cn'
 import { describeFrequency } from './frequency'
 import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import type { LimitSummary } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 const TOKEN_ICON_SIZE = 24
 
@@ -108,6 +109,12 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
           </Badge>
         )}
       </div>
+
+      {limit.token.untrusted && (
+        <Typography variant="paragraph-mini" color="warning" data-testid="token-untrusted-warning">
+          {limit.token.symbol} {shortenAddress(limit.token.address)}: {UNTRUSTED_TOKEN_WARNING}
+        </Typography>
+      )}
 
       {spendReset && (
         <Typography variant="paragraph-mini" color="muted" data-testid="spend-reset-warning">
