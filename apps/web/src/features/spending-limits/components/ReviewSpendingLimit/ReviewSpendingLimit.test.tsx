@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import type { Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -46,11 +47,11 @@ const existingLimit = (amount = ONE_USDC): SpendingLimitState =>
     .with({ beneficiary: newLimit.beneficiary, token: usdc, amount, resetTimeMin: ONE_WEEK_IN_MINUTES })
     .build()
 
-const givenTokenOptions = (tokens: Erc20Token[]) => {
+const givenTokenOptions = (tokens: Erc20Token[], { untrusted }: { untrusted?: boolean } = {}) => {
   jest.spyOn(useSpendingLimitTokenOptionsHook, 'default').mockReturnValue({
     options: tokens.map(({ address, symbol, name, decimals, logoUri }) =>
       tokenOptionBuilder()
-        .with({ address, symbol, name, decimals: decimals ?? 0, logoUri })
+        .with({ address, symbol, name, decimals: decimals ?? 0, logoUri, untrusted })
         .build(),
     ),
     isLoading: false,
@@ -98,6 +99,15 @@ describe('ReviewSpendingLimit', () => {
     expect(screen.getByTestId('beneficiary-address')).toHaveTextContent(newLimit.beneficiary)
     expect(screen.getByText('1 day')).toBeInTheDocument()
     expect(screen.queryByTestId('limit-replacement-warning')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('token-untrusted-warning')).not.toBeInTheDocument()
+  })
+
+  it('repeats the not-trusted warning for a token on no trusted list', () => {
+    givenTokenOptions([usdc], { untrusted: true })
+
+    renderReview()
+
+    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(UNTRUSTED_TOKEN_WARNING)
   })
 
   it('warns and shows the old amount and reset time when it replaces an existing limit', () => {

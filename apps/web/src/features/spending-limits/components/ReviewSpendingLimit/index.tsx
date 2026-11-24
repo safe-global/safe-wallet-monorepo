@@ -10,6 +10,8 @@ import { trackEvent } from '@/services/analytics'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { selectSpendingLimits } from '../../public/store/spendingLimitsSlice'
 import { formatVisualAmount, safeParseUnits } from '@safe-global/utils/utils/formatters'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import type { NewSpendingLimitFlowProps } from '../../public/types'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
@@ -90,6 +92,12 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
         isOneTime={existingSpendingLimit ? existingSpendingLimit.resetTimeMin === '0' : isOneTime}
         replaces={replaces}
       />
+
+      {token?.untrusted && (
+        <Typography variant="paragraph-small" color="warning" data-testid="token-untrusted-warning">
+          {UNTRUSTED_TOKEN_WARNING}
+        </Typography>
+      )}
 
       {children}
     </ReviewTransaction>
