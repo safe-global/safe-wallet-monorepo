@@ -6,6 +6,8 @@ import { mockRole, type TestRole } from '@/tests/mocks/roles'
 import { render, screen } from '@/tests/test-utils'
 import NftSendForm from '.'
 
+jest.mock('@/features/gnosispay', () => ({ useIsGnosisPaySafe: () => [false, undefined, false] }))
+
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
 jest.mock('@/hooks/useIsWrongChain')

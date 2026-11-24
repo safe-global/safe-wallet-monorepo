@@ -1,6 +1,7 @@
 import type { MetaTransactionData } from '@safe-global/types-kit'
 
 export type GnosisPayTxItem = {
+  isNext: boolean
   queueNonce: number
   txData: MetaTransactionData
   executableAt: number

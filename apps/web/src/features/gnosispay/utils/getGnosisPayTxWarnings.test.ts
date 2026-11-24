@@ -284,3 +284,19 @@ describe('getGnosisPayTxWarnings', () => {
     ).toHaveLength(3)
   })
 })
+
+describe('queued Delay management warnings', () => {
+  it.each([
+    ['enableModule(address)', ['0x0000000000000000000000000000000000000020']],
+    ['disableModule(address,address)', [SENTINEL_ADDRESS, '0x0000000000000000000000000000000000000020']],
+    ['setTxNonce(uint256)', [5]],
+  ])('warns for %s in a queued payload', (signature, args) => {
+    const address = '0x0000000000000000000000000000000000000010'
+    const abi = new Interface([`function ${signature}`])
+    const tx = { to: address, value: '0', data: abi.encodeFunctionData(signature, args) }
+    const safe = safeInfoBuilder()
+      .with({ modules: [{ value: address }] })
+      .build()
+    expect(getGnosisPayTxWarnings(tx, safe)).toEqual([expect.stringContaining('Delay modifier')])
+  })
+})

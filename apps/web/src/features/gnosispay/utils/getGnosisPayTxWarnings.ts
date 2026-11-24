@@ -85,6 +85,9 @@ const isChangingDelayModifier: TxCheck = (tx, safe) => {
   const CHANGE_DELAY_SELECTORS = [
     id('setTxCooldown(uint256)').slice(0, 10),
     id('setTxExpiration(uint256)').slice(0, 10),
+    id('enableModule(address)').slice(0, 10),
+    id('disableModule(address,address)').slice(0, 10),
+    id('setTxNonce(uint256)').slice(0, 10),
   ]
   if (
     safe.modules?.map((module) => module.value.toLowerCase()).includes(tx.to.toLowerCase()) &&
@@ -99,22 +102,24 @@ const TX_CHECKS = [isChangingDelayModifier, isChangingModulesOrGuards, isChangin
 const runChecks = (tx: MetaTransactionData, safe: SafeState): string[] =>
   TX_CHECKS.map((check) => check(tx, safe)).filter(Boolean) as string[]
 
-export const getGnosisPayTxWarnings = (safeTx: SafeTransaction | undefined, safe: SafeState) => {
+export const getGnosisPayTxWarnings = (safeTx: SafeTransaction | MetaTransactionData | undefined, safe: SafeState) => {
   if (!safeTx) {
     return []
   }
 
-  if (isMultiSendCalldata(safeTx.data.data)) {
-    const txs = decodeMultiSendData(safeTx.data.data)
+  const txData = typeof safeTx.data === 'string' ? (safeTx as MetaTransactionData) : (safeTx as SafeTransaction).data
+
+  if (isMultiSendCalldata(txData.data)) {
+    const txs = decodeMultiSendData(txData.data)
     return txs.flatMap((tx) => runChecks(tx, safe))
   }
 
   return runChecks(
     {
-      to: safeTx.data.to,
-      value: safeTx.data.value,
-      data: safeTx.data.data,
-      operation: safeTx.data.operation,
+      to: txData.to,
+      value: txData.value,
+      data: txData.data,
+      operation: txData.operation,
     },
     safe,
   )

@@ -15,6 +15,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const item = (queueNonce: number, executableAt: number, expiresAt: number | null): GnosisPayTxItem => ({
+  isNext: queueNonce === 2,
   queueNonce,
   txData: { to: '0x0000000000000000000000000000000000000001', value: '0', data: '0x' },
   executableAt,

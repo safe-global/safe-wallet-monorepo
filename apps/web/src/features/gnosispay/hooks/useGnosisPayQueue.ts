@@ -4,10 +4,9 @@ import { useEffect, useState } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useIntervalCounter } from '@safe-global/utils/hooks/useIntervalCounter'
 import useChainId from '@/hooks/useChainId'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { logError, Errors } from '@/services/exceptions'
-import { _getRecoveryStateItem, type RecoveryQueueItem } from '@/features/recovery/services'
+import { readDelayState, type DelayQueueItem } from '@/services/delay/state'
 import { useGnosisPayDelayModule } from './useGnosisPayDelayModule'
 import type { GnosisPayTxItem } from '../types'
 
@@ -18,9 +17,10 @@ const listeners = new Set<() => void>()
 // Announce/execute/skip run in a modal over the queue page, so they refetch it without waiting for the poll
 export const refreshGnosisPayQueue = () => listeners.forEach((listener) => listener())
 
-export const _toGnosisPayQueue = (queue: RecoveryQueueItem[]): GnosisPayTxItem[] =>
+export const _toGnosisPayQueue = (queue: DelayQueueItem[], txNonce?: bigint): GnosisPayTxItem[] =>
   queue
     .map(({ args, validFrom, expiresAt }) => ({
+      isNext: txNonce !== undefined && args.queueNonce === txNonce,
       queueNonce: Number(args.queueNonce),
       txData: {
         to: args.to,
@@ -36,8 +36,7 @@ export const _toGnosisPayQueue = (queue: RecoveryQueueItem[]): GnosisPayTxItem[]
 export const useGnosisPayQueue = (): AsyncResult<GnosisPayTxItem[]> => {
   const chainId = useChainId()
   const web3ReadOnly = useWeb3ReadOnly()
-  const { safeAddress } = useSafeInfo()
-  const [delayModule] = useGnosisPayDelayModule()
+  const [delayModule, detectionError, detecting] = useGnosisPayDelayModule()
   const [pollCount] = useIntervalCounter(REFRESH_INTERVAL)
   const [refreshCount, setRefreshCount] = useState(0)
 
@@ -49,13 +48,12 @@ export const useGnosisPayQueue = (): AsyncResult<GnosisPayTxItem[]> => {
     }
   }, [])
 
-  return useAsync(
+  const result = useAsync(
     async () => {
       if (!delayModule || !web3ReadOnly) return
 
-      const { queue } = await _getRecoveryStateItem({
+      const { queue, txNonce } = await readDelayState({
         delayModifier: getModuleInstance(KnownContracts.DELAY, delayModule.value, web3ReadOnly),
-        safeAddress,
         provider: web3ReadOnly,
         chainId,
       }).catch((e) => {
@@ -63,9 +61,10 @@ export const useGnosisPayQueue = (): AsyncResult<GnosisPayTxItem[]> => {
         throw e
       })
 
-      return _toGnosisPayQueue(queue)
+      return _toGnosisPayQueue(queue, txNonce)
     },
-    [delayModule, web3ReadOnly, safeAddress, chainId, pollCount, refreshCount],
+    [delayModule, web3ReadOnly, chainId, pollCount, refreshCount],
     false,
   )
+  return [result[0], detectionError ?? result[1], detecting || result[2]]
 }

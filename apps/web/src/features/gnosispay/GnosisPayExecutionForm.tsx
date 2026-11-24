@@ -22,7 +22,12 @@ import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 // (recovery-sender → zodiac) here is fine.
 import { useIsGnosisPayOwner } from './hooks/useIsGnosisPayOwner'
 import { useGnosisPayDelayModifier } from './hooks/useGnosisPayDelayModifier'
-import { didRevert } from '@/utils/ethers-utils'
+import useWallet from '@/hooks/wallets/useWallet'
+import useIsWrongChain from '@/hooks/useIsWrongChain'
+import { useNow } from './hooks/useNow'
+import { useGnosisPayCooldown } from './hooks/useGnosisPayCooldown'
+import { canExecuteQueuedTx } from './utils/canExecuteQueuedTx'
+import { assertGnosisPayExecution, waitForGnosisPayReceipt } from './utils/submitGnosisPayTx'
 import GnosisPayIcon from '@/public/images/common/gnosis-pay.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getGnosisPayTxWarnings } from './utils/getGnosisPayTxWarnings'
@@ -61,14 +66,18 @@ export const GnosisPayExecutionForm = ({
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const { setTxFlow } = useContext(TxModalContext)
   const [delayModifier] = useGnosisPayDelayModifier()
-  const [isOwner] = isGnosisPayOwner
+  const [isOwner, ownerError, ownerLoading] = isGnosisPayOwner
+  const wallet = useWallet()
+  const wrongChain = useIsWrongChain()
+  const now = useNow()
+  const [cooldown] = useGnosisPayCooldown()
 
   const { enqueueTx, executeTx } = useGnosisPayActions(
     delayModifier?.delayModifier,
     safeTx?.data ?? queuedGnosisPayTx?.txData,
   )
 
-  const [delayModifierNonces] = useAsync(async () => {
+  const [delayModifierNonces, nonceError, nonceLoading] = useAsync(async () => {
     if (!delayModifier?.delayModifier) {
       return
     }
@@ -76,16 +85,19 @@ export const GnosisPayExecutionForm = ({
     return { txNonce }
   }, [delayModifier])
 
-  const txWarnings = useMemo(() => getGnosisPayTxWarnings(safeTx, safeInfo.safe), [safeInfo.safe, safeTx])
+  const txWarnings = useMemo(
+    () => getGnosisPayTxWarnings(queuedGnosisPayTx?.txData ?? safeTx, safeInfo.safe),
+    [safeInfo.safe, safeTx, queuedGnosisPayTx],
+  )
 
   const isNotNextInQueue =
-    delayModifierNonces && queuedGnosisPayTx && queuedGnosisPayTx.queueNonce > delayModifierNonces.txNonce
+    delayModifierNonces && queuedGnosisPayTx && BigInt(queuedGnosisPayTx.queueNonce) !== delayModifierNonces.txNonce
 
   // On modal submit
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
-    if (!delayModifierNonces || (!safeTx && !queuedGnosisPayTx)) {
+    if (submitDisabled || !delayModifier?.delayModifier || !wallet) {
       return
     }
 
@@ -97,33 +109,12 @@ export const GnosisPayExecutionForm = ({
     setSubmitError(undefined)
 
     try {
-      // depending on the mode we dispatch something
-      if (!queuedGnosisPayTx && safeTx) {
-        const queueResult = await enqueueTx()
-        const receipt = await queueResult?.wait()
-        if (receipt === null || receipt === undefined) {
-          throw new Error('No transaction receipt found')
-        }
-        if (didRevert(receipt)) {
-          throw new Error('Transaction reverted by EVM')
-        }
-        refreshGnosisPayQueue()
-        onSubmit?.(receipt.hash)
-        // We close the modal
-        setTxFlow(undefined)
-      } else if (queuedGnosisPayTx) {
-        const executeResult = await executeTx()
-        const receipt = await executeResult?.wait()
-        if (receipt === null || receipt === undefined) {
-          throw new Error('No transaction receipt found')
-        }
-        if (didRevert(receipt)) {
-          throw new Error('Transaction reverted by EVM')
-        }
-        refreshGnosisPayQueue()
-        onSubmit?.(receipt.hash, true)
-        setTxFlow(undefined)
-      }
+      await assertGnosisPayExecution(delayModifier.delayModifier, wallet.address, queuedGnosisPayTx)
+      const result = queuedGnosisPayTx ? await executeTx() : await enqueueTx()
+      const receipt = await waitForGnosisPayReceipt(result)
+      refreshGnosisPayQueue()
+      onSubmit?.(receipt.hash, queuedGnosisPayTx ? true : undefined)
+      setTxFlow(undefined)
     } catch (_err) {
       const err = asError(_err)
       trackError(Errors._804, err)
@@ -133,10 +124,14 @@ export const GnosisPayExecutionForm = ({
     }
   }
 
-  const cannotPropose = !isOwner
+  const cannotPropose = !isOwner || !!ownerError || !!ownerLoading
   const submitDisabled =
     (!safeTx && !queuedGnosisPayTx) ||
     !delayModifierNonces ||
+    !!nonceError ||
+    !!nonceLoading ||
+    wrongChain ||
+    (!!queuedGnosisPayTx && !canExecuteQueuedTx(queuedGnosisPayTx, delayModifierNonces?.txNonce, now)) ||
     !isSubmittable ||
     disableSubmit ||
     isExecutionLoop ||
@@ -158,12 +153,13 @@ export const GnosisPayExecutionForm = ({
             ) : (
               <>
                 <p>
-                  This is an activated Gnosis Pay Safe. Transaction executions have a delay of 3 minutes and require two
-                  transactions:
+                  This is an activated Gnosis Pay Safe. Transaction executions have{' '}
+                  {cooldown === undefined ? 'a contract-defined cooldown' : `a cooldown of ${cooldown} seconds`} and
+                  require two transactions:
                 </p>
                 <ul className="list-disc pl-5">
                   <li>Announce / Queue a new transaction</li>
-                  <li>Execute the transaction after waiting for 3 minutes</li>
+                  <li>Execute the transaction after the cooldown has elapsed</li>
                 </ul>
               </>
             )}

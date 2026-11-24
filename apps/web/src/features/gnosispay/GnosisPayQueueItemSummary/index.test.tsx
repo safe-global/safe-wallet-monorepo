@@ -3,10 +3,15 @@ import { faker } from '@faker-js/faker'
 import { type GnosisPayTxItem } from '../types'
 import { GnosisPayQueueItemSummary } from './index'
 
+jest.mock('../hooks/useIsGnosisPayOwner', () => ({ useIsGnosisPayOwner: jest.fn(() => [true, undefined, false]) }))
+jest.mock('@/hooks/useIsWrongChain', () => () => false)
+jest.mock('../GnosisPayTxDetails', () => ({ GnosisPayTxDetails: () => <div>Transaction details</div> }))
+
 const COOLDOWN_MS = 180_000
 const EXPIRATION_MS = 1_800_000
 
 const buildItem = (overrides: Partial<GnosisPayTxItem> = {}): GnosisPayTxItem => ({
+  isNext: true,
   queueNonce: faker.number.int({ max: 100 }),
   txData: { to: faker.finance.ethereumAddress(), value: '0', data: '0x' },
   executableAt: Date.now() + COOLDOWN_MS,
@@ -85,4 +90,9 @@ describe('GnosisPayQueueItemSummary', () => {
     expect(getByTestId('execute-btn')).toBeEnabled()
     expect(queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument()
   })
+})
+
+it('blocks a ready transaction behind the queue head', () => {
+  const { getByTestId } = render(<GnosisPayQueueItemSummary item={buildItem({ isNext: false, executableAt: 0 })} />)
+  expect(getByTestId('execute-btn')).toBeDisabled()
 })

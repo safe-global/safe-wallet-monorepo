@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { type JsonRpcProvider } from 'ethers'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
-import { _getRecoveryStateItem, type RecoveryQueueItem, type RecoveryStateItem } from '@/features/recovery/services'
+import { readDelayState, type DelayQueueItem, type DelayState } from '@/services/delay/state'
 import { logError, Errors } from '@/services/exceptions'
 import { _toGnosisPayQueue, refreshGnosisPayQueue, useGnosisPayQueue } from './useGnosisPayQueue'
 
@@ -22,9 +22,9 @@ jest.mock('@gnosis.pm/zodiac', () => ({
   getModuleInstance: jest.fn(),
 }))
 
-jest.mock('@/features/recovery/services', () => ({
-  ...jest.requireActual('@/features/recovery/services'),
-  _getRecoveryStateItem: jest.fn(),
+jest.mock('@/services/delay/state', () => ({
+  ...jest.requireActual('@/services/delay/state'),
+  readDelayState: jest.fn(),
 }))
 
 jest.mock('@/services/exceptions', () => ({
@@ -32,7 +32,7 @@ jest.mock('@/services/exceptions', () => ({
   logError: jest.fn(),
 }))
 
-const mockGetRecoveryStateItem = jest.mocked(_getRecoveryStateItem)
+const mockGetDelayState = jest.mocked(readDelayState)
 
 const buildQueueItem = ({
   queueNonce,
@@ -53,10 +53,9 @@ const buildQueueItem = ({
     },
     validFrom: 1_000_000n,
     expiresAt,
-  }) as RecoveryQueueItem
+  }) as DelayQueueItem
 
-const resolveQueue = (queue: RecoveryQueueItem[]) =>
-  mockGetRecoveryStateItem.mockResolvedValue({ queue } as RecoveryStateItem)
+const resolveQueue = (queue: DelayQueueItem[]) => mockGetDelayState.mockResolvedValue({ queue } as DelayState)
 
 describe('_toGnosisPayQueue', () => {
   it('maps Delay queue items to their execution window, sorted by nonce', () => {
@@ -65,6 +64,7 @@ describe('_toGnosisPayQueue', () => {
 
     expect(_toGnosisPayQueue([later, earlier])).toEqual([
       {
+        isNext: false,
         queueNonce: 4,
         txData: {
           to: earlier.args.to,
@@ -99,7 +99,7 @@ describe('useGnosisPayQueue', () => {
 
     await waitFor(() => expect(result.current[2]).toBe(false))
     expect(result.current[0]).toBeUndefined()
-    expect(mockGetRecoveryStateItem).not.toHaveBeenCalled()
+    expect(mockGetDelayState).not.toHaveBeenCalled()
   })
 
   it('returns the on-chain Delay queue sorted by nonce', async () => {
@@ -123,11 +123,19 @@ describe('useGnosisPayQueue', () => {
 
   it('logs and surfaces the error when the Delay queue cannot be read', async () => {
     const error = new Error('RPC unavailable')
-    mockGetRecoveryStateItem.mockRejectedValue(error)
+    mockGetDelayState.mockRejectedValue(error)
 
     const { result } = renderHook(() => useGnosisPayQueue())
 
     await waitFor(() => expect(result.current[1]?.message).toBe('RPC unavailable'))
     expect(logError).toHaveBeenCalledWith(Errors._603, error)
   })
+})
+
+it('marks only the actual contract nonce executable, including unsorted logs', () => {
+  const items = _toGnosisPayQueue([buildQueueItem({ queueNonce: 5 }), buildQueueItem({ queueNonce: 4 })], 4n)
+  expect(items.map((item) => [item.queueNonce, item.isNext])).toEqual([
+    [4, true],
+    [5, false],
+  ])
 })
