@@ -113,8 +113,7 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
       />
 
       {queue ? (
-        // The last queue stays mounted and dimmed while a new search or filter loads, so the table doesn't flicker.
-        // Inert, so nobody signs or executes from rows that may no longer match; the status line says why
+        // Old rows stay to avoid a flicker, but inert: they may no longer match the new search or filter
         <div className={cn('relative', isStale && 'cursor-progress')}>
           <QueueUpdatingStatus isStale={isStale} />
           <div
