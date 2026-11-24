@@ -47,8 +47,8 @@ export function useThreatAnalysisHypernativeMessage({
 }: UseThreatAnalysisHypernativeMessageProps): AsyncResult<ThreatAnalysisResults> {
   const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessMessageMutation()
 
-  // Track the last triggered message hash to prevent duplicate calls
-  const lastTriggeredHashRef = useRef<string | null>(null)
+  // A new typedData object for the same message and token must not trigger another assessment
+  const lastTriggeredKeyRef = useRef<string | undefined>(undefined)
 
   // Parse origin if it's a JSON string containing url
   const origin = useParsedOrigin(originProp)
@@ -70,19 +70,14 @@ export function useThreatAnalysisHypernativeMessage({
   }, [typedData, safeAddress, chainId, messageHash, proposer, origin, skip])
 
   useEffect(() => {
-    if (!skip && hypernativeRequest && authToken) {
-      // Prevent duplicate calls for the same message hash
-      if (lastTriggeredHashRef.current === hypernativeRequest.messageHash) {
-        return
-      }
-      lastTriggeredHashRef.current = hypernativeRequest.messageHash
+    if (!hypernativeRequest || !authToken) return
 
-      triggerAssessment({
-        ...hypernativeRequest,
-        authToken,
-      })
-    }
-  }, [hypernativeRequest, authToken, triggerAssessment, skip])
+    const key = `${hypernativeRequest.messageHash}:${authToken}`
+    if (lastTriggeredKeyRef.current === key) return
+    lastTriggeredKeyRef.current = key
+
+    triggerAssessment({ ...hypernativeRequest, authToken })
+  }, [hypernativeRequest, authToken, triggerAssessment])
 
   const fetchError = useMemo(() => {
     if (!error) return undefined
@@ -120,5 +115,5 @@ export function useThreatAnalysisHypernativeMessage({
     return [undefined, new Error('authToken is required'), false]
   }
 
-  return [threatAnalysisResult, fetchError, isLoading]
+  return [threatAnalysisResult, skip ? undefined : fetchError, isLoading]
 }

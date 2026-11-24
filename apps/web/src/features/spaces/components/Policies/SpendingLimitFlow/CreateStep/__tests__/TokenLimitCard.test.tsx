@@ -20,11 +20,13 @@ import {
   type SpendingLimitPolicyFormValues,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 const SPENDER = '0x1234567890123456789012345678901234567890'
+const UNTRUSTED = '0x48f9e38f3070AD8945DFEae3FA70987722E3D89c'
 
 const mockTokens = [
   tokenOptionBuilder()
@@ -51,6 +53,7 @@ const mockTokens = [
     })
     .build(),
   tokenOptionBuilder().with({ address: DAI, symbol: 'DAI', name: 'Dai Stablecoin' }).build(),
+  tokenOptionBuilder().with({ address: UNTRUSTED, symbol: 'NEW', group: 'custom', untrusted: true }).build(),
 ]
 
 // A plain <select> keeps these tests about the row. It still renders `helperText`, since that slot is
@@ -182,6 +185,15 @@ describe('TokenLimitCard', () => {
     expect(screen.getByTestId('token-balance')).toHaveTextContent('0 USDC')
   })
 
+  it('warns instead of showing a balance for a token on no trusted list', async () => {
+    const { user } = renderRows()
+
+    await user.selectOptions(screen.getByTestId('limit-token-selector'), UNTRUSTED)
+
+    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(UNTRUSTED_TOKEN_WARNING)
+    expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
+  })
+
   it('shows the fiat equivalent of the entered amount', async () => {
     const { user } = renderRows()
 
@@ -301,7 +313,7 @@ describe('TokenLimitCard', () => {
       const options = Array.from(screen.getByTestId('limit-token-selector').querySelectorAll('option')).map(
         (option) => option.textContent,
       )
-      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI'])
+      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI', 'NEW'])
       expect(screen.getByRole('option', { name: 'USDC' })).toBeDisabled()
     })
 

@@ -163,6 +163,13 @@ export class TxReviewPage {
     await this.waitForExecution()
   }
 
+  /** `signAndExecute` where a sponsor is sure to be on offer, such as a Safe in a Business Workspace */
+  async signAndExecuteDecliningSponsor(): Promise<void> {
+    await this.sign()
+    await this.executeDecliningSponsor()
+    await this.waitForExecution()
+  }
+
   /** Execute a fully signed transaction with the relay, which pays the gas (the Pro plan or the chain's free transactions) */
   async executeWithRelay(): Promise<void> {
     await this.feePayerSelector.click()
