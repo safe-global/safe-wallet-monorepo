@@ -4,7 +4,10 @@ import type { JourneyEnvironment } from '../fixtures/journey.fixture'
 
 const safeEvents = new Interface(['event ExecutionSuccess(bytes32 indexed txHash, uint256 payment)'])
 
-/** The gas refund that a Safe (1.4.1 or later) paid in the execution `txHash`, from its `ExecutionSuccess` event, in wei. */
+/**
+ * The gas refund that a Safe (1.4.1 or later) paid in the execution `txHash`, from its `ExecutionSuccess` event, in base
+ * units of the gas token: wei when the Safe pays in ETH.
+ */
 export function refundPaidIn(env: JourneyEnvironment, txHash: string): Promise<bigint> {
   return readChain(env, async (provider) => {
     const receipt = await provider.getTransactionReceipt(txHash)

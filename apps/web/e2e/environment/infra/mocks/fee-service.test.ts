@@ -1,9 +1,18 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { BASE_GAS, FEE_COLLECTOR, GAS_PRICE, RELAY_COST_FIAT, SAFE_TX_GAS, dispatch } from './fee-service.ts'
+import {
+  BASE_GAS,
+  ERC20_GAS_PRICE,
+  FEE_COLLECTOR,
+  GAS_PRICE,
+  RELAY_COST_FIAT,
+  SAFE_TX_GAS,
+  dispatch,
+} from './fee-service.ts'
 
 const SAFE = '0x1111111111111111111111111111111111111111'
 const NATIVE = '0x0000000000000000000000000000000000000000'
+const USDC = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238'
 const FEES_PATH = `/v1/chains/11155111/safes/${SAFE}/transactions/relay/fees`
 
 function call(method: string, path: string, body: unknown = ''): [number, unknown] {
@@ -28,6 +37,22 @@ describe('fee service', () => {
         numberSignatures: 2,
       },
       relayCost: { fiatCode: 'EUR', fiatValue: RELAY_COST_FIAT },
+    })
+  })
+
+  it('quotes an ERC-20 gas token at its own gas price, in base units of the token', () => {
+    const [status, quote] = call('POST', FEES_PATH, { gasToken: USDC, numberSignatures: 1 })
+
+    assert.equal(status, 200)
+    assert.deepEqual((quote as { txData: unknown }).txData, {
+      chainId: '11155111',
+      safeAddress: SAFE,
+      safeTxGas: SAFE_TX_GAS,
+      baseGas: BASE_GAS,
+      gasPrice: ERC20_GAS_PRICE,
+      gasToken: USDC,
+      refundReceiver: FEE_COLLECTOR,
+      numberSignatures: 1,
     })
   })
 
