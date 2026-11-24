@@ -6,6 +6,7 @@ import {
   QueueNoMatches,
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
+import QueueUpdatingStatus from '@safe-global/views/features/spaces/components/SpaceQueue/QueueUpdatingStatus'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { cn } from '@safe-global/views/utils/cn'
 import { POLLING_INTERVAL } from '@/config/constants'
@@ -115,9 +116,7 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
         // The last queue stays mounted and dimmed while a new search or filter loads, so the table doesn't flicker.
         // Inert, so nobody signs or executes from rows that may no longer match; the status line says why
         <div className={cn('relative', isStale && 'cursor-progress')}>
-          <p role="status" className="absolute -top-5 left-0 text-xs text-muted-foreground">
-            {isStale ? 'Updating results…' : ''}
-          </p>
+          <QueueUpdatingStatus isStale={isStale} />
           <div
             data-testid="space-queue-body"
             aria-busy={isStale}
