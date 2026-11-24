@@ -9,6 +9,7 @@ import {
   getRejectedNonces,
   getSafeKey,
   getSectionRows,
+  getSignedOtherOptions,
   type SignerWallets,
 } from '../utils'
 import { getChainKey, getGroupId, type QueueGroup, type QueueGroupKind, type QueueUnit } from './queueGroups'
@@ -57,6 +58,8 @@ export type QueueListItem =
       nextStatus?: QueueStatus
       conflict?: ConflictOption
       canReject: boolean
+      /** The user signed another option at this nonce */
+      signedOther?: boolean
     }
 
 const SUMMARY_LABELS: Record<QueueStatus, string> = {
@@ -91,6 +94,7 @@ export const buildQueueList = (args: {
       return {
         chainId,
         rows,
+        signedOther: getSignedOtherOptions(rows, args.signers),
         nextNonce: getNextNonce(rows),
         nextStatus: getNextStatus(rows, statuses),
         rejectedNonces: getRejectedNonces(rows),
@@ -109,7 +113,7 @@ export const buildQueueList = (args: {
 
     return [
       band,
-      ...chains.flatMap(({ chainId, rows, nextNonce, nextStatus, rejectedNonces, statuses }) => {
+      ...chains.flatMap(({ chainId, rows, nextNonce, nextStatus, rejectedNonces, statuses, signedOther }) => {
         const scopeKey = getChainKey(section.safeAddress, chainId)
         const chainCollapsed = args.collapsedChains.has(scopeKey)
         const header: QueueListItem = {
@@ -148,6 +152,7 @@ export const buildQueueList = (args: {
                   nextStatus,
                   conflict: row.conflict,
                   canReject: !rejectedNonces.has(getNonce(row.item.transaction) ?? -1),
+                  signedOther: signedOther.has(row.item.transaction.id),
                 },
           ),
         ]
@@ -162,7 +167,7 @@ const toUnitRows = (unit: QueueUnit): QueueListItem[] => {
     : []
   return [
     ...header,
-    ...unit.transactions.map<QueueListItem>(({ item, status, conflict: option, canReject }) => ({
+    ...unit.transactions.map<QueueListItem>(({ item, status, conflict: option, canReject, signedOther }) => ({
       kind: 'transaction',
       key: `tx-${item.transaction.id}`,
       scopeKey,
@@ -174,6 +179,7 @@ const toUnitRows = (unit: QueueUnit): QueueListItem[] => {
       nextStatus,
       conflict: option,
       canReject,
+      signedOther,
     })),
   ]
 }

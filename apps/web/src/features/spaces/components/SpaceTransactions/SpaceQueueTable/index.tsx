@@ -109,6 +109,7 @@ const ScopedRow = ({
       nextNonce={item.nextNonce}
       nextStatus={item.nextStatus}
       canReject={item.canReject}
+      signedOther={item.signedOther}
       safeAddress={item.safeAddress}
       rowProps={rowProps}
       compact={compact}

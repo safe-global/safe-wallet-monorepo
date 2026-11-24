@@ -47,6 +47,7 @@ type RowActionsMenuViewProps = {
   nonce?: number
   canReplace: boolean
   canReject: boolean
+  replaceDisabledReason?: string
   rejectDisabledReason?: string
   link?: string
   /** Rendered only while the menu is open, e.g. a RowDeleteMenuItem */
@@ -61,6 +62,7 @@ const RowActionsMenuView = ({
   nonce,
   canReplace,
   canReject,
+  replaceDisabledReason,
   rejectDisabledReason,
   link,
   deleteItem,
@@ -76,12 +78,14 @@ const RowActionsMenuView = ({
       <MoreHorizontal />
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      {wrapItem(
-        'replace',
-        <DropdownMenuItem disabled={!canReplace} onClick={onReplace}>
-          Replace with a transfer
-        </DropdownMenuItem>,
-      )}
+      <WithReason reason={canReplace ? undefined : replaceDisabledReason}>
+        {wrapItem(
+          'replace',
+          <DropdownMenuItem disabled={!canReplace} onClick={onReplace}>
+            Replace with a transfer
+          </DropdownMenuItem>,
+        )}
+      </WithReason>
       <WithReason reason={canReject ? undefined : rejectDisabledReason}>
         {wrapItem(
           'reject',

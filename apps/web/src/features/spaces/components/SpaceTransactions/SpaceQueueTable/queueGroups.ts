@@ -15,6 +15,7 @@ import {
   getRejectedNonces,
   getSafeKey,
   getSectionRows,
+  getSignedOtherOptions,
   type SignerWallets,
 } from '../utils'
 
@@ -24,6 +25,8 @@ export type QueueTransaction = {
   conflict?: ConflictOption
   /** False when a rejection already holds this nonce */
   canReject: boolean
+  /** The user signed another option at this nonce */
+  signedOther?: boolean
 }
 
 /** What moves as one: a transaction, or every option sharing its nonce on one Safe and chain. */
@@ -80,6 +83,7 @@ const toUnits = (sections: SpaceQueueSection[], signers: SignerWallets): QueueUn
       const nextNonce = getNextNonce(rows)
       const nextStatus = getNextStatus(rows, statuses)
       const rejectedNonces = getRejectedNonces(rows)
+      const signedOther = getSignedOtherOptions(rows, signers)
       const scopeKey = getChainKey(safeAddress, chainId)
       const start = (key: string, conflict?: QueueUnit['conflict']): QueueUnit => {
         const unit: QueueUnit = {
@@ -113,6 +117,7 @@ const toUnits = (sections: SpaceQueueSection[], signers: SignerWallets): QueueUn
           status: statuses[index] ?? 'waiting',
           conflict: row.conflict,
           canReject: !rejectedNonces.has(getNonce(transaction) ?? -1),
+          signedOther: signedOther.has(transaction.id),
         })
       })
     }

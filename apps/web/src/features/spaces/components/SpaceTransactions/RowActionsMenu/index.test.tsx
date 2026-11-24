@@ -73,6 +73,9 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockWallet.current,
 }))
 
+const mockIsSafeOwner = { current: true }
+jest.mock('@/hooks/useIsSafeOwner', () => ({ __esModule: true, default: () => mockIsSafeOwner.current }))
+
 const mockGetTxDetails = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/transactions'),
@@ -117,6 +120,7 @@ describe('RowActionsMenu', () => {
     mockTrackEvent.mockClear()
     mockIsOk.current = true
     mockWallet.current = null
+    mockIsSafeOwner.current = true
     mockIsNonceDeletable.mockReturnValue(true)
     mockGetTxDetails.mockReset().mockReturnValue({ currentData: undefined })
   })
@@ -204,6 +208,21 @@ describe('RowActionsMenu', () => {
     )
     expect(screen.getByRole('menuitem', { name: 'Reject' })).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByRole('menuitem', { name: 'Copy link' })).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it.each([
+    ['Replace with a transfer', 'Only signers of this Safe can replace it.'],
+    ['Reject', 'Only signers of this Safe can reject it.'],
+  ])('tells a connected wallet that does not sign for the Safe why %s is disabled', async (name, reason) => {
+    mockIsOk.current = false
+    mockIsSafeOwner.current = false
+    mockWallet.current = { address: checksumAddress(faker.finance.ethereumAddress()) }
+    renderMenu(tx(7))
+    openMenu()
+
+    const item = await screen.findByRole('menuitem', { name })
+    await userEvent.hover(item.closest('[data-slot="tooltip-trigger"]')!)
+    expect(await screen.findByText(reason)).toBeInTheDocument()
   })
 
   it('copies the link to the transaction in the Safe of the row', async () => {

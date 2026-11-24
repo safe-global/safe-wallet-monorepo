@@ -29,13 +29,22 @@ import QueueTxDetails from './QueueTxDetails'
 import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
 import QueueNonce from '@safe-global/views/features/spaces/components/SpaceQueue/QueueNonce'
+import { QueueTriggerHint } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueHint'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { QUEUE_COLUMNS, QUEUE_PINNED_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
-import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce, getNonceHint, getQueueWarnings } from './utils'
+import {
+  getBlockedBy,
+  getBlockedByHint,
+  getCounterparty,
+  getNonce,
+  getNonceHint,
+  getQueueWarnings,
+  getSignHint,
+} from './utils'
 import { NonceTakenAction, PendingRowAction, useIsNonceExecutingElsewhere } from './PendingRowAction'
 
 const PartyAvatar = ({ address, logoUri, size }: { address: string; logoUri?: string | null; size: number }) => {
@@ -142,6 +151,8 @@ type SpaceQueueRowProps = {
   conflict?: ConflictOption
   /** False when a rejection already holds this nonce */
   canReject?: boolean
+  /** The user signed another option at this nonce */
+  signedOther?: boolean
   safeAddress: string
   rowProps?: ComponentProps<'tr'>
   /** Phones: one cell beside the nonce */
@@ -156,6 +167,7 @@ const SpaceQueueRow = ({
   nextStatus,
   conflict,
   canReject = true,
+  signedOther,
   safeAddress,
   rowProps,
   compact = false,
@@ -215,7 +227,9 @@ const SpaceQueueRow = ({
       {pendingTx ? (
         <PendingRowAction txId={tx.id} pendingTx={pendingTx} />
       ) : expiredSwap ? (
-        <StatusLabel status="expired" />
+        <QueueTriggerHint hint="This order expired. Reject or delete it to free the nonce.">
+          <StatusLabel status="expired" />
+        </QueueTriggerHint>
       ) : nonceTaken && nonce !== undefined ? (
         <NonceTakenAction tx={tx} nonce={nonce} />
       ) : blockedBy !== undefined ? (
@@ -225,7 +239,7 @@ const SpaceQueueRow = ({
           onClick={() => goTo?.({ safeAddress, chainId, nonce: blockedBy, status: nextStatus })}
         />
       ) : (
-        <QueueActions tx={tx} dense />
+        <QueueActions tx={tx} dense signHint={getSignHint({ tx, status, nextNonce, signedOther })} />
       )}
       <RowActionsMenu tx={tx} canReject={canReject} />
     </div>

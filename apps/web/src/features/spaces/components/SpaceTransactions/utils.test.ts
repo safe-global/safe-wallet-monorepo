@@ -17,6 +17,8 @@ import {
   getRejectedNonces,
   getSectionRows,
   getSettingsSummary,
+  getSignHint,
+  getSignedOtherOptions,
   getTypeHint,
 } from './utils'
 
@@ -568,5 +570,70 @@ describe('getQueueWarnings', () => {
   it('lists an expired order and an unknown network the row found', () => {
     expect(warn({ type: 'SwapOrder' }, { expired: true })).toEqual(['Order expired'])
     expect(warn({ type: 'SwapAndBridge' }, { unknownNetwork: true })).toEqual(['Unknown network'])
+  })
+})
+
+describe('getSignedOtherOptions', () => {
+  const ME = checksumAddress(faker.finance.ethereumAddress())
+  const OTHER = checksumAddress(faker.finance.ethereumAddress())
+  const option = (missing: string[], conflictType: TransactionQueuedItem['conflictType']) => {
+    const item = transactionItem(4, conflictType)
+    item.transaction.executionInfo = {
+      type: 'MULTISIG',
+      nonce: 4,
+      confirmationsRequired: 2,
+      confirmationsSubmitted: 0,
+      missingSigners: missing.map((value) => ({ value })),
+    }
+    return item
+  }
+  const signers = new Set([ME.toLowerCase()])
+
+  it('finds the option the user can sign after signing another one at the nonce', () => {
+    const signedByMe = option([OTHER], 'HasNext')
+    const unsigned = option([ME, OTHER], 'End')
+    const rows = getSectionRows([conflictHeader(4), signedByMe, unsigned])
+
+    expect(getSignedOtherOptions(rows, signers)).toEqual(new Set([unsigned.transaction.id]))
+  })
+
+  it('finds none while the user has signed no option', () => {
+    const rows = getSectionRows([conflictHeader(4), option([ME, OTHER], 'HasNext'), option([ME, OTHER], 'End')])
+
+    expect(getSignedOtherOptions(rows, signers).size).toBe(0)
+  })
+
+  it('cannot tell from an option no longer awaiting signatures', () => {
+    const rows = getSectionRows([conflictHeader(4), option([], 'HasNext'), option([ME, OTHER], 'End')])
+
+    expect(getSignedOtherOptions(rows, signers).size).toBe(0)
+  })
+})
+
+describe('getSignHint', () => {
+  const tx = (submitted: number, required = 2, nonce = 5) =>
+    ({
+      executionInfo: { type: 'MULTISIG', nonce, confirmationsRequired: required, confirmationsSubmitted: submitted },
+    }) as Transaction
+
+  it('says the last signature can be executed right after on the next nonce', () => {
+    expect(getSignHint({ tx: tx(1), status: 'sign', nextNonce: 5 })).toBe(
+      'Yours is the last signature. You can execute right after.',
+    )
+  })
+
+  it('has no hint for the last signature behind the next nonce, or for an earlier one', () => {
+    expect(getSignHint({ tx: tx(1), status: 'sign', nextNonce: 4 })).toBeUndefined()
+    expect(getSignHint({ tx: tx(0, 3), status: 'sign', nextNonce: 5 })).toBeUndefined()
+  })
+
+  it('says only one option can execute when the user signed another', () => {
+    expect(getSignHint({ tx: tx(1), status: 'sign', nextNonce: 5, signedOther: true })).toBe(
+      'You signed another option at #5. Only one can execute.',
+    )
+  })
+
+  it('has no hint when the user cannot sign', () => {
+    expect(getSignHint({ tx: tx(1), status: 'waiting', nextNonce: 5 })).toBeUndefined()
   })
 })

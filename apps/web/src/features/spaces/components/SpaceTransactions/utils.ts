@@ -327,3 +327,50 @@ export const getQueueWarnings = (args: {
     isToSelf && WARNING_LABELS.toSelf,
   ].filter((warning): warning is (typeof WARNING_LABELS)[keyof typeof WARNING_LABELS] => !!warning)
 }
+
+const getMissingSigners = (tx: Transaction): string[] =>
+  isMultisigExecutionInfo(tx.executionInfo)
+    ? (tx.executionInfo.missingSigners ?? []).map(({ value }) => value.toLowerCase())
+    : []
+
+/**
+ * Ids of the conflicting options the user can still sign although they signed another option at the same nonce: a
+ * wallet of theirs missing here isn't missing there. An option no longer awaiting signatures can't tell, so it is skipped.
+ */
+export const getSignedOtherOptions = (rows: QueueRowData[], signers: SignerWallets): Set<string> => {
+  const byNonce = new Map<number | undefined, Transaction[]>()
+  for (const row of rows) {
+    if (row.kind !== 'transaction' || !row.conflict) continue
+    const tx = row.item.transaction
+    byNonce.set(getNonce(tx), [...(byNonce.get(getNonce(tx)) ?? []), tx])
+  }
+  const ids = new Set<string>()
+  for (const options of byNonce.values()) {
+    for (const tx of options) {
+      const mine = getMissingSigners(tx).filter((address) => signers.has(address))
+      const signedOther = options.some((other) => {
+        const missing = getMissingSigners(other)
+        return other !== tx && missing.length > 0 && mine.some((address) => !missing.includes(address))
+      })
+      if (signedOther) ids.add(tx.id)
+    }
+  }
+  return ids
+}
+
+/** The Sign button's tooltip on a queue row, or undefined when it needs none */
+export const getSignHint = (args: {
+  tx: Transaction
+  status: QueueStatus
+  nextNonce?: number
+  signedOther?: boolean
+}): string | undefined => {
+  const { tx, status } = args
+  if (status !== 'sign') return undefined
+  const nonce = getNonce(tx)
+  if (args.signedOther) return `You signed another option at #${nonce}. Only one can execute.`
+  const isLast =
+    isMultisigExecutionInfo(tx.executionInfo) &&
+    tx.executionInfo.confirmationsRequired - tx.executionInfo.confirmationsSubmitted === 1
+  return isLast && nonce === args.nextNonce ? 'Yours is the last signature. You can execute right after.' : undefined
+}
