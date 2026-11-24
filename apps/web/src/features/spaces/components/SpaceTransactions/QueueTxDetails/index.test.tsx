@@ -149,3 +149,49 @@ describe('QueueTxDetails.Summary tooltip', () => {
     expect(await screen.findByText('Changes who controls funds')).toBeInTheDocument()
   })
 })
+
+describe('QueueTxDetails.Summary tooltip on amounts', () => {
+  const tooltips = () => document.querySelectorAll('[data-slot="tooltip-content"]')
+
+  it('shows one tooltip, with the transfer amount as plain text', async () => {
+    renderSummary({
+      type: 'Transfer',
+      direction: 'OUTGOING',
+      sender: { value: address() },
+      recipient: { value: address() },
+      transferInfo: {
+        type: 'ERC20',
+        tokenAddress: address(),
+        value: '250000000000',
+        tokenSymbol: 'USDC',
+        decimals: 6,
+        logoUri: 'https://example.com/usdc.png',
+      },
+    })
+
+    await userEvent.hover(screen.getByText(/250,000 USDC/))
+
+    await screen.findByText('250,000 USDC', { selector: '[data-slot="tooltip-content"] span' })
+    expect(tooltips()).toHaveLength(1)
+    expect(tooltips()[0].querySelector('img, b')).toBeNull()
+  })
+
+  it('shows one tooltip, with the swap as plain text', async () => {
+    renderSummary({
+      type: 'SwapOrder',
+      kind: 'sell',
+      orderClass: 'market',
+      sellAmount: '2000000000000000000',
+      buyAmount: '6000000000',
+      sellToken: { ...token('WETH'), logoUri: 'https://example.com/weth.png' },
+      buyToken: token('USDC', 6),
+    })
+
+    await userEvent.hover(screen.getByText(/2 WETH/))
+
+    await screen.findByText('2 WETH → USDC', { selector: '[data-slot="tooltip-content"] span' })
+    expect(tooltips()).toHaveLength(1)
+    expect(tooltips()[0].querySelector('img, b')).toBeNull()
+    expect(screen.getByText('Market order')).toBeInTheDocument()
+  })
+})

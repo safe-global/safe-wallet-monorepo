@@ -2,12 +2,13 @@ import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENE
 import type {
   AddressInfo,
   SettingsChangeTransaction,
+  TokenInfo,
   Transaction,
   VaultInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { groupConflictingTxs } from '@/utils/tx-list'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { ellipsis, formatVisualAmount, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import {
@@ -16,11 +17,14 @@ import {
   isBridgeOrderTxInfo,
   isCancellationTxInfo,
   isCustomTxInfo,
+  isERC20Transfer,
+  isERC721Transfer,
   isIncomingTransfer,
   isLifiSwapTxInfo,
   isMigrateToL2TxInfo,
   isModuleExecutionInfo,
   isMultiSendTxInfo,
+  isNativeTokenTransfer,
   isNestedConfirmationTxInfo,
   isOrderTxInfo,
   isSettingsChangeTxInfo,
@@ -409,4 +413,71 @@ export const getSafeBandDetails = (
     ...(nextNonce ? [{ label: 'Next nonce', value: nextNonce, mono: true }] : []),
     ...(signerNames.length > 0 ? [{ label: 'You sign with', value: signerNames.join(', ') }] : []),
   ]
+}
+
+/** An amount as the queue row shows it, with the parts TokenAmount needs */
+export type QueueAmount = {
+  value: string
+  decimals?: number | null
+  symbol?: string | null
+  logoUri?: string | null
+  /** The row's symbol when it is cut short, e.g. a long NFT name */
+  rowSymbol?: string
+  fallbackSrc?: string
+}
+
+export const toQueueAmount = (
+  value: string,
+  token: Pick<TokenInfo, 'decimals' | 'symbol' | 'logoUri'>,
+): QueueAmount => ({
+  value,
+  decimals: token.decimals,
+  symbol: token.symbol,
+  logoUri: token.logoUri,
+})
+
+/** The amount in plain text, formatted as TokenAmount formats it on the row: "1.5 ETH" */
+export const formatQueueAmount = ({ value, decimals, symbol }: QueueAmount): string =>
+  `${decimals !== undefined ? formatVisualAmount(value, decimals) : value}${symbol ? ` ${symbol}` : ''}`
+
+/** The amount a transfer, a Kiln stake or claim, or a vault deposit or withdrawal moves; undefined for other types */
+export const getQueueAmount = (
+  txInfo: TransactionInfo,
+  nativeCurrency?: Pick<TokenInfo, 'decimals' | 'symbol' | 'logoUri'>,
+): QueueAmount | undefined => {
+  if (isTransferTxInfo(txInfo)) {
+    const transfer = txInfo.transferInfo
+    if (isNativeTokenTransfer(transfer)) {
+      return {
+        value: transfer.value ?? '0',
+        decimals: nativeCurrency?.decimals,
+        symbol: nativeCurrency?.symbol,
+        logoUri: nativeCurrency?.logoUri,
+      }
+    }
+    if (isERC20Transfer(transfer)) {
+      return {
+        value: transfer.value,
+        decimals: transfer.decimals,
+        symbol: transfer.tokenSymbol,
+        logoUri: transfer.logoUri,
+      }
+    }
+    if (isERC721Transfer(transfer)) {
+      const symbol = `${transfer.tokenSymbol || 'Unknown NFT'} #${transfer.tokenId}`
+      return {
+        value: '1',
+        decimals: 0,
+        symbol,
+        rowSymbol: ellipsis(symbol, 16),
+        logoUri: transfer.logoUri,
+        fallbackSrc: '/images/common/nft-placeholder.png',
+      }
+    }
+    return undefined
+  }
+  if (isStakingTxDepositInfo(txInfo) || isStakingTxWithdrawInfo(txInfo))
+    return toQueueAmount(txInfo.value, txInfo.tokenInfo)
+  if (isVaultDepositTxInfo(txInfo) || isVaultRedeemTxInfo(txInfo)) return toQueueAmount(txInfo.value, txInfo.tokenInfo)
+  return undefined
 }

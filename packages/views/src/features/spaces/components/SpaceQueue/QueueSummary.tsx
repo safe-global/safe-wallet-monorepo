@@ -5,13 +5,15 @@ import { QUEUE_HINT_CLASS, QUEUE_TRIGGER_FOCUS } from './QueueHint'
 type QueueSummaryProps = {
   /** What the transaction does; it truncates on the row */
   children: ReactNode
+  /** The summary in plain text, when `children` is richer (token logos, bold amounts) */
+  label?: ReactNode
   /** More about it: the network it goes to, the order type, what a rejection does */
   hint?: ReactNode
   defaultOpen?: boolean
 }
 
 /** What a transaction does. Long methods and amounts truncate, so the tooltip always has the full text. */
-const QueueSummary = ({ children, hint, defaultOpen }: QueueSummaryProps): ReactElement => (
+const QueueSummary = ({ children, label, hint, defaultOpen }: QueueSummaryProps): ReactElement => (
   <Tooltip defaultOpen={defaultOpen}>
     <TooltipTrigger
       render={
@@ -25,7 +27,7 @@ const QueueSummary = ({ children, hint, defaultOpen }: QueueSummaryProps): React
       {children}
     </TooltipTrigger>
     <TooltipContent className={QUEUE_HINT_CLASS}>
-      <span className="block break-words font-medium">{children}</span>
+      <span className="block break-words font-medium">{label ?? children}</span>
       {hint && <span className="mt-1 block">{hint}</span>}
     </TooltipContent>
   </Tooltip>

@@ -5,7 +5,9 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import {
+  formatQueueAmount,
   getBlockedBy,
+  getQueueAmount,
   getBlockedByHint,
   getCounterparty,
   getNextNonce,
@@ -669,5 +671,40 @@ describe('getSafeBandDetails', () => {
 
   it('leaves out what is not loaded', () => {
     expect(getSafeBandDetails([{ chainName: 'Ethereum' }], [])).toEqual([{ label: 'Network', value: 'Ethereum' }])
+  })
+})
+
+describe('getQueueAmount and formatQueueAmount', () => {
+  const native = { decimals: 18, symbol: 'ETH', logoUri: 'eth.png' }
+
+  it('formats a native transfer with the chain currency', () => {
+    const amount = getQueueAmount(
+      {
+        type: 'Transfer',
+        direction: 'OUTGOING',
+        transferInfo: { type: 'NATIVE_COIN', value: '1500000000000000000' },
+      } as TransactionInfo,
+      native,
+    )
+
+    expect(amount).toEqual({ value: '1500000000000000000', decimals: 18, symbol: 'ETH', logoUri: 'eth.png' })
+    expect(formatQueueAmount(amount!)).toBe('1.5 ETH')
+  })
+
+  it('names an NFT in full, and cuts it short only on the row', () => {
+    const amount = getQueueAmount({
+      type: 'Transfer',
+      direction: 'OUTGOING',
+      transferInfo: { type: 'ERC721', tokenSymbol: 'CryptoPunksCollection', tokenId: '42' },
+    } as TransactionInfo)!
+
+    expect(formatQueueAmount(amount)).toBe('1 CryptoPunksCollection #42')
+    expect(amount.rowSymbol!.length).toBeLessThan(amount.symbol!.length)
+  })
+
+  it('has none for a type without an amount', () => {
+    expect(
+      getQueueAmount({ type: 'Custom', methodName: 'approve', to: { value: '0x1' } } as TransactionInfo),
+    ).toBeUndefined()
   })
 })
