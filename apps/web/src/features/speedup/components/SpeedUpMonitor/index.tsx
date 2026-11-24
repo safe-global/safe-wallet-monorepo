@@ -74,7 +74,7 @@ const SpeedUpMonitor = ({
           </AlertAction>
         </Alert>
       ) : modalTrigger === 'rowButton' ? (
-        <Tooltip delay={150}>
+        <Tooltip>
           <TooltipTrigger
             render={
               <Button
