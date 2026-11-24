@@ -86,9 +86,8 @@ const setupMocks = ({
 }
 
 describe('useLoadSpendingLimits', () => {
-  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
-
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     jest.clearAllMocks()
   })
 

@@ -280,7 +280,9 @@ describe('TokenAmountInput', () => {
       expect(await screen.findByText('The value must be greater than 0')).toBeInTheDocument()
 
       await user.type(amountField, '5')
-      await waitFor(() => expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument(), {
+        timeout: AMOUNT_ERROR_DEBOUNCE_MS / 2,
+      })
       expect(screen.getByText('Amount')).toBeInTheDocument()
 
       // Breaking the value differently right away must not flash the previous message.
