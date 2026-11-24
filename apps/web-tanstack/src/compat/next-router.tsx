@@ -36,8 +36,8 @@ export interface NextRouterLike {
   prefetch: (url: Url, as?: Url, options?: TransitionOptions) => Promise<void>
   beforePopState: (cb: (state: NextHistoryStateLike) => boolean) => void
   events: {
-    on: (event: string, handler: (...args: unknown[]) => void) => void
-    off: (event: string, handler: (...args: unknown[]) => void) => void
+    on: (event: string, handler: (...args: never[]) => void) => void
+    off: (event: string, handler: (...args: never[]) => void) => void
     emit: (event: string, ...args: unknown[]) => void
   }
 }
