@@ -16,6 +16,7 @@ import {
   getRejectedNonces,
   getSectionRows,
   getSettingsSummary,
+  getTypeHint,
 } from './utils'
 
 const SAFE_TO_L2_MIGRATION = checksumAddress(getSafeToL2MigrationDeployment()!.defaultAddress)
@@ -448,5 +449,67 @@ describe('getRejectedNonces', () => {
     ])
 
     expect(getRejectedNonces(rows)).toEqual(new Set([3]))
+  })
+})
+
+describe('getTypeHint', () => {
+  const custom = (overrides: object = {}) =>
+    ({
+      id: '1',
+      timestamp: 0,
+      txStatus: 'AWAITING_CONFIRMATIONS',
+      txInfo: {
+        type: 'Custom',
+        methodName: 'approve',
+        to: { value: checksumAddress(faker.finance.ethereumAddress()) },
+      },
+      ...overrides,
+    }) as unknown as Transaction
+
+  it.each([
+    [
+      'an outgoing transfer',
+      { txInfo: { type: 'Transfer', direction: 'OUTGOING' } },
+      'Transfers tokens out of this Safe.',
+    ],
+    ['an incoming transfer', { txInfo: { type: 'Transfer', direction: 'INCOMING' } }, undefined],
+    ['a swap order', { txInfo: { type: 'SwapOrder' } }, 'Trades one token for another through a swap protocol.'],
+    ['a bridge', { txInfo: { type: 'SwapAndBridge' } }, 'Moves tokens from this network to another one.'],
+    [
+      'a batch',
+      { txInfo: { type: 'Custom', methodName: 'multiSend', to: { value: '0x1' } } },
+      'Runs several actions together in one transaction.',
+    ],
+    [
+      'a rejection',
+      { txInfo: { type: 'Custom', isCancellation: true, to: { value: '0x1' } } },
+      'Cancels the proposal at this nonce by replacing it.',
+    ],
+    ['a stake', { txInfo: { type: 'NativeStakingDeposit' } }, 'Stakes ETH with Kiln, in 32 ETH validators.'],
+    [
+      'a withdraw request',
+      { txInfo: { type: 'NativeStakingValidatorsExit' } },
+      'Asks Kiln to exit validators, so their ETH can be claimed.',
+    ],
+    ['a claim', { txInfo: { type: 'NativeStakingWithdraw' } }, 'Claims ETH from validators that have exited.'],
+    [
+      'a settings change',
+      { txInfo: { type: 'SettingsChange', dataDecoded: { method: 'x' } } },
+      'Changes this Safe’s settings, such as its signers or threshold.',
+    ],
+    ['a contract call', {}, 'Calls a function on a smart contract.'],
+    [
+      'a nested approval',
+      { txInfo: { type: 'Custom', methodName: 'approveHash', dataSize: '36', to: { value: '0x1' } } },
+      'Approves a transaction on another Safe that this Safe co-owns.',
+    ],
+  ])('explains %s', (_, overrides, hint) => {
+    expect(getTypeHint(custom(overrides))).toBe(hint)
+  })
+
+  it('names the Safe App a transaction was made in', () => {
+    expect(getTypeHint(custom({ safeAppInfo: { name: 'Transaction Builder', url: '', logoUri: '' } }))).toBe(
+      'Created in the Transaction Builder Safe App. Calls a function on a smart contract.',
+    )
   })
 })

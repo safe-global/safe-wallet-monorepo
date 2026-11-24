@@ -137,7 +137,7 @@ const QueueTxDetailsVariants = () => (
   <div className="grid max-w-xl grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 text-sm">
     {VARIANTS.map(([label, transaction]) => (
       <div key={label} className="contents">
-        <span className="flex items-center gap-1.5 rounded-md bg-muted px-2 py-1">
+        <span className="flex">
           <QueueTxDetails.Type tx={transaction} />
         </span>
         <span className="min-w-0">

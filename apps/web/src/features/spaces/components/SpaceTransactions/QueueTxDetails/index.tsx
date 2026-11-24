@@ -9,7 +9,9 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import TokenAmount from '@/components/common/TokenAmount'
 import TxInfo from '@/components/transactions/TxInfo'
-import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
+import { TxTypeIcon } from '@/components/transactions/TxType'
+import { useTransactionType } from '@/hooks/useTransactionType'
+import QueueTypeTag from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTypeTag'
 import { useChain } from '@/hooks/useChains'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
@@ -25,7 +27,7 @@ import {
   isSettingsChangeTxInfo,
   isStakingTxExitInfo,
 } from '@/utils/transaction-guards'
-import { getNonce, getQueueTypeLabel, getSettingsSummary, type QueueTypeLabel } from '../utils'
+import { getNonce, getQueueTypeLabel, getSettingsSummary, getTypeHint, type QueueTypeLabel } from '../utils'
 
 const TYPE_ICONS: Record<QueueTypeLabel, LucideIcon> = {
   Settings,
@@ -35,24 +37,19 @@ const TYPE_ICONS: Record<QueueTypeLabel, LucideIcon> = {
 
 const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
   const label = getQueueTypeLabel(tx)
-  if (!label) {
-    return (
-      <>
-        <TxTypeIcon tx={tx} />
-        <span className="min-w-0 truncate">
-          <TxTypeText tx={tx} />
-        </span>
-      </>
-    )
-  }
-  const Icon = TYPE_ICONS[label]
+  const type = useTransactionType(tx)
+  const Icon = label ? TYPE_ICONS[label] : undefined
   return (
-    <>
-      <span className={css.txType}>
-        <Icon className="size-4" strokeWidth={ICON_STROKE} />
-      </span>
-      <span className="min-w-0 truncate">{label}</span>
-    </>
+    <QueueTypeTag title={label ?? type.text} hint={getTypeHint(tx)}>
+      {Icon ? (
+        <span className={css.txType}>
+          <Icon className="size-4" strokeWidth={ICON_STROKE} />
+        </span>
+      ) : (
+        <TxTypeIcon tx={tx} />
+      )}
+      <span className="min-w-0 truncate">{label ?? type.text}</span>
+    </QueueTypeTag>
   )
 }
 

@@ -109,10 +109,6 @@ export const Counterparty = ({
   )
 }
 
-// The transaction type: a grey tag on the row, white while the row is hovered
-const TYPE_TAG =
-  'flex min-w-0 max-w-full items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card'
-
 // Layout B's widths as the basis, the same on every row: when Details is narrower, the summary and the counterparty
 // shrink by the same amount on every row and truncate, so each part still lines up down the table
 const DetailsSlot = ({ className, children }: { className: string; children?: ReactNode }): ReactElement => (
@@ -278,9 +274,7 @@ const SpaceQueueRow = ({
 
           <TableCell className="py-2">
             <span className="flex min-w-0">
-              <span className={TYPE_TAG}>
-                <QueueTxDetails.Type tx={tx} />
-              </span>
+              <QueueTxDetails.Type tx={tx} />
             </span>
           </TableCell>
 

@@ -22,6 +22,9 @@ import {
   isNestedConfirmationTxInfo,
   isOrderTxInfo,
   isSettingsChangeTxInfo,
+  isStakingTxDepositInfo,
+  isStakingTxExitInfo,
+  isStakingTxWithdrawInfo,
   isTransferTxInfo,
   isLabelListItem,
   isMultisigExecutionInfo,
@@ -247,4 +250,40 @@ export const getNonceHint = (
     case 'blocked':
       return blocked
   }
+}
+
+/** What each transaction type means, in the type tag's tooltip */
+export const TYPE_HINTS = {
+  Send: 'Transfers tokens out of this Safe.',
+  Swap: 'Trades one token for another through a swap protocol.',
+  Bridge: 'Moves tokens from this network to another one.',
+  Batch: 'Runs several actions together in one transaction.',
+  Contract: 'Calls a function on a smart contract.',
+  Settings: 'Changes this Safe’s settings, such as its signers or threshold.',
+  Nested: 'Approves a transaction on another Safe that this Safe co-owns.',
+  Rejection: 'Cancels the proposal at this nonce by replacing it.',
+  Stake: 'Stakes ETH with Kiln, in 32 ETH validators.',
+  WithdrawRequest: 'Asks Kiln to exit validators, so their ETH can be claimed.',
+  Claim: 'Claims ETH from validators that have exited.',
+} as const
+
+/** The type tag's tooltip text, or undefined for a type the design doesn't explain (incoming transfers, vaults) */
+export const getTypeHint = (tx: Transaction): string | undefined => {
+  const { txInfo } = tx
+  if (isCustomTxInfo(txInfo) && tx.safeAppInfo) {
+    return `Created in the ${tx.safeAppInfo.name} Safe App. ${TYPE_HINTS.Contract}`
+  }
+  const label = getQueueTypeLabel(tx)
+  if (label) return TYPE_HINTS[label]
+  if (isTransferTxInfo(txInfo)) return isIncomingTransfer(txInfo) ? undefined : TYPE_HINTS.Send
+  if (isOrderTxInfo(txInfo) || isLifiSwapTxInfo(txInfo)) return TYPE_HINTS.Swap
+  if (isBridgeOrderTxInfo(txInfo)) return TYPE_HINTS.Bridge
+  if (isMultiSendTxInfo(txInfo)) return TYPE_HINTS.Batch
+  if (isCancellationTxInfo(txInfo)) return TYPE_HINTS.Rejection
+  if (isStakingTxDepositInfo(txInfo)) return TYPE_HINTS.Stake
+  if (isStakingTxExitInfo(txInfo)) return TYPE_HINTS.WithdrawRequest
+  if (isStakingTxWithdrawInfo(txInfo)) return TYPE_HINTS.Claim
+  // A module's call: the queue's own Contract label leaves it to the shared type, which names the contract
+  if (isCustomTxInfo(txInfo)) return TYPE_HINTS.Contract
+  return undefined
 }
