@@ -107,7 +107,7 @@ describe('hypernativeApi retries', () => {
     expect(result.error).toEqual(body)
   })
 
-  it.each([429, 500])('retries a request that fails with %s twice', async (status) => {
+  it.each([408, 429, 500])('retries a request that fails with %s twice', async (status) => {
     const requests = countRequestsTo(ASSESSMENT_URL, () => HttpResponse.json({}, { status }))
 
     await assessTransaction(makeStore())
