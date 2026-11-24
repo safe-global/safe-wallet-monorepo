@@ -28,6 +28,7 @@ export default [
       '@typescript-eslint/no-non-null-asserted-optional-chain': 'warn',
       '@typescript-eslint/no-unnecessary-type-constraint': 'warn',
       'no-useless-escape': 'warn',
+      curly: 'error',
     },
   },
   noExplicitAny,

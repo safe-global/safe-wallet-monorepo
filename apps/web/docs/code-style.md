@@ -70,8 +70,12 @@ When writing utility scripts or complex logic, follow these patterns to keep cyc
    }
 
    // ✅ Good: Early returns + helpers
-   if (!condition1) return
-   if (!condition2) return
+   if (!condition1) {
+     return
+   }
+   if (!condition2) {
+     return
+   }
    handleCondition3()
    ```
 

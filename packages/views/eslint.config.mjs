@@ -18,6 +18,7 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'shadcn/no-raw-colors': 'error',
+      curly: 'error',
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
       'no-restricted-imports': [
         'error',
@@ -43,5 +44,6 @@ export default tseslint.config(
     name: 'views/tests',
     files: TEST_FILES,
     extends: [tseslint.configs.base, noExplicitAny],
+    rules: { curly: 'error' },
   },
 )

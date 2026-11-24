@@ -64,6 +64,7 @@ export default [
       'no-restricted-syntax': ['error', ...featurePublicImportExpressionRules],
       'object-shorthand': ['error', 'properties'],
       'jsx-quotes': ['error', 'prefer-double'],
+      curly: 'error',
       'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
     },
   },
