@@ -15,9 +15,9 @@ import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/se
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
+import type { PlanLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { PlanCatalog } from './PlanCatalog'
+import { PlanPicker } from './PlanPicker'
 import { InfoTip } from './PlanStatusCard'
 import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
@@ -26,10 +26,7 @@ import type { PlanPick } from '@safe-global/views/features/spaces/components/Pla
 export const _LAPSED_DATA_NOTE =
   'Nothing was charged. Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
 
-export const chooserCopy = (
-  reason: Exclude<WorkspaceLockReason, 'trial-offered'>,
-  endedAt: number | null,
-): { title: string; subtitle: string } => {
+export const chooserCopy = (reason: PlanLockReason, endedAt: number | null): { title: string; subtitle: string } => {
   if (reason === 'payment-failed') {
     return {
       title: 'Your last payment failed',
@@ -54,13 +51,13 @@ export default function PlanChooserModal({
   onBack,
 }: {
   spaceId: string
-  reason: Exclude<WorkspaceLockReason, 'trial-offered'>
+  reason: PlanLockReason
   endedAt: number | null
   onBack: () => void
 }) {
   const { paidPlans, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => buildPlanTiers(paidPlans).filter((tier) => tier.id !== ENTERPRISE_TIER.id), [paidPlans])
-  const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId)
+  const { seatCount, needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId)
   const { openPortal, isRedirecting: isOpeningPortal } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
   const { title, subtitle } = chooserCopy(reason, endedAt)
@@ -78,21 +75,29 @@ export default function PlanChooserModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && trimming && setPick(undefined)}>
-      <DialogContent size={trimming ? 'md' : 'lg'} surface="card" padding="sm" showCloseButton={Boolean(trimming)}>
-        <div className="flex flex-col gap-6 pt-5">
+      <DialogContent
+        size={trimming ? 'md' : 'sm'}
+        surface="card"
+        padding="sm"
+        showCloseButton={Boolean(trimming)}
+        className="flex max-h-[90vh] flex-col"
+      >
+        <div className="flex min-h-0 flex-col gap-6 pt-5">
           {trimming ? (
-            <SelectAccountsStep
-              limit={trimming.option.seats as number}
-              planName={trimming.tier.name}
-              onBack={() => setPick(undefined)}
-              onContinue={(removed) => {
-                if (trimming.option.paymentLinkId) {
-                  void checkout(trimming.option.paymentLinkId, removed)
-                }
-              }}
-              isSubmitting={isBusy}
-              error={error}
-            />
+            <div className="-mx-1 min-h-0 overflow-y-auto px-1">
+              <SelectAccountsStep
+                limit={trimming.option.seats as number}
+                planName={trimming.tier.name}
+                onBack={() => setPick(undefined)}
+                onContinue={(removed) => {
+                  if (trimming.option.paymentLinkId) {
+                    void checkout(trimming.option.paymentLinkId, removed)
+                  }
+                }}
+                isSubmitting={isBusy}
+                error={error}
+              />
+            </div>
           ) : (
             <>
               <div className="flex flex-col gap-1">
@@ -105,38 +110,37 @@ export default function PlanChooserModal({
                 </div>
               </div>
 
-              {reason === 'payment-failed' ? (
-                <Track
-                  {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
-                  mixpanelParams={entry}
-                  as="div"
-                  className="self-start"
-                >
-                  <Button size="lg" accentIcon disabled={isOpeningPortal} onClick={() => void openPortal()}>
-                    Update billing details
-                    <ArrowRight />
-                  </Button>
-                </Track>
-              ) : isLoading ? (
-                <div className="flex gap-4" data-testid="plan-chooser-skeleton">
-                  <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                  <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                </div>
-              ) : tiers.length === 0 ? (
-                <Alert variant="info">
-                  <AlertSeverityIcon variant="info" />
-                  <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
-                </Alert>
-              ) : (
-                <PlanCatalog
-                  embedded
-                  tiers={tiers}
-                  onSubscribe={subscribe}
-                  isBusy={isBusy}
-                  location={PlanLocation.LOCKED_MODAL}
-                  onCta={start}
-                />
-              )}
+              <div className="-mx-1 min-h-0 overflow-y-auto px-1">
+                {reason === 'payment-failed' ? (
+                  <Track
+                    {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
+                    mixpanelParams={entry}
+                    as="div"
+                    className="self-start"
+                  >
+                    <Button size="lg" accentIcon disabled={isOpeningPortal} onClick={() => void openPortal()}>
+                      Update billing details
+                      <ArrowRight />
+                    </Button>
+                  </Track>
+                ) : isLoading ? (
+                  <Skeleton className="h-105 w-full rounded-lg-xl" data-testid="plan-chooser-skeleton" />
+                ) : tiers.length === 0 ? (
+                  <Alert variant="info">
+                    <AlertSeverityIcon variant="info" />
+                    <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
+                  </Alert>
+                ) : (
+                  <PlanPicker
+                    tiers={tiers}
+                    initialSeats={seatCount}
+                    onSubscribe={subscribe}
+                    isBusy={isBusy}
+                    location={PlanLocation.LOCKED_MODAL}
+                    onCta={start}
+                  />
+                )}
+              </div>
 
               {error && (
                 <Alert variant="destructive">

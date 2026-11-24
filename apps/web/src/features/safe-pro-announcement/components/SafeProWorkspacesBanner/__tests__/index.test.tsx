@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { trackEvent, trackMixpanelEvent, MixpanelEvent } from '@/services/analytics'
+import { trackEvent, trackMixpanelEvent } from '@/services/analytics'
+import { MixpanelEvent } from '@/services/analytics/mixpanel-events'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { SAFE_PRO_INTRO_URL } from '@/config/constants'
 import SafeProWorkspacesBanner from '../index'
@@ -24,7 +25,7 @@ describe('SafeProWorkspacesBanner', () => {
   it('renders the headline and the supporting line', () => {
     render(<SafeProWorkspacesBanner />)
 
-    expect(screen.getByText('Safe Pro: 30 days of Business free. No card.')).toBeInTheDocument()
+    expect(screen.getByText('Safe Pro: 14 days of Business free. No card.')).toBeInTheDocument()
     expect(screen.getByText('Your Safe accounts remain free in My accounts.')).toBeInTheDocument()
   })
 

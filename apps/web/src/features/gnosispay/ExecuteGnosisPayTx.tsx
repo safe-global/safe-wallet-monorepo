@@ -6,9 +6,10 @@ import GnosisPayExecutionForm from './GnosisPayExecutionForm'
 import { type GnosisPayTxItem } from './types'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useContext, useEffect } from 'react'
-import SafeTxProvider, { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { createTx } from '@/services/tx/tx-sender'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import SafeTxProvider from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { createTx } from '@/services/tx/tx-sender/create'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 
 const ExecuteGnosisPayModal = ({ gnosisPayTx }: { gnosisPayTx: GnosisPayTxItem }) => {
   const { setSafeTx } = useContext(SafeTxContext)

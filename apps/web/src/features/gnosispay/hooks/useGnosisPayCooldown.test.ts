@@ -4,7 +4,7 @@ import { rpcFixture, DELAY } from '../tests/rpcFixture'
 const mockFixture = rpcFixture()
 const mockModule = { value: DELAY }
 jest.mock('@/hooks/wallets/web3', () => ({ useWeb3ReadOnly: () => mockFixture.provider }))
-jest.mock('./useGnosisPayDelayModule', () => ({ useGnosisPayDelayModule: () => [mockModule] }))
+jest.mock('../public/hooks/useGnosisPayDelayModule', () => ({ useGnosisPayDelayModule: () => [mockModule] }))
 beforeEach(() => {
   mockFixture.server.use(mockFixture.handler)
   mockFixture.values.fail = false

@@ -1,16 +1,14 @@
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import { GnosisPayFeature, useIsGnosisPaySafe } from '@/features/gnosispay'
-import { useLoadFeature } from '@/features/__core__'
-import { type SlotComponentProps, SlotName, withSlot } from '../slots'
+import { useIsGnosisPaySafe } from '@/features/gnosispay/public/hooks/useIsGnosisPaySafe'
+import GnosisPayExecutionForm from '@/features/gnosispay/public/components/GnosisPayExecutionForm'
+import { type SlotComponentProps, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '@/components/tx-flow/slots/withSlot'
 
 const GnosisPay = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx } = useContext(SafeTxContext)
   const { isSubmitDisabled } = useContext(TxFlowContext)
-  // Lazy-loaded form chunk — pulls @gnosis.pm/zodiac etc. only when this
-  // slot actually renders (i.e., on a Gnosis Pay safe).
-  const { GnosisPayExecutionForm } = useLoadFeature(GnosisPayFeature)
 
   // Gnosis Pay txs go through the Delay modifier as module txs and have no
   // Gateway tx id, so we skip `trackTxEvent` (which fetches tx details by id)

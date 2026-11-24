@@ -21,15 +21,19 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({ pathname: '/home' })),
 }))
 
-jest.mock('@/features/spaces', () => ({
-  useIsQualifiedSafe: jest.fn(() => false),
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}))
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => undefined,
+}))
+jest.mock('@/features/spaces/public/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: () => ({ scope: 'local', canRename: true }),
+}))
+jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils', () => ({
   matchesSafeSearch: jest.requireActual('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils')
     .matchesSafeSearch,
-  get SafeSelectorDropdown() {
-    return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
-  },
 }))
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -61,10 +65,18 @@ jest.mock('./hooks/useSpaceBackLink', () => ({
 jest.mock('./SpaceChainSelector', () => {
   const MockSpaceChainSelector = () => <div data-testid="space-chain-selector" />
   MockSpaceChainSelector.displayName = 'SpaceChainSelector'
-  return { __esModule: true, default: MockSpaceChainSelector }
+  const MockLockedChainSelector = ({ chain }: { chain: { chainId: string } }) => (
+    <div data-testid="locked-chain-selector" data-chain-id={chain.chainId} />
+  )
+  MockLockedChainSelector.displayName = 'LockedChainSelector'
+  return { __esModule: true, default: MockSpaceChainSelector, LockedChainSelector: MockLockedChainSelector }
 })
 
-jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
+jest.mock('./hooks/useLockedSafeBarItem', () => ({
+  useLockedSafeBarItem: jest.fn(),
+}))
+
+jest.mock('@/features/spaces/public/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => {
     const footerFn = props.footer as ((close: () => void) => React.ReactNode) | undefined
     const emptyStateOverride = props.emptyStateOverride as React.ReactNode | ((close: () => void) => React.ReactNode)
@@ -81,6 +93,7 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
         data-has-on-retry={String(typeof props.onRetry === 'function')}
         data-has-footer={String(typeof props.footer === 'function')}
         data-keep-open={String(props.keepOpen)}
+        data-locked={String(Boolean(props.locked))}
       >
         {props.header as React.ReactNode}
         {emptyStateOverride != null && (
@@ -112,14 +125,6 @@ jest.mock('./SpaceNestedSafesButton', () => {
   return { __esModule: true, default: MockSpaceNestedSafesButton }
 })
 
-jest.mock('@/features/myAccounts', () => ({
-  MyAccountsFeature: {},
-}))
-
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({}),
-}))
-
 jest.mock('@/components/common/TrustedSafesModal', () => ({
   __esModule: true,
   default: () => null,
@@ -138,9 +143,10 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 
 jest.mock('@/hooks/useChainId', () => () => '1')
 
-jest.mock('@/hooks/safes', () => ({
-  ...jest.requireActual('@/hooks/safes'),
-  useAllSafes: () => [],
+jest.mock('@/hooks/safes/useAllSafes', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafes'),
+  __esModule: true,
+  default: () => [],
 }))
 
 jest.mock('@/hooks/wallets/useWallet', () => ({
@@ -161,10 +167,11 @@ jest.mock('@/store', () => ({
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { useIsQualifiedSafe } from '@/features/spaces'
+import useIsQualifiedSafe from '@/features/spaces/public/hooks/useIsQualifiedSafe'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
+import { useLockedSafeBarItem } from './hooks/useLockedSafeBarItem'
 
 const mockUsePathname = usePathname as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
@@ -172,6 +179,7 @@ const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
 const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
+const mockUseLockedSafeBarItem = useLockedSafeBarItem as jest.Mock
 
 describe('SpaceSafeBar', () => {
   beforeEach(() => {
@@ -192,6 +200,41 @@ describe('SpaceSafeBar', () => {
     mockUseSpaceBackLink.mockReturnValue({
       space: undefined,
       handleBackToSpace: jest.fn(),
+    })
+  })
+
+  describe('locked to the Safe of a Workspace tx flow', () => {
+    const lockedSafe = { chainId: '137', safeAddress: '0xScoped' }
+    const lockedItem = { ...mockItems[0], id: '137:0xScoped', address: '0xScoped', name: 'Scoped Safe' }
+
+    beforeEach(() => {
+      mockUseLockedSafeBarItem.mockReturnValue({ item: lockedItem, chain: { chainId: '137' } })
+    })
+
+    it('shows only that Safe, locked, instead of the URL Safe', () => {
+      const { getByTestId } = render(<SpaceSafeBar lockedSafe={lockedSafe} />)
+
+      expect(mockUseLockedSafeBarItem).toHaveBeenCalledWith(lockedSafe)
+      const dropdown = getByTestId('safe-selector-dropdown')
+      expect(dropdown).toHaveAttribute('data-locked', 'true')
+      expect(dropdown).toHaveAttribute('data-selected-item-id', '137:0xScoped')
+      expect(JSON.parse(dropdown.getAttribute('data-items') ?? '[]')).toEqual([lockedItem])
+      expect(mockUseSpaceSafeSelectorItems).not.toHaveBeenCalled()
+    })
+
+    it("shows that Safe's network, locked, and no nested Safes button", () => {
+      const { getByTestId, queryByTestId } = render(<SpaceSafeBar lockedSafe={lockedSafe} />)
+
+      expect(getByTestId('locked-chain-selector')).toHaveAttribute('data-chain-id', '137')
+      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+    })
+
+    it('keeps the selector unlocked without a flow Safe', () => {
+      const { getByTestId } = render(<SpaceSafeBar />)
+
+      expect(getByTestId('safe-selector-dropdown')).toHaveAttribute('data-locked', 'false')
+      expect(mockUseLockedSafeBarItem).not.toHaveBeenCalled()
     })
   })
 

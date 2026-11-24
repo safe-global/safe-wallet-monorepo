@@ -4,7 +4,10 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { _resetCheckoutDeadlines, useCheckoutReturn } from '../useCheckoutReturn'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockReplace = jest.fn()
 let mockQuery: Record<string, string> = {}
@@ -15,6 +18,7 @@ jest.mock('next/router', () => ({
 const mockSessionQuery = jest.fn()
 const mockSubscriptionsQuery = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/billing', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/billing'),
   useBillingGetCheckoutSessionV1Query: (...args: unknown[]) => mockSessionQuery(...args),
   useBillingGetSubscriptionsV1Query: (...args: unknown[]) => mockSubscriptionsQuery(...args),
 }))

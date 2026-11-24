@@ -1,4 +1,4 @@
-import type { WalletContextType } from '@/components/common/WalletProvider'
+import type { WalletContextType } from '@/components/common/WalletProvider/WalletContext'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { WalletPreset } from './types'
 
@@ -9,6 +9,7 @@ export const disconnectedWallet: WalletContextType = {
   connectedWallet: null,
   signer: null,
   setSignerAddress: () => {},
+  getParentSafeNonce: () => undefined,
   setParentSafeNonce: () => {},
   clearParentSafeNonce: () => {},
   isReady: true,
@@ -49,6 +50,7 @@ export function createConnectedWallet(
       provider: null,
     },
     setSignerAddress: () => {},
+    getParentSafeNonce: () => undefined,
     setParentSafeNonce: () => {},
     clearParentSafeNonce: () => {},
     isReady: true,
@@ -82,6 +84,7 @@ export function createNonOwnerWallet(
       provider: null,
     },
     setSignerAddress: () => {},
+    getParentSafeNonce: () => undefined,
     setParentSafeNonce: () => {},
     clearParentSafeNonce: () => {},
     isReady: true,

@@ -15,19 +15,18 @@ import {
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { SafenetChecksSection } from '../SafenetChecksSection'
-import {
-  MixpanelEventParams,
-  SAFENET_EVENTS,
-  SafenetCheckResult,
-  SafenetSignerRole,
-  trackEvent,
-} from '@/services/analytics'
+import { MixpanelEventParams, SafenetCheckResult, SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
+import { trackEvent } from '@/services/analytics'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
   useSafenetCheck: jest.fn(),
 }))
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseSafenetCheck = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
 

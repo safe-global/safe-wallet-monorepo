@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import SpendingLimitIcon from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
 import { FLOW_SUBTITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import ReviewEnableModule, { type EnableModuleFlowData } from './ReviewEnableModule'

@@ -8,8 +8,11 @@ export const abCsvReaderValidator = ({ size }: File): string[] | undefined => {
   }
 }
 
+// A workspace export adds a `tags` column; the local address book ignores it
 export const hasValidAbHeader = (header: string[]) => {
-  return header.length === 3 && header[0] === 'address' && header[1] === 'name' && header[2] === 'chainId'
+  const [address, name, chainId, ...rest] = header
+  const hasValidTags = rest.length === 0 || (rest.length === 1 && rest[0] === 'tags')
+  return address === 'address' && name === 'name' && chainId === 'chainId' && hasValidTags
 }
 
 export const hasValidAbEntryAddresses = (entries: string[][]) => {

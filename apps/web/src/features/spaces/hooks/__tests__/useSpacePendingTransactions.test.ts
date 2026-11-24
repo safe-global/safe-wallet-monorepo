@@ -1,200 +1,241 @@
-import { renderHook, waitFor } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { GATEWAY_URL } from '@/config/gateway'
+import { server } from '@/tests/server'
+import { act, renderHook, waitFor } from '@/tests/test-utils'
+import { multisigTransactionBuilder, queuedTransactionItem } from '@/tests/builders/queuedTransaction'
 import { useSpacePendingTransactions } from '../useSpacePendingTransactions'
-import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import * as transactionsService from '@/services/transactions'
-import * as txList from '@/utils/tx-list'
 
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: jest.fn(),
+}))
 jest.mock('../useSpaceSafesWithQueue', () => ({
   useSpaceSafesWithQueue: jest.fn(),
 }))
-jest.mock('@/services/transactions', () => ({
-  getTransactionQueue: jest.fn(),
-}))
-jest.mock('@/utils/tx-list', () => ({
-  getLatestTransactions: jest.fn(),
-}))
 
-import { useSpaceSafesWithQueue } from '../useSpaceSafesWithQueue'
+const mockUseHasFeature = jest.requireMock('@/hooks/useChains').useHasFeature as jest.Mock
+const mockUseSpaceSafesWithQueue = jest.requireMock('../useSpaceSafesWithQueue').useSpaceSafesWithQueue as jest.Mock
 
-const createQueuedItem = (
-  timestamp: number,
-  overrides: Partial<TransactionQueuedItem> = {},
-): TransactionQueuedItem => ({
-  type: 'TRANSACTION',
-  transaction: {
-    id: faker.string.uuid(),
-    txHash: faker.string.hexadecimal({ length: 64 }),
-    timestamp,
-    txStatus: 'AWAITING_CONFIRMATIONS',
-    txInfo: {
-      type: 'Custom',
-      to: { value: faker.finance.ethereumAddress() },
-      methodName: null,
-      dataSize: '0',
-      isCancellation: false,
-      humanDescription: null,
-    },
-    executionInfo: {
-      type: 'MULTISIG',
-      nonce: faker.number.int({ min: 1, max: 100 }),
-      confirmationsRequired: 2,
-      confirmationsSubmitted: 1,
-      missingSigners: [],
-    },
-    ...overrides.transaction,
+const spaceId = faker.string.uuid()
+const SAFE_1 = faker.finance.ethereumAddress()
+const SAFE_2 = faker.finance.ethereumAddress()
+const CHAIN_1 = faker.string.numeric({ length: 3, allowLeadingZeros: false })
+const CHAIN_2 = faker.string.numeric({ length: 4, allowLeadingZeros: false })
+
+const signedInAuth = {
+  sessionExpiresAt: Date.now() + 60_000,
+  landingSpaceHint: null,
+  isStoreHydrated: true,
+  cfSafeSynced: false,
+  isOidcLoginPending: false,
+  isSessionCheckPending: false,
+}
+
+const queuedItemAt = (timestamp: number, conflictType?: Parameters<typeof queuedTransactionItem>[1]) =>
+  queuedTransactionItem(multisigTransactionBuilder().with({ timestamp }).build(), conflictType)
+
+const createPage = (results: SpaceQueuedItemPage['results'], count: number | null = null): SpaceQueuedItemPage => ({
+  count,
+  next: null,
+  previous: null,
+  results,
+  unavailableSafes: [],
+  counts: {
+    total: 0,
+    execute: 0,
+    sign: 0,
+    blocked: 0,
+    waiting: 0,
+    conflicting: 0,
+    stale: 0,
+    safes: [],
+    chains: [],
+    signers: [],
   },
-  conflictType: 'None',
-  ...overrides,
 })
 
-const SAFE_ADDRESS_1 = faker.finance.ethereumAddress()
-const SAFE_ADDRESS_2 = faker.finance.ethereumAddress()
+const respondWithQueue = (page: SpaceQueuedItemPage | null) => {
+  const requests: URL[] = []
+  server.use(
+    http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, ({ request }) => {
+      requests.push(new URL(request.url))
+      return page ? HttpResponse.json(page) : new HttpResponse(null, { status: 500 })
+    }),
+  )
+  return requests
+}
+
+const respondWithSafeQueues = (results: QueuedItemPage['results'] = []) => {
+  const requests: URL[] = []
+  server.use(
+    http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:address/transactions/queued`, ({ request }) => {
+      requests.push(new URL(request.url))
+      return HttpResponse.json<QueuedItemPage>({ count: results.length, next: null, previous: null, results })
+    }),
+  )
+  return requests
+}
+
+const renderInSpace = (limit?: number, sessionExpiresAt: number | null = signedInAuth.sessionExpiresAt) =>
+  renderHook(() => useSpacePendingTransactions(limit), {
+    routerProps: { query: { spaceId } },
+    initialReduxState: { auth: { ...signedInAuth, sessionExpiresAt } },
+  })
+
+const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 50)))
 
 describe('useSpacePendingTransactions', () => {
   beforeEach(() => {
-    jest.resetAllMocks()
-    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
-      safesWithQueue: [
-        { chainId: '1', address: SAFE_ADDRESS_1 },
-        { chainId: '137', address: SAFE_ADDRESS_2 },
-      ],
+    jest.clearAllMocks()
+    mockUseHasFeature.mockReturnValue(true)
+    mockUseSpaceSafesWithQueue.mockReturnValue({
+      safesWithQueue: [{ chainId: CHAIN_1, address: SAFE_1 }],
       isLoading: false,
     })
   })
 
-  it('should return empty transactions when no safes have queued txs', async () => {
-    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
-      safesWithQueue: [],
-      isLoading: false,
-    })
+  it('requests as many transactions from the Space queue as it shows', async () => {
+    const requests = respondWithQueue(createPage({}))
 
-    const { result } = renderHook(() => useSpacePendingTransactions())
+    renderInSpace(4)
 
-    await waitFor(() => {
-      expect(result.current.transactions).toEqual([])
-      expect(result.current.count).toBe(0)
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(requests).toHaveLength(1))
+    expect(requests[0].searchParams.get('limit')).toBe('4')
   })
 
-  it('should reflect loading state from useSpaceSafesWithQueue', () => {
-    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
-      safesWithQueue: [],
-      isLoading: true,
-    })
+  it('returns the oldest transactions across Safes and chains, up to the limit', async () => {
+    respondWithQueue(
+      createPage({
+        [SAFE_1]: { [CHAIN_1]: [queuedItemAt(3000)], [CHAIN_2]: [queuedItemAt(1000)] },
+        [SAFE_2]: { [CHAIN_1]: [queuedItemAt(2000), queuedItemAt(4000)] },
+      }),
+    )
 
-    const { result } = renderHook(() => useSpacePendingTransactions())
+    const { result } = renderInSpace(3)
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(3))
+    expect(result.current.transactions.map((tx) => [tx.transaction.timestamp, tx.safeAddress, tx.chainId])).toEqual([
+      [1000, SAFE_1, CHAIN_2],
+      [2000, SAFE_2, CHAIN_1],
+      [3000, SAFE_1, CHAIN_1],
+    ])
+    expect(result.current.count).toBe(3)
+    expect(result.current.isLoading).toBe(false)
+  })
+
+  it('returns the size of the whole Space queue as the total count', async () => {
+    respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }, 12))
+
+    const { result } = renderInSpace(2)
+
+    await waitFor(() => expect(result.current.totalCount).toBe(12))
+    expect(result.current.count).toBe(2)
+  })
+
+  it('counts the returned transactions as the whole queue when the gateway omits the total and the page is not full', async () => {
+    respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }))
+
+    const { result } = renderInSpace(4)
+
+    await waitFor(() => expect(result.current.totalCount).toBe(2))
+  })
+
+  it('leaves the total count unknown when the gateway omits it and the page reached the limit', async () => {
+    respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }))
+
+    const { result } = renderInSpace(2)
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.totalCount).toBeUndefined()
+  })
+
+  it('returns every transaction of a conflict group, oldest first', async () => {
+    const newer = queuedItemAt(2000, 'HasNext')
+    const older = queuedItemAt(1000, 'End')
+    respondWithQueue(
+      createPage({
+        [SAFE_1]: {
+          [CHAIN_1]: [{ type: 'CONFLICT_HEADER', nonce: 1 }, newer, older],
+        },
+      }),
+    )
+
+    const { result } = renderInSpace()
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.transactions.map((tx) => tx.transaction.id)).toEqual([
+      older.transaction.id,
+      newer.transaction.id,
+    ])
+  })
+
+  it('returns an error when the Space queue fails to load', async () => {
+    respondWithQueue(null)
+
+    const { result } = renderInSpace()
+
+    await waitFor(() => expect(result.current.error).toBe('Failed to load pending transactions'))
+    expect(result.current.transactions).toEqual([])
+    expect(result.current.isLoading).toBe(false)
+  })
+
+  it('requests the Space queue again on refetch', async () => {
+    const requests = respondWithQueue(createPage({}))
+
+    const { result } = renderInSpace()
+
+    await waitFor(() => expect(requests).toHaveLength(1))
+    await act(async () => result.current.refetch())
+    await waitFor(() => expect(requests).toHaveLength(2))
+  })
+
+  it('does not request the Space queue when signed out, even on refetch', async () => {
+    const requests = respondWithQueue(createPage({}))
+
+    const { result } = renderInSpace(4, null)
+
+    await act(async () => result.current.refetch())
+    await settle()
+    expect(requests).toHaveLength(0)
+    expect(result.current.transactions).toEqual([])
+  })
+
+  it('does not request the per-Safe queues when the Space queue is enabled', async () => {
+    const spaceRequests = respondWithQueue(createPage({}))
+    const safeRequests = respondWithSafeQueues()
+
+    renderInSpace(4)
+
+    await waitFor(() => expect(spaceRequests).toHaveLength(1))
+    await settle()
+    expect(safeRequests).toHaveLength(0)
+  })
+
+  it('returns the per-Safe queues when the Space queue is disabled', async () => {
+    mockUseHasFeature.mockReturnValue(false)
+    const spaceRequests = respondWithQueue(createPage({}))
+    const pending = queuedItemAt(1000)
+    respondWithSafeQueues([pending])
+
+    const { result } = renderInSpace(4)
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(1))
+    expect(result.current.transactions[0]).toMatchObject({
+      transaction: { id: pending.transaction.id },
+      safeAddress: SAFE_1,
+      chainId: CHAIN_1,
+    })
+    expect(spaceRequests).toHaveLength(0)
+    expect(result.current.totalCount).toBeUndefined()
+  })
+
+  it('reports loading until the chains config tells whether the Space queue is enabled', () => {
+    mockUseHasFeature.mockReturnValue(undefined)
+
+    const { result } = renderInSpace()
 
     expect(result.current.isLoading).toBe(true)
-  })
-
-  it('should fetch and merge transactions from multiple safes', async () => {
-    const tx1 = createQueuedItem(1000)
-    const tx2 = createQueuedItem(2000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [tx1] })
-      .mockResolvedValueOnce({ results: [tx2] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
-
-    const { result } = renderHook(() => useSpacePendingTransactions())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-      expect(result.current.transactions).toHaveLength(2)
-      expect(result.current.count).toBe(2)
-    })
-  })
-
-  it('should sort transactions by timestamp ascending (oldest first)', async () => {
-    const oldTx = createQueuedItem(1000)
-    const recentTx = createQueuedItem(3000)
-    const middleTx = createQueuedItem(2000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [recentTx, oldTx] })
-      .mockResolvedValueOnce({ results: [middleTx] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
-
-    const { result } = renderHook(() => useSpacePendingTransactions())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-      const timestamps = result.current.transactions.map((tx) => tx.transaction.timestamp)
-      expect(timestamps).toEqual([1000, 2000, 3000])
-    })
-  })
-
-  it('should respect the limit parameter', async () => {
-    const tx1 = createQueuedItem(1000)
-    const tx2 = createQueuedItem(2000)
-    const tx3 = createQueuedItem(3000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [tx1, tx2] })
-      .mockResolvedValueOnce({ results: [tx3] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
-
-    const { result } = renderHook(() => useSpacePendingTransactions(2))
-
-    await waitFor(() => {
-      expect(result.current.transactions).toHaveLength(2)
-      expect(result.current.transactions[0].transaction.timestamp).toBe(1000)
-      expect(result.current.transactions[1].transaction.timestamp).toBe(2000)
-    })
-  })
-
-  it('should attach safeAddress and chainId to each transaction', async () => {
-    const tx1 = createQueuedItem(1000)
-    const tx2 = createQueuedItem(2000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [tx1] })
-      .mockResolvedValueOnce({ results: [tx2] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
-
-    const { result } = renderHook(() => useSpacePendingTransactions())
-
-    await waitFor(() => {
-      expect(result.current.transactions[0]).toHaveProperty('safeAddress', SAFE_ADDRESS_1)
-      expect(result.current.transactions[0]).toHaveProperty('chainId', '1')
-      expect(result.current.transactions[1]).toHaveProperty('safeAddress', SAFE_ADDRESS_2)
-      expect(result.current.transactions[1]).toHaveProperty('chainId', '137')
-    })
-  })
-
-  it('should set error when fetching fails', async () => {
-    ;(transactionsService.getTransactionQueue as jest.Mock).mockRejectedValue(new Error('Network error'))
-
-    const { result } = renderHook(() => useSpacePendingTransactions())
-
-    await waitFor(() => {
-      expect(result.current.error).toBe('Failed to load pending transactions')
-      expect(result.current.isLoading).toBe(false)
-      expect(result.current.transactions).toEqual([])
-    })
-  })
-
-  it('should pass correct cursor with limit to getTransactionQueue', async () => {
-    ;(transactionsService.getTransactionQueue as jest.Mock).mockResolvedValue({ results: [] })
-    ;(txList.getLatestTransactions as jest.Mock).mockReturnValue([])
-
-    renderHook(() => useSpacePendingTransactions(5))
-
-    await waitFor(() => {
-      expect(transactionsService.getTransactionQueue).toHaveBeenCalledWith('1', SAFE_ADDRESS_1, {
-        trusted: true,
-        cursor: 'limit=5&offset=0',
-      })
-    })
   })
 })

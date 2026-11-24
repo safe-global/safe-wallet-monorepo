@@ -1,6 +1,6 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { safeCreationPendingStatuses } from '../../hooks/safeCreationPendingStatuses'
-import { SafeCreationEvent, safeCreationSubscribe } from '../../services/safeCreationEvents'
+import { safeCreationPendingStatuses } from '../../public/utils/safeCreationPendingStatuses'
+import { SafeCreationEvent, safeCreationSubscribe } from '../../public/services/safeCreationEvents'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useEffect, useState } from 'react'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
@@ -8,7 +8,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Check } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { NetworkLogosList } from '@/features/multichain'
+import NetworkLogosList from '@/components/common/NetworkLogosList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 
 const CounterfactualSuccessScreen = () => {

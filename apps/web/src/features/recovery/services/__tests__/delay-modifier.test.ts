@@ -4,7 +4,7 @@ import type { Delay } from '@gnosis.pm/zodiac'
 import type { JsonRpcProvider } from 'ethers'
 
 import { _getZodiacContract, _isOfficialRecoveryDelayModifier } from '../delay-modifier'
-import * as proxies from '../proxies'
+import * as proxies from '@/services/delay/proxies'
 
 const DELAY_MODULE = {
   '1.0.0': '0xD62129BF40CD1694b3d9D9847367783a1A4d5cB4',

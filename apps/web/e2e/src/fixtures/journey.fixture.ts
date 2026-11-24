@@ -1,6 +1,7 @@
 import { isolatedEnvironment } from '../../environment/isolated-environment.mjs'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { createOwners } from '../../environment/scenarios/safe.mjs'
+import { randomAddressUnlike } from '../data/addresses.mjs'
 import { WalletPage } from '../pages/wallet.page'
 import { addSafeToAccounts } from './seed-added-safes'
 import { seedSwitchableWallet } from './seed-wallet'
@@ -24,6 +25,8 @@ export type Journey = {
   recordSafe: (safe: { prefixedAddress: string }) => void
   /** Puts the Safe in the accounts of `safePage` from its next page load */
   addToAccounts: (safe: { prefixedAddress: string }) => Promise<void>
+  /** A random address that Safe Shield cannot flag as a look-alike of an owner or a Safe of this journey */
+  newAddress: () => string
 }
 
 function journeyEnvironment(): JourneyEnvironment {
@@ -50,6 +53,9 @@ export const test = base.extend<{ journey: Journey }>({
       cookie: CONNECTED_OWNER_COOKIE,
     })
 
+    const knownAddresses = new Set(OWNER_NAMES.map((name) => owners[name].address))
+    const unprefixed = (safe: { prefixedAddress: string }) => safe.prefixedAddress.split(':')[1]
+
     await provide({
       env: journeyEnvironment(),
       owners,
@@ -59,8 +65,15 @@ export const test = base.extend<{ journey: Journey }>({
         await safePage.reload()
         await wallet.accountCenter.filter({ hasText: short(owners[owner].address) }).waitFor()
       },
-      recordSafe: (safe) => testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress }),
-      addToAccounts: (safe) => addSafeToAccounts(safePage, safe.prefixedAddress),
+      recordSafe: (safe) => {
+        knownAddresses.add(unprefixed(safe))
+        testInfo.annotations.push({ type: 'safe-address', description: safe.prefixedAddress })
+      },
+      addToAccounts: (safe) => {
+        knownAddresses.add(unprefixed(safe))
+        return addSafeToAccounts(safePage, safe.prefixedAddress)
+      },
+      newAddress: () => randomAddressUnlike(knownAddresses),
     })
   },
 })

@@ -1,7 +1,7 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import type { Meta, StoryObj } from '@storybook/react'
 import CowOrderConfirmationView from './index'
-import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
+import { swapOrderConfirmationViewBuilder } from '../../helpers/swapOrderBuilder'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 

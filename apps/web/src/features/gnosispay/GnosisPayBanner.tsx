@@ -1,7 +1,7 @@
 import { useGnosisPayCooldown } from './hooks/useGnosisPayCooldown'
 import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
 import GnosisPayIcon from '@/public/images/common/gnosis-pay.svg'
-import { useIsGnosisPaySafe } from './hooks/useIsGnosisPaySafe'
+import { useIsGnosisPaySafe } from './public/hooks/useIsGnosisPaySafe'
 
 /**
  * Renders a small read-only banner whenever the current Safe is a Gnosis Pay

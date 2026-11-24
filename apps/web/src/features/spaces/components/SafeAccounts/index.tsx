@@ -5,19 +5,18 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { getSpaceOrderScope, OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import {
-  type AllSafeItems,
-  type SafeItem,
-  _groupAndSort,
-  flattenSafeItems,
-  useSafeOrderComparator,
-  useSafesSearch,
-  useSaveManualOrder,
-} from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { _groupAndSort, flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { useSafeOrderComparator } from '@/hooks/safes/useSafeOrderComparator'
+import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
+import { useSaveManualOrder } from '@/hooks/safes/useSaveManualOrder'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import { useSimilarityClusters } from '@/features/address-poisoning'
-import { useSpaceSafes, useIsInvited, useIsAdmin, useCurrentSpaceId } from '@/features/spaces'
-import { SafeAccountsTable } from '@/features/myAccounts'
+import useSimilarityClusters from '@/features/address-poisoning/public/hooks/useSimilarityClusters'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
+import { useIsInvited, useIsAdmin } from '../../public/hooks/useSpaceMembers'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import SafeAccountsTable from '@/features/myAccounts/public/components/SafeAccountsTable'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw, Search } from 'lucide-react'
@@ -28,6 +27,7 @@ import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
 import SeatLimitBanner from './SeatLimitBanner'
 import SelectedCounter from '@safe-global/views/features/spaces/components/SelectedCounter'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 import { seatsTooltip } from '../Plans/PlanStatusCard'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { countSeats } from '@/utils/spaces'
@@ -89,7 +89,7 @@ const SpaceSafeAccounts = () => {
                 tooltip={seatsTooltip(tierName, limit)}
               />
             )}
-            <InputGroup variant="search" inputSize="lg" className="flex-1">
+            <InputGroup variant="search" inputSize="lg" fieldError="hidden" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
               </InputGroupAddon>
@@ -140,7 +140,7 @@ const SpaceSafeAccounts = () => {
           No Safe accounts match your search
         </Typography>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4" data-tour={TOUR_TARGETS.safeAccountsList}>
           {similarAddresses.size > 0 && <SecurityBanner title="Verify before you trust" />}
           <SafeAccountsTable
             items={visibleSafes}

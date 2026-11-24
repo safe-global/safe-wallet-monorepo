@@ -35,7 +35,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { type GnosisPayTxItem } from './types'
 import { useGnosisPayActions } from './hooks/useGnosisPayActions'
 import { refreshGnosisPayQueue } from './hooks/useGnosisPayQueue'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 
 type SubmitCallback = (txId: string, isExecuted?: boolean) => void
 

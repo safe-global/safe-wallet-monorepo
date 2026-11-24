@@ -1,10 +1,39 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useCallback, useRef } from 'react'
-import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isNestedConfirmationTxInfo } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
+
+export type GasPaymentSource = 'safe' | 'signing_wallet' | 'sponsored'
+
+/**
+ * Who pays the gas, for the Gas Payment Source property:
+ *   - a payload that refunds the gas is paid by the Safe, whatever the step;
+ *   - at execution, the payer the user picked (a sponsored option means nobody in the Safe paid);
+ *   - otherwise, where the Safe could pay, the signer — at signing, before anyone picks.
+ */
+export const getGasPaymentSource = ({
+  isSafePaid,
+  isExecuted,
+  gasPaymentOption,
+  isPayFromSafeChain,
+}: {
+  isSafePaid: boolean
+  isExecuted: boolean
+  gasPaymentOption: GasPayer | undefined
+  isPayFromSafeChain: boolean
+}): GasPaymentSource | undefined => {
+  if (isSafePaid) return 'safe'
+  if (isExecuted && gasPaymentOption) {
+    if (gasPaymentOption === 'PAY_FROM_SAFE') return 'safe'
+    return gasPaymentOption === 'WALLET' ? 'signing_wallet' : 'sponsored'
+  }
+  return isPayFromSafeChain ? 'signing_wallet' : undefined
+}
 
 function getCreationEvent(args: { isParentSigner: boolean; isRoleExecution: boolean; isProposerCreation: boolean }) {
   if (args.isParentSigner) {
@@ -52,7 +81,7 @@ export function trackTxEvents(
   origin?: string,
   isMassPayout: boolean = false,
   threshold?: number,
-  gasPaymentSource?: 'safe' | 'signing_wallet',
+  gasPaymentSource?: GasPaymentSource,
   gasPaymentOption?: GasPayer,
 ) {
   const isNestedConfirmation = !!details && isNestedConfirmationTxInfo(details.txInfo)

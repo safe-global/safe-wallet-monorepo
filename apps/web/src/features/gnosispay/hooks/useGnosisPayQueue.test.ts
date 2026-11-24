@@ -8,7 +8,7 @@ import { _toGnosisPayQueue, refreshGnosisPayQueue, useGnosisPayQueue } from './u
 const mockUseGnosisPayDelayModule = jest.fn()
 const mockProvider = {} as JsonRpcProvider
 
-jest.mock('./useGnosisPayDelayModule', () => ({
+jest.mock('../public/hooks/useGnosisPayDelayModule', () => ({
   useGnosisPayDelayModule: () => mockUseGnosisPayDelayModule(),
 }))
 

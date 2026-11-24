@@ -12,11 +12,25 @@ export class TxReviewPage {
   readonly signButton: Locator
   /** A proposer who is not a signer gets this button in place of the sign step */
   readonly proposeButton: Locator
+  /** The old execution method selector, still used by bulk execution */
   readonly connectedWalletMethod: Locator
-  readonly relayMethod: Locator
-  /** "<n> free transactions left today" next to the relay option */
+  /** The fee card of the execute step and its "Pay fees from" dropdown */
+  readonly feePayerCard: Locator
+  readonly feePayerSelector: Locator
+  readonly signerWalletOption: Locator
+  readonly sponsoredOption: Locator
+  readonly safeAccountOption: Locator
+  /** The payer that the fee card shows without a choice, e.g. "Safe account" once the signed payload carries the fees */
+  readonly lockedFeePayer: Locator
+  readonly gasFeeRow: Locator
+  /** Opens the gas settings in the fee card: editable while the connected wallet pays, read-only otherwise */
+  readonly gasSettingsToggle: Locator
+  readonly maxPriorityFeeInput: Locator
+  readonly maxFeeInput: Locator
+  readonly saveGasSettingsButton: Locator
+  /** "<n> sponsored transactions left today" in the fee card */
   readonly remainingRelays: Locator
-  /** The sponsored transactions left: the free daily ones, or "<left>/<quota>" of a Workspace plan */
+  /** The sponsored transactions left: the free daily ones, or the ones left this month on a Workspace plan */
   readonly sponsoredTxsCounter: Locator
   readonly executeButton: Locator
   /** The spending-limit review has no signing step, only this button */
@@ -54,9 +68,19 @@ export class TxReviewPage {
     this.signButton = page.getByTestId('combo-submit-sign')
     this.proposeButton = page.getByRole('button', { name: 'Propose transaction' })
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
-    this.relayMethod = page.getByTestId('relay-execution-method').first()
-    this.remainingRelays = page.getByText(/free transactions? left today/)
-    this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter')
+    this.feePayerCard = page.getByTestId('gas-payer-selector')
+    this.feePayerSelector = page.getByTestId('fee-payer-selector')
+    this.signerWalletOption = page.getByTestId('fee-payer-signer')
+    this.sponsoredOption = page.getByTestId('fee-payer-sponsored')
+    this.safeAccountOption = page.getByTestId('fee-payer-safe')
+    this.lockedFeePayer = page.getByTestId('fee-payer-locked')
+    this.gasFeeRow = page.getByTestId('gas-fee-row')
+    this.gasSettingsToggle = page.getByTestId('gas-fee-details-toggle')
+    this.maxPriorityFeeInput = page.getByTestId('gas-param-maxPriorityFeePerGas')
+    this.maxFeeInput = page.getByTestId('gas-param-maxFeePerGas')
+    this.saveGasSettingsButton = page.getByTestId('gas-params-save')
+    this.remainingRelays = page.getByText(/sponsored transactions? left today/)
+    this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter').or(page.getByTestId('sponsored-quota'))
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
     this.status = page.getByTestId('transaction-status')
@@ -95,6 +119,12 @@ export class TxReviewPage {
     await this.signButton.click()
   }
 
+  /** Pick the Safe account as the payer of the fees in the fee card of the review */
+  async payFeesFromSafe(): Promise<void> {
+    await this.feePayerSelector.click()
+    await this.safeAccountOption.click()
+  }
+
   /** Wait until the signer select shows `address`; it fills in once CGW returns the wallet's Safes */
   async waitForSigner(address: string): Promise<void> {
     await this.signerSelect.filter({ hasText: short(address) }).waitFor()
@@ -124,16 +154,56 @@ export class TxReviewPage {
     await this.waitForExecution()
   }
 
-  /** Execute a fully signed transaction with the relay, which pays the gas */
+  /** `signAndExecute` where a sponsor is sure to be on offer, such as a Safe in a Business Workspace */
+  async signAndExecuteDecliningSponsor(): Promise<void> {
+    await this.sign()
+    await this.executeDecliningSponsor()
+    await this.waitForExecution()
+  }
+
+  /** Execute a fully signed transaction with the relay, which pays the gas (the Pro plan or the chain's free transactions) */
   async executeWithRelay(): Promise<void> {
-    await this.relayMethod.click()
+    await this.feePayerSelector.click()
+    await this.sponsoredOption.click()
     await this.executeButton.click()
   }
 
-  /** Execute a fully signed transaction with the connected wallet, not the relay */
+  /** Execute a fully signed transaction with the connected wallet: picked when a sponsor is on offer, the only payer otherwise */
   async execute(): Promise<void> {
-    await this.connectedWalletMethod.click()
+    await this.feePayerCard.waitFor()
+    if (await this.feePayerSelector.isVisible()) {
+      await this.feePayerSelector.click()
+      await this.signerWalletOption.click()
+    }
     await this.executeButton.click()
+  }
+
+  /**
+   * Execute with the connected wallet where a sponsor is sure to be on offer. The offer arrives after the fee card
+   * and makes itself the payer, so this waits for its selector; `execute` reads the card once and can miss it.
+   */
+  async executeDecliningSponsor(): Promise<void> {
+    await this.payFeesFromSignerWallet()
+    await this.executeButton.click()
+  }
+
+  /** Pick the connected wallet as the payer of the gas in the fee card of the execute step */
+  async payFeesFromSignerWallet(): Promise<void> {
+    await this.feePayerSelector.click()
+    await this.signerWalletOption.click()
+  }
+
+  /**
+   * Set the max priority fee and the max fee per gas of the execution, in Gwei, in the gas settings of the fee card.
+   * The settings open with the estimate they have at that moment, so this waits until the wallet's fee is estimated:
+   * the row is editable (the wallet pays) and shows an amount, which needs the gas limit.
+   */
+  async setGasFees({ maxPriorityFee, maxFee }: { maxPriorityFee: string; maxFee: string }): Promise<void> {
+    await this.gasFeeRow.filter({ has: this.page.getByTestId('gas-fee-edit-button'), hasText: /\d/ }).waitFor()
+    await this.gasSettingsToggle.click()
+    await this.maxPriorityFeeInput.fill(maxPriorityFee)
+    await this.maxFeeInput.fill(maxFee)
+    await this.saveGasSettingsButton.click()
   }
 
   /** Continue from the review and add the transaction to the batch instead of signing it */
@@ -154,6 +224,12 @@ export class TxReviewPage {
   async continueAndExecute(): Promise<void> {
     await this.continueButton.click()
     await this.execute()
+  }
+
+  /** Continue from the review and execute with the connected wallet where a sponsor is sure to be on offer */
+  async continueAndExecuteDecliningSponsor(): Promise<void> {
+    await this.continueButton.click()
+    await this.executeDecliningSponsor()
   }
 
   /** Continue from the review and execute with the relay, which pays the gas */

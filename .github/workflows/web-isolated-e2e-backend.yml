@@ -42,6 +42,7 @@ jobs:
       run: ${{ steps.changes.outputs.relevant }}
       matrix: ${{ steps.plan.outputs.matrix }}
       images: ${{ steps.images.outputs.images }}
+      release-comment: ${{ steps.release.outputs.comment }}
     steps:
       - name: Detect changes that the isolated E2E covers
         id: changes
@@ -77,18 +78,33 @@ jobs:
         if: steps.changes.outputs.relevant == 'true'
         with:
           persist-credentials: false
+      # A pull request that changes a flag to enabled: true runs the specs that cover the flag several times.
+      - name: Find the flags that this pull request releases
+        id: release
+        if: steps.changes.outputs.relevant == 'true' && github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          DECLARATION: apps/web/config/remote-config.json
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          if git cat-file -e "$BASE_SHA:$DECLARATION" 2> /dev/null; then
+            git show "$BASE_SHA:$DECLARATION" > "$RUNNER_TEMP/base-remote-config.json"
+            SAFE_E2E_BASE_DECLARATION="$RUNNER_TEMP/base-remote-config.json" \
+              node apps/web/e2e/environment/run.mjs release >> "$GITHUB_OUTPUT"
+          fi
       - name: Plan shards
         id: plan
         if: steps.changes.outputs.relevant == 'true'
         env:
           SAFE_E2E_SPECS: ${{ inputs.specs }}
           SAFE_E2E_SHARDS: ${{ inputs.shards || '3' }}
+          SAFE_E2E_BURN_IN_SPECS: ${{ steps.release.outputs.specs }}
         run: echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
 
       # The Queue Service image is a private package.
       - name: Log in to GitHub Container Registry
         if: steps.changes.outputs.relevant == 'true'
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -181,8 +197,10 @@ jobs:
       SAFE_E2E_WEB_PORT: '8080'
       SAFE_E2E_WEB_URL: http://localhost:8080
       # Pull requests have no inputs, so every shard runs its part of all registered specs.
-      SAFE_E2E_SPECS: ${{ inputs.specs }}
-      SAFE_E2E_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+      # The burnin entry has its own specs and no shard; it repeats each test.
+      SAFE_E2E_SPECS: ${{ matrix.specs || inputs.specs }}
+      SAFE_E2E_SHARD: ${{ matrix.total && format('{0}/{1}', matrix.shard, matrix.total) || '' }}
+      SAFE_E2E_REPEAT: ${{ matrix.repeat || '' }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -196,7 +214,7 @@ jobs:
 
       # The Queue Service image is a private package.
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4.7.0
+        uses: docker/login-action@v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -380,7 +398,7 @@ jobs:
 
   publish-report:
     name: Publish E2E report
-    needs: merge-report
+    needs: [plan, merge-report]
     if: always() && needs.merge-report.result == 'success'
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
@@ -427,6 +445,15 @@ jobs:
         with:
           header: isolated-e2e-report
           message: ${{ steps.link.outputs.body }}
+
+      - name: Comment the checklist for the released flags
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v3.0.5
+        with:
+          header: flag-release
+          message: ${{ needs.plan.outputs.release-comment }}
+          # A later push that releases no flag removes the checklist.
+          delete: ${{ needs.plan.outputs.release-comment == '' }}
 
   result:
     # The one stable check name for branch protection; the shard names change with the shard count.

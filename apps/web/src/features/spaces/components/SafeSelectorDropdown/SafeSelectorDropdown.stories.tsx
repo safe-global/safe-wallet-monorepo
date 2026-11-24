@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { fn } from 'storybook/test'
 import { useState } from 'react'
 
 const action = (name: string) => fn().mockName(name)
-import SafeSelectorDropdown from './index'
+import SafeSelectorDropdown from '../../public/components/SafeSelectorDropdown'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 const defaultSetup = createMockStory({
@@ -134,6 +134,11 @@ export const Default: Story = {
 export const SingleSafeSingleChain: Story = {
   render: () => <InteractiveWrapper items={[singleChainItem]} initialItemId={singleChainItem.id} />,
   args: {} as any,
+}
+
+/** A flow whose Safe is fixed (signing from the Workspace): no chevron, no list, a "not allowed" tooltip. */
+export const Locked: Story = {
+  args: { items: [mockItems[0]], selectedItemId: mockItems[0].id, locked: true },
 }
 
 export const SingleSafeMultiChains: Story = {

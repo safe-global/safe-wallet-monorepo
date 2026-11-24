@@ -7,7 +7,7 @@ import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { logError, Errors } from '@/services/exceptions'
 import { readDelayState, type DelayQueueItem } from '@/services/delay/state'
-import { useGnosisPayDelayModule } from './useGnosisPayDelayModule'
+import { useGnosisPayDelayModule } from '../public/hooks/useGnosisPayDelayModule'
 import type { GnosisPayTxItem } from '../types'
 
 const REFRESH_INTERVAL = 30_000

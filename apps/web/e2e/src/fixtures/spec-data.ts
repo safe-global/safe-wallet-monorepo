@@ -12,7 +12,7 @@ export type Owners = ReturnType<typeof createOwners>
 /** Prefixed Safe addresses (`sep:0x…`) by the names that the spec's scenarios return. */
 export type Safes = Record<string, string>
 
-type SpecEntry = { scenarios?: string[]; chains?: number[]; devices?: string[] }
+type SpecEntry = { scenarios?: string[]; chains?: number[]; devices?: string[]; flags?: string[] }
 type ScenarioFunction = (env: Record<string, unknown>, owners: Owners) => Promise<unknown>
 type SpecData = { safes: Safes; owners: Owners }
 

@@ -12,7 +12,7 @@ export const GnosisPayQueue = () => {
         <AlertDescription>Could not load the Gnosis Pay queue. Please try again.</AlertDescription>
       </Alert>
     )
-  if (loading) return <p role="status">Loading Gnosis Pay queue…</p>
+  if (loading && !queue) return <p role="status">Loading Gnosis Pay queue…</p>
 
   if (!queue?.length) {
     return null

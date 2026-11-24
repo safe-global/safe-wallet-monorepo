@@ -7,6 +7,7 @@ const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
+const mockUseSpaceQueuePolling = jest.fn()
 let mockPathname = '/spaces/security'
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
@@ -32,7 +33,8 @@ jest.mock('@/store/authSlice', () => ({
   selectIsSessionCheckPending: 'selectIsSessionCheckPending',
 }))
 
-jest.mock('@/features/spaces/store', () => ({
+jest.mock('../../public/store/spaceNavigationSlice', () => ({
+  ...jest.requireActual('../../public/store/spaceNavigationSlice'),
   setLastUsedSpaceOrigin: (origin: { path: string; spaceId: string } | null) => ({
     type: 'setLastUsedSpaceOrigin',
     payload: origin,
@@ -57,7 +59,7 @@ jest.mock('../LoadingState', () => ({
   default: () => <div data-testid="loading" />,
 }))
 
-jest.mock('@/features/spaces/utils', () => ({
+jest.mock('../../utils', () => ({
   isUnauthorized: (...args: unknown[]) => mockIsUnauthorized(...args),
 }))
 
@@ -65,8 +67,48 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { welcome: { spaces: '/welcome/spaces' }, spaces: { index: '/spaces', plans: '/spaces/plans' } },
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../public/hooks/useSpaceMembers', () => ({
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsAdmin() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useIsAdmin
+  },
+  get useIsInvited() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useIsInvited
+  },
   MemberStatus: { ACTIVE: 'ACTIVE' },
+}))
+
+jest.mock('../../hooks/useSpaceQueuePolling', () => ({
+  useSpaceQueuePolling: () => mockUseSpaceQueuePolling(),
 }))
 
 jest.mock('../Plans/TrialEndingModal', () => ({
@@ -93,6 +135,16 @@ describe('AuthState', () => {
       isFetching: false,
     })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 'u1' } })
+  })
+
+  it('polls the Space queue', () => {
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockUseSpaceQueuePolling).toHaveBeenCalled()
   })
 
   it('skips the space query when the user is not authenticated', () => {

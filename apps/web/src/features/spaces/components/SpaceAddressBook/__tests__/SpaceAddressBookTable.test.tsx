@@ -25,11 +25,15 @@ jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
 })
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
+jest.mock('@/components/common/NetworkLogosTooltip', () => ({
+  __esModule: true,
+  default: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
     <span data-testid="network-logos" data-max-visible={maxVisible} data-count={networks.length} />
   ),
-  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
+}))
+jest.mock('@/components/common/NetworkLogosPill', () => ({
+  __esModule: true,
+  default: ({ networks }: { networks: { chainId: string }[] }) => (
     <span data-testid="network-logos" data-count={networks.length} />
   ),
 }))
@@ -47,7 +51,7 @@ jest.mock('../LocalContactActions', () => {
 })
 
 const mockResolveMemberName = jest.fn()
-jest.mock('../../../hooks/useMemberNameResolver', () => ({
+jest.mock('../../../public/hooks/useMemberNameResolver', () => ({
   useMemberNameResolver: () => mockResolveMemberName,
 }))
 

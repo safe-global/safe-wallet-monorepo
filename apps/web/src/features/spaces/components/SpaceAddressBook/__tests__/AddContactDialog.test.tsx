@@ -1,8 +1,14 @@
 import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { buildSpaceAddressBookTags, spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import AddContactDialog from '../AddContactDialog'
 
 const mockDispatch = jest.fn()
+const mockChains = [
+  { chainId: '1', chainName: 'Ethereum' },
+  { chainId: '137', chainName: 'Polygon' },
+]
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
@@ -15,18 +21,21 @@ jest.mock('@/store/notificationsSlice', () => ({
 
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
+}))
+
+const mockCreateTag = jest.fn()
+jest.mock('../../SpaceAddressBookV2/useTagActions', () => ({
+  __esModule: true,
+  default: () => ({
+    tagActions: { onCreate: mockCreateTag, onRename: jest.fn(), onDelete: jest.fn() },
+  }),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({
-    configs: [
-      { chainId: '1', chainName: 'Ethereum' },
-      { chainId: '137', chainName: 'Polygon' },
-    ],
-  }),
+  default: () => ({ configs: mockChains }),
 }))
 
 jest.mock('@/components/common/ModalDialog', () => ({
@@ -55,9 +64,11 @@ jest.mock('@/components/common/AddressInput', () => ({
   },
 }))
 
-jest.mock('@/components/common/NetworkSelector/NetworkMultiSelectorInput', () => ({
+jest.mock('@/components/common/ChainIndicator', () => ({
   __esModule: true,
-  default: () => <div data-testid="network-selector" />,
+  default: ({ chainId }: { chainId: string }) => (
+    <span>{mockChains.find((chain) => chain.chainId === chainId)?.chainName}</span>
+  ),
 }))
 
 const baseProps = {
@@ -245,5 +256,153 @@ describe('AddContactDialog', () => {
     openDialog()
 
     expect(screen.getByLabelText('Address or ENS')).toHaveAttribute('data-ens-chain', '1')
+  })
+
+  describe('tags', () => {
+    it('creates a new tag at once from the Tags field', async () => {
+      mockCreateTag.mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} workspaceTags={[]} />)
+      openDialog()
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.type(screen.getByRole('searchbox'), 'Vendor')
+      await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+
+      expect(mockCreateTag).toHaveBeenCalledWith('Vendor')
+    })
+
+    it('has no Tags field without workspace tags, as for a local contact', () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+      openDialog()
+
+      expect(screen.queryByTestId('tag-picker')).not.toBeInTheDocument()
+    })
+
+    it('sends no tags when none is picked', async () => {
+      const vendor = spaceAddressBookTagBuilder().with({ name: 'Vendor' }).build()
+      const submit = jest.fn().mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={submit} workspaceTags={[vendor]} />)
+      openDialog()
+      fillRequiredFields()
+
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() =>
+        expect(submit).toHaveBeenCalledWith({ name: 'Alice', address: '0xabc', chainIds: ['1', '137'] }, '42'),
+      )
+    })
+
+    it('reports the workspace tag limit from the Tags field', async () => {
+      const onTagLimitReached = jest.fn()
+      render(
+        <AddContactDialog
+          {...baseProps}
+          submit={jest.fn()}
+          workspaceTags={buildSpaceAddressBookTags(8)}
+          onTagLimitReached={onTagLimitReached}
+        />,
+      )
+      openDialog()
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.type(screen.getByRole('searchbox'), 'One too many')
+      await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+
+      expect(onTagLimitReached).toHaveBeenCalled()
+      expect(mockCreateTag).not.toHaveBeenCalled()
+    })
+
+    it('submits the picked tags with the new contact', async () => {
+      const vendor = spaceAddressBookTagBuilder().with({ name: 'Vendor' }).build()
+      const submit = jest.fn().mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={submit} workspaceTags={[vendor]} />)
+      openDialog()
+      fillRequiredFields()
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.keyboard('{Escape}')
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() =>
+        expect(submit).toHaveBeenCalledWith(
+          { name: 'Alice', address: '0xabc', chainIds: ['1', '137'], tags: ['Vendor'] },
+          '42',
+        ),
+      )
+    })
+  })
+
+  describe('networks', () => {
+    const pickOnly = async (chainName: string) => {
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByRole('option', { name: 'Select All' }))
+      await userEvent.click(screen.getByRole('option', { name: chainName }))
+      await userEvent.keyboard('{Escape}')
+    }
+
+    it('submits only the network picked instead of all networks', async () => {
+      const submit = jest.fn().mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={submit} />)
+      openDialog()
+      fillRequiredFields()
+
+      await pickOnly('Polygon')
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() =>
+        expect(submit).toHaveBeenCalledWith({ name: 'Alice', address: '0xabc', chainIds: ['137'] }, '42'),
+      )
+    })
+
+    it('keeps Add contact disabled and asks for a network when none is selected', async () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+      openDialog()
+      fillRequiredFields()
+
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(screen.getByRole('option', { name: 'Select All' }))
+
+      expect(await screen.findByText('Select at least one network')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Add contact' })).toBeDisabled()
+    })
+  })
+
+  describe('Add contact button', () => {
+    it('is disabled on an empty form', () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+      openDialog()
+
+      expect(screen.getByRole('button', { name: 'Add contact' })).toBeDisabled()
+    })
+
+    it('stays disabled while the address is missing', async () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+      openDialog()
+
+      fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alice' } })
+
+      await waitFor(() => expect(screen.getByLabelText('Name')).toHaveValue('Alice'))
+      expect(screen.getByRole('button', { name: 'Add contact' })).toBeDisabled()
+    })
+
+    it('stays disabled while the name is missing', async () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} />)
+      openDialog()
+
+      fireEvent.change(screen.getByLabelText('Address or ENS'), { target: { value: '0xabc' } })
+
+      await waitFor(() => expect(screen.getByLabelText('Address or ENS')).toHaveValue('0xabc'))
+      expect(screen.getByRole('button', { name: 'Add contact' })).toBeDisabled()
+    })
   })
 })

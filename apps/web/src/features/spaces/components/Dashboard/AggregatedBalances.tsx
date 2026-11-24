@@ -1,19 +1,21 @@
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useRouter } from 'next/router'
-import { useContext, useCallback, useState } from 'react'
+import { useContext, useCallback, useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import type { SafeItem } from '@/hooks/safes'
-import { useChain } from '@/hooks/useChains'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import useChains, { useChain } from '@/hooks/useChains'
+import usePortfolioSummaries from '@/features/portfolio/public/hooks/usePortfolioSummaries'
+import { aggregateBalance } from './aggregateBalance'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { AppRoutes } from '@/config/routes'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { TxModalContext } from '@/components/tx-flow'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { DashboardHeader } from './DashboardHeader'
+import { DashboardHeader } from '../../public/components/DashboardHeader'
 import QrModal from '@/components/common/QrCodeButton/QrModal'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
@@ -33,8 +35,18 @@ const AggregatedBalance = ({
   const chain = useChain(firstSafe?.chainId ?? '')
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false)
 
-  const { data: safeOverviews, isLoading } = useGetMultipleSafeOverviewsQuery({ safes: safeItems, currency })
-  const aggregatedBalance = safeOverviews ? safeOverviews.reduce((prev, next) => prev + Number(next.fiatTotal), 0) : 0
+  const { configs } = useChains()
+  const { data: safeOverviews, isLoading: overviewsLoading } = useGetMultipleSafeOverviewsQuery({
+    safes: safeItems,
+    currency,
+  })
+  const summaries = usePortfolioSummaries(safeItems)
+  const testnetChainIds = useMemo(
+    () => new Set(configs.filter((config) => config.isTestnet).map((config) => config.chainId)),
+    [configs],
+  )
+  const aggregatedBalance = aggregateBalance(safeItems, safeOverviews, summaries, testnetChainIds)
+  const isLoading = overviewsLoading || summaries.isLoading
 
   const safeQueryParam = chain && firstSafe ? `${chain.shortName}:${firstSafe.address}` : undefined
 

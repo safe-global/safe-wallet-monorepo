@@ -1,4 +1,4 @@
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { tokenInfoBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
@@ -7,7 +7,9 @@ import { mockRole, type TestRole } from '@/tests/mocks/roles'
 import { render, screen } from '@/tests/test-utils'
 import SendButton from '../SendButton'
 
-jest.mock('@/features/gnosispay', () => ({ useIsGnosisPaySafe: () => [false, undefined, false] }))
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: () => [false, undefined, false],
+}))
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
@@ -17,9 +19,10 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/hooks/useChains', () => ({

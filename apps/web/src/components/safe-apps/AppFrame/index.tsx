@@ -12,7 +12,7 @@ import { trackSafeAppOpenCount } from '@/services/safe-apps/track-app-usage-coun
 import { isSafePassApp } from '@/services/safe-apps/utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeAppFromBackend } from '@/hooks/safe-apps/useSafeAppFromBackend'
-import { useSafePermissions } from '@/hooks/safe-apps/permissions'
+import { useSafePermissions } from '@/hooks/safe-apps/permissions/useSafePermissions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isSameUrl } from '@/utils/url'
 import useTransactionQueueBarState from '@/components/safe-apps/AppFrame/useTransactionQueueBarState'
@@ -64,17 +64,23 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
   const { permissionsRequest, setPermissionsRequest, confirmPermissionRequest, getPermissions, hasPermission } =
     useSafePermissions()
 
-  const communicator = useCustomAppCommunicator(iframeRef, remoteApp || safeAppFromManifest, chain, {
-    onGetPermissions: getPermissions,
-    onRequestAddressBook: (origin: string): AddressBookItem[] => {
-      if (hasPermission(origin, Methods.requestAddressBook)) {
-        return Object.entries(addressBook).map(([address, name]) => ({ address, name, chainId }))
-      }
+  const communicator = useCustomAppCommunicator(
+    iframeRef,
+    remoteApp || safeAppFromManifest,
+    chain,
+    { channel: isNativeEmbed ? 'WIDGET' : 'SAFE_APP', listedAppId: remoteApp?.id },
+    {
+      onGetPermissions: getPermissions,
+      onRequestAddressBook: (origin: string): AddressBookItem[] => {
+        if (hasPermission(origin, Methods.requestAddressBook)) {
+          return Object.entries(addressBook).map(([address, name]) => ({ address, name, chainId }))
+        }
 
-      return []
+        return []
+      },
+      onSetPermissions: setPermissionsRequest,
     },
-    onSetPermissions: setPermissionsRequest,
-  })
+  )
 
   const onAcceptPermissionRequest = (_origin: string, requestId: RequestId) => {
     const permissions = confirmPermissionRequest(PermissionStatus.GRANTED)

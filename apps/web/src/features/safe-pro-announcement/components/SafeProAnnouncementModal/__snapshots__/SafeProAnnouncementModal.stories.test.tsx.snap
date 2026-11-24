@@ -39,7 +39,7 @@ exports[`./SafeProAnnouncementModal.stories Default 1`] = `
         />
         <div
           aria-labelledby="base-ui-_r_3_"
-          class="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 shadow-lg duration-200 max-w-[900px] p-0 bg-card rounded-[2rem]"
+          class="outline-none data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 shadow-lg duration-200 max-w-[900px] p-0 bg-card rounded-[2rem]"
           data-base-ui-focusable=""
           data-open=""
           data-slot="dialog-content"

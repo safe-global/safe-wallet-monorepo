@@ -6,8 +6,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 
-jest.mock('@/features/gnosispay', () => ({ useIsGnosisPaySafe: jest.fn(() => [false, undefined, false]) }))
-const mockIsGnosisPay = jest.requireMock('@/features/gnosispay').useIsGnosisPaySafe as jest.Mock
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: jest.fn(() => [false, undefined, false]),
+}))
+const mockIsGnosisPay = jest.requireMock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe')
+  .useIsGnosisPaySafe as jest.Mock
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
@@ -17,9 +20,10 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/hooks/useChains', () => ({

@@ -1,9 +1,13 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { MD_DOWN_QUERY } from '@/hooks/useMediaQuery'
 import TxLayoutBase from '.'
 
 // The Safe Shield widget and the status rail pull in network/analytics-heavy hooks; stub them so
 // this test focuses on the shared layout logic (what renders, when) rather than their internals.
-jest.mock('@/features/safe-shield', () => ({
+jest.mock('@/features/safe-shield/public/components/SafeShieldWidget', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget">SafeShield</div>,
 }))
@@ -13,9 +17,81 @@ jest.mock('@/components/tx-flow/common/TxStatusWidget', () => ({
   default: () => <div data-testid="tx-status-widget">StatusRail</div>,
 }))
 
+const mockScope: { current: { chainId: string; safeAddress: string } | undefined } = { current: undefined }
+jest.mock('@safe-global/views/components/tx-flow/safe-scope/context', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope/context'),
+  useSafeScope: () => mockScope.current,
+}))
+
+jest.mock('@/components/common/ChainIndicator', () => ({
+  __esModule: true,
+  default: ({ chainId }: { chainId: string }) => <span>chain {chainId}</span>,
+}))
+
 const Step = () => <div data-testid="step-content">Step content</div>
 
 describe('TxLayoutBase', () => {
+  beforeEach(() => {
+    mockScope.current = undefined
+  })
+
+  describe('Safe of a Workspace flow', () => {
+    const originalMatchMedia = window.matchMedia
+    const setBelowMd = (below: boolean) => {
+      window.matchMedia = (query: string) =>
+        ({
+          matches: below && query === MD_DOWN_QUERY,
+          media: query,
+          onchange: null,
+          addListener: () => {},
+          removeListener: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          dispatchEvent: () => false,
+        }) as MediaQueryList
+    }
+    const renderLayout = () =>
+      render(
+        <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
+          <Step />
+        </TxLayoutBase>,
+      )
+
+    afterEach(() => {
+      window.matchMedia = originalMatchMedia
+    })
+
+    it('leaves it to the topbar at md and up', () => {
+      setBelowMd(false)
+      mockScope.current = { chainId: '137', safeAddress: checksumAddress(faker.finance.ethereumAddress()) }
+
+      renderLayout()
+
+      expect(screen.getByTestId('modal-title')).toHaveTextContent('Confirm transaction')
+      expect(screen.queryByTestId('tx-flow-scoped-safe')).not.toBeInTheDocument()
+    })
+
+    it('names the Safe and network in the title row below md, where the dialog covers the topbar', () => {
+      setBelowMd(true)
+      const safeAddress = checksumAddress(faker.finance.ethereumAddress())
+      mockScope.current = { chainId: '137', safeAddress }
+
+      renderLayout()
+
+      const scopedSafe = screen.getByTestId('tx-flow-scoped-safe')
+      expect(scopedSafe).toHaveTextContent(shortenAddress(safeAddress))
+      expect(scopedSafe).toHaveTextContent('chain 137')
+    })
+
+    it('names no Safe below md in a flow opened from the Safe itself', () => {
+      setBelowMd(true)
+
+      renderLayout()
+
+      expect(screen.queryByTestId('tx-flow-scoped-safe')).not.toBeInTheDocument()
+    })
+  })
+
   it('renders the title and the current step content', () => {
     render(
       <TxLayoutBase title="Review details" step={0} stepCount={1} progress={100}>

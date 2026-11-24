@@ -6,7 +6,7 @@ const mockModule = { value: DELAY }
 let mockWallet: { address: string } | undefined = { address: OWNER }
 jest.mock('@/hooks/wallets/useWallet', () => () => mockWallet)
 jest.mock('@/hooks/wallets/web3', () => ({ useWeb3ReadOnly: () => mockFixture.provider }))
-jest.mock('./useGnosisPayDelayModule', () => ({ useGnosisPayDelayModule: () => [mockModule] }))
+jest.mock('../public/hooks/useGnosisPayDelayModule', () => ({ useGnosisPayDelayModule: () => [mockModule] }))
 beforeEach(() => mockFixture.server.use(mockFixture.handler))
 afterAll(() => {
   mockFixture.provider.destroy()

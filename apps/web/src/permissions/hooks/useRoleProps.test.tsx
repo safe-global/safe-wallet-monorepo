@@ -2,7 +2,7 @@ import { renderHook } from '@/tests/test-utils'
 import * as reactRedux from 'react-redux'
 import { useRoleProps } from './useRoleProps'
 import { Role } from '../config'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 
 describe('useRoleProps', () => {
   const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector')

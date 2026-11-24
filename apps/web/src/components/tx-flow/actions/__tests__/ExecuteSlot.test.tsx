@@ -1,9 +1,10 @@
 import { type PropsWithChildren, type ReactElement } from 'react'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
-import { useSlotIds } from '@/components/tx-flow/slots/hooks'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SlotProvider, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import SignSlot from '../Sign'
 import ExecuteSlot from '../Execute'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -30,13 +31,19 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(),
 }))
 
-jest.mock('@/features/gnosispay', () => ({ useIsGnosisPaySafe: jest.fn(() => [false, undefined, false]) }))
-const mockUseIsGnosisPaySafe = jest.requireMock('@/features/gnosispay').useIsGnosisPaySafe as jest.Mock
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: jest.fn(() => [false, undefined, false]),
+}))
+const mockUseIsGnosisPaySafe = jest.requireMock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe')
+  .useIsGnosisPaySafe as jest.Mock
 
-jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
-
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
+  default: jest.fn(() => false),
+}))
+
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShield: jest.fn(() => ({ needsRiskConfirmation: false, isRiskConfirmed: false })),
 }))
 
@@ -108,8 +115,6 @@ const buildSafeTxContext = (safeTx: SafeTransaction): SafeTxContextParams => ({
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  feePaymentMode: 'signer',
-  setFeePaymentMode: jest.fn(),
   setFeeGasToken: jest.fn(),
 })
 

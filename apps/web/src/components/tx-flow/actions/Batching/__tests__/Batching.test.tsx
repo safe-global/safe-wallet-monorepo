@@ -11,11 +11,14 @@ import { getStoreInstance } from '@/store'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import BatchingSlot, { Batching } from '..'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { SlotName, SlotProvider, useSlotIds } from '@/components/tx-flow/slots'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SlotName, SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import { TxModalContext } from '@/components/tx-flow'
 import { txDataBuilder, txInfoBuilder } from '@/tests/builders/safeTx'
-import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
+import { BATCH_EVENTS } from '@/services/analytics/events/batching'
+import { trackEvent } from '@/services/analytics'
 import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 jest.mock('@/hooks/useSafeInfo')
@@ -45,8 +48,6 @@ const safeTxContext: Omit<SafeTxContextParams, 'safeTx'> = {
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  feePaymentMode: 'safe',
-  setFeePaymentMode: jest.fn(),
   setFeeGasToken: jest.fn(),
 }
 

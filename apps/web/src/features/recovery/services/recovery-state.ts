@@ -6,20 +6,11 @@ import type { JsonRpcProvider } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
-import { readDelayState, type DelayQueueItem, type DelayState } from '@/services/delay/state'
-export {
-  MAX_MODULE_PAGE_SIZE as MAX_RECOVERER_PAGE_SIZE,
-  getDelayQueueItemTimestamps as _getRecoveryQueueItemTimestamps,
-  _addedTransactionsCache,
-} from '@/services/delay/state'
+import { readDelayState } from '@/services/delay/state'
+import type { RecoveryState, RecoveryStateItem } from '../public/types'
 
 type AddedEvent = TransactionAddedEvent.Log
-export type RecoveryQueueItem = DelayQueueItem & { isMalicious: boolean }
-export type RecoveryStateItem = Omit<DelayState, 'queue' | 'modules'> & {
-  recoverers: string[]
-  queue: RecoveryQueueItem[]
-}
-export type RecoveryState = RecoveryStateItem[]
+
 export function _isMaliciousRecovery({
   chainId,
   safeAddress,

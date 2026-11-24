@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./NetworkLogosPill.stories FewNetworks 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="rounded-lg bg-card p-4"
+    >
+      <span
+        class="bg-foreground/5 inline-flex items-center rounded-full p-0.75"
+      >
+        <span
+          class="inline-flex"
+          data-slot="tooltip-trigger"
+          id="base-ui-_r_1_"
+        >
+          <div
+            class="networks capped"
+            style="--network-logo-size: 22px;"
+          >
+            <span
+              class="inlineIndicator withLogo onlyLogo"
+              data-testid="chain-logo"
+            >
+              <img
+                alt="Ethereum Logo"
+                data-testid="chain-indicator-network-logo-img"
+                height="22"
+                loading="lazy"
+                src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+                style="min-width: 22px;"
+                width="22"
+              />
+            </span>
+            <span
+              class="inlineIndicator withLogo onlyLogo"
+              data-testid="chain-logo"
+            >
+              <img
+                alt="Polygon Logo"
+                data-testid="chain-indicator-network-logo-img"
+                height="22"
+                loading="lazy"
+                src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+                style="min-width: 22px;"
+                width="22"
+              />
+            </span>
+          </div>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./NetworkLogosPill.stories WithOverflow 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="rounded-lg bg-card p-4"
+    >
+      <span
+        class="bg-foreground/5 inline-flex items-center rounded-full p-0.75"
+      >
+        <span
+          class="inline-flex"
+          data-slot="tooltip-trigger"
+          id="base-ui-_r_3_"
+        >
+          <div
+            class="networks capped"
+            style="--network-logo-size: 22px;"
+          >
+            <span
+              class="inlineIndicator withLogo onlyLogo"
+              data-testid="chain-logo"
+            >
+              <img
+                alt="Ethereum Logo"
+                data-testid="chain-indicator-network-logo-img"
+                height="22"
+                loading="lazy"
+                src="https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png"
+                style="min-width: 22px;"
+                width="22"
+              />
+            </span>
+            <span
+              class="inlineIndicator withLogo onlyLogo"
+              data-testid="chain-logo"
+            >
+              <img
+                alt="Polygon Logo"
+                data-testid="chain-indicator-network-logo-img"
+                height="22"
+                loading="lazy"
+                src="https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png"
+                style="min-width: 22px;"
+                width="22"
+              />
+            </span>
+            <span
+              class="inlineIndicator withLogo onlyLogo"
+              data-testid="chain-logo"
+            >
+              <mock-icon
+                class="rounded-full bg-[var(--color-background-main)]"
+                style="height: 22px; width: 22px;"
+              />
+            </span>
+            <div
+              class="moreChainsIndicator"
+            >
+              +
+              3
+            </div>
+          </div>
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;

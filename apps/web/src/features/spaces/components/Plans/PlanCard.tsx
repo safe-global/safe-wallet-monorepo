@@ -2,13 +2,12 @@ import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
-import { Input } from '@safe-global/views/components/ui/input'
 import { Link } from '@safe-global/views/components/ui/link'
 import { List, ListItem } from '@safe-global/views/components/ui/list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { CONTACT_SALES_URL } from '../../constants'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
@@ -23,7 +22,16 @@ import type {
   PlanTier,
 } from '@safe-global/views/features/spaces/components/Plans/types'
 import { FeatureCheck } from './FeatureCheck'
-import { getCardSaving, getPlanCta, getPlanPrice, pickProps, pickSeatOption, plansClickParams } from './planTiers'
+import {
+  getBestYearlySaving,
+  getCardSaving,
+  getPlanCta,
+  getPlanPrice,
+  isUnpaid,
+  pickProps,
+  pickSeatOption,
+  plansClickParams,
+} from './planTiers'
 
 const CTA_KIND: Partial<Record<PlanCtaKindOf['kind'], PlanCtaKind>> = {
   billing: PlanCtaKind.ADD_PAYMENT_METHOD,
@@ -37,7 +45,13 @@ const SUPPORT_HIGHLIGHT_CLASSES = [
   'group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100',
 ].join(' ')
 
+/** The price of a plan sold in several sizes, until the user picks one. */
+export const UNPICKED_PRICE = { headline: 'Custom', suffix: 'price per Safe' }
+
 const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
+
+const seatsShort = (option: PlanSeatOption): string =>
+  option.seats ? `${option.seats} Safes` : option.label.replace(/Safe accounts$/, 'Safes')
 
 const Seats = ({
   options,
@@ -46,32 +60,35 @@ const Seats = ({
   label,
 }: {
   options: PlanSeatOption[]
-  value: PlanSeatOption
+  /** Null until the user picks a size. */
+  value: PlanSeatOption | null
   onChange: (option: PlanSeatOption) => void
   label?: string
 }) =>
   options.length > 1 ? (
-    <Select
-      value={optionKey(value)}
+    <Tabs
+      value={value ? optionKey(value) : null}
       onValueChange={(key) => {
         const next = options.find((option) => optionKey(option) === key)
         if (next) onChange(next)
       }}
     >
-      <SelectTrigger className="w-full" aria-label={label}>
-        {/* The closed trigger would otherwise print the raw value, the price id. */}
-        <SelectValue>{value.label}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
+      <TabsList aria-label={label} className="w-full" data-testid="plan-seats-switch">
         {options.map((option) => (
-          <SelectItem key={optionKey(option)} value={optionKey(option)}>
-            {option.label}
-          </SelectItem>
+          <TabsTrigger key={optionKey(option)} value={optionKey(option)} aria-label={option.label}>
+            {seatsShort(option)}
+          </TabsTrigger>
         ))}
-      </SelectContent>
-    </Select>
+      </TabsList>
+    </Tabs>
   ) : (
-    <Input readOnly value={value.label} aria-label={label} />
+    <div
+      className="flex h-9 items-center justify-center rounded-md bg-muted text-sm font-medium text-muted-foreground"
+      aria-label={label}
+      data-testid="plan-seats-fixed"
+    >
+      {options[0] && seatsShort(options[0])}
+    </div>
   )
 
 export type PlanCardActions = {
@@ -89,11 +106,13 @@ const SalesCta = ({
   kind,
   location,
   onClick,
+  isPrimary = false,
 }: {
   label: string
   kind: 'sales' | 'account-team'
   location: PlanLocation
   onClick?: () => void
+  isPrimary?: boolean
 }) => {
   const trackLabel = kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
   return (
@@ -104,7 +123,7 @@ const SalesCta = ({
       as="div"
     >
       <Button
-        variant="outline"
+        variant={isPrimary ? 'default' : 'outline'}
         size="lg"
         weight="semibold"
         className="w-full"
@@ -181,6 +200,8 @@ export const PlanCard = ({
   onSeatsChange,
   counterpartTier,
   onSwitchToYearly,
+  seatOptions = tier.options,
+  isOnlyCard = false,
   ...actions
 }: {
   tier: PlanTier
@@ -188,33 +209,53 @@ export const PlanCard = ({
   onSeatsChange?: (label: string) => void
   counterpartTier?: PlanTier
   onSwitchToYearly?: () => void
+  /** The sizes in the tabs; a single-card picker lists the sizes of every plan. */
+  seatOptions?: PlanSeatOption[]
+  /** The card stands alone, so it always takes the selected look and the primary button. */
+  isOnlyCard?: boolean
 } & PlanCardActions) => {
   const { subtitle, supportLevel, supportDetail } = tier.copy ?? {}
-  const isPrimary = tier.name === RECOMMENDED_PLAN
-  const isCurrentPlan = Boolean(tier.isCurrent)
+  const isPrimary = isOnlyCard || tier.name === RECOMMENDED_PLAN
+  const isUnpaidPlan = isUnpaid(actions.currentPlan)
+  // A trial is not a plan the user paid for, so its card gets no "Current" look.
+  const isCurrentPlan = Boolean(tier.isCurrent) && !isUnpaidPlan
+  const isFeatured = isOnlyCard || isCurrentPlan || (isPrimary && isUnpaidPlan)
   const option = pickSeatOption(tier, actions.currentPlan, seatsLabel)
-  const price = option ? getPlanPrice(tier, option) : undefined
+  // Without a paid plan, a plan sold in several sizes shows no size and no price until the user picks one.
+  const hasPicked = !isUnpaidPlan || tier.options.length < 2 || seatsLabel !== undefined
+  const price = !option ? undefined : hasPicked ? getPlanPrice(tier, option) : UNPICKED_PRICE
   const isYearly = tier.billingCycle === 'year'
-  const saving = getCardSaving(tier, option, counterpartTier)
+  const saving = hasPicked ? getCardSaving(tier, option, counterpartTier) : undefined
+  const unpickedSaving = hasPicked || isYearly ? undefined : getBestYearlySaving(tier, counterpartTier)
   const features = option?.features?.length ? option.features : tier.features
+  const talkToSales = (isPrimaryCta: boolean) =>
+    option && (
+      <SalesCta
+        label="Talk to sales"
+        kind="sales"
+        location={actions.location}
+        isPrimary={isPrimaryCta}
+        onClick={() => actions.onCta?.({ tier, option }, { kind: 'sales', label: 'Talk to sales' })}
+      />
+    )
 
   // Always render all five rows so the subgrid lines up across cards.
   return (
     <Card
-      variant={isCurrentPlan ? 'default' : 'muted-secondary'}
-      bordered={!isCurrentPlan}
-      selected={isCurrentPlan || undefined}
-      shadowOnHover={isCurrentPlan}
-      highlightOnHover={!isCurrentPlan}
+      variant={isFeatured ? 'default' : 'muted-secondary'}
+      bordered={!isFeatured}
+      selected={isFeatured || undefined}
+      shadowOnHover={isFeatured}
+      highlightOnHover={!isFeatured}
       size="offer"
       radius="lg-xl"
       className={cn(
         'group/plan min-w-0 @4xl:row-span-5 @4xl:grid @4xl:grid-rows-subgrid',
-        // The current card goes grey while another card is hovered.
-        isCurrentPlan && 'group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary',
+        // The featured card goes grey while another card is hovered.
+        isFeatured && 'group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary',
       )}
       data-testid={tier.isCurrent ? 'current-plan-card' : 'plan-card'}
-      data-hover-plan={!isCurrentPlan || undefined}
+      data-hover-plan={!isFeatured || undefined}
     >
       <CardContent className="flex min-w-0 flex-col @2xl:@max-4xl:grid @2xl:@max-4xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @2xl:@max-4xl:grid-rows-[auto_1fr_auto_auto_auto] @2xl:@max-4xl:gap-x-10 @4xl:row-span-5 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)] @4xl:grid-rows-subgrid">
         <div className="flex flex-col gap-1.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-1">
@@ -248,7 +289,7 @@ export const PlanCard = ({
               Save {saving.amount} ({saving.percent}) vs monthly
             </Typography>
           )}
-          {saving && !isYearly && onSwitchToYearly && (
+          {(saving || unpickedSaving) && !isYearly && onSwitchToYearly && (
             <Typography variant="paragraph-small">
               <Link
                 render={<button type="button" />}
@@ -256,7 +297,9 @@ export const PlanCard = ({
                 data-testid="plan-yearly-saving"
                 onClick={onSwitchToYearly}
               >
-                Save {saving.amount} ({saving.percent}) with yearly
+                {saving
+                  ? `Save ${saving.amount} (${saving.percent}) with yearly`
+                  : `Save up to ${unpickedSaving} with yearly`}
               </Link>
             </Typography>
           )}
@@ -266,21 +309,20 @@ export const PlanCard = ({
           {option && (
             <>
               <Seats
-                options={tier.options}
-                value={option}
+                options={seatOptions}
+                value={hasPicked ? option : null}
                 onChange={(next) => onSeatsChange?.(next.label)}
-                label={`Safe accounts for ${tier.name}`}
+                label={isOnlyCard ? 'Safe accounts' : `Safe accounts for ${tier.name}`}
               />
               {!actions.readOnly && (
                 <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1 *:basis-0" data-testid="plan-ctas">
-                  <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
-                  {isPrimary && (
-                    <SalesCta
-                      label="Talk to sales"
-                      kind="sales"
-                      location={actions.location}
-                      onClick={() => actions.onCta?.({ tier, option }, { kind: 'sales', label: 'Talk to sales' })}
-                    />
+                  {hasPicked ? (
+                    <>
+                      <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
+                      {tier.name === RECOMMENDED_PLAN && talkToSales(false)}
+                    </>
+                  ) : (
+                    talkToSales(isPrimary)
                   )}
                 </div>
               )}

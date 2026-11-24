@@ -1,7 +1,7 @@
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useMemo, type ReactElement } from 'react'
-import { useIsOnlySpendingLimitBeneficiary } from '@/features/spending-limits'
+import useIsOnlySpendingLimitBeneficiary from '@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
@@ -9,7 +9,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
-import { useIsGnosisPaySafe } from '@/features/gnosispay'
+import { useIsGnosisPaySafe } from '@/features/gnosispay/public/hooks/useIsGnosisPaySafe'
 
 export type CheckWalletProps = {
   children: (ok: boolean) => ReactElement

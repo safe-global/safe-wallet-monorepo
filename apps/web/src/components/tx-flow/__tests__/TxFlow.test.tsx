@@ -1,3 +1,5 @@
+jest.mock('@/components/tx-flow/actions/GnosisPay', () => ({ __esModule: true, default: () => null }))
+import type { ReactNode } from 'react'
 import type { PropsWithChildren } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
@@ -9,10 +11,13 @@ jest.mock('../SafeTxProvider', () => ({
   default: ({ children }: PropsWithChildren) => <>{children}</>,
 }))
 jest.mock('../TxInfoProvider', () => ({ TxInfoProvider: ({ children }: PropsWithChildren) => <>{children}</> }))
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/safe-shield/public/components/SafeShieldProvider', () => ({
   SafeShieldProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }))
-jest.mock('../slots', () => ({ SlotProvider: ({ children }: PropsWithChildren) => <>{children}</> }))
+jest.mock('@safe-global/views/components/tx-flow/slots/SlotProvider', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/slots/SlotProvider'),
+  SlotProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+}))
 jest.mock('../TxFlowProvider', () => ({
   __esModule: true,
   default: jest.fn(({ children }: PropsWithChildren) => <>{children}</>),
@@ -25,24 +30,62 @@ jest.mock('../useTxStepper', () => ({
   default: () => ({ step: 0, data: undefined, nextStep: jest.fn(), prevStep: jest.fn() }),
 }))
 jest.mock('@/components/tx/shared/tracking', () => ({ useTrackTimeSpent: () => jest.fn() }))
-jest.mock('@/features/__core__', () => ({ useLoadFeature: () => ({ LedgerHashComparison: () => null }) }))
-jest.mock('../features', () => ({
-  TxNote: () => null,
-  SignerSelect: () => null,
-  BalanceChanges: () => null,
-  FeeInfoBanner: () => null,
-  FeesPreview: () => null,
-  RiskConfirmation: () => null,
+jest.mock('../FeePayerProvider', () => ({
+  __esModule: true,
+  default: ({ children }: { children: ReactNode }) => children,
 }))
-jest.mock('../actions', () => ({
-  Batching: () => null,
-  ComboSubmit: () => null,
-  Counterfactual: () => null,
-  Execute: () => null,
-  ExecuteThroughRole: () => null,
-  GnosisPay: () => null,
-  Propose: () => null,
-  Sign: () => null,
+jest.mock('@/components/tx-flow/features/TxNote', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/SignerSelect', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/BalanceChanges', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/FeeCard', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/RiskConfirmation', () => ({
+  ...jest.requireActual('@/components/tx-flow/features/RiskConfirmation'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Batching', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/Batching'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/ComboSubmit', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ComboSubmit'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Counterfactual', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Execute', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/Execute'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Propose', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Sign', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/Sign'),
+  __esModule: true,
+  default: () => null,
 }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,

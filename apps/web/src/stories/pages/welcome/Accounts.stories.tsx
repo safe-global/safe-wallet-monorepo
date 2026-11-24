@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { expect, waitFor } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import type { MockStoryConfig } from '@/stories/mocks/types'
 import Accounts from '@/pages/welcome/accounts'
 

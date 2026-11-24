@@ -2,7 +2,7 @@ import useChainId from '@/hooks/useChainId'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getDelayModifierContract } from '@/services/delay/signer'
-import { useGnosisPayDelayModule } from './useGnosisPayDelayModule'
+import { useGnosisPayDelayModule } from '../public/hooks/useGnosisPayDelayModule'
 
 export const useGnosisPayDelayModifier = () => {
   const chainId = useChainId()

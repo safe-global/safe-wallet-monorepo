@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { Interface } from 'ethers'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { GnosisPayTxDetails } from './GnosisPayTxDetails'
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'disconnected', layout: 'paper' })
 const recipient = '0x0000000000000000000000000000000000000020'

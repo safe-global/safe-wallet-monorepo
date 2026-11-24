@@ -6,9 +6,12 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { TxFlow, type SubmitCallbackWithData } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { MixpanelEventParams, TxFlowType, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { TxFlowType } from '@/services/analytics/types'
+import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { ExistingSpendingLimitsProvider } from './ExistingSpendingLimitsProvider'
+import { CustomTokensProvider } from './CustomTokensProvider'
 import CreateSpendingLimitPolicy from './CreateStep'
 import ReviewSpendingLimitPolicy from './ReviewStep'
 import {
@@ -52,18 +55,20 @@ const SpendingLimitFlow = (): ReactElement => {
   return (
     <SafeScopeProvider>
       <ExistingSpendingLimitsProvider>
-        <TxFlow
-          icon={SpendingLimitIcon}
-          subtitle={<FlowSubtitle />}
-          ReviewTransactionComponent={ReviewSpendingLimitPolicy}
-          eventCategory={TxFlowType.SETUP_SPACE_SPENDING_LIMIT}
-          initialData={createDefaultFormValues()}
-          onSubmit={trackTxSigned}
-        >
-          <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
-            <CreateSpendingLimitPolicy isCalloutDismissed={isCalloutDismissed} onDismissCallout={dismissCallout} />
-          </TxFlowStep>
-        </TxFlow>
+        <CustomTokensProvider>
+          <TxFlow
+            icon={SpendingLimitIcon}
+            subtitle={<FlowSubtitle />}
+            ReviewTransactionComponent={ReviewSpendingLimitPolicy}
+            eventCategory={TxFlowType.SETUP_SPACE_SPENDING_LIMIT}
+            initialData={createDefaultFormValues()}
+            onSubmit={trackTxSigned}
+          >
+            <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
+              <CreateSpendingLimitPolicy isCalloutDismissed={isCalloutDismissed} onDismissCallout={dismissCallout} />
+            </TxFlowStep>
+          </TxFlow>
+        </CustomTokensProvider>
       </ExistingSpendingLimitsProvider>
     </SafeScopeProvider>
   )

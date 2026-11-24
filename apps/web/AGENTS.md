@@ -5,8 +5,8 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 ## Web-specific principles
 
 - New features must be created in a separate folder inside `src/features/` – only components, hooks, and services used globally across many features belong in top-level folders inside `src/`
-- **All features must follow the standard feature architecture pattern** – See [docs/feature-architecture.md](docs/feature-architecture.md) for the complete guide including folder structure, feature flags, lazy loading, and public API patterns
-- Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature` from `src/hooks/useChains.ts`, passing a flag from `FEATURES` (imported from `@safe-global/utils/utils/chains`)
+- **All features must follow the feature architecture** – a feature's `public/` folder is its only entry point; see [docs/feature-architecture.md](docs/feature-architecture.md)
+- Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature` from `src/hooks/useChains.ts`, passing a flag from `FEATURES` (imported from `@safe-global/utils/utils/chains`). Declare every flag that web code reads in `apps/web/config/remote-config.json` with `"enabled": false` until a separate PR releases it, and remove it there when the code stops reading it; also list it as `on` or `off` for the E2E stack. `remote-config.test.ts` fails otherwise ([config/README.md](config/README.md))
 - A new Redux slice must be exported from `src/store/slices.ts` and registered in the `rootReducer` in `src/store/index.ts`; adding it to `persistedSlices` there both persists it to localStorage **and** syncs it across tabs (`persistStore.ts` and `broadcast.ts` share that list)
 - Use theme variables from vars.css instead of hard-coded CSS values
 - Build UI from the shadcn/ui primitives in `@safe-global/views/components/ui/*` (Tailwind); MUI/Emotion are removed
@@ -14,7 +14,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@safe-global/views/components/ui/overlay`](../../packages/views/src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
 - **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
-- **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`; an event that mirrors an API result is sent by a store listener on the endpoint's `matchFulfilled`, with props from the request args, the response or the RTK cache (see `features/spaces/store/workspaceTrackingListener.ts`). Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
+- **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`; an event that mirrors an API result is sent by a store listener on the endpoint's `matchFulfilled`, with props from the request args, the response or the RTK cache (see `features/spaces/public/store/workspaceTrackingListener.ts`). Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
 - **Don't add `next/*` imports that have a plain replacement; we are migrating away from Next.** Use `<a>` instead of `next/link` for external links. Routing and document APIs (`next/router`, `next/navigation`, `next/link` for internal routes, `next/head`, `next/document`) have no replacement yet, so keep using them.
 
 ## Component variants over custom styling
@@ -30,42 +30,12 @@ add a variant or a preset instead of pasting the classes again. The **`UI/Button
 
 ## Feature Architecture Import Rules
 
-Features are lazy-loaded to keep the bundle small. ESLint enforces the import boundaries as **errors** (CI-failing):
+Each feature's `public/` folder is its only entry point. Import the one file you need, for example `@/features/recovery/public/components/RecoveryList`; `public/` uses the private folder names (`components/`, `hooks/`, `store/`, `services/`, `utils/`); inside a feature, use relative imports. No `index.ts` under `public/`, and no value re-exports (`export … from`) in `src/features`: a re-export makes every importer depend on every re-exported file, which ties features into one import cycle and makes `jest --findRelatedTests` select most of the suite.
 
-```typescript
-// ✅ Allowed
-import { MyFeature, useMyHook } from '@/features/myfeature' // barrel: handle + hooks
-import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
-import type { MyType } from '@/features/myfeature/types' // public types
-import { lightUtil } from '@/features/myfeature/services' // services barrel only — lightweight utils
+- **Public components** are gated and lazy: `gatedDynamic(FEATURES.X, () => import('../../components/Y'))` from `@/utils/gatedDynamic`. Consumers do not check the flag. A component that must render with the current chain's flag off uses `dynamic()` with a one-line reason.
+- **Public hooks** run on every chain, so make one public only for a cheap value. If it reads its feature's flag, it returns a neutral value (`false`, `[]`, `undefined`) when the flag is off and has a flag-off test. It loads heavy libraries inside its async step.
 
-// ❌ Forbidden: any deep import (components, hooks/*, services/* files) — it defeats
-// lazy loading. Components and heavy services are reached via useLoadFeature() instead.
-```
-
-**Using a feature:**
-
-```typescript
-const { MyComponent, myService, $isReady, $isDisabled } = useLoadFeature(MyFeature) // from '@/features/__core__'
-// Always returns an object: components render null until ready (proxy stub);
-// services are undefined until ready — check $isReady before calling.
-```
-
-**Defining a feature:**
-
-```typescript
-// feature.ts — already lazy via createFeatureHandle: a flat object of direct imports only.
-// Naming determines stub behavior: PascalCase → component, camelCase → service.
-// No lazy()/dynamic(), no nested categories, no hooks here (Rules of Hooks).
-export default { MyComponent, myService }
-
-// index.ts — hooks are exported directly (always loaded — keep them lightweight,
-// heavy logic goes in services):
-export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook'
-```
-
-Full guide (folder structure, proxy stubs, `$error`, feature flags): [docs/feature-architecture.md](docs/feature-architecture.md).
+ESLint enforces the `public/` boundary for every feature (`config/eslint/feature-public-imports.mjs`). Full guide: [docs/feature-architecture.md](docs/feature-architecture.md).
 
 Shared Delay proxy detection, signing and queue reads live in `src/services/delay`; recovery adds its own policy checks in its feature adapter.
 
@@ -103,7 +73,7 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
 
 ## Web-specific common pitfalls
 
-1. **Never use `lazy()`/`dynamic()` anywhere inside a feature** – the whole feature is already lazy via `createFeatureHandle` (see [Feature Architecture Import Rules](#feature-architecture-import-rules) above).
+1. **Use `dynamic()` inside a feature only in its public components** – private code loads with the public component that wraps it (see [Feature Architecture Import Rules](#feature-architecture-import-rules) above).
 2. **CSS-module padding silently beaten by variant utilities** – shadcn primitives ship group-data variant utilities (e.g. Card's `group-data-[size=none]/card:px-0`) whose two-class selectors outrank a single CSS-module class. If a module style "mysteriously doesn't apply", check for a competing variant utility before adding more CSS (see ISSUE-050: every tx-flow card lost its horizontal padding this way). Prefer utility classes at the call site; when a module must win, document the `!important`.
 3. **`<img height={24}>` doesn't size images** – Tailwind's preflight sets `img { height: auto }`, which overrides the HTML `height` attribute. Always size raster images with classes (`className="h-6 w-auto"`), never attributes.
 4. **Unit tests don't see layout** – 6,600 green tests said nothing while the send-tokens form rendered with zero padding (ISSUE-050). Any UI-affecting change must be verified visually: check the component's story (or the live page) yourself, and review its Argos diff on the PR (see [Storybook](#storybook) above). Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.

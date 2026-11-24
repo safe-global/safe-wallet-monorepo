@@ -10,9 +10,10 @@ import { useChain } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import { getPopularTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/popularTokens'
 import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenOption } from '../utils/tokenOptions'
+import { useCustomTokens } from '../CustomTokensProvider'
 
 export type TokenOptionsResult = {
-  /** Held tokens first (fiat desc), then popular in table order (native first). */
+  /** Held tokens first (fiat desc), then existing-limit and custom tokens, then popular in table order (native first). */
   options: TokenOption[]
   /** False while the query is skipped. */
   isLoading: boolean
@@ -82,10 +83,12 @@ const useSpendingLimitTokenOptions = (extraTokens: readonly TokenOption[] = []):
     [popularData],
   )
 
+  const customTokens = useCustomTokens(chainId)
+  const extra = [...extraTokens, ...customTokens]
   // A new array every render at the call sites, so key on the addresses rather than the reference.
-  const extraKey = extraTokens.map((token) => token.address).join(',')
+  const extraKey = extra.map((token) => token.address).join(',')
   const options = useMemo(
-    () => buildTokenOptions({ balances: currentData?.items, popular, native, showNative, extra: extraTokens }),
+    () => buildTokenOptions({ balances: currentData?.items, popular, native, showNative, extra }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentData, popular, native, showNative, extraKey],
   )

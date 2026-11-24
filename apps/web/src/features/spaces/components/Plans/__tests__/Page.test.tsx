@@ -3,7 +3,10 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import SpacePlansPage from '../Page'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -19,12 +22,12 @@ jest.mock('../../AuthState', () => ({
 }))
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ SafeProAnnouncement: () => <div data-testid="safe-pro-announcement" /> }),
-  createFeatureHandle: () => ({}),
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProAnnouncement', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-pro-announcement" />,
 }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
-jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
@@ -204,7 +207,7 @@ describe('SpacePlansPage', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
       'Entry Point': 'direct',
-      'Default Seats': 20,
+      'Default Seats': undefined,
       'Default Billing Period': 'monthly',
       'Plan Limit': 20,
       'Sponsored Remaining': 10,
@@ -215,6 +218,17 @@ describe('SpacePlansPage', () => {
     expect(trackEvent).toHaveBeenCalledWith(
       SAFE_PRO_EVENTS.PLAN_CTA_CLICKED,
       expect.objectContaining({ CTA: 'switch_plan', Location: 'plans_page' }),
+    )
+  })
+
+  it('tracks the Safe count of a paid plan as the default seats', () => {
+    onPlan('Business', 499, 'active')
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER, BUSINESS], isLoading: false })
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED,
+      expect.objectContaining({ 'Default Seats': 20 }),
     )
   })
 })

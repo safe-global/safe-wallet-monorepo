@@ -1,7 +1,7 @@
 import { getAddress, parseUnits } from 'ethers'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import type { SpendingLimitState } from '@/features/spending-limits'
-import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
+import type { SpendingLimitState } from '@/features/spending-limits/public/store/spendingLimitsSlice'
+import { buildSpendingLimitEdit } from '@/features/spending-limits/public/services/spendingLimitEdit'
 import { toSpendingLimitFormValues } from '../prefill'
 
 const SAFE = `11155111:${getAddress('0x1000000000000000000000000000000000000001')}`

@@ -15,7 +15,7 @@ jest.mock('../../ShowAllAddress/ShowAllAddress', () => ({
 }))
 
 // Mock AnalysisIssuesDisplay to verify it's rendered
-jest.mock('../../AnalysisIssuesDisplay', () => ({
+jest.mock('../../AnalysisIssuesDisplay/AnalysisIssuesDisplay', () => ({
   AnalysisIssuesDisplay: ({ result }: { result: any }) => {
     if ('issues' in result && result.issues) {
       return <div data-testid="analysis-issues-display">Issues Display</div>
@@ -24,7 +24,7 @@ jest.mock('../../AnalysisIssuesDisplay', () => ({
   },
 }))
 
-jest.mock('../../ReportFalseResultModal', () => ({
+jest.mock('../../ReportFalseResultModal/ReportFalseResultModal', () => ({
   ReportFalseResultModal: ({ open }: { open: boolean }) =>
     open ? <div data-testid="report-modal">Report Modal</div> : null,
 }))

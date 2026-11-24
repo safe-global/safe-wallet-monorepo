@@ -1,6 +1,6 @@
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SecurityScanner } from './types'
-import { getSeverityFromScore } from './constants'
+import { getSeverityFromScore } from '../../public/constants'
 
 /** Up to this many queued txs is fine — clear status. */
 const CLEAR_QUEUE_MAX = 2

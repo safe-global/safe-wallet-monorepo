@@ -8,25 +8,31 @@ import { SidebarActionButton } from '../SidebarActionButton'
 const mockSetTxFlow = jest.fn()
 const mockTrackEvent = jest.fn()
 const mockUseIsCounterfactualSafe = jest.fn()
-const mockUseLoadFeature = jest.fn()
 
-jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
-  CounterfactualFeature: 'counterfactual-feature',
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: () => mockUseIsCounterfactualSafe(),
 }))
-
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: () => mockUseLoadFeature(),
+jest.mock('@/features/counterfactual/public/components/ActivateAccountButton', () => ({
+  __esModule: true,
+  default: () => <button>Activate account</button>,
 }))
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: { NEW_TRANSACTION: { action: 'New transaction' } },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
-jest.mock('@/features/gnosispay', () => ({ useIsGnosisPaySafe: () => [false, undefined, false] }))
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: () => [false, undefined, false],
+}))
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
@@ -36,12 +42,13 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
+  __esModule: true,
+  default: jest.fn(),
 }))
 
-jest.mock('@/components/tx-flow/flows', () => ({
+jest.mock('@/components/tx-flow/flows/NewTxFlow', () => ({
   NewTxFlow: () => <div>NewTxFlow</div>,
 }))
 
@@ -78,7 +85,6 @@ describe('SidebarActionButton', () => {
     mockRole('owner')
     mockSafeInfo({ deployed: true })
     mockUseIsCounterfactualSafe.mockReturnValue(false)
-    mockUseLoadFeature.mockReturnValue({ ActivateAccountButton: () => <button>Activate account</button> })
   })
 
   it('renders the New transaction button', () => {

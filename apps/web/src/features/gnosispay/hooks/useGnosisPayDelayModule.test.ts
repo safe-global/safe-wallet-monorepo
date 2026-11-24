@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { safeInfoBuilder } from '@/tests/builders/safe'
-import { useGnosisPayDelayModule } from './useGnosisPayDelayModule'
+import { useGnosisPayDelayModule } from '../public/hooks/useGnosisPayDelayModule'
 import { GNOSIS_PAY_DELAY_MODIFIER_ADDRESS } from '../utils/isGnosisPayDelayModifier'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 const sentinel = '0x0000000000000000000000000000000000000002'

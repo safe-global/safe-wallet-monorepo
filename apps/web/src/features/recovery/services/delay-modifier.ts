@@ -5,8 +5,13 @@ import { type JsonRpcProvider, isAddress } from 'ethers'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getGenericProxyMasterCopy, getGnosisProxyMasterCopy, isGenericProxy, isGnosisProxy } from './proxies'
-import { MAX_RECOVERER_PAGE_SIZE } from './recovery-state'
+import {
+  getGenericProxyMasterCopy,
+  getGnosisProxyMasterCopy,
+  isGenericProxy,
+  isGnosisProxy,
+} from '@/services/delay/proxies'
+import { MAX_MODULE_PAGE_SIZE } from '@/services/delay/state'
 
 export async function _getZodiacContract(
   chainId: string,
@@ -49,7 +54,7 @@ export async function _isOfficialRecoveryDelayModifier(
 ) {
   // Zodiac-deployed Delay Modifiers only have other Zodiac contracts added as modules
   // If Delay Modifier only has non-Zodiac contracts as modules, it's a recovery-specific Delay Modifier
-  const [modules] = await delayModifier.getModulesPaginated(SENTINEL_ADDRESS, MAX_RECOVERER_PAGE_SIZE)
+  const [modules] = await delayModifier.getModulesPaginated(SENTINEL_ADDRESS, MAX_MODULE_PAGE_SIZE)
 
   if (modules.length === 0) {
     return false

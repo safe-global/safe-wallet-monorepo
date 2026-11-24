@@ -17,19 +17,19 @@ import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { selectSpendingLimits } from '@/features/spending-limits'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
 import { useAppSelector } from '@/store'
 import { useVisibleTokens } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
-import SpendingLimitRow from '../SpendingLimitRow'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
+import SpendingLimitRow from '@/features/spending-limits/public/components/SpendingLimitRow'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { X } from 'lucide-react'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useResolvedGasToken, type FeePreviewTx } from '@/features/fee-payment'
+import { useIsPayFromSafeEnabled } from '@/features/fee-payment/public/hooks/useIsPayFromSafeEnabled'
+import { useResolvedGasToken } from '@/features/fee-payment/public/hooks/useResolvedGasToken'
+import type { FeePreviewTx } from '@/features/fee-payment/public/hooks/useResolvedGasToken'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { OperationType } from '@safe-global/types-kit'
 
@@ -85,7 +85,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  const isPayFromSafeEnabled = useHasFeature(FEATURES.GTF)
+  const isPayFromSafeEnabled = useIsPayFromSafeEnabled()
   const [maxPressed, setMaxPressed] = useState(false)
 
   // Probe only after Max click — eager probing on every edit wastes network for the common case.
@@ -134,7 +134,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
         </div>
 
         {showFeeBanner && (
-          <Alert data-testid="gtf-fee-banner" variant="info" className="items-center">
+          <Alert data-testid="pay-from-safe-fee-banner" variant="info" className="items-center">
             <AlertSeverityIcon variant="info" />
             <AlertDescription className="flex w-full items-center justify-between gap-2">
               <span>

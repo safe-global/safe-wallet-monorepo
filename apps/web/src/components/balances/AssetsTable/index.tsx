@@ -1,5 +1,4 @@
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__'
+import CheckBalance from '@/features/counterfactual/public/components/CheckBalance'
 import React, { type ReactElement } from 'react'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
@@ -13,8 +12,8 @@ import TokenMenu from '../TokenMenu'
 import useBalances from '@/hooks/useBalances'
 import { useHideAssets, useVisibleAssets } from './useHideAssets'
 import AddFundsCTA from '@/components/common/AddFunds'
-import { useIsSwapFeatureEnabled } from '@/features/swap'
-import { useIsEarnPromoEnabled } from '@/features/earn'
+import useIsSwapFeatureEnabled from '@/features/swap/public/hooks/useIsSwapFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/public/hooks/useIsEarnFeatureEnabled'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
 import { FiatBalance } from './FiatBalance'
@@ -84,15 +83,6 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
 }
 
 const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeletonCells })
-
-/**
- * Wrapper component for counterfactual CheckBalance.
- * Extracted to reduce cyclomatic complexity in AssetsTable.
- */
-function CounterfactualCheckBalance(): ReactElement | null {
-  const { CheckBalance } = useLoadFeature(CounterfactualFeature)
-  return CheckBalance ? <CheckBalance /> : null
-}
 
 const AssetsTable = ({
   showHiddenAssets,
@@ -299,7 +289,7 @@ const AssetsTable = ({
         </Card>
       )}
 
-      <CounterfactualCheckBalance />
+      <CheckBalance />
     </>
   )
 }

@@ -1,10 +1,7 @@
 import { fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
 import { useState, type ReactNode } from 'react'
-import {
-  SafeShieldProvider,
-  useSafeShield,
-  useSafeShieldForAddressPoisoning,
-} from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '../public/components/SafeShieldProvider'
+import { useSafeShield, useSafeShieldForAddressPoisoning } from '../public/hooks/useSafeShield'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { StatusGroup } from '@safe-global/utils/features/safe-shield/types'
 
@@ -14,20 +11,32 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 // mock ONLY the sibling analyses (like the real create step: nothing registered)
-jest.mock('@/features/safe-shield/hooks', () => ({
-  ...jest.requireActual('@/features/safe-shield/hooks'),
+jest.mock('../hooks/useRecipientAnalysis', () => ({
+  ...jest.requireActual('../hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+jest.mock('../hooks/useCounterpartyAnalysis', () => ({
+  ...jest.requireActual('../hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('../hooks/useThreatAnalysis', () => ({
+  ...jest.requireActual('../hooks/useThreatAnalysis'),
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 jest.mock('@/hooks/useIsTrustedSafe', () => ({ __esModule: true, default: jest.fn(() => true) }))
-jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => ({ hasProFeatures: true, isLoading: false }) }))
-jest.mock('@/features/myAccounts', () => ({ useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })) }))
-jest.mock('@/features/hypernative', () => ({ useAuthToken: jest.fn(() => [{ token: undefined }]) }))
+jest.mock('@/features/spaces/public/hooks/useSafeProAccess', () => ({
+  useSafeProAccess: () => ({ hasProFeatures: true, isLoading: false }),
+}))
+jest.mock('@/features/myAccounts/public/hooks/useTrustSafe', () => ({
+  useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })),
+}))
+jest.mock('@/features/hypernative/public/hooks/useAuthToken', () => ({
+  useAuthToken: jest.fn(() => [{ token: undefined }]),
+}))
 
 const ANCHOR = checksumAddress('0xa1b2c3d4e5f60718293a4b5c6d7e8f9012345678')
 const LOOKALIKE = checksumAddress('0xa1b2ffffffffffffffffffffffffffffffff5678')

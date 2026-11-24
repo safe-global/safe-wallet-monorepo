@@ -20,12 +20,12 @@ import BlockedAddress from '@/components/common/BlockedAddress'
 import useSwapConsent from '../../useSwapConsent'
 import Disclaimer from '@safe-global/views/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
-import { selectSwapParams, setSwapParams } from '../../store/swapParamsSlice'
+import { selectSwapParams, setSwapParams } from '../../public/store/swapParamsSlice'
 import { setSwapOrder } from '@/store/swapOrderSlice'
 import useChainId from '@/hooks/useChainId'
-import { SWAP_TITLE, SWAP_FEE_RECIPIENT } from '../../constants'
+import { SWAP_TITLE, SWAP_FEE_RECIPIENT } from '../../public/constants'
 import { calculateFeePercentageInBps } from '../../helpers/fee'
-import { UiOrderTypeToOrderType, parseCowTradeParams } from '../../helpers/utils'
+import { UiOrderTypeToOrderType, parseCowTradeParams } from '../../public/utils'
 import { useGetIsSanctionedQuery } from '@/store/api/ofac'
 import { skipToken } from '@reduxjs/toolkit/query/react'
 import { getKeyWithTrueValue } from '@/utils/helpers'
@@ -210,7 +210,7 @@ const SwapWidget = ({ sell }: Params) => {
     }
   }, [params, isConsentAccepted, safeLoading])
 
-  useCustomAppCommunicator(iframeRef, appData, chain)
+  useCustomAppCommunicator(iframeRef, appData, chain, { channel: 'WIDGET' })
 
   if (blockedAddress) {
     return <BlockedAddress address={blockedAddress} featureTitle="embedded swaps feature with CoW Swap" />

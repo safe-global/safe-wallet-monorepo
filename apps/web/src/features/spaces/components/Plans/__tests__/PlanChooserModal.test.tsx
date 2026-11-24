@@ -1,5 +1,5 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { CONTACT_SALES_URL } from '../../../constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import PlanChooserModal, { chooserCopy, _LAPSED_DATA_NOTE } from '../PlanChooserModal'
@@ -10,7 +10,10 @@ const mockNeedsTrim = jest.fn()
 const mockOpenPortal = jest.fn()
 let mockTrimState: Record<string, unknown> = {}
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
@@ -110,9 +113,11 @@ describe('PlanChooserModal', () => {
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, undefined)
   })
 
-  it('goes straight to Stripe when the picked plan covers the Workspace', () => {
+  it('opens on the smallest plan that holds every Safe of the Workspace and goes straight to Stripe', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
+    expect(screen.getByRole('tab', { selected: true, name: '20 Safe accounts' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Business' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, LOCKED_ENTRY)
     expect(trackEvent).toHaveBeenCalledWith(
@@ -126,6 +131,7 @@ describe('PlanChooserModal', () => {
   it('asks which Safes stay when the picked plan covers fewer than the Workspace holds', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
+    fireEvent.click(screen.getByRole('tab', { name: '2 Safe accounts' }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     expect(mockCheckout).not.toHaveBeenCalled()
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
@@ -135,6 +141,7 @@ describe('PlanChooserModal', () => {
     fireEvent.click(screen.getByText('step-back'))
     expect(screen.getByRole('heading', { name: 'Your Safe Pro free access ended on Dec 5, 2026' })).toBeInTheDocument()
 
+    fireEvent.click(screen.getByRole('tab', { name: '2 Safe accounts' }))
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     fireEvent.click(screen.getByText('step-continue'))
     expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_starter', [{ chainId: '1', address: '0xC' }])

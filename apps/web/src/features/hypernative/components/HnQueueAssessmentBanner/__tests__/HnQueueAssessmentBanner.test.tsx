@@ -1,16 +1,19 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { HnQueueAssessmentBanner } from '../HnQueueAssessmentBanner'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 const mockInitiateLogin = jest.fn()
+let mockIsSessionRejected = false
 
-jest.mock('../../../hooks/useHypernativeOAuth', () => ({
+jest.mock('../../../public/hooks/useHypernativeOAuth', () => ({
   useHypernativeOAuth: () => ({
     initiateLogin: mockInitiateLogin,
+    isSessionRejected: mockIsSessionRejected,
   }),
 }))
 
@@ -24,12 +27,16 @@ jest.mock('../../../hooks/useHnAssessmentSeverity', () => ({
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics').HYPERNATIVE_EVENTS,
+}))
+jest.mock('@/services/analytics/events/hypernative', () => ({
+  ...jest.requireActual('@/services/analytics/events/hypernative'),
+  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics/events/hypernative').HYPERNATIVE_EVENTS,
 }))
 
 describe('HnQueueAssessmentBanner', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsSessionRejected = false
   })
 
   it('should track HYPERNATIVE_LOGIN_CLICKED with Queue source when login is clicked', async () => {
@@ -37,12 +44,28 @@ describe('HnQueueAssessmentBanner', () => {
 
     render(<HnQueueAssessmentBanner safeTxHash="0x123" assessment={undefined} isAuthenticated={false} />)
 
-    await user.click(screen.getByText('Log in'))
+    await user.click(screen.getByRole('link', { name: 'Log in' }))
 
     expect(trackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {
       [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Queue,
     })
     expect(mockInitiateLogin).toHaveBeenCalled()
+  })
+
+  it('asks to reconnect when the API rejected the session', async () => {
+    const user = userEvent.setup()
+    mockIsSessionRejected = true
+    render(<HnQueueAssessmentBanner safeTxHash="0x123" assessment={undefined} isAuthenticated={false} />)
+
+    await user.click(screen.getByRole('link', { name: 'Reconnect to Hypernative' }))
+
+    expect(
+      screen.getByText("Please reconnect your Hypernative account to review this transaction's risks."),
+    ).toBeVisible()
+    expect(mockInitiateLogin).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {
+      [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Queue,
+    })
   })
 
   it('should track SECURITY_REPORT_CLICKED when View details is clicked', async () => {

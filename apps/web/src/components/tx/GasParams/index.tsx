@@ -1,4 +1,4 @@
-import type { ReactElement, SyntheticEvent } from 'react'
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +14,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'
-import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import classnames from 'classnames'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
@@ -38,6 +39,7 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
+  feeLabel?: ReactNode
   noFeeCampaign?: {
     isEligible: boolean
     remaining: number
@@ -52,6 +54,7 @@ export const _GasParams = ({
   onEdit,
   gasLimitError,
   willRelay,
+  feeLabel,
   noFeeCampaign,
   chain,
 }: GasParamsProps & { chain?: Chain }): ReactElement => {
@@ -126,7 +129,7 @@ export const _GasParams = ({
                         </Tooltip>
                       </>
                     ) : (
-                      <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                      <span>{feeLabel ?? (willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`)}</span>
                     )}
                   </div>
                 )}

@@ -138,7 +138,7 @@ const PayNowPayLater = ({
                 showGasFeeEstimation && (
                   <Typography className={css.radioSubtitle} variant="paragraph-small" color="muted">
                     {canRelay ? (
-                      'Sponsored free transaction'
+                      'Sponsored transaction'
                     ) : (
                       <>
                         &asymp; {totalFee} {chain?.nativeCurrency.symbol}

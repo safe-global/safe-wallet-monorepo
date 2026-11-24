@@ -12,12 +12,12 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
+import { useCurrentMembership, useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
-import { markTrialReminderSeen, wasTrialReminderSeen } from '../../store/trialReminder'
+import { markTrialReminderSeen, wasTrialReminderSeen } from '../../public/store/trialReminder'
 import ChangePlanFlow from './ChangePlanFlow'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { PlanCatalog } from './PlanCatalog'
+import { PlanPicker } from './PlanPicker'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import { InfoTip } from './PlanStatusCard'
 import type { CurrentPlan, PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
@@ -78,8 +78,8 @@ const TrialEndingChooser = ({
   return (
     <>
       <Dialog open={!isChanged} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent size="lg" surface="card" padding="sm">
-          <div className="flex flex-col gap-6 pt-5">
+        <DialogContent size="sm" surface="card" padding="sm" className="flex max-h-[90vh] flex-col">
+          <div className="flex min-h-0 flex-col gap-6 pt-5">
             <div className="flex flex-col gap-1">
               <Typography variant="h3" as={DialogTitle}>
                 Your free access will end {_endsIn(currentPlan.daysLeft ?? null)}
@@ -90,29 +90,28 @@ const TrialEndingChooser = ({
               </Typography>
             </div>
 
-            {isLoading ? (
-              <div className="flex gap-4" data-testid="trial-ending-skeleton">
-                <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-              </div>
-            ) : tiers.length === 0 ? (
-              <Alert variant="info">
-                <AlertSeverityIcon variant="info" />
-                <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
-              </Alert>
-            ) : (
-              <PlanCatalog
-                embedded
-                tiers={tiers}
-                currentPlan={currentPlan}
-                onManage={() => void openPortal()}
-                onSubscribe={setPick}
-                isBusy={isRedirecting}
-                readOnly={!isAdmin}
-                location={PlanLocation.REMINDER_MODAL}
-                onCta={() => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)}
-              />
-            )}
+            <div className="-mx-1 min-h-0 overflow-y-auto px-1">
+              {isLoading ? (
+                <Skeleton className="h-105 w-full rounded-lg-xl" data-testid="trial-ending-skeleton" />
+              ) : tiers.length === 0 ? (
+                <Alert variant="info">
+                  <AlertSeverityIcon variant="info" />
+                  <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
+                </Alert>
+              ) : (
+                <PlanPicker
+                  tiers={tiers}
+                  initialSeats={currentPlan.seats}
+                  currentPlan={currentPlan}
+                  onManage={() => void openPortal()}
+                  onSubscribe={setPick}
+                  isBusy={isRedirecting}
+                  readOnly={!isAdmin}
+                  location={PlanLocation.REMINDER_MODAL}
+                  onCta={() => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)}
+                />
+              )}
+            </div>
 
             {isAdmin ? (
               <Button variant="ghost-muted" size="sm" className="self-center" onClick={onClose}>

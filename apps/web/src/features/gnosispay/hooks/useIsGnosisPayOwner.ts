@@ -2,7 +2,7 @@ import { KnownContracts, getModuleInstance } from '@gnosis.pm/zodiac'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { useGnosisPayDelayModule } from './useGnosisPayDelayModule'
+import { useGnosisPayDelayModule } from '../public/hooks/useGnosisPayDelayModule'
 
 export const useIsGnosisPayOwner = (): AsyncResult<boolean> => {
   const wallet = useWallet()

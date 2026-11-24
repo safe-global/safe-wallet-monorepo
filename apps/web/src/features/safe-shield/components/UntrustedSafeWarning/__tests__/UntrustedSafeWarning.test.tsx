@@ -6,6 +6,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import type { RootState } from '@/store'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import * as analytics from '@/services/analytics'
+import * as overview from '@/services/analytics/events/overview'
 import UntrustedSafeWarning from '../index'
 
 jest.mock('@/services/analytics', () => ({
@@ -64,7 +65,7 @@ describe('UntrustedSafeWarning', () => {
       expect(screen.getByTestId('add-trusted-safe-dialog')).toBeInTheDocument()
     })
     expect(analytics.trackEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ label: analytics.TRUSTED_SAFE_LABELS.safe_shield }),
+      expect.objectContaining({ label: overview.TRUSTED_SAFE_LABELS.safe_shield }),
     )
   })
 
