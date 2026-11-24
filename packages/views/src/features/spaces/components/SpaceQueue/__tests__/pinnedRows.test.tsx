@@ -35,10 +35,11 @@ describe('queue rows while the table scrolls sideways', () => {
     expect(label.firstElementChild).toHaveClass(...QUEUE_ROW_LABEL.split(' '))
   })
 
-  it('wraps the conflict explanation instead of widening the table', () => {
+  it('wraps the conflict explanation instead of widening the table, the nonce beside its first line', () => {
     renderRow(<ConflictHeaderRow nonce={57} size={2} />)
 
-    const label = screen.getAllByRole('cell')[1]
+    const [nonce, label] = screen.getAllByRole('cell')
+    expect(nonce).toHaveClass('align-top')
     expect(label).toHaveClass('whitespace-normal')
     expect(label).not.toHaveClass('whitespace-nowrap')
     expect(label.firstElementChild).toHaveClass('flex-wrap')

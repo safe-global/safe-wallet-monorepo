@@ -13,8 +13,8 @@ const LINE = 'pointer-events-none absolute left-1/2 border-l-[1.5px] border-warn
 const FULL_HEIGHT = 'top-[-6px] bottom-[-8px]'
 
 const SEGMENT_CLASSES: Record<ConflictBracketSegment, string> = {
-  // Below the header's text-sm nonce (cell `pt-4 pb-1`: its bottom is 16px under half height), with a 4px gap
-  header: 'top-[calc(50%+20px)] bottom-[-8px]',
+  // 4px below the header's top-aligned text-sm nonce: the cell's 16px top padding plus its 20px line
+  header: 'top-10 bottom-[-8px]',
   first: FULL_HEIGHT,
   middle: FULL_HEIGHT,
   // Ends in a curve on the same 1.5px as the other options' ticks

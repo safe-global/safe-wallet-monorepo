@@ -17,7 +17,7 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Action: 204,
 }
 
-/** The queue table's floor: Details at 232px, so it fits the 1002px panel of a 1280px window with the sidebar open */
+/** The queue table's floor: Details at 268px, so it fits the 1002px panel of a 1280px window with the sidebar open */
 export const QUEUE_TABLE_MIN_WIDTH = 'min-w-[960px]'
 
 /** The columns that stay in view while the table scrolls sideways in its panel (`data-pin`, see table.module.css) */

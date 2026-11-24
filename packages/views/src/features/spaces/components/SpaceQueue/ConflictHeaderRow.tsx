@@ -16,8 +16,11 @@ const ConflictHeaderRow = ({
   rowProps?: ComponentProps<'tr'>
 }): ReactElement => (
   <TableRow data-no-hover data-no-divider {...rowProps}>
-    {/* ConflictBracketStart's top-[calc(50%+20px)] depends on this cell's pt-4 pb-1 text-sm */}
-    <TableCell data-pin="start" className="relative pt-4 pb-1 text-center text-sm tabular-nums text-muted-foreground">
+    {/* Top-aligned beside the badge when the label wraps; ConflictBracketStart's top-10 depends on pt-4 text-sm */}
+    <TableCell
+      data-pin="start"
+      className="relative pt-4 pb-1 align-top text-center text-sm tabular-nums text-muted-foreground"
+    >
       {nonce}
       <ConflictBracketStart />
     </TableCell>

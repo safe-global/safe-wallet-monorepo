@@ -79,7 +79,7 @@ describe('ConflictHeaderRow', () => {
     )
 
     const start = container.querySelector('[data-segment="header"]')
-    expect(start).toHaveClass('top-[calc(50%+20px)]', 'bottom-[-8px]', 'border-warning-accent')
+    expect(start).toHaveClass('top-10', 'bottom-[-8px]', 'border-warning-accent')
     expect(start?.parentElement).toHaveClass('relative')
     expect(start?.parentElement).toHaveTextContent('42')
   })
