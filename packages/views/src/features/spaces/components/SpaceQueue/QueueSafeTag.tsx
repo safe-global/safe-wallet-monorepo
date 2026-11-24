@@ -1,4 +1,4 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { MouseEvent, ReactElement, ReactNode } from 'react'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { ChainLogo } from '@safe-global/views/features/spaces/components/AddressBookV2/ChainLogos'
 import QueueParty from '@safe-global/views/features/spaces/components/SpaceQueue/QueuePartyCard'
@@ -12,21 +12,43 @@ type QueueSafeTagProps = {
   /** The party card, a QueuePartyCard */
   card: ReactNode
   defaultOpen?: boolean
+  /** The Safe's home page: the tag links to it, and hovering still shows the card */
+  href?: string
+  /** Lets the app navigate in place; a modified click is left to the browser */
+  onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void
 }
+
+const TAG_CLASS =
+  'flex max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted py-1 pr-2 pl-1 text-sm outline-hidden group-hover/transaction:bg-card focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
 /**
  * The Safe a row belongs to, in the Safe column. Grey until the row is hovered; a long name truncates to the column,
  * and the party card says it whole with its network and address.
  */
-const QueueSafeTag = ({ address, name, chain, card, defaultOpen }: QueueSafeTagProps): ReactElement => (
+const QueueSafeTag = ({
+  address,
+  name,
+  chain,
+  card,
+  defaultOpen,
+  href,
+  onNavigate,
+}: QueueSafeTagProps): ReactElement => (
   <QueueParty
     defaultOpen={defaultOpen}
     trigger={
-      <span
-        data-testid="queue-safe-tag"
-        tabIndex={0}
-        className="flex max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted py-1 pr-2 pl-1 text-sm outline-hidden group-hover/transaction:bg-card focus-visible:ring-[3px] focus-visible:ring-ring/50"
-      />
+      href ? (
+        <a
+          data-testid="queue-safe-tag"
+          href={href}
+          // The popover trigger makes it a button; it navigates, so it is a link
+          role="link"
+          onClick={onNavigate}
+          className={`${TAG_CLASS} cursor-pointer`}
+        />
+      ) : (
+        <span data-testid="queue-safe-tag" tabIndex={0} className={TAG_CLASS} />
+      )
     }
     card={card}
   >
