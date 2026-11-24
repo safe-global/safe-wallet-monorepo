@@ -4,10 +4,12 @@ import {
   QueueEmpty,
   QueueLoadError,
   QueueNoMatches,
+  QueueRefreshFailed,
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
+import QueueUpdatingStatus from '@safe-global/views/features/spaces/components/SpaceQueue/QueueUpdatingStatus'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
-import { POLLING_INTERVAL } from '@/config/constants'
+import { cn } from '@safe-global/views/utils/cn'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   hasSpaceQueueFilters,
@@ -41,14 +43,25 @@ const QueueBody = memo(function QueueBody({
   onClearFilters: () => void
 }): ReactElement {
   const { sections, unavailableSafes } = queue
+  const hasUnavailableSafes = unavailableSafes.length > 0
 
   return (
     <>
-      {unavailableSafes.length > 0 && (
-        <UnavailableSafesAlert spaceId={spaceId} safes={unavailableSafes} onRetry={onRetry} isRetrying={isFetching} />
+      {(hasUnavailableSafes || !queue.isComplete) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {!queue.isComplete && <QueueTruncatedNotice shown={queue.shownCount} total={queue.totalCount} />}
+          {hasUnavailableSafes && (
+            <div className="ml-auto">
+              <UnavailableSafesAlert
+                spaceId={spaceId}
+                safes={unavailableSafes}
+                onRetry={onRetry}
+                isRetrying={isFetching}
+              />
+            </div>
+          )}
+        </div>
       )}
-
-      {!queue.isComplete && <QueueTruncatedNotice shown={queue.shownCount} total={queue.totalCount} />}
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} groupBy={groupBy} />
@@ -74,11 +87,8 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
-  const { queue, counts, isError, isFetching, refetch } = useSpaceQueue(
-    spaceId,
-    { filters: queryFilters, search: querySearch },
-    { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
-  )
+  const { queue, queueQuery, isStale, counts, isError, isRetryingError, isFetching, isRefreshFailing, refetch } =
+    useSpaceQueue(spaceId, { filters: queryFilters, search: querySearch }, { poll: true })
 
   const clearFilters = useCallback(() => {
     setFilters(NO_SPACE_QUEUE_FILTERS)
@@ -99,19 +109,32 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
         onGroupByChange={changeGroupBy}
       />
 
+      {queue && isRefreshFailing && <QueueRefreshFailed />}
+
       {queue ? (
-        <QueueBody
-          spaceId={spaceId}
-          queue={queue}
-          groupBy={tableGroupBy}
-          isFetching={isFetching}
-          isFiltered={hasSpaceQueueFilters(queryFilters)}
-          isSearching={querySearch !== ''}
-          onRetry={refetch}
-          onClearFilters={clearFilters}
-        />
+        // Old rows stay to avoid a flicker, but inert: they may no longer match the new search or filter
+        <div className={cn('relative', isStale && 'cursor-progress')}>
+          <QueueUpdatingStatus isStale={isStale} />
+          <div
+            data-testid="space-queue-body"
+            aria-busy={isStale}
+            inert={isStale}
+            className={cn('flex flex-col gap-6 transition-opacity', isStale && 'opacity-50')}
+          >
+            <QueueBody
+              spaceId={spaceId}
+              queue={queue}
+              groupBy={tableGroupBy}
+              isFetching={isFetching && !isStale}
+              isFiltered={hasSpaceQueueFilters(queueQuery.filters)}
+              isSearching={!!queueQuery.search}
+              onRetry={refetch}
+              onClearFilters={clearFilters}
+            />
+          </div>
+        </div>
       ) : isError ? (
-        <QueueLoadError onRetry={refetch} />
+        <QueueLoadError onRetry={refetch} isRetrying={isRetryingError} />
       ) : (
         <SkeletonTxList />
       )}

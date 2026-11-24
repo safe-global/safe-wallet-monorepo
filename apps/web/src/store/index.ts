@@ -28,6 +28,7 @@ import { workspaceTrackingListener } from '@/features/spaces/public/store/worksp
 import { spaceSafesCacheListener } from '@/features/spaces/public/store/spaceSafesCacheListener'
 import { addressBookTagsCacheListener } from '@/features/spaces/public/store/addressBookTagsCacheListener'
 import { trialReminderListener } from '@/features/spaces/public/store/trialReminder'
+import { hnSessionListener } from '@/features/hypernative/public/store/hnSessionListener'
 import { workspaceDraftExpiryListener } from '@/features/spaces/public/store/workspaceDraftExpiryListener'
 import { workspaceDraftCompletionListener } from '@/features/spaces/public/store/workspaceDraftCompletionListener'
 import * as slices from './slices'
@@ -74,11 +75,13 @@ const rootReducer = combineReducers({
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
   [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
+  [slices.hnSessionSlice.name]: slices.hnSessionSlice.reducer,
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.spaceQueueViewSlice.name]: slices.spaceQueueViewSlice.reducer,
+  [slices.spaceQueuePollingSlice.name]: slices.spaceQueuePollingSlice.reducer,
   [slices.workspaceDraftSlice.name]: slices.workspaceDraftSlice.reducer,
   [slices.workspaceWizardSlice.name]: slices.workspaceWizardSlice.reducer,
   [slices.feePaymentSourcePreferenceSlice.name]: slices.feePaymentSourcePreferenceSlice.reducer,
@@ -160,6 +163,7 @@ const listeners = [
   workspaceDraftCompletionListener,
   forbiddenSessionListener,
   spaceQueueReconciliationListener,
+  hnSessionListener,
   safeOverviewsTokenListListener,
 ]
 

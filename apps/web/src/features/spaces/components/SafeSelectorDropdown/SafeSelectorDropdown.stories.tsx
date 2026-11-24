@@ -136,6 +136,11 @@ export const SingleSafeSingleChain: Story = {
   args: {} as any,
 }
 
+/** A flow whose Safe is fixed (signing from the Workspace): no chevron, no list, a "not allowed" tooltip. */
+export const Locked: Story = {
+  args: { items: [mockItems[0]], selectedItemId: mockItems[0].id, locked: true },
+}
+
 export const SingleSafeMultiChains: Story = {
   render: () => <InteractiveWrapper items={[mockItems[0]]} initialItemId={mockItems[0].id} />,
   args: {} as any,

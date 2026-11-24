@@ -1,7 +1,7 @@
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
-import { withoutFees, computeTotalOutgoing, getSendInGasToken, ERC20_INTERFACE } from '../totalOutgoing'
+import { computeTotalOutgoing, getSendInGasToken, ERC20_INTERFACE } from '../totalOutgoing'
 import { createSafeTx } from '@/tests/builders/safeTx'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -105,22 +105,5 @@ describe('computeTotalOutgoing', () => {
 
     expect(result?.primary).toEqual([])
     expect(result?.fees).toEqual({ amount: '1', currency: 'USDC' })
-  })
-
-  describe('withoutFees', () => {
-    it('drops the fee line and keeps what is sent', () => {
-      expect(
-        withoutFees({
-          primary: [{ amount: '1', currency: 'ETH' }],
-          fees: { amount: '1', currency: 'USDC' },
-          fiatTotal: '$2',
-        }),
-      ).toEqual({ primary: [{ amount: '1', currency: 'ETH' }], fees: undefined, fiatTotal: '$2' })
-    })
-
-    it('hides the row when the fee was all that left the Safe', () => {
-      expect(withoutFees({ primary: [], fees: { amount: '1', currency: 'ETH' }, fiatTotal: '$1' })).toBeUndefined()
-      expect(withoutFees(undefined)).toBeUndefined()
-    })
   })
 })

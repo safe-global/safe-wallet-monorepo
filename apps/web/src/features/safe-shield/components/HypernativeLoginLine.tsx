@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { ExternalLinkIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { HN_RECONNECT_LABEL, HN_RECONNECT_MESSAGE } from '@/features/hypernative/public/constants'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
@@ -15,7 +16,7 @@ export const HypernativeLoginLine = ({
 }): ReactElement | null => {
   if (!hypernativeAuth) return null
 
-  const { isAuthenticated, isTokenExpired, initiateLogin } = hypernativeAuth
+  const { isAuthenticated, isTokenExpired, isSessionRejected, initiateLogin } = hypernativeAuth
   if (isAuthenticated && !isTokenExpired) return null
 
   const login = () => {
@@ -23,6 +24,27 @@ export const HypernativeLoginLine = ({
       [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Copilot,
     })
     initiateLogin()
+  }
+
+  if (isSessionRejected) {
+    return (
+      <Typography
+        variant="paragraph-mini"
+        align="center"
+        className="flex flex-col items-center gap-1 py-2 text-[var(--color-primary-light)]"
+        data-testid="hypernative-reconnect-line"
+      >
+        {HN_RECONNECT_MESSAGE}
+        <button
+          type="button"
+          onClick={login}
+          className="flex cursor-pointer items-center gap-1 font-semibold underline"
+        >
+          {HN_RECONNECT_LABEL}
+          <ExternalLinkIcon className="size-3.5" aria-hidden />
+        </button>
+      </Typography>
+    )
   }
 
   return (

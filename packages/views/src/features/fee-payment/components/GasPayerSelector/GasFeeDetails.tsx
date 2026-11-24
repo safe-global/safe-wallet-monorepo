@@ -29,7 +29,7 @@ const GAS_DETAIL_LABEL: Record<GasDetailName, string> = {
 const READ_ONLY_NOTE: Record<GasDetailsReadOnlyReason, string> = {
   PAID_FROM_SAFE: "Paid from your Safe account. Set at signing, so it can't be changed.",
   SPONSORED_PLAN: 'Covered by your Pro plan.',
-  SPONSORED_FREE: 'Covered by a free transaction.',
+  SPONSORED_FREE: 'Covered by a sponsored transaction.',
 }
 
 const paramErrorText = (name: GasDetailName, error: GasParamError): string => {

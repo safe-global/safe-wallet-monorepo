@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { balanceOf, emptyBalance } from '../../src/chain/balances'
 import { sponsoredTransactionsUsed } from '../../src/fixtures/email-session'
@@ -31,9 +31,9 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const owner = journey.owners.alice.address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     await emptyBalance(journey.env, owner)
 
     const review = new TxReviewPage(safePage)
@@ -54,15 +54,15 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     const workspace = await seedBusinessWorkspace(safePage, { Treasury: safe })
 
     const review = new TxReviewPage(safePage)
     await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT }, workspace.id)
     await review.sign()
     await expect(review.sponsoredTxsCounter).toContainText(
-      `${BUSINESS_PLAN_RELAYS}/${BUSINESS_PLAN_RELAYS} sponsored transactions left`,
+      `${BUSINESS_PLAN_RELAYS} sponsored transactions left this month`,
     )
     await review.executeWithRelay()
     await review.waitForExecution()
@@ -78,8 +78,8 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['bob', 'alice'], threshold: 2 })
+    const recipient = journey.newAddress()
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)

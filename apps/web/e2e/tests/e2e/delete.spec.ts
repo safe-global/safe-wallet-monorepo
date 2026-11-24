@@ -1,4 +1,3 @@
-import { Wallet } from 'ethers'
 import { nonceOf } from '../../src/api/transaction-items'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
@@ -10,8 +9,8 @@ test.describe('Delete a queued transaction', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
+    const recipient = journey.newAddress()
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: '0.001' })
     const last = await seedQueuedTransfer(safe, { nonce: 1, recipient, amount: '0.001' })
 

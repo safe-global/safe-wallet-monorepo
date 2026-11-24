@@ -1,4 +1,3 @@
-import { Wallet } from 'ethers'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { TxHistoryPage } from '../../src/pages/tx-history.page'
 import { seedExecutedTransfer, seedSafe } from '../../src/seed/safe'
@@ -10,7 +9,7 @@ test.describe('Filter the transaction history', { tag: '@e2e' }, () => {
   }) => {
     // seedSafe funds the Safe with 1 ETH, its incoming transfer
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
-    await seedExecutedTransfer(safe, { recipient: Wallet.createRandom().address, amount: '0.001' })
+    await seedExecutedTransfer(safe, { recipient: journey.newAddress(), amount: '0.001' })
 
     const history = new TxHistoryPage(safePage)
     await history.goto(safe.prefixedAddress)
