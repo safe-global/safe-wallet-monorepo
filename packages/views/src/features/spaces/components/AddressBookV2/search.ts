@@ -1,15 +1,27 @@
-import type { AddressBookContact } from './types'
+import type { AddressBookContact, PendingRequest, SuggestedContact } from './types'
 
-export const searchContacts = (contacts: AddressBookContact[], query: string): AddressBookContact[] => {
+/** Keeps the items with a field that contains the query, ignoring case and surrounding spaces. */
+const searchBy = <T>(items: T[], query: string, fieldsOf: (item: T) => Array<string | undefined>): T[] => {
   const needle = query.trim().toLowerCase()
-  if (!needle) return contacts
-  return contacts.filter(
-    (contact) =>
-      contact.name.toLowerCase().includes(needle) ||
-      contact.address.toLowerCase().includes(needle) ||
-      Boolean(contact.tags?.some((tag) => tag.name.toLowerCase().includes(needle))),
-  )
+  if (!needle) return items
+  return items.filter((item) => fieldsOf(item).some((field) => field?.toLowerCase().includes(needle)))
 }
+
+/** Name + address + tag names */
+export const searchContacts = (contacts: AddressBookContact[], query: string): AddressBookContact[] =>
+  searchBy(contacts, query, (contact) => [
+    contact.name,
+    contact.address,
+    ...(contact.tags ?? []).map((tag) => tag.name),
+  ])
+
+/** Suggested name + address + signed Safe names */
+export const searchSuggestions = (suggestions: SuggestedContact[], query: string): SuggestedContact[] =>
+  searchBy(suggestions, query, (item) => [item.suggestedName, item.address, ...item.reason.safes])
+
+/** Requested name + address + requester */
+export const searchPendingRequests = (requests: PendingRequest[], query: string): PendingRequest[] =>
+  searchBy(requests, query, (request) => [request.name, request.address, request.requestedBy])
 
 /** A contact must have every selected tag. */
 export const filterByTags = (contacts: AddressBookContact[], tagIds: number[]): AddressBookContact[] =>

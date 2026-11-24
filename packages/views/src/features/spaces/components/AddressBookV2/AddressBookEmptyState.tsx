@@ -11,8 +11,8 @@ import {
 } from '@safe-global/views/components/ui/empty'
 
 type AddressBookEmptyStateProps =
-  | { kind: 'no-results'; book: 'workspace' | 'local'; onClear: () => void }
-  | { kind: 'empty'; book: 'workspace' | 'local'; actions?: ReactNode }
+  | { kind: 'no-results'; book: keyof typeof NO_RESULTS; onClear: () => void }
+  | { kind: 'empty'; book: keyof typeof EMPTY_BOOK; actions?: ReactNode }
 
 const EMPTY_BOOK = {
   workspace: {
@@ -32,6 +32,8 @@ const EMPTY_BOOK = {
 const NO_RESULTS = {
   workspace: { description: 'Try another name, address or tag, or clear the filters.', clearLabel: 'Clear filters' },
   local: { description: 'Try another name or address.', clearLabel: 'Clear search' },
+  suggested: { description: 'Try another name, address or Safe.', clearLabel: 'Clear search' },
+  pending: { description: 'Try another name, address or member.', clearLabel: 'Clear search' },
 }
 
 const AddressBookEmptyState = (props: AddressBookEmptyStateProps) => {
