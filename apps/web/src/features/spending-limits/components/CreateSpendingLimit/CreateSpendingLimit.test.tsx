@@ -8,6 +8,7 @@ import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../publi
 import CreateSpendingLimit from './index'
 import { NO_TOKEN_SELECTED_ERROR } from '../../public/services/spendingLimitValidation'
 import type { TokenOption } from '@/utils/tokenOptions'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import * as useSpendingLimitTokenOptionsHook from '@/hooks/useSpendingLimitTokenOptions'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
 
@@ -105,6 +106,15 @@ describe('CreateSpendingLimit', () => {
 
     expect(screen.getByTestId('spending-limit-token-selector')).toHaveValue('ETH')
     expect(screen.getByText('1 ETH')).toBeInTheDocument()
+  })
+
+  it('warns under the token picker when the selected token is not trusted', () => {
+    const untrusted = tokenOptionBuilder().with({ group: 'custom', untrusted: true, balance: undefined }).build()
+    mockOptions([nativeOption, untrusted])
+
+    renderForm({ [SpendingLimitFields.tokenAddress]: untrusted.address })
+
+    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(UNTRUSTED_TOKEN_WARNING)
   })
 
   it('resets the limit only once by default', () => {

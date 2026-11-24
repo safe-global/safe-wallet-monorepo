@@ -18,6 +18,7 @@ import {
   LIMIT_AMOUNT_LABEL,
   LIMIT_AMOUNT_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import TokenSelector from '@/components/common/TokenSelector'
 import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { findTokenOption, tokenOptionLabel } from '@/utils/tokenOptions'
@@ -96,9 +97,13 @@ const CreateSpendingLimit = () => {
                     onChange={(next) => field.onChange(next ?? '')}
                     name={field.name}
                     helperText={
-                      selectedToken?.balance !== undefined
-                        ? `${formatVisualAmount(selectedToken.balance, selectedToken.decimals)} ${tokenOptionLabel(selectedToken)}`
-                        : undefined
+                      selectedToken?.untrusted ? (
+                        <span className="text-warning-strong" data-testid="token-untrusted-warning">
+                          {UNTRUSTED_TOKEN_WARNING}
+                        </span>
+                      ) : selectedToken?.balance !== undefined ? (
+                        `${formatVisualAmount(selectedToken.balance, selectedToken.decimals)} ${tokenOptionLabel(selectedToken)}`
+                      ) : undefined
                     }
                   />
                 )}
