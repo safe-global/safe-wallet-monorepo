@@ -988,8 +988,8 @@ describe('SpaceQueueTable', () => {
       expect(screen.queryByTestId('queue-row-nonce-taken')).not.toBeInTheDocument()
     })
 
-    it('keeps only the gauge in the 128px Status column', () => {
-      expect(QUEUE_COLUMN_WIDTHS.Status).toBe(128)
+    it('keeps only the gauge in the 104px Status column', () => {
+      expect(QUEUE_COLUMN_WIDTHS.Status).toBe(104)
     })
 
     it('fills one cell per column, with the Safe in its own column', () => {

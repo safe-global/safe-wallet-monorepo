@@ -11,10 +11,10 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Safe: 160,
   Transaction: 160,
   Details: undefined,
-  // Only the gauge with 10/10 (about 70px): pending and expired states sit in the Action column
-  Status: 128,
-  // Fits "Blocked by #nnnn" and its arrow (146px at the widest digits), or "Processing mm:ss", beside the More button
-  Action: 216,
+  // Only the gauge: a 16px icon and a 5ch count (71px). Pending and expired states sit in the Action column
+  Status: 104,
+  // Fits "Blocked by #8888" and its arrow beside the More button (169px), the widest action
+  Action: 204,
 }
 
 /** The queue table's floor: below it, the table scrolls sideways */
