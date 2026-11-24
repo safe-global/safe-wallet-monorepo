@@ -2,9 +2,8 @@ import { type ReactElement, useContext, useMemo, useCallback, useState, Suspense
 import { useRouter } from 'next/router'
 import dynamic from '@/utils/dynamic'
 import { Settings } from 'lucide-react'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Button } from '@safe-global/views/components/ui/button'
-import { DashboardHeader } from '@/features/spaces/public/components/DashboardHeader'
+import { DashboardHeader, DashboardHeaderSkeleton } from '@/features/spaces/public/components/DashboardHeader'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
@@ -66,7 +65,7 @@ const AccountHeader = (): ReactElement => {
     router.push({ pathname: AppRoutes.settings.setup, query: router.query })
   }, [router])
 
-  if (isLoading) return <SafeAccountHeaderSkeleton />
+  if (isLoading) return <DashboardHeaderSkeleton />
 
   return (
     <>
@@ -92,18 +91,6 @@ const AccountHeader = (): ReactElement => {
         </Suspense>
       )}
     </>
-  )
-}
-
-const SafeAccountHeaderSkeleton = (): ReactElement => {
-  return (
-    <div className="mb-10 flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-[16px] w-[80px]" />
-        <Skeleton className="h-[30px] w-[200px]" />
-      </div>
-      <Skeleton className="h-[36px] w-[500px]" />
-    </div>
   )
 }
 
