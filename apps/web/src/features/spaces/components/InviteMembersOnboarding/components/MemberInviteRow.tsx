@@ -5,7 +5,7 @@ import { Loader2, X } from 'lucide-react'
 import { checksumAddress, isChecksummedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
-import { MemberRole } from '../../../public/hooks/useSpaceMembers'
+import { MemberRole } from '../../../memberRole'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import useChains from '@/hooks/useChains'
 import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
@@ -153,14 +153,14 @@ const MemberInviteRow = ({
             })}
             placeholder="Email, wallet address or ENS name"
             variant="surface"
-            // eslint-disable-next-line no-restricted-syntax -- bespoke 44px invite field (h-11, rounded-lg, px-4); between the lg/xl tiers, no size fits
-            className={cn('h-11 rounded-lg px-4', resolving && 'pr-10')}
+            inputSize="lg"
+            className={cn(resolving && 'pr-10')}
             error={displayError}
             errorSize="xs"
             data-testid={`invite-identifier-input-${index}`}
           />
           {resolving && (
-            <div className="pointer-events-none absolute right-3 top-0 flex h-11 items-center">
+            <div className="pointer-events-none absolute right-3 top-0 flex h-10 items-center">
               <Loader2 className="size-4 animate-spin text-muted-foreground" />
             </div>
           )}
@@ -169,13 +169,13 @@ const MemberInviteRow = ({
         {resolverError && <p className="text-xs text-destructive">Failed to resolve ENS name</p>}
       </div>
 
-      <div className="flex h-11 items-center gap-2">
+      <div className="flex h-10 items-center gap-2">
         <Controller
           control={control}
           name={`members.${index}.role`}
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="min-w-[120px] cursor-pointer data-[size=default]:h-11">
+              <SelectTrigger size="lg" className="min-w-[120px] cursor-pointer">
                 <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false} align="start">

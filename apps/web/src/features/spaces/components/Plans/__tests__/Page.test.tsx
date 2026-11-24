@@ -207,7 +207,7 @@ describe('SpacePlansPage', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
       'Entry Point': 'direct',
-      'Default Seats': 20,
+      'Default Seats': undefined,
       'Default Billing Period': 'monthly',
       'Plan Limit': 20,
       'Sponsored Remaining': 10,
@@ -218,6 +218,17 @@ describe('SpacePlansPage', () => {
     expect(trackEvent).toHaveBeenCalledWith(
       SAFE_PRO_EVENTS.PLAN_CTA_CLICKED,
       expect.objectContaining({ CTA: 'switch_plan', Location: 'plans_page' }),
+    )
+  })
+
+  it('tracks the Safe count of a paid plan as the default seats', () => {
+    onPlan('Business', 499, 'active')
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER, BUSINESS], isLoading: false })
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED,
+      expect.objectContaining({ 'Default Seats': 20 }),
     )
   })
 })

@@ -9,6 +9,7 @@ import { dispatchSafeMsgProposal, dispatchSafeMsgConfirmation } from '@/services
 import { useEffect, useCallback, useState } from 'react'
 import useSafeInfo from '../useSafeInfo'
 import { getStoreInstance } from '@/store'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 const HIDE_DELAY = 3000
 
@@ -40,14 +41,23 @@ export const fetchSafeMessage = async (safeMessageHash: string, chainId: string)
   return message
 }
 
-const useSyncSafeMessageSigner = (
-  message: MessageItem | undefined,
-  decodedMessage: string | TypedData,
-  safeMessageHash: string,
-  requestId: string | undefined,
-  origin: string | undefined,
-  onClose: () => void,
-) => {
+const useSyncSafeMessageSigner = ({
+  message,
+  decodedMessage,
+  safeMessageHash,
+  requestId,
+  origin,
+  declared,
+  onClose,
+}: {
+  message: MessageItem | undefined
+  decodedMessage: string | TypedData
+  safeMessageHash: string
+  requestId: string | undefined
+  origin: string | undefined
+  declared: DeclaredAttribution | undefined
+  onClose: () => void
+}) => {
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const wallet = useWallet()
   const safeSignerAddress = useSafeSignerAddress()
@@ -79,6 +89,7 @@ const useSyncSafeMessageSigner = (
           message: decodedMessage,
           origin,
           safeSignerAddress,
+          declared,
         })
 
         // Fetch updated message
@@ -112,7 +123,7 @@ const useSyncSafeMessageSigner = (
     } catch (e) {
       setSubmitError(asError(e))
     }
-  }, [wallet, safeSignerAddress, safe, message, decodedMessage, origin, safeMessageHash, onClose, requestId])
+  }, [wallet, safeSignerAddress, safe, message, decodedMessage, origin, declared, safeMessageHash, onClose, requestId])
 
   return { submitError, onSign }
 }

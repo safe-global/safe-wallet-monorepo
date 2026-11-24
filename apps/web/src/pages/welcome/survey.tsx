@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
-import SurveyOnboarding from '@/features/spaces/public/components/SurveyOnboarding'
+import WorkspaceOnboardingStep from '@/features/spaces/public/components/WorkspaceOnboardingStep'
 
 const SurveyPage = () => {
   const router = useRouter()
@@ -29,7 +29,7 @@ const SurveyPage = () => {
         <title>{`${BRAND_NAME} – How will you use Safe?`}</title>
       </Head>
 
-      <SurveyOnboarding />
+      <WorkspaceOnboardingStep step="survey" />
     </>
   )
 }
