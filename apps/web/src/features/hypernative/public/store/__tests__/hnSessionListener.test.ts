@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
+import { waitFor } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { makeStore } from '@/store'
 import { server } from '@/tests/server'
@@ -15,6 +16,14 @@ const RECONNECT_REQUIRED = {
   error: "Please reconnect your Hypernative account to review this transaction's risks.",
   errorCode: 1038,
 }
+
+const INVALID_GRANT = {
+  success: false,
+  data: null,
+  error: { error: 'invalid_grant', error_description: 'Refresh token has been revoked' },
+}
+
+const REFRESH_WINDOW_SECONDS = 2592000
 
 const hash = () => faker.string.hexadecimal({ length: 64, casing: 'lower' }) as `0x${string}`
 const address = () => faker.finance.ethereumAddress() as `0x${string}`
@@ -67,8 +76,42 @@ const signIn = (): string => {
   return getAuthCookieAuthorization() as string
 }
 
+const newTokens = () => ({
+  access_token: faker.string.alphanumeric(40),
+  token_type: 'Bearer',
+  expires_in: 3600,
+  scope: 'read',
+  refresh_token: faker.string.alphanumeric(43),
+  refresh_expires_in: REFRESH_WINDOW_SECONDS,
+})
+
+const signInWithRefreshToken = (): string => {
+  setAuthCookie(newTokens())
+  return getAuthCookieAuthorization() as string
+}
+
 const answerWith = (path: string, status: number, body: object) =>
   server.use(http.post(`${HYPERNATIVE_API_BASE_URL}${path}`, () => HttpResponse.json(body, { status })))
+
+const answerRefreshWith = (status: number, body: object) => {
+  let requests = 0
+  server.use(
+    http.post(`${HYPERNATIVE_API_BASE_URL}/oauth/token`, () => {
+      requests += 1
+      return HttpResponse.json(body, { status })
+    }),
+  )
+  return () => requests
+}
+
+const refreshSettled = async (store: Store) => {
+  await waitFor(() => {
+    const mutations = Object.values(store.getState()[hypernativeApi.reducerPath].mutations)
+    expect(mutations.some((mutation) => mutation?.status === 'fulfilled' || mutation?.status === 'rejected')).toBe(true)
+  })
+  // The listener carries on after the refresh request settles
+  await new Promise((resolve) => setTimeout(resolve, 0))
+}
 
 describe('hnSessionListener', () => {
   afterEach(() => clearAuthCookie())
@@ -105,5 +148,64 @@ describe('hnSessionListener', () => {
 
     expect(getAuthCookieAuthorization()).toBe(token)
     expect(selectRejectedHypernativeAuthorization(store.getState())).toBeUndefined()
+  })
+
+  describe('with a refresh token', () => {
+    it.each(ENDPOINTS)('refreshes instead of signing out when %s answers 1038', async (_label, path, call) => {
+      const store = makeStore()
+      const token = signInWithRefreshToken()
+      const refreshed = newTokens()
+      answerWith(path, 401, RECONNECT_REQUIRED)
+      const refreshRequests = answerRefreshWith(200, { data: refreshed })
+
+      await call(store, token)
+
+      await waitFor(() => expect(getAuthCookieAuthorization()).toBe(`Bearer ${refreshed.access_token}`))
+      expect(refreshRequests()).toBe(1)
+      expect(selectRejectedHypernativeAuthorization(store.getState())).toBeUndefined()
+    })
+
+    it('signs out when the refresh is refused', async () => {
+      const store = makeStore()
+      const token = signInWithRefreshToken()
+      answerWith('/safe/transaction/assessment', 401, RECONNECT_REQUIRED)
+      answerRefreshWith(400, INVALID_GRANT)
+
+      await assessTransaction(store, token)
+
+      await waitFor(() => expect(selectRejectedHypernativeAuthorization(store.getState())).toBe(token))
+      expect(getAuthCookieAuthorization()).toBeUndefined()
+    })
+
+    it('signs out without another refresh when the refreshed token is rejected too', async () => {
+      const store = makeStore()
+      const token = signInWithRefreshToken()
+      const refreshed = newTokens()
+      const refreshedToken = `Bearer ${refreshed.access_token}`
+      answerWith('/safe/transaction/assessment', 401, RECONNECT_REQUIRED)
+      const refreshRequests = answerRefreshWith(200, { data: refreshed })
+
+      await assessTransaction(store, token)
+      await waitFor(() => expect(getAuthCookieAuthorization()).toBe(refreshedToken))
+      await assessTransaction(store, refreshedToken)
+
+      expect(refreshRequests()).toBe(1)
+      expect(getAuthCookieAuthorization()).toBeUndefined()
+      expect(selectRejectedHypernativeAuthorization(store.getState())).toBe(refreshedToken)
+    })
+
+    it('keeps the session when the refresh fails with a server error', async () => {
+      const store = makeStore()
+      const token = signInWithRefreshToken()
+      answerWith('/safe/transaction/assessment', 401, RECONNECT_REQUIRED)
+      const refreshRequests = answerRefreshWith(500, {})
+
+      await assessTransaction(store, token)
+      await refreshSettled(store)
+
+      expect(refreshRequests()).toBe(1)
+      expect(getAuthCookieAuthorization()).toBe(token)
+      expect(selectRejectedHypernativeAuthorization(store.getState())).toBeUndefined()
+    })
   })
 })
