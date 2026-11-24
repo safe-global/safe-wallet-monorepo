@@ -1,0 +1,46 @@
+# Remote-config declaration (web)
+
+`remote-config.json` declares the runtime feature flags the **web** app expects in
+the Safe Config Service, scoped to the `WALLET_WEB` service. It is the
+self-documenting, reviewed record of "which flags this release needs", validated
+against `remote-config.schema.json`.
+
+It does **not** change runtime behaviour — `hasFeature(chain, FEATURES.X)` still
+reads the chain's `features` array from the gateway. This file is the source the
+Config Service diffs against when seeding/verifying `Feature` rows for a release.
+
+## Fields
+
+| Field           | Maps to `Feature`     | Notes                                              |
+| --------------- | --------------------- | -------------------------------------------------- |
+| `key`           | `Feature.key`         | A `FEATURES` value that web code reads.            |
+| `description`   | `Feature.description` | Code is authoritative.                             |
+| `scope`         | `Feature.scope`       | `GLOBAL` or `PER_CHAIN`.                           |
+| `enabled`       | Row exists            | `false`: reconcile does not create the flag.       |
+| `defaultChains` | `Feature.chains`      | Release-time seed (chain IDs). Empty for `GLOBAL`. |
+
+## Adding a flag
+
+1. Add the key to the `FEATURES` enum in
+   [`packages/utils/src/utils/chains.ts`](../../../packages/utils/src/utils/chains.ts).
+2. Add a matching entry here (`key`, `description`, `scope`, `enabled`, `defaultChains`),
+   with `"enabled": false`.
+3. `remote-config.test.ts` (the sync test) fails if web code (`apps/web/src`,
+   `packages/utils/src`, `packages/store/src`) reads a flag that is not declared, if a
+   declared flag is not read anywhere, or if the file is schema-invalid.
+
+## Releasing a flag
+
+A flag with `"enabled": false` is off everywhere: reconcile does not create its
+`Feature` row. When the feature is ready, open a PR that changes it to `true`. That PR
+is the place to confirm the definition of done, for example the E2E coverage. A flag
+shared with mobile must have the same `enabled` value in both files.
+
+After the release that contains the change, reconcile shows an `ADD`. For a
+`PER_CHAIN` flag, choose the chains in the admin or seed them with `defaultChains`.
+Changing `enabled` back to `false` makes reconcile offer to remove the row.
+
+On release, an operator reconciles flags via the Config Service admin "Reconcile
+flags" view. `defaultChains` is currently seeded empty for every flag; run the
+Config Service `export_remote_config --service WALLET_WEB` command against
+production and commit the result to make the seed authoritative.
