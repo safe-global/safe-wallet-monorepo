@@ -81,3 +81,71 @@ describe('QueueTxDetails.Summary', () => {
     )
   })
 })
+
+describe('QueueTxDetails.Summary tooltip', () => {
+  const focusSummary = async () => {
+    await userEvent.tab()
+    expect(screen.getByTestId('queue-summary')).toHaveFocus()
+  }
+  const tooltip = () => document.querySelector('[data-slot="tooltip-content"]')
+
+  it('repeats a summary with no hint in full, in bold', async () => {
+    const { container } = renderSummary({ type: 'Custom', methodName: null, to: { value: address() }, dataSize: '68' })
+
+    expect(container.querySelector('[title]')).toBeNull()
+    await focusSummary()
+
+    expect(await screen.findByText('Unknown method', { selector: '[data-slot="tooltip-content"] span' })).toHaveClass(
+      'font-medium',
+      'break-words',
+    )
+  })
+
+  it('says how many actions a batch runs', async () => {
+    renderSummary({ type: 'Custom', methodName: 'multiSend', actionCount: 3, to: { value: address() }, dataSize: '9' })
+    await focusSummary()
+
+    expect(await screen.findByText('3 actions in one transaction')).toBeInTheDocument()
+  })
+
+  it('names the order type of a swap', async () => {
+    renderSummary({
+      type: 'SwapOrder',
+      kind: 'sell',
+      orderClass: 'limit',
+      sellAmount: '1000000',
+      buyAmount: '1',
+      sellToken: token('USDC', 6),
+      buyToken: token('WETH'),
+    })
+    await focusSummary()
+
+    expect(await screen.findByText('Limit order')).toBeInTheDocument()
+  })
+
+  it('shows the threshold before and after a threshold change', async () => {
+    renderSummary(
+      {
+        type: 'SettingsChange',
+        dataDecoded: { method: 'changeThreshold', parameters: [] },
+        settingsInfo: { type: 'CHANGE_THRESHOLD', threshold: 3 },
+      },
+      { type: 'MULTISIG', nonce: 1, confirmationsRequired: 2, confirmationsSubmitted: 0 },
+    )
+    await focusSummary()
+
+    expect(await screen.findByText('Threshold 2 → 3')).toBeInTheDocument()
+    expect(tooltip()).toHaveClass('max-w-xs', 'whitespace-normal')
+  })
+
+  it('says a module change changes who controls funds', async () => {
+    renderSummary({
+      type: 'SettingsChange',
+      dataDecoded: { method: 'enableModule', parameters: [] },
+      settingsInfo: { type: 'ENABLE_MODULE', module: { value: address(), name: 'Allowance' } },
+    })
+    await focusSummary()
+
+    expect(await screen.findByText('Changes who controls funds')).toBeInTheDocument()
+  })
+})

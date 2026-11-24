@@ -1,7 +1,10 @@
 import type { ReactElement, ReactNode } from 'react'
-import type { TokenInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
+import type {
+  SettingsChangeTransaction,
+  TokenInfo,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import QueueSummary from '@safe-global/views/features/spaces/components/SpaceQueue/QueueSummary'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import css from '@safe-global/views/components/transactions/TxType/styles.module.css'
 import { Code, GitMerge, Settings, type LucideIcon } from 'lucide-react'
@@ -25,7 +28,12 @@ import {
   isNestedConfirmationTxInfo,
   isOrderTxInfo,
   isSettingsChangeTxInfo,
+  isMultiSendTxInfo,
+  isMultisigExecutionInfo,
+  isStakingTxDepositInfo,
   isStakingTxExitInfo,
+  isStakingTxWithdrawInfo,
+  isTwapOrderTxInfo,
 } from '@/utils/transaction-guards'
 import { getNonce, getQueueTypeLabel, getSettingsSummary, getTypeHint, type QueueTypeLabel } from '../utils'
 
@@ -53,14 +61,26 @@ const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
   )
 }
 
-const WithHint = ({ hint, children }: { hint?: ReactNode; children: ReactNode }): ReactElement => {
-  if (!hint) return <span className="block min-w-0 truncate">{children}</span>
-  return (
-    <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
-      <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{children}</TooltipTrigger>
-      <TooltipContent>{hint}</TooltipContent>
-    </Tooltip>
-  )
+const WithHint = QueueSummary
+
+const ORDER_CLASSES: Record<string, string> = { market: 'Market order', limit: 'Limit order' }
+
+const getOrderHint = (info: OrderTransactionInfo): string | undefined =>
+  isTwapOrderTxInfo(info) ? 'TWAP order' : ORDER_CLASSES[info.orderClass]
+
+// Changes the prototype flags as changing who controls the funds
+const POLICY_CHANGES = ['ENABLE_MODULE', 'SET_GUARD', 'SET_FALLBACK_HANDLER', 'CHANGE_MASTER_COPY']
+
+const getSettingsHint = (tx: Transaction, txInfo: SettingsChangeTransaction): string | undefined => {
+  const { settingsInfo } = txInfo
+  if (!settingsInfo) return undefined
+  if (settingsInfo.type === 'ADD_OWNER' || settingsInfo.type === 'REMOVE_OWNER') {
+    return `Threshold ${settingsInfo.threshold} after the change`
+  }
+  if (settingsInfo.type === 'CHANGE_THRESHOLD' && isMultisigExecutionInfo(tx.executionInfo)) {
+    return `Threshold ${tx.executionInfo.confirmationsRequired} → ${settingsInfo.threshold}`
+  }
+  return POLICY_CHANGES.includes(settingsInfo.type) ? 'Changes who controls funds' : undefined
 }
 
 const Amount = ({ value, token }: { value: string; token: TokenInfo }): ReactElement => (
@@ -89,29 +109,36 @@ const TokenSymbol = ({ token }: { token: TokenInfo }): ReactElement => (
 )
 
 // A sell order fixes the amount sold and a buy order the amount bought; the other side is only a limit
-const OrderSummary = ({ info }: { info: OrderTransactionInfo }): ReactElement =>
-  info.kind === 'buy' ? (
-    <Exchange
-      from={<TokenSymbol token={info.sellToken} />}
-      to={<Amount value={info.buyAmount} token={info.buyToken} />}
-    />
-  ) : (
-    <Exchange
-      from={<Amount value={info.sellAmount} token={info.sellToken} />}
-      to={<TokenSymbol token={info.buyToken} />}
-    />
-  )
+const OrderSummary = ({ info }: { info: OrderTransactionInfo }): ReactElement => (
+  <WithHint hint={getOrderHint(info)}>
+    {info.kind === 'buy' ? (
+      <Exchange
+        from={<TokenSymbol token={info.sellToken} />}
+        to={<Amount value={info.buyAmount} token={info.buyToken} />}
+      />
+    ) : (
+      <Exchange
+        from={<Amount value={info.sellAmount} token={info.sellToken} />}
+        to={<TokenSymbol token={info.buyToken} />}
+      />
+    )}
+  </WithHint>
+)
+
+const getDefaultHint = (txInfo: Transaction['txInfo']): string | undefined => {
+  if (isMultiSendTxInfo(txInfo)) return `${txInfo.actionCount} actions in one transaction`
+  if (isStakingTxDepositInfo(txInfo)) {
+    return `Deposits into ${txInfo.numValidators} validator${maybePlural(txInfo.numValidators)} with Kiln`
+  }
+  if (isStakingTxWithdrawInfo(txInfo)) return 'Claims exited stake from Kiln'
+  return undefined
+}
 
 const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
   const { txInfo } = tx
 
   if (isSettingsChangeTxInfo(txInfo)) {
-    const { settingsInfo } = txInfo
-    const hint =
-      settingsInfo?.type === 'ADD_OWNER' || settingsInfo?.type === 'REMOVE_OWNER'
-        ? `Threshold ${settingsInfo.threshold} after the change`
-        : undefined
-    return <WithHint hint={hint}>{getSettingsSummary(txInfo)}</WithHint>
+    return <WithHint hint={getSettingsHint(tx, txInfo)}>{getSettingsSummary(txInfo)}</WithHint>
   }
 
   if (isCancellationTxInfo(txInfo)) {
@@ -143,10 +170,12 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
 
   if (isLifiSwapTxInfo(txInfo)) {
     return (
-      <Exchange
-        from={<Amount value={txInfo.fromAmount} token={txInfo.fromToken} />}
-        to={<Amount value={txInfo.toAmount} token={txInfo.toToken} />}
-      />
+      <WithHint>
+        <Exchange
+          from={<Amount value={txInfo.fromAmount} token={txInfo.fromToken} />}
+          to={<Amount value={txInfo.toAmount} token={txInfo.toToken} />}
+        />
+      </WithHint>
     )
   }
 
@@ -154,20 +183,22 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
 
   if (isStakingTxExitInfo(txInfo)) {
     return (
-      <span className="block min-w-0 truncate">{`${txInfo.numValidators} validator${maybePlural(txInfo.numValidators)}`}</span>
+      <WithHint hint="Asks Kiln to exit these validators. You claim the ETH once they have exited.">
+        {`${txInfo.numValidators} validator${maybePlural(txInfo.numValidators)}`}
+      </WithHint>
     )
   }
 
   // The gateway leaves the method out when it can't decode the call data
   if (isCustomTxInfo(txInfo) && !txInfo.methodName && !isMigrateToL2TxInfo(txInfo)) {
-    return <span className="block min-w-0 truncate">Unknown method</span>
+    return <WithHint>Unknown method</WithHint>
   }
 
   return (
-    <span className="block min-w-0 truncate">
+    <WithHint hint={getDefaultHint(txInfo)}>
       {/* The type tag already says which way the tokens go */}
       <TxInfo info={txInfo} omitSign />
-    </span>
+    </WithHint>
   )
 }
 
