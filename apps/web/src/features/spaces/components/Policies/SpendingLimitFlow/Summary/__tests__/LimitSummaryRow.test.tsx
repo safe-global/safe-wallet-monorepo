@@ -1,5 +1,5 @@
 import chains from '@safe-global/utils/config/chains'
-import { formatVisualAmount, shortenAddress } from '@safe-global/utils/utils/formatters'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import { render, screen } from '@/tests/test-utils'
 import LimitSummaryRow from '../LimitSummaryRow'
@@ -41,15 +41,13 @@ describe('LimitSummaryRow', () => {
     errorSpy.mockRestore()
   })
 
-  it('repeats the not-trusted warning with the short address for a token on no trusted list', () => {
-    const token = limitSummaryTokenBuilder().with({ symbol: 'COW', untrusted: true }).build()
+  it('repeats the not-trusted warning for a token on no trusted list', () => {
+    const token = limitSummaryTokenBuilder().with({ untrusted: true }).build()
     const limit = limitSummaryBuilder().with({ token }).build()
 
     render(<LimitSummaryRow limit={limit} chainId="1" />)
 
-    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(
-      `COW ${shortenAddress(token.address)}: ${UNTRUSTED_TOKEN_WARNING}`,
-    )
+    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(UNTRUSTED_TOKEN_WARNING)
   })
 
   it('shows no trust warning for a trusted token', () => {

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { CalendarClock } from 'lucide-react'
-import { safeFormatUnits, safeParseUnits, shortenAddress } from '@safe-global/utils/utils/formatters'
+import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength } from '@safe-global/utils/utils/validation'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -112,7 +112,7 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
 
       {limit.token.untrusted && (
         <Typography variant="paragraph-mini" color="warning" data-testid="token-untrusted-warning">
-          {limit.token.symbol} {shortenAddress(limit.token.address)}: {UNTRUSTED_TOKEN_WARNING}
+          {UNTRUSTED_TOKEN_WARNING}
         </Typography>
       )}
 
