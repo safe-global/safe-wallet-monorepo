@@ -116,9 +116,13 @@ describe('formatShortTimeAgo', () => {
   })
 
   it('never shows 12mo ago at month end', () => {
-    const feb28 = new Date('2026-02-28T00:00:00.000Z').getTime()
-    expect(formatShortTimeAgo(new Date('2025-02-28T23:00:00.000Z').getTime(), feb28)).toBe('11mo ago')
-    expect(formatShortTimeAgo(new Date('2025-02-27T23:00:00.000Z').getTime(), feb28)).toBe('1y ago')
+    // date-fns counts months in local time, so build the dates in local time too.
+    // From Feb 28 at month end, Feb 28 23:00 a year earlier is 12 months back but
+    // not a full year, which used to read as "12mo ago".
+    const feb28 = new Date(2026, 1, 28).getTime()
+    expect(formatShortTimeAgo(new Date(2025, 1, 28, 23).getTime(), feb28)).toBe('1y ago')
+    expect(formatShortTimeAgo(new Date(2025, 2, 1).getTime(), feb28)).toBe('11mo ago')
+    expect(formatShortTimeAgo(new Date(2025, 1, 27, 23).getTime(), feb28)).toBe('1y ago')
   })
 
   it('reads a time in the future as Just now', () => {
@@ -126,6 +130,11 @@ describe('formatShortTimeAgo', () => {
   })
 
   it('defaults to the current time', () => {
-    expect(formatShortTimeAgo(Date.now() - 2 * HOUR)).toBe('2h ago')
+    jest.useFakeTimers({ now })
+    try {
+      expect(formatShortTimeAgo(now - 2 * HOUR)).toBe('2h ago')
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })
