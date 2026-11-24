@@ -19,10 +19,16 @@ export type SafeOptionRow = {
 export type SafeOptionsProps = {
   options: SafeOptionRow[]
   onToggle: (safeAddress: string) => void
+  /** How the options are sorted */
+  note?: string
 }
 
 /** The Safe filter's checkboxes in the Filter menu */
-const SafeOptions = ({ options, onToggle }: SafeOptionsProps): ReactElement => {
+const SafeOptions = ({
+  options,
+  onToggle,
+  note = 'Sorted by number of transactions',
+}: SafeOptionsProps): ReactElement => {
   if (options.length === 0) return <NoFilterOptions>No Safe accounts</NoFilterOptions>
 
   return (
@@ -48,7 +54,7 @@ const SafeOptions = ({ options, onToggle }: SafeOptionsProps): ReactElement => {
       <DropdownMenuSeparator />
       <p className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground">
         <Info className="size-3.5" />
-        Sorted by number of transactions
+        {note}
       </p>
     </>
   )

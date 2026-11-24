@@ -16,6 +16,8 @@ export type UnavailableSafeRow = {
 
 export type UnavailableSafesAlertViewProps = {
   title: string
+  /** Replaces the default explanation, which is about the queue */
+  description?: string
   maxSafes: number
   isOverLimit: boolean
   rows: UnavailableSafeRow[]
@@ -25,6 +27,7 @@ export type UnavailableSafesAlertViewProps = {
 
 const UnavailableSafesAlertView = ({
   title,
+  description,
   maxSafes,
   isOverLimit,
   rows,
@@ -39,8 +42,8 @@ const UnavailableSafesAlertView = ({
     <PopoverContent align="end" className="w-80 gap-0 p-0">
       <section aria-label={title} className="flex flex-col gap-3 p-4">
         <p className="text-xs text-muted-foreground">
-          Their transactions aren&apos;t shown in the table. They may not be deployed on that network yet, or the
-          network may be unreachable.
+          {description ??
+            "Their transactions aren't shown in the table. They may not be deployed on that network yet, or the network may be unreachable."}
           {isOverLimit &&
             ` The pending queue covers up to ${maxSafes} Safe accounts, so some of these may not be included.`}
         </p>

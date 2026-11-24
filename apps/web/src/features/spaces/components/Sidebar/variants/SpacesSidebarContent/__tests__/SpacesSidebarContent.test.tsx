@@ -52,6 +52,11 @@ jest.mock('../../../config', () => ({
       href: '/spaces/transactions',
     },
     {
+      icon: () => <div>Assets</div>,
+      label: 'Assets',
+      href: '/spaces/assets',
+    },
+    {
       icon: () => <div>Policies</div>,
       label: 'Policies',
       href: '/spaces/policies',
@@ -263,10 +268,11 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
-      // The mocked config has Home + Transactions + Policies + Activity; Activity should be dropped.
+      // The mocked config has Home + Transactions + Assets + Policies + Activity; Activity should be dropped.
       expect(mainNav.map((i: { href: string }) => i.href)).toEqual([
         '/spaces',
         '/spaces/transactions',
+        '/spaces/assets',
         '/spaces/policies',
       ])
     })
@@ -277,7 +283,7 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(mainNav).toHaveLength(4)
+      expect(mainNav).toHaveLength(5)
     })
 
     it('keeps the Activity entry when the flag is enabled', () => {
@@ -286,7 +292,7 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(mainNav).toHaveLength(4)
+      expect(mainNav).toHaveLength(5)
     })
   })
 
@@ -297,7 +303,12 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(mainNav.map((i: { href: string }) => i.href)).toEqual(['/spaces', '/spaces/policies', '/spaces/activity'])
+      expect(mainNav.map((i: { href: string }) => i.href)).toEqual([
+        '/spaces',
+        '/spaces/assets',
+        '/spaces/policies',
+        '/spaces/activity',
+      ])
     })
 
     it('keeps the Transactions entry while the flag is undefined (chain config still loading)', () => {
@@ -319,6 +330,35 @@ describe('SpacesSidebarContent', () => {
     })
   })
 
+  describe('SPACE_ASSETS feature flag', () => {
+    it('hides the Assets entry when the flag is explicitly off', () => {
+      mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.SPACE_ASSETS)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).not.toContain('/spaces/assets')
+    })
+
+    it('hides the Assets entry while the flag is undefined (chain config still loading)', () => {
+      mockUseHasFeature.mockImplementation((feature) => (feature === FEATURES.SPACE_ASSETS ? undefined : true))
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).not.toContain('/spaces/assets')
+    })
+
+    it('shows the Assets entry when the flag is enabled', () => {
+      mockUseHasFeature.mockReturnValue(true)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(mainNav.map((i: { href: string }) => i.href)).toContain('/spaces/assets')
+    })
+  })
+
   describe('POLICIES feature flag', () => {
     it('hides the Policies entry when the flag is explicitly off', () => {
       mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.POLICIES)
@@ -329,6 +369,7 @@ describe('SpacesSidebarContent', () => {
       expect(mainNav.map((i: { href: string }) => i.href)).toEqual([
         '/spaces',
         '/spaces/transactions',
+        '/spaces/assets',
         '/spaces/activity',
       ])
     })
@@ -370,7 +411,7 @@ describe('SpacesSidebarContent', () => {
     )
 
     const [mainNav, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-    expect(mainNav).toHaveLength(4)
+    expect(mainNav).toHaveLength(5)
     expect(setupGroup.items).toHaveLength(3)
   })
 })

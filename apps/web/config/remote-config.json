@@ -395,6 +395,13 @@
       "defaultChains": []
     },
     {
+      "key": "SPACE_ASSETS",
+      "description": "Token balances and positions across all Safes in a Workspace.",
+      "scope": "PER_CHAIN",
+      "enabled": false,
+      "defaultChains": []
+    },
+    {
       "key": "WORKSPACES_EXPERIMENTAL_FEATURES",
       "description": "Experimental settings page for Workspaces.",
       "scope": "PER_CHAIN",
