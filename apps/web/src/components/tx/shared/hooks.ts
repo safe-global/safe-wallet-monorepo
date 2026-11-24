@@ -199,6 +199,7 @@ export const useTxActions = (): TxActions => {
           executesImmediately(signer),
           safe.version,
           scope,
+          signer.isSafe ? declared : undefined,
         )
         return { txId: signedTxId, isNestedSigning: viaSafe }
       }
@@ -290,6 +291,7 @@ export const useTxActions = (): TxActions => {
         viaSafe,
         safe.version,
         scope,
+        signer.isSafe ? declared : undefined,
       )
 
       return { txId: executedTxId, isExecuted: executed }

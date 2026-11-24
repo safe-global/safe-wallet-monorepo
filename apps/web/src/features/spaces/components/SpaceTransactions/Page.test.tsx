@@ -3,7 +3,9 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { act, fireEvent, render, screen } from '@/tests/test-utils'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import SpaceTransactionsPage from './Page'
 
@@ -12,9 +14,18 @@ jest.mock('../AuthState', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 jest.mock('./NewTransactionButton', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
+const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
+
+const HISTORY_TITLE = 'Workspace history is coming'
 
 describe('SpaceTransactionsPage', () => {
   beforeEach(() => {
+    mockTrackEvent.mockClear()
     setBaseUrl(GATEWAY_URL)
     server.use(
       http.get(`${GATEWAY_URL}/v1/spaces/:spaceId/transactions/queued`, () =>
@@ -60,5 +71,81 @@ describe('SpaceTransactionsPage', () => {
     rerender(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
 
     expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toHaveValue('')
+  })
+
+  describe('History tab', () => {
+    const openTab = (name: string) =>
+      act(async () => {
+        fireEvent.click(screen.getByRole('tab', { name }))
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+      })
+
+    it('comes after Pending, which is selected by default', () => {
+      render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+
+      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Pending', 'History'])
+      expect(screen.getByRole('tab', { name: 'Pending' })).toHaveAttribute('aria-selected', 'true')
+      expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toBeInTheDocument()
+      expect(screen.queryByText(HISTORY_TITLE)).not.toBeInTheDocument()
+      expect(mockTrackEvent).not.toHaveBeenCalled()
+    })
+
+    it('says where the history is, without a search field, filters or list', async () => {
+      render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+
+      await openTab('History')
+
+      expect(screen.getByRole('heading', { name: HISTORY_TITLE })).toBeInTheDocument()
+      expect(screen.getByText('Until then, you can find the transaction history inside each Safe.')).toBeInTheDocument()
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Filter' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    })
+
+    it('requests nothing', async () => {
+      render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+      await screen.findByText('Pending transactions of your Safe accounts will appear here')
+      const requests: string[] = []
+      const onRequest = ({ request }: { request: Request }) => requests.push(request.url)
+      server.events.on('request:start', onRequest)
+
+      await openTab('History')
+
+      server.events.removeListener('request:start', onRequest)
+      expect(screen.getByRole('heading', { name: HISTORY_TITLE })).toBeInTheDocument()
+      expect(requests).toEqual([])
+    })
+
+    it('tracks once each time it is opened, with the Workspace', async () => {
+      const spaceId = faker.string.uuid()
+      render(<SpaceTransactionsPage spaceId={spaceId} />)
+
+      await openTab('History')
+
+      expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.TRANSACTIONS_HISTORY_TAB_OPENED, {
+        workspace_id: spaceId,
+      })
+
+      await openTab('Pending')
+
+      expect(screen.queryByText(HISTORY_TITLE)).not.toBeInTheDocument()
+      expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+
+      await openTab('History')
+
+      expect(mockTrackEvent).toHaveBeenCalledTimes(2)
+    })
+
+    it('gives the queue back when returning to Pending', async () => {
+      render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+
+      await openTab('History')
+      await openTab('Pending')
+
+      expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+      expect(screen.queryByText(HISTORY_TITLE)).not.toBeInTheDocument()
+    })
   })
 })

@@ -15,10 +15,7 @@ import { cn } from '@safe-global/views/utils/cn'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ProChip from '@safe-global/views/assets/images/safe-pro/pro-chip.svg'
-import {
-  EXECUTION_FEE_TOOLTIP,
-  GAS_FEE_TOOLTIP,
-} from '@safe-global/views/features/fee-payment/components/shared/tooltips'
+import { GAS_FEE_TOOLTIP } from '@safe-global/views/features/fee-payment/components/shared/tooltips'
 import type {
   FeePayerControl,
   FeePayerView,
@@ -44,18 +41,25 @@ const PAYER_LABEL: Record<GasPayerChoice, string> = {
 
 type SponsorKind = FeePayerView['sponsorKind']
 
+// Pro users pay for their plan, so it is named; the network's free transactions are just "Sponsored".
 const payerLabel = (choice: GasPayerChoice, sponsorKind: SponsorKind): string =>
-  choice === 'SPONSORED' && sponsorKind === 'free' ? 'Free transaction' : PAYER_LABEL[choice]
+  choice === 'SPONSORED' && sponsorKind === 'free' ? 'Sponsored' : PAYER_LABEL[choice]
 
-const LOCKED_TOOLTIP: Record<GasPayerChoice, string> = {
-  PAY_FROM_SAFE: "Set at signing and can't be changed.",
-  WALLET: 'Whoever executes pays the gas fee.',
-  SPONSORED: 'Covered by your sponsored transactions.',
+const SET_AT_SIGNING_TOOLTIP = "Set at signing and can't be changed."
+
+// Only the Safe account needs explaining: the signatures locked it.
+const LOCKED_PAYER_TOOLTIP: Partial<Record<GasPayerChoice, string>> = {
+  PAY_FROM_SAFE: SET_AT_SIGNING_TOOLTIP,
 }
 
-const gasTokenLockTooltip = (reason: GasTokenLockReason | undefined, token?: GasTokenOption): string | undefined => {
-  if (reason === 'SET_AT_SIGNING') return LOCKED_TOOLTIP.PAY_FROM_SAFE
-  if (reason === 'SPONSORED') return LOCKED_TOOLTIP.SPONSORED
+const gasTokenLockTooltip = (
+  reason: GasTokenLockReason | undefined,
+  sponsorKind: SponsorKind,
+  token?: GasTokenOption,
+): string | undefined => {
+  if (reason === 'SET_AT_SIGNING') return SET_AT_SIGNING_TOOLTIP
+  if (reason === 'SPONSORED')
+    return sponsorKind === 'free' ? 'Covered by a sponsored transaction.' : 'Covered by your Pro plan.'
   if (reason === 'NATIVE_ONLY') return `Fees are paid in ${token?.symbol} for now. More tokens are coming soon.`
   return undefined
 }
@@ -116,23 +120,35 @@ const PayerChoice = ({
   </DropdownMenu>
 )
 
-const LockedPill = ({ children, tooltip }: { children: ReactNode; tooltip: string }): ReactElement => (
-  <Tooltip>
-    <TooltipTrigger
-      render={
-        <div
-          className={cn(css.paymentSourceSelector, css.gasTokenSelectorLocked, css.payerPill)}
-          style={{ width: 'auto' }}
-          data-testid="fee-payer-locked"
-        />
-      }
-    >
+const LOCKED_PILL_CLASS = cn(css.paymentSourceSelector, css.gasTokenSelectorLocked, css.payerPill)
+
+const LockedPill = ({ children, tooltip }: { children: ReactNode; tooltip?: string }): ReactElement => {
+  const content = (
+    <>
       {children}
       <Lock className={css.lockIcon} />
-    </TooltipTrigger>
-    <TooltipContent side="top">{tooltip}</TooltipContent>
-  </Tooltip>
-)
+    </>
+  )
+
+  if (!tooltip) {
+    return (
+      <div className={LOCKED_PILL_CLASS} style={{ width: 'auto' }} data-testid="fee-payer-locked">
+        {content}
+      </div>
+    )
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={<div className={LOCKED_PILL_CLASS} style={{ width: 'auto' }} data-testid="fee-payer-locked" />}
+      >
+        {content}
+      </TooltipTrigger>
+      <TooltipContent side="top">{tooltip}</TooltipContent>
+    </Tooltip>
+  )
+}
 
 const PayerControl = ({
   control,
@@ -146,7 +162,7 @@ const PayerControl = ({
   control.kind === 'choice' ? (
     <PayerChoice value={control.value} options={control.options} sponsorKind={sponsorKind} onChange={onChange} />
   ) : (
-    <LockedPill tooltip={LOCKED_TOOLTIP[control.value]}>
+    <LockedPill tooltip={LOCKED_PAYER_TOOLTIP[control.value]}>
       <PillLabel>{payerLabel(control.value, sponsorKind)}</PillLabel>
     </LockedPill>
   )
@@ -160,16 +176,18 @@ const LabelledControl = ({ label, children }: { label: string; children: ReactNo
   </div>
 )
 
-const FeeLabel = ({ label, tooltip }: { label: string; tooltip: string }): ReactElement => (
+const FeeLabel = ({ label, tooltip }: { label: string; tooltip?: string }): ReactElement => (
   <Typography variant="paragraph-small" className={css.feeLabel}>
     {label}
-    <Tooltip>
-      {/* Keeps a tap on the icon from toggling a clickable row it sits in. */}
-      <TooltipTrigger render={<span className={css.tooltipIcon} onClick={(e) => e.stopPropagation()} />}>
-        <InfoIcon className="size-4 text-[var(--color-border-main)]" />
-      </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
-    </Tooltip>
+    {tooltip && (
+      <Tooltip>
+        {/* Keeps a tap on the icon from toggling a clickable row it sits in. */}
+        <TooltipTrigger render={<span className={css.tooltipIcon} onClick={(e) => e.stopPropagation()} />}>
+          <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+        </TooltipTrigger>
+        <TooltipContent>{tooltip}</TooltipContent>
+      </Tooltip>
+    )}
   </Typography>
 )
 
@@ -282,7 +300,11 @@ const GasPayerSelector = ({
               onGasTokenChange={onGasTokenChange}
               locked={gasToken.locked || singleToken}
               forcedDisplay={displayedToken ?? gasToken.tokens[0]}
-              lockedTooltip={gasTokenLockTooltip(gasToken.lockedReason, displayedToken ?? gasToken.tokens[0])}
+              lockedTooltip={gasTokenLockTooltip(
+                gasToken.lockedReason,
+                sponsorKind,
+                displayedToken ?? gasToken.tokens[0],
+              )}
               currency={currency}
               renderTokenIcon={renderTokenIcon}
             />
@@ -293,7 +315,7 @@ const GasPayerSelector = ({
 
         <div className={css.rows}>
           <FeeRow testId="execution-fee-row">
-            <FeeLabel label="Execution fee" tooltip={EXECUTION_FEE_TOOLTIP} />
+            <FeeLabel label="Execution fee" />
             {executionFee.amount ? (
               <FeeValue fee={executionFee} />
             ) : (

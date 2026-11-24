@@ -4,6 +4,9 @@ import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/P
 import {
   buildPlanTiers,
   claimTiers,
+  getBestYearlySaving,
+  getFittingSize,
+  getPlanSizes,
   getCatalogTiers,
   getCardSaving,
   getChangeDirection,
@@ -362,7 +365,7 @@ describe('getPlanCta on a card', () => {
       billingCycle: 'year',
       options: [option({ priceId: 'price_b20y', price: 17_990 })],
     })
-    const inForce = currentPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' })
+    const inForce = currentPlan({ seatsLabel: '20 Safe accounts' })
 
     expect(getPlanCta({ tier: yearly, option: yearly.options[0] }, inForce)).toMatchObject({
       kind: 'change',
@@ -371,6 +374,47 @@ describe('getPlanCta on a card', () => {
     expect(
       getPlanCta({ tier: yearly, option: option({ label: '5 Safe accounts', price: 7190 }) }, inForce),
     ).toMatchObject({ kind: 'change', label: 'Switch to 5 Safe accounts' })
+  })
+
+  it('words every move off a trial as a switch to the named size, never as an upgrade', () => {
+    const business = tier({
+      id: 'current',
+      isCurrent: true,
+      currentPriceId: 'price_b5m',
+      options: [
+        option({ priceId: 'price_b5m', paymentLinkId: null, label: '5 Safe accounts', seats: 5, price: 669 }),
+        option({ priceId: 'price_b10m', paymentLinkId: 'pl_b10m', label: '10 Safe accounts', seats: 10, price: 999 }),
+      ],
+    })
+    const starter = tier({ id: 'Starter-month', name: 'Starter', options: [option({ seats: 2, price: 189 })] })
+    const trial = currentPlan({ isTrialing: true, price: 669, seatsLabel: '5 Safe accounts' })
+
+    expect(getPlanCta({ tier: business, option: business.options[1] }, trial)).toMatchObject({
+      kind: 'change',
+      direction: 'upgrade',
+      label: 'Switch to Business 10',
+    })
+    expect(getPlanCta({ tier: starter, option: starter.options[0] }, trial)).toMatchObject({
+      kind: 'change',
+      label: 'Switch to Starter',
+    })
+    expect(getPlanCta({ tier: business, option: business.options[0] }, trial)).toEqual({
+      kind: 'billing',
+      label: 'Add payment method',
+    })
+  })
+
+  it('names the picked size when there is no plan to change', () => {
+    const business = tier({ options: [option({ seats: 5, label: '5 Safe accounts' }), option()] })
+
+    expect(getPlanCta({ tier: business, option: business.options[0] }, undefined)).toEqual({
+      kind: 'subscribe',
+      label: 'Continue with Business 5',
+    })
+    expect(getPlanCta({ tier: tier(), option: option() }, undefined)).toEqual({
+      kind: 'subscribe',
+      label: 'Continue with Business',
+    })
   })
 
   it('sends Enterprise to sales, or to the account team once it is the plan in force', () => {
@@ -451,6 +495,69 @@ describe('getCardSaving', () => {
     expect(getCardSaving(tier(), option(), yearlyTier)).toEqual({ amount: '€2,038', percent: '10.2%' })
     expect(getCardSaving(tier(), option({ label: '5 Safe accounts' }), yearlyTier)).toBeUndefined()
     expect(getCardSaving(tier(), option({ price: 1000 }), yearlyTier)).toBeUndefined()
+  })
+})
+
+describe('getBestYearlySaving', () => {
+  const monthly = tier({
+    options: [option({ label: '5 Safe accounts', price: 669 }), option({ label: '20 Safe accounts', price: 1669 })],
+  })
+
+  it('names the largest saving of any size', () => {
+    const yearly = tier({
+      id: 'Business-year',
+      billingCycle: 'year',
+      options: [
+        option({ label: '5 Safe accounts', price: 7_628 }),
+        option({ label: '20 Safe accounts', price: 17_990 }),
+      ],
+    })
+
+    expect(getBestYearlySaving(monthly, yearly)).toBe('10.2%')
+  })
+
+  it('names nothing without a cheaper yearly price', () => {
+    const pricier = tier({ id: 'Business-year', billingCycle: 'year', options: [option({ price: 30_000 })] })
+
+    expect(getBestYearlySaving(monthly, undefined)).toBeUndefined()
+    expect(getBestYearlySaving(monthly, pricier)).toBeUndefined()
+  })
+})
+
+describe('getPlanSizes and getFittingSize', () => {
+  const starter = tier({
+    id: 'Starter-month',
+    name: 'Starter',
+    options: [option({ label: '2 Safe accounts', seats: 2 })],
+  })
+  const business = tier({
+    options: [option({ label: '20 Safe accounts', seats: 20 }), option({ label: '5 Safe accounts', seats: 5 })],
+  })
+  const yearlyBusiness = tier({ id: 'Business-year', billingCycle: 'year', options: [option()] })
+  const sizes = getPlanSizes([starter, business, yearlyBusiness], 'month')
+
+  it('lists the sizes of every plan on the cycle, smallest first, each with its plan', () => {
+    expect(sizes.map(({ tier, option }) => `${tier.name} ${option.seats}`)).toEqual([
+      'Starter 2',
+      'Business 5',
+      'Business 20',
+    ])
+    expect(getPlanSizes([starter, business, yearlyBusiness], 'year').map(({ option }) => option.seats)).toEqual([20])
+  })
+
+  it('keeps a size two plans share on the first plan', () => {
+    const twin = tier({ id: 'Other-month', name: 'Other', options: [option({ label: '2 Safe accounts', seats: 2 })] })
+
+    expect(getPlanSizes([starter, twin], 'month')).toEqual([{ tier: starter, option: starter.options[0] }])
+  })
+
+  it('picks the smallest size that holds the Safes, the largest when none does', () => {
+    expect(getFittingSize(sizes, 1)?.option.seats).toBe(2)
+    expect(getFittingSize(sizes, 3)?.option.seats).toBe(5)
+    expect(getFittingSize(sizes, 5)?.option.seats).toBe(5)
+    expect(getFittingSize(sizes, 40)?.option.seats).toBe(20)
+    expect(getFittingSize(sizes, undefined)?.option.seats).toBe(2)
+    expect(getFittingSize([], 3)).toBeUndefined()
   })
 })
 

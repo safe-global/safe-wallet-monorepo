@@ -493,6 +493,62 @@ describe('useGasPayerSelection', () => {
     })
   })
 
+  describe('total outgoing', () => {
+    const TOTAL: FeesPreviewData['totalOutgoing'] = {
+      primary: [{ amount: '1', currency: 'ETH' }],
+      fees: { amount: '0.00001', currency: 'ETH' },
+      fiatTotal: '$2.50',
+    }
+
+    beforeEach(() => {
+      mockUseFeesPreview.mockReturnValue(buildFees({ totalOutgoing: TOTAL }))
+    })
+
+    it('is shown when the Safe account pays', () => {
+      const { result } = renderSelection(preference('PAY_FROM_SAFE'))
+
+      expect(result.current.view?.payer.value).toBe('PAY_FROM_SAFE')
+      expect(result.current.view?.totalOutgoing).toEqual(TOTAL)
+    })
+
+    it('is shown for a tx signed with the Safe paying', () => {
+      const safePaidTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
+      Object.assign(safePaidTx.data, {
+        safeTxGas: '2409',
+        baseGas: '68568',
+        gasPrice: '741064438',
+        refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
+      })
+      safePaidTx.addSignature({
+        signer: SIGNER,
+        data: '0x1234',
+        staticPart: () => '0x',
+        dynamicPart: () => '',
+      } as never)
+
+      const { result } = renderHook(() => useGasPayerSelection({ safeTx: safePaidTx, offer: null, step: 'execute' }))
+
+      expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'PAY_FROM_SAFE' })
+      expect(result.current.view?.totalOutgoing).toEqual(TOTAL)
+    })
+
+    it('is hidden when the signer wallet pays', () => {
+      const { result } = renderSelection(preference('WALLET'))
+
+      expect(result.current.view?.payer.value).toBe('WALLET')
+      expect(result.current.view?.totalOutgoing).toBeUndefined()
+    })
+
+    it('is hidden when the Pro plan pays', () => {
+      mockUseSafeSponsoredTxs.mockReturnValue({ isPro: true, left: 49, meter: { quota: 50, resetsAt: null } })
+
+      const { result } = renderSelection()
+
+      expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'SPONSORED' })
+      expect(result.current.view?.totalOutgoing).toBeUndefined()
+    })
+  })
+
   describe('sponsor at execution', () => {
     const signedTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
     signedTx.addSignature({ signer: SIGNER, data: '0x1234', staticPart: () => '0x', dynamicPart: () => '' } as never)

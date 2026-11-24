@@ -72,9 +72,6 @@ export const getSendInGasToken = (safeTx: SafeTransaction, gasTokenAddress: stri
   return getOutflowInGasToken({ to, value, data }, gasTokenAddress)
 }
 
-export const withoutFees = (totalOutgoing: TotalOutgoing | undefined): TotalOutgoing | undefined =>
-  totalOutgoing && totalOutgoing.primary.length > 0 ? { ...totalOutgoing, fees: undefined } : undefined
-
 export const computeTotalOutgoing = ({
   safeTx,
   gasFeeBaseUnits,

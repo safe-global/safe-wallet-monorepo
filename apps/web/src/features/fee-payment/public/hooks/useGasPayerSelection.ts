@@ -17,7 +17,6 @@ import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { usePayFromSafeFeePreview } from './usePayFromSafeFeePreview'
 import { useGasTokenCandidates } from '../../hooks/useGasTokenCandidates'
-import { withoutFees } from '../../services/totalOutgoing'
 import { buildFooter, buildPayerControl, resolveChoice } from '../../services/feePayerView'
 import {
   selectFeePaymentSourcePreference,
@@ -177,7 +176,8 @@ export const useGasPayerSelection = ({
           currency: fees.executionFee.currency,
           fiatAmount: fees.executionFee.fiatAmount,
         }
-    const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : withoutFees(fees.totalOutgoing)
+    // Only what the Safe pays adds up to a total.
+    const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : undefined
 
     const footer = buildFooter({
       offer,

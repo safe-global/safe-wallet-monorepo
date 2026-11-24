@@ -10,7 +10,6 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getStoreInstance } from '@/store'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
-import { spaceAddressBookRequestBuilder } from '@/tests/builders/space'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import SuggestedTab from '../SuggestedTab'
 
@@ -35,15 +34,9 @@ jest.mock('@safe-global/views/components/common/Identicon', () => {
   return Identicon
 })
 jest.mock('../../SpaceAddressBook/RequestToAddButton', () => {
-  const RequestToAddButton = ({
-    name,
-    alreadyRequested,
-    location,
-  }: {
-    name: string
-    alreadyRequested?: boolean
-    location?: string
-  }) => <button data-location={location}>{alreadyRequested ? `${name} requested` : `Request ${name}`}</button>
+  const RequestToAddButton = ({ name, location }: { name: string; location?: string }) => (
+    <button data-location={location}>Request {name}</button>
+  )
   return RequestToAddButton
 })
 
@@ -75,8 +68,6 @@ const renderTab = (props: Partial<Props> = {}) =>
       isAdmin
       isInvited={false}
       isPrivateAddressBookEnabled
-      pendingRequests={[]}
-      isRequestsSettled
       {...props}
     />,
   )
@@ -197,18 +188,13 @@ describe('SuggestedTab', () => {
   })
 
   it('offers Request to add to members when private address books are on', () => {
-    const [open, requested] = [suggestionBuilder().build(), suggestionBuilder().build()]
-    renderTab({
-      suggestions: [open, requested],
-      isAdmin: false,
-      pendingRequests: [spaceAddressBookRequestBuilder().with({ address: requested.address.toLowerCase() }).build()],
-    })
+    const suggestion = suggestionBuilder().build()
+    renderTab({ suggestions: [suggestion], isAdmin: false })
 
-    expect(screen.getByRole('button', { name: `Request ${open.suggestedName}` })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: `Request ${suggestion.suggestedName}` })).toHaveAttribute(
       'data-location',
       'suggested',
     )
-    expect(screen.getByRole('button', { name: `${requested.suggestedName} requested` })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
   })
 

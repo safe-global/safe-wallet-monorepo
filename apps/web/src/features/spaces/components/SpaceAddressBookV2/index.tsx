@@ -118,8 +118,6 @@ const SpaceAddressBookV2 = () => {
               isAdmin={isAdmin}
               isInvited={isInvited}
               isPrivateAddressBookEnabled={isPrivateAddressBookEnabled}
-              pendingRequests={requests.items}
-              isRequestsSettled={isRequestsSettled}
             />
           </TabsContent>
 

@@ -70,7 +70,7 @@ export type FeesPreviewData = {
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
 /**
- * @param options.isExecution - the executor is known, so signer-pays is estimated even one signature short.
+ * @param options.isExecution - the executor is known, so signer-pays is estimated, while signing it is not.
  * @param options.isPayFromSafe - the Safe pays the fee, so the CGW quote is priced instead of the signer estimate.
  */
 export const useFeesPreview = ({
@@ -269,7 +269,7 @@ export const useFeesPreview = ({
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
         fiatAmount: formatCurrencyMinimal(gasFiatUsd, currency),
@@ -289,7 +289,7 @@ export const useFeesPreview = ({
         isConfirmation: true,
         isLegacySigned: true,
         canCoverFees: true,
-        gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
+        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
@@ -300,7 +300,7 @@ export const useFeesPreview = ({
       isLegacySigned: true,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
         currency: nativeSymbol,
       },
@@ -310,43 +310,26 @@ export const useFeesPreview = ({
   }
 
   if (isSignerMode) {
-    // Multi-signer can't simulate execTransaction at sign time — executor unknown, signatures
-    // incomplete — nor can a proposer or a failed estimate, so we surface an explanatory note instead of a fake number.
-    if (safe.threshold > 1 || cannotEstimateLocally) {
+    // The gas is priced once the executor is known: not while signing, nor for a proposer or a failed estimate.
+    if (!isExecution || safe.threshold > 1 || cannotEstimateLocally) {
       return {
         ...base,
         canCoverFees: true,
-        gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
+        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
     }
 
-    const localGasFeeBaseUnits = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
-    const totalOutgoing = safeTx
-      ? computeTotalOutgoing({
-          safeTx,
-          gasFeeBaseUnits: localGasFeeBaseUnits,
-          relayCostFiat: 0,
-          relayCostFiatCode: currency,
-          nativeSymbol,
-          nativeDecimals,
-          gasTokenAddress: ZERO_ADDRESS,
-          gasSymbol: nativeSymbol,
-          gasDecimals: nativeDecimals,
-          balances,
-        })
-      : undefined
-
+    // No total outgoing: the signer's wallet or a sponsor pays the gas, not the Safe.
     return {
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
         currency: nativeSymbol,
       },
-      totalOutgoing,
       loading: !safeTx || gasLimitLoading || gasPriceLoading,
       error: false,
     }
@@ -358,7 +341,7 @@ export const useFeesPreview = ({
     return {
       ...base,
       canCoverFees: true,
-      gasFee: { label: 'Max gas fee', currency: gasSymbol },
+      gasFee: { label: 'Gas fee', currency: gasSymbol },
       loading: true,
       error: false,
     }
@@ -392,7 +375,7 @@ export const useFeesPreview = ({
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
         fiatAmount: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
@@ -414,7 +397,7 @@ export const useFeesPreview = ({
     return {
       ...base,
       canCoverFees: false,
-      gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
+      gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
       loading: false,
       error: false,
     }
@@ -424,7 +407,7 @@ export const useFeesPreview = ({
     ...base,
     canCoverFees: false,
     gasFee: {
-      label: 'Max gas fee',
+      label: 'Gas fee',
       amount: fallbackAmount,
       currency: nativeSymbol,
     },
