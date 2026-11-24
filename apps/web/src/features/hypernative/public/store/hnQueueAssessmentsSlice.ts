@@ -21,10 +21,17 @@ export const hnQueueAssessmentsSlice = createSlice({
     clearAssessments: (state) => {
       state.assessments = {}
     },
+    clearFailedAssessments: (state) => {
+      for (const [hash, assessment] of Object.entries(state.assessments)) {
+        if (assessment === null) {
+          delete state.assessments[hash as `0x${string}`]
+        }
+      }
+    },
   },
 })
 
-export const { setBatchAssessments, clearAssessments } = hnQueueAssessmentsSlice.actions
+export const { setBatchAssessments, clearAssessments, clearFailedAssessments } = hnQueueAssessmentsSlice.actions
 
 const selectQueueAssessments = (state: RootState): QueueAssessmentsState =>
   state[hnQueueAssessmentsSlice.name] || initialState

@@ -8,6 +8,7 @@ import * as useAuthTokenHook from '../../public/hooks/useAuthToken'
 import * as useThreatAnalysisHypernativeBatchHook from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
 import { hnQueueAssessmentsSlice } from '../../public/store/hnQueueAssessmentsSlice'
 import type { RootState } from '@/store'
+import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('../../public/hooks/useAuthToken')
@@ -467,6 +468,33 @@ describe('useThreatAnalysisHypernativeBatch', () => {
       rerender()
 
       expect(result.current[safeTxHash]).toBeUndefined()
+    })
+
+    it('keeps an assessment that loaded when the auth token changes, as on a silent refresh', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const assessment = { severity: 'OK' } as unknown as ThreatAnalysisResults
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+      const { result, rerender } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({ [safeTxHash]: assessment }),
+      })
+
+      mockUseAuthToken.mockReturnValue([
+        { token: `Bearer ${faker.string.alphanumeric(32)}`, isAuthenticated: true, isExpired: false },
+        jest.fn(),
+        jest.fn(),
+      ])
+      rerender()
+
+      expect(result.current[safeTxHash]).toEqual([assessment, undefined, false])
+      expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenLastCalledWith(
+        expect.objectContaining({ safeTxHashes: [] }),
+      )
     })
   })
 
