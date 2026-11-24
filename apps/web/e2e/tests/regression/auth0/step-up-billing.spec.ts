@@ -10,6 +10,7 @@ import {
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
+  workspaceIdNamed,
   workspaceResource,
   workspaceUrl,
   type EmailSession,
@@ -48,12 +49,9 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
     safePage,
   }) => {
     const workspace = new WorkspacePage(safePage)
-    const createdSetup = safePage.waitForResponse(
-      (response) => response.request().method() === 'POST' && response.url().endsWith('/v1/spaces/setup'),
-    )
     await safePage.goto('/welcome/create-space')
     await workspace.startTrialViaWizard(WORKSPACE_NAME, STARTER_SEATS)
-    const { spaceId: workspaceId } = (await (await createdSetup).json()) as { spaceId: string }
+    const workspaceId = await workspaceIdNamed(user, WORKSPACE_NAME)
     await expectLocalCheckout(safePage, workspaceId, 'Starter')
     await workspace.checkoutBackLink.click()
 
