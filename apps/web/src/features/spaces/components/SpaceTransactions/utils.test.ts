@@ -9,6 +9,7 @@ import {
   getBlockedByHint,
   getCounterparty,
   getNextNonce,
+  getNonceHint,
   getNextStatus,
   getQueueStatus,
   getQueueTypeLabel,
@@ -126,6 +127,21 @@ describe('getBlockedByHint', () => {
     ['waiting', '#1234 is waiting on other signers.'],
   ] as const)('says what #n needs when it is to %s', (status, hint) => {
     expect(getBlockedByHint(1234, status)).toBe(hint)
+  })
+})
+
+describe('getNonceHint', () => {
+  it.each([
+    ['execute', 5, 5, 'Ready to execute', 'Next in line. It can run now.'],
+    ['sign', 5, 5, 'Ready to sign', 'Next in line. Needs your signature.'],
+    ['sign', 7, 5, 'Ready to sign', 'You can sign now. It runs after #6.'],
+    ['sign', 7, undefined, 'Ready to sign', 'Needs your signature.'],
+    ['waiting', 5, 5, 'Signing', 'Next in line. Waiting on other signers.'],
+    ['waiting', 7, 5, 'Blocked', "Blocked. It can't run until #5 executes."],
+    ['blocked', 7, 5, 'Blocked', "Blocked. It can't run until #5 executes."],
+    ['blocked', 7, undefined, 'Blocked', "Blocked. It can't run until the earlier nonces execute."],
+  ] as const)('a %s row at #%s, next #%s, is "%s"', (status, nonce, nextNonce, state, hint) => {
+    expect(getNonceHint(status, nonce, nextNonce)).toEqual({ state, hint })
   })
 })
 

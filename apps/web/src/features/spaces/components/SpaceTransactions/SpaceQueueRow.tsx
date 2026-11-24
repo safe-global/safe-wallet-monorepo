@@ -26,13 +26,14 @@ import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
 import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
+import QueueNonce from '@safe-global/views/features/spaces/components/SpaceQueue/QueueNonce'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { QUEUE_COLUMNS, QUEUE_PINNED_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
-import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce } from './utils'
+import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce, getNonceHint } from './utils'
 import { NonceTakenAction, PendingRowAction, useIsNonceExecutingElsewhere } from './PendingRowAction'
 
 const PartyAvatar = ({ address, logoUri, size }: { address: string; logoUri?: string | null; size: number }) => {
@@ -241,7 +242,11 @@ const SpaceQueueRow = ({
         data-pin={QUEUE_PINNED_COLUMNS.Nonce}
         className="relative py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground"
       >
-        {conflict ? <ConflictBracket {...conflict} nonce={nonce} /> : nonce}
+        {conflict ? (
+          <ConflictBracket {...conflict} nonce={nonce} />
+        ) : (
+          <QueueNonce nonce={nonce} {...getNonceHint(status, nonce, nextNonce)} />
+        )}
       </TableCell>
 
       {compact ? (

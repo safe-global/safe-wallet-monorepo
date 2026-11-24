@@ -5,6 +5,7 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { QUEUE_COLUMNS, QUEUE_ROW_LABEL } from './columns'
 import { ConflictBracketStart } from './ConflictBracket'
+import QueueNonce from './QueueNonce'
 
 const ConflictHeaderRow = ({
   nonce,
@@ -21,7 +22,11 @@ const ConflictHeaderRow = ({
       data-pin="start"
       className="relative pt-4 pb-1 align-top text-center text-sm tabular-nums text-muted-foreground"
     >
-      {nonce}
+      <QueueNonce
+        nonce={nonce}
+        state="Conflicting transaction"
+        hint={`${size} conflicting transactions share this nonce; only one can execute.`}
+      />
       <ConflictBracketStart />
     </TableCell>
     <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="pt-4 pb-1 whitespace-normal">

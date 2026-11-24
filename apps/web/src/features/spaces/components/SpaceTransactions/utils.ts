@@ -210,3 +210,41 @@ export const getBlockedBy = (status: QueueStatus, nonce?: number, nextNonce?: nu
   if (status === 'blocked') return nextNonce
   return status === 'waiting' && nonce !== undefined && nonce > nextNonce ? nextNonce : undefined
 }
+
+/** The nonce tooltip: the row's state and what happens next, given where the Safe's next nonce stands */
+export const getNonceHint = (
+  status: QueueStatus,
+  nonce?: number,
+  nextNonce?: number,
+): { state: string; hint: string } => {
+  const isNext = nonce !== undefined && nonce === nextNonce
+  const isBehind = nonce !== undefined && nextNonce !== undefined && nonce > nextNonce
+  const blocked = {
+    state: 'Blocked',
+    hint:
+      nextNonce === undefined
+        ? "Blocked. It can't run until the earlier nonces execute."
+        : `Blocked. It can't run until #${nextNonce} executes.`,
+  }
+  switch (status) {
+    case 'execute':
+      return { state: 'Ready to execute', hint: 'Next in line. It can run now.' }
+    case 'sign':
+      return {
+        state: 'Ready to sign',
+        hint: isNext
+          ? 'Next in line. Needs your signature.'
+          : isBehind
+            ? `You can sign now. It runs after #${nonce - 1}.`
+            : 'Needs your signature.',
+      }
+    case 'waiting':
+      if (isBehind) return blocked
+      return {
+        state: 'Signing',
+        hint: isNext ? 'Next in line. Waiting on other signers.' : 'Waiting on other signers.',
+      }
+    case 'blocked':
+      return blocked
+  }
+}
