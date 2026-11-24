@@ -2,6 +2,7 @@
  * Email sessions of the local Auth0 of the isolated stack, and the Workspace data such a user starts from.
  */
 import { expect, request, test, type APIResponse, type BrowserContext, type Page } from '@playwright/test'
+import type { SpacesGetV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwBaseUrl, CHAIN_IDS, LS_NAMESPACE } from '../data/constants'
 import { AUTH0_CODE, Auth0Page } from '../pages/auth0.page'
 
@@ -183,6 +184,24 @@ export async function addWorkspaceSafes(
   })
 }
 
+export async function inviteMember(
+  admin: EmailSession,
+  workspaceId: string,
+  { email, name }: { email: string; name: string },
+): Promise<void> {
+  await gatewayRequest(admin, 'POST', `/v1/spaces/${workspaceId}/members/invite`, {
+    users: [{ type: 'email', email, role: 'MEMBER', name }],
+  })
+}
+
+export async function acceptInvite(member: EmailSession, workspaceId: string, name: string): Promise<void> {
+  await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/members/accept`, { name })
+  // The router guard sends a Workspace URL away until the gateway's (cached) Workspace list contains it.
+  await expect
+    .poll(async () => JSON.stringify(await gatewayRequest(member, 'GET', '/v1/spaces')), { timeout: 30_000 })
+    .toContain(workspaceId)
+}
+
 const billingSubscriptionsUrl = (uuid: string): string =>
   `${new URL(cgwBaseUrl()).origin}/billing/__test/customers/${uuid}/subscriptions`
 
@@ -208,13 +227,6 @@ export async function storeSubscription(
   })
   if (!response.ok) throw new Error(`POST ${url} returned ${response.status}: ${await response.text()}`)
   await expect.poll(() => offersTrial(session, uuid)).toBe(false)
-}
-
-/** Leaves a Workspace the gateway has not read yet without a plan, as every new Workspace is in production. */
-export async function removeSubscription(uuid: string): Promise<void> {
-  const url = billingSubscriptionsUrl(uuid)
-  const response = await fetch(url, { method: 'DELETE' })
-  if (!response.ok) throw new Error(`DELETE ${url} returned ${response.status}: ${await response.text()}`)
 }
 
 /** The name of the Workspace's plan, as the gateway reports it; null without a subscription. */
@@ -243,6 +255,24 @@ export async function workspaceName(session: EmailSession, uuid: string): Promis
     throw new Error(`GET /v1/spaces/${uuid} returned no name`)
   }
   return String(workspace.name)
+}
+
+/** The UUID of the user's Workspace named `name`, such as one the wizard created in the UI. */
+export async function workspaceIdNamed(session: EmailSession, name: string): Promise<string> {
+  let uuid: string | undefined
+  // The gateway caches the user's Workspace list, so a new Workspace can be missing for a moment.
+  await expect
+    .poll(
+      async () => {
+        const workspaces = (await gatewayRequest(session, 'GET', '/v1/spaces')) as SpacesGetV1ApiResponse
+        uuid = workspaces.find((workspace) => workspace.name === name)?.uuid
+        return uuid
+      },
+      { timeout: 30_000, message: `the Workspace "${name}" of ${session.email}` },
+    )
+    .toBeDefined()
+  if (!uuid) throw new Error(`GET /v1/spaces has no Workspace named "${name}" for ${session.email}`)
+  return uuid
 }
 
 /** The membership status (`INVITED`, `ACTIVE`, …) of the user with `email` in the Workspace, or null when not listed. */

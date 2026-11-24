@@ -1,5 +1,8 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type {
+  AddressBookRequestItemDto,
+  SpaceAddressBookItemDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
@@ -27,9 +30,12 @@ export const toSuggestedContacts = (
   signers: WorkspaceSigner[],
   workspaceItems: SpaceAddressBookItemDto[],
   configs: Chain[],
+  pendingRequests: AddressBookRequestItemDto[] = [],
 ): SuggestedContact[] =>
   signers
-    .filter((signer) => !workspaceItems.some((item) => sameAddress(item.address, signer.address)))
+    .filter((signer) =>
+      [...workspaceItems, ...pendingRequests].every((item) => !sameAddress(item.address, signer.address)),
+    )
     .map((signer) => {
       const safes = [...signer.safes].sort(bySafeLabel)
       return {

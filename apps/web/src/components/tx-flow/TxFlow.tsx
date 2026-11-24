@@ -11,7 +11,6 @@ import { ExecuteTxStep } from '../tx/ExecuteTxStep'
 import TxNote from '@/components/tx-flow/features/TxNote'
 import SignerSelect from '@/components/tx-flow/features/SignerSelect'
 import BalanceChanges from '@/components/tx-flow/features/BalanceChanges'
-import FeeInfoBanner from '@/components/tx-flow/features/FeeInfoBanner'
 import FeeCard from '@/components/tx-flow/features/FeeCard'
 import RiskConfirmation from '@/components/tx-flow/features/RiskConfirmation'
 import Batching from '@/components/tx-flow/actions/Batching'
@@ -41,6 +40,7 @@ type TxFlowProps<T extends unknown> = {
   isRejection?: TxFlowProviderProps<T>['isRejection']
   isBatch?: TxFlowProviderProps<T>['isBatch']
   isBatchable?: TxFlowProviderProps<T>['isBatchable']
+  declared?: TxFlowProviderProps<T>['declared']
   ReviewTransactionComponent?: ComponentType<ReviewTransactionProps>
   eventCategory?: string
 } & TxFlowContextType['txLayoutProps']
@@ -62,6 +62,7 @@ export const TxFlow = <T extends unknown>({
   isRejection,
   isBatch,
   isBatchable,
+  declared,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
   ...txLayoutProps
@@ -113,6 +114,7 @@ export const TxFlow = <T extends unknown>({
               isRejection={isRejection}
               isBatch={isBatch}
               isBatchable={isBatchable}
+              declared={declared}
               onContinueToExecute={handleContinueToExecute}
             >
               <FeePayerProvider>
@@ -122,7 +124,6 @@ export const TxFlow = <T extends unknown>({
                   <ReviewTransactionComponent onSubmit={() => nextStep()}>
                     <BalanceChanges />
                     <FeeCard />
-                    <FeeInfoBanner />
                     <TxNote />
                     <SignerSelect />
                     <RiskConfirmation />

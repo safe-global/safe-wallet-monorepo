@@ -29,6 +29,7 @@ import { type SignerWallet } from '@/components/common/WalletProvider/WalletCont
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
@@ -563,6 +564,41 @@ describe('SignOrExecute hooks', () => {
       expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ nestedTransaction: nestedChildTx }))
     })
 
+    it('should propose with the attribution the flow declared', async () => {
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => Promise.resolve(createSafeTx()))
+      const declared = declaredAttributionBuilder().build()
+      const ref: { current?: ReturnType<typeof useTxActions> } = {}
+      const Harness = () => {
+        ref.current = useTxActions()
+        return null
+      }
+      const flowContext: TxFlowContextType = { ...initialContext, declared }
+      render(createElement(TxFlowContext.Provider, { value: flowContext }, createElement(Harness)))
+
+      await ref.current!.signTx(createSafeTx())
+
+      expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ declared }))
+    })
+
     const mockEnvelopelessSafe = (version: string) =>
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
         safe: {
@@ -604,11 +640,17 @@ describe('SignOrExecute hooks', () => {
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
       const signSpy = jest.spyOn(txSender, 'dispatchOnChainSigning')
       const nestedSpy = jest.spyOn(txSender, 'dispatchNestedTxCreation').mockResolvedValue('nested-id')
-
-      const { result } = renderHook(() => useTxActions())
+      const declared = declaredAttributionBuilder().build()
+      const ref: { current?: ReturnType<typeof useTxActions> } = {}
+      const Harness = () => {
+        ref.current = useTxActions()
+        return null
+      }
+      const flowContext: TxFlowContextType = { ...initialContext, declared }
+      render(createElement(TxFlowContext.Provider, { value: flowContext }, createElement(Harness)))
       const safeTx = createSafeTx()
 
-      const id = await result.current.signTx(safeTx, undefined, 'origin')
+      const id = await ref.current!.signTx(safeTx, undefined, 'origin')
 
       // Without an envelope the child tx is proposed here, and the queue rejects unsigned proposals
       expect(id).toEqual({ txId: 'nested-id', isNestedSigning: true })
@@ -623,6 +665,7 @@ describe('SignOrExecute hooks', () => {
         origin: 'origin',
         scope: undefined,
         nestedTransaction: undefined,
+        declared,
       })
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(signSpy).not.toHaveBeenCalled()

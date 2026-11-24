@@ -25,7 +25,7 @@ describe('SafeProWorkspacesBanner', () => {
   it('renders the headline and the supporting line', () => {
     render(<SafeProWorkspacesBanner />)
 
-    expect(screen.getByText('Safe Pro: 30 days of Business free. No card.')).toBeInTheDocument()
+    expect(screen.getByText('Safe Pro: 14 days of Business free. No card.')).toBeInTheDocument()
     expect(screen.getByText('Your Safe accounts remain free in My accounts.')).toBeInTheDocument()
   })
 
