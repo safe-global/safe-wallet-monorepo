@@ -201,7 +201,7 @@ const SafeCardReadOnly = ({
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<div className="w-full min-w-0" />}>{card}</TooltipTrigger>
+      <TooltipTrigger render={<span className="contents" />}>{card}</TooltipTrigger>
       <TooltipContent>{tooltipTitle}</TooltipContent>
     </Tooltip>
   )
