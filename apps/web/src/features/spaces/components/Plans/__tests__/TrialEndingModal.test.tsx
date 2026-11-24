@@ -13,6 +13,7 @@ const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
 const mockUseIsAdmin = jest.fn()
 const mockOpenPortal = jest.fn()
+const mockIsTourOpen = jest.fn()
 const storage: Record<string, string> = {}
 
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
@@ -21,6 +22,9 @@ jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
 }))
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
+}))
+jest.mock('../../WorkspaceTour/hooks/useWorkspaceTourOpen', () => ({
+  useWorkspaceTourOpen: () => ({ isOpen: mockIsTourOpen() }),
 }))
 jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   useCurrentMembership: () => ({ id: 1 }),
@@ -131,6 +135,7 @@ describe('TrialEndingModal', () => {
     mockUseSpacePlan.mockReturnValue(trial(7))
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
     mockUseIsAdmin.mockReturnValue(true)
+    mockIsTourOpen.mockReturnValue(false)
   })
 
   it('words the countdown', () => {
@@ -238,6 +243,26 @@ describe('TrialEndingModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
+    expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
+  })
+
+  it('closes the reminder for good when the workspace tour starts over it', () => {
+    const { rerender } = render(<TrialEndingModal spaceId={SPACE_ID} />)
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
+
+    mockIsTourOpen.mockReturnValue(true)
+    rerender(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
+  })
+
+  it('does not show the reminder over a workspace tour that is already running', () => {
+    mockIsTourOpen.mockReturnValue(true)
+
+    render(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
   })
 })
