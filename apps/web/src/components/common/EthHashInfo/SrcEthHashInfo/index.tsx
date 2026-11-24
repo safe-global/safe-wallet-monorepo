@@ -40,8 +40,6 @@ export type EthHashInfoProps = {
   boldLabel?: boolean
   /** Shows the full address, instead of the copy hint, when hovering the address */
   showAddressTooltip?: boolean
-  /** Shows the name in a tooltip rather than the browser's title */
-  showNameTooltip?: boolean
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -68,7 +66,6 @@ const SrcEthHashInfo = ({
   href,
   boldLabel = false,
   showAddressTooltip = false,
-  showNameTooltip = false,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const isMobile = useIsBelowSm()
@@ -101,14 +98,6 @@ const SrcEthHashInfo = ({
     </>
   )
 
-  const nameLabel = href ? (
-    <NextLink href={href} className="overflow-hidden text-ellipsis text-inherit hover:underline">
-      {name}
-    </NextLink>
-  ) : (
-    <div className="overflow-hidden text-ellipsis">{name}</div>
-  )
-
   return (
     <div className={css.container}>
       {showAvatar && (
@@ -127,27 +116,16 @@ const SrcEthHashInfo = ({
       <div className={classnames('gap-1 overflow-hidden', { [css.inline]: onlyName })}>
         {!!name ? (
           <div
-            title={showNameTooltip ? undefined : name}
+            title={name}
             className={classnames('ethHashInfo-name flex items-center gap-1', { 'font-bold': boldLabel })}
             style={accountStylesWithBadge}
           >
-            {showNameTooltip ? (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <span
-                      data-testid="eth-hash-info-name"
-                      tabIndex={0}
-                      className="min-w-0 overflow-hidden rounded-sm outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
-                    />
-                  }
-                >
-                  {nameLabel}
-                </TooltipTrigger>
-                <TooltipContent>{name}</TooltipContent>
-              </Tooltip>
+            {href ? (
+              <NextLink href={href} className="overflow-hidden text-ellipsis text-inherit hover:underline">
+                {name}
+              </NextLink>
             ) : (
-              nameLabel
+              <div className="overflow-hidden text-ellipsis">{name}</div>
             )}
 
             {badgeTooltip

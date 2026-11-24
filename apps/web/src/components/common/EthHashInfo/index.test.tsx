@@ -177,22 +177,6 @@ describe('EthHashInfo', () => {
 
       expect(getByTitle('Address book name')).not.toHaveClass('font-bold')
     })
-
-    it('puts the name in the browser title by default', () => {
-      const { getByTitle, queryByTestId } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
-
-      expect(getByTitle('Address book name')).toBeInTheDocument()
-      expect(queryByTestId('eth-hash-info-name')).not.toBeInTheDocument()
-    })
-
-    it('puts the name in a tooltip instead of the browser title when asked to', async () => {
-      const { container, getByTestId, findByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showNameTooltip />)
-
-      expect(container.querySelector('[title]')).toBeNull()
-      act(() => getByTestId('eth-hash-info-name').focus())
-
-      expect(await findByText('Address book name', { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
-    })
   })
 
   describe('avatar', () => {

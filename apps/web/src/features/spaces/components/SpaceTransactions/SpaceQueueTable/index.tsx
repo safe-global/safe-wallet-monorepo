@@ -5,6 +5,7 @@ import { TooltipDelay } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
+import { AddToAddressBookProvider } from '../QueueParty/AddToAddressBook'
 import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import { useSignerWallets } from '../../../hooks/useSignerWallets'
 import ChainHeaderRow from '@safe-global/views/features/spaces/components/SpaceQueue/ChainHeaderRow'
@@ -343,57 +344,59 @@ const SpaceQueueTable = ({
 
   return (
     <QueueNavigationContext.Provider value={navigation}>
-      <DeleteTxDialogProvider>
-        {/* Every tooltip in the table opens after the same delay, those of the shared components it renders too */}
-        <TooltipDelay delay={QUEUE_TOOLTIP_DELAY}>
-          {/* A container, so a wider table scrolls in the panel instead of widening the page */}
-          <div
-            ref={panelRef}
-            data-scrolls-x={scrollsX ? '' : undefined}
-            className="@container w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2 [--table-pin-surface:var(--color-background-paper)]"
-          >
-            <ScopePool targets={scopeTargets} store={scopeStore} />
-            <table
-              aria-label="Pending transactions"
-              className={cn(
-                tableVariants({ variant: 'panel' }),
-                'table-fixed [&_td]:px-4',
-                !compact && QUEUE_TABLE_MIN_WIDTH,
-              )}
+      <AddToAddressBookProvider>
+        <DeleteTxDialogProvider>
+          {/* Every tooltip in the table opens after the same delay, those of the shared components it renders too */}
+          <TooltipDelay delay={QUEUE_TOOLTIP_DELAY}>
+            {/* A container, so a wider table scrolls in the panel instead of widening the page */}
+            <div
+              ref={panelRef}
+              data-scrolls-x={scrollsX ? '' : undefined}
+              className="@container w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2 [--table-pin-surface:var(--color-background-paper)]"
             >
-              <QueueTableHeader
-                compact={compact}
-                collapseAll={
-                  collapseUnit && collapsibleIds.length > 0
-                    ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
-                    : undefined
-                }
-              />
-              <TableBody ref={bodyRef}>
-                <QueueSkeletonRow height={paddingTop} rowHeight={transactionHeight} compact={compact} />
-                {virtualItems.map((virtualItem) => {
-                  const item = items[virtualItem.index]
-                  return (
-                    <VirtualRow
-                      key={item.key}
-                      item={item}
-                      index={virtualItem.index}
-                      scopeStore={scopeStore}
-                      measureRef={virtualizer.measureElement}
-                      compact={compact}
-                      chainConfigs={configs}
-                      onToggleSafe={onToggleSafe}
-                      onToggleChain={onToggleChain}
-                      onToggleGroup={onToggleGroup}
-                    />
-                  )
-                })}
-                <QueueSkeletonRow height={paddingBottom} rowHeight={transactionHeight} compact={compact} />
-              </TableBody>
-            </table>
-          </div>
-        </TooltipDelay>
-      </DeleteTxDialogProvider>
+              <ScopePool targets={scopeTargets} store={scopeStore} />
+              <table
+                aria-label="Pending transactions"
+                className={cn(
+                  tableVariants({ variant: 'panel' }),
+                  'table-fixed [&_td]:px-4',
+                  !compact && QUEUE_TABLE_MIN_WIDTH,
+                )}
+              >
+                <QueueTableHeader
+                  compact={compact}
+                  collapseAll={
+                    collapseUnit && collapsibleIds.length > 0
+                      ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
+                      : undefined
+                  }
+                />
+                <TableBody ref={bodyRef}>
+                  <QueueSkeletonRow height={paddingTop} rowHeight={transactionHeight} compact={compact} />
+                  {virtualItems.map((virtualItem) => {
+                    const item = items[virtualItem.index]
+                    return (
+                      <VirtualRow
+                        key={item.key}
+                        item={item}
+                        index={virtualItem.index}
+                        scopeStore={scopeStore}
+                        measureRef={virtualizer.measureElement}
+                        compact={compact}
+                        chainConfigs={configs}
+                        onToggleSafe={onToggleSafe}
+                        onToggleChain={onToggleChain}
+                        onToggleGroup={onToggleGroup}
+                      />
+                    )
+                  })}
+                  <QueueSkeletonRow height={paddingBottom} rowHeight={transactionHeight} compact={compact} />
+                </TableBody>
+              </table>
+            </div>
+          </TooltipDelay>
+        </DeleteTxDialogProvider>
+      </AddToAddressBookProvider>
     </QueueNavigationContext.Provider>
   )
 }

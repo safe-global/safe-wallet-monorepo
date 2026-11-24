@@ -14,7 +14,13 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectPendingTxById } from '@/store/pendingTxsSlice'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import Identicon from '@safe-global/views/components/common/Identicon'
+import ImageFallback from '@safe-global/views/components/common/ImageFallback'
+import QueueParty from '@safe-global/views/features/spaces/components/SpaceQueue/QueuePartyCard'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import PartyCard from './QueueParty/PartyCard'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
@@ -28,6 +34,52 @@ import { cn } from '@safe-global/views/utils/cn'
 import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
 import { getBlockedBy, getBlockedByHint, getCounterparty, getNonce } from './utils'
 import { NonceTakenAction, PendingRowAction, useIsNonceExecutingElsewhere } from './PendingRowAction'
+
+const PartyAvatar = ({ address, logoUri, size }: { address: string; logoUri?: string | null; size: number }) => {
+  const identicon = <Identicon address={address} size={size} />
+  return logoUri ? (
+    <ImageFallback
+      src={logoUri}
+      fallbackComponent={identicon}
+      alt=""
+      className="shrink-0 rounded-full"
+      style={{ width: size, height: size }}
+    />
+  ) : (
+    identicon
+  )
+}
+
+/** The other party's avatar and name; hovering or focusing it shows its party card */
+const CounterpartyParty = ({ party, chainId }: { party: AddressInfo; chainId: string }): ReactElement => {
+  const contact = useAddressBookItem(party.value, chainId)
+  const name = contact?.name || party.name || undefined
+  return (
+    <QueueParty
+      trigger={
+        <span
+          data-testid="counterparty-party"
+          tabIndex={0}
+          className="flex min-w-0 items-center gap-1.5 rounded-sm outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
+        />
+      }
+      card={
+        <PartyCard
+          address={party.value}
+          chainId={chainId}
+          name={name}
+          avatar={<PartyAvatar address={party.value} logoUri={party.logoUri} size={32} />}
+        />
+      }
+    >
+      {/* Grayscale only tints the avatar: the name is already a neutral colour */}
+      <span className="flex shrink-0 grayscale group-hover/transaction:grayscale-0">
+        <PartyAvatar address={party.value} logoUri={party.logoUri} size={20} />
+      </span>
+      <span className="min-w-0 truncate">{name ?? shortenAddress(party.value)}</span>
+    </QueueParty>
+  )
+}
 
 export const Counterparty = ({
   txInfo,
@@ -47,27 +99,11 @@ export const Counterparty = ({
       >
         {counterparty.join}
       </span>
-      {/* Grayscale only tints the avatar: the name is already a neutral colour. EthHashInfo's name box doesn't shrink
-        on its own, so it is let shrink here to end in an ellipsis. */}
-      <span className="min-w-0 truncate grayscale group-hover/transaction:grayscale-0 [&_.ethHashInfo-name]:min-w-0">
-        {'protocol' in counterparty ? (
-          counterparty.protocol
-        ) : (
-          <EthHashInfo
-            address={counterparty.party.value}
-            name={counterparty.party.name}
-            customAvatar={counterparty.party.logoUri}
-            chainId={chainId}
-            onlyName
-            shortAddress
-            showPrefix={false}
-            showCopyButton={false}
-            hasExplorer={false}
-            avatarSize={20}
-            showNameTooltip
-          />
-        )}
-      </span>
+      {'protocol' in counterparty ? (
+        <span className="min-w-0 truncate">{counterparty.protocol}</span>
+      ) : (
+        <CounterpartyParty party={counterparty.party} chainId={chainId} />
+      )}
     </span>
   )
 }

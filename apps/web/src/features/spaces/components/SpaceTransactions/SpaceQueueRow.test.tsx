@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { formatDateTime } from '@safe-global/utils/utils/date'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { advanceClock, render, renderOnFakeClock, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -51,22 +52,39 @@ describe('Counterparty', () => {
     expect(join).not.toHaveClass('capitalize', 'uppercase', 'rounded-md', 'bg-muted')
   })
 
-  it('shows the name in a tooltip, not a browser title', async () => {
+  it('opens the party card on focus, with no browser title', async () => {
     const txInfo = transfer('OUTGOING')
-    const { name } = (txInfo as { recipient: { name: string } }).recipient
+    const { name, value } = (txInfo as { recipient: { name: string; value: string } }).recipient
     const { container, user } = renderWithUserEvent(<Counterparty txInfo={txInfo} chainId="1" />)
 
     expect(container.querySelector('[title]')).toBeNull()
     await user.tab()
-    expect(screen.getByTestId('eth-hash-info-name')).toHaveFocus()
-    expect(screen.getByTestId('eth-hash-info-name')).toHaveClass(
-      'outline-hidden',
-      'focus-visible:ring-[3px]',
-      'focus-visible:ring-inset',
-      'focus-visible:ring-ring/50',
-    )
+    const trigger = screen.getByTestId('counterparty-party')
+    expect(trigger).toHaveFocus()
+    expect(trigger).toHaveClass('outline-hidden', 'focus-visible:ring-[3px]', 'focus-visible:ring-ring/50')
 
-    expect(await screen.findByText(name, { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
+    const card = await screen.findByText(name, { selector: '[data-slot="tooltip-content"] *' })
+    expect(card).toHaveClass('font-medium')
+    expect(screen.getByText(value)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument()
+  })
+
+  it('says an unnamed party is not in the address book and shows its short address', async () => {
+    const txInfo = { type: 'Custom', methodName: 'approve', to: { value: party().value } } as TransactionInfo
+    const { value } = (txInfo as { to: { value: string } }).to
+    const { user } = renderWithUserEvent(<Counterparty txInfo={txInfo} chainId="1" />)
+
+    expect(screen.getByTestId('counterparty-party')).toHaveTextContent(shortenAddress(value))
+    await user.tab()
+
+    expect(await screen.findByText('Not in your address book')).toBeInTheDocument()
+  })
+
+  it('shows a protocol by name, with no party card', () => {
+    render(<Counterparty txInfo={{ type: 'SwapOrder' } as TransactionInfo} chainId="1" />)
+
+    expect(screen.getByText('CoW Protocol')).toBeInTheDocument()
+    expect(screen.queryByTestId('counterparty-party')).not.toBeInTheDocument()
   })
 
   it('shows nothing when the transaction has no other party', () => {
