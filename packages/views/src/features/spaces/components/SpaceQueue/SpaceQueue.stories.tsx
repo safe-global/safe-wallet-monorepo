@@ -39,7 +39,7 @@ const bandTitle = (name: string, chains: ChainInfo[], defaultOpen?: boolean) => 
         details={[
           { label: 'Networks', value: chains.map(({ chainName }) => chainName).join(', ') },
           { label: 'Threshold', value: '2 of 3 signers' },
-          { label: 'Next nonce', value: '#42', mono: true },
+          { label: 'Next nonce', value: [{ text: '#42', mono: true }] },
           { label: 'You sign with', value: 'Ledger' },
         ]}
       />

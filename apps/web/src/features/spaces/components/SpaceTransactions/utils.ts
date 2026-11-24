@@ -388,11 +388,15 @@ export type SafeBandChainFacts = {
 }
 
 /** The facts the band's Safe card lists: networks, threshold, next nonce and the user's signing wallets */
+/** A run of a card value's text; the nonces are monospaced */
+export type SafeBandValuePart = { text: string; mono?: boolean }
+
 export const getSafeBandDetails = (
   chains: SafeBandChainFacts[],
   signerNames: string[],
-): Array<{ label: string; value: string; mono?: boolean }> => {
-  const perChain = (format: (chain: SafeBandChainFacts) => string | undefined) => {
+): Array<{ label: string; value: string | SafeBandValuePart[] }> => {
+  // One value when every network shares it, else each value with its network: "#12 on Ethereum, #4 on Base"
+  const perChain = (format: (chain: SafeBandChainFacts) => string | undefined): SafeBandValuePart[][] | undefined => {
     const known = chains.flatMap((chain) => {
       const value = format(chain)
       return value === undefined ? [] : [{ chain, value }]
@@ -400,17 +404,23 @@ export const getSafeBandDetails = (
     if (known.length === 0) return undefined
     const values = new Set(known.map(({ value }) => value))
     return chains.length === 1 || (values.size === 1 && known.length === chains.length)
-      ? known[0].value
-      : known.map(({ chain, value }) => `${value} on ${chain.chainName}`).join(', ')
+      ? [[{ text: known[0].value }]]
+      : known.map(({ chain, value }) => [{ text: value }, { text: ` on ${chain.chainName}` }])
   }
+  const join = (groups: SafeBandValuePart[][]): SafeBandValuePart[] =>
+    groups.flatMap((group, index) => (index === 0 ? group : [{ text: ', ' }, ...group]))
+  const asText = (parts: SafeBandValuePart[]): string => parts.map(({ text }) => text).join('')
+
   const threshold = perChain(({ threshold, owners }) =>
     threshold !== undefined && owners !== undefined ? `${threshold} of ${owners} signers` : undefined,
   )
   const nextNonce = perChain(({ nextNonce }) => (nextNonce === undefined ? undefined : `#${nextNonce}`))
   return [
     { label: chains.length === 1 ? 'Network' : 'Networks', value: chains.map(({ chainName }) => chainName).join(', ') },
-    ...(threshold ? [{ label: 'Threshold', value: threshold }] : []),
-    ...(nextNonce ? [{ label: 'Next nonce', value: nextNonce, mono: true }] : []),
+    ...(threshold ? [{ label: 'Threshold', value: asText(join(threshold)) }] : []),
+    ...(nextNonce
+      ? [{ label: 'Next nonce', value: join(nextNonce.map(([nonce, ...rest]) => [{ ...nonce, mono: true }, ...rest])) }]
+      : []),
     ...(signerNames.length > 0 ? [{ label: 'You sign with', value: signerNames.join(', ') }] : []),
   ]
 }

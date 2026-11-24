@@ -647,7 +647,7 @@ describe('getSafeBandDetails', () => {
       [
         { label: 'Network', value: 'Ethereum' },
         { label: 'Threshold', value: '2 of 3 signers' },
-        { label: 'Next nonce', value: '#12', mono: true },
+        { label: 'Next nonce', value: [{ text: '#12', mono: true }] },
         { label: 'You sign with', value: 'Ledger' },
       ],
     )
@@ -665,8 +665,29 @@ describe('getSafeBandDetails', () => {
     ).toEqual([
       { label: 'Networks', value: 'Ethereum, Base' },
       { label: 'Threshold', value: '2 of 3 signers' },
-      { label: 'Next nonce', value: '#12 on Ethereum, #4 on Base', mono: true },
+      {
+        label: 'Next nonce',
+        value: [
+          { text: '#12', mono: true },
+          { text: ' on Ethereum' },
+          { text: ', ' },
+          { text: '#4', mono: true },
+          { text: ' on Base' },
+        ],
+      },
     ])
+  })
+
+  it('names the network of each threshold when they differ', () => {
+    expect(
+      getSafeBandDetails(
+        [
+          { chainName: 'Ethereum', threshold: 2, owners: 3 },
+          { chainName: 'Base', threshold: 1, owners: 2 },
+        ],
+        [],
+      )[1],
+    ).toEqual({ label: 'Threshold', value: '2 of 3 signers on Ethereum, 1 of 2 signers on Base' })
   })
 
   it('leaves out what is not loaded', () => {

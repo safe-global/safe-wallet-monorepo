@@ -261,7 +261,11 @@ describe('SpaceQueueTable', () => {
 
     expect(await screen.findByText(safeA)).toHaveClass('font-mono')
     expect(screen.getByText(`${chainName}, ${otherChainName}`)).toBeInTheDocument()
-    expect(screen.getByText(`#7 on ${chainName}, #2 on ${otherChainName}`)).toHaveClass('font-mono')
+    const nonces = screen.getByText('#7').parentElement!
+    expect(nonces).toHaveTextContent(`#7 on ${chainName}, #2 on ${otherChainName}`)
+    expect(nonces).not.toHaveClass('font-mono')
+    expect(screen.getByText('#7')).toHaveClass('font-mono')
+    expect(screen.getByText('#2')).toHaveClass('font-mono')
   })
 
   it.each(['safe', 'status', 'next', 'network'] as const)(

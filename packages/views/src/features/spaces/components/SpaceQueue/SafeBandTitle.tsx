@@ -5,7 +5,8 @@ import { ChainLogo } from '@safe-global/views/features/spaces/components/Address
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import { QUEUE_HINT_CLASS, QueueHintContent } from './QueueHint'
 
-export type SafeBandDetail = { label: string; value: ReactNode; mono?: boolean }
+/** A value, or runs of it where the monospaced ones are nonces */
+export type SafeBandDetail = { label: string; value: ReactNode | Array<{ text: string; mono?: boolean }> }
 
 /** The band's Safe card: its name, full address and facts such as its networks and threshold */
 export const SafeBandCard = ({
@@ -21,10 +22,22 @@ export const SafeBandCard = ({
     <QueueHintContent title={name} body={<span className="break-all font-mono">{address}</span>} />
     {details.length > 0 && (
       <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-        {details.map(({ label, value, mono }) => (
+        {details.map(({ label, value }) => (
           <div key={label} className="contents">
             <dt className="opacity-70">{label}</dt>
-            <dd className={mono ? 'font-mono' : undefined}>{value}</dd>
+            <dd>
+              {Array.isArray(value)
+                ? value.map(({ text, mono }, index) =>
+                    mono ? (
+                      <span key={index} className="font-mono">
+                        {text}
+                      </span>
+                    ) : (
+                      text
+                    ),
+                  )
+                : value}
+            </dd>
           </div>
         ))}
       </dl>
