@@ -15,6 +15,7 @@ import {
   getQueueWarnings,
   getQueueTypeLabel,
   getRejectedNonces,
+  getSafeBandDetails,
   getSectionRows,
   getSettingsSummary,
   getSignHint,
@@ -635,5 +636,38 @@ describe('getSignHint', () => {
 
   it('has no hint when the user cannot sign', () => {
     expect(getSignHint({ tx: tx(1), status: 'waiting', nextNonce: 5 })).toBeUndefined()
+  })
+})
+
+describe('getSafeBandDetails', () => {
+  it('lists one network plainly', () => {
+    expect(getSafeBandDetails([{ chainName: 'Ethereum', nextNonce: 12, threshold: 2, owners: 3 }], ['Ledger'])).toEqual(
+      [
+        { label: 'Network', value: 'Ethereum' },
+        { label: 'Threshold', value: '2 of 3 signers' },
+        { label: 'Next nonce', value: '#12', mono: true },
+        { label: 'You sign with', value: 'Ledger' },
+      ],
+    )
+  })
+
+  it('says a shared threshold once and names the network of values that differ', () => {
+    expect(
+      getSafeBandDetails(
+        [
+          { chainName: 'Ethereum', nextNonce: 12, threshold: 2, owners: 3 },
+          { chainName: 'Base', nextNonce: 4, threshold: 2, owners: 3 },
+        ],
+        [],
+      ),
+    ).toEqual([
+      { label: 'Networks', value: 'Ethereum, Base' },
+      { label: 'Threshold', value: '2 of 3 signers' },
+      { label: 'Next nonce', value: '#12 on Ethereum, #4 on Base', mono: true },
+    ])
+  })
+
+  it('leaves out what is not loaded', () => {
+    expect(getSafeBandDetails([{ chainName: 'Ethereum' }], [])).toEqual([{ label: 'Network', value: 'Ethereum' }])
   })
 })

@@ -20,11 +20,32 @@ import ConflictHeaderRow from './ConflictHeaderRow'
 import QueueSkeletonRow from './QueueSkeletonRow'
 import QueueTableHeader from './QueueTableHeader'
 import SafeBandRow from './SafeBandRow'
-import SafeTitle from './SafeTitle'
+import SafeBandTitle, { SafeBandCard } from './SafeBandTitle'
 
 const SAFE = '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 const ETHEREUM: ChainInfo = { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }
 const GNOSIS: ChainInfo = { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null, shortName: 'gno' }
+
+const bandTitle = (name: string, chains: ChainInfo[], defaultOpen?: boolean) => (
+  <SafeBandTitle
+    safeAddress={SAFE}
+    name={name}
+    defaultOpen={defaultOpen}
+    chains={chains.map((chain) => ({ chain, collapsed: false, label: `Show ${chain.chainName}`, onClick: fn() }))}
+    card={
+      <SafeBandCard
+        name={name}
+        address={SAFE}
+        details={[
+          { label: 'Networks', value: chains.map(({ chainName }) => chainName).join(', ') },
+          { label: 'Threshold', value: '2 of 3 signers' },
+          { label: 'Next nonce', value: '#42', mono: true },
+          { label: 'You sign with', value: 'Ledger' },
+        ]}
+      />
+    }
+  />
+)
 
 const InTable = ({ children }: { children: ReactNode }) => (
   <Table>
@@ -45,12 +66,30 @@ export const SafeBandExpanded: Story = {
     <InTable>
       <SafeBandRow
         safeAddress={SAFE}
-        title={<SafeTitle safeAddress={SAFE} name="Treasury" chains={[ETHEREUM, GNOSIS]} />}
+        title={bandTitle('Treasury', [ETHEREUM, GNOSIS])}
         collapsed={false}
         summary="1 to execute · 2 to sign"
         onToggle={fn()}
       />
     </InTable>
+  ),
+}
+
+/** The Safe card, anchored to the band's avatar */
+export const SafeBandCardOpen: Story = {
+  parameters: { layout: 'fullscreen' },
+  render: () => (
+    <div className="px-4 pt-48">
+      <InTable>
+        <SafeBandRow
+          safeAddress={SAFE}
+          title={bandTitle('Treasury', [ETHEREUM, GNOSIS], true)}
+          collapsed={false}
+          summary=""
+          onToggle={fn()}
+        />
+      </InTable>
+    </div>
   ),
 }
 
@@ -60,7 +99,7 @@ export const SafeBandCollapsed: Story = {
     <InTable>
       <SafeBandRow
         safeAddress={SAFE}
-        title={<SafeTitle safeAddress={SAFE} chains={[ETHEREUM]} />}
+        title={bandTitle('0xA77D…98b6', [ETHEREUM])}
         collapsed
         summary="1 to execute · 2 to sign"
         onToggle={fn()}

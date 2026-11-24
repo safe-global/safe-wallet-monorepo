@@ -374,3 +374,39 @@ export const getSignHint = (args: {
     tx.executionInfo.confirmationsRequired - tx.executionInfo.confirmationsSubmitted === 1
   return isLast && nonce === args.nextNonce ? 'Yours is the last signature. You can execute right after.' : undefined
 }
+
+export type SafeBandChainFacts = {
+  chainName: string
+  nextNonce?: number
+  /** Unknown until the Safe's overview loads */
+  threshold?: number
+  owners?: number
+}
+
+/** The facts the band's Safe card lists: networks, threshold, next nonce and the user's signing wallets */
+export const getSafeBandDetails = (
+  chains: SafeBandChainFacts[],
+  signerNames: string[],
+): Array<{ label: string; value: string; mono?: boolean }> => {
+  const perChain = (format: (chain: SafeBandChainFacts) => string | undefined) => {
+    const known = chains.flatMap((chain) => {
+      const value = format(chain)
+      return value === undefined ? [] : [{ chain, value }]
+    })
+    if (known.length === 0) return undefined
+    const values = new Set(known.map(({ value }) => value))
+    return chains.length === 1 || (values.size === 1 && known.length === chains.length)
+      ? known[0].value
+      : known.map(({ chain, value }) => `${value} on ${chain.chainName}`).join(', ')
+  }
+  const threshold = perChain(({ threshold, owners }) =>
+    threshold !== undefined && owners !== undefined ? `${threshold} of ${owners} signers` : undefined,
+  )
+  const nextNonce = perChain(({ nextNonce }) => (nextNonce === undefined ? undefined : `#${nextNonce}`))
+  return [
+    { label: chains.length === 1 ? 'Network' : 'Networks', value: chains.map(({ chainName }) => chainName).join(', ') },
+    ...(threshold ? [{ label: 'Threshold', value: threshold }] : []),
+    ...(nextNonce ? [{ label: 'Next nonce', value: nextNonce, mono: true }] : []),
+    ...(signerNames.length > 0 ? [{ label: 'You sign with', value: signerNames.join(', ') }] : []),
+  ]
+}

@@ -14,6 +14,7 @@ import {
   fireEvent,
   render,
   renderOnFakeClock,
+  renderWithUserEvent,
   screen,
   within,
 } from '@/tests/test-utils'
@@ -218,7 +219,7 @@ describe('SpaceQueueTable', () => {
     try {
       const { user } = renderOnFakeClock(<SpaceQueueTable sections={[sections[0]]} groupBy="safe" />)
 
-      await user.hover(screen.getByTestId('chain-logos'))
+      await user.hover(screen.getByRole('button', { name: `Show ${chainName}` }))
       await advanceClock(QUEUE_TOOLTIP_DELAY - 50)
       expect(screen.queryByText(chainName, { selector: '[data-slot="tooltip-content"]' })).not.toBeInTheDocument()
 
@@ -227,6 +228,40 @@ describe('SpaceQueueTable', () => {
     } finally {
       jest.useRealTimers()
     }
+  })
+
+  it("gives each network of a Safe's band its own logo button and tooltip", async () => {
+    const { user } = renderWithUserEvent(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
+
+    const other = screen.getByRole('button', { name: `Show ${otherChainName}` })
+    expect(other).toHaveAttribute('aria-expanded', 'true')
+    await user.hover(other)
+    expect(await screen.findByText(otherChainName, { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
+  })
+
+  it('shows only the network whose logo is clicked, then every network on a second click', async () => {
+    render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
+
+    fireEvent.click(screen.getByRole('button', { name: `Show ${otherChainName}` }))
+
+    expect(screen.queryByText(`${onChainA.transaction.id} execute ${chainId} of ${safeA}`)).not.toBeInTheDocument()
+    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId} of ${safeA}`)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: `Show ${chainName}` })).toHaveAttribute('aria-expanded', 'false')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show all 2 networks' }))
+
+    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId} of ${safeA}`)).toBeInTheDocument()
+    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId} of ${safeA}`)).toBeInTheDocument()
+  })
+
+  it("opens the Safe's card on focus, with its address, networks and next nonces", async () => {
+    render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
+
+    act(() => screen.getByTestId('safe-band-identity').focus())
+
+    expect(await screen.findByText(safeA)).toHaveClass('font-mono')
+    expect(screen.getByText(`${chainName}, ${otherChainName}`)).toBeInTheDocument()
+    expect(screen.getByText(`#7 on ${chainName}, #2 on ${otherChainName}`)).toHaveClass('font-mono')
   })
 
   it.each(['safe', 'status', 'next', 'network'] as const)(

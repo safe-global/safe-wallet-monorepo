@@ -126,6 +126,7 @@ type VirtualRowProps = {
   onToggleSafe: (safeAddress: string) => void
   onToggleChain: (scopeKey: string) => void
   onToggleGroup: (id: string) => void
+  onFocusChain: (section: SpaceQueueSection, chainId: string) => void
 }
 
 // Memoized so a scroll re-renders only the rows that enter the window, not every row in it
@@ -139,6 +140,7 @@ const VirtualRow = memo(function VirtualRow({
   onToggleSafe,
   onToggleChain,
   onToggleGroup,
+  onFocusChain,
 }: VirtualRowProps): ReactElement {
   const rowProps = { ref: measureRef, 'data-index': index }
   if (isScoped(item)) {
@@ -155,11 +157,14 @@ const VirtualRow = memo(function VirtualRow({
           safeAddress={item.section.safeAddress}
           title={
             <SafeTitle
-              safeAddress={item.section.safeAddress}
+              section={item.section}
               chains={toChainInfos(
                 item.section.chains.map(({ chainId }) => chainId),
                 chainConfigs,
               )}
+              collapsed={item.collapsed}
+              collapsedChainIds={item.collapsedChainIds}
+              onFocusChain={(chainId) => onFocusChain(item.section, chainId)}
             />
           }
           collapsed={item.collapsed}
@@ -299,8 +304,8 @@ const SpaceQueueTable = ({
   const [highlights] = useState(createHighlightStore)
   useEffect(() => highlights.dispose, [highlights])
   const [goToTarget, setGoToTarget] = useState<QueueTarget>()
-  const latest = useRef({ groups, collapsedGroups, collapsedSafes })
-  latest.current = { groups, collapsedGroups, collapsedSafes }
+  const latest = useRef({ groups, collapsedGroups, collapsedSafes, collapsedChains })
+  latest.current = { groups, collapsedGroups, collapsedSafes, collapsedChains }
 
   const goTo = useCallback((target: QueueTarget) => {
     const { groups, collapsedGroups, collapsedSafes } = latest.current
@@ -340,6 +345,24 @@ const SpaceQueueTable = ({
   )
   const onToggleChain = useCallback((scopeKey: string) => setCollapsedChains((prev) => toggle(prev, scopeKey)), [])
   const onToggleGroup = useCallback((id: string) => setToggledGroups((prev) => toggle(prev, id)), [])
+  // A network's logo in the band shows only that network, or every network when it is already the only one shown
+  const onFocusChain = useCallback((section: SpaceQueueSection, chainId: string) => {
+    const { collapsedSafes, collapsedChains } = latest.current
+    const safeKey = getSafeKey(section.safeAddress)
+    const bandCollapsed = collapsedSafes.has(safeKey)
+    const target = getChainKey(section.safeAddress, chainId)
+    const keys = section.chains.map((chain) => getChainKey(section.safeAddress, chain.chainId))
+    const showAll = !bandCollapsed && keys.every((key) => collapsedChains.has(key) === (key !== target))
+    if (bandCollapsed) setToggledSafes((prev) => toggle(prev, safeKey))
+    setCollapsedChains((prev) => {
+      const next = new Set(prev)
+      for (const key of keys) {
+        if (showAll || key === target) next.delete(key)
+        else next.add(key)
+      }
+      return next
+    })
+  }, [])
 
   const scopeTargets = getScopeTargets(virtualItems.map((virtualItem) => items[virtualItem.index]))
 
@@ -388,6 +411,7 @@ const SpaceQueueTable = ({
                         onToggleSafe={onToggleSafe}
                         onToggleChain={onToggleChain}
                         onToggleGroup={onToggleGroup}
+                        onFocusChain={onFocusChain}
                       />
                     )
                   })}

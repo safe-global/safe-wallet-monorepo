@@ -23,7 +23,7 @@ import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvi
  * Key Props:
  * - TooltipProvider: `delay`
  * - TooltipDelay: `delay` for every tooltip inside it that doesn't set its own
- * - TooltipContent: `side`, `sideOffset`, `align`, `alignOffset`
+ * - TooltipContent: `side`, `sideOffset`, `align`, `alignOffset`, `anchor` (position against an element other than the trigger)
  * - Root / Trigger: see Base UI
  */
 
@@ -82,16 +82,18 @@ function TooltipContent({
   sideOffset = 8,
   align = 'center',
   alignOffset = 0,
+  anchor,
   children,
   ...props
 }: TooltipPrimitive.Popup.Props &
-  Pick<TooltipPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'>) {
+  Pick<TooltipPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'anchor' | 'side' | 'sideOffset'>) {
   const portalContainer = usePortalContainer()
   return (
     <TooltipPrimitive.Portal container={portalContainer}>
       <TooltipPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
+        anchor={anchor}
         side={side}
         sideOffset={sideOffset}
         className="isolate z-[var(--z-overlay)]"

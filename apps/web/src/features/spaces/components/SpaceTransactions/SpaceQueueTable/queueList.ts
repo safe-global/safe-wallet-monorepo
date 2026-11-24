@@ -16,7 +16,15 @@ import { getChainKey, getGroupId, type QueueGroup, type QueueGroupKind, type Que
 
 /** One table row of the queue, in display order */
 export type QueueListItem =
-  | { kind: 'safe'; key: string; section: SpaceQueueSection; collapsed: boolean; summary: string }
+  | {
+      kind: 'safe'
+      key: string
+      section: SpaceQueueSection
+      collapsed: boolean
+      /** The chains whose transactions are folded away inside the band */
+      collapsedChainIds: string[]
+      summary: string
+    }
   | {
       kind: 'group'
       key: string
@@ -107,6 +115,9 @@ export const buildQueueList = (args: {
       key: `safe-${safeKey}`,
       section,
       collapsed: safeCollapsed,
+      collapsedChainIds: section.chains
+        .map(({ chainId }) => chainId)
+        .filter((chainId) => args.collapsedChains.has(getChainKey(section.safeAddress, chainId))),
       summary: getSummary(chains.flatMap((chain) => chain.statuses.filter((status) => status !== undefined))),
     }
     if (safeCollapsed) return [band]
