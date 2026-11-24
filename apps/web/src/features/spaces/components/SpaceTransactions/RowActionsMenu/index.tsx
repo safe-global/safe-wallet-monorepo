@@ -121,9 +121,11 @@ type RowActionsMenuProps = {
   tx: Transaction
   /** False when a rejection already holds this nonce */
   canReject: boolean
+  /** Another transaction at this nonce is executing, so a replacement or rejection would be dead on arrival */
+  nonceTaken?: boolean
 }
 
-const RowActionsMenu = ({ tx, canReject }: RowActionsMenuProps): ReactElement => {
+const RowActionsMenu = ({ tx, canReject, nonceTaken = false }: RowActionsMenuProps): ReactElement => {
   const setTxFlow = useSetScopedTxFlow()
   const scope = useSafeScope()
   const openDeleteDialog = useOpenDeleteTxDialog()
@@ -150,21 +152,26 @@ const RowActionsMenu = ({ tx, canReject }: RowActionsMenuProps): ReactElement =>
   return (
     <CheckWallet noTooltip>
       {(isOk) => {
-        const canReplace = isOk && !isPending && nonce !== undefined
+        const canReplace = isOk && !isPending && !nonceTaken && nonce !== undefined
         // A connected wallet that doesn't sign for this Safe: the menu says why it can't act
         const notSigner = !isOk && !!wallet && !isSafeOwner
+        const takenReason = nonceTaken
+          ? `Another transaction at #${nonce} is executing. Available if it fails.`
+          : undefined
         return (
           <RowActionsMenuView
             nonce={nonce}
             canReplace={canReplace}
             canReject={canReplace && canReject}
-            replaceDisabledReason={notSigner ? NOT_SIGNER_REPLACE : undefined}
+            replaceDisabledReason={notSigner ? NOT_SIGNER_REPLACE : takenReason}
             rejectDisabledReason={
               notSigner
                 ? NOT_SIGNER_REJECT
-                : canReject
-                  ? undefined
-                  : `Transaction with nonce ${nonce} already has a reject transaction`
+                : takenReason
+                  ? takenReason
+                  : canReject
+                    ? undefined
+                    : `Transaction with nonce ${nonce} already has a reject transaction`
             }
             link={link}
             deleteItem={<DeleteItem tx={tx} onDelete={onDelete} />}

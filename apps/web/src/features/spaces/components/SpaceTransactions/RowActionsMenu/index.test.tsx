@@ -105,10 +105,10 @@ const tx = (nonce: number): Transaction =>
     executionInfo: { type: 'MULTISIG', nonce, confirmationsRequired: 2, confirmationsSubmitted: 1 },
   }) as Transaction
 
-const renderMenu = (transaction: Transaction, canReject = true) =>
+const renderMenu = (transaction: Transaction, canReject = true, nonceTaken = false) =>
   render(
     <DeleteTxDialogProvider>
-      <RowActionsMenu tx={transaction} canReject={canReject} />
+      <RowActionsMenu tx={transaction} canReject={canReject} nonceTaken={nonceTaken} />
     </DeleteTxDialogProvider>,
   )
 
@@ -152,6 +152,19 @@ describe('RowActionsMenu', () => {
       'aria-disabled',
       'true',
     )
+  })
+
+  it('disables replacing and rejecting while another transaction at the nonce is executing, and says why', async () => {
+    renderMenu(tx(7), true, true)
+    openMenu()
+
+    const reject = await screen.findByRole('menuitem', { name: 'Reject' })
+    expect(reject).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByRole('menuitem', { name: 'Replace with a transfer' })).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.hover(reject.parentElement!)
+    expect(
+      await screen.findByText('Another transaction at #7 is executing. Available if it fails.'),
+    ).toBeInTheDocument()
   })
 
   it('explains why a nonce cannot be rejected twice', async () => {

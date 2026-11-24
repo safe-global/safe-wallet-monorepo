@@ -2,14 +2,11 @@ import { useCallback, useEffect, useRef, type ComponentProps, type ReactElement,
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import {
   QueueProposerMark,
   QueueWarningMarker,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueRowMarks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { formatDateTime, formatShortTimeAgo } from '@safe-global/utils/utils/date'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import StatusLabel from '@/features/swap/public/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
@@ -17,8 +14,8 @@ import useChains, { useHasFeature } from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectPendingTxById } from '@/store/pendingTxsSlice'
 import { isBridgeOrderTxInfo, isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import Identicon from '@safe-global/views/components/common/Identicon'
-import ImageFallback from '@safe-global/views/components/common/ImageFallback'
+import QueuePartyAvatar from '@safe-global/views/features/spaces/components/SpaceQueue/QueuePartyAvatar'
+import QueueProposedTime from '@safe-global/views/features/spaces/components/SpaceQueue/QueueProposedTime'
 import QueueParty from '@safe-global/views/features/spaces/components/SpaceQueue/QueuePartyCard'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -47,21 +44,6 @@ import {
 } from './utils'
 import { NonceTakenAction, PendingRowAction, useIsNonceExecutingElsewhere } from './PendingRowAction'
 
-const PartyAvatar = ({ address, logoUri, size }: { address: string; logoUri?: string | null; size: number }) => {
-  const identicon = <Identicon address={address} size={size} />
-  return logoUri ? (
-    <ImageFallback
-      src={logoUri}
-      fallbackComponent={identicon}
-      alt=""
-      className="shrink-0 rounded-full"
-      style={{ width: size, height: size }}
-    />
-  ) : (
-    identicon
-  )
-}
-
 /** The other party's avatar and name; hovering or focusing it shows its party card */
 const CounterpartyParty = ({ party, chainId }: { party: AddressInfo; chainId: string }): ReactElement => {
   const contact = useAddressBookItem(party.value, chainId)
@@ -80,13 +62,13 @@ const CounterpartyParty = ({ party, chainId }: { party: AddressInfo; chainId: st
           address={party.value}
           chainId={chainId}
           name={name}
-          avatar={<PartyAvatar address={party.value} logoUri={party.logoUri} size={32} />}
+          avatar={<QueuePartyAvatar address={party.value} logoUri={party.logoUri} size={32} />}
         />
       }
     >
       {/* Grayscale only tints the avatar: the name is already a neutral colour */}
       <span className="flex shrink-0 grayscale group-hover/transaction:grayscale-0">
-        <PartyAvatar address={party.value} logoUri={party.logoUri} size={20} />
+        <QueuePartyAvatar address={party.value} logoUri={party.logoUri} size={20} />
       </span>
       {/* Unnamed, the short address is monospaced like any other address */}
       <span className={cn('min-w-0 truncate', !name && 'font-mono text-xs')}>
@@ -123,18 +105,9 @@ export const Counterparty = ({
   )
 }
 
-// Layout B's widths as the basis, the same on every row: when Details is narrower, the summary and the counterparty
-// shrink by the same amount on every row and truncate, so each part still lines up down the table
+// The same basis on every row, so the summary and counterparty shrink alike and line up down the table
 const DetailsSlot = ({ className, children }: { className: string; children?: ReactNode }): ReactElement => (
   <span className={`flex min-w-0 items-center ${className}`}>{children}</span>
-)
-
-/** Short proposed time ("5h ago"), with the full date and time in the tooltip */
-export const ProposedTime = ({ timestamp }: { timestamp: number }): ReactElement => (
-  <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
-    <TooltipTrigger className="truncate">{formatShortTimeAgo(timestamp)}</TooltipTrigger>
-    <TooltipContent>{formatDateTime(timestamp)}</TooltipContent>
-  </Tooltip>
 )
 
 // Painted on the cells like the hover pill, so it sits inside the row's insets with the same rounded ends
@@ -244,7 +217,7 @@ const SpaceQueueRow = ({
       ) : (
         <QueueActions tx={tx} dense signHint={getSignHint({ tx, status, nextNonce, signedOther })} />
       )}
-      <RowActionsMenu tx={tx} canReject={canReject} />
+      <RowActionsMenu tx={tx} canReject={canReject} nonceTaken={nonceTaken} />
     </div>
   )
 
@@ -319,7 +292,7 @@ const SpaceQueueRow = ({
               </DetailsSlot>
               <DetailsSlot className="shrink-0 gap-1.5 text-sm text-muted-foreground group-hover/transaction:text-foreground">
                 <span className="flex w-16 min-w-0">
-                  <ProposedTime timestamp={tx.timestamp} />
+                  <QueueProposedTime timestamp={tx.timestamp} />
                 </span>
                 {proposedOnly && executionInfo && <QueueProposerMark threshold={executionInfo.confirmationsRequired} />}
               </DetailsSlot>

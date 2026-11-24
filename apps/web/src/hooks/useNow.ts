@@ -31,10 +31,7 @@ const subscribeNothing = (): (() => void) => () => undefined
 
 const getNow = (): number => now
 
-/**
- * The current time, re-rendering every second while `enabled`. All callers share one interval, so a list of rows
- * with a running timer ticks together and costs one timer. While disabled the value is stale: don't read it.
- */
+/** The current time, re-rendering every second while `enabled`; stale while disabled */
 const useNow = (enabled = true): number => {
   const value = useSyncExternalStore(enabled ? subscribe : subscribeNothing, getNow, getNow)
   // Fresh on the first render too, before the subscription has refreshed the shared value
