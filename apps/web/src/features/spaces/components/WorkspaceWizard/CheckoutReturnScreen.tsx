@@ -34,12 +34,13 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
   })
   const isApplied = setup?.status === 'applied'
 
-  const openWorkspace = useCallback(() => {
-    dispatch(clearWorkspaceDraft())
-    void router.replace({
+  // Cleared only once the Workspace is open: the wizard names a first checkout's Workspace through the draft.
+  const openWorkspace = useCallback(async () => {
+    await router.replace({
       pathname: AppRoutes.spaces.index,
       query: { spaceId, [CHECKOUT_SESSION_QUERY_PARAM]: sessionId },
     })
+    dispatch(clearWorkspaceDraft())
   }, [dispatch, router, spaceId, sessionId])
 
   useEffect(() => {
@@ -51,7 +52,7 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
   useEffect(() => {
     if (!isApplied || hasOpened.current) return
     hasOpened.current = true
-    openWorkspace()
+    void openWorkspace()
   }, [isApplied, openWorkspace])
 
   if (!spaceId) {
@@ -97,7 +98,7 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
         title="Your trial started"
         body="We are still adding your Safe accounts and sending your invites. They will show up in your Workspace in a moment."
         actionLabel="Go to Workspace"
-        onAction={openWorkspace}
+        onAction={() => void openWorkspace()}
       />
     )
   }

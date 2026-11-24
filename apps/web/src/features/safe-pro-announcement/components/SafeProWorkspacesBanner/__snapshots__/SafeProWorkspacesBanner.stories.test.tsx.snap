@@ -45,7 +45,7 @@ exports[`./SafeProWorkspacesBanner.stories Default 1`] = `
                     data-slot="typography"
                     data-variant="paragraph-large-bold"
                   >
-                    Safe Pro: 30 days of Business free. No card.
+                    Safe Pro: 14 days of Business free. No card.
                   </p>
                   <span
                     class="m-0 text-sm leading-5 font-normal text-muted-foreground"

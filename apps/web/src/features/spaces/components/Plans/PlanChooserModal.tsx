@@ -17,7 +17,7 @@ import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import type { PlanLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { PlanCatalog } from './PlanCatalog'
+import { PlanPicker } from './PlanPicker'
 import { InfoTip } from './PlanStatusCard'
 import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
@@ -57,7 +57,7 @@ export default function PlanChooserModal({
 }) {
   const { paidPlans, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => buildPlanTiers(paidPlans).filter((tier) => tier.id !== ENTERPRISE_TIER.id), [paidPlans])
-  const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId)
+  const { seatCount, needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId)
   const { openPortal, isRedirecting: isOpeningPortal } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
   const { title, subtitle } = chooserCopy(reason, endedAt)
@@ -76,7 +76,7 @@ export default function PlanChooserModal({
   return (
     <Dialog open onOpenChange={(open) => !open && trimming && setPick(undefined)}>
       <DialogContent
-        size={trimming ? 'md' : 'lg'}
+        size={trimming ? 'md' : 'sm'}
         surface="card"
         padding="sm"
         showCloseButton={Boolean(trimming)}
@@ -124,19 +124,16 @@ export default function PlanChooserModal({
                     </Button>
                   </Track>
                 ) : isLoading ? (
-                  <div className="flex gap-4" data-testid="plan-chooser-skeleton">
-                    <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                    <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                  </div>
+                  <Skeleton className="h-105 w-full rounded-lg-xl" data-testid="plan-chooser-skeleton" />
                 ) : tiers.length === 0 ? (
                   <Alert variant="info">
                     <AlertSeverityIcon variant="info" />
                     <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
                   </Alert>
                 ) : (
-                  <PlanCatalog
-                    embedded
+                  <PlanPicker
                     tiers={tiers}
+                    initialSeats={seatCount}
                     onSubscribe={subscribe}
                     isBusy={isBusy}
                     location={PlanLocation.LOCKED_MODAL}
