@@ -4,7 +4,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import type { ReactNode } from 'react'
 import { Provider } from 'react-redux'
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { makeStore, setStoreInstance } from '@/store'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
@@ -85,12 +85,11 @@ const ownedSafesHandler = (resolver?: (owner: string) => Promise<Response> | Res
     return HttpResponse.json(owner === WALLET ? { [CHAIN_ID]: [NESTED_OWNER_SAFE] } : { [CHAIN_ID]: [] })
   })
 
-// One store for the whole render: the test-utils wrapper builds a new store on every rerender
-const renderCheck = (enabled = true) => {
+const renderCheckWithStableStore = (options: { skip?: boolean } = {}) => {
   const store = makeStore()
   setStoreInstance(store)
   const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
-  return renderHook(() => useSafeSignerCheck(safes, enabled), { wrapper })
+  return renderHook(() => useSafeSignerCheck(safes, options), { wrapper })
 }
 
 describe('useSafeSignerCheck', () => {
@@ -102,7 +101,7 @@ describe('useSafeSignerCheck', () => {
   })
 
   it('resolves owners, proposers and nested-Safe owners as signers and others as not signers', async () => {
-    const { result } = renderCheck()
+    const { result } = renderCheckWithStableStore()
 
     await waitFor(() => expect(result.current(strangerSafe)).toBe('not-signer'))
     expect(result.current(ownedSafe)).toBe('signer')
@@ -111,7 +110,7 @@ describe('useSafeSignerCheck', () => {
   })
 
   it('enables an owned Safe right away while the other checks are pending', () => {
-    const { result } = renderCheck()
+    const { result } = renderCheckWithStableStore()
 
     expect(result.current(ownedSafe)).toBe('signer')
     expect(result.current(proposerSafe)).toBe('pending')
@@ -121,10 +120,9 @@ describe('useSafeSignerCheck', () => {
   it('keeps a nested-owner Safe pending while only the owned-Safes query is loading', async () => {
     server.use(ownedSafesHandler(async () => (await delay('infinite')) as never))
 
-    const { result } = renderCheck()
+    const { result } = renderCheckWithStableStore()
 
     await waitFor(() => expect(delegatesRequests).toHaveLength(1))
-    await new Promise((resolve) => setTimeout(resolve, 500))
     expect(result.current(proposerSafe)).toBe('pending')
     expect(result.current(nestedSafe)).toBe('pending')
     expect(result.current(strangerSafe)).toBe('pending')
@@ -133,7 +131,7 @@ describe('useSafeSignerCheck', () => {
   it('treats a failed proposer query as no proposer role without blocking the list', async () => {
     server.use(delegatesHandler(() => new HttpResponse(null, { status: 500 })))
 
-    const { result } = renderCheck()
+    const { result } = renderCheckWithStableStore()
 
     await waitFor(() => expect(result.current(proposerSafe)).toBe('not-signer'))
     expect(result.current(nestedSafe)).toBe('signer')
@@ -142,14 +140,14 @@ describe('useSafeSignerCheck', () => {
   it('treats a failed owned-Safes query as no nested-owner role', async () => {
     server.use(ownedSafesHandler(() => new HttpResponse(null, { status: 500 })))
 
-    const { result } = renderCheck()
+    const { result } = renderCheckWithStableStore()
 
     await waitFor(() => expect(result.current(nestedSafe)).toBe('not-signer'))
     expect(result.current(proposerSafe)).toBe('signer')
   })
 
   it('makes one delegates request for the chain, keyed by the wallet', async () => {
-    const { result } = renderCheck()
+    const { result } = renderCheckWithStableStore()
 
     await waitFor(() => expect(result.current(strangerSafe)).toBe('not-signer'))
     expect(delegatesRequests).toEqual([{ chainId: CHAIN_ID, delegate: WALLET }])
@@ -160,8 +158,8 @@ describe('useSafeSignerCheck', () => {
     const onRequest = ({ request }: { request: Request }) => requests.push(request.url)
     server.events.on('request:start', onRequest)
 
-    renderCheck(false)
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    renderCheckWithStableStore({ skip: true })
+    await act(() => Promise.resolve())
     server.events.removeListener('request:start', onRequest)
 
     expect(requests.filter((url) => /\/v2\/(safes|chains|owners)/.test(url))).toEqual([])
@@ -178,7 +176,7 @@ describe('useSafeSignerCheck', () => {
         return HttpResponse.json(owner === WALLET ? { [CHAIN_ID]: [NESTED_OWNER_SAFE] } : { [CHAIN_ID]: [] })
       }),
     )
-    const { result, rerender } = renderCheck()
+    const { result, rerender } = renderCheckWithStableStore()
     await waitFor(() => expect(result.current(nestedSafe)).toBe('signer'))
 
     mockUseWallet.mockReturnValue({ address: WALLET_B })

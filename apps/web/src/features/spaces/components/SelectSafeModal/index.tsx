@@ -8,7 +8,7 @@ import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Message as CheckWalletMessage } from '@/components/common/CheckWallet'
+import { CheckWalletMessage } from '@/components/common/CheckWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import {
@@ -47,10 +47,11 @@ const SelectSafeModal = () => {
     () => flatSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
     [flatSafes, undeployedSafes],
   )
-  const hasHiddenUndeployedSafes = selectableSafes.length < flatSafes.length
+  const areAllSafesUndeployed = flatSafes.length > 0 && selectableSafes.length === 0
   const filteredSafes = useSearchFilter(selectableSafes, query, matchSafe)
   const wallet = useWallet()
-  const getSignerStatus = useSafeSignerCheck(flatSafes, opened && isNewTxAction)
+  // flatSafes, not selectableSafes: the same Safe set shares the overviews cache entry with useSpaceSafes
+  const getSignerStatus = useSafeSignerCheck(flatSafes, { skip: !opened || !isNewTxAction })
   const { actionMapper, resetActiveSafe } = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
@@ -60,28 +61,26 @@ const SelectSafeModal = () => {
     void resetActiveSafe()
   }, [resetActiveSafe])
 
-  const isSwapAction = actionType === ESafeAction.Swap
-  const getSwapDisabledTooltip = useCallback(
-    (safe: SafeItem): string | undefined => {
-      if (!isSwapAction) return undefined
-      const chain = chains.find((c) => c.chainId === safe.chainId)
-      if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)) return SWAP_DISABLED_TOOLTIP
-      return undefined
-    },
-    [isSwapAction, chains],
-  )
-
-  // Same gate as the Safe-level New transaction button (CheckWallet)
-  const getNewTxDisabled = useCallback(
+  const getDisabledState = useCallback(
     (safe: SafeItem): { disabled: boolean; tooltip?: string } => {
-      if (!isNewTxAction) return { disabled: false }
-      if (!wallet) return { disabled: true, tooltip: CheckWalletMessage.WalletNotConnected }
-      const status = getSignerStatus(safe)
-      if (status === 'pending') return { disabled: true }
-      if (status === 'not-signer') return { disabled: true, tooltip: CheckWalletMessage.NotSafeOwner }
+      if (actionType === ESafeAction.Swap) {
+        const chain = chains.find((c) => c.chainId === safe.chainId)
+        if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS))
+          return { disabled: true, tooltip: SWAP_DISABLED_TOOLTIP }
+        return { disabled: false }
+      }
+
+      // Same gate as the Safe-level New transaction button (CheckWallet)
+      if (actionType === ESafeAction.NewTransaction) {
+        if (!wallet) return { disabled: true, tooltip: CheckWalletMessage.WalletNotConnected }
+        const status = getSignerStatus(safe)
+        if (status === 'pending') return { disabled: true }
+        if (status === 'not-signer') return { disabled: true, tooltip: CheckWalletMessage.NotSafeOwner }
+      }
+
       return { disabled: false }
     },
-    [isNewTxAction, wallet, getSignerStatus],
+    [actionType, chains, wallet, getSignerStatus],
   )
 
   const handleClose = useCallback(() => {
@@ -122,16 +121,12 @@ const SelectSafeModal = () => {
                 </div>
               ) : filteredSafes.length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">
-                  {hasHiddenUndeployedSafes && selectableSafes.length === 0
-                    ? NO_ACTIVATED_SAFES_MESSAGE
-                    : 'No safes found'}
+                  {areAllSafesUndeployed ? NO_ACTIVATED_SAFES_MESSAGE : 'No safes found'}
                 </p>
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {filteredSafes.map((safe) => {
-                    const swapDisabledTooltip = getSwapDisabledTooltip(safe)
-                    const newTx = getNewTxDisabled(safe)
-                    const disabledTooltip = swapDisabledTooltip ?? newTx.tooltip
+                    const { disabled, tooltip } = getDisabledState(safe)
                     return (
                       <SafeCardReadOnly
                         key={`${safe.chainId}:${safe.address}`}
@@ -139,8 +134,8 @@ const SelectSafeModal = () => {
                         hideContextMenu
                         showPending={false}
                         onClick={() => void handleSafeClick(safe)}
-                        disabled={Boolean(swapDisabledTooltip) || newTx.disabled}
-                        disabledTooltip={disabledTooltip}
+                        disabled={disabled}
+                        disabledTooltip={tooltip}
                         className="px-4 sm:px-4"
                       />
                     )

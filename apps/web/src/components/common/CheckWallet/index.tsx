@@ -20,7 +20,7 @@ export type CheckWalletProps = {
   allowProposer?: boolean
 }
 
-export enum Message {
+export enum CheckWalletMessage {
   WalletNotConnected = 'Please connect your wallet',
   SDKNotInitialized = 'Still loading. Try again in a moment.',
   NotSafeOwner = 'Your connected wallet is not a signer of this Safe account',
@@ -52,14 +52,14 @@ const CheckWallet = ({
 
   const message = useMemo(() => {
     if (!wallet) {
-      return Message.WalletNotConnected
+      return CheckWalletMessage.WalletNotConnected
     }
     if (!sdk && safeLoaded) {
-      return Message.SDKNotInitialized
+      return CheckWalletMessage.SDKNotInitialized
     }
 
     if (isUndeployedSafe && !allowUndeployedSafe) {
-      return Message.SafeNotActivated
+      return CheckWalletMessage.SafeNotActivated
     }
 
     if (
@@ -69,11 +69,11 @@ const CheckWallet = ({
       !isNestedSafeOwner &&
       (!isOnlySpendingLimit || !allowSpendingLimit)
     ) {
-      return Message.NotSafeOwner
+      return CheckWalletMessage.NotSafeOwner
     }
 
     if (!allowProposer && isProposer && !isSafeOwner && !isNestedSafeOwner) {
-      return Message.NotSafeOwner
+      return CheckWalletMessage.NotSafeOwner
     }
   }, [
     allowNonOwner,
