@@ -88,7 +88,10 @@ const CounterpartyParty = ({ party, chainId }: { party: AddressInfo; chainId: st
       <span className="flex shrink-0 grayscale group-hover/transaction:grayscale-0">
         <PartyAvatar address={party.value} logoUri={party.logoUri} size={20} />
       </span>
-      <span className="min-w-0 truncate">{name ?? shortenAddress(party.value)}</span>
+      {/* Unnamed, the short address is monospaced like any other address */}
+      <span className={cn('min-w-0 truncate', !name && 'font-mono text-xs')}>
+        {name ?? shortenAddress(party.value)}
+      </span>
     </QueueParty>
   )
 }

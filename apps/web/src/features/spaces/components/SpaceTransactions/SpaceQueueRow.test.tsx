@@ -63,6 +63,7 @@ describe('Counterparty', () => {
     expect(trigger).toHaveFocus()
     expect(trigger).toHaveClass('outline-hidden', 'focus-visible:ring-[3px]', 'focus-visible:ring-ring/50')
 
+    expect(screen.getByText(name, { selector: '[data-testid="counterparty-party"] span' })).not.toHaveClass('font-mono')
     const card = await screen.findByText(name, { selector: '[data-slot="tooltip-content"] *' })
     expect(card).toHaveClass('font-medium')
     expect(screen.getByText(value)).toBeInTheDocument()
@@ -75,6 +76,7 @@ describe('Counterparty', () => {
     const { user } = renderWithUserEvent(<Counterparty txInfo={txInfo} chainId="1" />)
 
     expect(screen.getByTestId('counterparty-party')).toHaveTextContent(shortenAddress(value))
+    expect(screen.getByText(shortenAddress(value))).toHaveClass('font-mono', 'text-xs')
     await user.tab()
 
     expect(await screen.findByText('Not in your address book')).toBeInTheDocument()
