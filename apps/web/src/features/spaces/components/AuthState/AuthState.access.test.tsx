@@ -6,6 +6,7 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import * as useChains from '@/hooks/useChains'
 import { useSpaceMembersByStatus } from '../../public/hooks/useSpaceMembers'
 import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressBook'
@@ -21,16 +22,9 @@ jest.mock('../Plans/TrialEndingModal', () => ({ __esModule: true, default: () =>
 jest.mock('../LoadingState', () => ({ __esModule: true, default: () => <div data-testid="loading" /> }))
 jest.mock('../UnauthorizedState', () => ({ __esModule: true, default: () => <div data-testid="unauthorized" /> }))
 
-const member = {
-  id: 1,
-  role: 'MEMBER',
-  status: 'ACTIVE',
-  name: 'B',
-  invitedBy: null,
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedAt: '2026-01-01T00:00:00Z',
-  user: { id: userId, status: 'ACTIVE' },
-}
+const member = memberBuilder()
+  .with({ user: memberUserBuilder().with({ id: userId }).build() })
+  .build()
 
 const emptyQueue: SpaceQueuedItemPage = {
   count: 0,
