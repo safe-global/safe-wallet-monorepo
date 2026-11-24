@@ -210,6 +210,7 @@ export const ExecuteForm = ({
     isSubmitDisabled ||
     selection.isQuoteLoading ||
     selection.hasQuoteError ||
+    selection.safeCannotCoverFee ||
     isSubmitLoading ||
     disableSubmit ||
     isExecutionLoop ||
