@@ -12,7 +12,9 @@ export const isSafeAffectedByZodiacVulnerability = async (chainId: string, safeA
   try {
     const url = `${SECURITY_CHECK_URL}?safes=${encodeURIComponent(`${chainId}:${safeAddress}`)}`
     const response = await fetch(url)
-    if (!response.ok) throw new Error(`Zodiac security-check responded with ${response.status}`)
+    if (!response.ok) {
+      throw new Error(`Zodiac security-check responded with ${response.status}`)
+    }
 
     const { status } = (await response.json()) as SecurityCheckResponse
     return status === 'affected'

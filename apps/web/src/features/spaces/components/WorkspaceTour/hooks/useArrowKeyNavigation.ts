@@ -8,9 +8,15 @@ const isTyping = (target: EventTarget | null) =>
 export const useArrowKeyNavigation = ({ onNext, onBack }: { onNext: () => void; onBack: () => void }) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (isTyping(event.target)) return
-      if (event.key === 'ArrowRight') onNext()
-      if (event.key === 'ArrowLeft') onBack()
+      if (isTyping(event.target)) {
+        return
+      }
+      if (event.key === 'ArrowRight') {
+        onNext()
+      }
+      if (event.key === 'ArrowLeft') {
+        onBack()
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)

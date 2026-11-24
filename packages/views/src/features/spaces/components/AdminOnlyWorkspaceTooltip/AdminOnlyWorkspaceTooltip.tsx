@@ -18,7 +18,9 @@ export const AdminOnlyWorkspaceTooltip = ({
   side = 'right',
   message = ADMIN_ONLY_WORKSPACE_TOOLTIP_MESSAGE,
 }: AdminOnlyWorkspaceTooltipProps): ReactElement => {
-  if (isAdmin) return children
+  if (isAdmin) {
+    return children
+  }
 
   return (
     <Tooltip>

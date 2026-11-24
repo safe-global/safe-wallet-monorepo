@@ -46,14 +46,22 @@ export const getLocalDecimalSeparator = (): string => {
  */
 export const formatAmount = (number: string | number, precision = 5, maxLength = 6): string => {
   const float = Number(number)
-  if (float === 0) return '0'
-  if (float === Math.round(float)) precision = 0
-  if (Math.abs(float) < 0.00001) return '< 0.00001'
+  if (float === 0) {
+    return '0'
+  }
+  if (float === Math.round(float)) {
+    precision = 0
+  }
+  if (Math.abs(float) < 0.00001) {
+    return '< 0.00001'
+  }
 
   const fullNum = getNumberFormatter(precision).format(float)
 
   // +3 for the decimal point and the two decimal places
-  if (fullNum.length <= maxLength + 3) return fullNum
+  if (fullNum.length <= maxLength + 3) {
+    return fullNum
+  }
 
   return getNumberFormatter(2, true).format(float)
 }
@@ -133,10 +141,14 @@ export function percentageOfTotal(balance: number | string, total: number | stri
   const balanceNum = Number(balance)
 
   // invalid, zero or negative totals → return 0 to avoid division by 0/−n
-  if (!Number.isFinite(totalNum) || totalNum <= 0) return 0
+  if (!Number.isFinite(totalNum) || totalNum <= 0) {
+    return 0
+  }
 
   // invalid balances → treat as 0 so the overall percentage still works
-  if (!Number.isFinite(balanceNum)) return 0
+  if (!Number.isFinite(balanceNum)) {
+    return 0
+  }
 
   return balanceNum / totalNum
 }

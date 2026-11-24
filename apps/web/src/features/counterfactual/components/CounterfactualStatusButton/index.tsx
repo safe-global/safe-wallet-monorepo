@@ -11,7 +11,9 @@ const CounterfactualStatusButton = () => {
   const { safe, safeAddress } = useSafeInfo()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
 
-  if (safe.deployed) return null
+  if (safe.deployed) {
+    return null
+  }
 
   const isActivating = undeployedSafe?.status.status !== 'AWAITING_EXECUTION'
 

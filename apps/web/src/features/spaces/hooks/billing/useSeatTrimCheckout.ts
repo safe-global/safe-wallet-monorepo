@@ -9,7 +9,9 @@ export const useSeatTrimCheckout = (spaceId: string, returnPathname?: string) =>
 
   const checkout = useCallback(
     async (paymentLinkId: string, removed: SafeRef[] = []): Promise<boolean> => {
-      if (removed.length > 0 && !(await trim(removed))) return false
+      if (removed.length > 0 && !(await trim(removed))) {
+        return false
+      }
       await startCheckout(paymentLinkId)
       return true
     },

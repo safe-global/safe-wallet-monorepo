@@ -141,7 +141,9 @@ export const SafenetAuditRow = ({
   isLast,
 }: SafenetAuditRowProps): ReactElement | null => {
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
-  if (!safeTxHash || !display) return null
+  if (!safeTxHash || !display) {
+    return null
+  }
   if (display.publicStatus === CheckStatus.UNAVAILABLE) {
     return <SafenetUnavailableAuditRowView reason={display.unavailableReason} isLast={isLast} />
   }

@@ -168,7 +168,9 @@ const SafeAccountSelector = ({
       <Select
         value={value || null}
         onValueChange={(next) => {
-          if (next != null) onChange(next)
+          if (next != null) {
+            onChange(next)
+          }
         }}
         disabled={disabled}
         // On the root, not the trigger: the root owns the hidden input a form submits.

@@ -26,7 +26,9 @@ type SummaryRequest = { safes: string[]; currency: string | null; trusted: strin
 const totalFor = new Map<string, string>()
 const expectedTotal = (trusted: boolean, currency: string, round = 0) => {
   const key = `${trusted}:${currency}:${round}`
-  if (!totalFor.has(key)) totalFor.set(key, faker.finance.amount())
+  if (!totalFor.has(key)) {
+    totalFor.set(key, faker.finance.amount())
+  }
   return totalFor.get(key)
 }
 
@@ -228,7 +230,9 @@ describe('usePortfolioSummaries', () => {
       http.get(`${GATEWAY_URL}/v2/portfolio/summaries`, async ({ request }) => {
         const safes = (new URL(request.url).searchParams.get('safes') ?? '').split(',')
         const isSlowList = safes.length === 1
-        if (isSlowList) await delay(100)
+        if (isSlowList) {
+          await delay(100)
+        }
         const updatedAt = (isSlowList ? olderAt : newerAt).toISOString()
         return HttpResponse.json(
           safes.map((safeId) => {

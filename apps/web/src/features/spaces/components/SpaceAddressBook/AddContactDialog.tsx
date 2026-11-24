@@ -129,7 +129,9 @@ const AddContactDialog = ({
 
       const result = await submit(item, spaceId ?? '')
 
-      if (isElevationRequiredError(result.error)) return
+      if (isElevationRequiredError(result.error)) {
+        return
+      }
       if (result.error) {
         const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
         setError(message)

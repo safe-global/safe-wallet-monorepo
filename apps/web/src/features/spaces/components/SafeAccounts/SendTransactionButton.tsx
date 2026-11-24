@@ -24,7 +24,9 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
 
   const setActiveSafe = async () => {
     const shortname = getEip3770ShortName(safe.chainId)
-    if (!shortname) return
+    if (!shortname) {
+      return
+    }
 
     await router.replace({
       pathname: router.pathname,

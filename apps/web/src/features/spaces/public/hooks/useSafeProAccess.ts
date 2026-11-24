@@ -33,7 +33,9 @@ export const useSafeProAccess = (): {
     [spaceSafes, chainId, safeAddress],
   )
 
-  if (!isSafePro) return { hasProFeatures: true, isSafePro, isLoading: false, spaceId: null }
+  if (!isSafePro) {
+    return { hasProFeatures: true, isSafePro, isLoading: false, spaceId: null }
+  }
 
   return {
     hasProFeatures: isSafeInSpace && isLivePlanStatus(status),

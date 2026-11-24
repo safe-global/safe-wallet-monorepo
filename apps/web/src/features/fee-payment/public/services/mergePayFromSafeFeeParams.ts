@@ -34,9 +34,15 @@ export const mergePayFromSafeFeeParams = async ({
   dispatch,
 }: PayFromSafeMergeContext): Promise<PayFromSafeMerge> => {
   const unchanged = { safeTx, feesMerged: false }
-  if (safeTx.signatures.size > 0) return unchanged
-  if (!isPayFromSafeAvailable(chain)) return unchanged
-  if (!isPayFromSafe) return unchanged
+  if (safeTx.signatures.size > 0) {
+    return unchanged
+  }
+  if (!isPayFromSafeAvailable(chain)) {
+    return unchanged
+  }
+  if (!isPayFromSafe) {
+    return unchanged
+  }
   // Signing without the quoted token would make the signer pay while the card says Safe account.
   if (!feeGasToken) {
     throw new Error('The fee quote for paying from the Safe account is not ready. Try again in a moment.')

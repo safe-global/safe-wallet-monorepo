@@ -33,7 +33,9 @@ export const getSafeSetups = (
     const undeployedSafe = undeployedSafes?.[safeItem.chainId]?.[safeItem.address]
     if (undeployedSafe) {
       const counterfactualSetup = extractCounterfactualSafeSetup(undeployedSafe, safeItem.chainId)
-      if (!counterfactualSetup) return undefined
+      if (!counterfactualSetup) {
+        return undefined
+      }
       return {
         owners: counterfactualSetup.owners,
         threshold: counterfactualSetup.threshold,
@@ -43,7 +45,9 @@ export const getSafeSetups = (
     const foundOverview = safeOverviews?.find(
       (overview) => overview.chainId === safeItem.chainId && sameAddress(overview.address.value, safeItem.address),
     )
-    if (!foundOverview) return undefined
+    if (!foundOverview) {
+      return undefined
+    }
     return {
       owners: foundOverview.owners.map((owner) => owner.value),
       threshold: foundOverview.threshold,
@@ -56,7 +60,9 @@ export const getSafeSetups = (
 export const getSharedSetup = (safeSetups: (SafeSetup | undefined)[]): Omit<SafeSetup, 'chainId'> | undefined => {
   const comparisonSetup = safeSetups[0]
 
-  if (!comparisonSetup) return undefined
+  if (!comparisonSetup) {
+    return undefined
+  }
 
   const allMatching = safeSetups.every(
     (setup) =>
@@ -72,7 +78,9 @@ export const getDeviatingSetups = (
   currentChainId: string | undefined,
 ): SafeSetup[] => {
   const currentSafeSetup = safeSetups.find((setup) => setup?.chainId === currentChainId)
-  if (!currentChainId || !currentSafeSetup) return []
+  if (!currentChainId || !currentSafeSetup) {
+    return []
+  }
 
   const deviatingSetups = safeSetups
     .filter((setup): setup is SafeSetup => Boolean(setup))
@@ -180,6 +188,8 @@ export const hasMultiChainCreationFeatures = (chain: Chain): boolean => {
 }
 
 export const hasMultiChainAddNetworkFeature = (chain: Chain | undefined): boolean => {
-  if (!chain) return false
+  if (!chain) {
+    return false
+  }
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_ADD_NETWORK) && canMultichain(chain)
 }

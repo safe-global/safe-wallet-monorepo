@@ -17,7 +17,9 @@ const TEXT_FIELD = [
 
 // A plain button that sets `open` gives no open type; after keyboard use the browser marks it `:focus-visible`
 const isOpenedFromKeyboard = (openType: string): boolean => {
-  if (openType === 'keyboard') return true
+  if (openType === 'keyboard') {
+    return true
+  }
   const opener = document.activeElement
   return opener instanceof HTMLElement && opener !== document.body && opener.matches(':focus-visible')
 }
@@ -40,12 +42,18 @@ export function usePopupInitialFocus<PopupElement extends HTMLElement, InitialFo
     (node: PopupElement | null) => {
       popupRef.current = node
       const callerCleanup = typeof ref === 'function' ? ref(node) : undefined
-      if (ref && typeof ref !== 'function') ref.current = node
+      if (ref && typeof ref !== 'function') {
+        ref.current = node
+      }
       return () => {
         popupRef.current = null
-        if (typeof callerCleanup === 'function') callerCleanup()
-        else if (typeof ref === 'function') ref(null)
-        else if (ref) ref.current = null
+        if (typeof callerCleanup === 'function') {
+          callerCleanup()
+        } else if (typeof ref === 'function') {
+          ref(null)
+        } else if (ref) {
+          ref.current = null
+        }
       }
     },
     [ref],
@@ -53,9 +61,15 @@ export function usePopupInitialFocus<PopupElement extends HTMLElement, InitialFo
 
   const focusByOpenType = React.useCallback((openType: string): boolean | HTMLElement | null => {
     const popup = popupRef.current
-    if (openType === 'touch') return popup
-    if (isOpenedFromKeyboard(openType)) return true
-    if (!popup) return null
+    if (openType === 'touch') {
+      return popup
+    }
+    if (isOpenedFromKeyboard(openType)) {
+      return true
+    }
+    if (!popup) {
+      return null
+    }
     const firstControl = tabbable(popup, tabbableOptions())[0]
     return firstControl instanceof HTMLElement && firstControl.matches(TEXT_FIELD) ? firstControl : popup
   }, [])

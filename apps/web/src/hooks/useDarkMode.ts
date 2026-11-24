@@ -3,7 +3,9 @@ import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 
 const isSystemDarkMode = (): boolean => {
-  if (typeof window === 'undefined' || !window.matchMedia) return false
+  if (typeof window === 'undefined' || !window.matchMedia) {
+    return false
+  }
   return window.matchMedia('(prefers-color-scheme: dark)').matches
 }
 
@@ -13,7 +15,9 @@ export const useDarkMode = (): boolean => {
   // synchronously on first render so a remount (e.g. Next.js route change)
   // doesn't flash light-mode for a frame before the effect runs.
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof document === 'undefined') return false
+    if (typeof document === 'undefined') {
+      return false
+    }
     return document.documentElement.dataset.theme === 'dark'
   })
 

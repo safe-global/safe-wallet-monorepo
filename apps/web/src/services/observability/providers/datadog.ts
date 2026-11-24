@@ -55,12 +55,16 @@ const KNOWN_NOISE_PATTERNS = [
 ]
 
 const originatesFromExtension = (stack: string | undefined): boolean => {
-  if (!stack) return false
+  if (!stack) {
+    return false
+  }
   return EXTENSION_URL_PATTERNS.some((pattern) => stack.includes(pattern))
 }
 
 const isKnownNoise = (message: string | undefined): boolean => {
-  if (!message) return false
+  if (!message) {
+    return false
+  }
   return KNOWN_NOISE_PATTERNS.some((pattern) => message.includes(pattern))
 }
 
@@ -83,7 +87,9 @@ const FIRST_PARTY_BUNDLE_PATH = '_next/static/'
  * be pointing at.
  */
 const isNotFirstPartyStack = (stack: string | undefined): boolean => {
-  if (!stack) return true
+  if (!stack) {
+    return true
+  }
   return !stack.includes(FIRST_PARTY_BUNDLE_PATH)
 }
 
@@ -156,7 +162,9 @@ const EXPECTED_RESOURCE_FAILURES: { urlPattern: RegExp; statuses: Set<number> }[
 
 const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
   const { url, status_code: status } = event.resource ?? {}
-  if (!url || status === undefined) return false
+  if (!url || status === undefined) {
+    return false
+  }
   return EXPECTED_RESOURCE_FAILURES.some(({ urlPattern, statuses }) => urlPattern.test(url) && statuses.has(status))
 }
 
@@ -190,14 +198,26 @@ const isExpectedResourceFailure = (event: RumResourceEvent): boolean => {
  * source `network` — so it reaches us only as the `resource` event above.
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
-  if (event.type === 'resource') return !isExpectedResourceFailure(event as RumResourceEvent)
-  if (event.type !== 'error') return true
+  if (event.type === 'resource') {
+    return !isExpectedResourceFailure(event as RumResourceEvent)
+  }
+  if (event.type !== 'error') {
+    return true
+  }
 
   const errorEvent = event as RumErrorEvent
-  if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false
-  if (isKnownNoise(errorEvent.error.message)) return false
-  if (isCspBlockedEval(errorEvent)) return false
-  if (originatesFromExtension(errorEvent.error.stack)) return false
+  if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) {
+    return false
+  }
+  if (isKnownNoise(errorEvent.error.message)) {
+    return false
+  }
+  if (isCspBlockedEval(errorEvent)) {
+    return false
+  }
+  if (originatesFromExtension(errorEvent.error.stack)) {
+    return false
+  }
 
   // User-driven outcomes surfaced as unhandled errors by third-party SDKs
   // (WalletConnect TTL expiry, a wallet's bare "Rejected" reply) never pass
@@ -213,7 +233,9 @@ export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext):
   // context.error is the raw value originally passed to addError/captureException
   const { error: rawError } = context as RumErrorEventDomainContext
   const rawStack = rawError instanceof Error ? rawError.stack : undefined
-  if (originatesFromExtension(rawStack)) return false
+  if (originatesFromExtension(rawStack)) {
+    return false
+  }
 
   return true
 }

@@ -270,7 +270,9 @@ const NetworkSelector = ({
 
   const registerRow = useCallback(
     (chainId: string) => (node: HTMLElement | null) => {
-      if (!node) return
+      if (!node) {
+        return
+      }
       rowRefs.current.set(chainId, node)
       return () => {
         rowRefs.current.delete(chainId)
@@ -318,7 +320,9 @@ const NetworkSelector = ({
   const renderMenuItem = useCallback(
     (chainId: string, isSelected: boolean) => {
       const chain = configs.find((chain) => chain.chainId === chainId)
-      if (!chain) return null
+      if (!chain) {
+        return null
+      }
 
       const onSwitchNetwork = () => {
         trackEvent({ ...OVERVIEW_EVENTS.SWITCH_NETWORK, label: chainId })
@@ -357,7 +361,9 @@ const NetworkSelector = ({
   const focusRow = (edge: 'first' | 'last') => {
     const rendered = [...prodNets, ...testNets]
     const chain = edge === 'first' ? rendered[0] : rendered[rendered.length - 1]
-    if (!chain) return
+    if (!chain) {
+      return
+    }
     rowRefs.current.get(chain.chainId)?.focus()
   }
 
@@ -390,7 +396,9 @@ const NetworkSelector = ({
 
   const renderSelectedValue = () => {
     const chain = configs.find((chain) => chain.chainId === chainId)
-    if (!chain) return null
+    if (!chain) {
+      return null
+    }
     return <ChainIndicator responsive chainId={chain.chainId} inline onlyLogo={compactButton} />
   }
 

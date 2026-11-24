@@ -28,7 +28,9 @@ const respondWithSafeQueues = (queues: Record<string, QueuedItemPage['results']>
       `${GATEWAY_URL}/v1/chains/:chainId/safes/:address/transactions/queued`,
       ({ request, params }) => {
         requests.push(new URL(request.url))
-        if (!queues) return new HttpResponse(null, { status: 500 })
+        if (!queues) {
+          return new HttpResponse(null, { status: 500 })
+        }
         const results = queues[`${params.chainId}:${params.address}`] ?? []
         return HttpResponse.json<QueuedItemPage>({ count: results.length, next: null, previous: null, results })
       },

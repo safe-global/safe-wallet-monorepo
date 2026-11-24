@@ -36,7 +36,9 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   }, [])
 
   useEffect(() => {
-    if (!onboard) return
+    if (!onboard) {
+      return
+    }
 
     const walletSubscription = onboard.state.select('wallets').subscribe((wallets) => {
       const newWallet = getConnectedWallet(wallets)

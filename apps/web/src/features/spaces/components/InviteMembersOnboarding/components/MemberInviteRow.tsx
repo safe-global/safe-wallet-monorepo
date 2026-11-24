@@ -41,11 +41,15 @@ function validateEthereumAddress(value: string, onAutoChecksum: AutoChecksumCall
 
   if (hasNoChecksumIntent) {
     const checksummed = checksumAddress(value.toLowerCase())
-    if (checksummed !== value) onAutoChecksum(checksummed)
+    if (checksummed !== value) {
+      onAutoChecksum(checksummed)
+    }
     return undefined
   }
 
-  if (!isChecksummedAddress(value)) return INVALID_ADDRESS_ERROR
+  if (!isChecksummedAddress(value)) {
+    return INVALID_ADDRESS_ERROR
+  }
 
   return undefined
 }
@@ -95,7 +99,9 @@ const MemberInviteRow = ({
   } = useNameResolver(isEmailAddress(identifierValue.trim()) ? '' : identifierValue, ensChain)
 
   useEffect(() => {
-    if (resolvedAddress) handleAddressResolved(resolvedAddress)
+    if (resolvedAddress) {
+      handleAddressResolved(resolvedAddress)
+    }
   }, [resolvedAddress, handleAddressResolved])
 
   return (
@@ -113,14 +119,20 @@ const MemberInviteRow = ({
                 const otherFields = members
                   ?.map((_, i) => (i !== index ? (`members.${i}.identifier` as const) : null))
                   .filter(Boolean) as `members.${number}.identifier`[]
-                if (otherFields?.length) trigger(otherFields)
+                if (otherFields?.length) {
+                  trigger(otherFields)
+                }
               },
               validate: (value) => {
                 const trimmed = value?.trim()
-                if (!trimmed) return undefined
+                if (!trimmed) {
+                  return undefined
+                }
 
                 if (isEmailAddress(trimmed)) {
-                  if (trimmed.length > EMAIL_MAX_LENGTH) return `Email must be ${EMAIL_MAX_LENGTH} characters or less.`
+                  if (trimmed.length > EMAIL_MAX_LENGTH) {
+                    return `Email must be ${EMAIL_MAX_LENGTH} characters or less.`
+                  }
 
                   const isDuplicateEmail = members?.some((member, i) => {
                     // Trim to match the trimmed-on-submit value
@@ -132,23 +144,31 @@ const MemberInviteRow = ({
                       otherIdentifier.toLowerCase() === trimmed.toLowerCase()
                     )
                   })
-                  if (isDuplicateEmail) return 'Email already added'
+                  if (isDuplicateEmail) {
+                    return 'Email already added'
+                  }
 
                   return undefined
                 }
 
-                if (isDomain(trimmed)) return undefined
+                if (isDomain(trimmed)) {
+                  return undefined
+                }
 
                 const addressError = validateEthereumAddress(trimmed, (checksummed) => {
                   setValue(`members.${index}.identifier`, checksummed, { shouldValidate: true })
                 })
-                if (addressError) return addressError
+                if (addressError) {
+                  return addressError
+                }
 
                 const isDuplicate = members?.some(
                   (member, i) =>
                     i !== index && member.identifier?.trim() && sameAddress(member.identifier.trim(), trimmed),
                 )
-                if (isDuplicate) return 'Address already added'
+                if (isDuplicate) {
+                  return 'Address already added'
+                }
               },
             })}
             placeholder="Email, wallet address or ENS name"

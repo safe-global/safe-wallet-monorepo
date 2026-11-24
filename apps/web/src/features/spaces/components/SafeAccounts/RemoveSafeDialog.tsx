@@ -64,7 +64,9 @@ const RemoveSafeDialog = ({
         }),
       )
     } catch (e) {
-      if (isElevationRequiredError(e)) return
+      if (isElevationRequiredError(e)) {
+        return
+      }
       setError('Error removing safe account.')
     }
   }

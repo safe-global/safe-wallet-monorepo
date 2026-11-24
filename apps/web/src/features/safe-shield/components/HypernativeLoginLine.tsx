@@ -14,10 +14,14 @@ export const HypernativeLoginLine = ({
 }: {
   hypernativeAuth?: HypernativeAuthStatus
 }): ReactElement | null => {
-  if (!hypernativeAuth) return null
+  if (!hypernativeAuth) {
+    return null
+  }
 
   const { isAuthenticated, isTokenExpired, isSessionRejected, initiateLogin } = hypernativeAuth
-  if (isAuthenticated && !isTokenExpired) return null
+  if (isAuthenticated && !isTokenExpired) {
+    return null
+  }
 
   const login = () => {
     trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {

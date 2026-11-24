@@ -29,14 +29,18 @@ const usePendingSafeNotifications = (): void => {
   const safeAddress = useSafeAddress()
 
   useEffect(() => {
-    if (!chain) return
+    if (!chain) {
+      return
+    }
 
     const entries = Object.entries(SafeCreationNotifications) as [keyof typeof SafeCreationNotifications, string][]
 
     const unsubFns = entries.map(([event, baseMessage]) =>
       safeCreationSubscribe(event, async (detail) => {
         const isError = 'error' in detail
-        if (isError && isWalletRejection(detail.error)) return
+        if (isError && isWalletRejection(detail.error)) {
+          return
+        }
 
         const isSuccess = event === SafeCreationEvent.INDEXED
         const message = isError ? `${baseMessage} ${formatError(detail.error)}` : baseMessage

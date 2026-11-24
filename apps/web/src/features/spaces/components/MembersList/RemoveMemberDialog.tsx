@@ -50,7 +50,9 @@ const RemoveMemberDialog = ({
 
       handleClose()
     } catch (e) {
-      if (isElevationRequiredError(e)) return
+      if (isElevationRequiredError(e)) {
+        return
+      }
       setErrorMessage('An unexpected error occurred while removing the member.')
     }
   }

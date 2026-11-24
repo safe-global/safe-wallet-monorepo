@@ -46,8 +46,12 @@ export type SafeAppSuggestion = {
 }
 
 const statusForChoice = (choice: SafeAppSuggestionChoice | undefined): SafeAppSuggestionStatus => {
-  if (choice === 'safeApp') return 'redirect'
-  if (choice === 'walletConnect') return 'none'
+  if (choice === 'safeApp') {
+    return 'redirect'
+  }
+  if (choice === 'walletConnect') {
+    return 'none'
+  }
   return 'shown'
 }
 
@@ -82,8 +86,12 @@ export const useSafeAppSuggestion = (proposal: WalletKitTypes.SessionProposal | 
   )
 
   const getStatus = (): SafeAppSuggestionStatus => {
-    if (!risk || !origin) return 'off'
-    if (isLoading) return 'loading'
+    if (!risk || !origin) {
+      return 'off'
+    }
+    if (isLoading) {
+      return 'loading'
+    }
     const canSkipForm = safeLoaded && !isCounterfactualSafe && !needsConnectionForm(risk, sanctionedAddress)
     return safeApp && canSkipForm ? statusForChoice(getActiveChoice(rememberedChoices?.[origin])) : 'none'
   }

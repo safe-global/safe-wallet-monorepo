@@ -20,11 +20,15 @@ export const ensApi = gatewayApi.injectEndpoints({
         const state = getState() as RootState
         const chains = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)(state).data
         const hubChain = chains ? chainsAdapter.getSelectors().selectById(chains, hubChainId) : undefined
-        if (!hubChain) return { error: new Error('ENS hub chain config not found') }
+        if (!hubChain) {
+          return { error: new Error('ENS hub chain config not found') }
+        }
 
         try {
           const provider = await getReadOnlyProvider(hubChain, customRpc)
-          if (!provider) return { error: new Error('No RPC is configured for the ENS hub') }
+          if (!provider) {
+            return { error: new Error('No RPC is configured for the ENS hub') }
+          }
           // Primary names live on the hub with ETH coin type 60
           return { data: (await provider.lookupAddress(address, ETH_COIN_TYPE)) ?? null }
         } catch (error) {

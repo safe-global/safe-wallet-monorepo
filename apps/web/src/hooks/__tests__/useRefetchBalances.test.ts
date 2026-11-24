@@ -44,8 +44,12 @@ describe('useRefetchBalances', () => {
 
     // Mock both PORTFOLIO_ENDPOINT (false) and POSITIONS (true) by default
     jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
-      if (feature === FEATURES.PORTFOLIO_ENDPOINT) return false
-      if (feature === FEATURES.POSITIONS) return true
+      if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+        return false
+      }
+      if (feature === FEATURES.POSITIONS) {
+        return true
+      }
       return false
     })
     jest.spyOn(useLoadBalances, 'useTokenListSetting').mockReturnValue(true)
@@ -78,8 +82,12 @@ describe('useRefetchBalances', () => {
 
     it('should return true when portfolio feature is enabled and positions are enabled', async () => {
       jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
-        if (feature === FEATURES.PORTFOLIO_ENDPOINT) return true
-        if (feature === FEATURES.POSITIONS) return true
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        if (feature === FEATURES.POSITIONS) {
+          return true
+        }
         return false
       })
 
@@ -92,8 +100,12 @@ describe('useRefetchBalances', () => {
 
     it('should return false when positions feature is disabled', async () => {
       jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
-        if (feature === FEATURES.PORTFOLIO_ENDPOINT) return true
-        if (feature === FEATURES.POSITIONS) return false
+        if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+          return true
+        }
+        if (feature === FEATURES.POSITIONS) {
+          return false
+        }
         return false
       })
 

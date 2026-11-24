@@ -120,7 +120,9 @@ const CreateRecipientAllowlistPolicy = ({
             value={scopeKey}
             onChange={(id) => {
               const next = parseSafeScopeKey(id)
-              if (next) setScope(next.chainId, next.safeAddress)
+              if (next) {
+                setScope(next.chainId, next.safeAddress)
+              }
             }}
             isLoading={isLoading}
             isError={isError}

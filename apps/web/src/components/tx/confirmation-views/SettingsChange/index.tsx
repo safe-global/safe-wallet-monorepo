@@ -20,7 +20,9 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
   const { safe } = useSafeInfo()
   const params = useContext(SettingsChangeContext)
 
-  if (!settingsInfo || settingsInfo.type === SettingsInfoType.REMOVE_OWNER) return null
+  if (!settingsInfo || settingsInfo.type === SettingsInfoType.REMOVE_OWNER) {
+    return null
+  }
 
   const shouldShowChangeSigner = 'owner' in settingsInfo || 'newOwner' in params
   const hasNewOwner = 'newOwner' in params

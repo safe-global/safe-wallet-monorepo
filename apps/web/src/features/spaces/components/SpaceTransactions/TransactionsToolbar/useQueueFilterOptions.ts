@@ -50,7 +50,9 @@ export const useQueueFilterOptions = (
       })),
       onToggle: (safeAddress) => {
         const option = safeOptions.find((other) => other.safeAddress === safeAddress)
-        if (option) onFiltersChange({ ...filters, safes: toggleSafeOption(option, filters.safes) })
+        if (option) {
+          onFiltersChange({ ...filters, safes: toggleSafeOption(option, filters.safes) })
+        }
       },
     },
     network: {

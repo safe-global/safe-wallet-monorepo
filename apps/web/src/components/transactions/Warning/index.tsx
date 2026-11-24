@@ -61,7 +61,9 @@ export const DelegateCallWarning = ({
   const isDelegateCall = txData?.operation === Operation.DELEGATE
   const trustedDelegateCall = isDelegateCall && !!txData?.trustedDelegateCallTarget
 
-  if (!isDelegateCall || (!trustedDelegateCall && !showWarning)) return <></>
+  if (!isDelegateCall || (!trustedDelegateCall && !showWarning)) {
+    return <></>
+  }
 
   return (
     <Warning

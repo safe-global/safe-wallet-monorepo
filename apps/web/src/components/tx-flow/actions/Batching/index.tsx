@@ -39,7 +39,9 @@ export const Batching = ({
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
-    if (!safeTx) return
+    if (!safeTx) {
+      return
+    }
 
     onSubmit?.()
 

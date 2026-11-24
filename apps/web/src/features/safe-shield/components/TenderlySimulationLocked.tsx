@@ -11,7 +11,9 @@ import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 export const TenderlySimulationLocked = (): ReactElement | null => {
   const hasSimulation = useHasFeature(FEATURES.TX_SIMULATION) === true
   const safeLinkQuery = useSafeLinkQuery()
-  if (!hasSimulation) return null
+  if (!hasSimulation) {
+    return null
+  }
 
   return (
     <LockedCheckRow

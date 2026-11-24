@@ -50,7 +50,9 @@ const useSearchKeyboardNavigation = (containerRef: RefObject<HTMLElement | null>
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       const items = getItems()
-      if (items.length === 0) return
+      if (items.length === 0) {
+        return
+      }
 
       switch (e.key) {
         case 'ArrowDown': {
@@ -64,7 +66,9 @@ const useSearchKeyboardNavigation = (containerRef: RefObject<HTMLElement | null>
           break
         }
         case 'Enter': {
-          if (indexRef.current < 0) return
+          if (indexRef.current < 0) {
+            return
+          }
           e.preventDefault()
 
           const focused = items[indexRef.current]

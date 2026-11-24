@@ -61,7 +61,9 @@ let consumeQueue: Promise<void> = Promise.resolve()
 
 // Must be called once at app startup, before any CGW requests are made.
 export function initializeCaptchaHeaders() {
-  if (initialized) return
+  if (initialized) {
+    return
+  }
   initialized = true
 
   // Create initial promise
@@ -69,10 +71,14 @@ export function initializeCaptchaHeaders() {
 
   setPrepareHeadersHook(async (headers: Headers, url: string) => {
     // Non-owners URLs pass through immediately — no captcha needed
-    if (!isProtectedEndpoint(url)) return headers
+    if (!isProtectedEndpoint(url)) {
+      return headers
+    }
 
     // Captcha disabled (no site key) — pass through
-    if (!TURNSTILE_SITE_KEY) return headers
+    if (!TURNSTILE_SITE_KEY) {
+      return headers
+    }
 
     // First protected request: signal CaptchaProvider to load the Turnstile script + widget
     if (!captchaActivated) {
@@ -120,11 +126,17 @@ export function initializeCaptchaHeaders() {
 
   setHandleResponseHook(async (response: Response, url: string) => {
     // Only handle 401 responses
-    if (response.status !== 401) return
+    if (response.status !== 401) {
+      return
+    }
     // Only captcha-protected endpoints can return captcha 401s
-    if (!isProtectedEndpoint(url)) return
+    if (!isProtectedEndpoint(url)) {
+      return
+    }
     // No widget registered means captcha is disabled — don't reset the promise or we'll deadlock
-    if (!widgetRefreshCallbackRef.current) return
+    if (!widgetRefreshCallbackRef.current) {
+      return
+    }
 
     try {
       const data = await response.clone().json()

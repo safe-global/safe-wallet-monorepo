@@ -96,7 +96,9 @@ export function trezorModule(): WalletInit {
               return accounts.map((account) => account.address)
             },
             eth_accounts: async () => {
-              if (!currentAccount) return []
+              if (!currentAccount) {
+                return []
+              }
               return [currentAccount.address]
             },
             eth_chainId: async () => {
@@ -283,7 +285,9 @@ export function trezorModule(): WalletInit {
               } else {
                 zeroBalanceAccounts = 0
               }
-              if (zeroBalanceAccounts >= MAX_ZERO_BALANCE_ACCOUNTS) break
+              if (zeroBalanceAccounts >= MAX_ZERO_BALANCE_ACCOUNTS) {
+                break
+              }
             }
 
             index += BATCH_SIZE

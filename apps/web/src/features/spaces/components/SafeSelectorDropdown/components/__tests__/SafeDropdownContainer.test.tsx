@@ -241,7 +241,9 @@ describe('SafeDropdownContainer', () => {
       render(<SafeDropdownContainer items={[itemA, itemB]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
 
     beforeEach(() => {
-      for (const key of Object.keys(mockAddressBookNames)) delete mockAddressBookNames[key]
+      for (const key of Object.keys(mockAddressBookNames)) {
+        delete mockAddressBookNames[key]
+      }
     })
 
     it('renders the search input when there are items', () => {
@@ -338,7 +340,9 @@ describe('SafeDropdownContainer', () => {
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'nonexistent')
 
       expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes match your search')
-      for (const row of screen.getAllByTestId('safe-item')) expect(row).not.toBeVisible()
+      for (const row of screen.getAllByTestId('safe-item')) {
+        expect(row).not.toBeVisible()
+      }
     })
 
     it('filters with a controlled searchValue and reports typing via onSearchValueChange', () => {
@@ -563,7 +567,9 @@ describe('SafeDropdownContainer', () => {
       rerender(renderWithQuery('nonexistent'))
       expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes match your search')
       screen.getAllByTestId('reorder-safe-row').forEach((row, i) => expect(row).toBe(rows[i]))
-      for (const row of rows) expect(row).not.toBeVisible()
+      for (const row of rows) {
+        expect(row).not.toBeVisible()
+      }
 
       rerender(renderWithQuery('alph'))
       expect(screen.queryByTestId('dropdown-empty')).not.toBeInTheDocument()

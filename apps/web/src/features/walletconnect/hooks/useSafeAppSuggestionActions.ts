@@ -51,10 +51,14 @@ export const useSafeAppSuggestionActions = (onApprove: () => Promise<boolean>) =
 
   const openSafeApp = useCallback(
     (safeApp: SafeAppData) => {
-      if (remember && origin) rememberChoice(origin, 'safeApp')
+      if (remember && origin) {
+        rememberChoice(origin, 'safeApp')
+      }
       leaveFor(getSafeAppUrl(router, safeLinkQuery, safeApp.url))
         .then((navigated) => {
-          if (!navigated) return
+          if (!navigated) {
+            return
+          }
           trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: safeApp.name }, safeApp, {
             launchLocation: SafeAppLaunchLocation.WC_PROPOSAL,
           })
@@ -75,12 +79,18 @@ export const useSafeAppSuggestionActions = (onApprove: () => Promise<boolean>) =
     const choiceOrigin = origin
     const shouldRemember = remember
     const isApproved = await onApprove()
-    if (isApproved && shouldRemember && choiceOrigin) rememberChoice(choiceOrigin, 'walletConnect')
+    if (isApproved && shouldRemember && choiceOrigin) {
+      rememberChoice(choiceOrigin, 'walletConnect')
+    }
   }, [origin, remember, onApprove, rememberChoice])
 
   useEffect(() => {
-    if (status !== 'redirect' || !suggestedSafeApp || !origin) return
-    if (leftProposalId.current === proposalId) return
+    if (status !== 'redirect' || !suggestedSafeApp || !origin) {
+      return
+    }
+    if (leftProposalId.current === proposalId) {
+      return
+    }
     const { event, params } = getSuggestionResultEvent(origin, suggestedSafeApp, {
       result: WcSafeAppSuggestionResult.OPENED_REMEMBERED_SAFE_APP,
       remember: true,

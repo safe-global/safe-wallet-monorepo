@@ -10,7 +10,9 @@ export const getSharedReadOnlyProvider = (chain: Chain, customRpc?: string): Jso
   const key = `${chain.chainId}:${customRpc ?? ''}`
   if (!providers[key]) {
     const provider = createWeb3ReadOnly(chain, customRpc)
-    if (!provider) return undefined
+    if (!provider) {
+      return undefined
+    }
     providers[key] = provider
   }
   return providers[key]

@@ -42,7 +42,9 @@ export function ReviewSigners({ onSubmit, ...props }: ReviewTransactionContentPr
   }, [data, safe, setSafeTx, setSafeTxError])
 
   const addAddressBookEntry = () => {
-    if (!data) return
+    if (!data) {
+      return
+    }
 
     // Add address book entries for new owners with names
     data.owners

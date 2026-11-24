@@ -17,12 +17,20 @@ export const withScannerTimeout = <T>(promise: Promise<T>): Promise<T> =>
   ])
 
 export const formatTimestamp = (ts?: number): string => {
-  if (!ts) return '—'
+  if (!ts) {
+    return '—'
+  }
   const now = Date.now()
   const diff = now - ts
-  if (diff < 60_000) return 'Just now'
-  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`
-  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`
+  if (diff < 60_000) {
+    return 'Just now'
+  }
+  if (diff < 3_600_000) {
+    return `${Math.floor(diff / 60_000)}m ago`
+  }
+  if (diff < 86_400_000) {
+    return `${Math.floor(diff / 3_600_000)}h ago`
+  }
   return new Date(ts).toLocaleDateString()
 }
 
@@ -36,7 +44,9 @@ export type GradeSummary = {
 export const computeSummary = (results: Record<string, ScanResult>): GradeSummary | null => {
   const entries = Object.values(results)
   const applicable = entries.filter((r) => r.status !== 'not_applicable' && r.status !== 'inconclusive')
-  if (applicable.length === 0) return null
+  if (applicable.length === 0) {
+    return null
+  }
 
   const passing = applicable.filter((r) => r.status === 'clear').length
   const hasCriticalIssue = applicable.some((r) => r.severity === 'Critical')
@@ -52,13 +62,25 @@ export const getSafeGrade = (results: Record<string, ScanResult>): SafeGrade => 
   let hasPartial = false
 
   for (const result of Object.values(results)) {
-    if (result.status === 'not_applicable' || result.status === 'inconclusive') continue
-    if (result.severity === 'Critical') return 'critical'
-    if (result.status === 'issue') hasIssue = true
-    if (result.status === 'partial') hasPartial = true
+    if (result.status === 'not_applicable' || result.status === 'inconclusive') {
+      continue
+    }
+    if (result.severity === 'Critical') {
+      return 'critical'
+    }
+    if (result.status === 'issue') {
+      hasIssue = true
+    }
+    if (result.status === 'partial') {
+      hasPartial = true
+    }
   }
 
-  if (hasIssue) return 'at_risk'
-  if (hasPartial) return 'needs_attention'
+  if (hasIssue) {
+    return 'at_risk'
+  }
+  if (hasPartial) {
+    return 'needs_attention'
+  }
   return 'passing'
 }

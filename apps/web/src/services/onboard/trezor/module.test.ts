@@ -68,8 +68,12 @@ jest.mock('@/config/constants', () => ({
 jest.mock('@web3-onboard/hw-common', () => ({
   getHardwareWalletProvider: jest.fn().mockReturnValue({
     request: jest.fn().mockImplementation(({ method }: { method: string }) => {
-      if (method === 'eth_getTransactionCount') return Promise.resolve('0x0')
-      if (method === 'eth_sendRawTransaction') return Promise.resolve('0xtxhash')
+      if (method === 'eth_getTransactionCount') {
+        return Promise.resolve('0x0')
+      }
+      if (method === 'eth_sendRawTransaction') {
+        return Promise.resolve('0xtxhash')
+      }
       return Promise.resolve(null)
     }),
   }),

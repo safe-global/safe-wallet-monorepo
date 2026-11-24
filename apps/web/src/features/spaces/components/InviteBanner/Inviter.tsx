@@ -11,7 +11,9 @@ type InviterProps = {
 }
 
 const Inviter = ({ invitedByName, variant, avatarSize }: InviterProps) => {
-  if (!invitedByName) return null
+  if (!invitedByName) {
+    return null
+  }
 
   return (
     <div className="flex flex-row items-center gap-1.5">

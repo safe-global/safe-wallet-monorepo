@@ -35,8 +35,12 @@ const compareSafes = (a: PolicySafe, b: PolicySafe, getSafeName: PolicySortConte
   const nameA = getSafeName(a)
   const nameB = getSafeName(b)
 
-  if (nameA && nameB) return nameA.localeCompare(nameB)
-  if (nameA || nameB) return nameA ? -1 : 1
+  if (nameA && nameB) {
+    return nameA.localeCompare(nameB)
+  }
+  if (nameA || nameB) {
+    return nameA ? -1 : 1
+  }
   return a.address.toLowerCase().localeCompare(b.address.toLowerCase())
 }
 

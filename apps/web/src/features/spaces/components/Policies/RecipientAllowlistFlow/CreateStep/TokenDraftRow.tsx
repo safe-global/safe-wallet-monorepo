@@ -87,10 +87,14 @@ const TokenDraftRow = ({ options, onConfirm, onCancel }: TokenDraftRowProps): Re
         filter={(option, value) => matchesTokenQuery(option, value)}
         onInputValueChange={setQuery}
         onValueChange={(option) => {
-          if (option) confirm(option.address)
+          if (option) {
+            confirm(option.address)
+          }
         }}
         onOpenChange={(open) => {
-          if (!open && !isTyping && !isSettled.current) cancel()
+          if (!open && !isTyping && !isSettled.current) {
+            cancel()
+          }
         }}
       >
         <ComboboxInput

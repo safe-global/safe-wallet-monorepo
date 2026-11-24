@@ -7,10 +7,14 @@ export const useStepRoute = ({ route }: TourStep, onLeave: () => void): boolean 
   const isOnStepRoute = pathname === route
   const [hasArrived, setHasArrived] = useState(isOnStepRoute)
 
-  if (isOnStepRoute && !hasArrived) setHasArrived(true)
+  if (isOnStepRoute && !hasArrived) {
+    setHasArrived(true)
+  }
 
   useEffect(() => {
-    if (hasArrived && !isOnStepRoute) onLeave()
+    if (hasArrived && !isOnStepRoute) {
+      onLeave()
+    }
   }, [hasArrived, isOnStepRoute, onLeave])
 
   return isOnStepRoute

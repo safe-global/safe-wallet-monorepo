@@ -18,8 +18,12 @@ export const createTx = async (
   nonce?: number,
   scope?: TxSenderScope,
 ): Promise<SafeTransaction> => {
-  if (nonce !== undefined) txParams = { ...txParams, nonce }
-  if (Number.isNaN(txParams.safeTxGas) || txParams.safeTxGas === 'NaN') txParams = { ...txParams, safeTxGas: '0' }
+  if (nonce !== undefined) {
+    txParams = { ...txParams, nonce }
+  }
+  if (Number.isNaN(txParams.safeTxGas) || txParams.safeTxGas === 'NaN') {
+    txParams = { ...txParams, safeTxGas: '0' }
+  }
   const safeSDK = getAndValidateSafeSDK(scope)
   return safeSDK.createTransaction({ transactions: [txParams] })
 }
@@ -47,7 +51,9 @@ export const createAddOwnerTx = async (
   txParams: AddOwnerTxParams,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  if (isDeployed) return safeSDK.createAddOwnerTx(txParams)
+  if (isDeployed) {
+    return safeSDK.createAddOwnerTx(txParams)
+  }
 
   const safeVersion = safeSDK.getContractVersion()
 
@@ -72,7 +78,9 @@ export const createSwapOwnerTx = async (
   txParams: SwapOwnerTxParams,
 ): Promise<SafeTransaction> => {
   const safeSDK = getAndValidateSafeSDK()
-  if (isDeployed) return safeSDK.createSwapOwnerTx(txParams)
+  if (isDeployed) {
+    return safeSDK.createSwapOwnerTx(txParams)
+  }
 
   const safeVersion = safeSDK.getContractVersion()
 

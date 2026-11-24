@@ -11,7 +11,9 @@ import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'
 
 const container = document.getElementById('__next')
-if (!container) throw new Error('Mount node #__next not found in index.html')
+if (!container) {
+  throw new Error('Mount node #__next not found in index.html')
+}
 
 // Perf experiment: StrictMode disabled to test whether double-renders
 // account for the ~4.8s long-task per navigation.

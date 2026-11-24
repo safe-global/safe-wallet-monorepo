@@ -9,7 +9,9 @@ export default function SpaceSecurityPage() {
   const { spaceId } = router.query
   useSecurityHubFeatureRedirect()
 
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

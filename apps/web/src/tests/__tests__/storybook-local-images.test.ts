@@ -38,7 +38,9 @@ const isRaster = (bytes: Buffer) =>
 function sourceFiles(dir: string, keep: (file: string) => boolean): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name)
-    if (entry.isDirectory()) return entry.name === 'node_modules' ? [] : sourceFiles(file, keep)
+    if (entry.isDirectory()) {
+      return entry.name === 'node_modules' ? [] : sourceFiles(file, keep)
+    }
     return keep(file) ? [file] : []
   })
 }
@@ -77,7 +79,9 @@ describe('Storybook images', () => {
       const file = path.join(MOCK_ASSETS, reference.slice('mock-assets/'.length))
       // Compare the exact name: macOS ignores case, so `USDC.webp` would find `usdc.webp` there but not in CI
       const exists = fs.existsSync(file) && fs.readdirSync(path.dirname(file)).includes(path.basename(file))
-      if (!file.startsWith(MOCK_ASSETS + path.sep) || !exists) return true
+      if (!file.startsWith(MOCK_ASSETS + path.sep) || !exists) {
+        return true
+      }
       return !isRaster(fs.readFileSync(file))
     })
 

@@ -36,7 +36,9 @@ const PayNowPayLater = ({
   const { signIn, loading: signingIn } = useSiwe()
 
   const signInAndSelectPayLater = async () => {
-    if (signingIn) return
+    if (signingIn) {
+      return
+    }
     const result = await signIn()
     if (result && !result.error) {
       dispatch(setAuthenticated(Date.now() + SESSION_LIFETIME_MS))

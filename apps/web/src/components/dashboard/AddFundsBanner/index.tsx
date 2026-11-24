@@ -12,7 +12,9 @@ const AddFundsToGetStarted = () => {
 
   const addressCopyText = safeAddress
 
-  if (!safe.deployed) return null
+  if (!safe.deployed) {
+    return null
+  }
 
   return (
     <div className="flex flex-col items-start gap-4 rounded-3xl bg-[var(--color-info-light)] p-4 md:flex-row md:items-center">

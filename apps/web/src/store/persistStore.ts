@@ -21,7 +21,9 @@ export const persistState = <K extends keyof RootState>(sliceNames: K[]): Middle
 
     if (typeof action === 'object' && action !== null && 'type' in action) {
       // No need to persist broadcasted actions because they are persisted in another tab
-      if ('_isBroadcasted' in action && action._isBroadcasted) return result
+      if ('_isBroadcasted' in action && action._isBroadcasted) {
+        return result
+      }
 
       const sliceType = (action as { type: string }).type.split('/')[0]
       const name = sliceNames.find((slice) => slice === sliceType)

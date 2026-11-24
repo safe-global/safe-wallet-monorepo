@@ -17,7 +17,9 @@ export type SpenderCalloutProps = {
 }
 
 const SpenderCallout = ({ dismissed, onDismiss }: SpenderCalloutProps): ReactElement | null => {
-  if (dismissed) return null
+  if (dismissed) {
+    return null
+  }
 
   return (
     <Alert

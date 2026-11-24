@@ -19,10 +19,16 @@ export const resolvePolicyGuardState = ({
   const isOurs = (address: string) => sameAddress(address, policyGuardAddress)
 
   const foreignGuards: ForeignGuard[] = slots.filter(({ address }) => !isEmpty(address) && !isOurs(address))
-  if (foreignGuards.length) return { status: 'unknown', foreignGuards }
+  if (foreignGuards.length) {
+    return { status: 'unknown', foreignGuards }
+  }
 
   const missing = slots.filter(({ address }) => isEmpty(address))
-  if (missing.length === 2) return { status: 'none' }
-  if (missing.length === 1) return { status: 'partial', missingSlot: missing[0].slot }
+  if (missing.length === 2) {
+    return { status: 'none' }
+  }
+  if (missing.length === 1) {
+    return { status: 'partial', missingSlot: missing[0].slot }
+  }
   return { status: 'known' }
 }

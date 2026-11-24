@@ -108,7 +108,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
 
   // Update chainId/safeAddress
   useEffect(() => {
-    if (!walletConnect || !chainId || !safeAddress) return
+    if (!walletConnect || !chainId || !safeAddress) {
+      return
+    }
 
     walletConnect.updateSessions(chainId, safeAddress).catch(setError)
   }, [walletConnect, chainId, safeAddress])
@@ -117,7 +119,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // --- Subscribe to requests
   //
   useEffect(() => {
-    if (!walletConnect || !safeWalletProvider || !chainId) return
+    if (!walletConnect || !safeWalletProvider || !chainId) {
+      return
+    }
 
     return walletConnect.onRequest(async (event) => {
       if (!IS_PRODUCTION) {
@@ -170,7 +174,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // --- One-click Auth
   //
   useEffect(() => {
-    if (!walletConnect || !safeWalletProvider || !chainId) return
+    if (!walletConnect || !safeWalletProvider || !chainId) {
+      return
+    }
 
     return walletConnect.onSessionAuth(async (event) => {
       const { authPayload, requester } = event.params
@@ -217,7 +223,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       // Get a signature and send it to WalletConnect
       try {
         const signature = await getSignature()
-        if ('error' in signature) throw new Error(signature.error.message)
+        if ('error' in signature) {
+          throw new Error(signature.error.message)
+        }
         await walletConnect.approveSessionAuth(event.id, authPayload, signature.result as string, chainId, safeAddress)
       } catch (e) {
         try {
@@ -240,7 +248,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   const safeAppSuggestion = useSafeAppSuggestion(sessionProposal)
 
   const approveSession = useCallback(async () => {
-    if (!walletConnect || !sessionProposal) return
+    if (!walletConnect || !sessionProposal) {
+      return
+    }
 
     setLoading(WCLoadingState.APPROVE)
 
@@ -285,7 +295,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // Auto approve previously approved non-malicious dApps, unless the user gets to choose the Safe App instead
   const { blocksAutoApprove } = safeAppSuggestion
   useEffect(() => {
-    if (blocksAutoApprove) return
+    if (blocksAutoApprove) {
+      return
+    }
     if (sessionProposal && autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {
       approveSession().catch((e) => {
         setError(e as Error)
@@ -294,7 +306,9 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   }, [autoApprove, approveSession, sessionProposal, chainId, blocksAutoApprove])
 
   const rejectSession = useCallback(async () => {
-    if (!walletConnect || !sessionProposal) return
+    if (!walletConnect || !sessionProposal) {
+      return
+    }
 
     setLoading(WCLoadingState.REJECT)
 

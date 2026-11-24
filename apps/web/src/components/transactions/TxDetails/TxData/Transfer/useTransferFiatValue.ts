@@ -16,14 +16,20 @@ const useTransferFiatValue = (
   const [balances] = useTrustedTokenBalances()
 
   return useMemo(() => {
-    if (!enabled || !balances || !transferInfo) return null
+    if (!enabled || !balances || !transferInfo) {
+      return null
+    }
 
     const tokenAddress = isERC20Transfer(transferInfo) ? transferInfo.tokenAddress : ZERO_ADDRESS
     const token = balances.items.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
-    if (!token) return null
+    if (!token) {
+      return null
+    }
 
     const value = isNativeTokenTransfer(transferInfo) || isERC20Transfer(transferInfo) ? transferInfo.value : null
-    if (!value) return null
+    if (!value) {
+      return null
+    }
 
     return computeFiatValue(parseFloat(safeFormatUnits(value, token.tokenInfo.decimals)), token.fiatConversion)
   }, [enabled, balances, transferInfo])

@@ -91,8 +91,12 @@ type TabsListTone = 'brand' | 'neutral'
 type TabsListSize = 'default' | 'lg'
 
 const resolveLook = (variant: TabsListVariant, tone: TabsListTone, size: TabsListSize) => {
-  if (variant === 'toggle') return size === 'lg' ? 'segmented' : 'default'
-  if (tone === 'neutral') return 'line'
+  if (variant === 'toggle') {
+    return size === 'lg' ? 'segmented' : 'default'
+  }
+  if (tone === 'neutral') {
+    return 'line'
+  }
   return size === 'lg' ? 'nav-lg' : 'nav'
 }
 

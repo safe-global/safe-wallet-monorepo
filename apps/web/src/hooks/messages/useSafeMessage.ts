@@ -18,7 +18,9 @@ const useSafeMessage = (safeMessageHash: string | undefined) => {
     .find((msg) => msg.messageHash === safeMessageHash)
 
   const [updatedMessage, messageError] = useAsync(async () => {
-    if (!safeMessageHash || !safe.chainId) return
+    if (!safeMessageHash || !safe.chainId) {
+      return
+    }
     return fetchSafeMessage(safeMessageHash, safe.chainId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [safeMessageHash, safe.chainId, safe.messagesTag])

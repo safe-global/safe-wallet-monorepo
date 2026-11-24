@@ -30,7 +30,9 @@ export const TxLayoutHeader = ({
   const { safe } = useSafeInfo()
   const { nonceNeeded } = useContext(SafeTxContext)
 
-  if (hideNonce && !icon && !subtitle) return null
+  if (hideNonce && !icon && !subtitle) {
+    return null
+  }
 
   const Icon = icon
 

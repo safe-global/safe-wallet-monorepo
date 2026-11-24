@@ -57,8 +57,12 @@ describe('ManageTokensButton', () => {
     )
 
     jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => {
-      if (feature === FEATURES.DEFAULT_TOKENLIST) return true
-      if (feature === FEATURES.PORTFOLIO_ENDPOINT) return false
+      if (feature === FEATURES.DEFAULT_TOKENLIST) {
+        return true
+      }
+      if (feature === FEATURES.PORTFOLIO_ENDPOINT) {
+        return false
+      }
       return false
     })
   })

@@ -36,7 +36,9 @@ export type AllowanceValue = { amount: string; resetTime: string }
  */
 export const isSameAllowance = (value: AllowanceValue, onChain: SpendingLimitState): boolean => {
   const { decimals } = onChain.token
-  if (decimals == null) return false
+  if (decimals == null) {
+    return false
+  }
 
   return (
     parseUnits(value.amount, decimals) === BigInt(onChain.amount) &&

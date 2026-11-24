@@ -14,7 +14,9 @@ export type TrackedRowAction = 'replace' | 'reject'
 
 // Disabled items ignore the pointer, so the wrapper holds the tooltip
 const WithReason = ({ reason, children }: { reason?: string; children: ReactElement }): ReactElement => {
-  if (!reason) return children
+  if (!reason) {
+    return children
+  }
   return (
     <Tooltip delay={150}>
       <TooltipTrigger render={<div />}>{children}</TooltipTrigger>

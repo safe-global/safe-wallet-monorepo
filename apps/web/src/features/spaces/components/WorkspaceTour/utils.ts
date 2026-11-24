@@ -17,7 +17,9 @@ type StopLayout = {
 }
 
 const withPlaceholderRow = (anchor: SpotlightRect, emptyState: SpotlightRect | null) => {
-  if (!emptyState) return { hole: anchor, placeholderRow: null }
+  if (!emptyState) {
+    return { hole: anchor, placeholderRow: null }
+  }
 
   const placeholderRow = { ...emptyState, height: TOUR_PLACEHOLDER_ROW_HEIGHT }
   const placeholderBottom = placeholderRow.top + placeholderRow.height

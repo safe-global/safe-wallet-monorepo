@@ -126,12 +126,16 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const { multiSendContract, multiSendContractAddress } = useMultiSendContract(safe)
 
   const [multiSendTxs] = useAsync(async () => {
-    if (!txsWithDetails || !chain || !safe.version) return
+    if (!txsWithDetails || !chain || !safe.version) {
+      return
+    }
     return getMultiSendTxs(txsWithDetails, chain, safe.address.value, safe.version)
   }, [chain, safe.address.value, safe.version, txsWithDetails])
 
   const multiSendTxData = useMemo(() => {
-    if (!txsWithDetails || !multiSendTxs) return
+    if (!txsWithDetails || !multiSendTxs) {
+      return
+    }
     return encodeMultiSendData(multiSendTxs) as `0x${string}`
   }, [txsWithDetails, multiSendTxs])
 
@@ -162,7 +166,9 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   }
 
   const [safeTx, safeTxError] = useAsync<SafeTransaction | undefined>(async () => {
-    if (!multiSendTxs || !safeSDK) return
+    if (!multiSendTxs || !safeSDK) {
+      return
+    }
     const safeTx = await createMultiSendCallOnlyTx(multiSendTxs)
 
     // For simulation purposes, we need to estimate gas even if the Safe version doesn't require it
@@ -191,16 +197,24 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   }
 
   const getSubmit = (): (() => Promise<void>) | undefined => {
-    if (!multiSendInputs) return undefined
-    if (willRelay) return () => onRelay(multiSendInputs)
-    if (walletExecutionInputs) return () => onExecute(multiSendInputs, walletExecutionInputs)
+    if (!multiSendInputs) {
+      return undefined
+    }
+    if (willRelay) {
+      return () => onRelay(multiSendInputs)
+    }
+    if (walletExecutionInputs) {
+      return () => onExecute(multiSendInputs, walletExecutionInputs)
+    }
     return undefined
   }
   const submit = getSubmit()
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
-    if (!submit) return
+    if (!submit) {
+      return
+    }
     setIsSubmittable(false)
     setSubmitError(undefined)
     setRefusalMessage(undefined)

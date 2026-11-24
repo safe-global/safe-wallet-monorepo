@@ -358,7 +358,9 @@ export class SafeWalletProvider {
       appInfo,
     )
 
-    if (txHash) return txHash
+    if (txHash) {
+      return txHash
+    }
 
     // Store fake transaction
     this.submittedTxs.set(safeTxHash, {

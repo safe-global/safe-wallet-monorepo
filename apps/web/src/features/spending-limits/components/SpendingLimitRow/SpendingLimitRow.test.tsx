@@ -23,8 +23,12 @@ const FormWrapper = ({ children }: { children: ReactNode }) => {
 const givenPermissions = ({ standard, spendingLimit }: { standard: boolean; spendingLimit: boolean }) => {
   jest.spyOn(useHasPermission, 'useHasPermission').mockImplementation((...args) => {
     const [permission] = args
-    if (permission === Permission.CreateTransaction) return standard
-    if (permission === Permission.CreateSpendingLimitTransaction) return spendingLimit
+    if (permission === Permission.CreateTransaction) {
+      return standard
+    }
+    if (permission === Permission.CreateSpendingLimitTransaction) {
+      return spendingLimit
+    }
     return false
   })
 }

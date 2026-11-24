@@ -48,9 +48,14 @@ export function parseNextQuery(search: string): NextQuery {
 export function stringifyNextQuery(query: Record<string, unknown>): string {
   const params = new URLSearchParams()
   for (const [k, v] of Object.entries(query)) {
-    if (v == null) continue
-    if (Array.isArray(v)) v.forEach((vv) => params.append(k, String(vv)))
-    else params.append(k, String(v))
+    if (v == null) {
+      continue
+    }
+    if (Array.isArray(v)) {
+      v.forEach((vv) => params.append(k, String(vv)))
+    } else {
+      params.append(k, String(v))
+    }
   }
   const qs = params.toString()
   return qs ? `?${qs}`.replace(/([?&]safe=.+?)%3A(?=0x)/g, '$1:') : ''
@@ -58,7 +63,9 @@ export function stringifyNextQuery(query: Record<string, unknown>): string {
 
 /** Serialize a Next `Url` (string | UrlObject) to a string href. */
 export function toHref(url: Url): string {
-  if (typeof url === 'string') return url
+  if (typeof url === 'string') {
+    return url
+  }
   const pathname = url.pathname ?? '/'
   let qs = ''
   if (typeof url.query === 'string') {

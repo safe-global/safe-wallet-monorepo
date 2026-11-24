@@ -42,20 +42,38 @@ export type SafeWorkspaceState = {
 
 /** The action for a signed-in user, from the membership and the Safes of the Workspace. */
 const getMemberAction = (state: SafeWorkspaceState): SafeWorkspaceAction => {
-  if (state.hasNoAccess) return 'removeNotMember'
-  if (state.membershipStatus === undefined) return 'none'
-  if (state.membershipStatus === MemberStatus.INVITED) return 'none'
-  if (state.membershipStatus !== MemberStatus.ACTIVE) return 'removeNotMember'
-  if (state.isSafeInSpace === undefined) return 'none'
+  if (state.hasNoAccess) {
+    return 'removeNotMember'
+  }
+  if (state.membershipStatus === undefined) {
+    return 'none'
+  }
+  if (state.membershipStatus === MemberStatus.INVITED) {
+    return 'none'
+  }
+  if (state.membershipStatus !== MemberStatus.ACTIVE) {
+    return 'removeNotMember'
+  }
+  if (state.isSafeInSpace === undefined) {
+    return 'none'
+  }
   return state.isSafeInSpace ? 'none' : 'remove'
 }
 
 /** What a Safe page does with the `spaceId` of its URL. A signed-out user keeps it and gets a sign-in prompt. */
 export const getSafeWorkspaceAction = (state: SafeWorkspaceState): SafeWorkspaceAction => {
-  if (!state.isSafeRoute || state.rawSpaceId === undefined) return 'none'
-  if (parseSpaceId(state.rawSpaceId) === null) return 'remove'
-  if (state.isSessionPending) return 'none'
-  if (!state.isSignedIn) return 'signIn'
+  if (!state.isSafeRoute || state.rawSpaceId === undefined) {
+    return 'none'
+  }
+  if (parseSpaceId(state.rawSpaceId) === null) {
+    return 'remove'
+  }
+  if (state.isSessionPending) {
+    return 'none'
+  }
+  if (!state.isSignedIn) {
+    return 'signIn'
+  }
   return getMemberAction(state)
 }
 
@@ -163,7 +181,9 @@ export const useSafeWorkspaceCheck = (): void => {
       removedSpaceId.current = undefined
       return
     }
-    if (removedSpaceId.current === rawSpaceId) return
+    if (removedSpaceId.current === rawSpaceId) {
+      return
+    }
 
     removedSpaceId.current = rawSpaceId
     removeUrlSpaceId()

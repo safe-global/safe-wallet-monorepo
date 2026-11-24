@@ -30,7 +30,9 @@ export function useTrustSafe() {
 
   const trustSafe = useCallback(
     ({ chainId, address, name, owners, threshold }: TrustSafeParams) => {
-      if (!chainId || !address) return
+      if (!chainId || !address) {
+        return
+      }
 
       dispatch(
         addOrUpdateSafe({

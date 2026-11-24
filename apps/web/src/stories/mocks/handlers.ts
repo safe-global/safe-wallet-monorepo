@@ -614,7 +614,9 @@ export function spacesHandlers(): RequestHandler[] {
     // Update space (name or experimental features)
     http.patch(/\/v1\/spaces\/[^/]+$/, async ({ request }) => {
       const body = (await request.json()) as UpdateSpaceDto
-      if (body.experimentalFeatures) experimentalFeatures = body.experimentalFeatures
+      if (body.experimentalFeatures) {
+        experimentalFeatures = body.experimentalFeatures
+      }
       return HttpResponse.json({ uuid: MOCK_SPACE_ID })
     }),
     // List all spaces for user

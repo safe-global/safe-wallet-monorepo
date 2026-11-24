@@ -20,8 +20,12 @@ const useAddressBook = (chainId?: string): AddressBook => {
     const out: AddressBook = {}
 
     for (const contact of mergedAddressBook.list) {
-      if (!contact.chainIds.includes(actualChainId)) continue
-      if (source === 'spaceOnly' && contact.source !== ContactSource.space) continue
+      if (!contact.chainIds.includes(actualChainId)) {
+        continue
+      }
+      if (source === 'spaceOnly' && contact.source !== ContactSource.space) {
+        continue
+      }
 
       const key = contact.address
       if (out[key] == null && contact.name?.trim()) {
@@ -32,7 +36,9 @@ const useAddressBook = (chainId?: string): AddressBook => {
     return out
   }, [mergedAddressBook, actualChainId, source])
 
-  if (source === 'localOnly') return localAddressBook
+  if (source === 'localOnly') {
+    return localAddressBook
+  }
 
   return merged
 }

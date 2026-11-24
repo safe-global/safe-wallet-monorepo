@@ -12,7 +12,9 @@ export default function SpaceTransactionsPage() {
   const spaceId = useCurrentSpaceId()
   useFeatureRedirect(FEATURES.SPACE_TRANSACTIONS, AppRoutes.spaces.index)
 
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

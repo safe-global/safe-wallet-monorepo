@@ -19,7 +19,9 @@ const HypernativeLogo = ({ className, fill, style }: HypernativeLogoProps) => {
   useEffect(() => {
     // Find the SVG element inside the wrapper
     const svg = containerRef?.current?.querySelector('svg')
-    if (!svg) return
+    if (!svg) {
+      return
+    }
 
     // Find the linearGradient element and update its ID to a unique one
     const gradient = svg.querySelector('linearGradient')

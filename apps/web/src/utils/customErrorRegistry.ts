@@ -88,7 +88,9 @@ const MESSAGE_SELECTOR_RE = /(?:custom error|following signature:?)[\s'"]*(0x[0-
  * about a revert at all.
  */
 export const extractRevertSelector = (error: unknown): string | undefined => {
-  if (!error) return undefined
+  if (!error) {
+    return undefined
+  }
 
   // ethers CALL_EXCEPTION carries the raw revert bytes in `data`
   if (isCallException(error as Error)) {

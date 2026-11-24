@@ -58,14 +58,18 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
 
   useEffect(() => {
     const unsubscribe = txSubscribe(TxEvent.PROCESSING, async ({ txId, txHash }) => {
-      if (!txId) return
+      if (!txId) {
+        return
+      }
       pendingTxs.current[txId] = txHash
     })
     return unsubscribe
   }, [])
 
   return useMemo<WalletSDK | undefined>(() => {
-    if (!chainId || !safeAddress) return
+    if (!chainId || !safeAddress) {
+      return
+    }
 
     const signMessage = (
       message: string | TypedData,
@@ -223,7 +227,9 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
           const previousPopupOpen = walletConnect?.wcPopupStore.getStore() ?? false
 
           const closeRequestIfActive = () => {
-            if (settled) return false
+            if (settled) {
+              return false
+            }
             settled = true
             walletConnect?.wcChainSwitchStore.setStore(undefined)
             walletConnect?.wcPopupStore.setStore(previousPopupOpen)
@@ -231,7 +237,9 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
           }
 
           const rejectSwitch = () => {
-            if (!closeRequestIfActive()) return
+            if (!closeRequestIfActive()) {
+              return
+            }
 
             reject({
               code: RpcErrorCode.USER_REJECTED,
@@ -240,7 +248,9 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
           }
 
           const handleSafeSelection = async (safeItem: SafeItem) => {
-            if (settled) return
+            if (settled) {
+              return
+            }
 
             try {
               await walletConnect?.updateSessions(targetChain.chainId, safeItem.address)
@@ -250,7 +260,9 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
               return
             }
 
-            if (!closeRequestIfActive()) return
+            if (!closeRequestIfActive()) {
+              return
+            }
 
             try {
               await router.push(getHref(targetChain, safeItem.address))
@@ -336,7 +348,9 @@ const useSafeWalletProvider = (fetchOwnedSafes = true): SafeWalletProvider | und
   const txFlowApi = useTxFlowApi(chainId, safeAddress, fetchOwnedSafes)
 
   return useMemo(() => {
-    if (!safeAddress || !chainId || !txFlowApi) return
+    if (!safeAddress || !chainId || !txFlowApi) {
+      return
+    }
 
     return new SafeWalletProvider(
       {

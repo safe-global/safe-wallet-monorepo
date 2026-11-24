@@ -13,7 +13,9 @@ const SafeWorkspaceSignInDialog = (): ReactElement | null => {
   const action = useSafeWorkspaceAction()
   const removeUrlSpaceId = useRemoveUrlSpaceId()
 
-  if (action !== 'signIn') return null
+  if (action !== 'signIn') {
+    return null
+  }
 
   return (
     <Dialog open onOpenChange={(open) => !open && removeUrlSpaceId()}>

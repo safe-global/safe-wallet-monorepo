@@ -70,7 +70,9 @@ const PREVIEW_ACCOUNTS: {
 /** The chain's logo from the chain config, so it loads from wherever the config points */
 const PreviewChainLogo = ({ chainId, chainName }: { chainId: string; chainName: string }) => {
   const logoUri = useChain(chainId)?.chainLogoUri
-  if (!logoUri) return null
+  if (!logoUri) {
+    return null
+  }
   return (
     <img
       src={logoUri}
@@ -90,7 +92,9 @@ const useCountUp = (target: number, enabled: boolean, duration = 1400, delay = 4
   const [value, setValue] = useState(enabled ? 0 : target)
 
   useEffect(() => {
-    if (!enabled) return
+    if (!enabled) {
+      return
+    }
 
     let frame = 0
     const start = performance.now() + delay
@@ -103,7 +107,9 @@ const useCountUp = (target: number, enabled: boolean, duration = 1400, delay = 4
       const t = Math.min(elapsed / duration, 1)
       const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t)
       setValue(Math.floor(target * eased))
-      if (t < 1) frame = requestAnimationFrame(step)
+      if (t < 1) {
+        frame = requestAnimationFrame(step)
+      }
     }
     frame = requestAnimationFrame(step)
 

@@ -22,16 +22,22 @@ export const useNewAllowlistIds = (
     const ids = new Set(policies.filter(isAllowlistPolicy).map((policy) => policy.id))
     const before = previous.current
     previous.current = ids
-    if (!before) return
+    if (!before) {
+      return
+    }
 
     const added = [...ids].filter((id) => !before.has(id))
-    if (added.length > 0) setNewIds((current) => new Set([...current, ...added]))
+    if (added.length > 0) {
+      setNewIds((current) => new Set([...current, ...added]))
+    }
   }, [policies, isSettled])
 
   const dismiss = useCallback(
     (id: string) =>
       setNewIds((current) => {
-        if (!current.has(id)) return current
+        if (!current.has(id)) {
+          return current
+        }
         const next = new Set(current)
         next.delete(id)
         return next

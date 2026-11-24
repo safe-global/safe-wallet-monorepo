@@ -14,7 +14,9 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 export const getCounterfactualBalance = async (safeAddress: string, provider?: BrowserProvider, chain?: Chain) => {
   let balance: bigint | undefined
 
-  if (!chain) return undefined
+  if (!chain) {
+    return undefined
+  }
 
   // Fetch balance via the connected wallet.
   // If there is no wallet connected we fetch and cache the balance instead

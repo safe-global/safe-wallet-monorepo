@@ -158,7 +158,9 @@ const AssetsWidget = () => {
 
   const isLoading = loading || !balances.fiatTotal
 
-  if (isLoading) return <AssetsSkeleton />
+  if (isLoading) {
+    return <AssetsSkeleton />
+  }
 
   return (
     <WidgetCard title="Top assets" viewAllUrl={items.length > 0 ? viewAllUrl : undefined} testId="assets-widget">

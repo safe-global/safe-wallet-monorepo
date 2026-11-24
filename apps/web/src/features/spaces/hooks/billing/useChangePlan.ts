@@ -22,7 +22,9 @@ export const useChangePlan = (spaceId?: string | null) => {
 
   const previewChange = useCallback(
     (priceId: string) => {
-      if (!gatedSpaceId || !subscriptionId) return
+      if (!gatedSpaceId || !subscriptionId) {
+        return
+      }
       void triggerPreview({ spaceId: gatedSpaceId, subscriptionId, planId: priceId })
     },
     [gatedSpaceId, subscriptionId, triggerPreview],
@@ -30,7 +32,9 @@ export const useChangePlan = (spaceId?: string | null) => {
 
   const changePlan = useCallback(
     async (priceId: string, paymentLinkId: string, removedSafes: SafeRef[] = []): Promise<boolean> => {
-      if (!gatedSpaceId || !subscriptionId) return false
+      if (!gatedSpaceId || !subscriptionId) {
+        return false
+      }
       const result = await update({
         spaceId: gatedSpaceId,
         subscriptionId,
@@ -40,7 +44,9 @@ export const useChangePlan = (spaceId?: string | null) => {
           ...(removedSafes.length > 0 && { removedSafes }),
         },
       })
-      if (removedSafes.length > 0) dispatch(spacesApi.util.invalidateTags(['spaces']))
+      if (removedSafes.length > 0) {
+        dispatch(spacesApi.util.invalidateTags(['spaces']))
+      }
       return !('error' in result)
     },
     [gatedSpaceId, subscriptionId, update, dispatch],

@@ -6,7 +6,9 @@ import SpaceSafeAccountsPage from '@/features/spaces/public/components/SpaceSafe
 export default function SpaceAccountsPage() {
   const router = useRouter()
   const { spaceId } = router.query
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

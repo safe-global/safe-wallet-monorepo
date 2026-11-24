@@ -49,7 +49,9 @@ const AddAccountsChooser = ({
   }
 
   const handleAdd = () => {
-    if (!isAdmin) return
+    if (!isAdmin) {
+      return
+    }
     setChooserOpen(false)
     setShowAddPicker(true)
   }

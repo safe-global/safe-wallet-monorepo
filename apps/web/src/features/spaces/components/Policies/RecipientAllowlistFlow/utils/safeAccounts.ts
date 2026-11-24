@@ -24,14 +24,20 @@ export const markAllowlistIneligibility = (
 ): SafeAccountEntry[] =>
   groupSafeAccounts(
     flattenSafeAccounts([...entries]).map((option) => {
-      if (option.ineligibleReason) return option
+      if (option.ineligibleReason) {
+        return option
+      }
 
       const eligibility = isSafeEligibleForAllowlist(
         { version: versions.get(option.id) },
         chainsById.get(option.chainId),
       )
-      if (eligibility.eligible) return option
-      if (eligibility.reason === 'version-unsupported' && !versions.has(option.id)) return option
+      if (eligibility.eligible) {
+        return option
+      }
+      if (eligibility.reason === 'version-unsupported' && !versions.has(option.id)) {
+        return option
+      }
 
       return { ...option, ineligibleReason: INELIGIBILITY_REASONS[eligibility.reason] }
     }),

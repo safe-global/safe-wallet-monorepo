@@ -29,7 +29,9 @@ const SafenetBatchWarning = ({ txs }: SafenetBatchWarningProps): ReactElement | 
           })?.status === CheckStatus.MALICIOUS,
       ).length,
   )
-  if (flagged === 0) return null
+  if (flagged === 0) {
+    return null
+  }
 
   return (
     <Alert variant="warning" outlined={false} className="mb-2" data-testid="safenet-batch-warning">

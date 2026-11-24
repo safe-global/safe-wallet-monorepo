@@ -53,7 +53,9 @@ const renderGuardWithStore = (
     },
     { initialReduxState: buildState(sessionExpiresAt, isStoreHydrated), routerProps: { pathname } },
   )
-  if (!capturedStore) throw new Error('store not captured')
+  if (!capturedStore) {
+    throw new Error('store not captured')
+  }
   return { ...result, store: capturedStore }
 }
 

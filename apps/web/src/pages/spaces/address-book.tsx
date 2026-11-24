@@ -6,7 +6,9 @@ import SpaceAddressBookContent from '@/features/spaces/public/components/SpaceAd
 export default function SpaceAddressBookPage() {
   const router = useRouter()
   const { spaceId } = router.query
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

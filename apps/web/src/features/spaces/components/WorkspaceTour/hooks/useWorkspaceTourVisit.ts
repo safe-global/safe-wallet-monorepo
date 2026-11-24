@@ -14,10 +14,14 @@ export const useWorkspaceTourVisit = (canShowTour: boolean, onFirstVisit: () => 
   const userId = user?.id
 
   useEffect(() => {
-    if (!canShowTour || userId === undefined) return
+    if (!canShowTour || userId === undefined) {
+      return
+    }
 
     const seen = localItem<boolean>(getWorkspaceTourSeenKey(userId))
-    if (seen.get()) return
+    if (seen.get()) {
+      return
+    }
 
     // Marked on open, not on finish: leaving mid-tour counts as having seen it.
     seen.set(true)

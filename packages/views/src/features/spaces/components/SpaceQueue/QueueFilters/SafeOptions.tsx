@@ -22,7 +22,9 @@ export type SafeOptionsProps = {
 
 /** The Safe filter's checkboxes in the Filter menu */
 const SafeOptions = ({ options, onToggle }: SafeOptionsProps): ReactElement => {
-  if (options.length === 0) return <NoFilterOptions>No Safe accounts</NoFilterOptions>
+  if (options.length === 0) {
+    return <NoFilterOptions>No Safe accounts</NoFilterOptions>
+  }
 
   return (
     <>

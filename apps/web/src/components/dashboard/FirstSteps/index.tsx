@@ -304,7 +304,9 @@ const FirstSteps = () => {
   const progress = calculateProgress(completedItems)
   const stepsCompleted = completedItems.filter((item) => item).length
 
-  if (safe.deployed) return null
+  if (safe.deployed) {
+    return null
+  }
 
   const isActivating = undeployedSafe?.status.status !== 'AWAITING_EXECUTION'
 

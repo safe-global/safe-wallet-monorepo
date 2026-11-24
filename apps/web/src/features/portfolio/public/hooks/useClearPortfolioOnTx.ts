@@ -26,9 +26,13 @@ const getSettleRefetchDelay = (
   const snapshot = summaries?.find(
     (summary) => summary.chainId === chainId && sameAddress(summary.address, safeAddress),
   )?.snapshot
-  if (!snapshot) return undefined
+  if (!snapshot) {
+    return undefined
+  }
   const lifetimeMs = Date.parse(snapshot.expiresAt) - Date.parse(snapshot.updatedAt)
-  if (Number.isNaN(lifetimeMs) || lifetimeMs <= 0 || lifetimeMs > SETTLE_WINDOW_MAX_MS) return undefined
+  if (Number.isNaN(lifetimeMs) || lifetimeMs <= 0 || lifetimeMs > SETTLE_WINDOW_MAX_MS) {
+    return undefined
+  }
   return lifetimeMs + SETTLE_REFETCH_DELAY_MS
 }
 
@@ -54,19 +58,25 @@ const useClearPortfolioOnTx = (): void => {
   useEffect(() => {
     return txSubscribe(TxEvent.SUCCESS, async ({ chainId, safeAddress }) => {
       const chain = configs.find((config) => config.chainId === chainId)
-      if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) return
+      if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) {
+        return
+      }
 
       const state = settle.current
       const generation = state.generation
       const result = await clearPortfolio({ address: safeAddress, chainId })
-      if ('error' in result) return
+      if ('error' in result) {
+        return
+      }
 
       const safeTag = makeSafeTag(chainId, safeAddress)
       const arg = { safes: [safeTag], currency, trusted: isTrustedTokenList(chain, tokenList) }
       const summaries = await dispatch(refreshPortfolioSummary(arg))
 
       const delay = getSettleRefetchDelay(summaries, chainId, safeAddress)
-      if (delay === undefined || generation !== state.generation) return
+      if (delay === undefined || generation !== state.generation) {
+        return
+      }
       clearTimeout(state.timers.get(safeTag))
       state.timers.set(
         safeTag,

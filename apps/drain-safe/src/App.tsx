@@ -6,7 +6,9 @@ import DrainForm from './components/DrainForm'
 function App() {
   const { assets, loaded, error } = useBalances()
 
-  if (!loaded) return <AppLoader />
+  if (!loaded) {
+    return <AppLoader />
+  }
 
   return (
     <Stack component="main" gap={2} sx={{ maxWidth: 800, p: 4 }}>

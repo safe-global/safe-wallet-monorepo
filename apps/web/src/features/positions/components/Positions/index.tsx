@@ -27,7 +27,9 @@ const Positions = () => {
     return <PositionsSkeleton />
   }
 
-  if (error || !protocols) return <PositionsUnavailable hasError={!!error} />
+  if (error || !protocols) {
+    return <PositionsUnavailable hasError={!!error} />
+  }
 
   if (protocols.length === 0) {
     return <PositionsEmpty entryPoint="Positions" />

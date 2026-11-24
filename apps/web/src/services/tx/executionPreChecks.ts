@@ -140,7 +140,9 @@ export const runExecutionPreChecks = async ({
   try {
     sdk = getAndValidateSafeSDK(scope)
   } catch (e) {
-    if (!scope && hasActiveScope()) throw e
+    if (!scope && hasActiveScope()) {
+      throw e
+    }
     sdk = undefined
   }
   if (sdk) {

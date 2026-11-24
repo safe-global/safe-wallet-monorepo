@@ -29,7 +29,9 @@ export const ReviewOwner = ({
   const { newOwner, removedOwner, threshold } = params
 
   useEffect(() => {
-    if (!chain) return
+    if (!chain) {
+      return
+    }
 
     const promise = removedOwner
       ? createSwapOwnerTx(chain, safe.deployed, {

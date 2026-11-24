@@ -18,7 +18,9 @@ const BatchTooltip = ({ children }: { children: ReactElement }) => {
   }, [])
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      return
+    }
     const dismiss = () => setOpen(false)
     document.addEventListener('click', dismiss)
     return () => document.removeEventListener('click', dismiss)

@@ -11,7 +11,9 @@ export const GAS_PAYMENT_OPTIONS = [
 
 /** Known entries in canonical order; anything else is dropped. */
 export const parseGasPaymentOptions = (value: unknown): GasPaymentOption[] => {
-  if (!Array.isArray(value)) return []
+  if (!Array.isArray(value)) {
+    return []
+  }
   return GAS_PAYMENT_OPTIONS.filter((option) => value.includes(option))
 }
 

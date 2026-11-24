@@ -53,7 +53,9 @@ const NotificationsPopover = forwardRef<NotificationsPopoverRef>((_props, ref): 
     <Popover
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) handleClose()
+        if (!isOpen) {
+          handleClose()
+        }
       }}
     >
       <PopoverContent

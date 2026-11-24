@@ -30,9 +30,13 @@ const orderDropdownSafes = (
   current: SafeItem | MultiChainSafeItem | undefined,
 ): AllSafeItems => {
   const sorted = items.slice().sort(comparator)
-  if (!safeAddress || !current) return sorted
+  if (!safeAddress || !current) {
+    return sorted
+  }
   const index = sorted.findIndex((s) => sameAddress(s.address, safeAddress))
-  if (index === -1) return [current, ...sorted]
+  if (index === -1) {
+    return [current, ...sorted]
+  }
   return sorted.map((safe, i) => (i === index ? current : safe))
 }
 
@@ -90,7 +94,9 @@ export function useSafeBarSafes() {
   // Fallback SafeItem for the current safe when it's not in any list
   // (e.g. navigated via URL to a safe that isn't pinned or owned).
   const fallbackCurrentSafe = useMemo<SafeItem | undefined>(() => {
-    if (!safeAddress || !currentChainId) return undefined
+    if (!safeAddress || !currentChainId) {
+      return undefined
+    }
     return {
       chainId: currentChainId,
       address: safeAddress,
@@ -129,10 +135,16 @@ export function useSafeBarSafes() {
 
   // Same for chain selector.
   const chainSelectorSafes = useMemo<AllSafeItems>(() => {
-    if (!safeAddress) return allKnownSafes
-    if (allKnownSafes.some((s) => sameAddress(s.address, safeAddress))) return allKnownSafes
+    if (!safeAddress) {
+      return allKnownSafes
+    }
+    if (allKnownSafes.some((s) => sameAddress(s.address, safeAddress))) {
+      return allKnownSafes
+    }
     const current = fallbackCurrentSafe
-    if (!current) return allKnownSafes
+    if (!current) {
+      return allKnownSafes
+    }
     return [current, ...allKnownSafes]
   }, [allKnownSafes, safeAddress, fallbackCurrentSafe])
 

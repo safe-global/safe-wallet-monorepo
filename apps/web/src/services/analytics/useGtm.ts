@@ -40,7 +40,9 @@ const useGtm = () => {
   // Enable GA cookies if consent was given
   useEffect(() => {
     setPrevAnalytics((prev) => {
-      if (isAnalyticsEnabled === prev) return prev
+      if (isAnalyticsEnabled === prev) {
+        return prev
+      }
 
       if (isAnalyticsEnabled) {
         gtmEnableCookies()
@@ -74,7 +76,9 @@ const useGtm = () => {
   // Track page views – anonymized by default.
   useEffect(() => {
     // Don't track 404 because it's not a real page, it immediately does a client-side redirect
-    if (router.pathname === AppRoutes['404'] || isSpaceRoute) return
+    if (router.pathname === AppRoutes['404'] || isSpaceRoute) {
+      return
+    }
 
     gtmTrackPageview(router.pathname, router.asPath)
   }, [router.asPath, router.pathname, isSpaceRoute])

@@ -18,8 +18,11 @@ export const workspaceWizardSlice = createSlice({
   initialState,
   reducers: {
     wizardStepOpened: (state, { payload: isFirstStep }: PayloadAction<boolean>) => {
-      if (state.resumeOffer === 'unknown') state.resumeOffer = isFirstStep ? 'offer' : 'done'
-      else if (!isFirstStep) state.resumeOffer = 'done'
+      if (state.resumeOffer === 'unknown') {
+        state.resumeOffer = isFirstStep ? 'offer' : 'done'
+      } else if (!isFirstStep) {
+        state.resumeOffer = 'done'
+      }
     },
     resumeOfferAnswered: (state) => {
       state.resumeOffer = 'done'

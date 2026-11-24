@@ -49,7 +49,9 @@ export function usePendingDelegations(): UsePendingDelegationsResult {
   )
 
   const pendingDelegations = useMemo(() => {
-    if (!messagesPage?.results || !parentSafeAddress) return []
+    if (!messagesPage?.results || !parentSafeAddress) {
+      return []
+    }
 
     const allDelegations = messagesPage.results
       .filter((item): item is MessageItem => item.type === 'MESSAGE')

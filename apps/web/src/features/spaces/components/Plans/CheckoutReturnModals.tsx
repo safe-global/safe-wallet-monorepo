@@ -40,7 +40,9 @@ export default function CheckoutReturnModals({
   const leave = () => void router.push(AppRoutes.welcome.spaces)
 
   useEffect(() => {
-    if (isComplete) refetch()
+    if (isComplete) {
+      refetch()
+    }
   }, [isComplete]) // eslint-disable-line react-hooks/exhaustive-deps -- refetch is a new function every render
 
   if (PENDING_STATUSES.includes(checkout.status)) {
@@ -63,7 +65,9 @@ export default function CheckoutReturnModals({
     )
   }
 
-  if (!isComplete || !checkout.subscription) return null
+  if (!isComplete || !checkout.subscription) {
+    return null
+  }
 
   // The fresh subscription knows its own period end; the entitlements it feeds may not have caught up yet.
   const endsAt = getSubscriptionPeriodEnd(checkout.subscription) ?? plan?.periodEndsAt

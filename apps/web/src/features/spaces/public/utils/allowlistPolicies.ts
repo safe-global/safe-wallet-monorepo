@@ -63,7 +63,9 @@ export const mockCgwAllowlist = (
   dtos: ActivePolicyDto[] = mockTreasuryAllowlistDtos(),
 ): AllowlistPolicy & { status: 'active' } => {
   const policy = mapActivePolicies(dtos, () => MOCK_ETH, resolveMockToken).find(isAllowlistPolicy)
-  if (policy?.status !== 'active') throw new Error('The DTOs map to no active allowlist')
+  if (policy?.status !== 'active') {
+    throw new Error('The DTOs map to no active allowlist')
+  }
 
   return policy
 }

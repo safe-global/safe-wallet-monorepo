@@ -29,7 +29,9 @@ class Storage {
       console.error(`key ${key} – ${(err as Error).message}`)
     }
 
-    if (saved == null) return null
+    if (saved == null) {
+      return null
+    }
 
     try {
       return JSON.parse(saved) as T

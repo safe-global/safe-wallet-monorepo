@@ -134,7 +134,9 @@ function Threshold({ formMethods, newOwners }: Pick<Props, 'formMethods' | 'newO
             name="threshold"
             render={({ field }) => {
               const onChange = (value: number | null) => {
-                if (value == null) return
+                if (value == null) {
+                  return
+                }
                 field.onChange(value)
                 trackEvent({ ...SETTINGS_EVENTS.SETUP.CHANGE_THRESHOLD, label: SETTINGS_LABELS.manage_signers })
               }

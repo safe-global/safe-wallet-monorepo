@@ -52,7 +52,9 @@ const safeMixpanelIdentify = (userId: string): void => {
 }
 
 export const mixpanelInit = (): void => {
-  if (typeof window === 'undefined' || isMixpanelInitialized) return
+  if (typeof window === 'undefined' || isMixpanelInitialized) {
+    return
+  }
 
   if (!MIXPANEL_TOKEN) {
     if (!IS_PRODUCTION) {

@@ -204,9 +204,15 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  * Calling it active would tell the user the Safe is protected when it is not.
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
-  if (isPendingPolicy(policy)) return policy.status
-  if (isAllowlistPolicy(policy) && policy.scheduledChange) return 'change-pending'
-  if (policy.enabled) return 'active'
+  if (isPendingPolicy(policy)) {
+    return policy.status
+  }
+  if (isAllowlistPolicy(policy) && policy.scheduledChange) {
+    return 'change-pending'
+  }
+  if (policy.enabled) {
+    return 'active'
+  }
 
   // A proposer grant has no module to switch on, so one that is not in force was never activated.
   return isProposerPolicy(policy) ? 'not-activated' : 'unenforced'

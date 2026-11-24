@@ -35,7 +35,9 @@ export function mergeAnalysisResults(
     const activityEntries = Object.entries(activityResult || {})
 
     for (const [address, result] of activityEntries) {
-      if (!result) continue
+      if (!result) {
+        continue
+      }
       const checksummedAddress = getAddress(address)
       merged[checksummedAddress] = { ...(merged[checksummedAddress] || {}), [StatusGroup.RECIPIENT_ACTIVITY]: [result] }
     }

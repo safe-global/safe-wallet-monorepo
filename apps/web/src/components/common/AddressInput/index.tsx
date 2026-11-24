@@ -127,8 +127,12 @@ const AddressInput = ({
 
   // Debounce the field error unless there's no error or it's resolving a domain
   let error = useDebounce(fieldError, ADDRESS_ERROR_DEBOUNCE_MS)
-  if (resolverError) error = resolverError
-  if (!fieldError || resolving) error = undefined
+  if (resolverError) {
+    error = resolverError
+  }
+  if (!fieldError || resolving) {
+    error = undefined
+  }
 
   // Validation function based on the current chain prefix
   const validatePrefixed = useMemo(() => validatePrefixedAddress(currentShortName), [currentShortName])
@@ -159,7 +163,9 @@ const AddressInput = ({
   // On ENS resolution, update the input value and remember the name it resolved from
   useEffect(() => {
     if (address) {
-      if (resolvedName) setResolvedFrom({ name: resolvedName, address })
+      if (resolvedName) {
+        setResolvedFrom({ name: resolvedName, address })
+      }
       setAddressValue(`${currentShortName}:${address}`)
     }
   }, [address, resolvedName, currentShortName, setAddressValue])
@@ -172,7 +178,9 @@ const AddressInput = ({
 
   // Retransform the value when chain changes
   useEffect(() => {
-    if (address) return
+    if (address) {
+      return
+    }
 
     if (watchedValue) {
       const transformedValue = transformAddressValue(watchedValue)
@@ -200,14 +208,18 @@ const AddressInput = ({
   const canEditChip = isSavedContact && !disabled
 
   const startEditing = () => {
-    if (!canEditChip) return
+    if (!canEditChip) {
+      return
+    }
     focusInputWhenShown.current = true
     setEditingAddress(watchedValue)
     onEdit?.()
   }
 
   const resetName = () => {
-    if (!canEditChip) return
+    if (!canEditChip) {
+      return
+    }
     focusInputWhenShown.current = true
     setEditingAddress(undefined)
     setValue(name, '')
@@ -225,7 +237,9 @@ const AddressInput = ({
   }
 
   const onWrapperBlur = (event: FocusEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) setEditingAddress(undefined)
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setEditingAddress(undefined)
+    }
   }
 
   const labelText =
@@ -243,7 +257,9 @@ const AddressInput = ({
     // Validate the stored value, not the last typed text: a pick from the address book or an ENS
     // resolution sets the value programmatically and must not be judged by what was typed before.
     validate: async (value: string) => {
-      if (!value) return
+      if (!value) {
+        return
+      }
 
       const { address } = parsePrefixedAddress(value)
 
@@ -260,7 +276,9 @@ const AddressInput = ({
     // Workaround for a bug in react-hook-form that it restores a cached error state on blur
     onBlur: () =>
       setTimeout(() => {
-        if (getValues(name)) void trigger(name)
+        if (getValues(name)) {
+          void trigger(name)
+        }
       }, 100),
   })
 

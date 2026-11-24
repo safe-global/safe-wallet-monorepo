@@ -46,7 +46,9 @@ const SafeOwnerStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormD
   )
 
   useEffect(() => {
-    if (!safeInfo) return
+    if (!safeInfo) {
+      return
+    }
 
     setValue(Field.threshold, safeInfo.threshold)
 

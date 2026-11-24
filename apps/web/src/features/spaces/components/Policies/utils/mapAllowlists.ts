@@ -54,9 +54,13 @@ const isAllowlistDto = (dto: ActivePolicyDto): dto is AllowlistDto =>
 const isEnforced = (guards: GuardSlotsDto): boolean => !!guards.transactionGuard
 
 const toNativeRecipient = ({ target, selector, operation }: PolicyAccessDto): string | null => {
-  if (operation !== 'CALL' || selector.toLowerCase() !== NATIVE_TRANSFER_SELECTOR) return null
+  if (operation !== 'CALL' || selector.toLowerCase() !== NATIVE_TRANSFER_SELECTOR) {
+    return null
+  }
   // The zero target is the guard's catch-all rule, not a recipient.
-  if (sameAddress(target, ZERO_ADDRESS)) return null
+  if (sameAddress(target, ZERO_ADDRESS)) {
+    return null
+  }
 
   return target
 }
@@ -71,8 +75,9 @@ const addToGroup = (group: AllowlistGroup, dto: AllowlistDto): void => {
   if (dto.type === 'native-transfer') {
     const recipient = toNativeRecipient(dto.enforcement.access)
     // The native policy has no permission, so a listed recipient is allowed outright.
-    if (recipient)
+    if (recipient) {
       group.nativeRecipients = addRecipients(group.nativeRecipients, [{ account: recipient, permission: 'ALWAYS' }])
+    }
     return
   }
 
@@ -97,7 +102,9 @@ const toAllowlist = (
       token: resolveErc20Token(chainId, entry.token.address) ?? entry.token,
     })),
   ]
-  if (entries.length === 0) return []
+  if (entries.length === 0) {
+    return []
+  }
 
   return [
     {
@@ -124,7 +131,9 @@ export const toAllowlists = (
   const bySafe = new Map<string, AllowlistGroup>()
 
   for (const dto of dtos) {
-    if (!isAllowlistDto(dto)) continue
+    if (!isAllowlistDto(dto)) {
+      continue
+    }
 
     const key = toChainAddressKey(dto.safe.chainId, dto.safe.address)
     const { guards } = dto.enforcement
@@ -151,7 +160,9 @@ export const getAllowlistTokenAddresses = (dtos: ActivePolicyDto[]): Map<string,
   const byChain = new Map<string, Set<string>>()
 
   for (const dto of dtos) {
-    if (!isAllowlistDto(dto) || dto.type !== 'erc20-transfer') continue
+    if (!isAllowlistDto(dto) || dto.type !== 'erc20-transfer') {
+      continue
+    }
     const addresses = byChain.get(dto.safe.chainId) ?? new Set<string>()
     addresses.add(dto.data.tokenAddress.toLowerCase())
     byChain.set(dto.safe.chainId, addresses)

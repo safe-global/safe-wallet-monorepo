@@ -51,16 +51,22 @@ export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoad
           .catch(() => null),
       ),
     ).then((results) => {
-      if (cancelled) return
+      if (cancelled) {
+        return
+      }
 
       const nextMap: SafeSpacesMap = {}
       for (const result of results) {
-        if (!result) continue
+        if (!result) {
+          continue
+        }
         const seen = new Set<string>()
         for (const chainId in result.safes) {
           for (const address of result.safes[chainId]) {
             const key = safeSpaceKey(chainId, address)
-            if (seen.has(key)) continue
+            if (seen.has(key)) {
+              continue
+            }
             seen.add(key)
             ;(nextMap[key] ??= []).push(result.space)
           }

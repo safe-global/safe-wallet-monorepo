@@ -25,7 +25,9 @@ function flattenPaletteToCSS(palette: ColorPalette, indent = '  '): string[] {
   const vars: string[] = []
 
   function flatten(obj: unknown, prefix = 'color'): void {
-    if (typeof obj !== 'object' || obj === null) return
+    if (typeof obj !== 'object' || obj === null) {
+      return
+    }
 
     Object.entries(obj).forEach(([key, value]) => {
       const kebabKey = toKebabCase(key)

@@ -51,7 +51,9 @@ const AggregatedBalance = ({
   const safeQueryParam = chain && firstSafe ? `${chain.shortName}:${firstSafe.address}` : undefined
 
   const setActiveSafe = useCallback(async () => {
-    if (!safeQueryParam) return
+    if (!safeQueryParam) {
+      return
+    }
     await router.replace({
       pathname: router.pathname,
       query: { ...router.query, safe: safeQueryParam, chain: chain?.shortName },
@@ -65,7 +67,9 @@ const AggregatedBalance = ({
     })
   }, [router])
 
-  if (isLoading) return <AggregatedBalanceSkeleton />
+  if (isLoading) {
+    return <AggregatedBalanceSkeleton />
+  }
 
   const isDimmed = safeItems.length === 0 || accountsLoading
   const formattedValue = formatCurrencyPrecise(aggregatedBalance, currency)
@@ -76,18 +80,24 @@ const AggregatedBalance = ({
   }
 
   const handleSwap = () => {
-    if (!safeQueryParam) return
+    if (!safeQueryParam) {
+      return
+    }
     router.push({ pathname: AppRoutes.swap, query: withSpaceId({ safe: safeQueryParam }, spaceId) })
   }
 
   const handleBuildTransaction = () => {
-    if (!safeQueryParam) return
+    if (!safeQueryParam) {
+      return
+    }
     const query = typeof txBuilderLink.query === 'object' ? txBuilderLink.query : {}
     router.push({ ...txBuilderLink, query: { ...query, safe: safeQueryParam } })
   }
 
   const handleReceive = async () => {
-    if (!safeQueryParam) return
+    if (!safeQueryParam) {
+      return
+    }
     await setActiveSafe()
     setIsReceiveModalOpen(true)
   }

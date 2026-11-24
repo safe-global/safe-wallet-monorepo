@@ -61,8 +61,11 @@ const SurveyOnboarding = (): ReactElement | null => {
   const toggle = (key: string): void => {
     setSelected((prev) => {
       const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
       return next
     })
   }
@@ -74,7 +77,9 @@ const SurveyOnboarding = (): ReactElement | null => {
   const page = data?.survey.surveyContent.pages[0]
 
   const onFinish = async (): Promise<void> => {
-    if (!spaceId || !page || selected.size === 0) return
+    if (!spaceId || !page || selected.size === 0) {
+      return
+    }
     // Sort so the same set of options always produces the same array — keeps
     // server-side aggregation (group-by selections) deterministic.
     const selections = Array.from(selected).sort()

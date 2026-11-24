@@ -14,9 +14,13 @@ export const selectAccountAnchorAddresses = createSelector(
   [selectAllAddedSafes, (state: RootState) => selectAllCuratedNestedSafes(state), selectUndeployedSafes],
   (addedSafes, curatedNested, undeployedSafes): Set<string> => {
     const addresses: string[] = []
-    for (const perChain of Object.values(addedSafes)) addresses.push(...Object.keys(perChain))
+    for (const perChain of Object.values(addedSafes)) {
+      addresses.push(...Object.keys(perChain))
+    }
     addresses.push(...curatedNested)
-    for (const perChain of Object.values(undeployedSafes)) addresses.push(...Object.keys(perChain))
+    for (const perChain of Object.values(undeployedSafes)) {
+      addresses.push(...Object.keys(perChain))
+    }
     return new Set(addresses.map((address) => address.toLowerCase()))
   },
 )
@@ -35,7 +39,9 @@ export const selectAnchorAddresses = createSelector(
   [(state: RootState) => selectAllAddressBooks(state), selectAccountAnchorAddresses],
   (addressBooks, accountAnchors): string[] => {
     const addresses: string[] = []
-    for (const perChain of Object.values(addressBooks)) addresses.push(...Object.keys(perChain))
+    for (const perChain of Object.values(addressBooks)) {
+      addresses.push(...Object.keys(perChain))
+    }
     // Lowercase + dedupe. The sources already store lowercased addresses and buildSimilarityIndex
     // re-normalizes anyway, so this is belt-and-braces to keep the anchor set canonical.
     return Array.from(new Set([...addresses.map((address) => address.toLowerCase()), ...accountAnchors]))

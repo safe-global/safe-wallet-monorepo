@@ -15,7 +15,9 @@ export const useSafeShieldAssessmentUrl = (): string | null => {
   const { safeAddress, safe } = useSafeInfo()
 
   return useMemo(() => {
-    if (!safeTx?.data || !safe.version) return null
+    if (!safeTx?.data || !safe.version) {
+      return null
+    }
     try {
       const safeTxHash = calculateSafeTransactionHash(safeAddress, safeTx.data, safe.version, BigInt(safe.chainId))
       return buildSecurityReportUrl(hnSecurityReportBtnConfig.baseUrl, safe.chainId, safeAddress, safeTxHash)

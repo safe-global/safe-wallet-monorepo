@@ -108,7 +108,9 @@ const AddManually = ({
                   <Select
                     value={chainId}
                     onValueChange={(value) => {
-                      if (value) setValue('chainId', value, { shouldValidate: true })
+                      if (value) {
+                        setValue('chainId', value, { shouldValidate: true })
+                      }
                     }}
                   >
                     {/* eslint-disable-next-line no-restricted-syntax -- h-full/w-full fill the row cell (layout); skin is variant="ghost" */}

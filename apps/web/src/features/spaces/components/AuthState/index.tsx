@@ -47,14 +47,22 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
     }
   }, [hasLostAccess, isInactiveMember, isFetching, router])
 
-  if (isLoadingState) return <LoadingState />
+  if (isLoadingState) {
+    return <LoadingState />
+  }
 
   // The router guard redirects signed-out users off every /spaces route, so a sign-in screen here would only flash.
-  if (!isUserSignedIn) return <LoadingState />
+  if (!isUserSignedIn) {
+    return <LoadingState />
+  }
 
-  if (hasLostAccess) return <UnauthorizedState />
+  if (hasLostAccess) {
+    return <UnauthorizedState />
+  }
 
-  if (isInactiveMember) return <LoadingState />
+  if (isInactiveMember) {
+    return <LoadingState />
+  }
 
   // A Workspace without a live plan keeps its pages underneath a blocking modal instead of bouncing elsewhere.
   return (

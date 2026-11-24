@@ -18,7 +18,9 @@ export const useInitSession = (): void => {
   }, [dispatch, chainId])
 
   useEffect(() => {
-    if (!safeAddress) return
+    if (!safeAddress) {
+      return
+    }
 
     dispatch(
       setLastSafeAddress({

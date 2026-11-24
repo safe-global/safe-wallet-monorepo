@@ -58,9 +58,15 @@ const createEnsAddressBook = (owners: Array<{ value: string; name?: string | nul
 // Mixed address book with some ENS, some regular names, some unnamed
 const createMixedAddressBook = (owners: Array<{ value: string; name?: string | null }>, chainId: string = '1') => {
   const book: Record<string, string> = {}
-  if (owners[0]) book[owners[0].value] = 'vitalik.eth'
-  if (owners[1]) book[owners[1].value] = 'Treasury Wallet'
-  if (owners[3]) book[owners[3].value] = 'safe-team.eth'
+  if (owners[0]) {
+    book[owners[0].value] = 'vitalik.eth'
+  }
+  if (owners[1]) {
+    book[owners[1].value] = 'Treasury Wallet'
+  }
+  if (owners[3]) {
+    book[owners[3].value] = 'safe-team.eth'
+  }
   return { [chainId]: book }
 }
 

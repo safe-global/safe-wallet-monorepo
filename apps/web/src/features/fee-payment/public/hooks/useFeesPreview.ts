@@ -110,7 +110,9 @@ export const useFeesPreview = ({
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
   const lockedCandidate = useMemo<GasTokenCandidate | undefined>(() => {
-    if (!lockedGasToken) return undefined
+    if (!lockedGasToken) {
+      return undefined
+    }
     if (sameAddress(lockedGasToken, ZERO_ADDRESS)) {
       return {
         address: ZERO_ADDRESS,
@@ -137,8 +139,12 @@ export const useFeesPreview = ({
   // Skip while the candidates list is empty — that's the transient remount window (Back/Forward
   // between flow steps) where balances haven't repopulated yet, not a real "token unavailable".
   useEffect(() => {
-    if (!feeGasToken) return
-    if (candidates.length === 0) return
+    if (!feeGasToken) {
+      return
+    }
+    if (candidates.length === 0) {
+      return
+    }
     if (!candidates.some((c) => sameAddress(c.address, feeGasToken))) {
       setFeeGasToken(undefined)
     }
@@ -174,12 +180,20 @@ export const useFeesPreview = ({
   //  - preview succeeded and the user hasn't picked anything yet: persist the implicit
   //    default.
   useEffect(() => {
-    if (!isPayFromSafe) return
-    if (isLegacySigned) return
-    if (preview.isLoading || preview.isFetching) return
+    if (!isPayFromSafe) {
+      return
+    }
+    if (isLegacySigned) {
+      return
+    }
+    if (preview.isLoading || preview.isFetching) {
+      return
+    }
 
     if (preview.error || !preview.data) {
-      if (feeGasToken) setFeeGasToken(undefined)
+      if (feeGasToken) {
+        setFeeGasToken(undefined)
+      }
       return
     }
     if (!feeGasToken && defaultAddress) {
@@ -209,7 +223,9 @@ export const useFeesPreview = ({
   // or the underlying safeTx change.
   const previewTxData = preview.data?.txData
   const previewedSafeTx = useMemo<SafeTransaction | undefined>(() => {
-    if (!previewTxData || !safeTx) return undefined
+    if (!previewTxData || !safeTx) {
+      return undefined
+    }
     return {
       data: {
         ...safeTx.data,

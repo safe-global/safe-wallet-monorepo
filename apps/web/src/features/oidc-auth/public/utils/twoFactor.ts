@@ -17,8 +17,12 @@ type TwoFactorMember = Pick<MemberDto, 'status' | 'user'>
 
 /** Declined invitees have no meaningful 2FA state, hence `undefined`. */
 export const getMemberTwoFactorStatus = (member: TwoFactorMember): MemberTwoFactorStatus | undefined => {
-  if (member.status === 'DECLINED') return undefined
-  if (member.status === 'INVITED') return MemberTwoFactorStatus.INVITE_PENDING
+  if (member.status === 'DECLINED') {
+    return undefined
+  }
+  if (member.status === 'INVITED') {
+    return MemberTwoFactorStatus.INVITE_PENDING
+  }
   return member.user.email ? MemberTwoFactorStatus.ACTIVE : MemberTwoFactorStatus.WALLET_SIGN_IN
 }
 

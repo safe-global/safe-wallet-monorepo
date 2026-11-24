@@ -11,7 +11,9 @@ async function getGithubRelease(version: string) {
       Accept: 'application/vnd.github.v3+json',
     },
   })
-  if (!resp.ok) return false
+  if (!resp.ok) {
+    return false
+  }
   return await resp.json()
 }
 
@@ -34,7 +36,9 @@ export const useIsOfficialHost = (): boolean => {
   }, [])
 
   const [isTrustedIpfs = false] = useAsync<boolean>(() => {
-    if (isOfficialHost || !isIpfs()) return
+    if (isOfficialHost || !isIpfs()) {
+      return
+    }
     return isOfficialIpfs()
   }, [isOfficialHost])
 

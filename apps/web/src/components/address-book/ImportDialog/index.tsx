@@ -64,7 +64,9 @@ const ImportDialog = ({ handleClose, validateRows, onImport }: ImportDialogProps
 
   // Count how many entries are in the CSV file
   const [entryCount, chainCount] = useMemo(() => {
-    if (!csvData) return [0, 0]
+    if (!csvData) {
+      return [0, 0]
+    }
     const entries = csvData.data.slice(1).filter(hasEntry)
     const entryLen = entries.length
     const chainLen = new Set(entries.map((entry) => entry[2].trim())).size
@@ -81,7 +83,9 @@ const ImportDialog = ({ handleClose, validateRows, onImport }: ImportDialogProps
     const byAddress = new Map<string, { address: string; name: string }>()
     for (const [address, name] of entries) {
       const key = address.trim().toLowerCase()
-      if (flagged.has(key) && !byAddress.has(key)) byAddress.set(key, { address: address.trim(), name })
+      if (flagged.has(key) && !byAddress.has(key)) {
+        byAddress.set(key, { address: address.trim(), name })
+      }
     }
     return Array.from(byAddress.values())
   }, [entries, flagged])
@@ -160,7 +164,9 @@ const ImportDialog = ({ handleClose, validateRows, onImport }: ImportDialogProps
   }
 
   const onCancelLookalikes = () => {
-    if (!isConfirmOpen) return
+    if (!isConfirmOpen) {
+      return
+    }
     trackDismissLookalikes(DismissAction.CANCEL)
     setIsConfirmOpen(false)
   }

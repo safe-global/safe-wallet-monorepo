@@ -31,7 +31,9 @@ const SafeThemeProvider: FC<SafeThemeProviderProps> = ({ children }) => {
     )
 
     window.addEventListener('message', function ({ data: eventData }) {
-      if (!eventData?.data || typeof eventData.data !== 'object' || !('darkMode' in eventData.data)) return
+      if (!eventData?.data || typeof eventData.data !== 'object' || !('darkMode' in eventData.data)) {
+        return
+      }
 
       setMode(eventData.data.darkMode ? EModes.DARK : EModes.LIGHT)
     })

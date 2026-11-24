@@ -25,7 +25,9 @@ export const useOpenSafenetStakingApp = () => {
   const isNavigatingRef = useRef(false)
 
   const openSafenetStakingApp = async () => {
-    if (isNavigatingRef.current) return
+    if (isNavigatingRef.current) {
+      return
+    }
     isNavigatingRef.current = true
     setIsNavigating(true)
     try {
@@ -34,7 +36,9 @@ export const useOpenSafenetStakingApp = () => {
         new Promise((resolve) => setTimeout(resolve, 1000)),
       ])
       const safenetApp = apps.find((app) => app.tags.includes(SafeAppsTag.SAFENET))
-      if (!safenetApp) return
+      if (!safenetApp) {
+        return
+      }
       router.push(
         withSpaceIdInUrl(
           `${AppRoutes.apps.open}?safe=${query?.get('safe')}&appUrl=${encodeURIComponent(safenetApp.url)}`,

@@ -41,7 +41,9 @@ export const SpendingLimits = ({ txData, type, resetsSpent = false }: SpendingLi
     [tokenAddress, tokens, txData?.tokenInfoIndex],
   )
 
-  if (!txData) return null
+  if (!txData) {
+    return null
+  }
 
   return (
     <div className="flex flex-col gap-2">

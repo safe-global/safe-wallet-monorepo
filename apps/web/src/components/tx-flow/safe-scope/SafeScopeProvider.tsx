@@ -48,7 +48,9 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
   // Inside the tx modal, report this flow's Safe to the topbar.
   const reportFlowSafe = useContext(TxFlowSafeReporterContext)
   useEffect(() => {
-    if (!reportFlowSafe) return
+    if (!reportFlowSafe) {
+      return
+    }
     reportFlowSafe(target)
     return () => reportFlowSafe(undefined)
   }, [reportFlowSafe, target])
@@ -80,11 +82,15 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
 
   useEffect(() => {
     setProviderState(undefined)
-    if (!chain) return
+    if (!chain) {
+      return
+    }
     let cancelled = false
     // Dynamic import keeps ethers out of the main bundle, same as `useInitWeb3`.
     import('@/hooks/wallets/web3').then(({ createWeb3ReadOnly }) => {
-      if (cancelled) return
+      if (cancelled) {
+        return
+      }
       const provider = createWeb3ReadOnly(chain, customRpcUrl)
       setProviderState(provider ? { chainId: chain.chainId, provider } : undefined)
     })
@@ -95,7 +101,9 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
 
   // 3. protocol-kit instance for the target Safe. Inputs mirror `useInitSafeCoreSDK`.
   const sdkInputs = useMemo(() => {
-    if (!safe || !web3ReadOnly) return undefined
+    if (!safe || !web3ReadOnly) {
+      return undefined
+    }
     return {
       provider: web3ReadOnly,
       chainId: safe.chainId,
@@ -122,14 +130,20 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
 
   useEffect(() => {
     setSdk(undefined)
-    if (!sdkInputs) return
+    if (!sdkInputs) {
+      return
+    }
     let cancelled = false
     initSafeSDK(sdkInputs)
       .then((instance) => {
-        if (!cancelled) setSdk(instance)
+        if (!cancelled) {
+          setSdk(instance)
+        }
       })
       .catch((e) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         setSdk(undefined)
         trackError(ErrorCodes._105, asError(e).message)
       })
@@ -142,7 +156,9 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
   const clearScope = useCallback(() => setTarget(undefined), [])
 
   const scope = useMemo<SafeScope | undefined>(() => {
-    if (!target || !scopeKey) return undefined
+    if (!target || !scopeKey) {
+      return undefined
+    }
     return {
       chainId: target.chainId,
       safeAddress: target.safeAddress,

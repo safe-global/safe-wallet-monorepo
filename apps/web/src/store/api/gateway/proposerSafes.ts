@@ -30,7 +30,9 @@ const isQueueServiceChain = (chain: ProposerChain) => hasFeature(chain, FEATURES
 
 /** `next` arrives as a full URL; the generated endpoint takes only the cursor param. */
 const getNextCursor = (next: string | null | undefined): string | undefined => {
-  if (!next) return undefined
+  if (!next) {
+    return undefined
+  }
 
   try {
     return new URL(next).searchParams.get('cursor') ?? undefined
@@ -71,7 +73,9 @@ const fetchProposerSafesOnChain = async (
     safes.push(...result.results.map((delegateEntry) => delegateEntry.safe).filter((safe): safe is string => !!safe))
 
     cursor = getNextCursor(result.next)
-    if (!cursor) break
+    if (!cursor) {
+      break
+    }
   }
 
   return safes
@@ -109,7 +113,9 @@ export const proposerSafesEndpoints = (builder: GatewayEndpointBuilder) => ({
       // taking the signer-eligible Safes down with it.
       const data: ProposerSafes = {}
       results.forEach((result, index) => {
-        if (result.status === 'fulfilled') data[chains[index].chainId] = result.value
+        if (result.status === 'fulfilled') {
+          data[chains[index].chainId] = result.value
+        }
       })
 
       return { data }

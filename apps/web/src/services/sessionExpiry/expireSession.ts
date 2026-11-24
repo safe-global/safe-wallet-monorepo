@@ -18,7 +18,9 @@ export const expireSession =
   (pathname: string): AppThunk =>
   (dispatch) => {
     dispatch(setUnauthenticated())
-    if (!isSpacesRoute(pathname)) return
+    if (!isSpacesRoute(pathname)) {
+      return
+    }
     dispatch(
       showNotification({
         message: SESSION_EXPIRED_MESSAGE,

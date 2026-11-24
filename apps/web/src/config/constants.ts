@@ -70,7 +70,9 @@ export const DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE =
 export const DATADOG_RUM_TRACING_ENABLED = process.env.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED === 'true'
 
 const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
-  if (value === undefined) return defaultValue
+  if (value === undefined) {
+    return defaultValue
+  }
   return value === 'true'
 }
 

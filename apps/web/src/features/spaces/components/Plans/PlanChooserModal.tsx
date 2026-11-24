@@ -68,9 +68,14 @@ export default function PlanChooserModal({
   const start = () => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)
 
   const subscribe = (picked: PlanPick) => {
-    if (!picked.option.paymentLinkId) return
-    if (needsTrim(picked.option.seats)) setPick(picked)
-    else void checkout(picked.option.paymentLinkId)
+    if (!picked.option.paymentLinkId) {
+      return
+    }
+    if (needsTrim(picked.option.seats)) {
+      setPick(picked)
+    } else {
+      void checkout(picked.option.paymentLinkId)
+    }
   }
 
   return (

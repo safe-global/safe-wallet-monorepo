@@ -34,7 +34,9 @@ export const useSpaceSafeOverviews = (spaceSafeItems: SpaceSafeRef[]) => {
 
   const ownedByChain = useMemo<AllOwnedSafes>(() => {
     // While loading (or signed out) leave the map empty → every row read-only (fail-closed).
-    if (!overviews || !wallet) return {}
+    if (!overviews || !wallet) {
+      return {}
+    }
 
     const map: AllOwnedSafes = {}
     const addOwned = (chainId: string, address: string) => {

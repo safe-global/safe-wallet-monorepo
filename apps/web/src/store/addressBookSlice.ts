@@ -23,7 +23,9 @@ export const addressBookSlice = createSlice({
   reducers: {
     migrate: (state, action: PayloadAction<AddressBookState>): AddressBookState => {
       // Don't migrate if there's data already
-      if (Object.keys(state).length > 0) return state
+      if (Object.keys(state).length > 0) {
+        return state
+      }
       // Otherwise, migrate
       return action.payload
     },
@@ -47,16 +49,22 @@ export const addressBookSlice = createSlice({
         return
       }
       chainIds.forEach((chainId) => {
-        if (!state[chainId]) state[chainId] = {}
+        if (!state[chainId]) {
+          state[chainId] = {}
+        }
         state[chainId][address] = name
       })
     },
 
     removeAddressBookEntry: (state, action: PayloadAction<{ chainId: string; address: string; notify?: boolean }>) => {
       const { chainId, address } = action.payload
-      if (!state[chainId]) return state
+      if (!state[chainId]) {
+        return state
+      }
       delete state[chainId][address]
-      if (Object.keys(state[chainId]).length > 0) return state
+      if (Object.keys(state[chainId]).length > 0) {
+        return state
+      }
       delete state[chainId]
     },
   },

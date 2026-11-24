@@ -28,8 +28,9 @@ export function useSpaceChainSelector() {
   const { deployedChains, deployedChainIds, safeName } = useMemo(() => {
     const currentSafe = allSafes.find((s) => sameAddress(s.address, safeAddress))
 
-    if (!currentSafe)
+    if (!currentSafe) {
       return { deployedChains: [] as ChainInfo[], deployedChainIds: [] as string[], safeName: undefined }
+    }
 
     const chainIds = isMultiChainSafeItem(currentSafe) ? currentSafe.safes.map((s) => s.chainId) : [currentSafe.chainId]
 
@@ -49,7 +50,9 @@ export function useSpaceChainSelector() {
   const handleChainChange = useCallback(
     (chainId: string) => {
       const chain = chainConfigs.find((c) => c.chainId === chainId)
-      if (!chain) return
+      if (!chain) {
+        return
+      }
       trackEvent(
         { ...SPACE_EVENTS.CHAIN_SWITCHED, label: spaceId ?? undefined },
         {

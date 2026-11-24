@@ -81,7 +81,9 @@ const WorkspaceContacts = ({
   const dialogEntry = dialog && items.find((item) => item.address === dialog.address)
   // A contact deleted elsewhere closes its dialog for good, so re-adding it doesn't reopen it
   useEffect(() => {
-    if (dialog && !dialogEntry) setDialog(undefined)
+    if (dialog && !dialogEntry) {
+      setDialog(undefined)
+    }
   }, [dialog, dialogEntry])
 
   const openDialog = (type: OpenDialog['type'], contact: AddressBookContact) =>
@@ -106,7 +108,9 @@ const WorkspaceContacts = ({
     setTagsError(undefined)
     const { saved, error } = await saveContactTags(entry.address, tagNamesOf(tagIds, tags))
     setTagsError(error)
-    if (saved) setDialog(undefined)
+    if (saved) {
+      setDialog(undefined)
+    }
   }
 
   const memberTagActions = isInvited ? undefined : tagActions

@@ -35,12 +35,16 @@ const RowIconAction = ({
 }: RowIconActionProps) => {
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation()
-    if (!href) e.preventDefault()
+    if (!href) {
+      e.preventDefault()
+    }
     onActivate?.()
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (href || (e.key !== 'Enter' && e.key !== ' ')) return
+    if (href || (e.key !== 'Enter' && e.key !== ' ')) {
+      return
+    }
     e.stopPropagation()
     e.preventDefault()
     onActivate?.()

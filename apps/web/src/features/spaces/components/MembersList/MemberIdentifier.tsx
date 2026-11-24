@@ -6,8 +6,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { cn } from '@safe-global/views/utils/cn'
 
 export const getMemberIdentifier = ({ user }: MemberDto) => {
-  if (user.email) return { value: user.email, isAddress: false }
-  if (user.address) return { value: user.address, isAddress: true }
+  if (user.email) {
+    return { value: user.email, isAddress: false }
+  }
+  if (user.address) {
+    return { value: user.address, isAddress: true }
+  }
   return null
 }
 
@@ -21,7 +25,9 @@ const useFitsFullValue = (value: string) => {
     const container = containerRef.current
     const measure = measureRef.current
     const copy = copyRef.current
-    if (!container || !measure || !copy) return
+    if (!container || !measure || !copy) {
+      return
+    }
     const update = () => {
       const gap = parseFloat(getComputedStyle(container).columnGap) || 0
       setFits(measure.offsetWidth + copy.offsetWidth + gap <= container.clientWidth)
@@ -72,7 +78,9 @@ const IdentifierLabel = ({
 
 const MemberIdentifier = ({ member, className }: { member: MemberDto; className?: string }) => {
   const identifier = getMemberIdentifier(member)
-  if (!identifier) return null
+  if (!identifier) {
+    return null
+  }
   return <IdentifierLabel {...identifier} className={className} />
 }
 

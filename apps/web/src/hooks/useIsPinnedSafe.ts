@@ -13,11 +13,15 @@ const useIsPinnedSafe = (): boolean => {
   const addedSafes = useAppSelector(selectAllAddedSafes)
   const chainId = safe?.chainId
 
-  if (!chainId || !safeAddress) return false
+  if (!chainId || !safeAddress) {
+    return false
+  }
 
   // Use case-insensitive comparison to handle addresses with different casing
   const chainSafes = addedSafes[chainId]
-  if (!chainSafes) return false
+  if (!chainSafes) {
+    return false
+  }
 
   return Object.keys(chainSafes).some((addr) => sameAddress(addr, safeAddress))
 }

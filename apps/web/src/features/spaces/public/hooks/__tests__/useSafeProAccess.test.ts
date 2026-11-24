@@ -62,7 +62,9 @@ describe('useSafeProAccess', () => {
     ['the user is signed out', () => mockIsSignedIn.mockReturnValue(false)],
   ])('withholds them when %s', (_, arrange) => {
     arrange()
-    if (!mockIsSignedIn()) mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isLoading: false })
+    if (!mockIsSignedIn()) {
+      mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isLoading: false })
+    }
 
     expect(renderHook(() => useSafeProAccess()).result.current.hasProFeatures).toBe(false)
   })

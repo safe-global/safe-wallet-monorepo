@@ -50,7 +50,9 @@ function ChainSelectorBlock({
   }
 
   const handleOpenChange = (next: boolean) => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     setOpen(next)
     // This block stays mounted across close, so the next opening would start filtered.
     setSearch('')

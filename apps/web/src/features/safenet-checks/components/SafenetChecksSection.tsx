@@ -161,8 +161,12 @@ const RuleBlock = ({ summary, severity }: { summary: RejectionSummary; severity:
 }
 
 const maliciousTitle = (summary: RejectionSummary, fallback: string): string => {
-  if (summary.rules.length === 1) return summary.rules[0].label
-  if (summary.rules.length > 1) return MULTIPLE_RULES_TITLE
+  if (summary.rules.length === 1) {
+    return summary.rules[0].label
+  }
+  if (summary.rules.length > 1) {
+    return MULTIPLE_RULES_TITLE
+  }
   return fallback
 }
 
@@ -187,7 +191,9 @@ const proofLinkFor = (check: SectionCheck, safeTxHash: string | undefined, links
   if (check.publicStatus === CheckStatus.BENIGN && links.attestationHref) {
     return { href: links.attestationHref, testId: 'safenet-attestation-link', label: SAFENET_ATTESTATION_LINK_LABEL }
   }
-  if (!hasExplorerPage(check, safeTxHash)) return null
+  if (!hasExplorerPage(check, safeTxHash)) {
+    return null
+  }
 
   return { href: links.explorerHref, testId: 'safenet-explorer-link', label: SAFENET_EXPLORER_LINK_LABEL }
 }
@@ -267,7 +273,9 @@ type RiskView = { summary: RejectionSummary | null; content: ResolvedPresentatio
 const resolveRisk = (check: SectionCheck, content: ResolvedPresentation): RiskView => {
   const summary =
     check.publicStatus === CheckStatus.MALICIOUS && check.snapshot ? summariseRejection(check.snapshot.events) : null
-  if (!summary) return { summary, content, title: content.label }
+  if (!summary) {
+    return { summary, content, title: content.label }
+  }
 
   return {
     summary,
@@ -288,7 +296,9 @@ const CheckRow = ({
 }): ReactElement | null => {
   const { publicStatus, snapshot, unavailableReason, isStale } = check
   const content = resolvePresentation(publicStatus, unavailableReason, snapshot !== undefined)
-  if (!content) return null
+  if (!content) {
+    return null
+  }
 
   const isInFlight = isCheckInFlight(publicStatus)
   const isRisk = publicStatus === CheckStatus.MALICIOUS
@@ -344,7 +354,9 @@ export const SafenetChecksSectionView = ({
     )
   }
 
-  if (preCheck) return <PreCheck kind={preCheck} />
+  if (preCheck) {
+    return <PreCheck kind={preCheck} />
+  }
 
   return <CheckRow check={check} safeTxHash={safeTxHash} links={links} />
 }
@@ -355,8 +367,12 @@ const resolvePreCheck = (
   willExecute: boolean,
   threshold: number,
 ): PreCheckKind | undefined => {
-  if (!isNewTransaction) return undefined
-  if (willExecute) return 'executeNow'
+  if (!isNewTransaction) {
+    return undefined
+  }
+  if (willExecute) {
+    return 'executeNow'
+  }
 
   return threshold > 1 ? 'multisig' : 'single'
 }

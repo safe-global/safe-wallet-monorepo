@@ -34,7 +34,9 @@ const Custom404 = () => {
   const [isRedirecting, setIsRedirecting] = useState<boolean>(true)
 
   useEffect(() => {
-    if (typeof location === 'undefined') return
+    if (typeof location === 'undefined') {
+      return
+    }
 
     const redirectUrl = _getRedirectUrl(location)
 

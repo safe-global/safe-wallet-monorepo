@@ -21,7 +21,9 @@ export const countTagChanges = (oldNames: string[], newNames: string[]) => ({
 export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const endpoints = spacesApi?.endpoints
   // Tests that mock the spaces module leave no endpoint to watch.
-  if (!endpoints) return
+  if (!endpoints) {
+    return
+  }
   const { startListening } = listenerMiddleware
   // RootState types the shared gateway reducer without the users and spaces tags; the cache entries are the same.
   const currentUserId = (state: unknown) => {
@@ -46,7 +48,9 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
     matcher: endpoints.spacesUpdateV1.matchFulfilled,
     effect: ({ meta }) => {
       const { id, updateSpaceDto } = meta.arg.originalArgs
-      if (!updateSpaceDto.experimentalFeatures) return
+      if (!updateSpaceDto.experimentalFeatures) {
+        return
+      }
       trackEvent(
         { ...SPACE_EVENTS.WORKSPACE_UPDATED, label: id },
         {
@@ -181,7 +185,9 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
     const book = addressBookBefore(state, spaceId)
     const workspaceTags = book?.tags ?? []
     items.forEach(({ address, tags }) => {
-      if (!tags) return
+      if (!tags) {
+        return
+      }
       const contact = book?.data.find((item) => sameAddress(item.address, address))
       const oldNames = workspaceTags.filter((tag) => contact?.tagIds.includes(tag.id)).map((tag) => tag.name)
       trackEvent(SPACE_EVENTS.CONTACT_TAGS_UPDATED, {

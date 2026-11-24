@@ -495,8 +495,12 @@ describe('CreateTokenTransfer', () => {
     // Simulate spending-limit-only user: canCreateSpendingLimitTx=true, canCreateStandardTx=false
     useHasPermissionSpy.mockImplementation((...args) => {
       const permission = args[0] as Permission
-      if (permission === Permission.CreateTransaction) return false
-      if (permission === Permission.CreateSpendingLimitTransaction) return true
+      if (permission === Permission.CreateTransaction) {
+        return false
+      }
+      if (permission === Permission.CreateSpendingLimitTransaction) {
+        return true
+      }
       return true
     })
 

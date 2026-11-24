@@ -31,7 +31,9 @@ class AppCommunicator {
   }
 
   private isValidMessage = (msg: SDKMessageEvent): boolean => {
-    if (!msg.data) return false
+    if (!msg.data) {
+      return false
+    }
 
     const sentFromIframe = this.iframeRef.current?.contentWindow === msg.source
     const originMatches = msg.origin === this.allowedOrigin
@@ -44,7 +46,9 @@ class AppCommunicator {
   }
 
   private canHandleMessage = (msg: SDKMessageEvent): boolean => {
-    if (!msg.data) return false
+    if (!msg.data) {
+      return false
+    }
 
     return Boolean(this.handlers.get(msg.data.method))
   }

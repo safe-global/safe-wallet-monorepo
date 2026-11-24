@@ -17,8 +17,12 @@ export function ThresholdBadge({
   iconOnly?: boolean
   loading?: boolean
 }) {
-  if (loading) return <Skeleton className="h-5 w-10 rounded-full" />
-  if (!iconOnly && (threshold == null || owners == null)) return null
+  if (loading) {
+    return <Skeleton className="h-5 w-10 rounded-full" />
+  }
+  if (!iconOnly && (threshold == null || owners == null)) {
+    return null
+  }
 
   return (
     <span
@@ -53,8 +57,12 @@ export function PendingBadge({
   loading?: boolean
   compact?: boolean
 }) {
-  if (loading) return <Skeleton className="h-5 w-16 rounded-full" />
-  if (count <= 0) return null
+  if (loading) {
+    return <Skeleton className="h-5 w-16 rounded-full" />
+  }
+  if (count <= 0) {
+    return null
+  }
 
   const needsConfirmation = awaitingConfirmation > 0
 

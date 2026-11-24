@@ -13,7 +13,9 @@ export const createOnboard = (
   currentChain: Chain,
   rpcConfig: EnvState['rpc'] | undefined,
 ): OnboardAPI => {
-  if (onboard) return onboard
+  if (onboard) {
+    return onboard
+  }
 
   const wallets = getAllWallets(currentChain)
 

@@ -13,7 +13,9 @@ export type SectionPanelProps = {
  * Renders nothing when there are no rows so empty sections collapse.
  */
 const SectionPanel = ({ rows, baseDelay = 0 }: SectionPanelProps): ReactElement | null => {
-  if (rows.length === 0) return null
+  if (rows.length === 0) {
+    return null
+  }
   return (
     <motion.div
       initial={{ opacity: 0 }}

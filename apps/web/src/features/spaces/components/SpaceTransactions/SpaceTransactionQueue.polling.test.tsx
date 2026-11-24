@@ -197,9 +197,12 @@ describe('SpaceTransactionQueue live updates', () => {
       server.use(
         http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, () => {
           requestTimes.push(Date.now())
-          if (status === 200) return HttpResponse.json(queuePage(1))
-          if (status === HTML_503)
+          if (status === 200) {
+            return HttpResponse.json(queuePage(1))
+          }
+          if (status === HTML_503) {
             return HttpResponse.html('<html><body>503 Service Unavailable</body></html>', { status: 503 })
+          }
           return new HttpResponse(null, { status })
         }),
       )

@@ -33,7 +33,9 @@ const TagPicker = ({ tags, value, onChange, actions, onLimitReached, disabled }:
 
   const tickCreated = (tagId: number) => {
     const next = [...latestSelected.current, tagId]
-    if (!exceedsTagLimit(next.length)) onChange(next)
+    if (!exceedsTagLimit(next.length)) {
+      onChange(next)
+    }
   }
 
   return (
@@ -54,7 +56,9 @@ const TagPicker = ({ tags, value, onChange, actions, onLimitReached, disabled }:
         tags={tags}
         selected={selected}
         onSelect={(tagIds) => {
-          if (exceedsTagLimit(tagIds.length)) return CONTACT_TAG_LIMIT_MESSAGE
+          if (exceedsTagLimit(tagIds.length)) {
+            return CONTACT_TAG_LIMIT_MESSAGE
+          }
           onChange(tagIds)
           return undefined
         }}

@@ -80,7 +80,9 @@ export const refreshPortfolioSummary =
     // On error RTK keeps the previous data: never write that over a newer list
     const { data, isError } = await query
     query.unsubscribe()
-    if (isError || !data) return undefined
+    if (isError || !data) {
+      return undefined
+    }
 
     const { util } = portfolioSummariesRtkApi
     const holdsRefreshedSafe = (cached: PortfolioSummariesForManyArg) =>
@@ -89,12 +91,16 @@ export const refreshPortfolioSummary =
       cached.safes.some((safeId) => arg.safes.includes(safeId))
 
     for (const cached of util.selectCachedArgsForQuery(getState(), 'portfolioGetSummariesForMany')) {
-      if (!holdsRefreshedSafe(cached)) continue
+      if (!holdsRefreshedSafe(cached)) {
+        continue
+      }
       dispatch(
         util.updateQueryData('portfolioGetSummariesForMany', cached, (draft) => {
           for (const fresh of data) {
             const index = draft.findIndex((summary) => isSameSafe(summary, fresh))
-            if (index !== -1) draft[index] = fresh
+            if (index !== -1) {
+              draft[index] = fresh
+            }
           }
         }),
       )

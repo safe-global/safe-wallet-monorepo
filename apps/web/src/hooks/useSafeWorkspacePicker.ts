@@ -30,7 +30,9 @@ export const useSafeWorkspacePicker = (
 
   return useCallback(
     (chainId: string, address: string) => {
-      if (!isActive || isSafesLoading || isEntitlementsLoading) return undefined
+      if (!isActive || isSafesLoading || isEntitlementsLoading) {
+        return undefined
+      }
 
       const spaceIds = (spacesSafes ?? [])
         .filter(({ safes }) => (safes[chainId] ?? []).some((safeAddress) => sameAddress(safeAddress, address)))

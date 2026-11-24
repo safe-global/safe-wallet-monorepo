@@ -70,17 +70,23 @@ export function useThreatAnalysisHypernativeMessage({
   }, [typedData, safeAddress, chainId, messageHash, proposer, origin, skip])
 
   useEffect(() => {
-    if (!hypernativeRequest || !authToken) return
+    if (!hypernativeRequest || !authToken) {
+      return
+    }
 
     const key = `${hypernativeRequest.messageHash}:${authToken}`
-    if (lastTriggeredKeyRef.current === key) return
+    if (lastTriggeredKeyRef.current === key) {
+      return
+    }
     lastTriggeredKeyRef.current = key
 
     triggerAssessment({ ...hypernativeRequest, authToken })
   }, [hypernativeRequest, authToken, triggerAssessment])
 
   const fetchError = useMemo(() => {
-    if (!error) return undefined
+    if (!error) {
+      return undefined
+    }
 
     const errorMessage = isHypernativeMessageAssessmentErrorResponse(error)
       ? `${error.error.reason}: ${error.error.message}`

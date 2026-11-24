@@ -25,7 +25,9 @@ export const useParentSafeWallet = (chainId: string | undefined): string | undef
   )
 
   const [isContract] = useAsync(() => {
-    if (!chainId || !walletAddress || !provider || isSpaceSafe) return
+    if (!chainId || !walletAddress || !provider || isSpaceSafe) {
+      return
+    }
     return isSmartContractWallet(chainId, walletAddress, provider).catch(() => false)
   }, [chainId, walletAddress, provider, isSpaceSafe])
 

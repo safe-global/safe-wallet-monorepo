@@ -12,7 +12,9 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
 
   // Mounting Tabs with value=undefined (tabs still loading) locks Base UI into uncontrolled mode
   // and the active tab is never highlighted once the tabs arrive.
-  if (!tabs.length) return null
+  if (!tabs.length) {
+    return null
+  }
 
   return (
     <Tabs value={activeHref}>

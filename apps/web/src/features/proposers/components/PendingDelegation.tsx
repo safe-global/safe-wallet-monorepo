@@ -65,7 +65,9 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     : ''
 
   const handleSign = async () => {
-    if (!wallet?.provider || !chain) return
+    if (!wallet?.provider || !chain) {
+      return
+    }
 
     setError(undefined)
     setIsSignLoading(true)

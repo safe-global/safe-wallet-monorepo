@@ -45,8 +45,12 @@ export const useResolvedGasToken = (
   // nonce, so probe against the recommended next nonce (the value the tx will actually get when
   // proposed). The exact nonce doesn't change which token can cover fees.
   const [recommendedNonce] = useAsync(async () => {
-    if (!safe.chainId || !safeAddress) return
-    if (!safe.deployed) return 0
+    if (!safe.chainId || !safeAddress) {
+      return
+    }
+    if (!safe.deployed) {
+      return 0
+    }
     try {
       const nonces = await getNonces(safe.chainId, safeAddress)
       return nonces?.recommendedNonce ?? safe.nonce

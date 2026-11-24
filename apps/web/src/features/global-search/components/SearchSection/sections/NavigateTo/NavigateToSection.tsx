@@ -94,7 +94,9 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
         return
       }
 
-      if (!isSafeLevel) return
+      if (!isSafeLevel) {
+        return
+      }
 
       switch (itemLabel) {
         case 'Send':
@@ -132,7 +134,9 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
     ],
   )
 
-  if (filteredItems.length === 0) return null
+  if (filteredItems.length === 0) {
+    return null
+  }
 
   return (
     <SectionWrapper label={label}>

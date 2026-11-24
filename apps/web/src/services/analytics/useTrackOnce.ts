@@ -7,7 +7,9 @@ export const useTrackOnce = (event: AnalyticsEvent, params?: Record<string, unkn
   const hasTracked = useRef(false)
 
   useEffect(() => {
-    if (!ready || hasTracked.current) return
+    if (!ready || hasTracked.current) {
+      return
+    }
     hasTracked.current = true
     trackEvent(event, params)
   }, [ready]) // eslint-disable-line react-hooks/exhaustive-deps -- once, with the values of that moment

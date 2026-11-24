@@ -10,7 +10,9 @@ export const useSignerNameResolver = (chainIds: string[]): ((address: string) =>
 
   return (address) => {
     const name = chainIds.map((chainId) => resolveName(address, chainId)).find(Boolean)
-    if (sameAddress(address, wallet?.address)) return name ? `${name} (you)` : 'You'
+    if (sameAddress(address, wallet?.address)) {
+      return name ? `${name} (you)` : 'You'
+    }
     return name || shortenAddress(address)
   }
 }

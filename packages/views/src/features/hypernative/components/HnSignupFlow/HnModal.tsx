@@ -12,7 +12,9 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) onClose()
+        if (!isOpen) {
+          onClose()
+        }
       }}
     >
       <DialogContent

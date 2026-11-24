@@ -25,7 +25,9 @@ const SecurityChecksSection = ({
   const { isReady, failingRows, passingRows } = useSecurityChecks(scanContext, results, safeQueryParam, onHnSignupClick)
 
   // Feature not yet loaded — render nothing; the panel skeleton covers this state.
-  if (!isReady) return null
+  if (!isReady) {
+    return null
+  }
 
   // One group per grade present, each headed by its chip and followed by a card of its rows.
   const groups = GRADE_ORDER.map((grade) => ({

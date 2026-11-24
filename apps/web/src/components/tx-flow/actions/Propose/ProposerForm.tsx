@@ -43,7 +43,9 @@ export const ProposerForm = ({
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
-    if (!safeTx || !wallet) return
+    if (!safeTx || !wallet) {
+      return
+    }
 
     setIsSubmittable(false)
     setIsRejectedByUser(false)

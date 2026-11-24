@@ -23,7 +23,9 @@ const respondWithBook = () => {
     http.get(addressBookUrl, async () => {
       getCount += 1
       // The refetch after the invalidation never answers, so only the listener can change the book
-      if (getCount > 1) await delay('infinite')
+      if (getCount > 1) {
+        await delay('infinite')
+      }
       return HttpResponse.json(book)
     }),
   )

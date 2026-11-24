@@ -11,7 +11,9 @@ export type DelegationWithTimestamp = PendingDelegation & { _timestamp: number }
  * Parses the origin JSON string from a message and validates it's a delegation origin.
  */
 export function parseDelegationOrigin(originStr: string | null | undefined): DelegationOrigin | null {
-  if (!originStr) return null
+  if (!originStr) {
+    return null
+  }
   try {
     const parsed = JSON.parse(originStr)
     if (
@@ -47,7 +49,9 @@ export function parseDelegation({ message, origin }: Pick<MessageItem, 'message'
   const action = DELEGATION_ACTIONS.get(message.message.action)
   const delegate = message.message.delegateAddress
   const nestedSafe = message.domain.safe
-  if (!action || !isAddress(delegate) || !isAddress(nestedSafe)) return null
+  if (!action || !isAddress(delegate) || !isAddress(nestedSafe)) {
+    return null
+  }
 
   return { type: 'proposer-delegation', action, delegate, nestedSafe }
 }
@@ -60,8 +64,12 @@ export function deriveDelegationStatus(
   confirmationsRequired: number,
   messageTotp: number,
 ): 'pending' | 'ready' | 'expired' {
-  if (!isTotpValid(messageTotp)) return 'expired'
-  if (confirmationsSubmitted >= confirmationsRequired) return 'ready'
+  if (!isTotpValid(messageTotp)) {
+    return 'expired'
+  }
+  if (confirmationsSubmitted >= confirmationsRequired) {
+    return 'ready'
+  }
   return 'pending'
 }
 
@@ -72,7 +80,9 @@ export function deriveDelegationStatus(
 export function extractTotpFromMessage(message: MessageItem['message']): number | undefined {
   const typedDataMessage = typeof message === 'object' ? message : null
   const rawTotp = typedDataMessage?.message?.totp
-  if (rawTotp === undefined) return undefined
+  if (rawTotp === undefined) {
+    return undefined
+  }
   const totp = Number(rawTotp)
   return isNaN(totp) ? undefined : totp
 }
@@ -91,10 +101,14 @@ export function parseMessageToDelegation(
   }
 
   const messageTotp = extractTotpFromMessage(message.message)
-  if (messageTotp === undefined) return null
+  if (messageTotp === undefined) {
+    return null
+  }
 
   const status = deriveDelegationStatus(message.confirmationsSubmitted, message.confirmationsRequired, messageTotp)
-  if (status === 'expired') return null
+  if (status === 'expired') {
+    return null
+  }
 
   return {
     messageHash: message.messageHash,

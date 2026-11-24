@@ -46,7 +46,9 @@ export const HexEncodedData = ({ hexData, title, highlightFirstBytes = true, lim
   const parts = restBytes.split(/(0{18,})/)
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i]
-    if (!part) continue
+    if (!part) {
+      continue
+    }
     if (ZEROES_PATTERN.test(part) && part.length >= 18) {
       dimmedZeroes.push(
         <span className={css.zeroes} key={i}>

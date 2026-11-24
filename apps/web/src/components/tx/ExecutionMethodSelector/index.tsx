@@ -143,7 +143,9 @@ const SponsoredStrip = ({
         balance
       )
     case 'FREE_DAILY_LIMIT':
-      if (!offer.relays) return balance
+      if (!offer.relays) {
+        return balance
+      }
       if (isSafeProEnabled) {
         return (
           <SponsoredTxsCounter
@@ -198,7 +200,9 @@ export const _ExecutionMethodSelector = ({
   }
 
   if (!offer) {
-    if (!showsProUpsell) return null
+    if (!showsProUpsell) {
+      return null
+    }
     return (
       <div className={`${css.container} overflow-hidden rounded-[var(--radius)]`}>
         <SponsoredTxsCounter left={0} quota={null} resetsAt={null} isSubscription={false} isPro={false} />

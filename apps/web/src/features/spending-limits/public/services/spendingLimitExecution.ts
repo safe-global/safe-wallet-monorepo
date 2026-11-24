@@ -65,15 +65,21 @@ const allowanceKey = (beneficiary: string, tokenAddress: string): string =>
 const assertWritableAllowances = (desired: readonly DesiredAllowance[]): void => {
   const seen = new Set<string>()
   for (const allowance of desired) {
-    if (!Number.isInteger(allowance.decimals)) throw new Error(UNKNOWN_TOKEN_DECIMALS_ERROR)
+    if (!Number.isInteger(allowance.decimals)) {
+      throw new Error(UNKNOWN_TOKEN_DECIMALS_ERROR)
+    }
     const key = allowanceKey(allowance.beneficiary, allowance.tokenAddress)
-    if (seen.has(key)) throw new Error(DUPLICATE_SPENDING_LIMIT_ERROR)
+    if (seen.has(key)) {
+      throw new Error(DUPLICATE_SPENDING_LIMIT_ERROR)
+    }
     seen.add(key)
   }
 }
 
 const assertValidAllowances = (desired: readonly DesiredAllowance[]): void => {
-  if (desired.length === 0) throw new Error(EMPTY_SPENDING_LIMITS_ERROR)
+  if (desired.length === 0) {
+    throw new Error(EMPTY_SPENDING_LIMITS_ERROR)
+  }
   assertWritableAllowances(desired)
 }
 
@@ -92,10 +98,14 @@ const resolveAllowanceModule = (
   deployed: boolean,
 ): AllowanceModule => {
   const enabledAddress = deployed ? getDeployedSpendingLimitModuleAddress(chainId, safeModules) : undefined
-  if (enabledAddress) return { address: enabledAddress, isEnabled: true }
+  if (enabledAddress) {
+    return { address: enabledAddress, isEnabled: true }
+  }
 
   const latestAddress = getLatestSpendingLimitAddress(chainId)
-  if (!latestAddress) throw new Error(NO_ALLOWANCE_MODULE_ERROR)
+  if (!latestAddress) {
+    throw new Error(NO_ALLOWANCE_MODULE_ERROR)
+  }
   return { address: latestAddress, isEnabled: false }
 }
 
@@ -172,7 +182,9 @@ export const createSpendingLimitsTx = async (
     sameAddress,
   )) {
     const isDelegate = existingSpendingLimits.some((limit) => sameAddress(limit.beneficiary, beneficiary))
-    if (!isDelegate) txs.push(createAddDelegateTx(beneficiary, allowanceModule.address))
+    if (!isDelegate) {
+      txs.push(createAddDelegateTx(beneficiary, allowanceModule.address))
+    }
   }
 
   for (const allowance of desired) {
@@ -222,10 +234,14 @@ export const createSpendingLimitEditTx = async (
   deployed: boolean,
   scope?: TxSenderScope,
 ): Promise<SafeTransaction> => {
-  if (!hasChanges(edit)) throw new Error(EMPTY_SPENDING_LIMIT_EDIT_ERROR)
+  if (!hasChanges(edit)) {
+    throw new Error(EMPTY_SPENDING_LIMIT_EDIT_ERROR)
+  }
   getAndValidateSafeSDK(scope)
   const { address, isEnabled } = resolveAllowanceModule(chainId, safeModules, deployed)
-  if (!isEnabled) throw new Error(MODULE_NOT_ENABLED_ERROR)
+  if (!isEnabled) {
+    throw new Error(MODULE_NOT_ENABLED_ERROR)
+  }
 
   const writes = [...edit.added, ...edit.modified]
   assertWritableAllowances(writes)
@@ -268,7 +284,9 @@ export const createNewSpendingLimitTx = async (
   tokenDecimals?: number | null,
   scope?: TxSenderScope,
 ): Promise<SafeTransaction> => {
-  if (tokenDecimals == null) throw new Error(UNKNOWN_TOKEN_DECIMALS_ERROR)
+  if (tokenDecimals == null) {
+    throw new Error(UNKNOWN_TOKEN_DECIMALS_ERROR)
+  }
 
   const allowance: DesiredAllowance = {
     beneficiary: data.beneficiary,

@@ -22,7 +22,9 @@ const UnknownContractError = ({ txData }: { txData: TransactionData | undefined 
 
   const isMigrationPossible = action === 'migrate'
 
-  if (!isUnknown || isMigrationTx) return null
+  if (!isUnknown || isMigrationTx) {
+    return null
+  }
 
   return (
     <ErrorMessage level="error" title="This Safe account was created with an unsupported base contract.">

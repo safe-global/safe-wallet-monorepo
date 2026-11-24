@@ -32,7 +32,9 @@ export const hasEditChanges = (
   values: SpendingLimitPolicyFormValues,
 ): boolean => {
   const rows = filledLimits(values)
-  if (rows.length !== baseline.length) return true
+  if (rows.length !== baseline.length) {
+    return true
+  }
 
   // Equal counts and every row matching one of them leaves nothing unaccounted for on either side.
   return rows.some((row) => {

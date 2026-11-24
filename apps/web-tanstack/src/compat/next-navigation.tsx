@@ -29,7 +29,9 @@ export function useRouter(): AppRouterInstance {
       push: (href) => void navigate(toNavigateOptions(href)),
       replace: (href) => void navigate({ ...toNavigateOptions(href), replace: true }),
       refresh: () => {
-        if (typeof window !== 'undefined') window.location.reload()
+        if (typeof window !== 'undefined') {
+          window.location.reload()
+        }
       },
       back: () => tsRouter.history.back(),
       forward: () => tsRouter.history.forward(),

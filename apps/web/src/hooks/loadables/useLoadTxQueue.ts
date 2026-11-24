@@ -18,9 +18,13 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
   // Re-fetch when chainId/address, or txQueueTag change
   const [data, error, loadingQueueItems] = useAsync<QueuedItemPage>(
     () => {
-      if (!effectiveChainId || !effectiveAddress) return
+      if (!effectiveChainId || !effectiveAddress) {
+        return
+      }
       // For undeployed safes, return empty once safe info confirms not deployed
-      if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
+      if (safeLoaded && !safe.deployed) {
+        return Promise.resolve({ results: [] })
+      }
 
       return getTransactionQueue(effectiveChainId, effectiveAddress).catch((e) => {
         logError(Errors._603, e)

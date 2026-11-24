@@ -67,7 +67,9 @@ const OutreachPopup = (): ReactElement | null => {
     }
   }, [dispatch, shouldOpen])
 
-  if (!outreachPopup.open) return null
+  if (!outreachPopup.open) {
+    return null
+  }
 
   const handleOpenSurvey = async () => {
     if (wallet) {

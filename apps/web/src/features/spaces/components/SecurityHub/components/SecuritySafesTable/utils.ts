@@ -55,11 +55,17 @@ export const hasUpgradeAvailable = (results: Record<string, ScanResult> | undefi
  * reconcile by construction. Excludes `not_applicable` and `inconclusive` checks.
  */
 export const getNonPassingCount = (results: Record<string, ScanResult> | undefined): number => {
-  if (!results) return 0
+  if (!results) {
+    return 0
+  }
   let count = 0
   for (const result of Object.values(results)) {
-    if (result.status === 'not_applicable' || result.status === 'inconclusive') continue
-    if (result.status !== 'clear') count++
+    if (result.status === 'not_applicable' || result.status === 'inconclusive') {
+      continue
+    }
+    if (result.status !== 'clear') {
+      count++
+    }
   }
   return count
 }
@@ -83,13 +89,23 @@ export const getAggregateNonPassingCount = (
  * "known empty" from "unknown / not loaded".
  */
 export const formatBalance = (fiatTotal?: string | null): string => {
-  if (fiatTotal === undefined || fiatTotal === null) return DASH
+  if (fiatTotal === undefined || fiatTotal === null) {
+    return DASH
+  }
   const trimmedFiatTotal = fiatTotal.trim()
-  if (trimmedFiatTotal === '') return DASH
+  if (trimmedFiatTotal === '') {
+    return DASH
+  }
   const value = Number(trimmedFiatTotal)
-  if (!Number.isFinite(value)) return DASH
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`
+  if (!Number.isFinite(value)) {
+    return DASH
+  }
+  if (value >= 1_000_000) {
+    return `$${(value / 1_000_000).toFixed(1)}M`
+  }
+  if (value >= 1_000) {
+    return `$${(value / 1_000).toFixed(1)}K`
+  }
   return `$${value.toFixed(0)}`
 }
 
@@ -111,18 +127,28 @@ export const getAggregateSummary = (
   for (const chain of safe.chainEntries) {
     const key = utils.scanKey(safe.address, chain.chainId)
     const results = scanResults[key]
-    if (!results) continue
+    if (!results) {
+      continue
+    }
     const summary = utils.computeSummary(results)
-    if (!summary) continue
+    if (!summary) {
+      continue
+    }
     hasAny = true
     totalPassing += summary.passing
     totalApplicable += summary.applicableCount
-    if (summary.hasCriticalIssue) hasCriticalIssue = true
+    if (summary.hasCriticalIssue) {
+      hasCriticalIssue = true
+    }
     const rank = utils.severityRank(summary.grade)
-    if (rank < worstGradeRank) worstGradeRank = rank
+    if (rank < worstGradeRank) {
+      worstGradeRank = rank
+    }
   }
 
-  if (!hasAny) return null
+  if (!hasAny) {
+    return null
+  }
   return {
     passing: totalPassing,
     applicableCount: totalApplicable,
@@ -147,7 +173,9 @@ export const getAggregateSafeGrade = (
   for (const chain of safe.chainEntries) {
     const key = scanKey(safe.address, chain.chainId)
     const results = scanResults[key]
-    if (!results) continue
+    if (!results) {
+      continue
+    }
     const grade = getSafeGrade(results)
     const rank = SAFE_GRADE_RANK[grade]
     if (rank < worstRank) {
@@ -170,7 +198,9 @@ export const hasMultichainWarning = (
   for (const chain of safe.chainEntries) {
     const key = scanKey(safe.address, chain.chainId)
     const results = scanResults[key]
-    if (!results) continue
+    if (!results) {
+      continue
+    }
     const multichainResult = results['multichain_setup']
     if (multichainResult && multichainResult.status !== 'clear' && multichainResult.status !== 'not_applicable') {
       return true
@@ -185,6 +215,8 @@ export const isAnyChainScanning = (
   scanningKeys: Set<string> | undefined,
   scanKey: SecurityServices['scanKey'],
 ): boolean => {
-  if (!scanningKeys) return false
+  if (!scanningKeys) {
+    return false
+  }
   return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
 }

@@ -33,7 +33,9 @@ const PlansSkeleton = () => (
 /** The seats the recommended card opens on; none when it waits for the user to pick a size. */
 const defaultSeats = (tiers: PlanTier[], currentPlan: CurrentPlan | undefined): number | undefined => {
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN && candidate.billingCycle !== 'year')
-  if (!tier || (isUnpaid(currentPlan) && tier.options.length > 1)) return undefined
+  if (!tier || (isUnpaid(currentPlan) && tier.options.length > 1)) {
+    return undefined
+  }
   return pickSeatOption(tier, currentPlan)?.seats ?? undefined
 }
 
@@ -108,8 +110,9 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             isManaging={isRedirecting}
             canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
             onSubscribe={(picked) => {
-              if (canChange) setPick(picked)
-              else if (picked.option.paymentLinkId) {
+              if (canChange) {
+                setPick(picked)
+              } else if (picked.option.paymentLinkId) {
                 void startCheckout(picked.option.paymentLinkId)
               }
             }}

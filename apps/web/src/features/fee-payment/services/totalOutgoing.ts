@@ -120,7 +120,9 @@ export const computeTotalOutgoing = ({
       const decoded = ERC20_INTERFACE.decodeFunctionData('transfer', data)
       const transferValue = decoded[1] as bigint
       const token = balances.items.find((b) => sameAddress(b.tokenInfo.address, to))
-      if (!token || token.tokenInfo.type !== 'ERC20') return undefined
+      if (!token || token.tokenInfo.type !== 'ERC20') {
+        return undefined
+      }
 
       const sendAmount = formatVisualAmount(transferValue, token.tokenInfo.decimals)
       const sendFiat = Number(formatUnits(transferValue, token.tokenInfo.decimals)) * Number(token.fiatConversion)
@@ -161,7 +163,9 @@ export const computeTotalOutgoing = ({
     const totals = new Map<string, TokenTotal>()
 
     const accrue = (addr: string, wei: bigint) => {
-      if (wei === 0n) return
+      if (wei === 0n) {
+        return
+      }
       const key = addr.toLowerCase()
       const existing = totals.get(key)
       if (existing) {
@@ -180,7 +184,9 @@ export const computeTotalOutgoing = ({
         return
       }
       const token = balances.items.find((b) => sameAddress(b.tokenInfo.address, addr))
-      if (!token || token.tokenInfo.type !== 'ERC20') return // unknown token — can't price/format
+      if (!token || token.tokenInfo.type !== 'ERC20') {
+        return
+      } // unknown token — can't price/format
       totals.set(key, {
         address: addr,
         wei,
@@ -191,7 +197,9 @@ export const computeTotalOutgoing = ({
     }
 
     for (const tx of inner) {
-      if (tx.value && tx.value !== '0') accrue(ZERO_ADDRESS, BigInt(tx.value))
+      if (tx.value && tx.value !== '0') {
+        accrue(ZERO_ADDRESS, BigInt(tx.value))
+      }
       if (tx.data && tx.data.startsWith(TRANSFER_SELECTOR)) {
         try {
           const amount = ERC20_INTERFACE.decodeFunctionData('transfer', tx.data)[1] as bigint
@@ -202,7 +210,9 @@ export const computeTotalOutgoing = ({
       }
     }
 
-    if (totals.size === 0) return feeOnly()
+    if (totals.size === 0) {
+      return feeOnly()
+    }
 
     const sendsFiat = [...totals.values()].reduce(
       (sum, t) => sum + Number(formatUnits(t.wei, t.decimals)) * t.fiatPerUnit,
@@ -211,7 +221,9 @@ export const computeTotalOutgoing = ({
 
     const gasKey = gasTokenAddress.toLowerCase()
     const gasFolded = totals.has(gasKey)
-    if (gasFolded) totals.get(gasKey)!.wei += gasFeeBaseUnits
+    if (gasFolded) {
+      totals.get(gasKey)!.wei += gasFeeBaseUnits
+    }
 
     return {
       primary: [...totals.values()].map((t) => ({
@@ -223,7 +235,9 @@ export const computeTotalOutgoing = ({
     }
   }
 
-  if (isEmptyData || value === '0') return feeOnly()
+  if (isEmptyData || value === '0') {
+    return feeOnly()
+  }
 
   return undefined
 }

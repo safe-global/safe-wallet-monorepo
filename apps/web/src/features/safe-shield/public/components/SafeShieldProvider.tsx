@@ -36,10 +36,18 @@ function criticalFindingsOf({ threat, deadlock, hasPoisoning, safeAnalysis }: Ri
   const primaryDeadlock = getPrimaryResult(Object.values(deadlock || {}).flatMap((safe) => safe.DEADLOCK || []))
 
   const findings: string[] = []
-  if (isCritical(primaryThreat)) findings.push(`threat:${primaryThreat.type}`)
-  if (isCritical(primaryDeadlock)) findings.push(`deadlock:${primaryDeadlock.type}`)
-  if (hasPoisoning) findings.push('address-poisoning')
-  if (isCritical(safeAnalysis)) findings.push(`safe:${safeAnalysis.type}`)
+  if (isCritical(primaryThreat)) {
+    findings.push(`threat:${primaryThreat.type}`)
+  }
+  if (isCritical(primaryDeadlock)) {
+    findings.push(`deadlock:${primaryDeadlock.type}`)
+  }
+  if (hasPoisoning) {
+    findings.push('address-poisoning')
+  }
+  if (isCritical(safeAnalysis)) {
+    findings.push(`safe:${safeAnalysis.type}`)
+  }
   return findings
 }
 

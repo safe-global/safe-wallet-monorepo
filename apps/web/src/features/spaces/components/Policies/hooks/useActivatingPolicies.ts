@@ -54,10 +54,18 @@ export const useActivatingPolicies = (
         id: getPendingTxId(row),
       })
       // Only a 404 means the tx was deleted; any other error can't rule out execution, so the row is held.
-      if (error && 'status' in error && error.status === 404) return
-      if (data && data.txStatus !== 'SUCCESS') return
-      if (latestKey.current !== key) return
-      if (isPendingChangeIndexed(row, latestActive.current)) return
+      if (error && 'status' in error && error.status === 404) {
+        return
+      }
+      if (data && data.txStatus !== 'SUCCESS') {
+        return
+      }
+      if (latestKey.current !== key) {
+        return
+      }
+      if (isPendingChangeIndexed(row, latestActive.current)) {
+        return
+      }
 
       setHeld((current) =>
         current.some((entry) => entry.policy.id === row.id)
@@ -73,7 +81,9 @@ export const useActivatingPolicies = (
   }, [active])
 
   useEffect(() => {
-    if (!enabled || held.length === 0) return
+    if (!enabled || held.length === 0) {
+      return
+    }
 
     const interval = setInterval(() => {
       refetchActive()

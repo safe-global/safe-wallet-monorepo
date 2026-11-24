@@ -15,7 +15,9 @@ const useCategoryFilter = ({
   const router = useRouter()
 
   useEffect(() => {
-    if (!router.isReady) return
+    if (!router.isReady) {
+      return
+    }
 
     const categoryOptions = getCategoryOptions(safeAppsList).map((category) => category.value)
     const categoryQuery = Array.isArray(router.query.categories) ? router.query.categories[0] : router.query.categories
@@ -24,7 +26,9 @@ const useCategoryFilter = ({
       const categoryQueryOptions = categoryQuery.split(',')
       const isCategoryOption = categoryQueryOptions.every((category) => categoryOptions.includes(category))
 
-      if (!isCategoryOption) return
+      if (!isCategoryOption) {
+        return
+      }
 
       setSelectedCategories(categoryQueryOptions)
     }

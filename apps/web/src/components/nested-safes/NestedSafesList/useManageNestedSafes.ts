@@ -152,7 +152,9 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
 
   // Check if there are unsaved changes
   const hasChanges = useMemo(() => {
-    if (selectedAddresses.size !== curatedAddresses.length) return true
+    if (selectedAddresses.size !== curatedAddresses.length) {
+      return true
+    }
     return !curatedAddresses.every((addr) => selectedAddresses.has(addr.toLowerCase()))
   }, [selectedAddresses, curatedAddresses])
 
@@ -169,7 +171,9 @@ export const useManageNestedSafes = (allSafesWithStatus: NestedSafeWithStatus[])
   const getSimilarAddresses = useCallback(
     (address: string): string[] => {
       const groupId = groupIdByAddress.get(address.toLowerCase())
-      if (!groupId) return []
+      if (!groupId) {
+        return []
+      }
       return addresses.filter(
         (a) => a.toLowerCase() !== address.toLowerCase() && groupIdByAddress.get(a.toLowerCase()) === groupId,
       )

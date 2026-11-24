@@ -22,7 +22,9 @@ export const syncPlanChange = async (
       dispatch(billingApi.util.invalidateTags(['billing']))
       return true
     }
-    if (Date.now() >= deadline) return false
+    if (Date.now() >= deadline) {
+      return false
+    }
     await sleep(intervalMs)
   }
 }

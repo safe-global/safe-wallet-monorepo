@@ -15,16 +15,24 @@ export const deriveSidePanelAccounts = (
   const accounts: SafeAppMockupAccount[] = []
 
   for (const [key, isSelected] of Object.entries(selectedSafes)) {
-    if (!isSelected) continue
+    if (!isSelected) {
+      continue
+    }
     // Sub-safe keys carry the real chain:address; the parent key is a UI grouping only.
-    if (key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)) continue
+    if (key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)) {
+      continue
+    }
 
     const colonIdx = key.indexOf(':')
-    if (colonIdx === -1) continue
+    if (colonIdx === -1) {
+      continue
+    }
     const chainId = key.slice(0, colonIdx)
     const address = key.slice(colonIdx + 1)
 
-    if (seen.has(address.toLowerCase())) continue
+    if (seen.has(address.toLowerCase())) {
+      continue
+    }
     seen.add(address.toLowerCase())
 
     let name: string | undefined
@@ -69,14 +77,22 @@ export const deriveSelectedBalanceSafes = (
   fallbackSpaceSafes: AllSafeItems,
 ): SafeItem[] => {
   const entries = Object.entries(selectedSafes)
-  if (entries.length === 0) return flattenSafeItems(fallbackSpaceSafes)
+  if (entries.length === 0) {
+    return flattenSafeItems(fallbackSpaceSafes)
+  }
 
   const result: SafeItem[] = []
   for (const [key, isSelected] of entries) {
-    if (!isSelected) continue
-    if (key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)) continue
+    if (!isSelected) {
+      continue
+    }
+    if (key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)) {
+      continue
+    }
     const colonIdx = key.indexOf(':')
-    if (colonIdx === -1) continue
+    if (colonIdx === -1) {
+      continue
+    }
     const chainId = key.slice(0, colonIdx)
     const address = key.slice(colonIdx + 1)
     let found: SafeItem | undefined
@@ -92,7 +108,9 @@ export const deriveSelectedBalanceSafes = (
         break
       }
     }
-    if (found) result.push(found)
+    if (found) {
+      result.push(found)
+    }
   }
   return result
 }
@@ -104,12 +122,16 @@ export const deriveSelectedBalanceSafes = (
 export const deriveNameByAddress = (allSafes: AllSafeItems): Map<string, string> => {
   const map = new Map<string, string>()
   const add = (address: string, name: string | undefined) => {
-    if (name && !map.has(address.toLowerCase())) map.set(address.toLowerCase(), name)
+    if (name && !map.has(address.toLowerCase())) {
+      map.set(address.toLowerCase(), name)
+    }
   }
   for (const safe of allSafes) {
     if (isMultiChainSafeItem(safe)) {
       add(safe.address, safe.name)
-      for (const sub of safe.safes) add(sub.address, sub.name ?? safe.name)
+      for (const sub of safe.safes) {
+        add(sub.address, sub.name ?? safe.name)
+      }
     } else {
       add(safe.address, safe.name)
     }

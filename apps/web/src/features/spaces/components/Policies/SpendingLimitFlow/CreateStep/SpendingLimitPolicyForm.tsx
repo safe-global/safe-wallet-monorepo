@@ -69,7 +69,9 @@ const SpendingLimitPolicyForm = ({
   useEffect(() => {
     const previous = previousScopeKey.current
     previousScopeKey.current = scopeKey
-    if (isEditMode || previous === undefined || previous === scopeKey) return
+    if (isEditMode || previous === undefined || previous === scopeKey) {
+      return
+    }
 
     reset({ ...createDefaultFormValues(), safe: getValues('safe') })
   }, [isEditMode, scopeKey, getValues, reset])

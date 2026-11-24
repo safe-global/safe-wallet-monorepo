@@ -26,7 +26,9 @@ type AddressBookEntry = { label: string; name: string; source: ContactSource; co
 
 const filterEntries = (entries: AddressBookEntry[], input: string): AddressBookEntry[] => {
   const search = input.trim().toLowerCase()
-  if (!search) return entries
+  if (!search) {
+    return entries
+  }
   return entries.filter((entry) => `${entry.name} ${entry.label}`.toLowerCase().includes(search))
 }
 
@@ -93,7 +95,9 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
   // A complete unknown address needs no suggestions; a saved contact opened for editing is
   // offered every contact again so the user can swap it.
   const filteredEntries = useMemo(() => {
-    if (isValidAddress(addressValue)) return isInAddressBook ? allAddressBookEntries : []
+    if (isValidAddress(addressValue)) {
+      return isInAddressBook ? allAddressBookEntries : []
+    }
     return filterEntries(allAddressBookEntries, addressValue ?? '')
   }, [allAddressBookEntries, addressValue, isInAddressBook])
 
@@ -134,7 +138,9 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
   // list stays open over the rest of the form, and a click aimed at the next field lands on a
   // contact instead — silently writing it in as the recipient.
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      return
+    }
 
     const wrapper = wrapperRef.current
 
@@ -188,7 +194,9 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
     switch (event.key) {
       case 'ArrowDown':
       case 'ArrowUp': {
-        if (props.disabled || props.InputProps?.readOnly || lastIndex < 0) return
+        if (props.disabled || props.InputProps?.readOnly || lastIndex < 0) {
+          return
+        }
         event.preventDefault()
         if (!showList) {
           setOpen(true)
@@ -201,25 +209,33 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
       }
       case 'Home':
       case 'End': {
-        if (!showList) return
+        if (!showList) {
+          return
+        }
         event.preventDefault()
         setActiveIndex(event.key === 'Home' ? 0 : lastIndex)
         return
       }
       case 'Enter': {
-        if (!showList || activeIndex < 0) return
+        if (!showList || activeIndex < 0) {
+          return
+        }
         // Picking a suggestion must not also submit the transaction form.
         event.preventDefault()
         onSelectOption(flatEntries[activeIndex])
         return
       }
       case 'Tab': {
-        if (showList) closeList()
+        if (showList) {
+          closeList()
+        }
         return
       }
       case 'Escape': {
         // Must stop here, or the enclosing tx modal closes too. With the list shut it falls through.
-        if (!showList) return
+        if (!showList) {
+          return
+        }
         event.preventDefault()
         event.stopPropagation()
         closeList()
@@ -280,7 +296,9 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
                           aria-selected={index === activeIndex}
                           className={css.option}
                           ref={(node) => {
-                            if (index === activeIndex) node?.scrollIntoView({ block: 'nearest' })
+                            if (index === activeIndex) {
+                              node?.scrollIntoView({ block: 'nearest' })
+                            }
                           }}
                           // Keep input focus on press so the click lands before blur removes the option
                           onMouseDown={(e) => e.preventDefault()}

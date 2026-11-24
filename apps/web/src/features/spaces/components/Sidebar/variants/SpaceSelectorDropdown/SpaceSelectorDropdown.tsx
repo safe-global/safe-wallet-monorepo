@@ -105,7 +105,9 @@ export const SpaceSelectorDropdown = ({
 
   const addSafeToSpace = async (targetSpace: SpaceItem) => {
     const success = await addToSpace(targetSpace.uuid)
-    if (success) setIsOpen(false)
+    if (success) {
+      setIsOpen(false)
+    }
   }
 
   const handleCreateSpace = () => {
@@ -260,7 +262,9 @@ const AddWorkspaceMenuItem = ({
     </DropdownMenuItem>
   )
 
-  if (!isAtSpacesLimit) return menuItem
+  if (!isAtSpacesLimit) {
+    return menuItem
+  }
 
   return (
     <Tooltip>

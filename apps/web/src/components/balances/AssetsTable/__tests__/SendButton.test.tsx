@@ -38,7 +38,9 @@ type Limit = keyof typeof LIMITED_TOKEN
 
 const spendingLimitsOf = (beneficiary: string | undefined, limit: Limit): SpendingLimitState[] => {
   const token = LIMITED_TOKEN[limit]
-  if (!beneficiary || !token) return []
+  if (!beneficiary || !token) {
+    return []
+  }
   const spendingLimit = spendingLimitStateBuilder().build()
   return [{ ...spendingLimit, beneficiary, token: { ...spendingLimit.token, address: token.address } }]
 }

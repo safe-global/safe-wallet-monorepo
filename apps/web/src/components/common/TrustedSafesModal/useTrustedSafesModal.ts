@@ -127,7 +127,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
 
   // Full list without selection state, rebuilt only when the safes, pins, or similarity change.
   const structuralItems = useMemo<SelectableItem[]>(() => {
-    if (!allMultiChainSafes || !allSingleSafes) return []
+    if (!allMultiChainSafes || !allSingleSafes) {
+      return []
+    }
 
     const items: SelectableItem[] = []
 
@@ -175,7 +177,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
 
   // Filter by the search matches, keeping the structural sort order and SelectableItem typing.
   const visibleItems = useMemo<SelectableItem[]>(() => {
-    if (!searchQuery) return structuralItems
+    if (!searchQuery) {
+      return structuralItems
+    }
     const matched = new Set(searchResults.map((item) => item.address.toLowerCase()))
     return structuralItems.filter((item) => matched.has(item.address.toLowerCase()))
   }, [searchQuery, searchResults, structuralItems])
@@ -199,7 +203,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   // not just the search-filtered view — selection persists across searches, so Save
   // must reflect pending changes for safes hidden by the current query.
   const hasChanges = useMemo(() => {
-    if (!allSafes) return false
+    if (!allSafes) {
+      return false
+    }
     return allSafes.some((safe) => {
       const isSelected = selectedAddresses.has(safe.address.toLowerCase())
       const isPinned = Boolean(addedSafes[safe.chainId]?.[safe.address])
@@ -286,7 +292,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     setSelectedAddresses((prev) => {
       const next = new Set(prev)
       for (const item of availableItems) {
-        if (!isAddressFlagged(item.address)) next.add(item.address.toLowerCase())
+        if (!isAddressFlagged(item.address)) {
+          next.add(item.address.toLowerCase())
+        }
       }
       return next
     })
@@ -302,13 +310,17 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const deselectAll = useCallback(() => {
     setSelectedAddresses((prev) => {
       const next = new Set(prev)
-      for (const address of visibleAddresses) next.delete(address)
+      for (const address of visibleAddresses) {
+        next.delete(address)
+      }
       return next
     })
   }, [visibleAddresses])
 
   const submitSelection = useCallback(() => {
-    if (!allSafes) return
+    if (!allSafes) {
+      return
+    }
 
     let pinnedCount = 0
     let unpinnedCount = 0

@@ -15,7 +15,9 @@ export const TagChip = ({ name, color, className }: TagLabel & { className?: str
 }
 
 export const TagChips = ({ tags }: { tags: TagLabel[] }) => {
-  if (tags.length === 0) return null
+  if (tags.length === 0) {
+    return null
+  }
   return (
     <span className="inline-flex flex-wrap items-center gap-1" data-testid="tag-chips">
       {tags.map((tag) => (

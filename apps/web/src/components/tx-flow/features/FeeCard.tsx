@@ -8,7 +8,9 @@ import { withSlot } from '@/components/tx-flow/slots/withSlot'
 const FeeCard = (): ReactElement | null => {
   const selection = useContext(FeePayerContext)
 
-  if (!selection) return null
+  if (!selection) {
+    return null
+  }
   return <GasPayerSelector selection={selection} />
 }
 

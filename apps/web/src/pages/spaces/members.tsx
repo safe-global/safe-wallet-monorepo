@@ -6,7 +6,9 @@ import SpaceMembersContent from '@/features/spaces/public/components/SpaceMember
 export default function SpaceMembersPage() {
   const router = useRouter()
   const { spaceId } = router.query
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

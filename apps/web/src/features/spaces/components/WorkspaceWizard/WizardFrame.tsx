@@ -11,7 +11,9 @@ const toMockupAccounts = (draft: WorkspaceDraft): SafeAppMockupAccount[] => {
   const seen = new Set<string>()
   return draft.safes.flatMap(({ address }) => {
     const key = address.toLowerCase()
-    if (seen.has(key)) return []
+    if (seen.has(key)) {
+      return []
+    }
     seen.add(key)
     return [{ address, name: draft.safeNames[key] }]
   })

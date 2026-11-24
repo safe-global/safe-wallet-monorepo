@@ -25,7 +25,9 @@ const WalletPopover = ({
     <Popover
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) onClose()
+        if (!isOpen) {
+          onClose()
+        }
       }}
     >
       <PopoverContent

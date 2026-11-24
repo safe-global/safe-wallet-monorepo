@@ -115,7 +115,9 @@ export class SafenetReader {
   private provider(): JsonRpcProvider {
     if (!this.currentProvider) {
       const url = this.rpcUrls[this.urlIndex]
-      if (!url) throw new Error('Safenet reader: no RPC URL configured')
+      if (!url) {
+        throw new Error('Safenet reader: no RPC URL configured')
+      }
       this.currentProvider = new JsonRpcProvider(url, Number(this.chainId), {
         staticNetwork: true,
         batchMaxCount: PROVIDER_BATCH_MAX_COUNT,
@@ -144,7 +146,9 @@ export class SafenetReader {
       return
     }
     this.holds.delete(provider)
-    if (this.currentProvider !== provider) provider.destroy()
+    if (this.currentProvider !== provider) {
+      provider.destroy()
+    }
   }
 
   /**
@@ -153,7 +157,9 @@ export class SafenetReader {
    * provider; its last holder destroys it.
    */
   private rotate(failed: JsonRpcProvider): void {
-    if (this.currentProvider !== failed) return
+    if (this.currentProvider !== failed) {
+      return
+    }
     this.currentProvider = null
     this.urlIndex = (this.urlIndex + 1) % this.rpcUrls.length
   }
@@ -172,7 +178,9 @@ export class SafenetReader {
         // rotating. Only revert data proves a revert: ethers classifies every
         // JSON-RPC error on an eth_call as CALL_EXCEPTION, and a data-less one
         // (rate limit, pruned state) deserves the next endpoint.
-        if (isCallException(error) && error.data != null) throw error
+        if (isCallException(error) && error.data != null) {
+          throw error
+        }
         this.rotate(provider)
       } finally {
         this.release(provider)
@@ -225,7 +233,9 @@ export class SafenetReader {
       // well after the submission and never reach it.
       coverage: 'heuristic' as const,
     }
-    if (timestampMs == null || !Number.isFinite(timestampMs)) return headRelative
+    if (timestampMs == null || !Number.isFinite(timestampMs)) {
+      return headRelative
+    }
 
     const targetSeconds = Math.floor(timestampMs / 1000)
     // Only a submission the chain has already seen can be located on it. Past
@@ -237,7 +247,9 @@ export class SafenetReader {
     // Aim only when the estimate converged — converting leftover drift into a
     // block budget needs a local cadence nothing here measures. A target past
     // the head is the exception: the head is still the best aim available.
-    if (seenByChain && !converged) return headRelative
+    if (seenByChain && !converged) {
+      return headRelative
+    }
 
     // One chunk wide, so a targeted read is always a single getLogs.
     const fromBlock = Math.max(0, centre - TARGETED_WINDOW_BACK_BLOCKS)
@@ -277,15 +289,23 @@ export class SafenetReader {
       // A failed probe (e.g. `missing trie node` on public RPC) degrades to the
       // head-relative scan rather than failing the read or burning a rotation.
       const block = await provider.getBlock(guess).catch(() => null)
-      if (!block) break
+      if (!block) {
+        break
+      }
       const driftSeconds = block.timestamp - targetSeconds
       const span = head.number - guess
       // Floored so a run of equal timestamps cannot divide by zero below.
       const observedBlockTime = span > 0 ? Math.max((head.timestamp - block.timestamp) / span, 0.1) : BLOCK_TIME_SECONDS
-      if (Math.abs(driftSeconds) < Math.abs(best.driftSeconds)) best = { block: guess, driftSeconds }
-      if (Math.abs(driftSeconds) <= BLOCK_ESTIMATE_TOLERANCE_SECONDS) break
+      if (Math.abs(driftSeconds) < Math.abs(best.driftSeconds)) {
+        best = { block: guess, driftSeconds }
+      }
+      if (Math.abs(driftSeconds) <= BLOCK_ESTIMATE_TOLERANCE_SECONDS) {
+        break
+      }
       const next = clamp(guess - Math.round(driftSeconds / observedBlockTime))
-      if (next === guess) break
+      if (next === guess) {
+        break
+      }
       guess = next
     }
     return best
@@ -324,7 +344,9 @@ export class SafenetReader {
     head: number,
   ): Promise<NormalizedCheckEvent[]> {
     const requestIds = openDisputeRequestIds(events)
-    if (requestIds.length === 0) return []
+    if (requestIds.length === 0) {
+      return []
+    }
 
     const contract = new Contract(oracle, [...ORACLE_READ_ABI], provider)
     // Issued concurrently so the provider coalesces them into one batched request.
@@ -350,7 +372,9 @@ export class SafenetReader {
     }
     return this.withProvider(async (provider) => {
       const latest = await provider.getBlock('latest')
-      if (!latest) throw new Error('Safenet reader: could not read the chain head')
+      if (!latest) {
+        throw new Error('Safenet reader: could not read the chain head')
+      }
       const head = latest.number
 
       const range = await this.readRange(provider, options.timestampMs, {
@@ -392,7 +416,9 @@ export class SafenetReader {
         // Keyed by the normalized address so one oracle cannot occupy two buckets.
         const key = proposal.oracle.toLowerCase()
         const ids = requestIdsByOracle.get(key) ?? []
-        if (!ids.includes(id)) requestIdsByOracle.set(key, [...ids, id].slice(-MAX_REQUEST_IDS_PER_ORACLE))
+        if (!ids.includes(id)) {
+          requestIdsByOracle.set(key, [...ids, id].slice(-MAX_REQUEST_IDS_PER_ORACLE))
+        }
       }
 
       const oracleEvents = await this.readOracleEvents(provider, requestIdsByOracle, range, head)
@@ -448,7 +474,9 @@ export class SafenetReader {
    */
   async loadGroupKey(epoch: string): Promise<{ x: string; y: string }> {
     const cached = this.groupKeyCache.get(epoch)
-    if (cached) return cached
+    if (cached) {
+      return cached
+    }
     // Derived outside the provider op: a malformed epoch is a caller bug.
     const epochValue = BigInt(epoch)
 
@@ -509,7 +537,9 @@ export class SafenetReader {
       return await this.withProvider(async (provider) => {
         const block = await provider.getBlock(blockNumber)
         // Thrown so the failure reaches withProvider and the next endpoint.
-        if (!block) throw new Error(`Safenet reader: no header for block ${blockNumber}`)
+        if (!block) {
+          throw new Error(`Safenet reader: no header for block ${blockNumber}`)
+        }
         return block.timestamp * 1000
       })
     } catch {

@@ -15,8 +15,14 @@ export const isSafeEligibleForAllowlist = (
   safe: { version?: string | null; deployed?: boolean },
   chain: Pick<Chain, 'chainId' | 'features'> | undefined,
 ): AllowlistEligibility => {
-  if (!chain || !isAllowlistEnabled(chain)) return { eligible: false, reason: 'chain-not-enabled' }
-  if (safe.deployed === false) return { eligible: false, reason: 'safe-not-deployed' }
-  if (!isSafeVersionSupported(safe.version)) return { eligible: false, reason: 'version-unsupported' }
+  if (!chain || !isAllowlistEnabled(chain)) {
+    return { eligible: false, reason: 'chain-not-enabled' }
+  }
+  if (safe.deployed === false) {
+    return { eligible: false, reason: 'safe-not-deployed' }
+  }
+  if (!isSafeVersionSupported(safe.version)) {
+    return { eligible: false, reason: 'version-unsupported' }
+  }
   return { eligible: true }
 }

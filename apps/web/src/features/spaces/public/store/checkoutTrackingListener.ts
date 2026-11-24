@@ -8,7 +8,9 @@ import { pickProps } from '../../components/Plans/planTiers'
 export const checkoutTrackingListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const endpoints = billingApi?.endpoints
   // Tests that mock the billing module leave no endpoint to watch.
-  if (!endpoints) return
+  if (!endpoints) {
+    return
+  }
 
   listenerMiddleware.startListening({
     matcher: endpoints.billingGetCheckoutUrlV1.matchFulfilled,

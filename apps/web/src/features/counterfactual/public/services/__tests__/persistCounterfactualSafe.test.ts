@@ -194,7 +194,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('returns ok=false and skips Redux add when user-endpoint POST fails', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'user-create-thunk') return { error: { status: 500 } }
+      if (action.type === 'user-create-thunk') {
+        return { error: { status: 500 } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -209,13 +211,17 @@ describe('persistCounterfactualSafe', () => {
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
+    if (!result.ok) {
+      expect(result.error.message).toBe(getGenericErrorWithStatus(500))
+    }
   })
 
   it('surfaces the backend message when the user-endpoint POST fails with a non-409 error', async () => {
     const backendMessage = 'Safe account name is too long'
     const dispatch = jest.fn((action) => {
-      if (action.type === 'user-create-thunk') return { error: { status: 422, data: { message: backendMessage } } }
+      if (action.type === 'user-create-thunk') {
+        return { error: { status: 422, data: { message: backendMessage } } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -228,12 +234,16 @@ describe('persistCounterfactualSafe', () => {
 
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error.message).toBe(backendMessage)
+    if (!result.ok) {
+      expect(result.error.message).toBe(backendMessage)
+    }
   })
 
   it('recovers as already-deployed (no error) when the backend responds 409', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'user-create-thunk') return { error: { status: 409 } }
+      if (action.type === 'user-create-thunk') {
+        return { error: { status: 409 } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -249,12 +259,16 @@ describe('persistCounterfactualSafe', () => {
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)
-    if (result.ok) expect(result.skipped).toBe('already-deployed')
+    if (result.ok) {
+      expect(result.skipped).toBe('already-deployed')
+    }
   })
 
   it('adds the Safe to My accounts and clears the stale undeployed entry on a backend 409', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'user-create-thunk') return { error: { status: 409 } }
+      if (action.type === 'user-create-thunk') {
+        return { error: { status: 409 } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -312,7 +326,9 @@ describe('persistCounterfactualSafe', () => {
     expect(userInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)
-    if (result.ok) expect(result.skipped).toBe('already-deployed')
+    if (result.ok) {
+      expect(result.skipped).toBe('already-deployed')
+    }
   })
 
   it('adds the already-deployed Safe to My accounts and clears any stale undeployed entry (unauth path)', async () => {
@@ -354,7 +370,9 @@ describe('persistCounterfactualSafe', () => {
     expect(isSmartContractImpl).not.toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
     expect(result.ok).toBe(true)
-    if (result.ok) expect(result.skipped).toBeUndefined()
+    if (result.ok) {
+      expect(result.skipped).toBeUndefined()
+    }
   })
 
   it('proceeds with the persist when the unauth deployment check fails (fail-open)', async () => {
@@ -375,7 +393,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('rolls back the user-level POST and skips Redux add when space-endpoint POST fails', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 500 } }
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 500 } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -394,7 +414,9 @@ describe('persistCounterfactualSafe', () => {
     })
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
+    if (!result.ok) {
+      expect(result.error.message).toBe(getGenericErrorWithStatus(500))
+    }
   })
 
   it('rolls back the user-level Safe and asks for the verification when the user cancels it', async () => {
@@ -423,7 +445,9 @@ describe('persistCounterfactualSafe', () => {
   it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {
     const backendMessage = 'This space only allows a maximum of 40 safe accounts'
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 400, data: { message: backendMessage } } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -445,7 +469,9 @@ describe('persistCounterfactualSafe', () => {
   it('rolls back and fails the chain on a 400 limit rejection during multi-chain creation', async () => {
     const backendMessage = 'This space only allows a maximum of 40 safe accounts'
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 400, data: { message: backendMessage } } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -470,7 +496,9 @@ describe('persistCounterfactualSafe', () => {
   it('rolls back and fails when the space POST returns a non-limit 400 (e.g. validation error)', async () => {
     const backendMessage = 'Validation failed (uuid is expected)'
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 400, data: { message: backendMessage } } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -485,7 +513,9 @@ describe('persistCounterfactualSafe', () => {
     expect(showNotificationImpl).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toBe(backendMessage)
+    if (!result.ok) {
+      expect(result.error.message).toBe(backendMessage)
+    }
   })
 
   it('queues a pending CF delete when both the space POST and the rollback DELETE fail', async () => {
@@ -493,8 +523,12 @@ describe('persistCounterfactualSafe', () => {
     // and rollback couldn't clean it up. The orphan must be queued so the next
     // sync flushes it instead of re-adding it as "Not activated".
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 500 } }
-      if (action.type === 'user-delete-thunk') return { error: { status: 500 } }
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 500 } }
+      }
+      if (action.type === 'user-delete-thunk') {
+        return { error: { status: 500 } }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -515,7 +549,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('does NOT queue a pending CF delete when the rollback DELETE succeeds', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 500 } }
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 500 } }
+      }
       // user-delete-thunk resolves successfully (no error in result)
       return action
     }) as unknown as AppDispatch
@@ -664,7 +700,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('leaves the decision to the backend while the seat limit is unknown', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: quotaExceeded() }
+      if (action.type === 'space-create-thunk') {
+        return { error: quotaExceeded() }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -705,7 +743,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('keeps the Safe in My accounts and toasts the quota when the space POST returns 402 QUOTA_EXCEEDED', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: quotaExceeded(20) }
+      if (action.type === 'space-create-thunk') {
+        return { error: quotaExceeded(20) }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -734,7 +774,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('does not roll back a 402 during multi-chain creation (seats are per address, so no chain was left behind)', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: quotaExceeded(20) }
+      if (action.type === 'space-create-thunk') {
+        return { error: quotaExceeded(20) }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -754,7 +796,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('falls back to the plan limit in the toast when the 402 body carries no quota', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: quotaExceeded() }
+      if (action.type === 'space-create-thunk') {
+        return { error: quotaExceeded() }
+      }
       return action
     }) as unknown as AppDispatch
 
@@ -773,7 +817,9 @@ describe('persistCounterfactualSafe', () => {
 
   it('rolls back on a 402 that is not a quota error', async () => {
     const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 402, data: { message: 'Payment required' } } }
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 402, data: { message: 'Payment required' } } }
+      }
       return action
     }) as unknown as AppDispatch
 

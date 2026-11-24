@@ -42,7 +42,9 @@ export const isAdmin = (member: MemberDto) => member.role === MemberRole.ADMIN
 export const isActiveAdmin = (member: MemberDto) => isAdmin(member) && member.status === MemberStatus.ACTIVE
 
 export const isInviteExpired = (member: MemberDto): boolean => {
-  if (member.status !== MemberStatus.INVITED || member.inviteExpiresAt == null) return false
+  if (member.status !== MemberStatus.INVITED || member.inviteExpiresAt == null) {
+    return false
+  }
 
   // Guard NaN explicitly so a malformed date isn't silently treated as not-expired
   const expiresAt = new Date(member.inviteExpiresAt).getTime()
@@ -59,7 +61,9 @@ const useAllMembers = (spaceId?: string) => {
   )
   // RTK keeps the last successful `data` on a failed refetch. When our membership is revoked in
   // another session the refetch 403s, so drop access instead of returning the stale member list.
-  if (isMembershipRevoked(error)) return EMPTY_MEMBERS
+  if (isMembershipRevoked(error)) {
+    return EMPTY_MEMBERS
+  }
   return data?.members ?? EMPTY_MEMBERS
 }
 

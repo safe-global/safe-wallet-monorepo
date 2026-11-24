@@ -29,10 +29,14 @@ export const trackSafenetChecked = ({
   signerRole,
 }: CheckedInput): void => {
   const result = toSafenetCheckResult(publicStatus, unavailableReason, events)
-  if (!result) return
+  if (!result) {
+    return
+  }
 
   const trackedKey = `${checkKey(identity)}:${result}:${signerRole ?? 'none'}`
-  if (trackedResults.has(trackedKey)) return
+  if (trackedResults.has(trackedKey)) {
+    return
+  }
   trackedResults.add(trackedKey)
 
   const { rules, flagged, revealed } = summariseRejection(events)

@@ -27,7 +27,9 @@ export const usePolicyIntro = (seenKey: string, startFlow: () => void) => {
 
   const onOpenChange = useCallback(
     (open: boolean) => {
-      if (!open) close()
+      if (!open) {
+        close()
+      }
     },
     [close],
   )

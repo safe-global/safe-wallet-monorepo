@@ -22,7 +22,9 @@ describe('mapActivePolicies', () => {
 
     expect(policy.type).toBe('spending-limit')
     expect(policy.status).toBe('active')
-    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
+    if (policy.type !== 'spending-limit') {
+      throw new Error('expected a spending limit')
+    }
 
     const [allowance] = policy.data.spenders[0].allowances
 
@@ -35,19 +37,25 @@ describe('mapActivePolicies', () => {
 
   it('should carry whether the spender is still registered', () => {
     const [policy] = mapActivePolicies([mockSpendingLimitDto()])
-    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
+    if (policy.type !== 'spending-limit') {
+      throw new Error('expected a spending limit')
+    }
 
     expect(policy.data.spenders[0].isActive).toBe(true)
   })
 
   it('should, when the allowance never resets, leave the reset time empty', () => {
     const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    if (!('spenders' in dto.data)) {
+      throw new Error('expected spending limit data')
+    }
     dto.data.spenders[0].allowances[0].resetPeriodMinutes = 0
     dto.data.spenders[0].allowances[0].resetsAtMinute = null
 
     const [policy] = mapActivePolicies([dto])
-    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
+    if (policy.type !== 'spending-limit') {
+      throw new Error('expected a spending limit')
+    }
 
     expect(policy.data.spenders[0].allowances[0].resetPeriodMinutes).toBe(0)
     expect(policy.data.spenders[0].allowances[0].resetsAtMinute).toBeNull()
@@ -55,22 +63,30 @@ describe('mapActivePolicies', () => {
 
   it('should, when more was spent than allowed, floor the remaining amount at zero', () => {
     const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    if (!('spenders' in dto.data)) {
+      throw new Error('expected spending limit data')
+    }
     dto.data.spenders[0].allowances[0].spent = '9000000000'
 
     const [policy] = mapActivePolicies([dto])
-    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
+    if (policy.type !== 'spending-limit') {
+      throw new Error('expected a spending limit')
+    }
 
     expect(policy.data.spenders[0].allowances[0].remaining).toBe('0')
   })
 
   it('should, when CGW could not resolve the token, render its address as the symbol in base units', () => {
     const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    if (!('spenders' in dto.data)) {
+      throw new Error('expected spending limit data')
+    }
     dto.data.spenders[0].allowances[0].tokenMetadata = null
 
     const [policy] = mapActivePolicies([dto])
-    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
+    if (policy.type !== 'spending-limit') {
+      throw new Error('expected a spending limit')
+    }
 
     expect(policy.data.spenders[0].allowances[0].token).toEqual({
       address: MOCK_TOKENS.usdc.address,
@@ -91,7 +107,9 @@ describe('mapActivePolicies', () => {
 
     expect(policy.type).toBe('proposer')
     expect(policy.enforcement).toEqual({ via: 'offchain', source: 'delegates' })
-    if (policy.type !== 'proposer') throw new Error('expected a proposer policy')
+    if (policy.type !== 'proposer') {
+      throw new Error('expected a proposer policy')
+    }
 
     expect(policy.data.proposers).toEqual([
       { proposer: MOCK_ADDRESSES.bob, delegatedBy: [{ delegator: MOCK_ADDRESSES.alice, label: 'Bob' }] },
@@ -141,7 +159,9 @@ describe('mapActivePolicies', () => {
 
   it('leaves out a spending limit whose allowances have all been removed', () => {
     const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    if (!('spenders' in dto.data)) {
+      throw new Error('expected spending limit data')
+    }
     dto.data.spenders = []
 
     expect(mapActivePolicies([dto])).toEqual([])
@@ -149,7 +169,9 @@ describe('mapActivePolicies', () => {
 
   it('leaves out a spending limit whose spender has no allowance left', () => {
     const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    if (!('spenders' in dto.data)) {
+      throw new Error('expected spending limit data')
+    }
     dto.data.spenders = dto.data.spenders.map((spender) => ({ ...spender, allowances: [] }))
 
     expect(mapActivePolicies([dto])).toEqual([])
@@ -162,12 +184,16 @@ describe('mapActivePolicies', () => {
     const CONTRACTS = { policyContract: '0x25DDa3b8974a10E93ca188F9C149A42F938Bd187', safePolicyGuard: GUARD }
 
     const withGuards = (dto: ActivePolicyDto, guards: GuardSlotsDto): ActivePolicyDto => {
-      if (dto.enforcement.via !== 'guard') throw new Error('expected a guard policy')
+      if (dto.enforcement.via !== 'guard') {
+        throw new Error('expected a guard policy')
+      }
       return { ...dto, enforcement: { ...dto.enforcement, guards } }
     }
 
     const withAccess = (dto: ActivePolicyDto, access: Partial<PolicyAccessDto>): ActivePolicyDto => {
-      if (dto.enforcement.via !== 'guard') throw new Error('expected a guard policy')
+      if (dto.enforcement.via !== 'guard') {
+        throw new Error('expected a guard policy')
+      }
       return { ...dto, enforcement: { ...dto.enforcement, access: { ...dto.enforcement.access, ...access } } }
     }
 

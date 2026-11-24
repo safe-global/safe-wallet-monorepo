@@ -94,19 +94,25 @@ export const useGasFeeDetails = ({
 
   // Switching to a payer that can't edit drops the draft.
   useEffect(() => {
-    if (!isEditable) setDraft(null)
+    if (!isEditable) {
+      setDraft(null)
+    }
   }, [isEditable])
 
   // When the gas can't be estimated, the editor opens once by itself to ask for a gas limit.
   useEffect(() => {
-    if (!isEditable || !cannotEstimate || wasAutoOpened) return
+    if (!isEditable || !cannotEstimate || wasAutoOpened) {
+      return
+    }
     setWasAutoOpened(true)
     setDraft(toGasParamsDraft(params))
   }, [isEditable, cannotEstimate, wasAutoOpened, params])
 
   const onEditOpenChange = useCallback(
     (open: boolean) => {
-      if (!open) return setDraft(null)
+      if (!open) {
+        return setDraft(null)
+      }
       setDraft(toGasParamsDraft(params))
       trackEvent(MODALS_EVENTS.EDIT_ADVANCED_PARAMS)
     },
@@ -119,8 +125,12 @@ export const useGasFeeDetails = ({
   }, [])
 
   const walletFee = useMemo<NetworkFee>(() => {
-    if (cannotEstimate) return { error: true }
-    if (!params.gasLimit || !params.maxFeePerGas) return { loading: true }
+    if (cannotEstimate) {
+      return { error: true }
+    }
+    if (!params.gasLimit || !params.maxFeePerGas) {
+      return { loading: true }
+    }
     return {
       amount: getTotalFeeFormatted(params.maxFeePerGas, params.gasLimit, chain),
       currency: chain?.nativeCurrency.symbol,
@@ -137,7 +147,9 @@ export const useGasFeeDetails = ({
   )
 
   const gasFeeDetails = useMemo<GasFeeDetails | undefined>(() => {
-    if (!view || !showGasFeeEstimation) return undefined
+    if (!view || !showGasFeeEstimation) {
+      return undefined
+    }
 
     if (isPayFromSafe) {
       const data = selection.isLocked ? safeTx?.data : selection.fees.previewedSafeTx?.data
@@ -180,7 +192,9 @@ export const useGasFeeDetails = ({
       },
       canSave: Object.keys(errors).length === 0,
       onSave: () => {
-        if (!draft || Object.keys(errors).length > 0) return
+        if (!draft || Object.keys(errors).length > 0) {
+          return
+        }
         // Saving the estimate unchanged goes back to following it.
         onParamsChange(isSameGasParamsDraft(draft, estimateDraft) ? undefined : fromGasParamsDraft(draft))
         setDraft(null)

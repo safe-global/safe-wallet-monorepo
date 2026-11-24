@@ -50,7 +50,9 @@ const ChainIndicator = ({
   const noChains = chains.length === 0
 
   const style = useMemo(() => {
-    if (!chainConfig) return
+    if (!chainConfig) {
+      return
+    }
     const { theme } = chainConfig
 
     return {

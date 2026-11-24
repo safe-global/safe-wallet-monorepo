@@ -17,7 +17,9 @@ import * as path from 'path'
 
 /** Recursively convert OpenAPI 3.0 `nullable: true` to JSON Schema `type: [..., "null"]` */
 function convertNullable(obj: Record<string, unknown>): void {
-  if (typeof obj !== 'object' || obj === null) return
+  if (typeof obj !== 'object' || obj === null) {
+    return
+  }
 
   if (obj.nullable === true) {
     delete obj.nullable
@@ -45,7 +47,9 @@ function convertNullable(obj: Record<string, unknown>): void {
     if (typeof value === 'object' && value !== null) {
       if (Array.isArray(value)) {
         value.forEach((item) => {
-          if (typeof item === 'object' && item !== null) convertNullable(item as Record<string, unknown>)
+          if (typeof item === 'object' && item !== null) {
+            convertNullable(item as Record<string, unknown>)
+          }
         })
       } else {
         convertNullable(value as Record<string, unknown>)

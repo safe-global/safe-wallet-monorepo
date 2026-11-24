@@ -34,8 +34,12 @@ const findBuildBlocker = ({
   isEditMode,
 }: BlockerInputs): Error | undefined => {
   // Building blind over unknown limits could re-add a delegate or skip a reset, so a failed load is final.
-  if (existingLimitsError) return new Error(EXISTING_LIMITS_LOAD_ERROR, { cause: existingLimitsError })
-  if (desiredError) return desiredError
+  if (existingLimitsError) {
+    return new Error(EXISTING_LIMITS_LOAD_ERROR, { cause: existingLimitsError })
+  }
+  if (desiredError) {
+    return desiredError
+  }
   // Only the create flow hides limits the Safe already has; an edit describes them, so they belong in it.
   if (!isEditMode && desired && existingLimits && findExistingAllowance(desired, existingLimits)) {
     return new Error(EXISTING_LIMIT_IN_POLICY_ERROR)
@@ -85,8 +89,18 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     // dropped here and only a finished build puts one back. Otherwise a stale one stays signable under a new summary.
     setSafeTx(undefined)
     setSafeTxError(blocker)
-    if (blocker || !desired || !existingLimits || !sdk || !chainId || !chain || !isSpendingLimitEnabled || !safeLoaded)
+    if (
+      blocker ||
+      !desired ||
+      !existingLimits ||
+      !sdk ||
+      !chainId ||
+      !chain ||
+      !isSpendingLimitEnabled ||
+      !safeLoaded
+    ) {
       return
+    }
 
     // A build that finishes after the inputs changed must not overwrite the newer one.
     let isStale = false
@@ -110,10 +124,14 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
 
     build
       .then((tx) => {
-        if (!isStale) setSafeTx(tx)
+        if (!isStale) {
+          setSafeTx(tx)
+        }
       })
       .catch((e) => {
-        if (!isStale) setSafeTxError(e)
+        if (!isStale) {
+          setSafeTxError(e)
+        }
       })
     return () => {
       isStale = true

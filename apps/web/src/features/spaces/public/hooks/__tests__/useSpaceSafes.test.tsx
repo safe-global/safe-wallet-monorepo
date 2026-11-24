@@ -25,10 +25,18 @@ jest.mock('../../../hooks/useSpaceSafeOverviews', () => ({
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
-    if (selector === 'isAuthenticated') return mockIsAuthenticated
-    if (selector === 'selectOrderByPreference') return { orderBy: 'name' }
-    if (selector === 'selectAllAddressBooks') return mockLocalAddressBook
-    if (selector === 'selectAllVisitedSafes') return {}
+    if (selector === 'isAuthenticated') {
+      return mockIsAuthenticated
+    }
+    if (selector === 'selectOrderByPreference') {
+      return { orderBy: 'name' }
+    }
+    if (selector === 'selectAllAddressBooks') {
+      return mockLocalAddressBook
+    }
+    if (selector === 'selectAllVisitedSafes') {
+      return {}
+    }
     return undefined
   },
 }))

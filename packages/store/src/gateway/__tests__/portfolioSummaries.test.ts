@@ -87,7 +87,9 @@ describe('portfolio summaries endpoints', () => {
       server.use(
         http.get(SUMMARIES_URL, ({ request }) => {
           const batch = new URL(request.url).searchParams.get('safes') ?? ''
-          if (batch === failingBatch) return HttpResponse.json({ message: 'Too many requests' }, { status: 429 })
+          if (batch === failingBatch) {
+            return HttpResponse.json({ message: 'Too many requests' }, { status: 429 })
+          }
           return HttpResponse.json(batch.split(',').map(toSummary))
         }),
       )

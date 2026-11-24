@@ -19,9 +19,15 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
-    if (selector === 'isAuthenticated') return mockIsAuthenticated
-    if (selector === 'selectIsOidcLoginPending') return mockIsOidcLoginPending
-    if (selector === 'selectIsSessionCheckPending') return mockIsSessionCheckPending
+    if (selector === 'isAuthenticated') {
+      return mockIsAuthenticated
+    }
+    if (selector === 'selectIsOidcLoginPending') {
+      return mockIsOidcLoginPending
+    }
+    if (selector === 'selectIsSessionCheckPending') {
+      return mockIsSessionCheckPending
+    }
     return undefined
   },
   useAppDispatch: () => mockDispatch,

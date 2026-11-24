@@ -36,7 +36,9 @@ const setup = () => {
       check()
       const unsubscribe = store.subscribe(() => {
         check()
-        if (store.getState().stepUp.status === status) unsubscribe()
+        if (store.getState().stepUp.status === status) {
+          unsubscribe()
+        }
       })
     })
   return { store, unregister, update, waitForStatus }

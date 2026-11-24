@@ -95,7 +95,9 @@ export const toCurrentPlan = (
 
 /** Compares monthly-equivalent prices, so a yearly plan is not read as a 12x upgrade. */
 export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanPick): PlanChangeDirection => {
-  if (!current || pick.option.price === null) return 'change'
+  if (!current || pick.option.price === null) {
+    return 'change'
+  }
   const next = monthlyEquivalent(pick.option.price, pick.tier.billingCycle)
   const now = monthlyEquivalent(current.price, current.billingCycle)
   return next > now ? 'upgrade' : next < now ? 'downgrade' : 'change'
@@ -126,12 +128,18 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
         : { kind: 'current', label: 'Current plan' }
     }
   }
-  if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
-  if (!current) return { kind: 'subscribe', label: `Continue with ${sizedPlanName(pick)}` }
+  if (!pick.option.paymentLinkId) {
+    return { kind: 'sales', label: 'Talk to sales' }
+  }
+  if (!current) {
+    return { kind: 'subscribe', label: `Continue with ${sizedPlanName(pick)}` }
+  }
 
   const direction = getChangeDirection(current, pick)
   // Nothing is paid during a trial, so every move off it is a switch to a named size.
-  if (current.isTrialing) return { kind: 'change', direction, label: `Switch to ${sizedPlanName(pick)}` }
+  if (current.isTrialing) {
+    return { kind: 'change', direction, label: `Switch to ${sizedPlanName(pick)}` }
+  }
   if (pick.tier.isCurrent) {
     // Another seat size of the same plan: a change, worded by seats rather than by plan name.
     return {
@@ -181,7 +189,9 @@ export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
 
     return CYCLES.flatMap((cycle) => {
       const offers = plan.offers.filter((offer) => offer.billingCycle === cycle)
-      if (offers.length === 0) return []
+      if (offers.length === 0) {
+        return []
+      }
 
       return [
         {
@@ -279,7 +289,9 @@ export const getPlanSizes = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanPi
   const byLabel = new Map<string, PlanPick>()
   for (const tier of getVisibleTiers(tiers, cycle)) {
     for (const option of tier.options) {
-      if (!byLabel.has(option.label)) byLabel.set(option.label, { tier, option })
+      if (!byLabel.has(option.label)) {
+        byLabel.set(option.label, { tier, option })
+      }
     }
   }
   return [...byLabel.values()].sort((a, b) => bySeats(a.option, b.option))
@@ -287,13 +299,17 @@ export const getPlanSizes = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanPi
 
 /** The smallest size that holds the given Safes, the largest when none does, the smallest when the count is unknown. */
 export const getFittingSize = (sizes: PlanPick[], seats: number | undefined): PlanPick | undefined => {
-  if (seats === undefined) return sizes[0]
+  if (seats === undefined) {
+    return sizes[0]
+  }
   return sizes.find(({ option }) => option.seats == null || option.seats >= seats) ?? sizes.at(-1)
 }
 
 export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
   tiers.filter((tier) => {
-    if (tier.billingCycle === null || tier.billingCycle === cycle) return true
+    if (tier.billingCycle === null || tier.billingCycle === cycle) {
+      return true
+    }
     return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)
   })
 
@@ -363,14 +379,18 @@ export const getCardSaving = (
   option: PlanSeatOption | undefined,
   counterpartTier: PlanTier | undefined,
 ): { amount: string; percent: string } | undefined => {
-  if (option?.price == null) return undefined
+  if (option?.price == null) {
+    return undefined
+  }
   const counterpart = counterpartTier?.options.find((candidate) => candidate.label === option.label)?.price
   const isYearly = tier.billingCycle === 'year'
   const twelveMonths = isYearly
     ? (option.originalPrice ?? (counterpart == null ? null : counterpart * 12))
     : option.price * 12
   const yearly = isYearly ? option.price : counterpart
-  if (twelveMonths == null || yearly == null || yearly >= twelveMonths) return undefined
+  if (twelveMonths == null || yearly == null || yearly >= twelveMonths) {
+    return undefined
+  }
   const saved = twelveMonths - yearly
   return { amount: formatPlanPrice(saved, tier.currency), percent: percentFormat.format(saved / twelveMonths) }
 }

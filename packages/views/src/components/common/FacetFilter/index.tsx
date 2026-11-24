@@ -76,19 +76,26 @@ export function FacetOptionList<V extends string = string>({
   const hasOptionActions = Boolean(onRenameOption || onDeleteOption)
 
   const saveRename = async () => {
-    if (!editing || !onRenameOption) return
+    if (!editing || !onRenameOption) {
+      return
+    }
     setIsSaving(true)
     try {
       const error = await onRenameOption(editing.value, editing.draft.trim())
-      if (error) setEditing({ ...editing, error })
-      else setEditing(undefined)
+      if (error) {
+        setEditing({ ...editing, error })
+      } else {
+        setEditing(undefined)
+      }
     } finally {
       setIsSaving(false)
     }
   }
 
   const confirmDelete = async (optionValue: V) => {
-    if (!onDeleteOption) return
+    if (!onDeleteOption) {
+      return
+    }
     setIsSaving(true)
     try {
       await onDeleteOption(optionValue)
@@ -102,7 +109,9 @@ export function FacetOptionList<V extends string = string>({
 
   const visibleOptions = useMemo(() => {
     const needle = query.trim().toLowerCase()
-    if (!needle) return options
+    if (!needle) {
+      return options
+    }
     return options.filter((option) => optionText(option).toLowerCase().includes(needle))
   }, [options, query])
 
@@ -120,8 +129,12 @@ export function FacetOptionList<V extends string = string>({
     !options.some((option) => isSameText(optionText(option), trimmedQuery))
 
   const handleCreate = async () => {
-    if (!canCreate || !onCreate) return
-    if (await onCreate(trimmedQuery)) setQuery('')
+    if (!canCreate || !onCreate) {
+      return
+    }
+    if (await onCreate(trimmedQuery)) {
+      setQuery('')
+    }
   }
 
   return (

@@ -4,7 +4,9 @@ import DelegationErrorBoundary from '../DelegationErrorBoundary'
 let shouldThrow = true
 
 const FlakyChild = () => {
-  if (shouldThrow) throw new Error('Unexpected delegation shape')
+  if (shouldThrow) {
+    throw new Error('Unexpected delegation shape')
+  }
   return <p>Delegation loaded</p>
 }
 

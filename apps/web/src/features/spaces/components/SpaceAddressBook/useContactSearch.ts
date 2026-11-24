@@ -19,7 +19,9 @@ export function useContactSearch(contactItems: ContactItem[], searchQuery: strin
   }, [contactItems])
 
   const results = useMemo(() => {
-    if (!searchQuery) return contactItems
+    if (!searchQuery) {
+      return contactItems
+    }
 
     return fuse.search(searchQuery).map((result) => result.item)
   }, [searchQuery, contactItems, fuse])

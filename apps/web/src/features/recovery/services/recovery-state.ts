@@ -131,7 +131,9 @@ const createLogWindowReader = (delayModifier: Delay, topics: AddedTransactionTop
         try {
           return { events: await read(fromBlock, toBlock), reached: fromBlock }
         } catch (error) {
-          if (!narrow()) throw error
+          if (!narrow()) {
+            throw error
+          }
         }
       }
     },
@@ -143,7 +145,9 @@ const createLogWindowReader = (delayModifier: Delay, topics: AddedTransactionTop
         try {
           return { events: await read(fromBlock, toBlock), reached: toBlock }
         } catch (error) {
-          if (!narrow()) throw error
+          if (!narrow()) {
+            throw error
+          }
         }
       }
     },

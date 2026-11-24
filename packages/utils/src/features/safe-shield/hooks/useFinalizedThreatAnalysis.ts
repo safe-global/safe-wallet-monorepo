@@ -33,7 +33,9 @@ export function useFinalizedThreatAnalysis(
 
   const merged = useMemo<ThreatAnalysisResults | undefined>(() => {
     const threat = guardResults?.length ? [...guardResults, ...(threatData?.THREAT ?? [])] : threatData?.THREAT
-    if (!threatData && !threat) return undefined
+    if (!threatData && !threat) {
+      return undefined
+    }
 
     const clean = <T extends AnalysisResult>(items: T[]) => pruneOkResults(dedupeAnalysisResults(items))
     return {

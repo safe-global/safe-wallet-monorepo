@@ -97,7 +97,9 @@ export const useSafeShieldForTxData = (txData: SafeTransaction | undefined) => {
       return
     }
     const key = JSON.stringify(txData.data)
-    if (key === lastDataKeyRef.current) return
+    if (key === lastDataKeyRef.current) {
+      return
+    }
     lastDataKeyRef.current = key
     setSafeTx(txData)
   }, [txData, setSafeTx])

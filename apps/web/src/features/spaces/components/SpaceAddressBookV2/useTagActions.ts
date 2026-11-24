@@ -31,38 +31,54 @@ const useTagActions = () => {
 
   const saveContactTags = async (address: string, tags: string[]): Promise<{ saved: boolean; error?: string }> => {
     const result = await setContactTags({ spaceId, setContactTagsDto: { items: [{ address, tags }] } })
-    if (result.error) return { saved: false, error: errorMessageOf(result) }
+    if (result.error) {
+      return { saved: false, error: errorMessageOf(result) }
+    }
     dispatch(showNotification({ message: 'Tags updated', variant: 'success', groupKey: 'update-tags-success' }))
     return { saved: true }
   }
 
   const createTag = async (rawName: string): Promise<{ tag?: WorkspaceTag; error?: string }> => {
     const error = validateTagName(rawName)
-    if (error) return { error }
+    if (error) {
+      return { error }
+    }
     const name = normalizeTagName(rawName)
 
     const result = await createTagMutation({ spaceId, createTagDto: { name } })
-    if (result.error) return { error: errorMessageOf(result) }
+    if (result.error) {
+      return { error: errorMessageOf(result) }
+    }
     return { tag: result.data.tags.find((candidate) => sameTagName(candidate.name, name)) }
   }
 
   /** `mergedIntoId` is the existing tag a rename to its name merged into. */
   const renameTag = async (tag: WorkspaceTag, rawName: string): Promise<{ error?: string; mergedIntoId?: number }> => {
     const error = validateTagName(rawName)
-    if (error) return { error }
+    if (error) {
+      return { error }
+    }
     const name = normalizeTagName(rawName)
-    if (name === tag.name) return {}
+    if (name === tag.name) {
+      return {}
+    }
 
     const result = await renameTagMutation({ spaceId, tagId: tag.id, renameTagDto: { name } })
-    if (result.error) return { error: errorMessageOf(result) }
-    if (result.data.tags.some((candidate) => candidate.id === tag.id)) return {}
+    if (result.error) {
+      return { error: errorMessageOf(result) }
+    }
+    if (result.data.tags.some((candidate) => candidate.id === tag.id)) {
+      return {}
+    }
     return { mergedIntoId: result.data.tags.find((candidate) => sameTagName(candidate.name, name))?.id }
   }
 
   const deleteTag = async (tag: WorkspaceTag): Promise<boolean> => {
     const result = await deleteTagMutation({ spaceId, tagId: tag.id })
     const message = errorMessageOf(result)
-    if (message) dispatch(showNotification({ message, variant: 'error', groupKey: 'delete-tag-error' }))
+    if (message) {
+      dispatch(showNotification({ message, variant: 'error', groupKey: 'delete-tag-error' }))
+    }
     return !result.error
   }
 

@@ -206,7 +206,9 @@ export default function SafeAccountsTable({
     const withActions = actionsWidth ? base.map((c) => (c.id === 'actions' ? { ...c, width: actionsWidth } : c)) : base
     // Reorder mode adds no column: the drag handle floats in the Name cell's left gutter, so the
     // table keeps the same width as the other sort modes (no differential horizontal scrollbar).
-    if (selection) return [SELECT_COLUMN, ...withActions]
+    if (selection) {
+      return [SELECT_COLUMN, ...withActions]
+    }
     return withActions
   }, [columns, actionsWidth, selection])
 
@@ -216,7 +218,9 @@ export default function SafeAccountsTable({
   )
 
   const sortedGroups = useMemo(() => {
-    if (!sortableColumns || !sort.orderBy) return groups
+    if (!sortableColumns || !sort.orderBy) {
+      return groups
+    }
     const orderBy = sort.orderBy
     return [...groups].sort((a, b) => compareGroups(a, b, orderBy, sort.order))
   }, [groups, sort, sortableColumns])
@@ -224,7 +228,9 @@ export default function SafeAccountsTable({
   // When an external sort-mode control takes over ordering (Last visited / Manual), clear any active
   // column sort so a stale header arrow and order don't linger if column sorting re-enables.
   useEffect(() => {
-    if (!sortableColumns) setSort({ orderBy: null, order: 'asc' })
+    if (!sortableColumns) {
+      setSort({ orderBy: null, order: 'asc' })
+    }
   }, [sortableColumns])
 
   // Pull similarity clusters together (non-reorder body) so each renders as one contiguous band.
@@ -265,7 +271,9 @@ export default function SafeAccountsTable({
 
   const toggle = (key: string) => setExpanded((prev) => toggleExpanded(prev, key))
 
-  if (items.length === 0) return null
+  if (items.length === 0) {
+    return null
+  }
 
   return (
     <div data-testid={testId} className="w-full">

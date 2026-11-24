@@ -62,7 +62,9 @@ export type AllowlistDrawerPolicy = ActiveAllowlistPolicy | QueuedAllowlistPolic
 
 /** The outcome a row carries on its own: a failed status, or a pending one whose signing window has closed. */
 export const inferAllowlistOutcome = (policy: AllowlistDrawerPolicy, nowMs: number): AllowlistTxOutcome | undefined => {
-  if (policy.status === 'failed') return 'failed'
+  if (policy.status === 'failed') {
+    return 'failed'
+  }
   if (policy.status === 'pending' && policy.expiresAt !== undefined && policy.expiresAt * 1_000 <= nowMs) {
     return 'expired'
   }
@@ -71,8 +73,12 @@ export const inferAllowlistOutcome = (policy: AllowlistDrawerPolicy, nowMs: numb
 }
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
-  if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
-  if (!viewer.isSigner) return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_HELPER }
+  if (!viewer.address) {
+    return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
+  }
+  if (!viewer.isSigner) {
+    return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_HELPER }
+  }
 
   return { kind: 'active', action: 'manage', disabled: false }
 }
@@ -92,9 +98,15 @@ const resolveScheduled = ({ operation }: AllowlistScheduledChange, viewer: Viewe
     bannerLine2: SCHEDULED_BANNER_LINE[operation],
   } as const
 
-  if (operation === 'create') return { ...base, action: 'none', disabled: false }
-  if (!viewer.address) return { ...base, action: 'connect', disabled: false, helper: CANCEL_CONNECT_HELPER }
-  if (!viewer.isSigner) return { ...base, action: 'cancel', disabled: true, helper: CANCEL_NOT_A_SIGNER_HELPER }
+  if (operation === 'create') {
+    return { ...base, action: 'none', disabled: false }
+  }
+  if (!viewer.address) {
+    return { ...base, action: 'connect', disabled: false, helper: CANCEL_CONNECT_HELPER }
+  }
+  if (!viewer.isSigner) {
+    return { ...base, action: 'cancel', disabled: true, helper: CANCEL_NOT_A_SIGNER_HELPER }
+  }
 
   return { ...base, action: 'cancel', disabled: false }
 }
@@ -117,9 +129,13 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
     return { ...base, action: 'review', bannerLine2: executeLine(policy.operation) }
   }
 
-  if (!viewer.isSigner) return { ...base, action: 'copy-link' }
+  if (!viewer.isSigner) {
+    return { ...base, action: 'copy-link' }
+  }
 
-  if (viewer.hasSigned === undefined) return { ...base, action: 'review' }
+  if (viewer.hasSigned === undefined) {
+    return { ...base, action: 'review' }
+  }
 
   if (viewer.hasSigned) {
     const missing = policy.confirmationsRequired - policy.confirmationsSubmitted
@@ -144,12 +160,16 @@ export const resolveAllowlistDrawerState = (
   safeName: string,
   outcome: AllowlistTxOutcome | undefined = inferAllowlistOutcome(policy, Date.now()),
 ): AllowlistDrawerState => {
-  if (policy.status === 'failed') return resolveClosed(policy, outcome ?? 'failed')
+  if (policy.status === 'failed') {
+    return resolveClosed(policy, outcome ?? 'failed')
+  }
   if (policy.status === 'pending') {
     return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
   }
 
-  if (policy.scheduledChange) return resolveScheduled(policy.scheduledChange, viewer)
+  if (policy.scheduledChange) {
+    return resolveScheduled(policy.scheduledChange, viewer)
+  }
 
   return policy.enabled ? resolveActive(viewer) : UNENFORCED_STATE
 }

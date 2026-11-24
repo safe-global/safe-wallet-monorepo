@@ -21,7 +21,9 @@ export const REMOVE_PROPOSER_NOT_ALLOWED =
 /** The grant the wallet made, or any grant when the proposer removes itself. Another owner gets none. */
 export const getRemovableGrantDelegator = (proposer: Proposer, walletAddress?: string): string | undefined => {
   const ownGrant = proposer.delegatedBy.find((grant) => sameAddress(grant.delegator, walletAddress))
-  if (ownGrant) return ownGrant.delegator
+  if (ownGrant) {
+    return ownGrant.delegator
+  }
 
   return sameAddress(proposer.proposer, walletAddress) ? proposer.delegatedBy[0]?.delegator : undefined
 }
@@ -55,7 +57,9 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
       const wallet = await assertWalletChain(onboard, chainId)
       const delegator = getRemovableGrantDelegator(ref.proposer, wallet.address)
 
-      if (!delegator) throw new Error(REMOVE_PROPOSER_NOT_ALLOWED)
+      if (!delegator) {
+        throw new Error(REMOVE_PROPOSER_NOT_ALLOWED)
+      }
 
       const signer = await getAssertedChainSigner(wallet.provider)
 

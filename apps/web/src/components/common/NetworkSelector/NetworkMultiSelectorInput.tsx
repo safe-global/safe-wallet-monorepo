@@ -148,7 +148,9 @@ const NetworkMultiSelectorInput = ({
   }
 
   const handleOptionClick = (chain: Chain | typeof SELECT_ALL_OPTION, disabled: boolean) => {
-    if (disabled) return
+    if (disabled) {
+      return
+    }
     if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
       toggleSelectAll()
     } else {
@@ -168,9 +170,13 @@ const NetworkMultiSelectorInput = ({
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
       const wasOpen = open
-      if (!wasOpen) setOpen(true)
+      if (!wasOpen) {
+        setOpen(true)
+      }
       const count = visibleOptions.length
-      if (count === 0) return
+      if (count === 0) {
+        return
+      }
       const delta = event.key === 'ArrowDown' ? 1 : -1
       let next = !wasOpen || activeIndex === -1 ? (delta === 1 ? 0 : count - 1) : (activeIndex + delta + count) % count
       let steps = 0
@@ -178,7 +184,9 @@ const NetworkMultiSelectorInput = ({
         next = (next + delta + count) % count
         steps++
       }
-      if (isKeyboardSkippable(visibleOptions[next] as Chain)) return
+      if (isKeyboardSkippable(visibleOptions[next] as Chain)) {
+        return
+      }
       setActiveIndex(next)
       document.getElementById(getOptionId(visibleOptions[next] as Chain))?.scrollIntoView({ block: 'nearest' })
     } else if (event.key === 'Enter') {
@@ -191,13 +199,17 @@ const NetworkMultiSelectorInput = ({
         }
       }
     } else if (event.key === 'Escape') {
-      if (open) setOpen(false)
+      if (open) {
+        setOpen(false)
+      }
     }
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
-    if (!nextOpen) setActiveIndex(-1)
+    if (!nextOpen) {
+      setActiveIndex(-1)
+    }
   }
 
   const activeOption = open && activeIndex >= 0 ? (visibleOptions[activeIndex] as Chain | undefined) : undefined

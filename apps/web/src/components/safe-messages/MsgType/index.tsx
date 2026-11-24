@@ -8,7 +8,9 @@ const FALLBACK_LOGO_URI = '/images/transactions/custom.svg'
 const MAX_TRIMMED_LENGTH = 20
 
 const getMessageName = (msg: MessageItem) => {
-  if (msg.name != null) return msg.name
+  if (msg.name != null) {
+    return msg.name
+  }
 
   if (isEIP712TypedData(msg.message)) {
     return msg.message.domain?.name || ''

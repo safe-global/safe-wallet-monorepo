@@ -33,7 +33,9 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
   const isFeatureEnabled = useHasFeature(FEATURES.SPEED_UP_TX)
 
   const [smartContract] = useAsync(async () => {
-    if (!pendingTx.signerAddress || !web3ReadOnly) return false
+    if (!pendingTx.signerAddress || !web3ReadOnly) {
+      return false
+    }
     return isSmartContract(pendingTx.signerAddress)
   }, [pendingTx.signerAddress, web3ReadOnly])
 

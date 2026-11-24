@@ -54,8 +54,12 @@ describe('transactions endpoints', () => {
 
       server = setupServer(
         http.get(`${GATEWAY_URL}/v1/chains/1/transactions/:id`, ({ params }) => {
-          if (params.id === 'tx-1') return HttpResponse.json(tx1)
-          if (params.id === 'tx-2') return HttpResponse.json(tx2)
+          if (params.id === 'tx-1') {
+            return HttpResponse.json(tx1)
+          }
+          if (params.id === 'tx-2') {
+            return HttpResponse.json(tx2)
+          }
           return new HttpResponse(null, { status: 404 })
         }),
       )
@@ -77,7 +81,9 @@ describe('transactions endpoints', () => {
     it('should return error if any request fails', async () => {
       server = setupServer(
         http.get(`${GATEWAY_URL}/v1/chains/1/transactions/:id`, ({ params }) => {
-          if (params.id === 'tx-1') return HttpResponse.json(createMockTxDetails('tx-1'))
+          if (params.id === 'tx-1') {
+            return HttpResponse.json(createMockTxDetails('tx-1'))
+          }
           return new HttpResponse(null, { status: 500 })
         }),
       )

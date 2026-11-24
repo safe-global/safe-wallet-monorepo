@@ -127,7 +127,9 @@ const trial = (daysLeft: number, isTrialEndingSoon = daysLeft <= 7) => ({
 describe('TrialEndingModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    for (const key of Object.keys(storage)) delete storage[key]
+    for (const key of Object.keys(storage)) {
+      delete storage[key]
+    }
     mockUseSpacePlan.mockReturnValue(trial(7))
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
     mockUseIsAdmin.mockReturnValue(true)

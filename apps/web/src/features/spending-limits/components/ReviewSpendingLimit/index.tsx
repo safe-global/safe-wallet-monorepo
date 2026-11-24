@@ -42,7 +42,9 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
 
   useEffect(() => {
     // Decimals arrive with the balances; building without them would throw a transient error.
-    if (!chain || !data || decimals == null) return
+    if (!chain || !data || decimals == null) {
+      return
+    }
 
     createNewSpendingLimitTx(data, spendingLimits, chainId, chain, safe.modules, safe.deployed, decimals)
       .then(setSafeTx)
@@ -66,7 +68,9 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   }
 
   const replaces = useMemo(() => {
-    if (!existingSpendingLimit) return undefined
+    if (!existingSpendingLimit) {
+      return undefined
+    }
 
     const previousAmount = formatVisualAmount(BigInt(existingSpendingLimit.amount), decimals)
     const previousResetTime = getResetTimeOptions(chainId).find(

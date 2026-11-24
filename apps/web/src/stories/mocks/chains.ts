@@ -85,7 +85,9 @@ export function createChainData(features: FeatureFlags = {}, baseChain: Chain = 
   // Filter chain features: keep enabled ones and remove always-disabled ones
   chainData.features = chainData.features.filter((f: string) => {
     // Always remove complex features
-    if (ALWAYS_DISABLED_FEATURES.includes(f)) return false
+    if (ALWAYS_DISABLED_FEATURES.includes(f)) {
+      return false
+    }
 
     // Check if this feature is in our map
     const configKey = Object.entries(FEATURE_MAP).find(([, value]) => value === f)?.[0]
@@ -125,7 +127,9 @@ const SEPOLIA_CHAIN_ID = '11155111'
 const SEPOLIA_FEATURES = ['policyRecipientAllowlist', 'spaceOnboardingSurvey'] as const
 
 const withSepoliaFeatures = (chain: Chain, features: FeatureFlags): Chain => {
-  if (chain.chainId !== SEPOLIA_CHAIN_ID) return chain
+  if (chain.chainId !== SEPOLIA_CHAIN_ID) {
+    return chain
+  }
   const added = SEPOLIA_FEATURES.filter((flag) => features[flag])
     .map((flag) => FEATURE_MAP[flag])
     .filter((feature) => !chain.features.includes(feature))

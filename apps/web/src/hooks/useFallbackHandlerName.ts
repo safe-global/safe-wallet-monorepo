@@ -17,7 +17,9 @@ export const useFallbackHandlerName = (): string | undefined => {
   const chainId = safe.chainId
 
   return useMemo(() => {
-    if (!address) return undefined
+    if (!address) {
+      return undefined
+    }
 
     const officialHandler = identifyOfficialFallbackHandler(address, chainId)
     if (officialHandler === 'compatibility') {

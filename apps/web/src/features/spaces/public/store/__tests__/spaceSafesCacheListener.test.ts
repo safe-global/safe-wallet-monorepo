@@ -19,7 +19,9 @@ const respondWithSpaceSafes = (spaceSafes: GetSpaceSafeResponse) => {
     http.get(spaceSafesUrl, async () => {
       getCount += 1
       // The refetch after the invalidation never answers, so only the listener can change the list
-      if (getCount > 1) await delay('infinite')
+      if (getCount > 1) {
+        await delay('infinite')
+      }
       return HttpResponse.json(spaceSafes)
     }),
   )

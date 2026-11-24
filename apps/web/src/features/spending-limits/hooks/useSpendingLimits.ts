@@ -32,7 +32,9 @@ export const useLoadSpendingLimits = () => {
 
   const [data, error, loading] = useAsync<SpendingLimitState[] | undefined>(
     () => {
-      if (!provider || !safeLoaded || !safe.modules || tokenInfoFromBalances.length === 0) return
+      if (!provider || !safeLoaded || !safe.modules || tokenInfoFromBalances.length === 0) {
+        return
+      }
 
       return loadSpendingLimits(provider, safe.modules, safeAddress, chainId, tokenInfoFromBalances).catch((e) => {
         logError(Errors._609, e, getRpcErrorContext(provider))

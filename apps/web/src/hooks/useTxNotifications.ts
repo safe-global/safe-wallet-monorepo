@@ -65,9 +65,15 @@ const getNotificationLink = (
   txHash: string | undefined,
   spaceId: string | null,
 ): ReturnType<typeof getTxLink> | ReturnType<typeof getExplorerLink> | undefined => {
-  if (!chain) return undefined
-  if (txId) return getTxLink(txId, chain, safeAddress, spaceId)
-  if (txHash) return getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+  if (!chain) {
+    return undefined
+  }
+  if (txId) {
+    return getTxLink(txId, chain, safeAddress, spaceId)
+  }
+  if (txHash) {
+    return getExplorerLink(txHash, chain.blockExplorerUriTemplate)
+  }
   return undefined
 }
 
@@ -85,17 +91,23 @@ const useTxNotifications = (): void => {
    */
 
   useEffect(() => {
-    if (!chain) return
+    if (!chain) {
+      return
+    }
 
     const entries = Object.entries(TxNotifications) as [keyof typeof TxNotifications, string][]
 
     const unsubFns = entries.map(([event, baseMessage]) =>
       txSubscribe(event, async (detail) => {
         const isError = 'error' in detail
-        if (isError && isWalletRejection(detail.error)) return
+        if (isError && isWalletRejection(detail.error)) {
+          return
+        }
         // The flow on screen already shows the failure inline, and errors are never listed in the
         // notification center — a toast would only repeat what the flow says.
-        if (isError && isTxFlowOpenRef.current) return
+        if (isError && isTxFlowOpenRef.current) {
+          return
+        }
         const isSuccess = successEvents.includes(event)
 
         // A Space-level flow acts on a Safe the page is not on, so the Safe an event names beats the URL's. A chain

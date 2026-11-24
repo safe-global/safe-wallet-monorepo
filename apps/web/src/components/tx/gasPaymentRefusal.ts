@@ -19,16 +19,26 @@ export const getGasPaymentRefusal = (
   err: Error,
   gasPayer: GasPayer,
 ): { excluded: SponsoredOption[]; message: string } | undefined => {
-  if (gasPayer === 'WALLET' || gasPayer === 'PAY_FROM_SAFE') return undefined
+  if (gasPayer === 'WALLET' || gasPayer === 'PAY_FROM_SAFE') {
+    return undefined
+  }
 
-  if (err instanceof QuotaExceededError) return { excluded: [gasPayer], message: sponsoredQuotaMessage(err) }
-  if (err instanceof RelayLimitReachedError) return { excluded: [gasPayer], message: LIMIT_REACHED_MESSAGE }
+  if (err instanceof QuotaExceededError) {
+    return { excluded: [gasPayer], message: sponsoredQuotaMessage(err) }
+  }
+  if (err instanceof RelayLimitReachedError) {
+    return { excluded: [gasPayer], message: LIMIT_REACHED_MESSAGE }
+  }
   if (err instanceof GasPaymentOptionUnavailableError) {
     const isRefundTx = err.requested === 'PAY_FROM_SAFE' || err.reason === REFUNDING_TRANSACTION_REASON
-    if (isRefundTx) return { excluded: SPONSORED_OPTIONS, message: WALLET_ONLY_MESSAGE }
+    if (isRefundTx) {
+      return { excluded: SPONSORED_OPTIONS, message: WALLET_ONLY_MESSAGE }
+    }
     return { excluded: [gasPayer], message: UNAVAILABLE_MESSAGE }
   }
-  if (err instanceof RelayerUnavailableError) return { excluded: [gasPayer], message: UNAVAILABLE_MESSAGE }
+  if (err instanceof RelayerUnavailableError) {
+    return { excluded: [gasPayer], message: UNAVAILABLE_MESSAGE }
+  }
 
   return undefined
 }

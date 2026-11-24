@@ -18,7 +18,9 @@ export const usePerSafePendingTransactions = (limit = 3, skip = false) => {
   const [error, setError] = useState<string>()
 
   const fetchAll = useCallback(async () => {
-    if (skip) return
+    if (skip) {
+      return
+    }
 
     if (safesWithQueue.length === 0) {
       setAllTransactions([])

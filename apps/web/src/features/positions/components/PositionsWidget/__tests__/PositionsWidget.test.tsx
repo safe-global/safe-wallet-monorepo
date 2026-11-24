@@ -52,8 +52,12 @@ describe('PositionsWidget', () => {
   it('shows the first four apps and links to all positions of the Safe', () => {
     renderWidget({ data: protocols })
 
-    for (const name of appNames.slice(0, 4)) expect(screen.getByText(name)).toBeInTheDocument()
-    for (const name of appNames.slice(4)) expect(screen.queryByText(name)).not.toBeInTheDocument()
+    for (const name of appNames.slice(0, 4)) {
+      expect(screen.getByText(name)).toBeInTheDocument()
+    }
+    for (const name of appNames.slice(4)) {
+      expect(screen.queryByText(name)).not.toBeInTheDocument()
+    }
     expect(screen.getByTestId('view-all-link')).toHaveAttribute(
       'href',
       expect.stringMatching(/^\/balances\/positions\?safe=eth(%3A|:)0x1111111111111111111111111111111111111111/),

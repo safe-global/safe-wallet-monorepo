@@ -11,11 +11,15 @@ export const useNestedSafeGrantor = (chainId: string, proposer: Proposer): strin
   const provider = useMemo(() => (chain ? createWeb3ReadOnly(chain) : undefined), [chain])
 
   const [grantor] = useAsync(async () => {
-    if (!provider) return
+    if (!provider) {
+      return
+    }
 
     for (const { delegator } of proposer.delegatedBy) {
       const isContract = await isSmartContractWallet(chainId, delegator, provider).catch(() => false)
-      if (isContract) return delegator
+      if (isContract) {
+        return delegator
+      }
     }
   }, [chainId, proposer, provider])
 

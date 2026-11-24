@@ -79,7 +79,9 @@ jest.mock('@safe-global/views/components/ui/dropdown-menu', () => {
 
   const DropdownMenuTrigger = ({ render }: { render: ReactElement<{ onClick?: () => void }> }) => {
     const context = useContext(Ctx)
-    if (!context) return null
+    if (!context) {
+      return null
+    }
     return cloneElement(render, { onClick: () => context.setOpen(!context.open) })
   }
 

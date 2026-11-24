@@ -102,7 +102,9 @@ export const validateAmount = (amount?: string, includingZero: boolean = false) 
 }
 
 export const validateLimitedAmount = (amount: string, decimals?: number | null, max?: string, errorMsg?: string) => {
-  if (decimals == null || !max) return
+  if (decimals == null || !max) {
+    return
+  }
 
   const numberError = validateAmount(amount)
   if (numberError) {

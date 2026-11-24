@@ -345,7 +345,9 @@ describe('safenetCheckApi.getSafenetCheck', () => {
     const store = configureStore({
       reducer: {
         [safenetCheckSlice.name]: (state: SafenetCheckSliceState | undefined, action: UnknownAction) => {
-          if (pinVerdict.match(action)) pins.push(action)
+          if (pinVerdict.match(action)) {
+            pins.push(action)
+          }
           return safenetCheckSlice.reducer(state, action)
         },
         [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,

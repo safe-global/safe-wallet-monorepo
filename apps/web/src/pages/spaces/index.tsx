@@ -13,7 +13,9 @@ export default function SpacePage() {
   const landing = useLandingSpaceId()
 
   useEffect(() => {
-    if (!router.isReady || spaceId || landing.isLoading) return
+    if (!router.isReady || spaceId || landing.isLoading) {
+      return
+    }
 
     // Preserve any context the user was carrying (e.g. ?safe=, ?chain=, tracking params)
     if (landing.spaceId) {
@@ -23,7 +25,9 @@ export default function SpacePage() {
     }
   }, [router, spaceId, landing.isLoading, landing.spaceId])
 
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

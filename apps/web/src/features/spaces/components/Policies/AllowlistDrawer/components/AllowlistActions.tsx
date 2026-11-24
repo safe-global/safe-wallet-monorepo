@@ -32,7 +32,9 @@ const AllowlistActions = ({
       return <PolicyDrawerActions actionLabel="Connect wallet" onClick={onConnectWallet} hint={state.helper} />
 
     case 'manage':
-      if (state.disabled) return <PolicyDrawerActions actionLabel="Edit" hint={state.helper} disabled />
+      if (state.disabled) {
+        return <PolicyDrawerActions actionLabel="Edit" hint={state.helper} disabled />
+      }
 
       return (
         <DrawerFooter>

@@ -27,7 +27,9 @@ export function usePreventNavigation(onNavigate?: (proceed: () => void) => boole
   }, [router.asPath])
 
   useEffect(() => {
-    if (!onNavigate) return
+    if (!onNavigate) {
+      return
+    }
 
     const onLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
@@ -36,7 +38,9 @@ export function usePreventNavigation(onNavigate?: (proceed: () => void) => boole
       const targetAttr = link?.getAttribute('target')
 
       // Only in-app paths are ours to route; new tabs, `mailto:` and external URLs stay the anchor's.
-      if (!link || !href?.startsWith('/') || targetAttr?.toLowerCase() === '_blank') return
+      if (!link || !href?.startsWith('/') || targetAttr?.toLowerCase() === '_blank') {
+        return
+      }
 
       const proceed = () => {
         router.push(href)

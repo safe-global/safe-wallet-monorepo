@@ -143,7 +143,9 @@ const TokenSelector = ({
   // render mid-navigation, which is not a Safe change.
   const previousIdentity = useRef(identityKey)
   useEffect(() => {
-    if (identityKey === '') return
+    if (identityKey === '') {
+      return
+    }
     const previous = previousIdentity.current
     previousIdentity.current = identityKey
     if (previous !== '' && previous !== identityKey && value !== undefined) {
@@ -162,7 +164,9 @@ const TokenSelector = ({
         items={groups}
         value={selectedOption}
         onValueChange={(next) => {
-          if (next?.group === 'custom') addCustomToken(chainId, next)
+          if (next?.group === 'custom') {
+            addCustomToken(chainId, next)
+          }
           onChange(next?.address)
         }}
         onInputValueChange={setQuery}

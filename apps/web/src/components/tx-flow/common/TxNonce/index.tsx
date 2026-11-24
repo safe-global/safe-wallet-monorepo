@@ -165,7 +165,9 @@ export const TxNonceForm = ({
         // Validation must be async to allow resetting invalid values onBlur
         validate: async (value) => {
           // nonce is always valid so no need to validate if the input is the same
-          if (value === nonce) return
+          if (value === nonce) {
+            return
+          }
 
           const newNonce = Number(value)
 

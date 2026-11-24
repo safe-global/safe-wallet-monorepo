@@ -25,8 +25,12 @@ export type FeatureFlagEditorData = {
 
 const getChainScope = (chains: Chain[], feature: FEATURES): FeatureFlagRowData['chainScope'] => {
   const withFeature = chains.filter((chain) => hasFeature(chain, feature))
-  if (withFeature.length === 0) return 'off'
-  if (withFeature.length === chains.length) return 'global'
+  if (withFeature.length === 0) {
+    return 'off'
+  }
+  if (withFeature.length === chains.length) {
+    return 'global'
+  }
   return withFeature
 }
 

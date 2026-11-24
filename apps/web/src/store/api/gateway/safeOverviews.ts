@@ -35,9 +35,13 @@ const selectChains = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select
 
 // A cold load can ask for overviews before the chain configs arrive: wait for them (capped) to send the right trusted
 const waitForLoadingChains = async ({ dispatch, getState }: Pick<BaseQueryApi, 'dispatch' | 'getState'>) => {
-  if (selectChains(getState() as never).data) return
+  if (selectChains(getState() as never).data) {
+    return
+  }
   const running = dispatch(apiSliceWithChainsConfig.util.getRunningQueryThunk('getChainsConfigV2', CONFIG_SERVICE_KEY))
-  if (running) await Promise.race([running, delay(CHAINS_WAIT_CAP_MS)])
+  if (running) {
+    await Promise.race([running, delay(CHAINS_WAIT_CAP_MS)])
+  }
 }
 
 // `state` is untyped: RootState would be circular, as these endpoints are part of it. Flag overrides don't apply.
@@ -45,14 +49,18 @@ const getOverviewTrusted = (state: unknown, chainId: string): boolean => {
   const rootState = state as never
   const { data } = selectChains(rootState)
   const chain = data ? chainsAdapter.getSelectors().selectById(data, chainId) : undefined
-  if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) return false
+  if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) {
+    return false
+  }
   return isTrustedTokenList(chain, selectTokenList(rootState))
 }
 
 /** Whether any chain sends a token-list-dependent `trusted` with its overviews. */
 export const hasPortfolioSummariesChain = (state: unknown): boolean => {
   const { data } = selectChains(state as never)
-  if (!data) return false
+  if (!data) {
+    return false
+  }
   return chainsAdapter
     .getSelectors()
     .selectAll(data)

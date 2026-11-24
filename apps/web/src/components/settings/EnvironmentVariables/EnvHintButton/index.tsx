@@ -34,7 +34,9 @@ const EnvHintButton = ({ chainId: chainIdProp, className }: EnvHintButtonProps =
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== 'Enter' && e.key !== ' ') return
+    if (e.key !== 'Enter' && e.key !== ' ') {
+      return
+    }
     e.stopPropagation()
     e.preventDefault()
     navigate()

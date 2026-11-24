@@ -35,7 +35,9 @@ export const useSpendingLimitSafeAccounts = () => {
   const eligible = useEligibleSafeAccounts()
   const { creatable, indexed, isLoading: isChainsLoading } = useSpendingLimitChainSets()
   const accounts = useMemo(() => {
-    if (isChainsLoading) return []
+    if (isChainsLoading) {
+      return []
+    }
     const marked = markSafeAccountsOffChains(eligible.accounts, creatable, 'no-spending-limits')
     return markSafeAccountsOffChains(marked, indexed, 'unsupported-chain')
   }, [eligible.accounts, creatable, indexed, isChainsLoading])

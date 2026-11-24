@@ -20,8 +20,12 @@ export const seatsTooltip = (tierName: string | undefined, quota: number | null 
   `${tierName ? `Your ${tierName} plan` : 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
 export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefined => {
-  if (!plan) return undefined
-  if (plan.status === 'active') return { label: 'Active', variant: 'brand' }
+  if (!plan) {
+    return undefined
+  }
+  if (plan.status === 'active') {
+    return { label: 'Active', variant: 'brand' }
+  }
   const endingSoon = plan.daysLeft !== null && plan.daysLeft <= TRIAL_ENDING_SOON_DAYS
   return {
     label: trialLabel(plan.daysLeft, Number.POSITIVE_INFINITY),

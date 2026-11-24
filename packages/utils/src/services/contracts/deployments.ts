@@ -88,7 +88,9 @@ export const getCanonicalOrFirstAddress = (
   deployment: SingletonDeploymentV2 | undefined,
   chainId: string,
 ): string | undefined => {
-  if (!deployment) return undefined
+  if (!deployment) {
+    return undefined
+  }
 
   if (hasCanonicalDeployment(deployment, chainId)) {
     return deployment.deployments.canonical?.address
@@ -114,7 +116,9 @@ export const getChainAgnosticAddress = (
   chainId: string,
   deploymentType: DeploymentType = 'canonical',
 ): string | undefined => {
-  if (!deployment) return undefined
+  if (!deployment) {
+    return undefined
+  }
 
   const deploymentTypeAddress = deployment.deployments?.[deploymentType]?.address
   const networkAddresses = toNetworkAddressList(deployment.networkAddresses?.[chainId] ?? [])
@@ -241,7 +245,9 @@ export const getSafeToL2SetupVersion = (safeVersion: string): SafeToL2SetupVersi
  * recognise multichain creations regardless of the Safe version they were built at.
  */
 export const getSafeToL2SetupVersionByAddress = (address: string | undefined): SafeToL2SetupVersion | undefined => {
-  if (!address) return undefined
+  if (!address) {
+    return undefined
+  }
   return SAFE_TO_L2_SETUP_VERSIONS.find((version) =>
     sameAddress(getSafeToL2SetupDeployment({ version })?.defaultAddress, address),
   )
@@ -371,9 +377,13 @@ export const isEraVmChain = (chainId: string, version: SafeState['version']): bo
   const l1 = getSafeSingletonDeployments({ version: safeVersion })
 
   return [l2, l1].some((deployment) => {
-    if (!deployment) return false
+    if (!deployment) {
+      return false
+    }
     const zksyncAddress = deployment.deployments?.zksync?.address
-    if (!zksyncAddress) return false
+    if (!zksyncAddress) {
+      return false
+    }
     const networkAddresses = toNetworkAddressList(deployment.networkAddresses?.[chainId] ?? [])
     return networkAddresses.some((networkAddress) => sameAddress(networkAddress, zksyncAddress))
   })
@@ -390,8 +400,12 @@ export const isCanonicalDeployment = (
   chainId: string,
   version: SafeState['version'],
 ): boolean => {
-  if (!implementationAddress) return false
-  if (!isEraVmChain(chainId, version)) return false
+  if (!implementationAddress) {
+    return false
+  }
+  if (!isEraVmChain(chainId, version)) {
+    return false
+  }
 
   const [safeVersion] = (version ?? '1.3.0').split('+')
 
@@ -452,7 +466,9 @@ const BASE_DEPLOYMENT_GETTERS: Record<AuxiliaryContractField, DeploymentGetter> 
 const CHAIN_AGNOSTIC_VERSIONS = '>=1.4.1'
 
 export const isChainAgnosticVersion = (version: string | null | undefined): boolean => {
-  if (!version) return false
+  if (!version) {
+    return false
+  }
   const [cleanVersion] = version.split('+')
   return semverSatisfies(cleanVersion, CHAIN_AGNOSTIC_VERSIONS)
 }
@@ -496,7 +512,9 @@ export const getDeploymentTypeForMasterCopy = (
   version: string,
   defaults: MasterCopyFlavour = { deploymentType: 'canonical', isL1: false },
 ): MasterCopyFlavour => {
-  if (!implementation) return defaults
+  if (!implementation) {
+    return defaults
+  }
   const [cleanVersion] = version.split('+')
 
   const tables: Array<{ getter: DeploymentGetter; isL1: boolean }> = [
@@ -506,7 +524,9 @@ export const getDeploymentTypeForMasterCopy = (
 
   for (const { getter, isL1 } of tables) {
     const deployment = getter({ version: cleanVersion })
-    if (!deployment?.deployments) continue
+    if (!deployment?.deployments) {
+      continue
+    }
     const { canonical, zksync, eip155 } = deployment.deployments
     if (zksync?.address && sameAddress(implementation, zksync.address)) {
       return { deploymentType: 'zksync', isL1 }

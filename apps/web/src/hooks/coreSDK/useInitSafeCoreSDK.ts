@@ -48,11 +48,15 @@ export const useInitSafeCoreSDK = () => {
       isZkChain: chain?.zk,
     })
       .then((safeSDK) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         setSafeSDK(safeSDK)
       })
       .catch((_e) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
 
         // Leaving the previous SDK in the store would silently serve a stale
         // instance (e.g. a counterfactual one after the Safe was deployed).

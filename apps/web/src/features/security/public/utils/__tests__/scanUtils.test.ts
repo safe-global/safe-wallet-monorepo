@@ -122,7 +122,9 @@ describe('computeSummary', () => {
 
   it('computes grade Low for >= 83% clear ratio', () => {
     const results: Record<string, ScanResult> = {}
-    for (let i = 0; i < 6; i++) results[`clear${i}`] = makeScanResult({ status: 'clear' })
+    for (let i = 0; i < 6; i++) {
+      results[`clear${i}`] = makeScanResult({ status: 'clear' })
+    }
     results.issue = makeScanResult({ status: 'issue', severity: 'High' })
     // 6/7 = 85.7% → Low
     expect(computeSummary(results)!.grade).toBe('Low')
@@ -151,7 +153,9 @@ describe('computeSummary', () => {
 
   it('computes grade Critical for < 17% clear ratio', () => {
     const results: Record<string, ScanResult> = {}
-    for (let i = 0; i < 7; i++) results[`issue${i}`] = makeScanResult({ status: 'issue', severity: 'High' })
+    for (let i = 0; i < 7; i++) {
+      results[`issue${i}`] = makeScanResult({ status: 'issue', severity: 'High' })
+    }
     // 0/7 = 0% → Critical
     expect(computeSummary(results)!.grade).toBe('Critical')
   })

@@ -52,10 +52,16 @@ const SelectSafeModal = () => {
   const isSwapAction = actionType === ESafeAction.Swap
   const getSwapDisabledTooltip = useCallback(
     (safe: SafeItem): string | undefined => {
-      if (!isSwapAction) return undefined
+      if (!isSwapAction) {
+        return undefined
+      }
       const chain = chains.find((c) => c.chainId === safe.chainId)
-      if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)) return SWAP_DISABLED_TOOLTIP
-      if (undeployedSafes[safe.chainId]?.[safe.address]) return SWAP_DISABLED_CF_TOOLTIP
+      if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)) {
+        return SWAP_DISABLED_TOOLTIP
+      }
+      if (undeployedSafes[safe.chainId]?.[safe.address]) {
+        return SWAP_DISABLED_CF_TOOLTIP
+      }
       return undefined
     },
     [isSwapAction, chains, undeployedSafes],

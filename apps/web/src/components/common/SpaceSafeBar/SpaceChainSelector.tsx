@@ -79,10 +79,14 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
     setAddNetworkChainId(undefined)
   }, [])
 
-  if (!isHydrated) return <SpaceChainSelectorSkeleton />
+  if (!isHydrated) {
+    return <SpaceChainSelectorSkeleton />
+  }
 
   if (!deployedChains.length) {
-    if (isLoading) return <SpaceChainSelectorSkeleton />
+    if (isLoading) {
+      return <SpaceChainSelectorSkeleton />
+    }
     return null
   }
 

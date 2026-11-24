@@ -11,7 +11,9 @@ const setup = (initialProps: Props) => {
     { initialProps },
   )
   const tick = (times = 1) => {
-    for (let i = 0; i < times; i++) act(() => jest.advanceTimersByTime(POLLING_INTERVAL))
+    for (let i = 0; i < times; i++) {
+      act(() => jest.advanceTimersByTime(POLLING_INTERVAL))
+    }
   }
   return { ...hook, refetch, tick }
 }

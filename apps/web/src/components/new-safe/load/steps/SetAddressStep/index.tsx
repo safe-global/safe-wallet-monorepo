@@ -99,19 +99,25 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
   }
 
   const onFormSubmit = handleSubmit((data: FormData) => {
-    if (similar) return setPendingData(data)
+    if (similar) {
+      return setPendingData(data)
+    }
     goToNextStep(data)
   })
 
   const onConfirmLookalike = () => {
-    if (!pendingData) return
+    if (!pendingData) {
+      return
+    }
     trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
     setPendingData(undefined)
     goToNextStep(pendingData)
   }
 
   const onCancelLookalike = () => {
-    if (!pendingData) return
+    if (!pendingData) {
+      return
+    }
     trackEvent(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
       ...lookalikeTracking,
       [MixpanelEventParams.DISMISS_ACTION]: DismissAction.CANCEL,

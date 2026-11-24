@@ -32,9 +32,15 @@ describe('ProposerDetails', () => {
 
   it('should, when opened, name the proposer, the Safe it applies to and the owner who granted it', () => {
     mockUseAddressBookItem.mockImplementation((address: string) => {
-      if (address === MOCK_ADDRESSES.bob) return { name: 'Robert' }
-      if (address === MOCK_SAFES.treasury.address) return { name: 'Treasury' }
-      if (address === MOCK_ADDRESSES.alice) return { name: 'Alice' }
+      if (address === MOCK_ADDRESSES.bob) {
+        return { name: 'Robert' }
+      }
+      if (address === MOCK_SAFES.treasury.address) {
+        return { name: 'Treasury' }
+      }
+      if (address === MOCK_ADDRESSES.alice) {
+        return { name: 'Alice' }
+      }
       return undefined
     })
 

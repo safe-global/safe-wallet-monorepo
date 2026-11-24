@@ -16,7 +16,9 @@ export const useSafeVersions = (
   const accountsKey = accounts.map((account) => account.id).join(',')
 
   const [versions, , isLoading] = useAsync<SafeVersions>(() => {
-    if (accounts.length === 0) return
+    if (accounts.length === 0) {
+      return
+    }
 
     return Promise.all(
       accounts.map(async ({ id, chainId, address }) => {

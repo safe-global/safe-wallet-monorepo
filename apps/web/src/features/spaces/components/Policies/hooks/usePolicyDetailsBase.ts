@@ -38,7 +38,9 @@ export const usePolicyDetailsBase = (
 
     for (const address of namedAddresses) {
       const name = addressBook.getFromSpace(address, chainId)?.name
-      if (name) named.push([address, name])
+      if (name) {
+        named.push([address, name])
+      }
     }
 
     return Object.fromEntries(named)

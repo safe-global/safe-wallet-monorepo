@@ -17,6 +17,8 @@ const decodeApprovedHash = (hexData: string): string | undefined => {
 
 export const useSignedHash = (txData?: TransactionData | null): string | undefined =>
   useMemo(() => {
-    if (!txData?.hexData || !isOnChainConfirmationTxData(txData)) return undefined
+    if (!txData?.hexData || !isOnChainConfirmationTxData(txData)) {
+      return undefined
+    }
     return decodeApprovedHash(txData.hexData)
   }, [txData])

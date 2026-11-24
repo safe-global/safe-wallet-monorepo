@@ -61,7 +61,9 @@ export const verifyAttestation = (input: AttestationInput): boolean => {
     const z = BigInt(attestation.z)
     // FROST.sol enforces `z < N`; noble currently rejects out-of-range scalars
     // too, but that must not be inherited silently — it guards malleable `z`.
-    if (z < 0n || z >= N) return false
+    if (z < 0n || z >= N) {
+      return false
+    }
 
     const groupPublicKey = toPoint(BigInt(groupKey.x), BigInt(groupKey.y))
     const groupCommitment = toPoint(BigInt(attestation.r.x), BigInt(attestation.r.y))

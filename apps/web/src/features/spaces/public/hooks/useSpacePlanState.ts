@@ -6,6 +6,8 @@ import { useSpacePlan } from '../../hooks/useSpacePlan'
 export const useSpacePlanState = (spaceId: string | null) => {
   const { status, tierName, isLoading, isUninitialized } = useSpacePlan(spaceId)
   const isAdmin = useIsAdmin(spaceId ?? undefined)
-  if (!spaceId || isLoading || isUninitialized) return null
+  if (!spaceId || isLoading || isUninitialized) {
+    return null
+  }
   return { status: toPlanStatus(status), tier: tierName?.toLowerCase() ?? 'none', role: isAdmin ? 'admin' : 'member' }
 }

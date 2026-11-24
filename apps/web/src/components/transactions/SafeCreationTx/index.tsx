@@ -14,7 +14,9 @@ type SafeCreationTxProps = {
 }
 
 const SafeCreationTx = ({ txSummary }: SafeCreationTxProps) => {
-  if (!isCreationTxInfo(txSummary.txInfo)) return null
+  if (!isCreationTxInfo(txSummary.txInfo)) {
+    return null
+  }
 
   const timestamp = txSummary.timestamp
   const { creator, factory, implementation, transactionHash } = txSummary.txInfo

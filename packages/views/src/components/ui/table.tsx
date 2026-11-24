@@ -97,8 +97,12 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
  * reflows as it appears. Put `group/sort` on the control that wraps the label and this icon.
  */
 function TableSortIcon({ direction }: { direction?: 'asc' | 'desc' }) {
-  if (direction === 'asc') return <ArrowUp className="size-3.5" aria-hidden />
-  if (direction === 'desc') return <ArrowDown className="size-3.5" aria-hidden />
+  if (direction === 'asc') {
+    return <ArrowUp className="size-3.5" aria-hidden />
+  }
+  if (direction === 'desc') {
+    return <ArrowDown className="size-3.5" aria-hidden />
+  }
   return (
     <ArrowUpDown
       className="size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"

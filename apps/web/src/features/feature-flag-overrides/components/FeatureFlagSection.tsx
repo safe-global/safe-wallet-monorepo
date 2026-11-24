@@ -14,7 +14,9 @@ export const FeatureFlagSection = ({
   rows: FeatureFlagRowData[]
   valueLabel: string
 }): ReactElement | null => {
-  if (rows.length === 0) return null
+  if (rows.length === 0) {
+    return null
+  }
   return (
     <section className="mb-6">
       <div className="mb-2 flex items-center gap-2 px-0.5">

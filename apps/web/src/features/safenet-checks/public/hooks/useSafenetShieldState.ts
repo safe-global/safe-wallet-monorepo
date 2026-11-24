@@ -33,7 +33,9 @@ type ShieldCheck = Pick<SafenetCheckView, 'publicStatus' | 'snapshot'>
 
 // A risk reads as severe as the rules sentinels cited; without them it stays a threat.
 const riskOf = ({ publicStatus, snapshot }: ShieldCheck): SafenetShieldState['risk'] => {
-  if (publicStatus !== CheckStatus.MALICIOUS) return undefined
+  if (publicStatus !== CheckStatus.MALICIOUS) {
+    return undefined
+  }
   return RISK[snapshot ? rejectionSeverity(summariseRejection(snapshot.events)) : Severity.CRITICAL]
 }
 
@@ -61,8 +63,12 @@ export const useSafenetShieldState = ({
   const isOpen = enabled && (!isSafePro || hasProFeatures)
   const { safeTxHash, check } = useFlowSafenetCheck(isOpen)
 
-  if (!isOpen) return enabled ? LOCKED : OFF
-  if (!safeTxHash) return OFF
+  if (!isOpen) {
+    return enabled ? LOCKED : OFF
+  }
+  if (!safeTxHash) {
+    return OFF
+  }
 
   return fromCheck(check)
 }

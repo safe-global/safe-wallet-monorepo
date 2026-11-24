@@ -110,7 +110,9 @@ export const EVENT_DISPATCH: readonly TopicDispatch[] = [
 /** Compute an event's topic0 from its interface + name. */
 export const topicHashOf = (dispatch: Pick<TopicDispatch, 'iface' | 'eventName'>): string => {
   const fragment = dispatch.iface.getEvent(dispatch.eventName)
-  if (!fragment) throw new Error(`unknown event ${dispatch.eventName}`)
+  if (!fragment) {
+    throw new Error(`unknown event ${dispatch.eventName}`)
+  }
   return fragment.topicHash
 }
 

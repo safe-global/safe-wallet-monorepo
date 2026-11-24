@@ -103,7 +103,9 @@ const Policies = ({
   }, [])
 
   const closeDetails = useCallback(() => {
-    if (openPolicy) dismissNewAllowlist(openPolicy.id)
+    if (openPolicy) {
+      dismissNewAllowlist(openPolicy.id)
+    }
     setOpenPolicy(null)
   }, [openPolicy, dismissNewAllowlist])
 
@@ -126,7 +128,9 @@ const Policies = ({
 
   const enableSpendingLimitModule = useCallback(
     ({ safe, enforcement, data }: Pick<SpendingLimitPolicy, 'safe' | 'enforcement' | 'data'>) => {
-      if (enforcement.via !== 'module') return
+      if (enforcement.via !== 'module') {
+        return
+      }
       setTxFlow(
         <EnableSpendingLimitModuleFlow
           safe={safe}
@@ -164,7 +168,9 @@ const Policies = ({
           return
 
         case 'recipient-allowlist':
-          if (canCreateAllowlist) allowlistIntro.request()
+          if (canCreateAllowlist) {
+            allowlistIntro.request()
+          }
           return
 
         // Not offered yet: ADD_POLICY_OPTIONS leaves it out.

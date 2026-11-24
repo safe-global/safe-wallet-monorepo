@@ -19,7 +19,9 @@ export const useIsAllowlistActiveInSpace = (spaceId?: string): boolean | undefin
     { skip: !isSignedIn || !id || hasExperimentalFlag === false },
   )
 
-  if (hasExperimentalFlag === undefined || (isFetching && space === undefined)) return undefined
+  if (hasExperimentalFlag === undefined || (isFetching && space === undefined)) {
+    return undefined
+  }
 
   return hasExperimentalFlag && isAvailable && isAllowlistOptedIn(space)
 }

@@ -96,7 +96,9 @@ export const bandHeaderAt = (
   colSpan: number,
 ): ReactElement | null => {
   const clusterId = clusterIdAt(index)
-  if (!clusterId) return null
+  if (!clusterId) {
+    return null
+  }
   const previous = index > 0 ? clusterIdAt(index - 1) : undefined
   return clusterId === previous ? null : <SimilarityBandHeader key={`band-${clusterId}`} colSpan={colSpan} />
 }

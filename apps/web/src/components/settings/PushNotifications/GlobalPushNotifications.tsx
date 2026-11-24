@@ -423,7 +423,9 @@ export const GlobalPushNotifications = (): ReactElement | null => {
         </ListItem>
 
         {Object.entries(notifiableSafes).map(([chainId, safeAddresses], i, arr) => {
-          if (safeAddresses.length === 0) return
+          if (safeAddresses.length === 0) {
+            return
+          }
           const chain = chains.configs?.find((chain) => chain.chainId === chainId)
 
           const isChainSelected = safeAddresses.every((address) => {

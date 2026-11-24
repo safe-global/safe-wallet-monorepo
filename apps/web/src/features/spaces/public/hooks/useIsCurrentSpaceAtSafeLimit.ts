@@ -15,7 +15,9 @@ export const useSpaceSafeCount = (spaceId: string | null): number | undefined =>
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   const { data: spaces } = useSpacesGetV1Query(undefined, { skip: !isSiweAuthenticated })
 
-  if (spaceId === null) return undefined
+  if (spaceId === null) {
+    return undefined
+  }
 
   return spaces?.find((s) => s.uuid === spaceId)?.safeCount
 }

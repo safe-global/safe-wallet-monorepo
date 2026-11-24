@@ -52,7 +52,9 @@ describe('useNestedSafeGrantor', () => {
 
   it('should treat a delegator whose code cannot be read as an EOA', async () => {
     mockIsSmartContractWallet.mockImplementation(async (_chainId: string, address: string) => {
-      if (address === MOCK_ADDRESSES.alice) throw new Error('RPC down')
+      if (address === MOCK_ADDRESSES.alice) {
+        throw new Error('RPC down')
+      }
       return address === PARENT_SAFE
     })
 

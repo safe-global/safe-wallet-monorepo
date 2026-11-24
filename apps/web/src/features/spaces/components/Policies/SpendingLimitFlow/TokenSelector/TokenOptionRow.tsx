@@ -11,8 +11,12 @@ import {
 
 /** Shown under the symbol: the name when both exist, the address when only one does. */
 const secondaryLine = (option: TokenOption): string => {
-  if (option.symbol && option.name) return option.name
-  if (option.symbol || option.name) return shortenAddress(option.address)
+  if (option.symbol && option.name) {
+    return option.name
+  }
+  if (option.symbol || option.name) {
+    return shortenAddress(option.address)
+  }
   return ''
 }
 

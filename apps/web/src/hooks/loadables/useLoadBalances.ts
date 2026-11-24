@@ -20,8 +20,12 @@ export const useTokenListSetting = (): boolean | undefined => {
   const settings = useAppSelector(selectSettings)
 
   return useMemo(() => {
-    if (hasPortfolioFeature === false) return false
-    if (settings.tokenList === TOKEN_LISTS.ALL) return false
+    if (hasPortfolioFeature === false) {
+      return false
+    }
+    if (settings.tokenList === TOKEN_LISTS.ALL) {
+      return false
+    }
     return chain ? isTrustedTokenList(chain, settings.tokenList) : undefined
   }, [chain, hasPortfolioFeature, settings.tokenList])
 }

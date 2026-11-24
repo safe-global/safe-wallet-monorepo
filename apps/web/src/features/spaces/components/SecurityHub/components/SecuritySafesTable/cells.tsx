@@ -14,7 +14,9 @@ type ScoreCellProps = {
 /** Numeric score (0–100) out of 100. */
 export const ScoreCell = ({ summary, isScanning }: ScoreCellProps) => {
   if (!summary) {
-    if (isScanning) return <Skeleton className="h-5 w-[60px]" />
+    if (isScanning) {
+      return <Skeleton className="h-5 w-[60px]" />
+    }
     return <span className="text-sm text-muted-foreground">{DASH}</span>
   }
   const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0

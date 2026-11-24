@@ -16,7 +16,9 @@ export const bandGroupsForList = (items: Addressed[], groupIdByAddress: Map<stri
   const result = new Map<string, string>()
   for (const address of new Set(items.map((item) => item.address.toLowerCase()))) {
     const group = groupIdByAddress.get(address)
-    if (group) result.set(address, group)
+    if (group) {
+      result.set(address, group)
+    }
   }
   return result
 }
@@ -42,7 +44,9 @@ export const buildSimilarWarnings = (
   const byCluster = new Map<string, { trusted: string[]; owned: string[] }>()
   for (const address of new Set([...trustedSet, ...ownedSet])) {
     const group = groupIdByAddress.get(address)
-    if (!group) continue
+    if (!group) {
+      continue
+    }
     const entry = byCluster.get(group) ?? { trusted: [], owned: [] }
     ;(trustedSet.has(address) ? entry.trusted : entry.owned).push(address)
     byCluster.set(group, entry)
@@ -51,7 +55,9 @@ export const buildSimilarWarnings = (
   const result = new Map<string, SimilarWarning>()
   for (const { trusted, owned } of byCluster.values()) {
     // Cross-list only: the cluster must reach into both sections.
-    if (trusted.length === 0 || owned.length === 0) continue
+    if (trusted.length === 0 || owned.length === 0) {
+      continue
+    }
     for (const address of [...trusted, ...owned]) {
       result.set(address, {
         trusted: trusted.filter((peer) => peer !== address).map(toPeer),

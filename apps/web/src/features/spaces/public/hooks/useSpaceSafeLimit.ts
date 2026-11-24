@@ -10,7 +10,9 @@ export const useSpaceSafeLimit = (spaceId?: string | null): SpaceSafeLimit => {
   const isSafePro = useIsSafeProEnabled()
   const { seats, isLoading, isError, refetch } = useSpaceEntitlements(spaceId)
 
-  if (!isSafePro) return { limit: SAFE_ACCOUNTS_LIMIT, isLoading: false, isError: false, retry: refetch }
+  if (!isSafePro) {
+    return { limit: SAFE_ACCOUNTS_LIMIT, isLoading: false, isError: false, retry: refetch }
+  }
 
   return { limit: seats ? seats.quota : undefined, isLoading, isError, retry: refetch }
 }

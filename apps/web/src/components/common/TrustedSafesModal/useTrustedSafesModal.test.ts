@@ -501,8 +501,12 @@ describe('useTrustedSafesModal', () => {
     // Selector-aware mock so the global order preference can be varied per test.
     const mockOrderBy = (orderBy: OrderByOption) => {
       ;(store.useAppSelector as jest.Mock).mockImplementation((selector: unknown) => {
-        if (selector === selectOrderByPreference) return { orderBy }
-        if (selector === selectAllAddedSafes) return {}
+        if (selector === selectOrderByPreference) {
+          return { orderBy }
+        }
+        if (selector === selectAllAddedSafes) {
+          return {}
+        }
         return undefined
       })
     }

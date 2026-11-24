@@ -66,7 +66,9 @@ const AccountHeader = (): ReactElement => {
     router.push({ pathname: AppRoutes.settings.setup, query: router.query })
   }, [router])
 
-  if (isLoading) return <SafeAccountHeaderSkeleton />
+  if (isLoading) {
+    return <SafeAccountHeaderSkeleton />
+  }
 
   return (
     <>

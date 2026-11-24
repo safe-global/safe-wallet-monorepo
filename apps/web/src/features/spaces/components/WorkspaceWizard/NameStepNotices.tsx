@@ -65,7 +65,9 @@ const NameStepNotices = ({ onStartOver }: { onStartOver: () => void }): ReactEle
   }
 
   // Once answered, the offer is gone: the user chose to continue or to start over.
-  if (!isResumeOffered) return null
+  if (!isResumeOffered) {
+    return null
+  }
 
   const unfinishedSetupNotice = (spaceId: string, name: string) => (
     <WizardNotice

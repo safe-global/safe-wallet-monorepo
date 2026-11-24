@@ -40,17 +40,19 @@ const SafeAppsPermissions = (): ReactElement => {
 
   const updateAllPermissions = useCallback(
     (origin: string, selected: boolean) => {
-      if (safePermissions[origin]?.length)
+      if (safePermissions[origin]?.length) {
         updateSafePermission(
           origin,
           safePermissions[origin].map(({ parentCapability }) => ({ capability: parentCapability, selected })),
         )
+      }
 
-      if (browserPermissions[origin]?.length)
+      if (browserPermissions[origin]?.length) {
         updateBrowserPermission(
           origin,
           browserPermissions[origin].map(({ feature }) => ({ feature, selected })),
         )
+      }
     },
     [browserPermissions, safePermissions, updateBrowserPermission, updateSafePermission],
   )

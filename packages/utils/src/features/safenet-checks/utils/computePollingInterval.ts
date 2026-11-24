@@ -41,7 +41,9 @@ type PollingInput = {
 // A stamp in the future is clock skew, not a young check: without the lower
 // bound the window would stretch by the whole skew.
 const isWithinGrace = (anchorMs: number | null | undefined, nowMs: number): boolean => {
-  if (anchorMs == null) return false
+  if (anchorMs == null) {
+    return false
+  }
   const age = nowMs - anchorMs
   return age >= 0 && age < UNAVAILABLE_GRACE_MS
 }
@@ -64,10 +66,14 @@ export const computePollingInterval = ({
   attestedAtMs,
   nowMs,
 }: PollingInput): number => {
-  if (status === CheckStatus.MALICIOUS || status === CheckStatus.VERIFICATION_FAILED) return 0
+  if (status === CheckStatus.MALICIOUS || status === CheckStatus.VERIFICATION_FAILED) {
+    return 0
+  }
 
   // The dispute deadline is ~28 days out, so the deadline cadence below would poll at 6s the whole time.
-  if (status === CheckStatus.DISPUTED) return DISPUTED_POLL_MS
+  if (status === CheckStatus.DISPUTED) {
+    return DISPUTED_POLL_MS
+  }
 
   // ponytail: BENIGN keeps a slow poll for the arbitration window. The merge
   // permits BENIGN → MALICIOUS precisely because arbitration can still reject a
@@ -75,7 +81,9 @@ export const computePollingInterval = ({
   // Ceiling: the window length is a guess, so an arbitration landing later than
   // it is still only picked up by a page reload.
   if (status === CheckStatus.BENIGN) {
-    if (attestedAtMs == null || nowMs === undefined) return 0
+    if (attestedAtMs == null || nowMs === undefined) {
+      return 0
+    }
     const age = nowMs - attestedAtMs
     return age >= 0 && age < ARBITRATION_WINDOW_MS ? ARBITRATION_POLL_MS : 0
   }
@@ -89,7 +97,9 @@ export const computePollingInterval = ({
   // submission date, so it cannot fire today.) Polling on past the window would
   // put every check-less transaction on a public RPC forever.
   if (status === CheckStatus.UNAVAILABLE) {
-    if (nowMs === undefined) return 0
+    if (nowMs === undefined) {
+      return 0
+    }
     const isYoung = [submittedAtMs, requestedAtMs].some((anchorMs) => isWithinGrace(anchorMs, nowMs))
     return isYoung ? UNAVAILABLE_GRACE_POLL_MS : 0
   }
@@ -97,7 +107,11 @@ export const computePollingInterval = ({
   const head = headBlock !== null ? BigInt(headBlock) : null
   const deadline = deadlineBlock !== null ? BigInt(deadlineBlock) : null
 
-  if (deadline === null || head === null || head <= deadline) return POLL_INTERVAL_FAST_MS
-  if (head <= deadline + BigInt(LATE_WINDOW_BLOCKS)) return POLL_INTERVAL_LATE_MS
+  if (deadline === null || head === null || head <= deadline) {
+    return POLL_INTERVAL_FAST_MS
+  }
+  if (head <= deadline + BigInt(LATE_WINDOW_BLOCKS)) {
+    return POLL_INTERVAL_LATE_MS
+  }
   return 0
 }

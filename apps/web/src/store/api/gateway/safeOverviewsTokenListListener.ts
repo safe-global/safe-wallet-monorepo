@@ -8,7 +8,9 @@ export const safeOverviewsTokenListListener = (listenerMiddleware: typeof listen
   listenerMiddleware.startListening({
     actionCreator: setTokenList,
     effect: (_action, listenerApi) => {
-      if (!hasPortfolioSummariesChain(listenerApi.getState())) return
+      if (!hasPortfolioSummariesChain(listenerApi.getState())) {
+        return
+      }
       listenerApi.dispatch(gatewayApi.util.invalidateTags(['SafeOverviews']))
     },
   })

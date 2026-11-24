@@ -31,7 +31,9 @@ const mapLocalToContacts = (addressBook: AddressBook, chainId: string): Extended
 }
 
 const mapSpaceToContacts = (addressBook: SpaceAddressBookItemDto[]): ExtendedContact[] => {
-  if (!addressBook) return []
+  if (!addressBook) {
+    return []
+  }
 
   return addressBook.map<ExtendedContact>((entry) => ({
     ...entry,
@@ -117,7 +119,9 @@ export const useAddressBookItem = (address: string, chainId: string | undefined)
   const source = useAddressBookSource()
 
   return useMemo<ExtendedContact | undefined>(() => {
-    if (!chainId) return undefined
+    if (!chainId) {
+      return undefined
+    }
 
     if (source === 'localOnly') {
       return getFromLocal(address, chainId)
@@ -171,12 +175,20 @@ export const useSafeNameResolver = (): ((
 
   return useCallback(
     (address, chainId, preferredName) => {
-      if (preferredName) return preferredName
-      if (!chainId) return ''
+      if (preferredName) {
+        return preferredName
+      }
+      if (!chainId) {
+        return ''
+      }
       const localName = localByKey.get(addressBookKey(address, chainId))
-      if (source === 'localOnly') return localName ?? ''
+      if (source === 'localOnly') {
+        return localName ?? ''
+      }
       const item = get(address, chainId)
-      if (source === 'spaceOnly') return item?.source === ContactSource.space ? (item.name ?? '') : ''
+      if (source === 'spaceOnly') {
+        return item?.source === ContactSource.space ? (item.name ?? '') : ''
+      }
       // merged: space (cross-chain) takes priority, then any chain's local
       return item?.name ?? localName ?? ''
     },

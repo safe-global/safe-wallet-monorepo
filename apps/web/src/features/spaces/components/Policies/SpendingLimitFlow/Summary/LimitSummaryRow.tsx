@@ -25,14 +25,18 @@ type DisplayAmount = { value: string; decimals?: number }
  * `safeParseUnits` logs every failed parse, and an over-precise amount is expected here, so it is ruled out first.
  */
 const toDisplayAmount = (amount: string, decimals?: number): DisplayAmount => {
-  if (decimals === undefined || validateDecimalLength(amount, decimals)) return { value: amount }
+  if (decimals === undefined || validateDecimalLength(amount, decimals)) {
+    return { value: amount }
+  }
   const raw = safeParseUnits(amount, decimals)
   return raw === undefined ? { value: amount } : { value: raw.toString(), decimals }
 }
 
 /** `setAllowance` keeps no spend, so any change to a partly used limit hands the whole new amount back at once. */
 export const describeSpendReset = (limit: LimitSummary): string | undefined => {
-  if (limit.change !== 'changed' || !limit.spent) return undefined
+  if (limit.change !== 'changed' || !limit.spent) {
+    return undefined
+  }
 
   const spent = safeFormatUnits(limit.spent, limit.token.decimals)
   return `The ${spent} ${limit.token.symbol} already spent this period is reset: the full ${limit.amount} ${limit.token.symbol} becomes available as soon as this executes.`

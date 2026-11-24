@@ -42,7 +42,9 @@ const useReportDrawer = ({ security, safes, overviewMap }: UseReportDrawerParams
   const closeReport = useCallback(() => setSelectedSafe(null), [])
 
   const selectedEntry = useMemo(() => {
-    if (!selectedSafe) return undefined
+    if (!selectedSafe) {
+      return undefined
+    }
     // Multichain Safes share the same address across chains, so a plain address match
     // can return a row whose chainEntries don't include the selected chain.
     return safes.find(

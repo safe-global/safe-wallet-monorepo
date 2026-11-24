@@ -73,7 +73,9 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
   )
 
   const [predictedSafeAddress] = useAsync(async () => {
-    if (!provider || !newSafeProps) return
+    if (!provider || !newSafeProps) {
+      return
+    }
 
     const replayedSafeWithNonce = { ...newSafeProps, saltNonce: selectedSaltNonce.toString() }
 

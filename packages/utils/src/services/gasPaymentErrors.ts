@@ -47,9 +47,13 @@ export class RelayerUnavailableError extends Error {
 }
 
 const getErrorBody = (thrown: unknown): { status: unknown; data: Record<string, unknown> } | undefined => {
-  if (typeof thrown !== 'object' || thrown === null || !('data' in thrown)) return undefined
+  if (typeof thrown !== 'object' || thrown === null || !('data' in thrown)) {
+    return undefined
+  }
   const { status, data } = thrown as { status?: unknown; data?: unknown }
-  if (typeof data !== 'object' || data === null) return undefined
+  if (typeof data !== 'object' || data === null) {
+    return undefined
+  }
   return { status, data: data as Record<string, unknown> }
 }
 
@@ -58,7 +62,9 @@ const getMessage = (data: Record<string, unknown>, fallback: string): string =>
 
 export const getGasPaymentOptionUnavailableError = (thrown: unknown): GasPaymentOptionUnavailableError | undefined => {
   const body = getErrorBody(thrown)
-  if (body?.data.code !== GAS_PAYMENT_OPTION_UNAVAILABLE_CODE) return undefined
+  if (body?.data.code !== GAS_PAYMENT_OPTION_UNAVAILABLE_CODE) {
+    return undefined
+  }
   const { requested, reason, available } = body.data
 
   return new GasPaymentOptionUnavailableError(
@@ -71,12 +77,16 @@ export const getGasPaymentOptionUnavailableError = (thrown: unknown): GasPayment
 
 export const getRelayLimitReachedError = (thrown: unknown): RelayLimitReachedError | undefined => {
   const body = getErrorBody(thrown)
-  if (body?.status !== 429) return undefined
+  if (body?.status !== 429) {
+    return undefined
+  }
   return new RelayLimitReachedError(getMessage(body.data, 'Relay limit reached'))
 }
 
 export const getRelayerUnavailableError = (thrown: unknown): RelayerUnavailableError | undefined => {
   const body = getErrorBody(thrown)
-  if (body?.status !== 403) return undefined
+  if (body?.status !== 403) {
+    return undefined
+  }
   return new RelayerUnavailableError(getMessage(body.data, 'No relayer defined'))
 }

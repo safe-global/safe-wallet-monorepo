@@ -21,7 +21,9 @@ jest.mock('@/store/settingsSlice', () => ({
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
-    if (selector === 'selectCurrency') return mockCurrency
+    if (selector === 'selectCurrency') {
+      return mockCurrency
+    }
     return undefined
   },
 }))

@@ -33,14 +33,20 @@ const ReviewTokenTransfer = ({
       setNonce(txNonce)
     }
 
-    if (!balances) return
-    if (scope && !scope.sdk) return
+    if (!balances) {
+      return
+    }
+    if (scope && !scope.sdk) {
+      return
+    }
 
     const calls = recipients
       .map((recipient) => {
         const token = balances.items.find((item) => sameAddress(item.tokenInfo.address, recipient.tokenAddress))
 
-        if (!token) return
+        if (!token) {
+          return
+        }
 
         return createTokenTransferParams(
           recipient.recipient,

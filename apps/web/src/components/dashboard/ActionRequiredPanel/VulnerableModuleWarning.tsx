@@ -7,7 +7,9 @@ const VULNERABLE_MODULE_HELP_ARTICLE =
 
 // Critical dashboard card shown when the Safe is flagged by the Zodiac security-check.
 export const VulnerableModuleWarning = ({ isVulnerable }: { isVulnerable: boolean }): ReactElement | null => {
-  if (!isVulnerable) return null
+  if (!isVulnerable) {
+    return null
+  }
 
   return (
     <ActionCard

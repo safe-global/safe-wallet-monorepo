@@ -35,10 +35,14 @@ const useAddressPoisoningCheck = (address: string | undefined): SimilarSavedAddr
   const addressBooks = useAppSelector(selectAllAddressBooks)
 
   return useMemo(() => {
-    if (!isEnabled || !address) return undefined
+    if (!isEnabled || !address) {
+      return undefined
+    }
 
     const match = anchorIndex.query(address)
-    if (!match) return undefined
+    if (!match) {
+      return undefined
+    }
 
     const saved = `0x${match.anchor}`
     return {

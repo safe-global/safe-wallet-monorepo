@@ -29,8 +29,11 @@ const NameAccountCell = ({ address }: { address: string }) => {
   // Shown only while unfocused: the message takes the address line's place, so typing keeps the address visible.
   let error: string | undefined
   if (!focused) {
-    if (value !== '') error = nameError
-    else if (isTouched) error = 'Name is required'
+    if (value !== '') {
+      error = nameError
+    } else if (isTouched) {
+      error = 'Name is required'
+    }
   }
   const showInput = focused || Boolean(nameError)
   const startEditing = () => setFocused(true)

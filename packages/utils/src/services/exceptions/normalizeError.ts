@@ -69,7 +69,9 @@ const USER_OUTCOME_TYPES: ReadonlySet<ErrorType> = new Set([ErrorType.USER_REJEC
  * see errors outside the `normalizeError` pipeline (e.g. RUM auto-capture).
  */
 export const matchUserOutcome = (message: string | undefined): ErrorType | undefined => {
-  if (!message) return undefined
+  if (!message) {
+    return undefined
+  }
   const type = refineType(message)
   return type !== undefined && USER_OUTCOME_TYPES.has(type) ? type : undefined
 }
@@ -78,7 +80,9 @@ export const sanitizeErrorMessage = (message: string): string => message.replace
 
 const classifyByCode = (code: number): ErrorClassification => {
   const known = ERROR_CODE_MAP[code]
-  if (known) return known
+  if (known) {
+    return known
+  }
 
   if (!Number.isFinite(code) || code === 0) {
     return { domain: ErrorDomain.FRONTEND_EXCEPTION, type: ErrorType.UNKNOWN, layer: ErrorLayer.OFF_CHAIN }

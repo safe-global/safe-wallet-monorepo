@@ -26,11 +26,19 @@ const getEndpointName = ({ meta }: UnknownAction): string | undefined => {
 }
 
 export const isSessionForbiddenRejection = (action: UnknownAction, state: RootState): boolean => {
-  if (!action.type.startsWith(CGW_ACTION_PREFIX)) return false
-  if (!isAuthenticated(state)) return false
-  if (!isForbidden(action.payload) || isElevationRequiredError(action.payload)) return false
+  if (!action.type.startsWith(CGW_ACTION_PREFIX)) {
+    return false
+  }
+  if (!isAuthenticated(state)) {
+    return false
+  }
+  if (!isForbidden(action.payload) || isElevationRequiredError(action.payload)) {
+    return false
+  }
   const endpoint = getEndpointName(action)
-  if (endpoint && NON_SESSION_FORBIDDEN[endpoint]) return false
+  if (endpoint && NON_SESSION_FORBIDDEN[endpoint]) {
+    return false
+  }
   const url = getRequestUrl(action)
   return url !== undefined && isCredentialRoute(url)
 }
@@ -40,7 +48,9 @@ export const forbiddenSessionListener = (listenerMiddleware: typeof listenerMidd
   listenerMiddleware.startListening({
     matcher: isRejectedWithValue(),
     effect: async (action, { dispatch, getState, unsubscribe, subscribe }) => {
-      if (!isSessionForbiddenRejection(action, getState())) return
+      if (!isSessionForbiddenRejection(action, getState())) {
+        return
+      }
 
       unsubscribe()
       const probedSession = getState().auth.sessionExpiresAt
@@ -50,7 +60,9 @@ export const forbiddenSessionListener = (listenerMiddleware: typeof listenerMidd
         await probe.unwrap()
       } catch (error) {
         const isSameSession = getState().auth.sessionExpiresAt === probedSession
-        if (isForbidden(error) && isSameSession) dispatch(expireSession(window.location.pathname))
+        if (isForbidden(error) && isSameSession) {
+          dispatch(expireSession(window.location.pathname))
+        }
       } finally {
         probe.unsubscribe()
         dispatch(setSessionCheckPending(false))

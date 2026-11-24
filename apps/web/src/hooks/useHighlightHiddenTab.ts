@@ -4,7 +4,9 @@ const ALT_FAVICON = '/favicons/favicon-dot.ico'
 const TITLE_PREFIX = '‼️ '
 
 const setFavicon = (favicon: HTMLLinkElement | null, href: string) => {
-  if (favicon) favicon.href = href
+  if (favicon) {
+    favicon.href = href
+  }
 }
 
 const setDocumentTitle = (isPrefixed: boolean) => {

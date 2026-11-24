@@ -75,7 +75,9 @@ const Multisend = ({
     }
   }, [multiSendTransactions, isOpenMapUndefined])
 
-  if (!multiSendTransactions) return null
+  if (!multiSendTransactions) {
+    return null
+  }
 
   const actionItems =
     Array.isArray(multiSendTransactions) &&

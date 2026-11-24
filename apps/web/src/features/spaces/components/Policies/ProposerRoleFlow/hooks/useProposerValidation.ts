@@ -35,13 +35,19 @@ const validateAgainstPickedSafe = async (value: string, picked: PickedSafe): Pro
   const { safeAddress, owners, existingProposers, chainId, provider } = picked
 
   const isSafeItself = addressIsNotCurrentSafe(safeAddress, PROPOSER_IS_SAFE_ERROR)(value)
-  if (isSafeItself) return isSafeItself
+  if (isSafeItself) {
+    return isSafeItself
+  }
 
   const isOwner = addressIsNotOwner(owners, PROPOSER_IS_OWNER_ERROR)(value)
-  if (isOwner) return isOwner
+  if (isOwner) {
+    return isOwner
+  }
 
   const isExistingProposer = addressIsNotExistingProposer(existingProposers, PROPOSER_EXISTS_ERROR)(value)
-  if (isExistingProposer) return isExistingProposer
+  if (isExistingProposer) {
+    return isExistingProposer
+  }
 
   return addressIsNotSmartContract(chainId, SMART_CONTRACT_PROPOSER_ERROR, provider)(value)
 }
@@ -61,9 +67,15 @@ export const useProposerValidation = (): Validate<string> => {
   return useCallback<Validate<string>>(
     async (value) => {
       const reserved = addressIsNotReserved(PROPOSER_RESERVED_ERROR)(value)
-      if (reserved || !safeAddress) return reserved
-      if (!safeLoaded && safeError) return PROPOSER_SAFE_ERROR_MESSAGE
-      if (!isReady) return PROPOSER_SAFE_LOADING_MESSAGE
+      if (reserved || !safeAddress) {
+        return reserved
+      }
+      if (!safeLoaded && safeError) {
+        return PROPOSER_SAFE_ERROR_MESSAGE
+      }
+      if (!isReady) {
+        return PROPOSER_SAFE_LOADING_MESSAGE
+      }
 
       return validateAgainstPickedSafe(value, { safeAddress, owners, existingProposers, chainId, provider })
     },

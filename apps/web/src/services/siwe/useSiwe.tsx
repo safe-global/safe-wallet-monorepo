@@ -19,7 +19,9 @@ export const useSiwe = () => {
   const [verifyAuthMutation] = useAuthVerifyV1Mutation()
 
   const signIn = useCallback(async () => {
-    if (!wallet) return
+    if (!wallet) {
+      return
+    }
 
     setLoading(true)
 

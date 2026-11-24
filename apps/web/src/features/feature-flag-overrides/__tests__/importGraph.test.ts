@@ -15,8 +15,12 @@ const ALLOWED_SPECIFIERS = [
 const collectSourceFiles = (dir: string): Array<string> =>
   readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const full = path.join(dir, entry.name)
-    if (entry.isDirectory()) return entry.name === '__tests__' ? [] : collectSourceFiles(full)
-    if (entry.name.endsWith('.stories.tsx')) return []
+    if (entry.isDirectory()) {
+      return entry.name === '__tests__' ? [] : collectSourceFiles(full)
+    }
+    if (entry.name.endsWith('.stories.tsx')) {
+      return []
+    }
     return /\.tsx?$/.test(entry.name) ? [full] : []
   })
 

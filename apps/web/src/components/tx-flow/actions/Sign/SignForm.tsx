@@ -67,7 +67,9 @@ export const SignForm = ({
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
 
-    if (!safeTx) return
+    if (!safeTx) {
+      return
+    }
 
     setIsSubmitLoading(true)
     setSubmitError(undefined)

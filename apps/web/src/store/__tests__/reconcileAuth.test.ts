@@ -21,7 +21,9 @@ jest.mock('@/store/authSlice', () => ({
 
 describe('reconcileAuth', () => {
   const mockDispatch = jest.fn((action) => {
-    if (action === 'initiate-thunk') return { unwrap: mockUnwrap }
+    if (action === 'initiate-thunk') {
+      return { unwrap: mockUnwrap }
+    }
     return action
   }) as unknown as AppDispatch & jest.Mock
 

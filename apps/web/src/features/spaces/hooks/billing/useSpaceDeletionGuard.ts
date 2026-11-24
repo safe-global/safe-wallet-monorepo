@@ -19,8 +19,12 @@ type SpaceDeletionGuard = {
 export const useSpaceDeletionGuard = (spaceId: string | null): SpaceDeletionGuard => {
   const { subscription, status, isLoading, isError, hasData } = useSpaceSubscription(spaceId)
 
-  if (isLoading) return { isDeletionBlocked: true }
-  if (isError && !hasData) return { isDeletionBlocked: true, blockedReason: SUBSCRIPTION_CHECK_FAILED_MESSAGE }
+  if (isLoading) {
+    return { isDeletionBlocked: true }
+  }
+  if (isError && !hasData) {
+    return { isDeletionBlocked: true, blockedReason: SUBSCRIPTION_CHECK_FAILED_MESSAGE }
+  }
   if (isSpaceDeletionBlocked(status)) {
     return { isDeletionBlocked: true, blockedReason: getDeletionBlockedReason(subscription?.cancelAt) }
   }

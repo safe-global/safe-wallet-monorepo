@@ -165,7 +165,9 @@ jest.mock('@safe-global/views/components/ui/dropdown-menu', () => {
     const isControlled = openProp !== undefined
     const open = isControlled ? openProp : internalOpen
     const setOpen = (nextOpen: boolean) => {
-      if (!isControlled) setInternalOpen(nextOpen)
+      if (!isControlled) {
+        setInternalOpen(nextOpen)
+      }
       onOpenChange?.(nextOpen)
     }
 
@@ -182,7 +184,9 @@ jest.mock('@safe-global/views/components/ui/dropdown-menu', () => {
     children: ReactNode
   }) => {
     const context = useContext(Ctx)
-    if (!context) return null
+    if (!context) {
+      return null
+    }
 
     return cloneElement(render, {
       onClick: () => context.setOpen(!context.open),
@@ -192,7 +196,9 @@ jest.mock('@safe-global/views/components/ui/dropdown-menu', () => {
 
   const DropdownMenuContent = ({ children, id }: { children: ReactNode; id?: string }) => {
     const context = useContext(Ctx)
-    if (!context?.open) return null
+    if (!context?.open) {
+      return null
+    }
     return <div id={id}>{children}</div>
   }
 

@@ -228,7 +228,9 @@ export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, typ
     const relayStatus = await getRelayTxStatus(baseUrl, chainId, taskId)
 
     // Request failed or not found yet
-    if (!relayStatus) return
+    if (!relayStatus) {
+      return
+    }
 
     switch (relayStatus.status) {
       case RelayStatus.Included:

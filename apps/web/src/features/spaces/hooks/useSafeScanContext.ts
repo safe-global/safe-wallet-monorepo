@@ -106,15 +106,29 @@ const useSafeScanContext = (
     // both initial fetches and refetches; we additionally require data to be
     // present unless the query has definitively errored (in which case the scanner
     // handles missing data with `inconclusive`).
-    if (!selected || !entry) return null
-    if (isSafeFetching || !safeInfo) return null
-    if (!overviewData && isOverviewFetching) return null
-    if (isMasterCopiesFetching || (!masterCopies && !isMasterCopiesError)) return null
-    if (isCreationFetching || (!creationTx && !isCreationError)) return null
-    if (isMultichain && (isOverviewsFetching || !safeOverviews)) return null
+    if (!selected || !entry) {
+      return null
+    }
+    if (isSafeFetching || !safeInfo) {
+      return null
+    }
+    if (!overviewData && isOverviewFetching) {
+      return null
+    }
+    if (isMasterCopiesFetching || (!masterCopies && !isMasterCopiesError)) {
+      return null
+    }
+    if (isCreationFetching || (!creationTx && !isCreationError)) {
+      return null
+    }
+    if (isMultichain && (isOverviewsFetching || !safeOverviews)) {
+      return null
+    }
     // Chain config must be loaded — otherwise feature flags (recovery, hypernative,
     // transaction scanning) all default to false, producing wrong scanner results.
-    if (!chain) return null
+    if (!chain) {
+      return null
+    }
 
     // Resolve deployer using the same logic as useMasterCopies + useMastercopyMigration
     const matchingMc = masterCopies?.find((mc) => sameAddress(mc.address, safeInfo.implementation.value))

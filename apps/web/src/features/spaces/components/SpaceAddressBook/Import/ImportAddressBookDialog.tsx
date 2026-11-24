@@ -96,7 +96,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
         upsertAddressBookItemsDto: { items: contactItems },
       })
 
-      if (isElevationRequiredError(result.error)) return
+      if (isElevationRequiredError(result.error)) {
+        return
+      }
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return
@@ -129,7 +131,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   })
 
   useEffect(() => {
-    if (!isSuccess) return
+    if (!isSuccess) {
+      return
+    }
     const timer = setTimeout(() => handleCloseRef.current(), SUCCESS_CLOSE_DELAY_MS)
     return () => clearTimeout(timer)
   }, [isSuccess])

@@ -28,7 +28,9 @@ const signMessage = async (
 ): Promise<string> => {
   const signer = await getAssertedChainSigner(provider)
   const signature = await tryOffChainMsgSigning(signer, safe, message)
-  if (!safeSignerAddress) return signature
+  if (!safeSignerAddress) {
+    return signature
+  }
   return buildSignatureBytes([new EthSafeSignature(safeSignerAddress, signature, true)])
 }
 

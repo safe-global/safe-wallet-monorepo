@@ -14,7 +14,9 @@ import { isSafeAffectedByZodiacVulnerability } from '../../services/vulnerableMo
 const VULNERABLE_MODULE_NAMES = ['delay', 'roles']
 
 const isVulnerableModuleName = (name?: string | null): boolean => {
-  if (!name) return false
+  if (!name) {
+    return false
+  }
   const lower = name.toLowerCase()
   return VULNERABLE_MODULE_NAMES.some((fragment) => lower.includes(fragment))
 }
@@ -55,7 +57,9 @@ const KNOWN_MODULE_NAMES = [
  * individual modules as trusted without rerunning the full scanner.
  */
 export const isKnownModuleByName = (name?: string | null): boolean => {
-  if (!name) return false
+  if (!name) {
+    return false
+  }
   const lower = name.toLowerCase()
   return KNOWN_MODULE_NAMES.some((known) => lower.includes(known))
 }
@@ -66,7 +70,9 @@ export const isKnownModuleByName = (name?: string | null): boolean => {
 const isKnownZodiacModule = (chainId: string, moduleAddress: string): boolean => {
   try {
     const chainContracts = ContractVersions[Number(chainId) as SupportedNetworks]
-    if (!chainContracts) return false
+    if (!chainContracts) {
+      return false
+    }
 
     for (const contract of Object.values(KnownContracts)) {
       const versions = chainContracts[contract]
@@ -101,7 +107,9 @@ const isKnownAllowanceModule = (chainId: string, moduleAddress: string): boolean
  */
 const isKnownModule = (chainId: string, moduleAddress: string, moduleName?: string | null): boolean => {
   // Layer 1: API-provided name
-  if (isKnownModuleByName(moduleName)) return true
+  if (isKnownModuleByName(moduleName)) {
+    return true
+  }
 
   // Layer 2: Known deployment addresses
   return isKnownZodiacModule(chainId, moduleAddress) || isKnownAllowanceModule(chainId, moduleAddress)

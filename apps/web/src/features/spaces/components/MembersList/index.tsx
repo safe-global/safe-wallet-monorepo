@@ -242,7 +242,9 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
       cellTestId: 'table-cell-actions',
       minWidth: 80,
       cell: (member, { isCompact }) => {
-        if (!isAdmin) return null
+        if (!isAdmin) {
+          return null
+        }
         const { isInvite, isDisabled, editDisabled, canRenew } = memberFlags(member)
         return isCompact ? (
           <MemberRowActionsMenu

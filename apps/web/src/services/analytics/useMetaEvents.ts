@@ -21,7 +21,9 @@ const useMetaEvents = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const safeQueue = useMemo(() => queue, [safeAddress, queue !== undefined])
   useEffect(() => {
-    if (!safeQueue || isSpaceRoute) return
+    if (!safeQueue || isSpaceRoute) {
+      return
+    }
 
     gtmTrack({
       ...TX_LIST_EVENTS.QUEUED_TXS,
@@ -33,7 +35,9 @@ const useMetaEvents = () => {
   const { balances } = useBalances()
   const totalTokens = balances?.items.length ?? 0
   useEffect(() => {
-    if (!safeAddress || totalTokens <= 0 || isSpaceRoute) return
+    if (!safeAddress || totalTokens <= 0 || isSpaceRoute) {
+      return
+    }
 
     gtmTrack({ ...ASSETS_EVENTS.DIFFERING_TOKENS, label: totalTokens })
   }, [totalTokens, safeAddress, chainId, isSpaceRoute])
@@ -44,7 +48,9 @@ const useMetaEvents = () => {
     balances?.items.filter((item) => hiddenTokens.includes(item.tokenInfo.address)).length ?? 0
 
   useEffect(() => {
-    if (!safeAddress || totalTokens <= 0 || isSpaceRoute) return
+    if (!safeAddress || totalTokens <= 0 || isSpaceRoute) {
+      return
+    }
 
     gtmTrack({ ...ASSETS_EVENTS.HIDDEN_TOKENS, label: totalHiddenFromBalance })
   }, [safeAddress, totalHiddenFromBalance, totalTokens, isSpaceRoute])

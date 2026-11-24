@@ -58,7 +58,9 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
   }, [matches, typeFilter, sort, sortContext])
 
   const renderTable = () => {
-    if (rows.length === 0) return <PoliciesNoSearchResults query={query} />
+    if (rows.length === 0) {
+      return <PoliciesNoSearchResults query={query} />
+    }
 
     return <PoliciesTable policies={rows} matchedSpenderNames={matchedSpenderNames} onSelect={onSelectPolicy} />
   }

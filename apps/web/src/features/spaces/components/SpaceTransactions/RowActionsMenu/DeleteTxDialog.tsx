@@ -29,6 +29,8 @@ export const DeleteTxDialogProvider = ({ children }: { children: ReactNode }): R
 
 export const useOpenDeleteTxDialog = (): ((target: DeleteTarget) => void) => {
   const open = useContext(DeleteTxDialogContext)
-  if (!open) throw new Error('useOpenDeleteTxDialog must be used inside DeleteTxDialogProvider')
+  if (!open) {
+    throw new Error('useOpenDeleteTxDialog must be used inside DeleteTxDialogProvider')
+  }
   return open
 }

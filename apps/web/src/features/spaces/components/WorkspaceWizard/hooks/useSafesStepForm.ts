@@ -47,7 +47,9 @@ const toForm = (draft: WorkspaceDraft): AddAccountsFormValues => ({
 const linkedSafeKeys = (allSafes: AllSafeItems, safeFromUrl: string): string[] => {
   const linked = fromSafeKey(safeFromUrl)
   const group = allSafes.filter(isMultiChainSafeItem).find((item) => sameAddress(item.address, linked.address))
-  if (group) return [getMultiChainSafeId(group), ...group.safes.map(getSafeId)]
+  if (group) {
+    return [getMultiChainSafeId(group), ...group.safes.map(getSafeId)]
+  }
   const single = allSafes.find(
     (item) =>
       !isMultiChainSafeItem(item) && item.chainId === linked.chainId && sameAddress(item.address, linked.address),
@@ -69,9 +71,13 @@ export const useSafesStepForm = ({ draft, allSafes, flaggedAddresses, limit, adv
   // The picker list arrives with the owned Safes, after mount; a linked Safe outside it takes no seat.
   const isLinkPreselected = useRef(false)
   useEffect(() => {
-    if (isLinkPreselected.current || draft.safes.length > 0 || !safeFromUrl) return
+    if (isLinkPreselected.current || draft.safes.length > 0 || !safeFromUrl) {
+      return
+    }
     const keys = linkedSafeKeys(allSafes, safeFromUrl)
-    if (keys.length === 0) return
+    if (keys.length === 0) {
+      return
+    }
     isLinkPreselected.current = true
     const linkedSelection = Object.fromEntries(keys.map((key) => [key, true]))
     setValue('selectedSafes', { ...getValues('selectedSafes'), ...linkedSelection })
@@ -89,20 +95,28 @@ export const useSafesStepForm = ({ draft, allSafes, flaggedAddresses, limit, adv
     ({ names }) => {
       if (subStep === 'select') {
         const toName = getSafesToName(pickedSafes, allSafes, [])
-        if (toName.length === 0) return saveAndAdvance(names)
+        if (toName.length === 0) {
+          return saveAndAdvance(names)
+        }
         setSafesToName(toName)
         setSubStep('name')
         return
       }
-      if (hasAllNames(names, safesToName)) saveAndAdvance(names)
-      else touchNames(getValues, setValue, safesToName)
+      if (hasAllNames(names, safesToName)) {
+        saveAndAdvance(names)
+      } else {
+        touchNames(getValues, setValue, safesToName)
+      }
     },
     () => touchNames(getValues, setValue, safesToName),
   )
 
   const onBack = () => {
-    if (subStep === 'name') setSubStep('select')
-    else retreat({ safes: pickedSafes, safeNames: toSafeNames(getValues('names') ?? {}) })
+    if (subStep === 'name') {
+      setSubStep('select')
+    } else {
+      retreat({ safes: pickedSafes, safeNames: toSafeNames(getValues('names') ?? {}) })
+    }
   }
 
   const onSkip = () => advance({ safes: [], safeNames: {} })

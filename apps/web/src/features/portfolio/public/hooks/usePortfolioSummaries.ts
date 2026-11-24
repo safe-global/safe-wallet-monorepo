@@ -76,7 +76,9 @@ const pickNewest = (cached: CachedSummaries[]) => {
       const key = summaryKey(trusted, summary.chainId, summary.address)
       const current = newest.get(key)
       const candidate = { summary, fetchedAt }
-      if (!current || isNewer(candidate, current)) newest.set(key, candidate)
+      if (!current || isNewer(candidate, current)) {
+        newest.set(key, candidate)
+      }
     }
   }
   return newest
@@ -119,7 +121,9 @@ const usePortfolioSummaries = (safes: SafeRef[]) => {
   const getSummary = useCallback(
     (chainId: string, address: string): PortfolioSummary | undefined => {
       const chain = enabledChains.get(chainId)
-      if (!chain) return undefined
+      if (!chain) {
+        return undefined
+      }
       return newestSummaries.get(summaryKey(isTrustedTokenList(chain, tokenList), chainId, address))?.summary
     },
     [enabledChains, newestSummaries, tokenList],

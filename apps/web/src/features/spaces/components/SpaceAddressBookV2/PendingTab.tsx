@@ -33,8 +33,12 @@ const PendingTab = ({ requests, workspaceBook, isAdmin }: PendingTabProps) => {
   )
 
   const reload = () => {
-    if (requests.isError) requests.refetch()
-    if (workspaceBook.isError) workspaceBook.refetch()
+    if (requests.isError) {
+      requests.refetch()
+    }
+    if (workspaceBook.isError) {
+      workspaceBook.refetch()
+    }
   }
 
   return (

@@ -6,7 +6,9 @@ import { syncPlanChange } from '../../hooks/billing/syncPlanChange'
 export const planChangeSyncListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const changed = billingApi?.endpoints?.billingUpdateSubscriptionV1?.matchFulfilled
   // Tests that mock the billing module leave no endpoint to watch.
-  if (!changed) return
+  if (!changed) {
+    return
+  }
 
   listenerMiddleware.startListening({
     matcher: changed,

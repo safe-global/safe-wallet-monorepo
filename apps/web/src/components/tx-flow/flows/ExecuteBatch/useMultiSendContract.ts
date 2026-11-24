@@ -11,12 +11,16 @@ export const useMultiSendContract = (safe: ExtendedSafeInfo) => {
   const safeSDK = useSafeSDK()
 
   const [multiSendContract] = useAsync(async () => {
-    if (!safe.version || !safeSDK) return
+    if (!safe.version || !safeSDK) {
+      return
+    }
     return await getReadOnlyMultiSendCallOnlyContract(safe.version, safe.chainId, safe.implementation?.value)
   }, [safe.version, safe.chainId, safe.implementation?.value, safeSDK])
 
   const [multiSendContractAddress = ''] = useAsync(async () => {
-    if (!multiSendContract) return ''
+    if (!multiSendContract) {
+      return ''
+    }
     return multiSendContract.getAddress()
   }, [multiSendContract])
 

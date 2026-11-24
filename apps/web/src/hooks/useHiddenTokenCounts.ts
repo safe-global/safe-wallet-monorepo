@@ -15,7 +15,9 @@ export interface HiddenTokenCounts {
 }
 
 const filterDustTokens = (items: ReturnType<typeof useBalances>['balances']['items'], hideDust: boolean) => {
-  if (!hideDust) return items
+  if (!hideDust) {
+    return items
+  }
   return items.filter((balanceItem) => Number(balanceItem.fiatBalance) >= DUST_THRESHOLD)
 }
 

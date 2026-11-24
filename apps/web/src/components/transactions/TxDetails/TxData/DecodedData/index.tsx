@@ -27,7 +27,9 @@ const DecodedData = ({
 
   // nothing to render
   if (!txData) {
-    if (!toInfo) return null
+    if (!toInfo) {
+      return null
+    }
 
     return (
       <SendToBlock

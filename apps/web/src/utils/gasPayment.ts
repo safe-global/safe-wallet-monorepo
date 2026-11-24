@@ -46,13 +46,17 @@ const isOffered = (option: SponsoredOption, { chainOptions, excluded }: GasPayme
 
 const getCampaignOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
   const { campaign } = inputs
-  if (!isOffered('NO_FEE_CAMPAIGN', inputs) || !campaign.isEligible) return null
+  if (!isOffered('NO_FEE_CAMPAIGN', inputs) || !campaign.isEligible) {
+    return null
+  }
   const disabledReason = campaign.isGasTooHigh ? 'GAS_TOO_HIGH' : campaign.remaining === 0 ? 'LIMIT_REACHED' : null
   return { option: 'NO_FEE_CAMPAIGN', disabledReason, remaining: campaign.remaining, limit: campaign.limit }
 }
 
 const getDailyOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
-  if (!isOffered('FREE_DAILY_LIMIT', inputs) || !(inputs.daily && inputs.daily.remaining > 0)) return null
+  if (!isOffered('FREE_DAILY_LIMIT', inputs) || !(inputs.daily && inputs.daily.remaining > 0)) {
+    return null
+  }
   // On a chain without the plan the offer does not wait for it, so isPro stays unknown while it loads or after the lookup failed.
   const isPro = inputs.pro.isLoading || inputs.pro.isError ? null : inputs.pro.isPro
   return { option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: inputs.daily, isPro }
@@ -60,7 +64,9 @@ const getDailyOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
 
 const getSubscriptionOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
   const { pro } = inputs
-  if (!isOffered('SUBSCRIPTION', inputs) || !pro.isPro || !pro.spaceId) return null
+  if (!isOffered('SUBSCRIPTION', inputs) || !pro.isPro || !pro.spaceId) {
+    return null
+  }
   return {
     option: 'SUBSCRIPTION',
     disabledReason: pro.left === 0 ? 'LIMIT_REACHED' : null,
@@ -73,7 +79,9 @@ const getSubscriptionOffer = (inputs: GasPaymentInputs): SponsoredOffer | null =
 export const selectSponsoredOffer = (
   inputs: GasPaymentInputs,
 ): { offer: SponsoredOffer | null; showsProUpsell: boolean } => {
-  if (inputs.isRefundTx || !inputs.walletCanRelay) return { offer: null, showsProUpsell: false }
+  if (inputs.isRefundTx || !inputs.walletCanRelay) {
+    return { offer: null, showsProUpsell: false }
+  }
 
   const { pro, chainOptions, daily } = inputs
   // A Safe on a plan spends only its plan, even once the plan is spent or refused.
@@ -95,6 +103,8 @@ export const getGasPayment = (
   offer: SponsoredOffer | null,
   method: ExecutionMethod,
 ): { gasPayer: GasPayer; sponsorSpaceId: string | null } => {
-  if (!offer || offer.disabledReason || method === 'WALLET') return { gasPayer: 'WALLET', sponsorSpaceId: null }
+  if (!offer || offer.disabledReason || method === 'WALLET') {
+    return { gasPayer: 'WALLET', sponsorSpaceId: null }
+  }
   return { gasPayer: offer.option, sponsorSpaceId: offer.option === 'SUBSCRIPTION' ? offer.spaceId : null }
 }

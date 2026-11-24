@@ -28,12 +28,18 @@ export const useMigrateProposerLabels = () => {
   const isSigner = isSafeOwner || isNestedSafeOwner
 
   useEffect(() => {
-    if (!isSigner) return
+    if (!isSigner) {
+      return
+    }
 
     for (const { delegate, label } of proposers.data?.results ?? []) {
       const name = sanitizeName(label ?? '')
-      if (!name || name === PROPOSER_LABEL_PLACEHOLDER) continue
-      if (has(delegate, chainId)) continue
+      if (!name || name === PROPOSER_LABEL_PLACEHOLDER) {
+        continue
+      }
+      if (has(delegate, chainId)) {
+        continue
+      }
 
       dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: delegate, name }))
     }

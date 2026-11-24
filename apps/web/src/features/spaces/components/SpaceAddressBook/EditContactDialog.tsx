@@ -121,7 +121,9 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
         upsertAddressBookItemsDto: { items: [addressBookItem] },
       })
 
-      if (isElevationRequiredError(result.error)) return
+      if (isElevationRequiredError(result.error)) {
+        return
+      }
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return

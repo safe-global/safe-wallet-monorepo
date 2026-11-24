@@ -20,7 +20,9 @@ export const useSeatTrim = (spaceId: string) => {
 
   const trim = useCallback(
     async (removed: SafeRef[]): Promise<boolean> => {
-      if (removed.length === 0) return true
+      if (removed.length === 0) {
+        return true
+      }
       const result = await removeSafes({ spaceId, deleteSpaceSafesDto: { safes: removed } })
       return !result.error
     },

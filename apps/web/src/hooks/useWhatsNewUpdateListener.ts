@@ -10,9 +10,13 @@ const MIN_UPDATE_DELAY = 100
 
 // Beamer's updates page posts "updatesAvailable" or "updatesAvailable:" followed by a JSON object.
 const parseUpdatesAvailable = (data: unknown): { isImmediate: boolean } | undefined => {
-  if (typeof data !== 'string' || !data.startsWith(UPDATES_AVAILABLE)) return undefined
+  if (typeof data !== 'string' || !data.startsWith(UPDATES_AVAILABLE)) {
+    return undefined
+  }
   const payload = data.slice(UPDATES_AVAILABLE.length + 1)
-  if (!payload) return { isImmediate: false }
+  if (!payload) {
+    return { isImmediate: false }
+  }
 
   let parsed: { immediate?: unknown } | null
   try {
@@ -29,9 +33,13 @@ export const useWhatsNewUpdateListener = () => {
   useEffect(() => {
     let refetchTimeout: ReturnType<typeof setTimeout> | undefined
     const onMessage = (event: MessageEvent) => {
-      if (event.origin !== BEAMER_ORIGIN) return
+      if (event.origin !== BEAMER_ORIGIN) {
+        return
+      }
       const update = parseUpdatesAvailable(event.data)
-      if (!update) return
+      if (!update) {
+        return
+      }
 
       const delay = update.isImmediate ? 0 : Math.max(MIN_UPDATE_DELAY, Math.ceil(Math.random() * MAX_UPDATE_DELAY))
       clearTimeout(refetchTimeout)

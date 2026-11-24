@@ -105,7 +105,9 @@ describe('mergeMonotonic', () => {
   describe('a transient UNAVAILABLE never clobbers a known status', () => {
     it('keeps every real pinned status when next is UNAVAILABLE', () => {
       for (const pinned of ALL) {
-        if (pinned === CheckStatus.UNAVAILABLE) continue
+        if (pinned === CheckStatus.UNAVAILABLE) {
+          continue
+        }
         expect(mergeMonotonic(pinned, CheckStatus.UNAVAILABLE)).toBe(pinned)
       }
     })

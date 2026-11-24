@@ -42,7 +42,9 @@ const useCounterfactualSafeSync = () => {
     }
 
     const syncKey = `${spaceId ?? ''}`
-    if (lastSyncedKey.current === syncKey) return
+    if (lastSyncedKey.current === syncKey) {
+      return
+    }
 
     // Signal consumers to wait again when switching spaces
     if (lastSyncedKey.current !== null) {
@@ -102,9 +104,13 @@ const useCounterfactualSafeSync = () => {
         const remoteSafesByChain: Record<string, RemoteSafe[]> = {}
 
         const mergeResponse = (response: GetCounterfactualSafesResponse | undefined, isCreator: boolean) => {
-          if (!response?.safes) return
+          if (!response?.safes) {
+            return
+          }
           for (const [chainId, safes] of Object.entries(response.safes)) {
-            if (!remoteSafesByChain[chainId]) remoteSafesByChain[chainId] = []
+            if (!remoteSafesByChain[chainId]) {
+              remoteSafesByChain[chainId] = []
+            }
             for (const safe of safes) {
               if (!remoteSafesByChain[chainId].some((s) => s.address === safe.address)) {
                 remoteSafesByChain[chainId].push({ ...safe, isCreator })
@@ -124,10 +130,14 @@ const useCounterfactualSafeSync = () => {
         for (const [chainId, remoteSafes] of Object.entries(remoteSafesByChain)) {
           for (const remoteSafe of remoteSafes) {
             const localExists = localSafes[chainId]?.[remoteSafe.address]
-            if (localExists) continue
+            if (localExists) {
+              continue
+            }
             // Block-list: don't re-add a safe whose deletion was just attempted.
             // The local self-heal already removed it because CGW reports it deployed.
-            if (blockedByPendingDelete.has(`${chainId}:${remoteSafe.address}`)) continue
+            if (blockedByPendingDelete.has(`${chainId}:${remoteSafe.address}`)) {
+              continue
+            }
 
             const { props } = fromBackendDto({ ...remoteSafe, chainId })
             dispatch(

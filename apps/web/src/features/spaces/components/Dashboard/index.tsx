@@ -66,7 +66,9 @@ const SpaceDashboard = () => {
   const planState = useSpacePlanState(spaceId)
 
   useEffect(() => {
-    if (!spaceId || !planState) return
+    if (!spaceId || !planState) {
+      return
+    }
     trackEvent(
       { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: spaceId },
       {
@@ -120,7 +122,9 @@ const SpaceDashboard = () => {
   }
 
   const handlePendingTxViewAll = () => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
     trackEvent(
       { ...SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED, label: spaceId },
       {

@@ -8,7 +8,9 @@ import DatePickerInput, { _fromText, _toMaskedText } from './index'
 type FormValues = { date: Date | null }
 
 const describeValue = (value: Date | null | undefined) => {
-  if (value === null || value === undefined) return 'empty'
+  if (value === null || value === undefined) {
+    return 'empty'
+  }
   return isValid(value) ? format(value, 'yyyy-MM-dd') : 'invalid'
 }
 

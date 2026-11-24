@@ -220,7 +220,9 @@ describe('SpaceTransactionQueue', () => {
         if (!new URL(request.url).searchParams.has('status')) {
           return HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }))
         }
-        if (failFilter) return new HttpResponse(null, { status: 500 })
+        if (failFilter) {
+          return new HttpResponse(null, { status: 500 })
+        }
         await retryReleased
         return HttpResponse.json(page({ [safeB]: { '1': transactions(1) } }))
       }),
@@ -484,7 +486,9 @@ describe('SpaceTransactionQueue', () => {
     const counts = { ...page({}).counts, total: 3, execute: 1, sign: 2 }
     server.use(
       http.get(queueUrl, async ({ request }) => {
-        if (new URL(request.url).searchParams.has('status')) await delay('infinite')
+        if (new URL(request.url).searchParams.has('status')) {
+          await delay('infinite')
+        }
         return HttpResponse.json(page({ [safeA]: { '1': transactions(3) } }, { count: 3, counts }))
       }),
     )
@@ -505,7 +509,9 @@ describe('SpaceTransactionQueue', () => {
       const released = new Promise<void>((resolve) => (release = resolve))
       server.use(
         http.get(queueUrl, async ({ request }) => {
-          if (!new URL(request.url).searchParams.has('status')) return HttpResponse.json(unfiltered)
+          if (!new URL(request.url).searchParams.has('status')) {
+            return HttpResponse.json(unfiltered)
+          }
           await released
           return HttpResponse.json(filtered)
         }),
@@ -570,7 +576,9 @@ describe('SpaceTransactionQueue', () => {
             await bReleased
             return HttpResponse.json(page({ [safeB]: { '1': transactions(1) } }))
           }
-          if (search === 'c') return HttpResponse.json(page({ [otherSafe]: { '1': transactions(1) } }))
+          if (search === 'c') {
+            return HttpResponse.json(page({ [otherSafe]: { '1': transactions(1) } }))
+          }
           return HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }))
         }),
       )
@@ -598,7 +606,9 @@ describe('SpaceTransactionQueue', () => {
         http.get(queueUrl, async ({ request }) => {
           requests.push(request)
           const isSearched = new URL(request.url).searchParams.has('search')
-          if (!isSearched && requests.length > 1) await delay('infinite')
+          if (!isSearched && requests.length > 1) {
+            await delay('infinite')
+          }
           return HttpResponse.json(page({ [isSearched ? otherSafe : safeA]: { '1': transactions(1) } }))
         }),
       )

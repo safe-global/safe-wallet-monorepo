@@ -14,7 +14,9 @@ import AuditEventRow from './AuditEventRow'
 import ActivityLogFilters, { type ActivityLogFilterState, EMPTY_FILTERS } from './ActivityLogFilters'
 
 function getCursor(pageUrl: string | null | undefined): string | undefined {
-  if (!pageUrl) return undefined
+  if (!pageUrl) {
+    return undefined
+  }
   try {
     return new URL(pageUrl).searchParams.get('cursor') ?? undefined
   } catch {

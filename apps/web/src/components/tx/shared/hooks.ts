@@ -337,8 +337,12 @@ export const useRecommendedNonce = (): number | undefined => {
 
   const [recommendedNonce] = useAsync(
     async () => {
-      if (!safe.chainId || !safeAddress) return
-      if (!safe.deployed) return 0
+      if (!safe.chainId || !safeAddress) {
+        return
+      }
+      if (!safe.deployed) {
+        return 0
+      }
 
       const nonces = await getNonces(safe.chainId, safeAddress)
 
@@ -368,7 +372,9 @@ export const useSafeTxGas = (safeTx: SafeTransaction | undefined): string | unde
   }, [safeTx?.data.to, safeTx?.data.value, safeTx?.data.data, safeTx?.data.operation])
 
   const [safeTxGas] = useAsync(() => {
-    if (!safe.chainId || !safeAddress || !safeTxParams || !safe.version) return
+    if (!safe.chainId || !safeAddress || !safeTxParams || !safe.version) {
+      return
+    }
 
     return getSafeTxGas(safe.chainId, safeAddress, safe.version, safeTxParams)
   }, [safeAddress, safe.chainId, safe.version, safeTxParams])

@@ -48,7 +48,9 @@ export const useSpacesSafeEligibility = (enabled: boolean): SpacesSafeEligibilit
   )
 
   const getLimit = (spaceId: string): SafeLimit => {
-    if (!isSafePro) return SAFE_ACCOUNTS_LIMIT
+    if (!isSafePro) {
+      return SAFE_ACCOUNTS_LIMIT
+    }
     const seats = getSeatsMeter(entitlementsQuery.currentData?.[spaceId])
     return seats ? seats.quota : undefined
   }

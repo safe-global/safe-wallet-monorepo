@@ -7,7 +7,9 @@ export const addSafesToSpaceSafes = (spaceSafes: GetSpaceSafeResponse, safes: Sp
   for (const { chainId, address } of safes) {
     const chainSafes = (spaceSafes.safes[chainId] ??= [])
     const isListed = chainSafes.some((listed) => listed.toLowerCase() === address.toLowerCase())
-    if (!isListed) chainSafes.push(address)
+    if (!isListed) {
+      chainSafes.push(address)
+    }
   }
 }
 
@@ -18,7 +20,9 @@ export const addSafesToSpaceSafes = (spaceSafes: GetSpaceSafeResponse, safes: Sp
 export const spaceSafesCacheListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const create = spacesApi?.endpoints?.spaceSafesCreateV1?.matchFulfilled
   // Tests that mock the spaces module leave no endpoints to watch.
-  if (!create) return
+  if (!create) {
+    return
+  }
 
   listenerMiddleware.startListening({
     matcher: create,

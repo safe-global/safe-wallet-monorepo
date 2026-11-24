@@ -12,7 +12,9 @@ export function useIsXlViewport(): boolean {
   const [isXl, setIsXl] = useState(getInitialMatch)
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return
+    }
     const mql = window.matchMedia(XL_QUERY)
     setIsXl(mql.matches)
     const onChange = (e: MediaQueryListEvent) => setIsXl(e.matches)

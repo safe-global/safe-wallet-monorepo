@@ -15,11 +15,15 @@ const useRenewInvite = (member: MemberDto) => {
   const [renewInvite, { isLoading }] = useMembersRenewInviteV1Mutation()
 
   const handleRenew = async () => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
 
     const { error } = await renewInvite({ spaceId, userId: member.user.id })
 
-    if (isElevationRequiredError(error)) return
+    if (isElevationRequiredError(error)) {
+      return
+    }
     if (error) {
       dispatch(
         showNotification({

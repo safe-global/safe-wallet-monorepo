@@ -31,7 +31,9 @@ const TourStop = ({ step, progress, onBack, onNext, onClose, onMissingAnchor }: 
     target?.scrollIntoView({ block: 'nearest' })
   }, [target])
 
-  if (!target || !layout.popoverTarget) return null
+  if (!target || !layout.popoverTarget) {
+    return null
+  }
 
   return (
     <>

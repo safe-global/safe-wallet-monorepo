@@ -261,8 +261,12 @@ describe('useAddressActivity', () => {
     const address1 = faker.finance.ethereumAddress()
     const address2 = faker.finance.ethereumAddress()
     const mockGetTransactionCount = jest.fn().mockImplementation((addr) => {
-      if (addr === address1) return Promise.resolve(3)
-      if (addr === address2) return Promise.resolve(100)
+      if (addr === address1) {
+        return Promise.resolve(3)
+      }
+      if (addr === address2) {
+        return Promise.resolve(100)
+      }
       return Promise.resolve(0)
     })
 
@@ -295,8 +299,12 @@ describe('useAddressActivity', () => {
     const address1 = faker.finance.ethereumAddress()
     const address2 = faker.finance.ethereumAddress()
     const mockGetTransactionCount = jest.fn().mockImplementation((addr) => {
-      if (addr === address1) return Promise.resolve(3)
-      if (addr === address2) return Promise.resolve(2)
+      if (addr === address1) {
+        return Promise.resolve(3)
+      }
+      if (addr === address2) {
+        return Promise.resolve(2)
+      }
       return Promise.resolve(0)
     })
 

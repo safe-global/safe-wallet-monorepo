@@ -20,7 +20,9 @@ import SafenetBatchWarning from '@/features/safenet-checks/public/components/Saf
 
 const BatchTxRiskChip = ({ details }: { details: TransactionDetails }) => {
   const execution = details.detailedExecutionInfo
-  if (!isMultisigDetailedExecutionInfo(execution)) return null
+  if (!isMultisigDetailedExecutionInfo(execution)) {
+    return null
+  }
 
   return <SafenetRiskChip safeTxHash={execution.safeTxHash} timestampMs={execution.submittedAt} />
 }
@@ -30,7 +32,9 @@ type DecodableTx = TransactionDetails & { txData: NonNullable<TransactionDetails
 const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
 
-  if (!txs) return null
+  if (!txs) {
+    return null
+  }
 
   const decodableTxs = txs.filter((transaction): transaction is DecodableTx => !!transaction.txData)
 

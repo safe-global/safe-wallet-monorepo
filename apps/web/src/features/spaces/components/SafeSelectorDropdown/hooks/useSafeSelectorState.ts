@@ -13,7 +13,9 @@ interface UseSafeSelectorStateProps {
 // No items[0] fallback on miss — surfaces regressions instead of silently
 // snapping to the wrong safe.
 const getSelectedItem = (items: SafeItemData[], selectedItemId?: string) => {
-  if (!selectedItemId) return undefined
+  if (!selectedItemId) {
+    return undefined
+  }
   return items.find((item) => item.id === selectedItemId)
 }
 
@@ -58,7 +60,9 @@ export const useSafeSelectorState = ({
       }
 
       const itemId = value ?? ''
-      if (itemId === (selectedItemId ?? '')) return
+      if (itemId === (selectedItemId ?? '')) {
+        return
+      }
 
       onItemSelect?.(itemId)
     },

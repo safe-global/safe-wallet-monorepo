@@ -7,7 +7,9 @@ import WorkspaceWizard from '@/features/spaces/public/components/WorkspaceWizard
 const PlanPage = () => {
   const isWizard = useIsWorkspaceWizardEnabled()
 
-  if (!isWizard) return null
+  if (!isWizard) {
+    return null
+  }
 
   return (
     <>

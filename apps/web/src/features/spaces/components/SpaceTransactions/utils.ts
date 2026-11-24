@@ -42,7 +42,9 @@ export type SignerWallets = ReadonlySet<string>
 
 /** `sign` when one of the caller's wallets is still a missing signer of the transaction */
 export const getQueueStatus = (tx: Transaction, isNext: boolean, signers: SignerWallets): QueueStatus => {
-  if (isAwaitingExecution(tx.txStatus)) return isNext ? 'execute' : 'blocked'
+  if (isAwaitingExecution(tx.txStatus)) {
+    return isNext ? 'execute' : 'blocked'
+  }
   const missingSigners = isMultisigExecutionInfo(tx.executionInfo) ? (tx.executionInfo.missingSigners ?? []) : []
   return missingSigners.some(({ value }) => signers.has(value.toLowerCase())) ? 'sign' : 'waiting'
 }
@@ -57,7 +59,9 @@ export const getSectionRows = (items: SpaceQueueItems): QueueRowData[] => {
   return groupConflictingTxs(items).flatMap<QueueRowData>((entry) => {
     if (Array.isArray(entry)) {
       const transactions = entry.filter(isTransactionQueuedItem)
-      if (transactions.length === 0) return []
+      if (transactions.length === 0) {
+        return []
+      }
       return [
         { kind: 'conflict', nonce: getNonce(transactions[0].transaction), size: transactions.length },
         ...transactions.map((item, index) => ({
@@ -96,19 +100,35 @@ export const getCounterparty = (txInfo: TransactionInfo): Counterparty | undefin
     return isIncomingTransfer(txInfo) ? { join: 'from', party: txInfo.sender } : { join: 'to', party: txInfo.recipient }
   }
   // A rejection is an empty call to the Safe itself
-  if (isCancellationTxInfo(txInfo)) return undefined
-  if (isMultiSendTxInfo(txInfo)) return { join: 'via', party: txInfo.to }
+  if (isCancellationTxInfo(txInfo)) {
+    return undefined
+  }
+  if (isMultiSendTxInfo(txInfo)) {
+    return { join: 'via', party: txInfo.to }
+  }
   if (isCustomTxInfo(txInfo)) {
     // Read `to` before the migration guard, which narrows txInfo to never when it returns false
     const { to } = txInfo
     return isMigrateToL2TxInfo(txInfo) ? undefined : { join: 'on', party: to }
   }
-  if (isBridgeOrderTxInfo(txInfo)) return { join: 'via', protocol: LIFI }
-  if (isLifiSwapTxInfo(txInfo)) return { join: 'on', protocol: LIFI }
-  if (isOrderTxInfo(txInfo)) return { join: 'on', protocol: COW_PROTOCOL }
-  if (isAnyStakingTxInfo(txInfo)) return { join: 'via', protocol: KILN }
-  if (isVaultDepositTxInfo(txInfo)) return { join: 'to', party: vaultParty(txInfo.vaultInfo) }
-  if (isVaultRedeemTxInfo(txInfo)) return { join: 'from', party: vaultParty(txInfo.vaultInfo) }
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return { join: 'via', protocol: LIFI }
+  }
+  if (isLifiSwapTxInfo(txInfo)) {
+    return { join: 'on', protocol: LIFI }
+  }
+  if (isOrderTxInfo(txInfo)) {
+    return { join: 'on', protocol: COW_PROTOCOL }
+  }
+  if (isAnyStakingTxInfo(txInfo)) {
+    return { join: 'via', protocol: KILN }
+  }
+  if (isVaultDepositTxInfo(txInfo)) {
+    return { join: 'to', party: vaultParty(txInfo.vaultInfo) }
+  }
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return { join: 'from', party: vaultParty(txInfo.vaultInfo) }
+  }
   return undefined
 }
 
@@ -117,11 +137,15 @@ export type QueueTypeLabel = 'Settings' | 'Contract' | 'Nested'
 
 export const getQueueTypeLabel = (tx: Transaction): QueueTypeLabel | undefined => {
   const { txInfo } = tx
-  if (isSettingsChangeTxInfo(txInfo) || isMigrateToL2TxInfo(txInfo)) return 'Settings'
+  if (isSettingsChangeTxInfo(txInfo) || isMigrateToL2TxInfo(txInfo)) {
+    return 'Settings'
+  }
   if (!isCustomTxInfo(txInfo) || tx.safeAppInfo || isMultiSendTxInfo(txInfo) || isCancellationTxInfo(txInfo)) {
     return undefined
   }
-  if (isModuleExecutionInfo(tx.executionInfo)) return undefined
+  if (isModuleExecutionInfo(tx.executionInfo)) {
+    return undefined
+  }
   return isNestedConfirmationTxInfo(txInfo) ? 'Nested' : 'Contract'
 }
 
@@ -164,7 +188,9 @@ export const getSettingsSummary = (txInfo: SettingsChangeTransaction): string =>
 export const getRejectedNonces = (rows: QueueRowData[]): Set<number> =>
   new Set(
     rows.flatMap((row) => {
-      if (row.kind !== 'transaction') return []
+      if (row.kind !== 'transaction') {
+        return []
+      }
       const { txInfo } = row.item.transaction
       const nonce = getNonce(row.item.transaction)
       return isCustomTxInfo(txInfo) && txInfo.isCancellation && nonce !== undefined ? [nonce] : []

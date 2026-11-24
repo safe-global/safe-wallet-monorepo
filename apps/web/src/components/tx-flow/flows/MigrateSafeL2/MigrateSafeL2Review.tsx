@@ -16,7 +16,9 @@ export const MigrateSafeL2Review = ({ children, ...props }: ReviewTransactionPro
   const safeSDK = useSafeSDK()
 
   useEffect(() => {
-    if (!chain || !safeSDK) return
+    if (!chain || !safeSDK) {
+      return
+    }
 
     const txData = createUpdateMigration(chain, safe.version, safe.fallbackHandler?.value, safe.implementation?.value)
     createTx(txData).then(setSafeTx).catch(setSafeTxError)

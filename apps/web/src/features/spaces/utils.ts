@@ -62,7 +62,9 @@ export const mapSpaceContactsToAddressBookState = (spaceContacts: SpaceAddressBo
  * @param userId - The user ID to check
  */
 export const isUserActiveAdmin = (members: SpaceMemberDto[], userId: number | undefined): boolean => {
-  if (!userId) return false
+  if (!userId) {
+    return false
+  }
   const membership = members.find((member) => member.user.id === userId)
   return !!membership && membership.role === MemberRole.ADMIN && membership.status === MemberStatus.ACTIVE
 }
@@ -73,9 +75,13 @@ export const isUserActiveAdmin = (members: SpaceMemberDto[], userId: number | un
  * Returns an empty string for missing or unparsable input.
  */
 export function formatDate(dateStr: string): string {
-  if (!dateStr) return ''
+  if (!dateStr) {
+    return ''
+  }
   const date = new Date(dateStr)
-  if (!isValid(date)) return ''
+  if (!isValid(date)) {
+    return ''
+  }
 
   const timeStr = format(date, 'p')
 

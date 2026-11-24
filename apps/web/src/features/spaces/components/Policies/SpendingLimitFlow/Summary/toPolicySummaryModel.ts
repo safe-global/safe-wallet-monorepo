@@ -28,7 +28,9 @@ const flattenAccounts = (entries: readonly SafeAccountEntry[]): SafeAccountOptio
 /** The selected option, or a minimal one from the scope key while the eligible list has not resolved it. */
 export const resolveSafe = (safeId: string, accounts: readonly SafeAccountEntry[]): SafeAccountOption => {
   const match = flattenAccounts(accounts).find((account) => account.id === safeId)
-  if (match) return match
+  if (match) {
+    return match
+  }
 
   const target = parseSafeScopeKey(safeId)
   return { id: safeId, chainId: target?.chainId ?? '', address: target?.safeAddress ?? safeId, eligibility: 'signer' }

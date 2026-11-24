@@ -38,8 +38,12 @@ export const fromGasParamsDraft = (draft: GasParamsDraft): AdvancedParameters =>
 })
 
 const validateAmount = (value: string): GasParamError | undefined => {
-  if (value.trim() === '') return 'REQUIRED'
-  if (!FLOAT_REGEX.test(value.trim()) || parseGwei(value) === undefined) return 'INVALID_AMOUNT'
+  if (value.trim() === '') {
+    return 'REQUIRED'
+  }
+  if (!FLOAT_REGEX.test(value.trim()) || parseGwei(value) === undefined) {
+    return 'INVALID_AMOUNT'
+  }
   return undefined
 }
 
@@ -47,21 +51,31 @@ const validateAmount = (value: string): GasParamError | undefined => {
 export const validateGasParamsDraft = (draft: GasParamsDraft, isEIP1559: boolean): GasParamsDraftErrors => {
   const errors: GasParamsDraftErrors = {}
 
-  if (!INTEGER_REGEX.test(draft.userNonce.trim())) errors.userNonce = 'NOT_INTEGER'
+  if (!INTEGER_REGEX.test(draft.userNonce.trim())) {
+    errors.userNonce = 'NOT_INTEGER'
+  }
 
   const gasLimit = draft.gasLimit.trim()
-  if (gasLimit === '') errors.gasLimit = 'REQUIRED'
-  else if (!INTEGER_REGEX.test(gasLimit)) errors.gasLimit = 'NOT_INTEGER'
-  else if (BigInt(gasLimit) < BigInt(BASE_TX_GAS)) errors.gasLimit = 'BELOW_MIN_GAS_LIMIT'
+  if (gasLimit === '') {
+    errors.gasLimit = 'REQUIRED'
+  } else if (!INTEGER_REGEX.test(gasLimit)) {
+    errors.gasLimit = 'NOT_INTEGER'
+  } else if (BigInt(gasLimit) < BigInt(BASE_TX_GAS)) {
+    errors.gasLimit = 'BELOW_MIN_GAS_LIMIT'
+  }
 
   const maxFeeError = validateAmount(draft.maxFeePerGas)
-  if (maxFeeError) errors.maxFeePerGas = maxFeeError
+  if (maxFeeError) {
+    errors.maxFeePerGas = maxFeeError
+  }
 
   if (isEIP1559) {
     const priorityFeeError = validateAmount(draft.maxPriorityFeePerGas)
-    if (priorityFeeError) errors.maxPriorityFeePerGas = priorityFeeError
-    else if (!maxFeeError && parseGwei(draft.maxPriorityFeePerGas)! > parseGwei(draft.maxFeePerGas)!)
+    if (priorityFeeError) {
+      errors.maxPriorityFeePerGas = priorityFeeError
+    } else if (!maxFeeError && parseGwei(draft.maxPriorityFeePerGas)! > parseGwei(draft.maxFeePerGas)!) {
       errors.maxFeePerGas = 'BELOW_PRIORITY_FEE'
+    }
   }
 
   return errors

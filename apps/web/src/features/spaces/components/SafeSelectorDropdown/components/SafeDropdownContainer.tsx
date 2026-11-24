@@ -139,10 +139,14 @@ const SafeDropdownContainer = ({
   )
 
   useEffect(() => {
-    if (!selectedItemId || isLoading || query) return
+    if (!selectedItemId || isLoading || query) {
+      return
+    }
     const area = scrollAreaRef.current
     const current = area?.querySelector<HTMLElement>('[data-current-safe="true"]')
-    if (!area || !current) return
+    if (!area || !current) {
+      return
+    }
     // Scroll only this area: scrollIntoView also scrolls the overflow-hidden popup, clipping its header.
     const offset = current.getBoundingClientRect().top - area.getBoundingClientRect().top
     area.scrollTop += offset - (area.clientHeight - current.offsetHeight) / 2
@@ -269,7 +273,9 @@ const SafeDropdownContainer = ({
                   // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
                   // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
                   onKeyDown={(e) => {
-                    if (e.key !== 'Escape') e.stopPropagation()
+                    if (e.key !== 'Escape') {
+                      e.stopPropagation()
+                    }
                   }}
                   autoComplete="off"
                   data-testid="safe-dropdown-search-input"

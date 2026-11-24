@@ -76,7 +76,9 @@ export const getEmptySafeApp = (url = '', appData?: SafeAppData): SafeAppDataWit
 }
 
 export const getOrigin = (url?: string): string => {
-  if (!url) return ''
+  if (!url) {
+    return ''
+  }
 
   const { origin } = new URL(url)
 

@@ -23,7 +23,9 @@ export const createContactItems = (data: ImportContactsFormValues) => {
   return Object.entries(data.contacts)
     .map(([contactItemId, name]) => {
       const [chainId, address] = contactItemId.split(':')
-      if (!name) return
+      if (!name) {
+        return
+      }
 
       return {
         chainIds: [chainId],

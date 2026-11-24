@@ -52,7 +52,9 @@ export default function Plans({
     // Wait a frame so the expanded rows are laid out before scrolling to the card.
     requestAnimationFrame(() => {
       const card = compareRef.current
-      if (!card) return
+      if (!card) {
+        return
+      }
       card.scrollIntoView({
         behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
         block: 'start',

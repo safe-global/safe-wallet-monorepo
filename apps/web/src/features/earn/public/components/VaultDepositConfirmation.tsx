@@ -11,7 +11,9 @@ import { InfoTooltip } from '@safe-global/views/components/common/InfoTooltip'
 import { BRAND_NAME } from '@/config/constants'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {
-  if (!txInfo.additionalRewards[0]) return null
+  if (!txInfo.additionalRewards[0]) {
+    return null
+  }
 
   return (
     <div className="mt-2 flex flex-col rounded-md border border-[var(--color-border-light)] p-3">
@@ -91,7 +93,9 @@ const VaultDepositConfirmation = ({
   txInfo: VaultDepositTransactionInfo
   isTxDetails?: boolean
 }) => {
-  if (!txInfo.vaultInfo) return null
+  if (!txInfo.vaultInfo) {
+    return null
+  }
 
   const annualReward = Number(txInfo.expectedAnnualReward).toFixed(0)
   const monthlyReward = Number(txInfo.expectedMonthlyReward).toFixed(0)

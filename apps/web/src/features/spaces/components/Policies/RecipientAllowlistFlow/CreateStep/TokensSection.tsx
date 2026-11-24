@@ -124,7 +124,9 @@ const TokensSection = ({
   }
 
   const renderBody = () => {
-    if (!hasAccount) return <AllowlistEmptyItem>{TOKENS_EMPTY_TEXT}</AllowlistEmptyItem>
+    if (!hasAccount) {
+      return <AllowlistEmptyItem>{TOKENS_EMPTY_TEXT}</AllowlistEmptyItem>
+    }
     if (isLoading) {
       return (
         <div
@@ -140,7 +142,9 @@ const TokensSection = ({
     if (hasLoadError) {
       return <LoadErrorAlert message={TOKENS_LOAD_ERROR_TEXT} onRetry={refetch} data-testid="allowlist-tokens-error" />
     }
-    if (tokens.length === 0) return <AllowlistEmptyItem>{TOKENS_EMPTY_TEXT}</AllowlistEmptyItem>
+    if (tokens.length === 0) {
+      return <AllowlistEmptyItem>{TOKENS_EMPTY_TEXT}</AllowlistEmptyItem>
+    }
     return (
       <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-2">
         {tokens.map((address) => {

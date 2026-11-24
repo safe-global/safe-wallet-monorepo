@@ -102,8 +102,12 @@ export const capitalize = (str: string): string => {
 // Format the error message
 export const formatError = (error: Error & { reason?: string }): string => {
   let { reason } = error
-  if (!reason) return ''
-  if (!reason.endsWith('.')) reason += '.'
+  if (!reason) {
+    return ''
+  }
+  if (!reason.endsWith('.')) {
+    reason += '.'
+  }
   return ` ${capitalize(reason)}`
 }
 

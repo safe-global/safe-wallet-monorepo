@@ -76,7 +76,9 @@ export const useRefetchBalances = () => {
 
   // Runs after the balances refetch, so the summary reads the snapshot it just cached rather than asking Zerion again
   const refetchSummary = useCallback(async () => {
-    if (!hasPortfolioSummaries || !safeAddress || !safe.deployed || isTrustedTokenList === undefined) return
+    if (!hasPortfolioSummaries || !safeAddress || !safe.deployed || isTrustedTokenList === undefined) {
+      return
+    }
     await dispatch(
       refreshPortfolioSummary({
         safes: [makeSafeTag(safe.chainId, safeAddress)],

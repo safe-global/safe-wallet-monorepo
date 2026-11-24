@@ -218,7 +218,9 @@ describe('SafenetReader.fetchCheckState', () => {
       reader.fetchCheckState(SAFE_TX_HASH),
       reader.fetchCheckState(SAFE_TX_HASH),
     ])
-    for (const result of results) expect(result.headBlock).toBe('25000')
+    for (const result of results) {
+      expect(result.headBlock).toBe('25000')
+    }
   })
 
   it('does not cancel a concurrent read when one call fails on the shared endpoint', async () => {
@@ -352,7 +354,9 @@ describe('SafenetReader.fetchCheckState', () => {
     // topic1 OR-array. Compared as a set: ethers sorts topic arrays on the way
     // out, so proposal order does not reach the wire.
     expect(orac.length).toBeGreaterThan(0)
-    for (const call of orac) expect([...(call.topics[1] as string[])].sort()).toEqual([...ids].sort())
+    for (const call of orac) {
+      expect([...(call.topics[1] as string[])].sort()).toEqual([...ids].sort())
+    }
     // The correlation fields follow the latest allowlisted proposal.
     expect(result.epoch).toBe('2')
     expect(result.requestId).toBe(ids[1])

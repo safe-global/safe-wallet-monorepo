@@ -72,7 +72,9 @@ function BalancesTable({ assets, selected, onSelectionChange, gasPrice, nativeFi
   const [sort, setSort] = useState<Sort>()
 
   const rows = useMemo(() => {
-    if (!sort) return assets
+    if (!sort) {
+      return assets
+    }
     const sign = sort.direction === 'asc' ? 1 : -1
     return [...assets].sort((a, b) => sign * compare[sort.column](a, b))
   }, [assets, sort])

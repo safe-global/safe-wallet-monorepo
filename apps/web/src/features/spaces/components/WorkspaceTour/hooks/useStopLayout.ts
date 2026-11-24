@@ -48,7 +48,9 @@ export const useStopLayout = (step: TourStep, isOnStepRoute: boolean, onMissingT
     const observer = new MutationObserver(sync)
     const timeout = targetSelector
       ? window.setTimeout(() => {
-          if (!document.querySelector(targetSelector)) reportMissing()
+          if (!document.querySelector(targetSelector)) {
+            reportMissing()
+          }
         }, ANCHOR_TIMEOUT_MS)
       : undefined
 

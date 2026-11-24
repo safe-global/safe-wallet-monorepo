@@ -61,7 +61,9 @@ const selectAttestation = async (
     if (best === null || VERIFICATION_RANK[attestation.status] > VERIFICATION_RANK[best.attestation.status]) {
       best = { event, attestation }
     }
-    if (attestation.status === AttestationVerificationStatus.VERIFIED) break
+    if (attestation.status === AttestationVerificationStatus.VERIFIED) {
+      break
+    }
   }
   return best
 }
@@ -77,7 +79,9 @@ const timedOutAtMs = async (
 }
 
 const configuredRpcUrl = (rpcUri: RpcUri | undefined): string => {
-  if (!rpcUri?.value) throw new Error('Safenet chain RPC configuration unavailable')
+  if (!rpcUri?.value) {
+    throw new Error('Safenet chain RPC configuration unavailable')
+  }
   if (rpcUri.authentication === 'API_KEY_PATH' && !INFURA_TOKEN) {
     throw new Error('Safenet chain RPC token unavailable')
   }

@@ -56,7 +56,9 @@ const useAutoScanOrchestrator = ({
   const lastScannedKeysRef = useRef<string>('')
 
   useEffect(() => {
-    if (isLoadingSpacesSafes || safes.length === 0 || !security) return
+    if (isLoadingSpacesSafes || safes.length === 0 || !security) {
+      return
+    }
 
     // Page stays mounted across sidebar space switches. Force a fresh scan when the
     // space changes so two spaces with overlapping Safes still trigger a rescan.

@@ -37,7 +37,9 @@ jest.mock('@/components/common/AddressInput', () => {
             // Like the real input, a resolved ENS name is replaced by its address.
             onChange: (event: { target: { value: string } }) => {
               const resolved = mockEnsNames[event.target.value]
-              if (resolved) setValue(name, resolved, { shouldValidate: true })
+              if (resolved) {
+                setValue(name, resolved, { shouldValidate: true })
+              }
             },
           })}
         />
@@ -68,7 +70,9 @@ const renderRow = (existing: AllowlistFormRecipient[] = [], autoFocus?: boolean)
 }
 
 const goToAddressStep = async (user: ReturnType<typeof renderRow>['user'], name?: string) => {
-  if (name) await user.type(screen.getByLabelText('Name (optional)'), name)
+  if (name) {
+    await user.type(screen.getByLabelText('Name (optional)'), name)
+  }
   await user.click(screen.getByRole('button', { name: 'Next' }))
 }
 

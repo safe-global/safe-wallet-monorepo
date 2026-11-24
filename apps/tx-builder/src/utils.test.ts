@@ -15,7 +15,9 @@ import {
 // This is what parseIntValue should return: decimal string, zero-padded for positive numbers
 const padDecimal = (decimalStr: string, bits: number): string => {
   const isNegative = decimalStr.startsWith('-')
-  if (isNegative) return decimalStr // Negative numbers are not padded
+  if (isNegative) {
+    return decimalStr
+  } // Negative numbers are not padded
   return decimalStr.padStart(Math.ceil(bits / 4), '0')
 }
 

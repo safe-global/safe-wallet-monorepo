@@ -18,11 +18,17 @@ export class QuotaExceededError extends Error {
 }
 
 export const getQuotaExceededError = (thrown: unknown): QuotaExceededError | undefined => {
-  if (typeof thrown !== 'object' || thrown === null || !('data' in thrown)) return undefined
+  if (typeof thrown !== 'object' || thrown === null || !('data' in thrown)) {
+    return undefined
+  }
   const data = (thrown as { data?: unknown }).data
-  if (typeof data !== 'object' || data === null) return undefined
+  if (typeof data !== 'object' || data === null) {
+    return undefined
+  }
   const { code, feature, quota, used, resetsAt, message } = data as Record<string, unknown>
-  if (code !== QUOTA_EXCEEDED_CODE) return undefined
+  if (code !== QUOTA_EXCEEDED_CODE) {
+    return undefined
+  }
 
   return new QuotaExceededError(
     typeof feature === 'string' ? feature : 'unknown',

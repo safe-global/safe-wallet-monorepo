@@ -14,7 +14,9 @@ export function useCounterfactualBalances(safe: ExtendedSafeInfo) {
   const showNativeInBalances = chain ? getNativeTokenDisplay(chain).showNativeInBalances : true
 
   return useAsync<Balances | undefined>(() => {
-    if (!chain || !isCounterfactual || !safeAddress) return
+    if (!chain || !isCounterfactual || !safeAddress) {
+      return
+    }
 
     if (!showNativeInBalances) {
       return Promise.resolve(<Balances>{ fiatTotal: '0', items: [] })

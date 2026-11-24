@@ -23,7 +23,9 @@ const NetworkInput = ({
 
   const renderItem = (chainId: string, isDisabled: boolean) => {
     const chain = chainConfigs.find((chain) => chain.chainId === chainId)
-    if (!chain) return null
+    if (!chain) {
+      return null
+    }
     return (
       <SelectItem disabled={isDisabled} key={chainId} value={chainId} className={css.item}>
         <ChainIndicator chainId={chain.chainId} />
@@ -60,7 +62,9 @@ const NetworkInput = ({
               <SelectValue>
                 {(value) => {
                   const chain = chainConfigs.find((chain) => chain.chainId === value)
-                  if (chain) return <ChainIndicator chainId={chain.chainId} />
+                  if (chain) {
+                    return <ChainIndicator chainId={chain.chainId} />
+                  }
                   return required ? null : 'Optional'
                 }}
               </SelectValue>

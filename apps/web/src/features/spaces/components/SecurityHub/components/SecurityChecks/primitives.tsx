@@ -143,10 +143,16 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
 export const makeBuildCta =
   (checkDefs: SecurityServices['checkDefs'], spaceId: string | null) =>
   (checkId: string, result: ScanResult | undefined, safeQueryParam: string | undefined): Cta | null => {
-    if (!safeQueryParam) return null
+    if (!safeQueryParam) {
+      return null
+    }
     const def = checkDefs[checkId]
-    if (!def) return null
-    if (result && isPassingStatus(result.status) && !result.upgradeAvailable) return null
+    if (!def) {
+      return null
+    }
+    if (result && isPassingStatus(result.status) && !result.upgradeAvailable) {
+      return null
+    }
     const label = result?.ctaLabelOverride || def.ctaLabel
     return {
       label,
@@ -195,7 +201,9 @@ export const EvidenceList = ({
   cta?: Cta | null
 }): ReactElement | null => {
   const hasEvidence = !!evidence && evidence.length > 0
-  if (!intro && !hasEvidence && !cta) return null
+  if (!intro && !hasEvidence && !cta) {
+    return null
+  }
   return (
     <div className="flex flex-col gap-1.5">
       {intro && (
@@ -243,8 +251,12 @@ export const EvidenceList = ({
  * carries only the evidence list and CTA.
  */
 export const buildExpanded = (result: ScanResult | undefined, cta?: Cta | null): ReactNode => {
-  if (!result) return cta ? <EvidenceList cta={cta} /> : undefined
+  if (!result) {
+    return cta ? <EvidenceList cta={cta} /> : undefined
+  }
   const hasEvidence = result.evidence && result.evidence.length > 0
-  if (!hasEvidence && !cta) return undefined
+  if (!hasEvidence && !cta) {
+    return undefined
+  }
   return <EvidenceList evidence={result.evidence} cta={cta} />
 }

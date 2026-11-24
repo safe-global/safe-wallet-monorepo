@@ -161,9 +161,13 @@ const GS_CODE_RE = /\bGS\d{3}\b/
 export const getGsCodeFromError = (
   error?: { message?: string; reason?: string; code?: unknown } | null,
 ): GsCode | undefined => {
-  if (!error) return undefined
+  if (!error) {
+    return undefined
+  }
 
-  if (isGsCode(error.code)) return error.code
+  if (isGsCode(error.code)) {
+    return error.code
+  }
 
   const reason = typeof error.reason === 'string' ? error.reason : ''
   const message = typeof error.message === 'string' ? error.message : ''
@@ -194,7 +198,9 @@ export const getSpecificContractErrorMessage = (
   params?: ContractErrorParams,
 ): string | undefined => {
   const code = getGsCodeFromError(error)
-  if (!code) return undefined
+  if (!code) {
+    return undefined
+  }
 
   const message = getContractErrorMessage(code, params)
 
@@ -216,20 +222,28 @@ const REVERT_MESSAGE = /execution reverted|reverted with the following/i
  * analytics provider is imported during app bootstrap.
  */
 export const isRevertError = (error: unknown): boolean => {
-  if (!error) return false
+  if (!error) {
+    return false
+  }
 
   const err = error as { code?: unknown; reason?: string; message?: string }
 
   // A known GS revert reason is definitive.
-  if (getGsCodeFromError(err)) return true
+  if (getGsCodeFromError(err)) {
+    return true
+  }
 
   // ethers marks a reverted eth_call/estimateGas as CALL_EXCEPTION.
-  if (err.code === 'CALL_EXCEPTION') return true
+  if (err.code === 'CALL_EXCEPTION') {
+    return true
+  }
 
   // viem/ethers revert text. "reverted with" is anchored to the phrasings those
   // clients actually emit, so an infra failure worded "… reverted with a
   // connection timeout" is not read as a revert.
-  if (typeof err.message === 'string' && REVERT_MESSAGE.test(err.message)) return true
+  if (typeof err.message === 'string' && REVERT_MESSAGE.test(err.message)) {
+    return true
+  }
 
   return false
 }

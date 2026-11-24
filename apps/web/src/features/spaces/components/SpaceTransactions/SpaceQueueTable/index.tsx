@@ -38,7 +38,9 @@ const OVERSCAN = 12
 
 const toggle = (set: ReadonlySet<string>, id: string): Set<string> => {
   const next = new Set(set)
-  if (!next.delete(id)) next.add(id)
+  if (!next.delete(id)) {
+    next.add(id)
+  }
   return next
 }
 
@@ -59,7 +61,9 @@ const toTarget = ({ scopeKey, chainId, safeAddress }: ScopedItem): ScopeTarget =
 const getScopeTargets = (items: QueueListItem[]): ScopeTarget[] => {
   const targets = new Map<string, ScopeTarget>()
   for (const item of items) {
-    if (isScoped(item) && !targets.has(item.scopeKey)) targets.set(item.scopeKey, toTarget(item))
+    if (isScoped(item) && !targets.has(item.scopeKey)) {
+      targets.set(item.scopeKey, toTarget(item))
+    }
   }
   return [...targets.values()]
 }
@@ -191,7 +195,9 @@ const SpaceQueueTable = ({
   const [scrollMargin, setScrollMargin] = useState(0)
   useLayoutEffect(() => {
     const body = bodyRef.current
-    if (!body) return
+    if (!body) {
+      return
+    }
     const update = () => setScrollMargin(body.getBoundingClientRect().top + window.scrollY)
     update()
     const observer = new ResizeObserver(update)

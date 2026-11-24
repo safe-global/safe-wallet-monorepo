@@ -11,7 +11,9 @@ const formatRowFiat = (n: number): string => '$' + rowFiatFormatter.format(n)
 
 // Multi-chain Safes appear as N overviews (one per chain); summing by address aggregates them.
 export const sumOverviewsForAddress = (overviews: SafeOverview[] | undefined, address: string): number | null => {
-  if (!overviews) return null
+  if (!overviews) {
+    return null
+  }
   let found = false
   let total = 0
   for (const o of overviews) {

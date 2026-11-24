@@ -34,7 +34,9 @@ const GroupedTxListItems = ({
 }): ReactElement | null => {
   const chain = useCurrentChain()
   const explorerLink = chain && getBlockExplorerLink(chain, transactionHash)?.href
-  if (groupedListItems.length === 0) return null
+  if (groupedListItems.length === 0) {
+    return null
+  }
   let title = 'Bulk transactions'
   const isSwapTransfer = isSwapTransferOrderTxInfo(groupedListItems[0].transaction.txInfo)
   if (isSwapTransfer) {

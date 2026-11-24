@@ -16,8 +16,11 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 const setSpaceId = (id: string | undefined) => {
-  if (id === undefined) delete mockRouterQuery.spaceId
-  else mockRouterQuery.spaceId = id
+  if (id === undefined) {
+    delete mockRouterQuery.spaceId
+  } else {
+    mockRouterQuery.spaceId = id
+  }
 }
 
 const parseHref = (anchor: HTMLAnchorElement) => {

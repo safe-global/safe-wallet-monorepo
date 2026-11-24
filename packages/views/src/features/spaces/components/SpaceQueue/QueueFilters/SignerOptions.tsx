@@ -18,7 +18,9 @@ export type SignerOptionsProps = {
 
 /** The Signer filter's checkboxes, in the Filter menu: the signers a queued transaction still awaits */
 const SignerOptions = ({ options, onToggle }: SignerOptionsProps): ReactElement => {
-  if (options.length === 0) return <NoFilterOptions>No signers to wait on</NoFilterOptions>
+  if (options.length === 0) {
+    return <NoFilterOptions>No signers to wait on</NoFilterOptions>
+  }
 
   return (
     <>

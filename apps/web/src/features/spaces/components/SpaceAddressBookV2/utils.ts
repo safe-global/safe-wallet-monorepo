@@ -61,8 +61,11 @@ export const toLocalContacts = (
     for (const [address, name] of Object.entries(book)) {
       const key = address.toLowerCase()
       const existing = byAddress.get(key)
-      if (existing) existing.chainIds.add(chainId)
-      else byAddress.set(key, { address, name, chainIds: new Set([chainId]) })
+      if (existing) {
+        existing.chainIds.add(chainId)
+      } else {
+        byAddress.set(key, { address, name, chainIds: new Set([chainId]) })
+      }
     }
   }
 

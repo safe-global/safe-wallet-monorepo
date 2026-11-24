@@ -67,7 +67,9 @@ const storeValue = <T,>(key: string, value: T): void => {
 
 const getAppRow = (origin: string): HTMLElement => {
   const row = screen.getByText(origin).closest<HTMLElement>('[data-testid="app-permissions-item"]')
-  if (!row) throw new Error(`No permissions row for ${origin}`)
+  if (!row) {
+    throw new Error(`No permissions row for ${origin}`)
+  }
   return row
 }
 

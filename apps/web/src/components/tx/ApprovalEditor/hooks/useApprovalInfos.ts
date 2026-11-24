@@ -36,7 +36,9 @@ export const useApprovalInfos = (payload: {
 
   const [approvalInfos, error, loading] = useAsync<ApprovalInfo[] | undefined>(
     async () => {
-      if (!hasApprovalSignatures) return
+      if (!hasApprovalSignatures) {
+        return
+      }
 
       return Promise.all(
         approvals.payload.map(async (approval) => {

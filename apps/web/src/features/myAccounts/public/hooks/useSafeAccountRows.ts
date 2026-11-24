@@ -256,8 +256,12 @@ const compareAddresses = (a: AccountGroup, b: AccountGroup) =>
 const compareByName = (a: AccountGroup, b: AccountGroup, order: 'asc' | 'desc') => {
   const an = a.sort.name
   const bn = b.sort.name
-  if (an && !bn) return -1
-  if (!an && bn) return 1
+  if (an && !bn) {
+    return -1
+  }
+  if (!an && bn) {
+    return 1
+  }
   const cmp = an && bn ? an.localeCompare(bn) || compareAddresses(a, b) : compareAddresses(a, b)
   return order === 'asc' ? cmp : -cmp
 }
@@ -269,25 +273,41 @@ const compareByName = (a: AccountGroup, b: AccountGroup, order: 'asc' | 'desc') 
 const compareByThreshold = (a: AccountGroup, b: AccountGroup, order: 'asc' | 'desc') => {
   const at = a.sort.threshold
   const bt = b.sort.threshold
-  if (at === null && bt === null) return 0
-  if (at === null) return 1
-  if (bt === null) return -1
+  if (at === null && bt === null) {
+    return 0
+  }
+  if (at === null) {
+    return 1
+  }
+  if (bt === null) {
+    return -1
+  }
   const cmp = at - bt || (a.sort.owners ?? 0) - (b.sort.owners ?? 0)
   return order === 'asc' ? cmp : -cmp
 }
 
 /** Orders groups by a sortable column; empty/unknown values always sink to the bottom. */
 export const compareGroups = (a: AccountGroup, b: AccountGroup, orderBy: SafeSortColumn, order: 'asc' | 'desc') => {
-  if (orderBy === 'name') return compareByName(a, b, order)
-  if (orderBy === 'threshold') return compareByThreshold(a, b, order)
+  if (orderBy === 'name') {
+    return compareByName(a, b, order)
+  }
+  if (orderBy === 'threshold') {
+    return compareByThreshold(a, b, order)
+  }
 
   const av = a.sort[orderBy]
   const bv = b.sort[orderBy]
   const aEmpty = av === null || av === ''
   const bEmpty = bv === null || bv === ''
-  if (aEmpty && bEmpty) return 0
-  if (aEmpty) return 1
-  if (bEmpty) return -1
+  if (aEmpty && bEmpty) {
+    return 0
+  }
+  if (aEmpty) {
+    return 1
+  }
+  if (bEmpty) {
+    return -1
+  }
 
   const cmp = typeof av === 'string' && typeof bv === 'string' ? av.localeCompare(bv) : av < bv ? -1 : av > bv ? 1 : 0
   return order === 'asc' ? cmp : -cmp

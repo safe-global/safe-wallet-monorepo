@@ -27,7 +27,9 @@ const getPathname = (value: string): string | undefined => {
 export const isTenderlySimulateUrl = (value: string): boolean => /\/simulate\/?$/.test(getPathname(value) ?? '')
 
 export const getTenderlyUrlError = (value: string): true | string => {
-  if (isTenderlySimulateUrl(value)) return true
+  if (isTenderlySimulateUrl(value)) {
+    return true
+  }
   // Tenderly's "Copy API URL" button yields the project URL; users must append /simulate themselves
   const isProjectUrl = /\/account\/[^/]+\/project\/[^/]+\/?$/.test(getPathname(value) ?? '')
   return isProjectUrl ? TENDERLY_URL_MISSING_SIMULATE_ERROR : TENDERLY_URL_ERROR

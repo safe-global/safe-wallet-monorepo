@@ -26,12 +26,16 @@ const Slider: React.FC<SliderProps> = ({ onSlideChange, children, initialStep })
     }
 
     return () => {
-      if (id) clearTimeout(id)
+      if (id) {
+        clearTimeout(id)
+      }
     }
   }, [disabledBtn])
 
   const nextSlide = () => {
-    if (disabledBtn) return
+    if (disabledBtn) {
+      return
+    }
 
     const nextStep = activeStep + 1
 
@@ -41,7 +45,9 @@ const Slider: React.FC<SliderProps> = ({ onSlideChange, children, initialStep })
   }
 
   const prevSlide = () => {
-    if (disabledBtn) return
+    if (disabledBtn) {
+      return
+    }
 
     const prevStep = activeStep - 1
 

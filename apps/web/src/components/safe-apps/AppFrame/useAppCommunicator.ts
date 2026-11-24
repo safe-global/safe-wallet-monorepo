@@ -101,7 +101,9 @@ const useAppCommunicator = (
 
       communicatorInstance = new AppCommunicator(iframeRef, allowedOrigin, {
         onMessage: (msg) => {
-          if (!msg.data) return
+          if (!msg.data) {
+            return
+          }
 
           const isCustomApp = app.id < 1
 

@@ -30,15 +30,21 @@ export const spenderDisplayName = ({ name, address }: Pick<SpenderSummary, 'name
 
 /** `Alice` · `Alice and Bob` · `Alice, Bob and Carol`. */
 export const joinNames = (names: readonly string[]): string => {
-  if (names.length === 0) return ''
-  if (names.length === 1) return names[0]
+  if (names.length === 0) {
+    return ''
+  }
+  if (names.length === 1) {
+    return names[0]
+  }
   return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
 }
 
 /** The callout adjective when every limit shares one canonical period; undefined for a mixed or test-chain set. */
 const sharedAdjective = (policy: SpendingLimitSummaryModel): string | undefined => {
   const periods = new Set(policy.spenders.flatMap((spender) => spender.limits.map((limit) => limit.resetTimeMin)))
-  if (periods.size !== 1) return undefined
+  if (periods.size !== 1) {
+    return undefined
+  }
   const [resetTimeMin] = [...periods]
   return describeFrequency(resetTimeMin, policy.safe.chainId).adjective
 }

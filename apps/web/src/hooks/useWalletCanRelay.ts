@@ -11,11 +11,15 @@ const useWalletCanRelay = (tx: SafeTransaction | undefined) => {
   const hasEnoughSignatures = tx && tx.signatures.size >= safe.threshold
 
   return useAsync(() => {
-    if (!tx || !wallet) return
+    if (!tx || !wallet) {
+      return
+    }
 
     return isSmartContractWallet(wallet.chainId, wallet.address)
       .then((isSCWallet) => {
-        if (!isSCWallet) return true
+        if (!isSCWallet) {
+          return true
+        }
 
         return hasEnoughSignatures
       })

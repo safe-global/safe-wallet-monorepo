@@ -83,7 +83,9 @@ function EntryDialog({
       setIsSubmitting(true)
       const result = await upsertWorkspaceName({ ...entry, chainIds: targetChainIds })
       setIsSubmitting(false)
-      if (result.error) return setError(result.error)
+      if (result.error) {
+        return setError(result.error)
+      }
     } else {
       dispatch(upsertAddressBookEntries({ ...entry, chainIds: targetChainIds, notify: true }))
     }
@@ -98,7 +100,9 @@ function EntryDialog({
   }
 
   const submitCallback = handleSubmit(async (data: AddressEntry) => {
-    if (similar) return setPendingEntry(data)
+    if (similar) {
+      return setPendingEntry(data)
+    }
     await save(data)
   })
 
@@ -108,14 +112,18 @@ function EntryDialog({
   }
 
   const onConfirmLookalike = () => {
-    if (!pendingEntry) return
+    if (!pendingEntry) {
+      return
+    }
     trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
     setPendingEntry(undefined)
     save(pendingEntry).catch(onSaveError)
   }
 
   const onCancelLookalike = () => {
-    if (!pendingEntry) return
+    if (!pendingEntry) {
+      return
+    }
     trackEvent(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
       ...lookalikeTracking,
       [MixpanelEventParams.DISMISS_ACTION]: DismissAction.CANCEL,

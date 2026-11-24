@@ -13,7 +13,9 @@ interface ErrorWithStatus extends Error {
 
 // EIP-1193 and JSON-RPC codes are safe integers, which cannot hold a secret; any other code could
 const safeIntegerCode = (thrown: unknown): number | undefined => {
-  if (typeof thrown !== 'object' || thrown === null || Array.isArray(thrown)) return undefined
+  if (typeof thrown !== 'object' || thrown === null || Array.isArray(thrown)) {
+    return undefined
+  }
 
   const { code } = thrown as { code?: unknown }
   return typeof code === 'number' && Number.isSafeInteger(code) ? code : undefined
@@ -119,14 +121,22 @@ export const getHttpStatusFromError = (thrown: unknown): number | undefined => {
       statusCode?: unknown
       originalStatus?: unknown
     }
-    if (isHttpStatus(status)) return status
-    if (isHttpStatus(statusCode)) return statusCode
-    if (isHttpStatus(originalStatus)) return originalStatus
+    if (isHttpStatus(status)) {
+      return status
+    }
+    if (isHttpStatus(statusCode)) {
+      return statusCode
+    }
+    if (isHttpStatus(originalStatus)) {
+      return originalStatus
+    }
   }
 
   if (thrown instanceof Error) {
     const match = thrown.message.match(CGW_STATUS_RE)
-    if (match) return Number(match[1])
+    if (match) {
+      return Number(match[1])
+    }
   }
 
   return undefined

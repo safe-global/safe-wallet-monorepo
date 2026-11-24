@@ -48,7 +48,9 @@ const paramErrorText = (name: GasDetailName, error: GasParamError): string => {
 }
 
 const rowValue = (row: GasDetailRow): string => {
-  if (row.error) return 'Cannot estimate'
+  if (row.error) {
+    return 'Cannot estimate'
+  }
   return row.value ?? '-'
 }
 
@@ -75,7 +77,9 @@ const ParamInput = ({
       onChange={(e) => onChange(field.name, e.target.value)}
       // The card sits inside the transaction form: Enter saves the settings instead of submitting the transaction.
       onKeyDown={(e) => {
-        if (e.key !== 'Enter') return
+        if (e.key !== 'Enter') {
+          return
+        }
         e.preventDefault()
         onEnter()
       }}

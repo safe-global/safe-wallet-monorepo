@@ -42,7 +42,9 @@ const PlanPicker = ({
       </Alert>
     )
   }
-  if (!sizes) return <Skeleton className="h-96 w-full max-w-md rounded-lg-xl" data-testid="trial-plans-skeleton" />
+  if (!sizes) {
+    return <Skeleton className="h-96 w-full max-w-md rounded-lg-xl" data-testid="trial-plans-skeleton" />
+  }
   if (!size) {
     return (
       <Alert variant="info">
@@ -74,7 +76,9 @@ const PlanStep = (): ReactElement => {
   const largestSeats = sizes?.at(-1)?.seats
 
   const onNext = () => {
-    if (size) advance({ paymentLinkId: size.paymentLinkId })
+    if (size) {
+      advance({ paymentLinkId: size.paymentLinkId })
+    }
   }
   // Back keeps only a plan the user picked, not the one shown by default.
   const onBack = () => retreat(pickedLinkId ? { paymentLinkId: pickedLinkId } : {})

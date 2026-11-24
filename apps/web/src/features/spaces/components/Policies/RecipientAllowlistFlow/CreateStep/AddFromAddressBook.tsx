@@ -77,7 +77,9 @@ const POPUP_SCROLL_MARGIN = 16
 
 const findScrollParent = (element: HTMLElement | null): HTMLElement => {
   for (let node = element?.parentElement; node; node = node.parentElement) {
-    if (/(auto|scroll)/.test(getComputedStyle(node).overflowY)) return node
+    if (/(auto|scroll)/.test(getComputedStyle(node).overflowY)) {
+      return node
+    }
   }
   return document.body
 }
@@ -88,7 +90,9 @@ const scrollPopupIntoView = (trigger: HTMLElement, popup: HTMLElement, container
   const visibleBottom = isPage ? window.innerHeight : container.getBoundingClientRect().bottom
   const popupBottom = trigger.getBoundingClientRect().bottom + POPUP_OFFSET + popup.offsetHeight
   const overflow = popupBottom + POPUP_SCROLL_MARGIN - visibleBottom
-  if (overflow <= 0) return
+  if (overflow <= 0) {
+    return
+  }
   const scroller = isPage ? (document.scrollingElement ?? container) : container
   scroller.scrollBy({ top: overflow, behavior: 'smooth' })
 }
@@ -150,7 +154,9 @@ const AddFromAddressBook = ({
 
   // Waits until the popup is laid out and has taken focus: focusing it would cancel a smooth scroll started earlier.
   useEffect(() => {
-    if (!spacerHost) return
+    if (!spacerHost) {
+      return
+    }
     let frame = 0
     const scrollWhenReady = (attemptsLeft: number) => {
       frame = requestAnimationFrame(() => {

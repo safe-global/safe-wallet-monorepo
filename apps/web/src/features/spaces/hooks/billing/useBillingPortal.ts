@@ -9,9 +9,13 @@ export const useBillingPortal = (spaceId?: string | null) => {
   const [trigger, { isFetching, isError }] = useLazyBillingGetSessionUrlV1Query()
 
   const openPortal = useCallback(async () => {
-    if (!gatedSpaceId) return
+    if (!gatedSpaceId) {
+      return
+    }
     const result = await trigger({ spaceId: gatedSpaceId, returnUrl: getPortalReturnUrl(gatedSpaceId) })
-    if (result.data) navigateTo(result.data.url)
+    if (result.data) {
+      navigateTo(result.data.url)
+    }
   }, [gatedSpaceId, trigger])
 
   return { openPortal, isRedirecting: isFetching, isError }

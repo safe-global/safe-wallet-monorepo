@@ -41,7 +41,9 @@ export const SpacesSidebarContent = ({
   // The spaces index (/spaces) is exact-match only — otherwise every space
   // sub-route would also highlight Home.
   const isItemActive = (item: SidebarItemConfig, pathname: string) => {
-    if (item.href === AppRoutes.spaces.index) return pathname === item.href
+    if (item.href === AppRoutes.spaces.index) {
+      return pathname === item.href
+    }
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 

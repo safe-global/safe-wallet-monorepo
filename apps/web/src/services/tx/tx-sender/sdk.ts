@@ -112,7 +112,9 @@ async function switchOrAddChain(walletProvider: ConnectedWallet['provider'], cha
 
 export const switchWalletChain = async (onboard: OnboardAPI, chainId: string): Promise<ConnectedWallet | null> => {
   const currentWallet = getConnectedWallet(onboard.state.get().wallets)
-  if (!currentWallet) return null
+  if (!currentWallet) {
+    return null
+  }
 
   // Onboard incorrectly returns WalletConnect's chainId, so it needs to be switched unconditionally
   if (currentWallet.chainId === chainId && !isWalletConnect(currentWallet)) {

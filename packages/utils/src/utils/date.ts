@@ -20,7 +20,9 @@ export const formatWithSchema = (timestamp: number, schema: string): string => f
 export const formatDate = (timestamp: number): string => formatWithSchema(timestamp, 'MMM d, yyyy')
 
 export const parseTimestamp = (value: string | null | undefined): number | null => {
-  if (!value) return null
+  if (!value) {
+    return null
+  }
   const timestamp = new Date(value).getTime()
   return Number.isFinite(timestamp) ? timestamp : null
 }

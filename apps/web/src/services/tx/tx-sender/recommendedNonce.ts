@@ -27,7 +27,9 @@ export const getSafeTxGas = async (
   const isSafeTxGasRequired = isLegacyVersion(safeVersion)
 
   // For 1.3.0+ Safes safeTxGas is not required
-  if (!isSafeTxGasRequired) return '0'
+  if (!isSafeTxGasRequired) {
+    return '0'
+  }
 
   try {
     const estimation = await fetchRecommendedParams(chainId, safeAddress, safeTxData)

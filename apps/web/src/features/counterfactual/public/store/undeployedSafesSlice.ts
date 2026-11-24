@@ -56,7 +56,9 @@ export const undeployedSafesSlice = createSlice({
     ) => {
       const { chainId, address, status } = action.payload
 
-      if (!state[chainId]?.[address]) return state
+      if (!state[chainId]?.[address]) {
+        return state
+      }
 
       const existing = state[chainId][address]
       state[chainId][address] = {
@@ -71,11 +73,15 @@ export const undeployedSafesSlice = createSlice({
 
     removeUndeployedSafe: (state, action: PayloadAction<{ chainId: string; address: string }>) => {
       const { chainId, address } = action.payload
-      if (!state[chainId]) return state
+      if (!state[chainId]) {
+        return state
+      }
 
       delete state[chainId][address]
 
-      if (Object.keys(state[chainId]).length > 0) return state
+      if (Object.keys(state[chainId]).length > 0) {
+        return state
+      }
 
       delete state[chainId]
     },

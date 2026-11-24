@@ -117,7 +117,9 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
   const isSmartContractError = addressError === SMART_CONTRACT_PROPOSER_ERROR
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
-    if (!wallet || !chain) return
+    if (!wallet || !chain) {
+      return
+    }
 
     const name = sanitizeName(data.name)
 

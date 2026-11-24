@@ -37,7 +37,9 @@ export const formatLastUpdated = (
   const createdAts = spenders.flatMap(({ allowances }) =>
     allowances.flatMap(({ createdAt }) => (createdAt != null && createdAt > 0 ? [createdAt] : [])),
   )
-  if (createdAts.length === 0) return undefined
+  if (createdAts.length === 0) {
+    return undefined
+  }
 
   const part = utcParts(Math.max(...createdAts) * MS_PER_SECOND)
 
@@ -49,7 +51,9 @@ const PERCENT_SCALE = 10_000n
 /** The bar fills with what is left to spend, so a full bar reads as untouched headroom. */
 export const remainingPercent = (allowance: Pick<PolicyAllowance, 'amount' | 'remaining'>): number => {
   const amount = BigInt(allowance.amount)
-  if (amount === 0n) return 0
+  if (amount === 0n) {
+    return 0
+  }
 
   const scaled = Number((BigInt(allowance.remaining) * PERCENT_SCALE) / amount) / 100
 

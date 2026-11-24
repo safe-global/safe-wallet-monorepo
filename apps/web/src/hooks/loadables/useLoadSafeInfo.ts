@@ -32,7 +32,9 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const awaitingCfSync = !isHydrated || (isUserAuthenticated && !cfSynced)
 
   const [undeployedData, undeployedError] = useAsync<ExtendedSafeInfo | undefined>(async () => {
-    if (!undeployedSafe || !chain || !isCounterfactualEnabled) return
+    if (!undeployedSafe || !chain || !isCounterfactualEnabled) {
+      return
+    }
     /**
      * This is the one place where we can't check for `safe.deployed` as we want to update that value
      * when the local storage is cleared, so we have to check undeployedSafe

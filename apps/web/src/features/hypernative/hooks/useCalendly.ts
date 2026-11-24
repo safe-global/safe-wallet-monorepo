@@ -136,7 +136,9 @@ export const useCalendly = (
    */
   const monitorIframeLoad = useCallback(() => {
     const element = widgetRef.current
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     // Store references to iframe and handlers for cleanup
     let iframeRef: HTMLIFrameElement | null = null
@@ -244,7 +246,9 @@ export const useCalendly = (
    * Manages the complete lifecycle of the Calendly widget integration.
    */
   useEffect(() => {
-    if (!widgetRef.current) return
+    if (!widgetRef.current) {
+      return
+    }
 
     // Reset error state when attempting to load
     dispatch(setError(false))
@@ -303,8 +307,12 @@ export const useCalendly = (
       checkInterval = setInterval(() => {
         if (window.Calendly && widgetRef.current) {
           setIframeMonitorCleanup(initWidget())
-          if (checkInterval) clearInterval(checkInterval)
-          if (timeoutId) clearTimeout(timeoutId)
+          if (checkInterval) {
+            clearInterval(checkInterval)
+          }
+          if (timeoutId) {
+            clearTimeout(timeoutId)
+          }
         }
       }, POLL_INTERVAL_MS)
     } else {
@@ -342,8 +350,12 @@ export const useCalendly = (
     return () => {
       callbackCalledRef.current = false
       window.removeEventListener('message', handleMessage)
-      if (checkInterval) clearInterval(checkInterval)
-      if (timeoutId) clearTimeout(timeoutId)
+      if (checkInterval) {
+        clearInterval(checkInterval)
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
       if (loadTimeoutRef.current) {
         clearTimeout(loadTimeoutRef.current)
         loadTimeoutRef.current = null

@@ -5,7 +5,9 @@ import { useNativeSwapsCard } from './useNativeSwapsCard'
 const NativeSwapsCardCell = () => {
   const { isVisible, dismiss } = useNativeSwapsCard()
 
-  if (!isVisible) return null
+  if (!isVisible) {
+    return null
+  }
 
   return (
     <li>

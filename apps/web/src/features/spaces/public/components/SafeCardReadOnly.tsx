@@ -81,7 +81,9 @@ const SafeCardReadOnly = ({
   const tooltipTitle = disabled ? (disabledTooltip ?? '') : !singleSafe ? 'Safe data is not available' : ''
 
   const handleCardClick = () => {
-    if (!singleSafe || !chain?.shortName) return
+    if (!singleSafe || !chain?.shortName) {
+      return
+    }
 
     router.push({
       pathname: AppRoutes.home,
@@ -197,7 +199,9 @@ const SafeCardReadOnly = ({
     </div>
   )
 
-  if (!tooltipTitle) return card
+  if (!tooltipTitle) {
+    return card
+  }
 
   return (
     <Tooltip>

@@ -12,7 +12,9 @@ const CurrencySelect = (): ReactElement => {
   const fiatCurrencies = useCurrencies() || [currency.toUpperCase()]
 
   const handleChange = (value: string | null) => {
-    if (value == null) return
+    if (value == null) {
+      return
+    }
 
     trackEvent({ ...ASSETS_EVENTS.CHANGE_CURRENCY, label: value.toUpperCase() })
 

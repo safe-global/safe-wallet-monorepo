@@ -52,7 +52,9 @@ const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
 }
 
 const WithHint = ({ hint, children }: { hint?: string; children: ReactNode }): ReactElement => {
-  if (!hint) return <span className="block min-w-0 truncate">{children}</span>
+  if (!hint) {
+    return <span className="block min-w-0 truncate">{children}</span>
+  }
   return (
     <Tooltip delay={150}>
       <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{children}</TooltipTrigger>
@@ -130,7 +132,9 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
     )
   }
 
-  if (isBridgeOrderTxInfo(txInfo)) return <BridgeSummary info={txInfo} />
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return <BridgeSummary info={txInfo} />
+  }
 
   if (isLifiSwapTxInfo(txInfo)) {
     return (
@@ -141,7 +145,9 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
     )
   }
 
-  if (isOrderTxInfo(txInfo)) return <OrderSummary info={txInfo} />
+  if (isOrderTxInfo(txInfo)) {
+    return <OrderSummary info={txInfo} />
+  }
 
   if (isStakingTxExitInfo(txInfo)) {
     return (

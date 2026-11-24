@@ -19,9 +19,15 @@ const lockReason = (state: {
   isTrialOffered: boolean
   hasPaymentFailed: boolean
 }): WorkspaceLockReason => {
-  if (state.isSetupPending) return 'setup-pending'
-  if (state.isTrialOffered) return 'trial-offered'
-  if (state.hasPaymentFailed) return 'payment-failed'
+  if (state.isSetupPending) {
+    return 'setup-pending'
+  }
+  if (state.isTrialOffered) {
+    return 'trial-offered'
+  }
+  if (state.hasPaymentFailed) {
+    return 'payment-failed'
+  }
   return 'lapsed'
 }
 
@@ -68,7 +74,9 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
     retry: () => {
       void subscription.refetch()
       void offers.refetch()
-      if (readsSetup) void space.refetch()
+      if (readsSetup) {
+        void space.refetch()
+      }
     },
     trialPeriodDays: offers.trialPeriodDays,
     reason,

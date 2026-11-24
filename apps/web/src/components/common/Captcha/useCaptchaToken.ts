@@ -58,7 +58,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   themeRef.current = theme
 
   const refreshToken = useCallback(() => {
-    if (!widgetIdRef.current) return
+    if (!widgetIdRef.current) {
+      return
+    }
     window.turnstile?.reset(widgetIdRef.current)
     setError(null)
     setIsLoading(true)
@@ -67,7 +69,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   // Render widget when script is ready and container is available
   const renderWidget = useCallback(() => {
     const container = widgetContainerRef.current
-    if (!container || !window.turnstile || hasRenderedRef.current) return
+    if (!container || !window.turnstile || hasRenderedRef.current) {
+      return
+    }
 
     try {
       const widgetId = window.turnstile.render(container, {
@@ -91,7 +95,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
 
           // Close modal after successful verification (if it was open)
           setTimeout(() => {
-            if (isMountedRef.current) setIsModalOpen(false)
+            if (isMountedRef.current) {
+              setIsModalOpen(false)
+            }
           }, MODAL_CLOSE_DELAY_MS)
         },
         'error-callback': (error: string) => {
@@ -128,7 +134,9 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
   const onWidgetContainerReady = useCallback(
     (container: HTMLDivElement | null) => {
       widgetContainerRef.current = container
-      if (container) renderWidget()
+      if (container) {
+        renderWidget()
+      }
     },
     [renderWidget],
   )
@@ -143,14 +151,18 @@ export function useCaptchaToken({ theme = 'auto', isScriptReady }: UseCaptchaTok
 
   // Render widget when script becomes ready (if container already mounted)
   useEffect(() => {
-    if (isScriptReady) renderWidget()
+    if (isScriptReady) {
+      renderWidget()
+    }
   }, [isScriptReady, renderWidget])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       isMountedRef.current = false
-      if (widgetIdRef.current) window.turnstile?.remove(widgetIdRef.current)
+      if (widgetIdRef.current) {
+        window.turnstile?.remove(widgetIdRef.current)
+      }
       widgetIdRef.current = null
       widgetContainerRef.current = null
       hasRenderedRef.current = false

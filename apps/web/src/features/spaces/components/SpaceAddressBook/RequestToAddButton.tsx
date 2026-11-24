@@ -44,7 +44,9 @@ const RequestToAddButton = ({
   const nameError = validateContactName(name)
 
   const handleConfirm = async () => {
-    if (isDone) return
+    if (isDone) {
+      return
+    }
 
     setIsSubmitting(true)
     try {

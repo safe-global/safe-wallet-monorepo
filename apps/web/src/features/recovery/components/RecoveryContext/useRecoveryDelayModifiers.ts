@@ -11,7 +11,9 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useIsRecoverySupported } from '../../public/hooks/useIsRecoverySupported'
 
 function isOnlySpendingLimitEnabled(chainId: string, modules: SafeState['modules']) {
-  if (modules && modules.length > 1) return false
+  if (modules && modules.length > 1) {
+    return false
+  }
   const spendingLimit = getDeployedSpendingLimitModuleAddress(chainId, modules)
   return !!spendingLimit
 }

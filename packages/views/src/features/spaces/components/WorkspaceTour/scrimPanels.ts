@@ -4,7 +4,9 @@ import type { SpotlightRect } from '@safe-global/views/features/spaces/component
 export type ScrimPanel = Pick<CSSProperties, 'top' | 'right' | 'bottom' | 'left' | 'width' | 'height'>
 
 export const toScrimPanels = (hole: SpotlightRect | null, uncoveredLeft: number): ScrimPanel[] => {
-  if (!hole) return [{ top: 0, right: 0, bottom: 0, left: uncoveredLeft }]
+  if (!hole) {
+    return [{ top: 0, right: 0, bottom: 0, left: uncoveredLeft }]
+  }
 
   const holeRight = hole.left + hole.width
   const holeBottom = hole.top + hole.height

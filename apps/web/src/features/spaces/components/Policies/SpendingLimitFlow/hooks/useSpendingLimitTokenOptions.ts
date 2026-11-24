@@ -73,7 +73,9 @@ const useSpendingLimitTokenOptions = (extraTokens: readonly TokenOption[] = []):
   const showNative = chain ? getNativeTokenDisplay(chain).showNativeInBalances : true
 
   const native = useMemo<NativeCurrencyInfo | undefined>(() => {
-    if (!chain || !showNative) return undefined
+    if (!chain || !showNative) {
+      return undefined
+    }
     const { symbol, name, decimals, logoUri } = chain.nativeCurrency
     return { symbol, name, decimals, logoUri }
   }, [chain, showNative])

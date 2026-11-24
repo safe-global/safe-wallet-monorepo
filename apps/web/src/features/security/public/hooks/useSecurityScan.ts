@@ -31,13 +31,19 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
 
       try {
         const result = await scanFn()
-        if (guardId !== undefined && scanIdRef.current !== guardId) return
+        if (guardId !== undefined && scanIdRef.current !== guardId) {
+          return
+        }
         setResults((prev) => ({ ...prev, [scannerId]: result }))
       } catch (err: unknown) {
-        if (guardId !== undefined && scanIdRef.current !== guardId) return
+        if (guardId !== undefined && scanIdRef.current !== guardId) {
+          return
+        }
         setErrors((prev) => ({ ...prev, [scannerId]: err instanceof Error ? err.message : 'Scan failed' }))
       } finally {
-        if (guardId !== undefined && scanIdRef.current !== guardId) return
+        if (guardId !== undefined && scanIdRef.current !== guardId) {
+          return
+        }
         setLoading((prev) => ({ ...prev, [scannerId]: false }))
         onAllComplete?.()
       }
@@ -47,7 +53,9 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
 
   const runScan = useCallback(() => {
     const currentCtx = ctxRef.current
-    if (!currentCtx) return
+    if (!currentCtx) {
+      return
+    }
 
     const currentScanId = ++scanIdRef.current
     const total = SCANNERS.length
@@ -78,7 +86,9 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
             setLastScannedAt(now)
             // Share results with module-level cache so other hook instances (sidebar) reuse them.
             const key = ctxRef.current ? scanKey(ctxRef.current.safeAddress, ctxRef.current.chainId) : null
-            if (key) setCachedScan(key, accumulatedResults, now)
+            if (key) {
+              setCachedScan(key, accumulatedResults, now)
+            }
           }
         },
       )

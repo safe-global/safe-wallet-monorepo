@@ -101,7 +101,9 @@ const useOnboardingSubmit = (
   const hasInitialized = useRef(false)
 
   useEffect(() => {
-    if (hasInitialized.current || spaceSafes.length === 0) return
+    if (hasInitialized.current || spaceSafes.length === 0) {
+      return
+    }
     hasInitialized.current = true
 
     const selected: Record<string, boolean> = {}
@@ -123,12 +125,16 @@ const useOnboardingSubmit = (
   const urlSelectionState = useRef<'idle' | 'tentative' | 'done'>('idle')
 
   useEffect(() => {
-    if (urlSelectionState.current === 'done' || !safeFromUrl || !router.isReady || spaceSafes.length > 0) return
+    if (urlSelectionState.current === 'done' || !safeFromUrl || !router.isReady || spaceSafes.length > 0) {
+      return
+    }
 
     const formKey = safeParamToFormKey(safeFromUrl, chains)
     if (!formKey) {
       const { prefix } = parsePrefixedAddress(safeFromUrl)
-      if (prefix && !/^\d+$/.test(prefix) && chains.length === 0) return
+      if (prefix && !/^\d+$/.test(prefix) && chains.length === 0) {
+        return
+      }
       urlSelectionState.current = 'done'
       return
     }
@@ -177,15 +183,21 @@ const useOnboardingSubmit = (
     spaceIdStr: string,
     addressBookItems: AddressBookItem[],
   ) => {
-    if (safesToAdd.length === 0) return
+    if (safesToAdd.length === 0) {
+      return
+    }
 
     const result = await addSafesToSpace({
       spaceId: spaceIdStr,
       createSpaceSafesDto: { safes: safesToAdd, addressBookItems },
     })
-    if (isElevationRequiredError(result.error)) throw result.error
+    if (isElevationRequiredError(result.error)) {
+      throw result.error
+    }
     if (result.error) {
-      if (getQuotaExceededError(result.error)) refreshSpaceEntitlements(dispatch, spaceIdStr)
+      if (getQuotaExceededError(result.error)) {
+        refreshSpaceEntitlements(dispatch, spaceIdStr)
+      }
       throw new Error(getRtkQueryErrorMessage(result.error))
     }
   }
@@ -193,7 +205,9 @@ const useOnboardingSubmit = (
   // Added Safes join the user's global Trusted list too, unless already there.
   const trustAddedSafes = (safesToAdd: Array<{ chainId: string; address: string }>) => {
     for (const { chainId, address } of safesToAdd) {
-      if (addedSafes[chainId]?.[address]) continue
+      if (addedSafes[chainId]?.[address]) {
+        continue
+      }
       dispatch(
         addOrUpdateSafe({
           safe: {
@@ -218,13 +232,17 @@ const useOnboardingSubmit = (
 
   const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
     const safesToRemove = getSafesToRemove(selectedSafes)
-    if (safesToRemove.length === 0) return
+    if (safesToRemove.length === 0) {
+      return
+    }
 
     const result = await removeSafesFromSpace({
       spaceId: spaceIdStr,
       deleteSpaceSafesDto: { safes: safesToRemove },
     })
-    if (isElevationRequiredError(result.error)) throw result.error
+    if (isElevationRequiredError(result.error)) {
+      throw result.error
+    }
     if (result.error) {
       throw new Error(getRtkQueryErrorMessage(result.error))
     }
@@ -237,7 +255,9 @@ const useOnboardingSubmit = (
     names: WorkspaceSafeName[],
   ) => {
     const prepared = prepareNames(names)
-    if (prepared.error !== undefined) throw new Error(prepared.error)
+    if (prepared.error !== undefined) {
+      throw new Error(prepared.error)
+    }
     // Free the seats first: a swap at the plan limit would otherwise 402 on the add.
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
     await addNewSafes(safesToAdd, spaceIdStr, prepared.items)
@@ -290,7 +310,9 @@ const useOnboardingSubmit = (
 
         onSuccess()
       } catch (e) {
-        if (isElevationRequiredError(e)) return
+        if (isElevationRequiredError(e)) {
+          return
+        }
         setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
       } finally {
         setIsSubmitting(false)

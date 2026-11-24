@@ -37,7 +37,9 @@ const SecurityDrawerDetails = ({ scanContext, lastScannedAt }: SecurityDrawerDet
   const security = useSecurityServices()
   const chain = useChain(scanContext?.chainId ?? '')
 
-  if (!scanContext) return null
+  if (!scanContext) {
+    return null
+  }
 
   const { owners, threshold, version, balanceUsd } = scanContext
 

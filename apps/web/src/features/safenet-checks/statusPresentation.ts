@@ -125,11 +125,15 @@ export const resolvePresentation = (
   hasSnapshot: boolean,
 ): ResolvedPresentation | undefined => {
   if (publicStatus === CheckStatus.UNAVAILABLE) {
-    if (!unavailableReason) return undefined
+    if (!unavailableReason) {
+      return undefined
+    }
     return { ...UNAVAILABLE_PRESENTATION[unavailableReason], severity: Severity.INFO, muted: true }
   }
 
-  if (!hasSnapshot) return undefined
+  if (!hasSnapshot) {
+    return undefined
+  }
 
   return { ...STATUS_PRESENTATION[publicStatus], muted: false }
 }

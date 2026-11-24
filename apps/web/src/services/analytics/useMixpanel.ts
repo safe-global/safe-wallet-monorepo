@@ -60,7 +60,9 @@ const useMixpanel = () => {
   }, [isMixpanelEnabled])
 
   useEffect(() => {
-    if (!isMixpanelEnabled) return
+    if (!isMixpanelEnabled) {
+      return
+    }
 
     if (isAnalyticsEnabled) {
       mixpanelOptInTracking()
@@ -125,7 +127,9 @@ const useMixpanel = () => {
   }, [wallet, walletChain])
 
   useEffect(() => {
-    if (!userProperties) return
+    if (!userProperties) {
+      return
+    }
 
     // Deep comparison to prevent infinite loop from object reference changes
     const currentPropertiesStr = JSON.stringify(userProperties.properties)

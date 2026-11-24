@@ -6,7 +6,9 @@ const WorkspaceTourSection = () => {
   const canShowTour = useCanShowWorkspaceTour()
   const { open } = useWorkspaceTourOpen()
 
-  if (!canShowTour) return null
+  if (!canShowTour) {
+    return null
+  }
 
   return <WorkspaceTourSettingsSection onStart={open} />
 }

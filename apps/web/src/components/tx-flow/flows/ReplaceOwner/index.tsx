@@ -36,7 +36,9 @@ const ReplaceOwnerFlow = ({ address }: { address: string }) => {
     threshold,
   }
 
-  if (!safeLoaded) return null
+  if (!safeLoaded) {
+    return null
+  }
 
   return (
     <TxFlow

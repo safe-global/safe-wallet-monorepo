@@ -59,13 +59,19 @@ export const usePendingPolicyTransaction = (
   useRefetchOnTxEvents(REFETCH_EVENTS, refetch, !isSettled)
 
   useEffect(() => {
-    if (isUnlisted) refetch()
+    if (isUnlisted) {
+      refetch()
+    }
   }, [isUnlisted, refetch])
 
   const transaction = useMemo<PendingPolicyTransaction>(() => {
     // A 404 while the row is still listed may be CGW lagging, so only the list leaving confirms a deletion.
-    if (isUnlisted && error && 'status' in error && error.status === 404) return { confirmedBy: [], outcome: 'deleted' }
-    if (!currentData) return error ? { confirmedBy: [], onRetry: refetch } : { confirmedBy: [] }
+    if (isUnlisted && error && 'status' in error && error.status === 404) {
+      return { confirmedBy: [], outcome: 'deleted' }
+    }
+    if (!currentData) {
+      return error ? { confirmedBy: [], onRetry: refetch } : { confirmedBy: [] }
+    }
 
     const execution = isMultisigDetailedExecutionInfo(currentData.detailedExecutionInfo)
       ? currentData.detailedExecutionInfo

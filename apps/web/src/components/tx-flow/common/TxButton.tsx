@@ -58,7 +58,9 @@ export const MakeASwapButton = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
   const safeLinkQuery = useSafeLinkQuery()
-  if (!isSwapFeatureEnabled) return null
+  if (!isSwapFeatureEnabled) {
+    return null
+  }
 
   const isSwapPage = router.pathname === AppRoutes.swap
 

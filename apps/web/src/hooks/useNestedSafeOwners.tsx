@@ -7,7 +7,9 @@ export const useNestedSafeOwners = () => {
   const allOwned = useOwnedSafes()
 
   const nestedSafeOwner = useMemo(() => {
-    if (!safeLoaded) return null
+    if (!safeLoaded) {
+      return null
+    }
 
     // Find an intersection of owned safes and the owners of the current safe
     const ownerAddresses = safe?.owners.map((owner) => owner.value)

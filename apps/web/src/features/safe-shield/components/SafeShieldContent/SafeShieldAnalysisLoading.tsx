@@ -18,7 +18,9 @@ export const SafeShieldAnalysisLoading = ({ analysesEmpty, loading }: SafeShield
   const hasStarted = useRef(false)
 
   useEffect(() => {
-    if (hasStarted.current) return
+    if (hasStarted.current) {
+      return
+    }
 
     hasStarted.current = true
 

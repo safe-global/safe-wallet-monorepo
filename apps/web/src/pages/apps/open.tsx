@@ -64,7 +64,9 @@ const SafeApps = () => {
     goToList,
   })
 
-  if (!shouldRender) return null
+  if (!shouldRender) {
+    return null
+  }
 
   if (isModalVisible) {
     return (

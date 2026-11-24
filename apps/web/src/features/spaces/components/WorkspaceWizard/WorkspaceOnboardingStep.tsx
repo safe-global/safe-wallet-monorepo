@@ -19,8 +19,12 @@ const LEGACY_STEPS: Record<LegacyStepId, () => ReactElement | null> = {
 /** An onboarding page: the new wizard behind WORKSPACE_ONBOARDING_V2, else the old step; nothing while the flag loads. */
 const WorkspaceOnboardingStep = ({ step }: { step: LegacyStepId }): ReactElement | null => {
   const isWizard = useIsWorkspaceWizardEnabled()
-  if (isWizard === undefined) return null
-  if (isWizard) return <WorkspaceWizard step={step} />
+  if (isWizard === undefined) {
+    return null
+  }
+  if (isWizard) {
+    return <WorkspaceWizard step={step} />
+  }
   const LegacyStep = LEGACY_STEPS[step]
   return <LegacyStep />
 }

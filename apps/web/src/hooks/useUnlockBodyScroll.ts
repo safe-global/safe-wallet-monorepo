@@ -76,7 +76,9 @@ const useUnlockBodyScroll = (): void => {
     let timer: ReturnType<typeof setTimeout> | undefined
 
     const scheduleCheck = () => {
-      if (timer) clearTimeout(timer)
+      if (timer) {
+        clearTimeout(timer)
+      }
       timer = setTimeout(() => unlockBodyScrollIfStuck(document), DEBOUNCE_MS)
     }
 
@@ -89,7 +91,9 @@ const useUnlockBodyScroll = (): void => {
     observer.observe(document.body, { attributes: true, attributeFilter: ['style'], childList: true })
 
     return () => {
-      if (timer) clearTimeout(timer)
+      if (timer) {
+        clearTimeout(timer)
+      }
       observer.disconnect()
     }
   }, [])

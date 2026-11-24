@@ -215,7 +215,9 @@ describe('forbiddenSessionListener', () => {
     ['the action is not a CGW action', { signedIn: true, options: { type: 'gatewayApi/executeQuery/rejected' } }],
   ])('does not probe when %s', async (_, { signedIn, options }) => {
     const store = createTestStore()
-    if (signedIn) signIn(store)
+    if (signedIn) {
+      signIn(store)
+    }
 
     store.dispatch(rejectedWithValue(options))
     await flush()

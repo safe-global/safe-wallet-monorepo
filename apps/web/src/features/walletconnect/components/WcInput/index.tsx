@@ -55,7 +55,9 @@ const WcInput = ({ uri }: { uri: string }) => {
 
   const onInput = useCallback(
     async (val: string) => {
-      if (!walletConnect) return
+      if (!walletConnect) {
+        return
+      }
 
       setValue(val)
 
@@ -66,7 +68,9 @@ const WcInput = ({ uri }: { uri: string }) => {
 
       setInputError(undefined)
 
-      if (!val) return
+      if (!val) {
+        return
+      }
 
       setLoading(WCLoadingState.CONNECT)
 
@@ -79,7 +83,9 @@ const WcInput = ({ uri }: { uri: string }) => {
       }
 
       // Closing the popup unmounts the input while connect is pending; its timer would never be cleared
-      if (!isMountedRef.current) return
+      if (!isMountedRef.current) {
+        return
+      }
 
       clearTimeout(timeoutRef.current)
       timeoutRef.current = setTimeout(() => {

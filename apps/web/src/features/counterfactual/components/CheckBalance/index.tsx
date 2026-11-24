@@ -12,7 +12,9 @@ const CheckBalance = () => {
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
 
-  if (safe.deployed) return null
+  if (safe.deployed) {
+    return null
+  }
 
   const blockExplorerLink = chain ? getBlockExplorerLink(chain, safeAddress) : undefined
 

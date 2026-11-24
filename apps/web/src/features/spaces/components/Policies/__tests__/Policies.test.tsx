@@ -52,8 +52,12 @@ const mockSetHasSeenAllowlistIntro = jest.fn()
 jest.mock('@/services/local-storage/useLocalStorage', () => ({
   __esModule: true,
   default: jest.fn((key: string) => {
-    if (key === 'proposerIntroSeen') return [mockHasSeenProposerIntro, mockSetHasSeenProposerIntro]
-    if (key === 'recipientAllowlistIntroSeen') return [mockHasSeenAllowlistIntro, mockSetHasSeenAllowlistIntro]
+    if (key === 'proposerIntroSeen') {
+      return [mockHasSeenProposerIntro, mockSetHasSeenProposerIntro]
+    }
+    if (key === 'recipientAllowlistIntroSeen') {
+      return [mockHasSeenAllowlistIntro, mockSetHasSeenAllowlistIntro]
+    }
     return [mockHasSeenSpendingLimitIntro, mockSetHasSeenSpendingLimitIntro]
   }),
 }))

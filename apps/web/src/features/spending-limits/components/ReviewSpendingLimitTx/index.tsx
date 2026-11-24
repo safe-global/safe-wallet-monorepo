@@ -83,7 +83,9 @@ const ReviewSpendingLimitTx = ({
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault()
-    if (!onboard || !wallet) return
+    if (!onboard || !wallet) {
+      return
+    }
 
     trackEvent(MODALS_EVENTS.USE_SPENDING_LIMIT)
 

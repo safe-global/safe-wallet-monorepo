@@ -40,7 +40,9 @@ export const UpdatingResults: Story = {
     msw: {
       handlers: [
         http.get(SPACE_QUEUE_URL, async ({ request }) => {
-          if (new URL(request.url).searchParams.has('search')) await delay('infinite')
+          if (new URL(request.url).searchParams.has('search')) {
+            await delay('infinite')
+          }
           return HttpResponse.json(toQueuePage(QUEUE_SECTIONS))
         }),
         ...setup.handlers,

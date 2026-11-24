@@ -85,7 +85,9 @@ const AddSpaceButton = ({
     </Button>
   )
 
-  if (!disabled) return button
+  if (!disabled) {
+    return button
+  }
 
   return (
     <Tooltip>

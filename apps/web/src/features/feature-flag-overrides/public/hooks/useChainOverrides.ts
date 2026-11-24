@@ -25,12 +25,17 @@ const IS_PRODUCTION_BUILD = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
  */
 export const applyFeatureOverrides = (chain: Chain, overrides: FeatureFlagOverridesState): Chain => {
   const entries = Object.entries(overrides).filter(([feature]) => isKnownFeature(feature))
-  if (entries.length === 0) return chain
+  if (entries.length === 0) {
+    return chain
+  }
 
   const features = new Set(chain.features)
   for (const [feature, value] of entries) {
-    if (value) features.add(feature)
-    else features.delete(feature)
+    if (value) {
+      features.add(feature)
+    } else {
+      features.delete(feature)
+    }
   }
   return { ...chain, features: Array.from(features) }
 }
@@ -45,7 +50,9 @@ export const useChainsWithOverrides = (chains: Chain[]): Chain[] => {
   const overrides = useAppSelector(selectFeatureFlagOverrides)
 
   return useMemo(() => {
-    if (IS_PRODUCTION_BUILD) return chains
+    if (IS_PRODUCTION_BUILD) {
+      return chains
+    }
     return chains.map((chain) => applyFeatureOverrides(chain, overrides))
   }, [chains, overrides])
 }

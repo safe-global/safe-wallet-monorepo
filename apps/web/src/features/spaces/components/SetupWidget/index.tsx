@@ -109,7 +109,9 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
     onDismiss?.()
   }
 
-  if (loading || isHidden || allRequiredStepsCompleted) return null
+  if (loading || isHidden || allRequiredStepsCompleted) {
+    return null
+  }
 
   return (
     <>

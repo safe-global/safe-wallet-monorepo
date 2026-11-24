@@ -57,7 +57,9 @@ const GRADE_ROW_COLOR: Record<SafeGrade, string> = {
  */
 const rowTone = (status: ScanResult['status'], severity: SecurityGrade): SeverityTone => {
   const base = resolveStatusTone(status, severity)
-  if (isPassingStatus(status)) return base
+  if (isPassingStatus(status)) {
+    return base
+  }
   const grade = SEVERITY_TO_SAFE_GRADE[severity]
   const Icon = grade === 'needs_attention' ? GRADE_TONE.needs_attention.Icon : base.Icon
   return { Icon, color: GRADE_ROW_COLOR[grade] }

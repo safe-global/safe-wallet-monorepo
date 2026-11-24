@@ -13,7 +13,9 @@ export async function _getZodiacContract(
   moduleAddress: string,
   provider: JsonRpcProvider,
 ): Promise<string | undefined> {
-  if (!isAddress(moduleAddress)) return
+  if (!isAddress(moduleAddress)) {
+    return
+  }
 
   const bytecode = await provider.getCode(moduleAddress)
 

@@ -12,7 +12,9 @@ export default function SpaceSettingsExperimentalPage() {
   const spaceId = useCurrentSpaceId()
   useFeatureRedirect(FEATURES.WORKSPACES_EXPERIMENTAL_FEATURES, AppRoutes.spaces.settingsGeneral)
 
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

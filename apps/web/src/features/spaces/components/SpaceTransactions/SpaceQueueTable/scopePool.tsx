@@ -34,7 +34,9 @@ export const createScopeStore = () => {
       notify()
     },
     remove: (scopeKey: string) => {
-      if (published.delete(scopeKey)) notify()
+      if (published.delete(scopeKey)) {
+        notify()
+      }
     },
     subscribe: (listener: () => void) => {
       listeners.add(listener)
@@ -50,7 +52,9 @@ export type ScopeStore = ReturnType<typeof createScopeStore>
 const PublishScope = ({ scopeKey, store }: { scopeKey: string; store: ScopeStore }): null => {
   const value = useSafeScopeContext()
   useLayoutEffect(() => {
-    if (value) store.publish(scopeKey, value)
+    if (value) {
+      store.publish(scopeKey, value)
+    }
   }, [store, scopeKey, value])
   useLayoutEffect(() => () => store.remove(scopeKey), [store, scopeKey])
   return null

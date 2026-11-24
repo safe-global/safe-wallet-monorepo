@@ -51,7 +51,9 @@ const proposerBuilder = (overrides: Partial<Delegate> = {}): Delegate => ({
 
 const mockConnectedRole = (role: TestRole) => {
   const wallet = mockRole(role)
-  if (!wallet) throw new Error(`The ${role} role has no connected wallet`)
+  if (!wallet) {
+    throw new Error(`The ${role} role has no connected wallet`)
+  }
   return wallet
 }
 

@@ -30,7 +30,9 @@ const useThirdPartyCookies = (): ThirdPartyCookiesType => {
   const [thirdPartyCookiesDisabled, setThirdPartyCookiesDisabled] = useState<boolean>(false)
 
   const messageHandler = useCallback((event: MessageEvent) => {
-    if (event.origin !== COOKIE_CHECK_ORIGIN) return
+    if (event.origin !== COOKIE_CHECK_ORIGIN) {
+      return
+    }
 
     const data = event.data
 

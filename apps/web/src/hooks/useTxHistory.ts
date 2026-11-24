@@ -34,7 +34,9 @@ const useTxHistory = (
   // If filter exists or pageUrl is passed, load a new history page from the API
   const [page, error, loading] = useAsync<TransactionItemPage>(
     () => {
-      if (!(filter || pageUrl)) return
+      if (!(filter || pageUrl)) {
+        return
+      }
 
       return (
         filter

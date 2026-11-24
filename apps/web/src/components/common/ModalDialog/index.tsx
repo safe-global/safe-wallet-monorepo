@@ -129,7 +129,9 @@ const ModalDialog = ({
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose?.()
+        if (!nextOpen) {
+          onClose?.()
+        }
       }}
     >
       <DialogContent

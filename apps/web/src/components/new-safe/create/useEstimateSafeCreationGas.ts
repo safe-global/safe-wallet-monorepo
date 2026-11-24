@@ -17,7 +17,9 @@ export const useEstimateSafeCreationGas = (
   const wallet = useWallet()
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint>(() => {
-    if (!wallet?.address || !chain || !web3ReadOnly || !undeployedSafe) return
+    if (!wallet?.address || !chain || !web3ReadOnly || !undeployedSafe) {
+      return
+    }
 
     return estimateSafeCreationGas(chain, web3ReadOnly, wallet.address, undeployedSafe)
   }, [wallet?.address, chain, web3ReadOnly, undeployedSafe])

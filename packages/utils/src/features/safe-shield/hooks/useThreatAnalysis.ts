@@ -50,7 +50,9 @@ export function useThreatAnalysis({
     if (isSafeTransaction(dataProp) && isSafeTransaction(data)) {
       const { nonce: _, ...dataWithoutNonce } = dataProp.data
       const { nonce: __, ...prevDataWithoutNonce } = data.data
-      if (isEqual(dataWithoutNonce, prevDataWithoutNonce)) return
+      if (isEqual(dataWithoutNonce, prevDataWithoutNonce)) {
+        return
+      }
     }
 
     setData(dataProp)

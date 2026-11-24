@@ -92,7 +92,9 @@ export const getGasLimitForZkSync = async (
   const simulateTxAccessorDeployment = getSimulateTxAccessorDeployment({ version: safeVersion })
   const simulateTxAccessorAddress =
     customContracts?.simulateTxAccessorAddress ?? simulateTxAccessorDeployment?.defaultAddress
-  if (!simulateTxAccessorAddress) throw new Error('SimulateTxAccessor deployment not found')
+  if (!simulateTxAccessorAddress) {
+    throw new Error('SimulateTxAccessor deployment not found')
+  }
   const simulateTxAccessorIface = new Interface(SIMULATE_TX_ACCESSOR_ABI)
 
   // 2. Add a simulate call to the predicted SafeProxy as second transaction

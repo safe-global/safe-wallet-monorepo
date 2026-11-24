@@ -25,7 +25,9 @@ const Popup = ({ children, open, onClose, anchorEl, modal = true }: PopupProps):
       open={open}
       modal={modal}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose?.()
+        if (!nextOpen) {
+          onClose?.()
+        }
       }}
     >
       <PopoverContent

@@ -15,6 +15,8 @@ export const isPaidFromSafe = ({
   baseGas?: string | bigint | null
   refundReceiver?: string | null
 }): boolean => {
-  if (!gasPrice || !baseGas || !refundReceiver) return false
+  if (!gasPrice || !baseGas || !refundReceiver) {
+    return false
+  }
   return BigInt(gasPrice) > 0n && BigInt(baseGas) > 0n && !sameAddress(refundReceiver, ZERO_ADDRESS)
 }

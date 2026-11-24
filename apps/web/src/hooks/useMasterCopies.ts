@@ -12,7 +12,9 @@ export const useMasterCopies = (): AsyncResult<MasterCopy[]> => {
   const transformedData = useMemo(() => (data ? transformMasterCopies(data) : undefined), [data])
 
   const processedError = useMemo(() => {
-    if (!error) return undefined
+    if (!error) {
+      return undefined
+    }
     return asError(error)
   }, [error])
 

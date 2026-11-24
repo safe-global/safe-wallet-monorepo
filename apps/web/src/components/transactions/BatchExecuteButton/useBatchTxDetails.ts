@@ -16,7 +16,9 @@ const paysGasFromSafe = ({ detailedExecutionInfo }: TransactionDetails): boolean
   })
 
 const toStatus = (details: TransactionDetails[] | undefined, isError: boolean): BatchTxDetailsStatus => {
-  if (isError) return 'error'
+  if (isError) {
+    return 'error'
+  }
   return details ? 'ready' : 'loading'
 }
 

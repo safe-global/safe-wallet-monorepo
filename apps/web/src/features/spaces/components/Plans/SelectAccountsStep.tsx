@@ -44,7 +44,9 @@ export const _initialSelection = (items: AllSafeItems): Record<string, boolean> 
   for (const item of items) {
     if (isMultiChainSafeItem(item)) {
       selected[getMultiChainSafeId(item)] = true
-      for (const safe of item.safes) selected[getSafeId(safe)] = true
+      for (const safe of item.safes) {
+        selected[getSafeId(safe)] = true
+      }
     } else {
       selected[getSafeId(item)] = true
     }

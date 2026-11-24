@@ -60,7 +60,9 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   )
 
   const summary = useMemo(() => {
-    if (!formValues) return undefined
+    if (!formValues) {
+      return undefined
+    }
     const sources = { accounts, tokens, names }
 
     return isEditMode && baseline

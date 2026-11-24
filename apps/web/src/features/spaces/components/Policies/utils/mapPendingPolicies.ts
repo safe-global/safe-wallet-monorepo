@@ -70,8 +70,11 @@ const toSpenders = (dto: PendingPolicyDto, active: ActiveSpendingLimit | undefin
     const { allowances } = spenderFor(delegate)
     const marked = active ? { ...allowance, change } : allowance
     const index = allowances.findIndex((existing) => sameAddress(existing.token.address, allowance.token.address))
-    if (index === -1) allowances.push(marked)
-    else allowances[index] = marked
+    if (index === -1) {
+      allowances.push(marked)
+    } else {
+      allowances[index] = marked
+    }
   }
 
   for (const change of dto.data.changes) {
@@ -133,7 +136,9 @@ const toSpenders = (dto: PendingPolicyDto, active: ActiveSpendingLimit | undefin
       }
       case 'delete-allowance': {
         const current = findActiveAllowance(active, change.delegate, change.token)
-        if (current) upsertAllowance(change.delegate, current, 'removed')
+        if (current) {
+          upsertAllowance(change.delegate, current, 'removed')
+        }
         break
       }
     }
@@ -149,7 +154,9 @@ export const getPendingTxId = ({ safe, safeTxHash }: Pick<PendingSpendingLimitPo
 /** One row per queued transaction and module, shown beside the active rows. */
 export const mapPendingPolicies = (dtos: PendingPolicyDto[], active: Policy[]): PendingSpendingLimitPolicy[] =>
   dtos.flatMap((dto) => {
-    if (dto.type !== 'spending-limit' || dto.data.changes.length === 0) return []
+    if (dto.type !== 'spending-limit' || dto.data.changes.length === 0) {
+      return []
+    }
 
     const current = findActive(dto.safe, dto.enforcement.moduleAddress, active)
     const operation = getOperation(dto.data.changes, current)

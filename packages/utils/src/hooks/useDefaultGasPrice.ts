@@ -39,7 +39,9 @@ type EtherscanResult = {
 }
 
 const isEtherscanResult = (data: unknown): data is EtherscanResult => {
-  if (typeof data !== 'object' || data === null) return false
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
   return 'FastGasPrice' in data && 'suggestBaseFee' in data
 }
 

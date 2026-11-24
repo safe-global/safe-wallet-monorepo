@@ -17,10 +17,16 @@ const isBusyStatus = (status: number): boolean => status === 429 || status >= 50
 
 /** A 429 or 5xx, or a request that never reached the gateway. A 401, 403 or 404 is an access problem, not load. */
 const isServiceBusy = (error?: FetchBaseQueryError): boolean => {
-  if (!error) return false
-  if (typeof error.status === 'number') return isBusyStatus(error.status)
+  if (!error) {
+    return false
+  }
+  if (typeof error.status === 'number') {
+    return isBusyStatus(error.status)
+  }
   // A proxy's HTML 503 or plain-text 429 fails JSON parsing, so its status only survives here
-  if (error.status === 'PARSING_ERROR') return isBusyStatus(error.originalStatus)
+  if (error.status === 'PARSING_ERROR') {
+    return isBusyStatus(error.originalStatus)
+  }
   return error.status === 'FETCH_ERROR' || error.status === 'TIMEOUT_ERROR'
 }
 
@@ -33,7 +39,9 @@ export const spaceQueuePollingSlice = createSlice({
   extraReducers: (builder) => {
     const queueEndpoint = cgwApi?.endpoints?.spaceTransactionsGetTransactionQueueV1
     // Tests that mock the spaces module leave no endpoint to watch.
-    if (!queueEndpoint) return
+    if (!queueEndpoint) {
+      return
+    }
     builder
       .addMatcher(queueEndpoint.matchPending, (state, { meta }) => {
         const key = toSpaceQueueKey(meta.arg.originalArgs)
@@ -44,7 +52,9 @@ export const spaceQueuePollingSlice = createSlice({
         state[key] = { ...(state[key] ?? NOT_POLLED), failures: 0 }
       })
       .addMatcher(queueEndpoint.matchRejected, (state, { meta, payload }) => {
-        if (meta.condition || meta.aborted || !isServiceBusy(payload)) return
+        if (meta.condition || meta.aborted || !isServiceBusy(payload)) {
+          return
+        }
         const key = toSpaceQueueKey(meta.arg.originalArgs)
         const polling = state[key] ?? NOT_POLLED
         state[key] = { ...polling, failures: polling.failures + 1 }

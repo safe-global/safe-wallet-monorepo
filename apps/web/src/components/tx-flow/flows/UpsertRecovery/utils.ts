@@ -11,7 +11,9 @@ export const isCustomDelaySelected = (selectedDelay: string) => {
 
 export const getDelay = (customDelay: string, selectedDelay: string) => {
   const isCustom = isCustomDelaySelected(selectedDelay)
-  if (!isCustom) return selectedDelay
+  if (!isCustom) {
+    return selectedDelay
+  }
   // BigInt keeps large values out of exponent notation, which BigInt() and the contract encoder reject
   return isWholeNumber(customDelay) ? `${BigInt(customDelay) * BigInt(DAY_IN_SECONDS)}` : ''
 }

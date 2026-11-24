@@ -43,7 +43,9 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
               const setSelected = (next: boolean) => field.onChange(next ? contactItem.name : false)
 
               const toggle = () => {
-                if (disabled) return
+                if (disabled) {
+                  return
+                }
                 setSelected(!isSelected)
               }
 

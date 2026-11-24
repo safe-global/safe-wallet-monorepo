@@ -43,7 +43,9 @@ const resolveUnavailableReason = (
   snapshot: SafenetCheckSnapshot | undefined,
   hasError: boolean,
 ): UnavailableReason | undefined => {
-  if (snapshot !== undefined) return snapshot.windowCoverage === 'proven' ? 'NO_CHECK' : 'WINDOW_UNCERTAIN'
+  if (snapshot !== undefined) {
+    return snapshot.windowCoverage === 'proven' ? 'NO_CHECK' : 'WINDOW_UNCERTAIN'
+  }
   return hasError ? 'READ_FAILED' : undefined
 }
 
@@ -152,12 +154,18 @@ export const useSafenetCheck = (
   // re-aim the shared entry. Exactly one refetch: the aim moves only when a
   // surface offers an earlier time, and the refetch equalises the two.
   useEffect(() => {
-    if (skip || query.isFetching || snapshot === undefined) return
-    if (snapshot.aimedAtMs !== aim) queryRefetch()
+    if (skip || query.isFetching || snapshot === undefined) {
+      return
+    }
+    if (snapshot.aimedAtMs !== aim) {
+      queryRefetch()
+    }
   }, [skip, query.isFetching, snapshot, aim, queryRefetch])
 
   const refetch = useCallback(() => {
-    if (!skip) queryRefetch()
+    if (!skip) {
+      queryRefetch()
+    }
   }, [skip, queryRefetch])
 
   return {

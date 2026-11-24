@@ -7,7 +7,9 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 const FiatBalance = ({ value }: { value: string | number | undefined }) => {
   const currency = useAppSelector(selectCurrency)
 
-  if (value === undefined) return null
+  if (value === undefined) {
+    return null
+  }
 
   return <Typography variant="paragraph-small-medium">{formatCurrency(value, currency)}</Typography>
 }

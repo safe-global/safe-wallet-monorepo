@@ -44,7 +44,9 @@ const validateTransactionsInBatch = (batch: BatchFile) => {
 export const TransactionLibraryContext = createContext<TransactionLibraryContextProps | null>(null)
 
 const loadBatches = async (chainInfo: ChainInfo | undefined): Promise<Batch[]> => {
-  if (!chainInfo) return []
+  if (!chainInfo) {
+    return []
+  }
 
   const batchesRecords = await StorageManager.getBatches()
   const batches: Batch[] = Object.keys(batchesRecords)

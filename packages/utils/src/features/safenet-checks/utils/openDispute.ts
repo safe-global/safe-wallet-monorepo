@@ -12,7 +12,9 @@ const RESOLVING_EVENTS: Partial<Record<CheckEventType, true>> = {
  * predicate over a check's events, it ignores which request an event belongs to.
  */
 export const openDisputeRequestIds = (events: ReadonlyArray<NormalizedCheckEvent>): Hex[] => {
-  if (events.some((event) => RESOLVING_EVENTS[event.type])) return []
+  if (events.some((event) => RESOLVING_EVENTS[event.type])) {
+    return []
+  }
 
   const triggered = events.flatMap((event) =>
     event.type === CheckEventType.DISPUTE_TRIGGERED ? [event.requestId] : [],

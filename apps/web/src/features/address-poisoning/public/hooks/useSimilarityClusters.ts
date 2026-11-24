@@ -26,10 +26,14 @@ const useSimilarityClusters = (addresses: string[]): SimilarityClusters => {
 
     if (anchorAnnotations.size > 0) {
       const inListByNorm = new Map<string, string>()
-      for (const address of addresses) inListByNorm.set(normalizeAddress(address), address.toLowerCase())
+      for (const address of addresses) {
+        inListByNorm.set(normalizeAddress(address), address.toLowerCase())
+      }
 
       anchorAnnotations.forEach((annotation) => {
-        if (!annotation.match) return
+        if (!annotation.match) {
+          return
+        }
         const impostor = annotation.address.toLowerCase()
         flagged.add(impostor)
 

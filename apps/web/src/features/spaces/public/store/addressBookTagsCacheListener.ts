@@ -5,7 +5,9 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 export const addressBookTagsCacheListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const create = spacesApi?.endpoints?.addressBooksCreateTagV1?.matchFulfilled
   // Tests that mock the spaces module leave no endpoints to watch.
-  if (!create) return
+  if (!create) {
+    return
+  }
 
   listenerMiddleware.startListening({
     matcher: create,

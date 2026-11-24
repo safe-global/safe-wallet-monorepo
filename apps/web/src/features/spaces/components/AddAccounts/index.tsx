@@ -318,9 +318,13 @@ const AddAccounts = ({
             createSpaceSafesDto: { safes: safesToAdd, addressBookItems: preparedNames.items },
           })
 
-          if (isElevationRequiredError(result.error)) return
+          if (isElevationRequiredError(result.error)) {
+            return
+          }
           if (result.error) {
-            if (getQuotaExceededError(result.error) && spaceId) refreshSpaceEntitlements(dispatch, spaceId)
+            if (getQuotaExceededError(result.error) && spaceId) {
+              refreshSpaceEntitlements(dispatch, spaceId)
+            }
             const msg =
               getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.'
             setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
@@ -335,7 +339,9 @@ const AddAccounts = ({
             deleteSpaceSafesDto: { safes: safesToRemove },
           })
 
-          if (isElevationRequiredError(result.error)) return
+          if (isElevationRequiredError(result.error)) {
+            return
+          }
           if (result.error) {
             setError(
               getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe accounts.',
@@ -346,8 +352,12 @@ const AddAccounts = ({
 
         // Show success notification
         const messages = []
-        if (safesToAdd.length > 0) messages.push(`Added ${countSafeAccounts(safesToAdd)} safe account(s)`)
-        if (safesToRemove.length > 0) messages.push(`Removed ${countSafeAccounts(safesToRemove)} safe account(s)`)
+        if (safesToAdd.length > 0) {
+          messages.push(`Added ${countSafeAccounts(safesToAdd)} safe account(s)`)
+        }
+        if (safesToRemove.length > 0) {
+          messages.push(`Removed ${countSafeAccounts(safesToRemove)} safe account(s)`)
+        }
 
         dispatch(
           showNotification({

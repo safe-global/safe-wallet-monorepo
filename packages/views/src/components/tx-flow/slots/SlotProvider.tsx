@@ -137,7 +137,9 @@ export const SlotProvider = ({ children }: { children: ReactNode }) => {
   const getSlotIds = useCallback(
     (slotName: SlotName): string[] => {
       const slot = slots[slotName]
-      if (!slot) return []
+      if (!slot) {
+        return []
+      }
       return Object.keys(slot).filter((id) => !!slot?.[id])
     },
     [slots],

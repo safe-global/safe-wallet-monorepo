@@ -5,7 +5,9 @@ export const getAllowlistRecipients = ({ entries }: AllowlistPolicyData): string
   const byAddress = new Map<string, string>()
   for (const { recipients } of entries) {
     for (const { account } of recipients) {
-      if (!byAddress.has(account.toLowerCase())) byAddress.set(account.toLowerCase(), account)
+      if (!byAddress.has(account.toLowerCase())) {
+        byAddress.set(account.toLowerCase(), account)
+      }
     }
   }
 

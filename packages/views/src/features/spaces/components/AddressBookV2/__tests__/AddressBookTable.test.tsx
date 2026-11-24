@@ -7,7 +7,9 @@ import { ADDRESSES, LOCAL_CONTACTS, WORKSPACE_CONTACTS } from '../mocks/fixtures
 
 const byAddress = (address: string) => {
   const contact = WORKSPACE_CONTACTS.find((item) => item.address === address)
-  if (!contact) throw new Error(`No fixture for ${address}`)
+  if (!contact) {
+    throw new Error(`No fixture for ${address}`)
+  }
   return contact
 }
 

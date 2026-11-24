@@ -177,7 +177,9 @@ const rpcHandler = (moduleGuard: string) =>
   http.post(RPC_URL, async ({ request }) => {
     const body = (await request.json()) as RpcRequest | RpcRequest[]
     const respond = ({ id, method, params }: RpcRequest) => {
-      if (method === 'eth_chainId') return { jsonrpc: '2.0', id, result: `0x${Number(CHAIN_ID).toString(16)}` }
+      if (method === 'eth_chainId') {
+        return { jsonrpc: '2.0', id, result: `0x${Number(CHAIN_ID).toString(16)}` }
+      }
       if (method === 'eth_getStorageAt') {
         const isModuleSlot = String(params?.[1]).toLowerCase() === MODULE_GUARD_STORAGE_SLOT
         return {
@@ -186,7 +188,9 @@ const rpcHandler = (moduleGuard: string) =>
           result: `0x${(isModuleSlot ? moduleGuard : ZERO_ADDRESS).slice(2).padStart(64, '0')}`,
         }
       }
-      if (method === 'eth_blockNumber') return { jsonrpc: '2.0', id, result: '0x1' }
+      if (method === 'eth_blockNumber') {
+        return { jsonrpc: '2.0', id, result: '0x1' }
+      }
       return { jsonrpc: '2.0', id, result: null }
     }
     return HttpResponse.json(Array.isArray(body) ? body.map(respond) : respond(body))

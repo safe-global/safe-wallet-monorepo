@@ -29,8 +29,12 @@ export const useGetHref = (router: NextRouter) => {
             : router.pathname
 
       // A Workspace page keeps only its Workspace; a Safe page keeps its whole query, spaceId included
-      if (isSpacePage) return { pathname, query: withSpaceId({ safe }, spaceId) }
-      if (!isWelcomePage) return { pathname, query: { ...router.query, safe } }
+      if (isSpacePage) {
+        return { pathname, query: withSpaceId({ safe }, spaceId) }
+      }
+      if (!isWelcomePage) {
+        return { pathname, query: { ...router.query, safe } }
+      }
 
       // My accounts opens the Safe in its Workspace when no choice is needed; the Safe page asks otherwise
       const pick = pickWorkspace(chain.chainId, address)

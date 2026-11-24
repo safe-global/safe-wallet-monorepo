@@ -14,12 +14,16 @@ const RejectTx = ({ onSubmit, children }: ReviewTransactionProps): ReactElement 
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
 
   useEffect(() => {
-    if (txNonce == undefined) return
+    if (txNonce == undefined) {
+      return
+    }
 
     setNonce(txNonce)
 
     // A Space-level scope has no SDK until it is initialised; building without it fails.
-    if (scope && !scope.sdk) return
+    if (scope && !scope.sdk) {
+      return
+    }
     createRejectTx(txNonce, scope).then(setSafeTx).catch(setSafeTxError)
   }, [txNonce, scope, setNonce, setSafeTx, setSafeTxError])
 

@@ -107,7 +107,9 @@ const ProposersList = () => {
   const showPendingDelegations = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
 
   const rows = useMemo(() => {
-    if (!proposers.data) return []
+    if (!proposers.data) {
+      return []
+    }
 
     return proposers.data.results.map((proposer) => {
       return {
@@ -135,7 +137,9 @@ const ProposersList = () => {
     })
   }, [isEnabled, proposers.data])
 
-  if (!proposers.data?.results) return null
+  if (!proposers.data?.results) {
+    return null
+  }
 
   const onAdd = () => {
     setIsAddDialogOpen(true)

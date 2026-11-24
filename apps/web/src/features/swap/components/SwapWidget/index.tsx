@@ -192,7 +192,9 @@ const SwapWidget = ({ sell }: Params) => {
   }, [darkMode, cowChainId, cowSwapBaseUrl])
 
   useEffect(() => {
-    if (!sell) return
+    if (!sell) {
+      return
+    }
     setParams((params) => ({
       ...params,
       sell,

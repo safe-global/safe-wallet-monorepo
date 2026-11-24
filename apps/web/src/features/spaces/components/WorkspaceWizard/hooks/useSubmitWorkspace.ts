@@ -18,7 +18,9 @@ import { useWorkspaceDraft } from './useWorkspaceDraft'
 
 /** The CGW names the Workspace it created when only the checkout that followed failed. */
 const createdSpaceIdOf = (error: FetchBaseQueryError | SerializedError): string | undefined => {
-  if (!('data' in error) || typeof error.data !== 'object' || error.data === null) return undefined
+  if (!('data' in error) || typeof error.data !== 'object' || error.data === null) {
+    return undefined
+  }
   const spaceId = 'spaceId' in error.data ? error.data.spaceId : undefined
   return typeof spaceId === 'string' ? spaceId : undefined
 }
@@ -39,7 +41,9 @@ export const useSubmitWorkspace = (returnPathname: string) => {
 
   const submit = useCallback(
     async (lastChanges: Partial<WorkspaceDraftFields> = {}) => {
-      if (inFlight.current) return
+      if (inFlight.current) {
+        return
+      }
       inFlight.current = true
       setError(undefined)
       setIsSubmitting(true)
@@ -56,14 +60,18 @@ export const useSubmitWorkspace = (returnPathname: string) => {
 
       if (result.error) {
         setIsSubmitting(false)
-        if (isElevationRequiredError(result.error)) return
+        if (isElevationRequiredError(result.error)) {
+          return
+        }
         if (existingId && isNotFound(result.error)) {
           update({ createdSpaceId: null })
           setError('This Workspace no longer exists. Submit again to create a new one.')
           return
         }
         const createdId = createdSpaceIdOf(result.error)
-        if (createdId) update({ createdSpaceId: createdId })
+        if (createdId) {
+          update({ createdSpaceId: createdId })
+        }
         setError(getRtkQueryErrorMessage(result.error) || 'We couldn’t create the Workspace. Please try again.')
         return
       }

@@ -20,7 +20,9 @@ const ALLOWED_DOMAINS: RegExp[] = [
 const useAnalyticsFromSafeApp = (iframeRef: RefObject<HTMLIFrameElement | null>): void => {
   const isValidMessage = useCallback(
     (msg: MessageEvent<AnalyticsEvent>) => {
-      if (!msg.data) return false
+      if (!msg.data) {
+        return false
+      }
       const isFromIframe = iframeRef.current?.contentWindow === msg.source
       const isCategoryAllowed = msg.data.category === SAFE_APPS_ANALYTICS_CATEGORY
       const isDomainAllowed = ALLOWED_DOMAINS.find((regExp) => regExp.test(msg.origin)) !== undefined

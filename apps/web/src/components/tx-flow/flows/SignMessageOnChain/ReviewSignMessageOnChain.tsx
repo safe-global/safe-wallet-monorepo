@@ -49,7 +49,9 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
   const [signMessageAddress, setSignMessageAddress] = useState<string>('')
 
   useEffect(() => {
-    if (!readOnlySignMessageLibContract) return
+    if (!readOnlySignMessageLibContract) {
+      return
+    }
     setSignMessageAddress(readOnlySignMessageLibContract.getAddress())
   }, [readOnlySignMessageLibContract])
 
@@ -66,7 +68,9 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
   useEffect(() => {
     let txData
 
-    if (!readOnlySignMessageLibContract || !signMessageAddress) return
+    if (!readOnlySignMessageLibContract || !signMessageAddress) {
+      return
+    }
 
     if (isTextMessage) {
       txData = readOnlySignMessageLibContract.encode('signMessage', [

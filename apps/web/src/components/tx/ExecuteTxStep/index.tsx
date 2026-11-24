@@ -52,8 +52,12 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   const scopedSafeQuery = scope?.chain ? `${scope.chain.shortName}:${scope.safeAddress}` : undefined
 
   useEffect(() => {
-    if (!txId) return
-    if (txSenderScope && !txSenderScope.sdk) return
+    if (!txId) {
+      return
+    }
+    if (txSenderScope && !txSenderScope.sdk) {
+      return
+    }
     setSafeTxError(undefined)
     createExistingTx(chainId, txId, undefined, txSenderScope)
       .then((signedTx) => {

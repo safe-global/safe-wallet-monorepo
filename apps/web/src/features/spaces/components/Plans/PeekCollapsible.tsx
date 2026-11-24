@@ -15,7 +15,9 @@ const useHeights = (contentRef: RefObject<HTMLElement | null>, peekUntil: RefObj
   useLayoutEffect(() => {
     const content = contentRef.current
     const peek = peekUntil.current
-    if (!content || !peek) return
+    if (!content || !peek) {
+      return
+    }
     const measure = () => {
       const full = content.offsetHeight
       const peekBottom = peek.getBoundingClientRect().bottom - content.getBoundingClientRect().top
@@ -23,7 +25,9 @@ const useHeights = (contentRef: RefObject<HTMLElement | null>, peekUntil: RefObj
       setHeights(full > 0 ? { full, collapsed: Math.min(peekBottom, full) } : undefined)
     }
     measure()
-    if (typeof ResizeObserver === 'undefined') return
+    if (typeof ResizeObserver === 'undefined') {
+      return
+    }
     const observer = new ResizeObserver(measure)
     observer.observe(content)
     return () => observer.disconnect()

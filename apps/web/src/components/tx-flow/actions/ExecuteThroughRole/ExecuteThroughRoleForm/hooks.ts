@@ -35,7 +35,9 @@ const multiSendInterface = Multi_send__factory.createInterface()
 export const useMetaTransactions = (safeTx?: SafeTransaction): MetaTransactionData[] => {
   const safeTxData = safeTx?.data
   return useMemo(() => {
-    if (!safeTxData) return []
+    if (!safeTxData) {
+      return []
+    }
 
     const metaTx: MetaTransactionData = {
       to: safeTxData.to,
@@ -66,7 +68,9 @@ export const useRolesMods = () => {
   const isFeatureEnabled = useHasFeature(FEATURES.ZODIAC_ROLES)
 
   const [data] = useAsync(async () => {
-    if (!ROLES_V2_SUPPORTED_CHAINS.includes(safe.chainId) || !isFeatureEnabled) return []
+    if (!ROLES_V2_SUPPORTED_CHAINS.includes(safe.chainId) || !isFeatureEnabled) {
+      return []
+    }
 
     const safeModules = safe.modules || []
     const rolesMods = await Promise.all(
@@ -119,7 +123,9 @@ export const useRoles = (safeTx?: SafeTransaction) => {
   // find all roles assigned to the connected wallet, statically check if they allow the given meta transaction
   const potentialRoles = useMemo(() => {
     const result: Role[] = []
-    if (metaTransactions.length === 0) return result
+    if (metaTransactions.length === 0) {
+      return result
+    }
 
     if (walletAddress && rolesMods) {
       for (const rolesMod of rolesMods) {
@@ -182,7 +188,9 @@ export const findMostLikelyRole = (roles: Role[]): Role | undefined =>
  */
 const checkPermissions = (role: RoleSummary, metaTx: MetaTransactionData): Status | null => {
   const target = role.targets.find((t) => t.address === metaTx.to.toLowerCase())
-  if (!target) return Status.TargetAddressNotAllowed
+  if (!target) {
+    return Status.TargetAddressNotAllowed
+  }
 
   if (target.clearance === Clearance.Target) {
     // all calls to the target are allowed
@@ -196,7 +204,9 @@ const checkPermissions = (role: RoleSummary, metaTx: MetaTransactionData): Statu
 
     if (func) {
       const execOptionsStatus = checkExecutionOptions(func.executionOptions, metaTx)
-      if (execOptionsStatus !== Status.Ok) return execOptionsStatus
+      if (execOptionsStatus !== Status.Ok) {
+        return execOptionsStatus
+      }
       return func.wildcarded ? Status.Ok : null // wildcarded means there's no condition set
     }
   }
@@ -326,13 +336,17 @@ export const useGasLimit = (
   const web3ReadOnly = useWeb3ReadOnly()
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
-    if (!web3ReadOnly || !tx) return
+    if (!web3ReadOnly || !tx) {
+      return
+    }
 
     try {
       return await web3ReadOnly.estimateGas(tx)
     } catch (e) {
       // A revert or a throttle is the estimate's expected answer, not a fault.
-      if (!isExpectedEstimationError(e)) logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+      if (!isExpectedEstimationError(e)) {
+        logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+      }
       throw e
     }
   }, [web3ReadOnly, tx])

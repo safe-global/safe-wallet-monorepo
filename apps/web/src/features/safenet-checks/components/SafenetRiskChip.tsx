@@ -13,7 +13,9 @@ export type SafenetRiskChipProps = {
 /** The risk chip of a batch item; every other state renders nothing. */
 const SafenetRiskChip = ({ safeTxHash, timestampMs }: SafenetRiskChipProps): ReactElement | null => {
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
-  if (display?.publicStatus !== CheckStatus.MALICIOUS) return null
+  if (display?.publicStatus !== CheckStatus.MALICIOUS) {
+    return null
+  }
 
   return (
     <SafenetStatusChip

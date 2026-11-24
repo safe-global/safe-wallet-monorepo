@@ -100,11 +100,15 @@ const PositionsWidget = () => {
     )
   }
 
-  if (error || !data) return null
+  if (error || !data) {
+    return null
+  }
 
   const protocols = data.slice(0, MAX_PROTOCOLS)
 
-  if (protocols.length === 0) return null
+  if (protocols.length === 0) {
+    return null
+  }
 
   return (
     <WidgetCard

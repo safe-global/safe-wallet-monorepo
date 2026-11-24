@@ -37,7 +37,9 @@ describe('PositionGroup', () => {
 
   it('shows a loan as debt with a negative value', () => {
     const loan = group.items.find(({ position_type }) => position_type === 'loan')
-    if (!loan) throw new Error('The fixture group has no loan')
+    if (!loan) {
+      throw new Error('The fixture group has no loan')
+    }
     render(<PositionGroup group={group} />)
 
     const row = screen.getAllByTestId('table-row')[group.items.indexOf(loan)]

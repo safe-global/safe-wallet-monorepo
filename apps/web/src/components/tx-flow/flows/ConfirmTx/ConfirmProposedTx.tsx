@@ -25,9 +25,13 @@ const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): Reac
   }, [setNonce, txNonce])
 
   useEffect(() => {
-    if (!txId) return
+    if (!txId) {
+      return
+    }
     // A Space-level scope has no SDK until it is initialised; building without it fails.
-    if (scope && !scope.sdk) return
+    if (scope && !scope.sdk) {
+      return
+    }
     createExistingTx(chainId, txId, undefined, scope).then(setSafeTx).catch(setSafeTxError)
   }, [txId, chainId, scope, setSafeTx, setSafeTxError])
 

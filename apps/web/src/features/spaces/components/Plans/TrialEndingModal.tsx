@@ -149,10 +149,14 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    if (isTrialEndingSoon && !hasPaymentMethod && membership && !wasTrialReminderSeen(spaceId)) setIsOpen(true)
+    if (isTrialEndingSoon && !hasPaymentMethod && membership && !wasTrialReminderSeen(spaceId)) {
+      setIsOpen(true)
+    }
   }, [isTrialEndingSoon, hasPaymentMethod, membership, spaceId])
 
-  if (!isOpen || !plan || !subscription) return null
+  if (!isOpen || !plan || !subscription) {
+    return null
+  }
 
   const close = () => {
     markTrialReminderSeen(spaceId)

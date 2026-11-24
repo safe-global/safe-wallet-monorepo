@@ -17,7 +17,9 @@ const NoResults = () => (
 const SectionEntry = ({ item, query }: { item: SectionItem; query: string }) => {
   const isActive = item.useActivate()
 
-  if (!isActive) return null
+  if (!isActive) {
+    return null
+  }
 
   return <item.Component query={query} label={item.label} />
 }

@@ -24,7 +24,9 @@ export const getBlockExplorerLink = (chain: Chain, address: string): { href: str
 }
 
 export const isRouteEnabled = (route: string, chain?: Chain) => {
-  if (!chain) return false
+  if (!chain) {
+    return false
+  }
   const featureRoute = FeatureRoutes[route]
   return !featureRoute || hasFeature(chain, featureRoute)
 }

@@ -6,7 +6,9 @@ import { useIsHydrated } from './useIsHydrated'
 
 // Use location object directly because Next.js router.query is empty during SSG hydration
 const getLocationQuery = (): ParsedUrlQuery => {
-  if (typeof location === 'undefined') return {}
+  if (typeof location === 'undefined') {
+    return {}
+  }
   return parse(location.search.slice(1))
 }
 
@@ -30,7 +32,9 @@ export const useSafeAddressFromUrl = (): string => {
   const fullAddress = useSafeQueryParam()
 
   const checksummedAddress = useMemo(() => {
-    if (!fullAddress) return ''
+    if (!fullAddress) {
+      return ''
+    }
     const { address } = parsePrefixedAddress(fullAddress)
     return address
   }, [fullAddress])

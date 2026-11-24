@@ -11,8 +11,12 @@ export const buildDelegatorOptions = (
   nestedSafeOwners: string[] | null | undefined,
 ): string[] => {
   const options: string[] = []
-  if (isDirectOwner && walletAddress) options.push(walletAddress)
-  if (nestedSafeOwners) options.push(...nestedSafeOwners)
+  if (isDirectOwner && walletAddress) {
+    options.push(walletAddress)
+  }
+  if (nestedSafeOwners) {
+    options.push(...nestedSafeOwners)
+  }
   return options
 }
 

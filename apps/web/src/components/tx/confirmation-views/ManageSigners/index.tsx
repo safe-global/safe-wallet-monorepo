@@ -20,7 +20,9 @@ import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 type FlowData = ManageSignersForm | AddOwnerFlowProps | ReplaceOwnerFlowProps
 function extractSignerNames(data?: FlowData): Record<string, string> {
-  if (!data) return {}
+  if (!data) {
+    return {}
+  }
 
   // ManageSigners flow
   if ('owners' in data) {

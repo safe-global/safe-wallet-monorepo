@@ -58,14 +58,18 @@ export const normalizeThreatData = (
  * Returns the result with the highest severity based on priority: CRITICAL > WARN > INFO > OK
  */
 export function getPrimaryResult<T extends { severity: Severity }>(results: T[]): T | null {
-  if (!results || results.length === 0) return null
+  if (!results || results.length === 0) {
+    return null
+  }
   return sortBySeverity(results)[0]
 }
 
 export function sortByIssueSeverity(
   issuesMap: { [severity in Severity]?: ThreatIssue[] } | undefined,
 ): Array<{ severity: Severity; issues: ThreatIssue[] }> {
-  if (!issuesMap || isEmpty(issuesMap)) return []
+  if (!issuesMap || isEmpty(issuesMap)) {
+    return []
+  }
 
   const issuesWithSeverity = Object.entries(issuesMap).map(([severity, issues]) => ({
     severity: severity as Severity,
@@ -84,7 +88,9 @@ export function dedupeAnalysisResults<T extends AnalysisResult>(results: T[]): T
   return sortBySeverity(results).filter((r) => {
     const { severity: _, addresses, ...rest } = r
     const key = JSON.stringify({ ...rest, addresses: addresses?.map((a) => a.address).sort() })
-    if (seen.has(key)) return false
+    if (seen.has(key)) {
+      return false
+    }
     seen.add(key)
     return true
   })

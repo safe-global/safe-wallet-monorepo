@@ -29,10 +29,14 @@ const createEnsHubProvider = async (chainId: string): Promise<JsonRpcProvider | 
   const hubConfig = hubChainId === chainId ? config : await getChainConfig(hubChainId)
 
   // DOMAIN_LOOKUP is hub-only — ignore the Safe's chain flag and require it on Mainnet/Sepolia.
-  if (!hasHubDomainLookup(hubConfig)) return undefined
+  if (!hasHubDomainLookup(hubConfig)) {
+    return undefined
+  }
 
   const rpcUrl = hubConfig.publicRpcUri?.value || hubConfig.rpcUri?.value
-  if (!rpcUrl) return undefined
+  if (!rpcUrl) {
+    return undefined
+  }
 
   // Match web's createWeb3ReadOnly: Infura and similar RPCs reject large batches.
   return new JsonRpcProvider(rpcUrl, Number(hubChainId), { staticNetwork: true, batchMaxCount: 3 })
@@ -64,7 +68,9 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const getChainInfo = async () => {
       try {
         const nextChainInfo = await sdk.safe.getChainInfo()
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         setChainInfo(nextChainInfo)
 
         try {
@@ -76,7 +82,9 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
           setEnsHubProvider(hubProvider)
         } catch (error) {
           console.error('Unable to configure the ENS hub provider:', error)
-          if (!cancelled) setEnsHubProvider(undefined)
+          if (!cancelled) {
+            setEnsHubProvider(undefined)
+          }
         }
       } catch (error) {
         console.error('Unable to get chain info:', error)
@@ -98,7 +106,9 @@ const NetworkProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
   const getAddressFromDomain = useCallback(
     async (name: string): Promise<string> => {
-      if (!chainInfo || !ensHubProvider) return name
+      if (!chainInfo || !ensHubProvider) {
+        return name
+      }
       try {
         const address = await resolveNameForChain(ensHubProvider, name, Number(chainInfo.chainId))
         return address ?? name

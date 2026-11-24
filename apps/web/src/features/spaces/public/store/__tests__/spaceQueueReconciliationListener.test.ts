@@ -80,7 +80,9 @@ const page = (resultList: QueueResults[], overrides: Partial<SpaceQueuedItemPage
   next: null,
   previous: null,
   results: resultList.reduce<QueueResults>((all, safes) => {
-    for (const [safe, chains] of Object.entries(safes)) all[safe] = { ...all[safe], ...chains }
+    for (const [safe, chains] of Object.entries(safes)) {
+      all[safe] = { ...all[safe], ...chains }
+    }
     return all
   }, {}),
   unavailableSafes: [],

@@ -40,7 +40,9 @@ const AddSuggestionsDialog = ({
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    if (hasInvalidName || isSubmitting) return
+    if (hasInvalidName || isSubmitting) {
+      return
+    }
     onAdd(
       suggestions.map((item) => ({
         address: item.address,

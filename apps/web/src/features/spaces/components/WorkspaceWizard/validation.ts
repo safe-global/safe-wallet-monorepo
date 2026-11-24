@@ -26,35 +26,52 @@ export const getPickedSize = (draft: WorkspaceDraft, context: ValidationContext)
 
 const validateNameStep: StepValidator = (draft) => {
   const name = sanitizeName(draft.name)
-  if (name === '') return 'Required'
+  if (name === '') {
+    return 'Required'
+  }
   return validateName(name, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH }) ?? null
 }
 
 const validatePlanStep: StepValidator = (draft, context) => {
-  if (!draft.paymentLinkId) return 'Pick a plan'
-  if (context.sizes && !getPickedSize(draft, context)) return 'This plan is no longer offered. Pick another plan.'
+  if (!draft.paymentLinkId) {
+    return 'Pick a plan'
+  }
+  if (context.sizes && !getPickedSize(draft, context)) {
+    return 'This plan is no longer offered. Pick another plan.'
+  }
   return null
 }
 
 const validateSafesStep: StepValidator = (draft, context) => {
   const seats = getPickedSize(draft, context)?.seats
   const used = countSeats(draft.safes.map((safe) => safe.address))
-  if (seats === undefined || used <= seats) return null
+  if (seats === undefined || used <= seats) {
+    return null
+  }
   const excess = used - seats
   return `Remove ${excess} Safe account${maybePlural(excess)} or pick a larger plan`
 }
 
 const validateInviteStep: StepValidator = (draft, context) => {
   const identifiers = draft.invites.map((invite) => invite.identifier.trim()).filter(Boolean)
-  if (identifiers.length > MAX_INVITES) return `You can invite up to ${MAX_INVITES} members at once`
+  if (identifiers.length > MAX_INVITES) {
+    return `You can invite up to ${MAX_INVITES} members at once`
+  }
   const unresolved = identifiers.filter((id) => !isEmailAddress(id) && !isAddress(id))
-  if (unresolved.some((id) => !isDomain(id))) return INVALID_IDENTIFIER_ERROR
-  if (unresolved.length > 0) return 'Wait until every ENS name resolves'
+  if (unresolved.some((id) => !isDomain(id))) {
+    return INVALID_IDENTIFIER_ERROR
+  }
+  if (unresolved.length > 0) {
+    return 'Wait until every ENS name resolves'
+  }
   const lowered = identifiers.map((id) => id.toLowerCase())
-  if (new Set(lowered).size !== lowered.length) return 'Each member can be invited once'
+  if (new Set(lowered).size !== lowered.length) {
+    return 'Each member can be invited once'
+  }
   const ownAddresses = context.ownAddresses ?? []
-  if (identifiers.some((id) => ownAddresses.some((own) => sameAddress(own, id))))
+  if (identifiers.some((id) => ownAddresses.some((own) => sameAddress(own, id)))) {
     return 'You are already in this Workspace'
+  }
   return null
 }
 

@@ -40,7 +40,9 @@ jest.mock('@/features/hypernative/public/components/HnBanner', () => {
     ...actual,
     HnBannerForSettings: () => {
       const { showBanner, loading } = useBannerVisibility(BannerType.Settings)
-      if (loading || !showBanner) return null
+      if (loading || !showBanner) {
+        return null
+      }
       return <div data-testid="hn-banner-for-settings">HnBannerForSettings</div>
     },
   }

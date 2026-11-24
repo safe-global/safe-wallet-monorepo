@@ -13,7 +13,9 @@ const useTransactionQueueBarState = () => {
   }, [])
 
   useEffect(() => {
-    if (txFlow) setExpanded(false)
+    if (txFlow) {
+      setExpanded(false)
+    }
   }, [txFlow])
 
   return {

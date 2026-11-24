@@ -22,8 +22,12 @@ const THEME_OPTIONS: ThemeOption[] = [
 ]
 
 const getCurrentTheme = (darkMode: boolean | undefined): ThemeOption['value'] => {
-  if (darkMode === true) return 'dark'
-  if (darkMode === false) return 'light'
+  if (darkMode === true) {
+    return 'dark'
+  }
+  if (darkMode === false) {
+    return 'light'
+  }
   return 'system'
 }
 
@@ -33,7 +37,9 @@ const AppearanceSection = () => {
   const current = getCurrentTheme(settings.theme.darkMode)
 
   const handleChange = (value: ThemeOption['value']) => {
-    if (value === current) return
+    if (value === current) {
+      return
+    }
     const nextDarkMode = value === 'dark' ? true : value === 'light' ? false : undefined
     dispatch(setDarkMode(nextDarkMode))
     trackEvent({ ...SETTINGS_EVENTS.APPEARANCE.DARK_MODE, label: value })

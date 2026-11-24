@@ -67,8 +67,12 @@ describe('useIsEarnPromoEnabled', () => {
 
   it('returns true when both promo and earn feature are enabled', () => {
     mockUseHasFeature.mockImplementation((feature) => {
-      if (feature === FEATURES.EARN_PROMO) return true
-      if (feature === FEATURES.EARN) return true
+      if (feature === FEATURES.EARN_PROMO) {
+        return true
+      }
+      if (feature === FEATURES.EARN) {
+        return true
+      }
       return false
     })
 
@@ -81,8 +85,12 @@ describe('useIsEarnPromoEnabled', () => {
 
   it('returns false when promo is disabled', () => {
     mockUseHasFeature.mockImplementation((feature) => {
-      if (feature === FEATURES.EARN_PROMO) return false
-      if (feature === FEATURES.EARN) return true
+      if (feature === FEATURES.EARN_PROMO) {
+        return false
+      }
+      if (feature === FEATURES.EARN) {
+        return true
+      }
       return false
     })
 
@@ -95,8 +103,12 @@ describe('useIsEarnPromoEnabled', () => {
 
   it('returns false when earn feature is disabled', () => {
     mockUseHasFeature.mockImplementation((feature) => {
-      if (feature === FEATURES.EARN_PROMO) return true
-      if (feature === FEATURES.EARN) return false
+      if (feature === FEATURES.EARN_PROMO) {
+        return true
+      }
+      if (feature === FEATURES.EARN) {
+        return false
+      }
       return false
     })
 

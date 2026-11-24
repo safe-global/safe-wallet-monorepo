@@ -30,7 +30,9 @@ const StakingBanner = ({
 
   const [_, setWidgetHidden] = useLocalStorage<boolean>(hideLocalStorageKey)
 
-  if (!isStakingBannerVisible) return null
+  if (!isStakingBannerVisible) {
+    return null
+  }
 
   return (
     <>

@@ -6,8 +6,9 @@ const useWalletCanPay = ({ gasLimit, maxFeePerGas }: { gasLimit?: bigint; maxFee
 
   // Take an optimistic approach and assume the wallet can pay
   // if gasLimit, maxFeePerGas or their walletBalance are missing
-  if (gasLimit === undefined || maxFeePerGas === undefined || maxFeePerGas === null || walletBalance === undefined)
+  if (gasLimit === undefined || maxFeePerGas === undefined || maxFeePerGas === null || walletBalance === undefined) {
     return true
+  }
 
   const totalFee = getTotalFee(maxFeePerGas, gasLimit)
 

@@ -44,7 +44,9 @@ export const InconsistentSignerSetupWarning = () => {
   const deviatingSetups = getDeviatingSetups(safeSetups, currentChain?.chainId)
   const deviatingChainIds = deviatingSetups.map((setup) => setup?.chainId)
 
-  if (!isMultichainSafe || !deviatingChainIds.length) return
+  if (!isMultichainSafe || !deviatingChainIds.length) {
+    return
+  }
 
   const handleReviewSigners = () => {
     router.push({

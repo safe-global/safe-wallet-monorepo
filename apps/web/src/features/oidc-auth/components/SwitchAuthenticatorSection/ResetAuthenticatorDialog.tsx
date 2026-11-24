@@ -39,10 +39,14 @@ const ResetAuthenticatorDialog = ({
 
     associate()
       .then((uri) => {
-        if (!cancelled) setBarcodeUri(uri)
+        if (!cancelled) {
+          setBarcodeUri(uri)
+        }
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Something went wrong')
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Something went wrong')
+        }
       })
 
     return () => {

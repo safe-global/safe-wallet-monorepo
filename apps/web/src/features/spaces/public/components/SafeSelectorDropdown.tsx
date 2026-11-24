@@ -20,9 +20,13 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/comp
 
 // Keeps the dropdown trigger renderable when the current safe isn't in `items`.
 function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs: Chain[]): SafeItemData | null {
-  if (!selectedItemId) return null
+  if (!selectedItemId) {
+    return null
+  }
   const { prefix: chainId, address } = parsePrefixedAddress(selectedItemId)
-  if (!chainId || !address) return null
+  if (!chainId || !address) {
+    return null
+  }
   const chain = chainConfigs.find((c) => c.chainId === chainId)
   return {
     id: selectedItemId,
@@ -118,8 +122,12 @@ function SafeSelectorDropdown({
   const handleOpenChangeWithReset = (open: boolean) => {
     // Ignore close requests while a modal is layered on top (e.g. renaming): base-ui tries to close
     // the popup when focus/pointer moves into the dialog, but we want the user to keep their place.
-    if (!open && keepOpen) return
-    if (!open) onSearchValueChange?.('')
+    if (!open && keepOpen) {
+      return
+    }
+    if (!open) {
+      onSearchValueChange?.('')
+    }
     handleOpenChange(open)
   }
 
@@ -137,18 +145,26 @@ function SafeSelectorDropdown({
   }
 
   const forwardPressToTrigger = (event: MouseEvent<HTMLDivElement>) => {
-    if (wasOpenOnPressRef.current || isDisabled || !variants.canOpen) return
-    if (event.target instanceof Element && event.target.closest('a, button, [role="button"]')) return
+    if (wasOpenOnPressRef.current || isDisabled || !variants.canOpen) {
+      return
+    }
+    if (event.target instanceof Element && event.target.closest('a, button, [role="button"]')) {
+      return
+    }
     triggerRef.current?.click()
   }
 
   if (!mounted || !triggerItem) {
-    if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
+    if (isError && mounted) {
+      return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
+    }
     return <SafeSelectorDropdownSkeleton />
   }
 
   if (items.length === 0) {
-    if (isError) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
+    if (isError) {
+      return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
+    }
     return <SafeSelectorDropdownSkeleton />
   }
 

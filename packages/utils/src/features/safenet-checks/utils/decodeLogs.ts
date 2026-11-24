@@ -36,7 +36,9 @@ export const decodeLogs = (logs: ReadonlyArray<RawLog>): NormalizedCheckEvent[] 
   const events: NormalizedCheckEvent[] = []
   for (const log of logs) {
     const event = decodeOne(log)
-    if (event) events.push(event)
+    if (event) {
+      events.push(event)
+    }
   }
   return events
 }
@@ -44,11 +46,17 @@ export const decodeLogs = (logs: ReadonlyArray<RawLog>): NormalizedCheckEvent[] 
 const decodeOne = (log: RawLog): NormalizedCheckEvent | null => {
   try {
     const topic0 = log.topics[0]
-    if (!topic0) return null
+    if (!topic0) {
+      return null
+    }
     const dispatch = TOPICS[topic0]
-    if (!dispatch) return null
+    if (!dispatch) {
+      return null
+    }
     const parsed = dispatch.iface.parseLog({ topics: [...log.topics], data: log.data })
-    if (!parsed) return null
+    if (!parsed) {
+      return null
+    }
     return normalize(dispatch, parsed.args, log)
   } catch {
     return null

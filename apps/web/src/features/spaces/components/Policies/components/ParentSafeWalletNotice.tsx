@@ -31,7 +31,9 @@ const ParentSafeWalletNotice = ({
   const goToSettings = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault()
     onNavigate?.()
-    if (settingsHref) void router.push(settingsHref)
+    if (settingsHref) {
+      void router.push(settingsHref)
+    }
   }
 
   return (

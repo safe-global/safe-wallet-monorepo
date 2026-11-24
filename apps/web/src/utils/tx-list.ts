@@ -88,7 +88,9 @@ const groupBulkTxs = <T extends AnyListItem>(list: Array<T | AnyTransactionItem[
       const currentTxHash = item.transaction.txHash
 
       const prevItem = resultItems[resultItems.length - 1]
-      if (!Array.isArray(prevItem)) return resultItems.concat([[item]])
+      if (!Array.isArray(prevItem)) {
+        return resultItems.concat([[item]])
+      }
       const prevTxHash = prevItem[0].transaction.txHash
 
       if (currentTxHash && currentTxHash === prevTxHash) {

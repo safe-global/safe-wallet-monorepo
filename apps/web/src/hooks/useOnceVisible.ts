@@ -5,7 +5,9 @@ const useOnceVisible = (element: RefObject<HTMLElement | null>): boolean => {
   const [onceVisible, setOnceVisible] = useState<boolean>(false)
 
   useEffect(() => {
-    if (!element.current) return
+    if (!element.current) {
+      return
+    }
 
     const observer = new IntersectionObserver(([entry], obs) => {
       if (entry.isIntersecting) {

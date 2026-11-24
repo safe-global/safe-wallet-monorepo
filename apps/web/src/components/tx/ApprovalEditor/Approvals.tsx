@@ -14,7 +14,9 @@ const Approvals = ({ approvalInfos }: { approvalInfos: ApprovalInfo[] }) => {
         <div key={spender} className="flex flex-col gap-4">
           <SpenderField address={spender} />
           {approvals.map((tx) => {
-            if (!tx.tokenInfo) return <></>
+            if (!tx.tokenInfo) {
+              return <></>
+            }
 
             return (
               <li

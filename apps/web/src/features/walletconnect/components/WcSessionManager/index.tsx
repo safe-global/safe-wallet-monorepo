@@ -38,7 +38,9 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
   }, [error])
 
   // Nothing to show
-  if (!open && !chainSwitchRequest) return null
+  if (!open && !chainSwitchRequest) {
+    return null
+  }
 
   if (chainSwitchRequest) {
     return (

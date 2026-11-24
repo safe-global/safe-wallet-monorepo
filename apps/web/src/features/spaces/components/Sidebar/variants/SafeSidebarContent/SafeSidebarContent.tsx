@@ -56,8 +56,12 @@ export const SafeSidebarContent = ({
 
   const isItemDisabled = useCallback(
     (item: SidebarItemConfig) => {
-      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return true
-      if (!safe.deployed && UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(item.href)) return true
+      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) {
+        return true
+      }
+      if (!safe.deployed && UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(item.href)) {
+        return true
+      }
       return !isRouteEnabled(item.href, chain)
     },
     [isBlockedCountry, safe.deployed, chain],
@@ -79,14 +83,18 @@ export const SafeSidebarContent = ({
   // Filter visible items by geoblocking and chain features
   const visibleMainNavigation = useMemo(() => {
     return safeMainNavigation.filter((item) => {
-      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
+      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) {
+        return false
+      }
       return isRouteEnabled(item.href, chain)
     })
   }, [chain, isBlockedCountry])
 
   const visibleDefiGroup = useMemo(() => {
     const filteredItems = safeDefiGroup.items.filter((item) => {
-      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
+      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) {
+        return false
+      }
       return isRouteEnabled(item.href, chain)
     })
     return { ...safeDefiGroup, items: filteredItems }

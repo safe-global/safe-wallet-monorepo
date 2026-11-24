@@ -20,7 +20,9 @@ export const useSpaceSafesWithQueue = () => {
   })
 
   const safesWithQueue = useMemo(() => {
-    if (!overviews) return []
+    if (!overviews) {
+      return []
+    }
 
     return overviews.reduce<SafePair[]>((result, overview) => {
       if (overview.queued > 0) {

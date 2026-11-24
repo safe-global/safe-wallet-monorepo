@@ -99,7 +99,9 @@ export default <RolePermissionsConfig>{
     [Permission.ExecuteTransaction]: () => true,
     [Permission.EnablePushNotifications]: true,
     [Permission.CreateSpendingLimitTransaction]: ({ tokenAddress } = {}) => {
-      if (!wallet) return false
+      if (!wallet) {
+        return false
+      }
 
       if (!tokenAddress) {
         // Check if the connected wallet has a spending limit for any token

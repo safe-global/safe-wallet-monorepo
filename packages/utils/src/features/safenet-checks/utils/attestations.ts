@@ -45,6 +45,8 @@ export const bindAttestations = (
  */
 export const verdictAttestation = (snapshot: SafenetCheckSnapshot): OracleAttestedEvent | undefined => {
   const { signatureId } = snapshot.attestation
-  if (signatureId === null) return undefined
+  if (signatureId === null) {
+    return undefined
+  }
   return attestationCandidates(snapshot.events).find((event) => event.signatureId === signatureId)
 }

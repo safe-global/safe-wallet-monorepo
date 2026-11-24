@@ -80,11 +80,15 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
 
   const getAddressType = async (address: string, chainId: string) => {
     const isSmartContract = await isSmartContractWallet(chainId, address)
-    if (!isSmartContract) return AddressType.EOA
+    if (!isSmartContract) {
+      return AddressType.EOA
+    }
 
     try {
       const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
-      if (result) return AddressType.Safe
+      if (result) {
+        return AddressType.Safe
+      }
     } catch {
       // Not a safe
     }

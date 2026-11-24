@@ -27,10 +27,14 @@ const useNameResolver = (
   const targetChainId = targetChain ? Number(targetChain.chainId) : undefined
 
   const [ens, resolverError, isResolving] = useAsync<{ name: string; address: string } | undefined>(() => {
-    if (!ethersProvider || !debouncedValue || !isDomain(debouncedValue) || targetChainId === undefined) return
+    if (!ethersProvider || !debouncedValue || !isDomain(debouncedValue) || targetChainId === undefined) {
+      return
+    }
 
     return resolveNameForChain(ethersProvider, debouncedValue, targetChainId).then((address) => {
-      if (!address) throw Error(getEnsNotAvailableError(targetChain))
+      if (!address) {
+        throw Error(getEnsNotAvailableError(targetChain))
+      }
       return { name: debouncedValue, address }
     })
   }, [debouncedValue, ethersProvider, targetChain, targetChainId])

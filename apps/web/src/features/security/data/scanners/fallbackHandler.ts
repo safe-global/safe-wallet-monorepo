@@ -9,8 +9,12 @@ type HandlerMatch = 'compatibility' | 'extensible' | 'twap' | null
 
 const identifyFallbackHandler = (address: string, chainId: string): HandlerMatch => {
   const officialHandler = identifyOfficialFallbackHandler(address, chainId)
-  if (officialHandler) return officialHandler
-  if (TWAP_FALLBACK_HANDLER_NETWORKS.includes(chainId) && sameAddress(address, TWAP_FALLBACK_HANDLER)) return 'twap'
+  if (officialHandler) {
+    return officialHandler
+  }
+  if (TWAP_FALLBACK_HANDLER_NETWORKS.includes(chainId) && sameAddress(address, TWAP_FALLBACK_HANDLER)) {
+    return 'twap'
+  }
   return null
 }
 

@@ -5,9 +5,13 @@ export type SignerStatus = AddressInfo & { signed: boolean }
 
 export const getSignersHeader = (submitted: number, required: number, unsignedCount?: number): string => {
   const progress = `${submitted} of ${required} signed`
-  if (submitted >= required) return `${progress} · threshold met`
+  if (submitted >= required) {
+    return `${progress} · threshold met`
+  }
   const missing = required - submitted
-  if (unsignedCount === undefined) return `${progress} · ${missing} more needed`
+  if (unsignedCount === undefined) {
+    return `${progress} · ${missing} more needed`
+  }
   return `${progress} · ${missing} more from ${unsignedCount} ${unsignedCount === 1 ? 'signer' : 'signers'}`
 }
 

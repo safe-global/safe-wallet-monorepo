@@ -23,7 +23,9 @@ const GlobalSearchModal = () => {
   }, [dispatch])
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      return
+    }
 
     router.events.on('routeChangeStart', handleClose)
 
@@ -32,7 +34,9 @@ const GlobalSearchModal = () => {
     }
   }, [open, router.events, handleClose])
 
-  if (!open) return null
+  if (!open) {
+    return null
+  }
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>

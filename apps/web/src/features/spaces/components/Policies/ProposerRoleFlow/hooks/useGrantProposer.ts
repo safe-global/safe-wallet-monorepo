@@ -141,7 +141,9 @@ export const useGrantProposer = (): GrantProposer => {
     async ({ proposer, name }: ProposerRoleFormValues, safeLabel?: string): Promise<boolean> => {
       trackEvent(POLICY_EVENTS.PROPOSER_SUBMITTED, { [MixpanelEventParams.CHAIN_ID]: chainId })
 
-      if (!wallet || !onboard || !safeAddress || !chain) return false
+      if (!wallet || !onboard || !safeAddress || !chain) {
+        return false
+      }
 
       reset()
       setIsSubmitting(true)

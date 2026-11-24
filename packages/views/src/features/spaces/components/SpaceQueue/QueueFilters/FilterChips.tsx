@@ -55,7 +55,9 @@ const FilterChips = ({
   ]
   const shownChips = chips.filter(({ values }) => values.length > 0)
 
-  if (shownChips.length === 0) return null
+  if (shownChips.length === 0) {
+    return null
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-2">

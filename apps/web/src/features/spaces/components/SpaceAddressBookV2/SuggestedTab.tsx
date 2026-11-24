@@ -77,11 +77,15 @@ const SuggestedTab = ({
   }
 
   const closeDialog = () => {
-    if (!isSubmitting) setDialog(undefined)
+    if (!isSubmitting) {
+      setDialog(undefined)
+    }
   }
 
   const handleAdd = async (contacts: AddedSuggestion[]) => {
-    if (!dialog) return
+    if (!dialog) {
+      return
+    }
 
     setIsSubmitting(true)
     setError(undefined)

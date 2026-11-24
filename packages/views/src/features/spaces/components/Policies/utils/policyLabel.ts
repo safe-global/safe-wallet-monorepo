@@ -63,8 +63,12 @@ const getAllowances = (policy: Extract<Policy, { type: 'spending-limit' }>): Pol
 const describeSpendingLimit = (policy: Extract<Policy, { type: 'spending-limit' }>): string => {
   const allowances = getAllowances(policy)
 
-  if (allowances.length === 0) return 'No limits set'
-  if (allowances.length === 1) return formatAllowance(allowances[0])
+  if (allowances.length === 0) {
+    return 'No limits set'
+  }
+  if (allowances.length === 1) {
+    return formatAllowance(allowances[0])
+  }
 
   const spenderCount = policy.data.spenders.length
   const spenders = `${spenderCount} spender${maybePlural(spenderCount)}`
@@ -79,10 +83,14 @@ const describeSpendingLimit = (policy: Extract<Policy, { type: 'spending-limit' 
  */
 export const getPolicySummary = (policy: Policy): string => {
   if (isSpendingLimitPolicy(policy)) {
-    if (!isPendingPolicy(policy) || policy.operation !== 'remove') return describeSpendingLimit(policy)
+    if (!isPendingPolicy(policy) || policy.operation !== 'remove') {
+      return describeSpendingLimit(policy)
+    }
 
     // Still enforced until the transaction executes, so the copy is in progress, not done.
-    if (getAllowances(policy).length > 0) return `Removing ${describeSpendingLimit(policy)}`
+    if (getAllowances(policy).length > 0) {
+      return `Removing ${describeSpendingLimit(policy)}`
+    }
 
     const { spenders } = policy.data
     return `Removing ${spenders.length} spender${maybePlural(spenders)}`

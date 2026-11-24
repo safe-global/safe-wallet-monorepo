@@ -84,7 +84,9 @@ const getAutoHideDuration = (
   variant: NotificationVariant,
   override: Notification['autoHideDuration'],
 ): number | undefined => {
-  if (override !== undefined) return override ?? undefined
+  if (override !== undefined) {
+    return override ?? undefined
+  }
   return variant === 'info' || variant === 'success' ? AUTO_HIDE_MS : undefined
 }
 

@@ -14,7 +14,9 @@ export const registerActiveScope = (): (() => void) => {
   activeScopes += 1
   let released = false
   return () => {
-    if (released) return
+    if (released) {
+      return
+    }
     released = true
     activeScopes -= 1
   }

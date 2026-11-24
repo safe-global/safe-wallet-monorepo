@@ -11,7 +11,9 @@ import { useEnabledWizardSteps } from './useEnabledWizardSteps'
 export const useWizardNavigation = (stepId: WizardStepId) => {
   const router = useRouter()
   const enabledSteps = useEnabledWizardSteps()
-  if (!enabledSteps) throw new Error('The onboarding steps are not known yet; mount the step below the wizard')
+  if (!enabledSteps) {
+    throw new Error('The onboarding steps are not known yet; mount the step below the wizard')
+  }
   const steps = enabledSteps
   const { onExit, hasNoSpaces } = useOnboardingExit(false)
 
@@ -27,13 +29,18 @@ export const useWizardNavigation = (stepId: WizardStepId) => {
 
   const goNext = useCallback(() => {
     const next = steps[index + 1]
-    if (next) goTo(next)
+    if (next) {
+      goTo(next)
+    }
   }, [steps, index, goTo])
 
   const goBack = useCallback(() => {
     const previous = steps[index - 1]
-    if (previous) goTo(previous)
-    else onExit()
+    if (previous) {
+      goTo(previous)
+    } else {
+      onExit()
+    }
   }, [steps, index, goTo, onExit])
 
   return {

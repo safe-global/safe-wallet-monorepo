@@ -30,7 +30,9 @@ const ReviewSafeAppsTx = ({
 
   useEffect(() => {
     // An app can request a transaction right after the page loads, before the Safe SDK is ready
-    if (!safeSDK) return
+    if (!safeSDK) {
+      return
+    }
 
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = txs.length > 1

@@ -20,7 +20,9 @@ export const useLogoutCallback = () => {
 
   useEffect(() => {
     const isLoggingOut = sessionStorage.getItem(LOGGING_OUT_KEY)
-    if (!isLoggingOut || hasProcessed.current) return
+    if (!isLoggingOut || hasProcessed.current) {
+      return
+    }
     hasProcessed.current = true
 
     const process = async () => {

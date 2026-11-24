@@ -11,7 +11,9 @@ const uniqueAddresses = (addresses: readonly string[]): string[] => {
   const seen = new Set<string>()
   return addresses.filter((address) => {
     const key = address.toLowerCase()
-    if (seen.has(key)) return false
+    if (seen.has(key)) {
+      return false
+    }
     seen.add(key)
     return true
   })
@@ -39,7 +41,9 @@ export const buildAllowlistRules = (
   values: RecipientAllowlistFormValues,
 ): AllowlistRule[] => {
   const recipients = uniqueAddresses(getSelectedRecipients(values).map(({ address }) => checksumAddress(address)))
-  if (recipients.length === 0) return []
+  if (recipients.length === 0) {
+    return []
+  }
 
   return getAllowedTokenAddresses(heldTokens, values).map((token) => ({
     tokenAddress: checksumAddress(token),

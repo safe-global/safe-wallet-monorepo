@@ -46,7 +46,9 @@ export const applySafeSelectionToggle = (
     setValue(`selectedSafes.${getMultiChainSafeId(group)}`, nextChecked, { shouldValidate: true })
     group.safes.forEach((safe) => {
       const key = getSafeId(safe)
-      if (disabledKeys?.has(key)) return
+      if (disabledKeys?.has(key)) {
+        return
+      }
       setValue(`selectedSafes.${key}`, nextChecked, { shouldValidate: true })
     })
     return

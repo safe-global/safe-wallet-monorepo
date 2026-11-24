@@ -27,7 +27,9 @@ const RejectTxButton = ({
   const isDisabled = isPending || !safeSDK
 
   const openReplacementModal = () => {
-    if (txNonce === undefined) return
+    if (txNonce === undefined) {
+      return
+    }
     setTxFlow(<ReplaceTxFlow txNonce={txNonce} safeTxHash={safeTxHash} proposer={proposer} />, undefined, false)
   }
 

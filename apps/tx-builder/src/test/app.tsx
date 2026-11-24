@@ -45,7 +45,9 @@ export const buildBatchFile = (overrides: Partial<BatchFile> = {}): BatchFile =>
 export const uploadJson = async (user: UserEvent, content: unknown): Promise<void> => {
   await screen.findByText('choose a file')
   const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]')
-  if (!fileInput) throw new Error('The batch upload input is not rendered')
+  if (!fileInput) {
+    throw new Error('The batch upload input is not rendered')
+  }
 
   await user.upload(fileInput, new File([JSON.stringify(content)], 'batch.json', { type: 'application/json' }))
 }

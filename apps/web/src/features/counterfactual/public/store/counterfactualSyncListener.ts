@@ -25,14 +25,18 @@ export const counterfactualSyncListener = (listenerMiddleware: typeof listenerMi
       // with calls that 404 (and pollute the pending-delete queue) when multiple
       // dispatchers fire in the same tick after activation (self-heal in
       // useLoadSafeInfo + INDEXED event in usePendingSafeStatuses).
-      if (!removed) return
+      if (!removed) {
+        return
+      }
 
       // Backend DELETE rejects non-creators with 40x, so skip the call for safes the
       // current user didn't create (e.g. ones synced from a space endpoint).
       // Treat undefined as `true` for backwards compatibility with entries
       // persisted before the isCreator flag existed.
       const wasCreator = removed.isCreator !== false
-      if (!wasCreator) return
+      if (!wasCreator) {
+        return
+      }
 
       // The user can deploy a safe before signing in with SIWE (just a wallet
       // connection is enough). In that case we can't reach the backend yet —
@@ -54,7 +58,9 @@ export const counterfactualSyncListener = (listenerMiddleware: typeof listenerMi
       } catch (e) {
         // 404 means the record is already gone server-side — that's our intended
         // end state, no retry needed.
-        if (is404(e)) return
+        if (is404(e)) {
+          return
+        }
         logError(Errors._650, e)
         // Network/5xx during the live DELETE leaves backend stuck on the now-deployed
         // safe. Queue it so the next sync flushes the retry — otherwise the next GET

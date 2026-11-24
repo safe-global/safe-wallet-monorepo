@@ -13,7 +13,11 @@ export const sponsoredQuotaMessage = ({ quota, resetsAt }: QuotaExceededError): 
 
 export const getQuotaExceededMessage = (error: unknown): string | undefined => {
   const quota = getQuotaExceededError(error)
-  if (quota?.feature === 'safe_seats') return seatLimitMessage(quota)
-  if (quota?.feature === 'sponsored_transactions') return sponsoredQuotaMessage(quota)
+  if (quota?.feature === 'safe_seats') {
+    return seatLimitMessage(quota)
+  }
+  if (quota?.feature === 'sponsored_transactions') {
+    return sponsoredQuotaMessage(quota)
+  }
   return undefined
 }

@@ -64,8 +64,12 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const isDisabled = waitingForConfirmation || !wallet || !speedUpFee || !onboard
   const scope = useSafeScope()
   const [safeTx] = useAsync(() => {
-    if (!chainInfo?.chainId) return
-    if (scope && !scope.sdk) return
+    if (!chainInfo?.chainId) {
+      return
+    }
+    if (scope && !scope.sdk) {
+      return
+    }
     return createExistingTx(chainInfo.chainId, txId, undefined, scope)
   }, [txId, chainInfo?.chainId, scope])
 

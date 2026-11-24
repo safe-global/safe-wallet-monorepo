@@ -210,7 +210,9 @@ function SelectableSpaceSafeBar() {
     const byId = new Map<string, SafeItemData>()
     for (const item of [...workspaceItems, ...localItems]) {
       const existing = byId.get(item.id)
-      if (!existing || item.chains.length > existing.chains.length) byId.set(item.id, item)
+      if (!existing || item.chains.length > existing.chains.length) {
+        byId.set(item.id, item)
+      }
     }
     return [...byId.values()]
   }, [workspaceItems, localItems])
@@ -230,9 +232,13 @@ function SelectableSpaceSafeBar() {
 
   // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
   // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
-  if (HIDDEN_ROUTES.includes(router.pathname)) return null
+  if (HIDDEN_ROUTES.includes(router.pathname)) {
+    return null
+  }
   // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
-  if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
+  if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) {
+    return null
+  }
 
   const activeTab: DropdownTab = selectedTab ?? (isInSpaceContext ? 'workspace' : 'local')
 

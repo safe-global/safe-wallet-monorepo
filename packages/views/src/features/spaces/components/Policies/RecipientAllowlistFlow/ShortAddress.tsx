@@ -5,7 +5,9 @@ const VISIBLE_CHARS = 4
 
 /** A muted, monospaced short address, cut like `shortenAddress`. */
 const ShortAddress = ({ address }: { address: string }): ReactElement | null => {
-  if (!address) return null
+  if (!address) {
+    return null
+  }
 
   return (
     <Typography variant="paragraph-mini" color="muted" className="font-mono leading-[normal]">

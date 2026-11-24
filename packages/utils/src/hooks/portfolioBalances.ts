@@ -21,7 +21,9 @@ export const createPortfolioBalances = (balances: Balances): PortfolioBalances =
 })
 
 export const transformPortfolioToBalances = (portfolio?: Portfolio): PortfolioBalances | undefined => {
-  if (!portfolio) return undefined
+  if (!portfolio) {
+    return undefined
+  }
 
   return {
     items: portfolio.tokenBalances.map((token) => ({

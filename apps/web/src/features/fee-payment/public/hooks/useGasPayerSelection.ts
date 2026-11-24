@@ -124,15 +124,23 @@ export const useGasPayerSelection = ({
     numberSignatures: safe.threshold,
   })
   const safeFee = useMemo<NetworkFee>(() => {
-    if (quote.isLoading || quote.isFetching) return { loading: true }
-    if (!quote.data) return { error: !!quote.error }
+    if (quote.isLoading || quote.isFetching) {
+      return { loading: true }
+    }
+    if (!quote.data) {
+      return { error: !!quote.error }
+    }
     // `useFeesPreview` prices the same quote in the gas token's decimals.
-    if (fees.loading) return { loading: true }
+    if (fees.loading) {
+      return { loading: true }
+    }
     return { amount: fees.gasFee.amount, currency: fees.gasFee.currency, fiatAmount: fees.gasFee.fiatAmount }
   }, [quote.isLoading, quote.isFetching, quote.data, quote.error, fees.loading, fees.gasFee])
 
   const view = useMemo<FeePayerView | null>(() => {
-    if (!safeTx) return null
+    if (!safeTx) {
+      return null
+    }
 
     const payer = buildPayerControl({
       isLocked,
@@ -225,7 +233,9 @@ export const useGasPayerSelection = ({
   const setChoice = useCallback(
     (next: GasPayerChoice) => {
       setExplicitChoice(next)
-      if (!signerAddress || !isSafeOptionShown || next === 'SPONSORED') return
+      if (!signerAddress || !isSafeOptionShown || next === 'SPONSORED') {
+        return
+      }
       dispatch(setFeePaymentSourcePreference({ signerAddress, source: next }))
     },
     [dispatch, signerAddress, isSafeOptionShown],

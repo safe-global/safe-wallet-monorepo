@@ -32,7 +32,9 @@ const CopyAddress = ({ address }: { address: string }) => {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (!copied) return
+    if (!copied) {
+      return
+    }
     const timer = setTimeout(() => setCopied(false), COPIED_MS)
     return () => clearTimeout(timer)
   }, [copied])

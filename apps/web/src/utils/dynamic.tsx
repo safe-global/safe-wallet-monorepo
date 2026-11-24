@@ -29,10 +29,14 @@ const dynamic: Dynamic = <P extends object>(loader: Loader<P>) => {
     const [Component, setComponent] = useState(() => loaded)
 
     useEffect(() => {
-      if (Component) return
+      if (Component) {
+        return
+      }
       let isMounted = true
       load().then((component) => {
-        if (isMounted) setComponent(() => component)
+        if (isMounted) {
+          setComponent(() => component)
+        }
       })
       return () => {
         isMounted = false

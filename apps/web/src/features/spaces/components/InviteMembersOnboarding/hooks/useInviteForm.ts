@@ -29,7 +29,9 @@ const NAME_MIN_LENGTH = 3
  * invite isn't rejected for a too-short name.
  */
 export const toInviteName = (identifier: string): string => {
-  if (!isEmailAddress(identifier)) return identifier
+  if (!isEmailAddress(identifier)) {
+    return identifier
+  }
 
   const localPart = identifier.slice(0, identifier.indexOf('@'))
   const sanitized = localPart
@@ -57,7 +59,9 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
   const { fields, append, remove } = useFieldArray({ control, name: 'members' })
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
 
     const validMembers = data.members
       .map((m) => ({ ...m, identifier: m.identifier.trim() }))
@@ -95,7 +99,9 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
         inviteUsersDto: { users: usersToInvite },
       })
 
-      if (isElevationRequiredError(result.error)) return
+      if (isElevationRequiredError(result.error)) {
+        return
+      }
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error) || 'Failed to invite members. Please try again.')
         return
@@ -106,7 +112,9 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     } catch {
       setError('Something went wrong inviting members. Please try again.')
     } finally {
-      if (!succeeded) setIsSubmitting(false)
+      if (!succeeded) {
+        setIsSubmitting(false)
+      }
     }
   })
 

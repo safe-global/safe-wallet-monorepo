@@ -95,8 +95,12 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   // denominated in `gasToken` base units. Falls back to native chain metadata when the gas
   // token is the zero address.
   const safePaidData = useMemo<HistoryFeesData | null>(() => {
-    if (!executedAt || !exec || !isSafePaid) return null
-    if (!payment) return null
+    if (!executedAt || !exec || !isSafePaid) {
+      return null
+    }
+    if (!payment) {
+      return null
+    }
 
     const isNative = sameAddress(gasToken, ZERO_ADDRESS)
     const decimals = isNative ? (chain?.nativeCurrency.decimals ?? 18) : (gasTokenDecimals ?? 18)
@@ -122,14 +126,22 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   // Only an unknown executor needs the receipt, to look for Rhinestone's log. Deps are primitives
   // so polling balances doesn't trigger a re-fetch.
   const [receipt] = useAsync(async () => {
-    if (!executedAt || !exec) return null
-    if (knownPayer || isSafePaid) return null
-    if (!txHash || !provider) return null
+    if (!executedAt || !exec) {
+      return null
+    }
+    if (knownPayer || isSafePaid) {
+      return null
+    }
+    if (!txHash || !provider) {
+      return null
+    }
     try {
       return await provider.getTransactionReceipt(txHash)
     } catch (e) {
       // A receipt fetch never reverts, so only a transient throttle is expected here.
-      if (!isRateLimitError(e)) logError(Errors._623, e, getRpcErrorContext(provider))
+      if (!isRateLimitError(e)) {
+        logError(Errors._623, e, getRpcErrorContext(provider))
+      }
       throw e
     }
   }, [executedAt, !!exec, knownPayer, isSafePaid, txHash, provider])
@@ -138,9 +150,13 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
 
   const executorPaidData = useMemo<HistoryFeesData | null>(() => {
     // No payer without a multisig executor or receipt, so `exec` needs no check of its own.
-    if (!executedAt || isSafePaid || !payer) return null
+    if (!executedAt || isSafePaid || !payer) {
+      return null
+    }
     // CGW defaults `fee` to '0' when the Transaction Service has none.
-    if (!fee || fee === '0') return null
+    if (!fee || fee === '0') {
+      return null
+    }
 
     const decimals = chain?.nativeCurrency.decimals ?? 18
     const symbol = chain?.nativeCurrency.symbol ?? 'ETH'

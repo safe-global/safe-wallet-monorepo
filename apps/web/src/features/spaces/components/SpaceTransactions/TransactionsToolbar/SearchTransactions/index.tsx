@@ -17,7 +17,9 @@ const SearchTransactions = ({ onSearch }: SearchTransactionsProps): ReactElement
   const lastQuery = useRef('')
 
   useEffect(() => {
-    if (debouncedQuery === lastQuery.current) return
+    if (debouncedQuery === lastQuery.current) {
+      return
+    }
     lastQuery.current = debouncedQuery
     onSearch(debouncedQuery)
   }, [debouncedQuery, onSearch])

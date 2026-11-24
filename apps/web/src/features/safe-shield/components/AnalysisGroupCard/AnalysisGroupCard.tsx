@@ -56,7 +56,9 @@ export const AnalysisGroupCard = ({
   const isShown = !!primaryResult && !isDataEmpty
 
   useEffect(() => {
-    if (!isShown) setRevealed(false)
+    if (!isShown) {
+      setRevealed(false)
+    }
   }, [isShown])
 
   // Track analytics event when results change
@@ -77,7 +79,9 @@ export const AnalysisGroupCard = ({
   }
 
   const handleRevealEnd = (e: AnimationEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) setRevealed(true)
+    if (e.target === e.currentTarget) {
+      setRevealed(true)
+    }
   }
 
   return (

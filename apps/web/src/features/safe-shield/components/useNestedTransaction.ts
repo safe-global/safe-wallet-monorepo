@@ -31,7 +31,9 @@ export type NestedTxInfo =
  * @returns Information about the nested transaction, or null if not nested
  */
 export const detectNestedTransaction = (safeTx?: SafeTransaction): NestedTxInfo => {
-  if (!safeTx?.data.data) return null
+  if (!safeTx?.data.data) {
+    return null
+  }
 
   const txData = safeTx.data.data
   const approveHashSelector = safeInterface.getFunction('approveHash').selector
@@ -123,7 +125,9 @@ export const useNestedTransaction = (
   )
 
   const nestedTxHash = useMemo(() => {
-    if (!nestedTxInfo) return ''
+    if (!nestedTxInfo) {
+      return ''
+    }
 
     if (nestedTxInfo.type === 'approveHash') {
       return nestedTxInfo.signedHash
@@ -149,7 +153,9 @@ export const useNestedTransaction = (
   )
 
   const nestedSafeTx = useMemo<SafeTransaction | undefined>(() => {
-    if (!nestedTxInfo || !nestedTxDetails) return undefined
+    if (!nestedTxInfo || !nestedTxDetails) {
+      return undefined
+    }
 
     return {
       addSignature: () => {},

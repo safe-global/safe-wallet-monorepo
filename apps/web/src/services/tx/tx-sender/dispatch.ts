@@ -764,7 +764,9 @@ export const dispatchTxRelay = async (
   } catch (error) {
     const finalError = getRelayError(error, sponsorSpaceId)
     // A space-route refusal means the meter on screen is stale.
-    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) {
+      refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    }
     txDispatch(TxEvent.FAILED, {
       txId,
       error: finalError,
@@ -812,7 +814,9 @@ export const dispatchBatchExecutionRelay = async (
           .unwrap()
   } catch (error) {
     const finalError = getRelayError(error, sponsorSpaceId)
-    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) {
+      refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+    }
     txs.forEach(({ txId }) => {
       txDispatch(TxEvent.FAILED, {
         txId,

@@ -36,13 +36,21 @@ export const getAddToSpaceStatus = ({
   safeAddress,
 }: AddToSpaceCheck): AddToSpaceStatus => {
   const isSafe = (address: string) => sameAddress(address, safeAddress)
-  if (spaceSafes?.[chainId]?.some(isSafe)) return 'alreadyAdded'
-  if (!isAdmin) return 'notAdmin'
-  if (hasPlan === false) return 'noPlan'
+  if (spaceSafes?.[chainId]?.some(isSafe)) {
+    return 'alreadyAdded'
+  }
+  if (!isAdmin) {
+    return 'notAdmin'
+  }
+  if (hasPlan === false) {
+    return 'noPlan'
+  }
 
   const addresses = Object.values(spaceSafes ?? {}).flat()
   // Seats are per address: a Safe the Workspace already holds on another chain takes none.
-  if (addresses.some(isSafe)) return 'available'
+  if (addresses.some(isSafe)) {
+    return 'available'
+  }
   const seatCount = spaceSafes ? countSeats(addresses) : safeCount
   return isSpaceAtSafeLimit(seatCount, limit) ? 'safeLimit' : 'available'
 }

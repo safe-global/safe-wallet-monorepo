@@ -46,13 +46,19 @@ export const initOnboard = async (
 
 // Get the most recently connected wallet address
 export const getConnectedWallet = (wallets: WalletState[]): ConnectedWallet | null => {
-  if (!wallets) return null
+  if (!wallets) {
+    return null
+  }
 
   const primaryWallet = wallets[0]
-  if (!primaryWallet) return null
+  if (!primaryWallet) {
+    return null
+  }
 
   const account = primaryWallet.accounts[0]
-  if (!account) return null
+  if (!account) {
+    return null
+  }
 
   let balance = ''
   if (account.balance) {
@@ -88,7 +94,9 @@ export const getConnectedWallet = (wallets: WalletState[]): ConnectedWallet | nu
 
 export const getWalletConnectLabel = (wallet: ConnectedWallet): string | undefined => {
   const UNKNOWN_PEER = 'Unknown'
-  if (!isWalletConnect(wallet)) return
+  if (!isWalletConnect(wallet)) {
+    return
+  }
   const { connector } = wallet.provider as unknown as any
   const peerWalletV2 = connector.session?.peer?.metadata?.name
   return peerWalletV2 || UNKNOWN_PEER
@@ -153,7 +161,9 @@ const lastWalletStorage = localItem<string>('lastWallet')
 
 const connectLastWallet = async (onboard: OnboardAPI) => {
   const lastWalletLabel = lastWalletStorage.get()
-  if (!lastWalletLabel) return
+  if (!lastWalletLabel) {
+    return
+  }
 
   if (await isWalletUnlocked(lastWalletLabel)) {
     await connectWallet(onboard, {
@@ -181,7 +191,9 @@ export const useInitOnboard = () => {
 
   // Disable unsupported wallets on the current chain
   useEffect(() => {
-    if (!onboard || !chain) return
+    if (!onboard || !chain) {
+      return
+    }
 
     const enableWallets = async () => {
       const { getSupportedWallets } = await import('@/hooks/wallets/wallets')
@@ -200,7 +212,9 @@ export const useInitOnboard = () => {
   // Track connected wallet
   useEffect(() => {
     let lastConnectedWallet = ''
-    if (!onboard) return
+    if (!onboard) {
+      return
+    }
 
     const walletSubscription = onboard.state.select('wallets').subscribe((wallets) => {
       const newWallet = getConnectedWallet(wallets)

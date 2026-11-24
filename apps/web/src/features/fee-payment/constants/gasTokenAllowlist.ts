@@ -77,7 +77,9 @@ const matchesEntry = (entry: GasTokenAllowlistEntry, address: string): boolean =
  */
 export const getGasTokenAllowlistOrder = (chainId: string, address: string): number => {
   const list = GAS_TOKEN_ALLOWLIST[chainId]
-  if (!list) return -1
+  if (!list) {
+    return -1
+  }
   return list.findIndex((entry) => matchesEntry(entry, address))
 }
 
@@ -87,8 +89,12 @@ export const getGasTokenAllowlistOrder = (chainId: string, address: string): num
  * unsupported chains by offering the native token only.
  */
 export const isAllowlistedGasToken = (chainId: string, address: string): boolean => {
-  if (sameAddress(address, ZERO_ADDRESS)) return true
+  if (sameAddress(address, ZERO_ADDRESS)) {
+    return true
+  }
   const list = GAS_TOKEN_ALLOWLIST[chainId]
-  if (!list) return false
+  if (!list) {
+    return false
+  }
   return list.some((entry) => matchesEntry(entry, address))
 }

@@ -16,7 +16,9 @@ const useAnchorListMatches = (addresses: string[]): Map<string, ListAnnotation> 
   const anchorIndex = useAppSelector(selectAnchorIndex)
 
   return useMemo(() => {
-    if (!isEnabled || addresses.length === 0) return new Map<string, ListAnnotation>()
+    if (!isEnabled || addresses.length === 0) {
+      return new Map<string, ListAnnotation>()
+    }
     return detectAnchorMatches(addresses, anchorIndex)
   }, [isEnabled, addresses, anchorIndex])
 }

@@ -52,7 +52,9 @@ export const useSignInRedirect = ({
     // A new user (no active spaces) is no longer pushed into the create-workspace
     // flow — they stay on the Workspaces tab and see the "Create your first
     // workspace" card. Any spaces-query error keeps them there too.
-    if (error) return
+    if (error) {
+      return
+    }
 
     if (hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
       if (requestedSpaceId) {

@@ -30,10 +30,14 @@ export const getSpendingLimitBatch = (
   txData: TransactionData | null | undefined,
   chainId: string,
 ): SpendingLimitBatch | undefined => {
-  if (txData?.dataDecoded?.method !== 'multiSend') return
+  if (txData?.dataDecoded?.method !== 'multiSend') {
+    return
+  }
 
   const actions = txData.dataDecoded.parameters?.[0]?.valueDecoded
-  if (!Array.isArray(actions) || actions.length === 0) return
+  if (!Array.isArray(actions) || actions.length === 0) {
+    return
+  }
 
   const isAllowanceModule = (address: string) => !!getDeployedSpendingLimitModuleAddress(chainId, [{ value: address }])
 
@@ -41,14 +45,18 @@ export const getSpendingLimitBatch = (
   const resets: BaseDataDecoded[] = []
 
   for (const { to, dataDecoded } of actions) {
-    if (!dataDecoded) return
+    if (!dataDecoded) {
+      return
+    }
 
     if (dataDecoded.method === 'enableModule' && isAllowanceModule(paramValue(dataDecoded, 0))) {
       batch.enablesModule = true
       continue
     }
 
-    if (!isAllowanceModule(to) || !ALLOWANCE_MODULE_METHODS.includes(dataDecoded.method)) return
+    if (!isAllowanceModule(to) || !ALLOWANCE_MODULE_METHODS.includes(dataDecoded.method)) {
+      return
+    }
 
     if (isSpendingLimitMethod(dataDecoded.method)) {
       batch.changes.push({ method: dataDecoded.method as SpendingLimitMethods, dataDecoded, resetsSpent: false })
@@ -59,7 +67,9 @@ export const getSpendingLimitBatch = (
     }
   }
 
-  if (batch.changes.length === 0 && batch.removedSpenders.length === 0) return
+  if (batch.changes.length === 0 && batch.removedSpenders.length === 0) {
+    return
+  }
 
   batch.changes = batch.changes.map((change) => ({
     ...change,

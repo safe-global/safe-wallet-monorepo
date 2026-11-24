@@ -82,7 +82,9 @@ export const AuditRow = ({
   const displayText = address ? name || shortenAddress(address) : undefined
   const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
   const handleCopy = useCallback(() => {
-    if (address) copy(address)
+    if (address) {
+      copy(address)
+    }
   }, [address, copy])
 
   const handleKeyDown = useCallback(

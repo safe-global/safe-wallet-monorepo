@@ -45,7 +45,9 @@ const ReorderableSafeList = ({
   hiddenIds,
 }: ReorderableSafeListProps) => {
   const handleDragEnd = ({ source, destination }: DropResult) => {
-    if (!destination || destination.index === source.index) return
+    if (!destination || destination.index === source.index) {
+      return
+    }
     onReorder(reorderByKey(items, source.index, destination.index, (item) => item.address))
   }
 

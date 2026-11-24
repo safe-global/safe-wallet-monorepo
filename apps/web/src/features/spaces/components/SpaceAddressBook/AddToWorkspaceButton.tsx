@@ -25,11 +25,15 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
   const nameError = validateContactName(name)
 
   const handleAdd = async () => {
-    if (added || nameError) return
+    if (added || nameError) {
+      return
+    }
 
     setIsSubmitting(true)
     try {
-      if ((await addOrRequestContact({ address, name, chainIds })) !== 'added') return
+      if ((await addOrRequestContact({ address, name, chainIds })) !== 'added') {
+        return
+      }
       trackEvent(SPACE_EVENTS.LOCAL_CONTACT_ADDED, { [MixpanelEventParams.SOURCE]: 'local_contact_row' })
       setAdded(true)
     } finally {

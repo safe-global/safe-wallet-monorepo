@@ -81,7 +81,9 @@ const FinishSetupRedirect = ({ spaceId }: { spaceId: string }) => {
 
   useEffect(() => {
     // Only once the flags are known: the last step depends on them.
-    if (steps) void router.replace(finishSetupRoute(steps, spaceId))
+    if (steps) {
+      void router.replace(finishSetupRoute(steps, spaceId))
+    }
   }, [steps, router, spaceId])
 
   // Covers the Workspace pages, as every other lock reason does, until the redirect lands.
@@ -101,7 +103,9 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
   const isConfirmingCheckout = checkout.isReturning && !CHECKOUT_RELEASED_STATUSES.includes(checkout.status)
 
   // Without the membership the admin check cannot be trusted yet; a non-member never gets this far (AuthState).
-  if (!membership || isConfirmingCheckout) return null
+  if (!membership || isConfirmingCheckout) {
+    return null
+  }
 
   const goBack = () => void router.push(AppRoutes.welcome.accounts)
 
@@ -119,16 +123,22 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
     )
   }
 
-  if (!isLocked) return null
+  if (!isLocked) {
+    return null
+  }
 
   if (!isAdmin) {
     const { title, body } = _memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
     return <MemberLockedNotice reason={reason} title={highlightSafePro(title)} body={body} onBack={goBack} />
   }
 
-  if (reason === 'setup-pending') return <FinishSetupRedirect spaceId={spaceId} />
+  if (reason === 'setup-pending') {
+    return <FinishSetupRedirect spaceId={spaceId} />
+  }
 
-  if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />
+  if (reason === 'trial-offered') {
+    return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />
+  }
 
   return <PlanChooserModal spaceId={spaceId} reason={reason} endedAt={endedAt} onBack={goBack} />
 }

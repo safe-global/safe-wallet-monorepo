@@ -59,7 +59,9 @@ const useSafeAppsInfoModal = ({
   }, [])
 
   const isPermissionsReviewCompleted = useMemo(() => {
-    if (!url) return false
+    if (!url) {
+      return false
+    }
 
     const safeAppRequiredFeatures = permissions || []
     const featureHasBeenGrantedOrDenied = (feature: AllowedFeatures) =>
@@ -72,13 +74,17 @@ const useSafeAppsInfoModal = ({
   }, [getPermissions, url, permissions])
 
   const isSafeAppInDefaultList = useMemo(() => {
-    if (!url) return false
+    if (!url) {
+      return false
+    }
 
     return !!safeApp
   }, [safeApp, url])
 
   const isFirstTimeAccessingApp = useMemo(() => {
-    if (!url) return true
+    if (!url) {
+      return true
+    }
 
     if (!modalInfo[chainId]) {
       return true

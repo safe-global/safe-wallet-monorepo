@@ -38,8 +38,12 @@ const hasNoAllowances = (data: SpendingLimitPolicyDataDto): boolean =>
   data.spenders.every((spender) => spender.allowances.length === 0)
 
 const toSpendingLimit = (dto: ActivePolicyDto): SpendingLimitPolicy | null => {
-  if (dto.enforcement.via !== 'module' || !isSpendingLimitData(dto.data)) return null
-  if (hasNoAllowances(dto.data)) return null
+  if (dto.enforcement.via !== 'module' || !isSpendingLimitData(dto.data)) {
+    return null
+  }
+  if (hasNoAllowances(dto.data)) {
+    return null
+  }
 
   return {
     id: `spending-limit:${dto.safe.chainId}:${dto.safe.address}:${dto.data.module}`,
@@ -59,7 +63,9 @@ const toSpendingLimit = (dto: ActivePolicyDto): SpendingLimitPolicy | null => {
 
 /** The drawer describes one proposer, so each proposer on a Safe gets its own row. */
 const toProposers = (dto: ActivePolicyDto): ProposerPolicy[] => {
-  if (dto.enforcement.via !== 'offchain' || !isProposerData(dto.data)) return []
+  if (dto.enforcement.via !== 'offchain' || !isProposerData(dto.data)) {
+    return []
+  }
 
   const { enforcement } = dto
 

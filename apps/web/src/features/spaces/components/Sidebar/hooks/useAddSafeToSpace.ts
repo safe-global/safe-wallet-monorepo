@@ -68,7 +68,9 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
     spaceQuery: typeof router.query,
   ): Promise<AddOutcome> => {
     const result = await addSafeToSpace({ spaceId, createSpaceSafesDto: { safes: [toAdd] } })
-    if (isElevationRequiredError(result.error)) return 'cancelled'
+    if (isElevationRequiredError(result.error)) {
+      return 'cancelled'
+    }
     if (result.error) {
       handleAddError(result.error)
       return 'failed'
@@ -78,7 +80,9 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   }
 
   const addToSpace = async (spaceId: string): Promise<boolean> => {
-    if (!chain?.chainId || !safe.address.value) return false
+    if (!chain?.chainId || !safe.address.value) {
+      return false
+    }
     const toAdd = { chainId: chain.chainId, address: safe.address.value }
     // The Safe comes from safeLinkQuery: router.query is still empty if the user clicks before the router is ready
     const { spaceId: _replaced, ...query } = { ...router.query, ...safeLinkQuery }

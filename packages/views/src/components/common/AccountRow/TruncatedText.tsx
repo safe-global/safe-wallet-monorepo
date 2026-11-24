@@ -28,8 +28,12 @@ export const shouldOpenTooltip = (
   el: Measurable | null,
   revealsMoreThanTheText = false,
 ): boolean => {
-  if (!requestedOpen || reason === 'trigger-focus') return false
-  if (revealsMoreThanTheText) return true
+  if (!requestedOpen || reason === 'trigger-focus') {
+    return false
+  }
+  if (revealsMoreThanTheText) {
+    return true
+  }
   return el !== null && el.scrollWidth > el.clientWidth
 }
 

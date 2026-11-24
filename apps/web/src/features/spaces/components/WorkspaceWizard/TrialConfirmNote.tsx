@@ -12,7 +12,9 @@ const TrialConfirmNote = (): ReactElement | null => {
   const { sizes } = useTrialSizes()
   const size = getPickedSize(draft, { sizes })
 
-  if (!isSafePro || !size) return null
+  if (!isSafePro || !size) {
+    return null
+  }
 
   return (
     <Typography variant="paragraph-small" color="muted" data-testid="trial-confirm-note">

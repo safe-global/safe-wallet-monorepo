@@ -112,7 +112,9 @@ const PendingTxsList = (): ReactElement | null => {
     [safeQueryParam, spaceId],
   )
 
-  if (isLoading) return <PendingTxsSkeleton />
+  if (isLoading) {
+    return <PendingTxsSkeleton />
+  }
 
   return (
     <section

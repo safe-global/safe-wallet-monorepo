@@ -9,7 +9,9 @@ const MAX_VISIBLE_TOKENS = 3
 const PolicyTokens = ({ policy }: { policy: Policy }) => {
   const tokens = getPolicyTokens(policy)
 
-  if (tokens.length === 0) return null
+  if (tokens.length === 0) {
+    return null
+  }
 
   const visibleTokens = tokens.slice(0, MAX_VISIBLE_TOKENS)
   const overflow = tokens.length - visibleTokens.length

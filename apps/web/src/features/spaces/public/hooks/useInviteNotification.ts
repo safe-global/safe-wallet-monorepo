@@ -28,7 +28,9 @@ export const useInviteNotification = (): void => {
   useEffect(() => {
     // The workspace list already renders the invite banner inline, so a toast
     // would just duplicate it. Skip here; navigating away surfaces the toast.
-    if (router.pathname === AppRoutes.welcome.spaces) return
+    if (router.pathname === AppRoutes.welcome.spaces) {
+      return
+    }
 
     const pendingInvites = filterSpacesByStatus(currentUser, spaces ?? [], MemberStatus.INVITED)
     const pendingKeys = new Set(pendingInvites.map((space) => inviteKey(space, currentUser?.id)))
@@ -36,7 +38,9 @@ export const useInviteNotification = (): void => {
 
     // Forget resolved invites and dismiss their now-stale toast once no longer INVITED
     for (const key of notifiedInvites.current) {
-      if (pendingKeys.has(key)) continue
+      if (pendingKeys.has(key)) {
+        continue
+      }
       notifiedInvites.current.delete(key)
 
       const uuid = key.slice(0, key.indexOf(':'))
@@ -47,7 +51,9 @@ export const useInviteNotification = (): void => {
 
     for (const space of pendingInvites) {
       const key = inviteKey(space, currentUser?.id)
-      if (notifiedInvites.current.has(key)) continue
+      if (notifiedInvites.current.has(key)) {
+        continue
+      }
 
       notifiedInvites.current.add(key)
       dispatch(

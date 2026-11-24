@@ -35,7 +35,9 @@ function useRateLimit(maxMessages = RATE_LIMIT_CONFIG.MAX_MESSAGES, windowMs = R
   const isRateLimited = useCallback(() => {
     const now = Date.now()
     timestamps.current = timestamps.current.filter((t) => now - t < windowMs)
-    if (timestamps.current.length >= maxMessages) return true
+    if (timestamps.current.length >= maxMessages) {
+      return true
+    }
     timestamps.current.push(now)
     return false
   }, [maxMessages, windowMs])
@@ -47,7 +49,9 @@ const SENSITIVE_PATTERNS = ['APP_ID', 'PYLON', 'configuration', 'config']
 
 function sanitizeError(error: string): string {
   const hasConfigInfo = SENSITIVE_PATTERNS.some((pattern) => error.toUpperCase().includes(pattern.toUpperCase()))
-  if (hasConfigInfo) return 'Configuration error. Please contact support.'
+  if (hasConfigInfo) {
+    return 'Configuration error. Please contact support.'
+  }
   return 'Support chat unavailable. Please try again later.'
 }
 
@@ -80,14 +84,20 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
 
   const chatUrl = useMemo(() => {
     const url = config.chatUrl
-    if (!url) return null
+    if (!url) {
+      return null
+    }
     const isLocalhost = url.includes('localhost') || url.includes('127.0.0.1')
-    if (!isLocalhost && !url.startsWith('https://')) return null
+    if (!isLocalhost && !url.startsWith('https://')) {
+      return null
+    }
     return url
   }, [config.chatUrl])
 
   const chatOrigin = useMemo(() => {
-    if (!chatUrl) return null
+    if (!chatUrl) {
+      return null
+    }
     try {
       return new URL(chatUrl).origin
     } catch {
@@ -96,8 +106,12 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
   }, [chatUrl])
 
   const displayName = useMemo(() => {
-    if (user.name) return user.name
-    if (user.email) return user.email.split('@')[0]
+    if (user.name) {
+      return user.name
+    }
+    if (user.email) {
+      return user.email.split('@')[0]
+    }
     return 'Safe User'
   }, [user])
 
@@ -108,7 +122,9 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
       return
     }
 
-    if (isRateLimited()) return
+    if (isRateLimited()) {
+      return
+    }
 
     const chatSettings = {
       app_id: config.appId,
@@ -145,7 +161,9 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
   ])
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      return
+    }
 
     if (!chatUrl) {
       setError('Invalid chat configuration')
@@ -164,21 +182,31 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
   }, [open, chatUrl, chatOrigin, status])
 
   useEffect(() => {
-    if (!open || !chatOrigin) return
+    if (!open || !chatOrigin) {
+      return
+    }
 
     const listener = (event: MessageEvent<SupportChatMessage>) => {
-      if (!event.data) return
+      if (!event.data) {
+        return
+      }
 
       const isPylonMessage = event.data.type?.startsWith('pylon-')
-      if (!isPylonMessage) return
+      if (!isPylonMessage) {
+        return
+      }
 
       const isValidOrigin =
         event.origin === chatOrigin ||
         (chatOrigin.startsWith('http://localhost') && event.origin.startsWith('http://localhost')) ||
         (chatOrigin.startsWith('https://localhost') && event.origin.startsWith('https://localhost'))
 
-      if (!isValidOrigin) return
-      if (isRateLimited()) return
+      if (!isValidOrigin) {
+        return
+      }
+      if (isRateLimited()) {
+        return
+      }
 
       switch (event.data.type) {
         case 'pylon-request-config':
@@ -229,7 +257,9 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
   const chatWidth = Math.min(frameDimensions.width, viewportWidth)
   const chatHeight = Math.min(frameDimensions.height, viewportHeight)
 
-  if (!open) return null
+  if (!open) {
+    return null
+  }
 
   return (
     <>

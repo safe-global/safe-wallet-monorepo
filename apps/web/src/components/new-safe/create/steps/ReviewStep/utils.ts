@@ -104,6 +104,8 @@ export function getWillRelay(canRelay: boolean, executionMethod: ExecutionMethod
 
 export function getNewSafeHomeUrl(shortName: string, safeAddress: string, spaceId: string | null): string {
   const query = new URLSearchParams({ safe: `${shortName}:${safeAddress}` })
-  if (spaceId) query.set('spaceId', spaceId)
+  if (spaceId) {
+    query.set('spaceId', spaceId)
+  }
   return `${AppRoutes.home}?${query}`
 }

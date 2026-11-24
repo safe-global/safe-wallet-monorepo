@@ -10,7 +10,9 @@ export function useTransferCost(item: TokenBalance, gasPrice: bigint, nativeFiat
   const [cost, setCost] = useState(0)
 
   useEffect(() => {
-    if (gasPrice === 0n || nativeFiatPrice === 0) return
+    if (gasPrice === 0n || nativeFiatPrice === 0) {
+      return
+    }
 
     const tx = tokenToTx(safe.safeAddress, item)
     sdk.eth

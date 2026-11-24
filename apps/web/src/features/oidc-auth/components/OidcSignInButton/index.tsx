@@ -32,7 +32,9 @@ const OidcSignInButton = ({
     loginWithRedirect(connection)
   }
 
-  if (!isOidcAuthEnabled) return null
+  if (!isOidcAuthEnabled) {
+    return null
+  }
 
   // Avoid `bg-primary` here: it flips to Safe-green in dark mode and would
   // clash with the Google "G" logo's own green path. `--sidebar-primary` is

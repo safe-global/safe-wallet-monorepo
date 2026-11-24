@@ -21,8 +21,12 @@ interface SidebarDeveloperGroupProps {
  * guard so no caller can leak the group, and each entry resolves its own state.
  */
 export const SidebarDeveloperGroup = ({ isLoading = false }: SidebarDeveloperGroupProps): ReactElement | null => {
-  if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') return null
-  if (!sidebarDeveloperGroup.items.length) return null
+  if (process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true') {
+    return null
+  }
+  if (!sidebarDeveloperGroup.items.length) {
+    return null
+  }
 
   return (
     <motion.div variants={itemVariants}>

@@ -22,9 +22,13 @@ const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
   // Re-fetch when chainId, address, hideSuspiciousTransactions, or txHistoryTag changes
   const [data, error, loading] = useAsync<TransactionItemPage>(
     () => {
-      if (!effectiveChainId || !effectiveAddress) return
+      if (!effectiveChainId || !effectiveAddress) {
+        return
+      }
       // For undeployed safes, return empty once safe info confirms not deployed
-      if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
+      if (safeLoaded && !safe.deployed) {
+        return Promise.resolve({ results: [] })
+      }
 
       return getTxHistory(effectiveChainId, effectiveAddress, hideUntrustedTxs, hideImitationTxs).catch((e) => {
         logError(Errors._602, e)

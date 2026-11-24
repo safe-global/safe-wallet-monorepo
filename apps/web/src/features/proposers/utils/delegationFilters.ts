@@ -35,8 +35,12 @@ export function filterActedUponDelegations(
   for (const delegation of delegations.values()) {
     const isAlreadyDelegate = currentDelegates.has(delegation.delegateAddress.toLowerCase())
 
-    if (delegation.action === 'add' && isAlreadyDelegate) continue
-    if (delegation.action === 'remove' && !isAlreadyDelegate) continue
+    if (delegation.action === 'add' && isAlreadyDelegate) {
+      continue
+    }
+    if (delegation.action === 'remove' && !isAlreadyDelegate) {
+      continue
+    }
 
     const { _timestamp: _, ...cleanDelegation } = delegation
     result.push(cleanDelegation)

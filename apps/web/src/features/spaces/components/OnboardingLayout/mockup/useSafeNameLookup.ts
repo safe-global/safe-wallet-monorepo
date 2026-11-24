@@ -8,14 +8,18 @@ export const useSafeNameLookup = (): Map<string, string> => {
 
   return useMemo(() => {
     const map = new Map<string, string>()
-    if (!allAddressBooks) return map
+    if (!allAddressBooks) {
+      return map
+    }
 
     for (const chainId of Object.keys(allAddressBooks)) {
       const book = allAddressBooks[chainId] ?? {}
       for (const [address, name] of Object.entries(book)) {
         if (typeof name === 'string' && name.trim()) {
           const key = address.toLowerCase()
-          if (!map.has(key)) map.set(key, name)
+          if (!map.has(key)) {
+            map.set(key, name)
+          }
         }
       }
     }

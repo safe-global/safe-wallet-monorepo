@@ -17,7 +17,9 @@ const WEB_SRC = join(__dirname, '..', '..', '..')
 
 const numberFrom = (source: string, pattern: RegExp, label: string): number => {
   const match = source.match(pattern)
-  if (!match) throw new Error(`Could not find ${label}`)
+  if (!match) {
+    throw new Error(`Could not find ${label}`)
+  }
   return Number(match[1])
 }
 

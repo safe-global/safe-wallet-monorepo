@@ -78,7 +78,9 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false, chil
   const dataTestId = item.testId ?? (isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item')
 
   const handleClick = () => {
-    if (item.disabled) return
+    if (item.disabled) {
+      return
+    }
 
     if (item.onSelect) {
       item.onSelect()

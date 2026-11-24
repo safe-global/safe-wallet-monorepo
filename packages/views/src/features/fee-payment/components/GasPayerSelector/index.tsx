@@ -57,10 +57,15 @@ const gasTokenLockTooltip = (
   sponsorKind: SponsorKind,
   token?: GasTokenOption,
 ): string | undefined => {
-  if (reason === 'SET_AT_SIGNING') return SET_AT_SIGNING_TOOLTIP
-  if (reason === 'SPONSORED')
+  if (reason === 'SET_AT_SIGNING') {
+    return SET_AT_SIGNING_TOOLTIP
+  }
+  if (reason === 'SPONSORED') {
     return sponsorKind === 'free' ? 'Covered by a sponsored transaction.' : 'Covered by your Pro plan.'
-  if (reason === 'NATIVE_ONLY') return `Fees are paid in ${token?.symbol} for now. More tokens are coming soon.`
+  }
+  if (reason === 'NATIVE_ONLY') {
+    return `Fees are paid in ${token?.symbol} for now. More tokens are coming soon.`
+  }
   return undefined
 }
 
@@ -206,20 +211,24 @@ const FeeValue = ({
   sponsored?: boolean
   sponsorKind?: SponsorKind
 }): ReactElement => {
-  if (fee.loading) return <Skeleton className="h-4 min-w-[7em]" />
-  if (fee.error)
+  if (fee.loading) {
+    return <Skeleton className="h-4 min-w-[7em]" />
+  }
+  if (fee.error) {
     return (
       <Typography variant="paragraph-small" className="text-[var(--color-warning-main)]">
         Cannot estimate
       </Typography>
     )
-  if (fee.note)
+  }
+  if (fee.note) {
     return (
       <Typography variant="paragraph-small" color="muted">
         {fee.note}
       </Typography>
     )
-  if (sponsored)
+  }
+  if (sponsored) {
     return (
       <span className={css.feeAmount}>
         <Typography variant="paragraph-small" color="muted" className="line-through">
@@ -228,6 +237,7 @@ const FeeValue = ({
         {sponsorKind === 'plan' && <ProBadge />}
       </span>
     )
+  }
   return (
     <span className={css.feeValue}>
       <Typography variant="paragraph-small">

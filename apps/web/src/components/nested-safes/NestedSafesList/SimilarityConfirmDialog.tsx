@@ -28,7 +28,9 @@ export function SimilarityConfirmDialog({
     <Dialog
       open
       onOpenChange={(open) => {
-        if (!open) onCancel()
+        if (!open) {
+          onCancel()
+        }
       }}
     >
       <DialogContent data-testid="similarity-confirm-dialog" showCloseButton={false} size="sm">

@@ -42,7 +42,9 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined, onSuccess?: 
 
       onSuccess?.()
     } catch (e) {
-      if (isElevationRequiredError(e)) return
+      if (isElevationRequiredError(e)) {
+        return
+      }
       console.error(e)
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }

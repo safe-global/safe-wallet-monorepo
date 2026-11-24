@@ -28,7 +28,9 @@ export const toWorkspaceSigners = (
       const signer = signers.get(key) ?? { address: owner, chainIds: [], safes: [] }
       signers.set(key, signer)
 
-      if (!signer.chainIds.includes(chainId)) signer.chainIds.push(chainId)
+      if (!signer.chainIds.includes(chainId)) {
+        signer.chainIds.push(chainId)
+      }
 
       const position = index + 1
       const known = signer.safes.find((safe) => sameAddress(safe.address, safeAddress))
@@ -93,7 +95,9 @@ export const useWorkspaceSigners = (): {
       const cfOwners = undeployedSafe?.props.safeAccountConfig.owners
       if (!cfOwners) {
         deployedCount += 1
-        if (!overview) missingCount += 1
+        if (!overview) {
+          missingCount += 1
+        }
       }
       const safeOwners = overview ? overview.owners.map((owner) => owner.value) : cfOwners
       return safeOwners ? [{ chainId, safeAddress: address, owners: safeOwners }] : []
@@ -107,9 +111,15 @@ export const useWorkspaceSigners = (): {
 
   const { refetch: refetchBook, isUninitialized: isBookUninitialized } = book
   const refetch = useCallback(() => {
-    if (!isSafesUninitialized) refetchSafes()
-    if (!isBookUninitialized) refetchBook()
-    if (hasSafes) refetchOverviews()
+    if (!isSafesUninitialized) {
+      refetchSafes()
+    }
+    if (!isBookUninitialized) {
+      refetchBook()
+    }
+    if (hasSafes) {
+      refetchOverviews()
+    }
   }, [isSafesUninitialized, isBookUninitialized, hasSafes, refetchSafes, refetchBook, refetchOverviews])
 
   return {

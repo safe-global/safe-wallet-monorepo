@@ -61,7 +61,9 @@ jest.mock('../components/SafeSelectorTriggerContent', () => {
     // commits the closed state before React dispatches the bubble-phase handlers.
     useEffect(() => {
       const node = inertRef.current
-      if (!node) return
+      if (!node) {
+        return
+      }
       const dismiss = () => mockDismissOnPress.current?.()
       node.addEventListener('pointerdown', dismiss)
       return () => node.removeEventListener('pointerdown', dismiss)

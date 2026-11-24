@@ -10,8 +10,12 @@ import BalancesTable from './BalancesTable'
 const SUCCESS_MESSAGE_MS = 5000
 
 const submitLabel = (count: number, total: number): string => {
-  if (count === 0) return 'No tokens selected'
-  if (count === total) return 'Transfer everything'
+  if (count === 0) {
+    return 'No tokens selected'
+  }
+  if (count === total) {
+    return 'Transfer everything'
+  }
   return `Transfer ${count} asset${count > 1 ? 's' : ''}`
 }
 
@@ -26,7 +30,9 @@ function DrainForm({ assets }: { assets: TokenBalance[] }) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!finished) return
+    if (!finished) {
+      return
+    }
     const timer = setTimeout(() => setFinished(false), SUCCESS_MESSAGE_MS)
     return () => clearTimeout(timer)
   }, [finished])
@@ -38,7 +44,9 @@ function DrainForm({ assets }: { assets: TokenBalance[] }) {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    if (isSending.current) return
+    if (isSending.current) {
+      return
+    }
     isSending.current = true
     setSubmitting(true)
 

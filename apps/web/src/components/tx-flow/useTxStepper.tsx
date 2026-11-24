@@ -8,7 +8,9 @@ const useTxStepper = <T extends unknown>(initialData: T, eventCategory?: string)
 
   const nextStep = useCallback(
     (entireData?: T) => {
-      if (entireData) setData(entireData)
+      if (entireData) {
+        setData(entireData)
+      }
 
       setStep((prevStep) => {
         if (eventCategory) {

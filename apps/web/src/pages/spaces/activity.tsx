@@ -11,7 +11,9 @@ export default function SpaceActivityPage() {
   const { spaceId } = router.query
   useFeatureRedirect(FEATURES.SPACE_AUDIT_LOG, AppRoutes.spaces.index)
 
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

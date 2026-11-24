@@ -61,8 +61,12 @@ const isLastSignature = (tx: TransactionQueuedItem['transaction']): boolean =>
 
 // What moves the queue forward comes first; waiting behind the next nonce sits with the blocked
 const getRank = ({ status, item }: QueueTransaction, isNext: boolean): number => {
-  if (status === 'execute') return 0
-  if (status === 'sign') return isNext && isLastSignature(item.transaction) ? 1 : 2
+  if (status === 'execute') {
+    return 0
+  }
+  if (status === 'sign') {
+    return isNext && isLastSignature(item.transaction) ? 1 : 2
+  }
   return status === 'waiting' && isNext ? 3 : 4
 }
 

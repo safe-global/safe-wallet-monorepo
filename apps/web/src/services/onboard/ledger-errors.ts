@@ -104,7 +104,9 @@ const USER_MESSAGES: Record<LedgerDeviceErrorReason, string> = {
 const REJECTION_MESSAGE = 'You rejected the request on your Ledger.'
 
 const readString = (source: unknown, key: string): string | undefined => {
-  if (typeof source !== 'object' || source === null) return undefined
+  if (typeof source !== 'object' || source === null) {
+    return undefined
+  }
   const value = (source as Record<string, unknown>)[key]
   return typeof value === 'string' && value.length > 0 ? value : undefined
 }
@@ -139,11 +141,21 @@ const readDeviceMessage = (error: DmkError): string | undefined =>
   readString(error, 'message') ?? readString(error.originalError, 'message')
 
 const resolveReason = (tag: string, errorCode: string | undefined): LedgerDeviceErrorReason => {
-  if (REJECTION_TAGS.has(tag) || (errorCode && REJECTION_CODES.has(errorCode))) return 'rejected'
-  if (LOCKED_TAGS.has(tag) || errorCode === StatusWord.DEVICE_LOCKED) return 'locked'
-  if (APP_TAGS.has(tag) || (errorCode && APP_CODES.has(errorCode))) return 'app_closed'
-  if (errorCode === StatusWord.INVALID_DATA) return 'blind_signing'
-  if (CONNECTION_TAGS.has(tag)) return 'connection'
+  if (REJECTION_TAGS.has(tag) || (errorCode && REJECTION_CODES.has(errorCode))) {
+    return 'rejected'
+  }
+  if (LOCKED_TAGS.has(tag) || errorCode === StatusWord.DEVICE_LOCKED) {
+    return 'locked'
+  }
+  if (APP_TAGS.has(tag) || (errorCode && APP_CODES.has(errorCode))) {
+    return 'app_closed'
+  }
+  if (errorCode === StatusWord.INVALID_DATA) {
+    return 'blind_signing'
+  }
+  if (CONNECTION_TAGS.has(tag)) {
+    return 'connection'
+  }
   return 'unknown'
 }
 
@@ -189,7 +201,9 @@ export const getLedgerDeviceError = (error: unknown): LedgerDeviceErrorInfo | un
 
   for (let depth = 0; depth < MAX_CAUSE_DEPTH && typeof current === 'object' && current !== null; depth++) {
     const { info, cause } = current as { info?: unknown; cause?: unknown }
-    if (isLedgerDeviceErrorInfo(info)) return info
+    if (isLedgerDeviceErrorInfo(info)) {
+      return info
+    }
     current = cause
   }
 

@@ -28,9 +28,15 @@ export const usePrepareWorkspaceSafeNames = (): ((items: WorkspaceSafeName[]) =>
 
   return useCallback(
     (items) => {
-      if (items.length === 0) return { items: [] }
-      if (!spaceId) return { error: 'No Workspace is selected. Switch to a Workspace and try again.' }
-      if (isLoading || isError) return { error: ADDRESS_BOOK_UNAVAILABLE }
+      if (items.length === 0) {
+        return { items: [] }
+      }
+      if (!spaceId) {
+        return { error: 'No Workspace is selected. Switch to a Workspace and try again.' }
+      }
+      if (isLoading || isError) {
+        return { error: ADDRESS_BOOK_UNAVAILABLE }
+      }
 
       // The upsert overwrites `chainIds` wholesale, so an entry that already spans more networks
       // than the Safe being renamed would silently lose them. Merge instead of replace.
@@ -58,8 +64,12 @@ export const useUpsertWorkspaceSafeNames = (): ((items: WorkspaceSafeName[]) => 
   return useCallback(
     async (items) => {
       const prepared = prepareNames(items)
-      if (prepared.error !== undefined) return { error: prepared.error }
-      if (prepared.items.length === 0 || !spaceId) return {}
+      if (prepared.error !== undefined) {
+        return { error: prepared.error }
+      }
+      if (prepared.items.length === 0 || !spaceId) {
+        return {}
+      }
 
       const result = await upsertAddressBook({ spaceId, upsertAddressBookItemsDto: { items: prepared.items } })
 
@@ -78,7 +88,9 @@ export const useUpsertWorkspaceSafeName = (): ((item: WorkspaceSafeName) => Upse
   return useCallback(
     async (item) => {
       const result = await upsertNames([item])
-      if (result.error) return result
+      if (result.error) {
+        return result
+      }
 
       dispatch(
         showNotification({

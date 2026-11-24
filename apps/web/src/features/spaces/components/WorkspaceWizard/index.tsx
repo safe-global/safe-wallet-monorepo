@@ -50,7 +50,9 @@ const useResumeOffer = (step: WizardStepId) => {
   useEffect(() => {
     const onRouteChangeStart = (url: string) => {
       const pathname = url.split(/[?#]/)[0]
-      if (!WIZARD_ROUTES.has(pathname)) dispatch(wizardLeft())
+      if (!WIZARD_ROUTES.has(pathname)) {
+        dispatch(wizardLeft())
+      }
     }
     router.events.on('routeChangeStart', onRouteChangeStart)
     return () => router.events.off('routeChangeStart', onRouteChangeStart)
@@ -67,7 +69,9 @@ export const useResumeSetup = (spaceId: string | null, isReturning: boolean) => 
   const space = useSpacesGetOneV1Query(args)
 
   useEffect(() => {
-    if (!needsLoad || !spaceId || !setup.data || !space.data) return
+    if (!needsLoad || !spaceId || !setup.data || !space.data) {
+      return
+    }
     if (setup.data.status === 'applied') {
       void router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
       return
@@ -97,11 +101,15 @@ const useFirstInvalidStepRedirect = (step: WizardStepId) => {
   const checkedStep = useRef<WizardStepId>(undefined)
 
   useEffect(() => {
-    if (!isContextReady || checkedStep.current === step) return
+    if (!isContextReady || checkedStep.current === step) {
+      return
+    }
     checkedStep.current = step
     const index = steps.findIndex((candidate) => candidate.id === step)
     const invalid = index > 0 ? findFirstInvalidStep(steps.slice(0, index), draft, { sizes }) : undefined
-    if (invalid) goTo(invalid, 'replace')
+    if (invalid) {
+      goTo(invalid, 'replace')
+    }
   }, [isContextReady, step, steps, draft, sizes, goTo])
 }
 
@@ -138,7 +146,9 @@ const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
         />
       )
     }
-    if (!spaceId && !isReady) return <SetupProgress isWorking title="Setting up your Workspace" />
+    if (!spaceId && !isReady) {
+      return <SetupProgress isWorking title="Setting up your Workspace" />
+    }
     return <CheckoutReturnScreen sessionId={sessionId} spaceId={spaceId} />
   }
 
@@ -153,7 +163,9 @@ const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
       />
     )
   }
-  if (resume.isResuming) return <SetupProgress isWorking title="Loading your Workspace" />
+  if (resume.isResuming) {
+    return <SetupProgress isWorking title="Loading your Workspace" />
+  }
 
   return (
     <WizardReady>

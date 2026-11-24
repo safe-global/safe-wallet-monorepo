@@ -53,8 +53,12 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 
 /** Reads the message of the completion page, which forwards the `error` params of the gateway callback. */
 export const getStepUpOutcome = (message: unknown): StepUpOutcome => {
-  if (!isRecord(message)) return 'failed'
-  if (!message.error) return 'elevated'
+  if (!isRecord(message)) {
+    return 'failed'
+  }
+  if (!message.error) {
+    return 'elevated'
+  }
 
   const isCancelled =
     message.error === STEP_UP_CANCELLED.error && message.errorDescription === STEP_UP_CANCELLED.description

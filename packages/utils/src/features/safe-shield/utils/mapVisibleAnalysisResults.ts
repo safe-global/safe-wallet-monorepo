@@ -37,7 +37,9 @@ export const mapVisibleAnalysisResults = (
     const results: AnalysisResult[] = []
 
     for (const [groupKey, groupResults] of Object.entries(addressResults[0])) {
-      if (!Array.isArray(groupResults)) continue
+      if (!Array.isArray(groupResults)) {
+        continue
+      }
 
       if (expandedGroups.includes(groupKey as StatusGroup)) {
         results.push(...sortBySeverity(groupResults as AnalysisResult[]))

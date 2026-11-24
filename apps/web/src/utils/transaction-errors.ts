@@ -28,7 +28,9 @@ export const getGuardErrorInfo = (error: Error): string | undefined => {
  * @returns {string | undefined} The error code if found, undefined otherwise
  */
 export const extractGuardErrorCode = (error: Error): string | undefined => {
-  if (!error) return undefined
+  if (!error) {
+    return undefined
+  }
 
   const errorMessage = error.message || ''
 
@@ -98,7 +100,9 @@ const isViemRateLimitError = (error: unknown): boolean =>
  * `eth_call`/`eth_estimateGas`, which ethers first misclassifies as a revert.
  */
 const isEthersRateLimitError = (error: unknown): boolean => {
-  if (!error || typeof error !== 'object') return false
+  if (!error || typeof error !== 'object') {
+    return false
+  }
 
   const err = error as {
     code?: unknown
@@ -107,11 +111,17 @@ const isEthersRateLimitError = (error: unknown): boolean => {
     response?: { statusCode?: unknown; statusMessage?: unknown }
   }
 
-  if (err.error?.code === RPC_LIMIT_EXCEEDED || err.info?.error?.code === RPC_LIMIT_EXCEEDED) return true
-  if (err.code !== 'SERVER_ERROR') return false
+  if (err.error?.code === RPC_LIMIT_EXCEEDED || err.info?.error?.code === RPC_LIMIT_EXCEEDED) {
+    return true
+  }
+  if (err.code !== 'SERVER_ERROR') {
+    return false
+  }
 
   const { statusCode, statusMessage } = err.response ?? {}
-  if (statusCode === 429) return true
+  if (statusCode === 429) {
+    return true
+  }
 
   // ethers retries a 429 itself and, once its retry budget is spent, escalates
   // it to a synthetic 599 that quotes the original status in its message.
@@ -141,11 +151,15 @@ export const isRateLimitError = (error: unknown): boolean =>
  * codes.
  */
 export const isNonceTooLowError = (error: unknown): boolean => {
-  if (!error) return false
+  if (!error) {
+    return false
+  }
 
   const err = error as { code?: unknown; message?: string }
 
-  if (err.code === 'NONCE_EXPIRED' || err.code === 'REPLACEMENT_UNDERPRICED') return true
+  if (err.code === 'NONCE_EXPIRED' || err.code === 'REPLACEMENT_UNDERPRICED') {
+    return true
+  }
 
   return (
     typeof err.message === 'string' &&
@@ -168,7 +182,9 @@ const MINIMUM_GAS = /(?:minimum needed|want)[:\s]+(\d+)/i
 export const getGasLimitTooLowMessage = (error: unknown): string | undefined => {
   const message = (error as { message?: unknown } | null | undefined)?.message
 
-  if (typeof message !== 'string' || !INTRINSIC_GAS_MESSAGE.test(message)) return undefined
+  if (typeof message !== 'string' || !INTRINSIC_GAS_MESSAGE.test(message)) {
+    return undefined
+  }
 
   const minimumGas = Number(MINIMUM_GAS.exec(message)?.[1])
 

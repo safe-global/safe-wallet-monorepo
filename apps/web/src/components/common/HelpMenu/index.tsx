@@ -43,7 +43,9 @@ const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => 
       <Popover
         open={isMenuOpen}
         onOpenChange={(open) => {
-          if (!open) onClose()
+          if (!open) {
+            onClose()
+          }
         }}
       >
         <PopoverContent anchor={anchorEl} side="top" align="end" className="w-auto min-w-32 gap-1 p-1">

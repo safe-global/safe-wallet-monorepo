@@ -41,7 +41,9 @@ export function useIsSidebarRoute(pathname?: string): [boolean, boolean] {
   const [isSidebarRoute, setIsSidebarRoute] = useState(!noSidebarRoute)
 
   useEffect(() => {
-    if (!router.isReady) return
+    if (!router.isReady) {
+      return
+    }
     setIsSidebarRoute(!!router.query.safe && !noSidebarRoute)
   }, [router.isReady, router.query.safe, noSidebarRoute])
 

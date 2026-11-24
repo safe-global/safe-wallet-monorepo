@@ -6,7 +6,9 @@ export const ChangeSignerSetupWarning = () => {
   const isMultichainSafe = useIsMultichainSafe()
   const currentChain = useCurrentChain()
 
-  if (!isMultichainSafe) return
+  if (!isMultichainSafe) {
+    return
+  }
 
   return (
     <Alert variant="info" className="my-0 border-none">

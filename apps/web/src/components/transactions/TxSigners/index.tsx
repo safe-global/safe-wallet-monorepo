@@ -179,7 +179,9 @@ const TxSigners = ({
   // Lookup the EOA that submitted the transaction on-chain (for module and incoming txs)
   const readOnlyProvider = useWeb3ReadOnly()
   const [onChainFrom] = useAsync(() => {
-    if (isMultisig || !txDetails.txHash || !readOnlyProvider) return undefined
+    if (isMultisig || !txDetails.txHash || !readOnlyProvider) {
+      return undefined
+    }
     return readOnlyProvider.getTransaction(txDetails.txHash).then((tx) => tx?.from)
   }, [isMultisig, txDetails.txHash, readOnlyProvider])
 
@@ -189,7 +191,9 @@ const TxSigners = ({
     address ? addressBook[address] || apiFallback || undefined : undefined
 
   if (!isMultisig && !isModule) {
-    if (!txDetails.executedAt) return null
+    if (!txDetails.executedAt) {
+      return null
+    }
 
     return (
       <AuditLog data-testid="transaction-actions-list">

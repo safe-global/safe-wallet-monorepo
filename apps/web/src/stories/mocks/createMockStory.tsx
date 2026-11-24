@@ -19,7 +19,9 @@ const answersChainsRequest = (handler: RequestHandler): boolean =>
 // msw-storybook-addon takes the handlers as one array or as named groups of arrays
 const mswHandlers = (parameters: StoryContext['parameters']): RequestHandler[] => {
   const handlers: RequestHandler[] | Record<string, RequestHandler[]> | undefined = parameters?.msw?.handlers
-  if (!handlers) return []
+  if (!handlers) {
+    return []
+  }
   return Array.isArray(handlers) ? handlers : Object.values(handlers).flat()
 }
 

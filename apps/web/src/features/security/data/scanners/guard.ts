@@ -18,7 +18,9 @@ const ZODIAC_GUARD_CONTRACTS = [KnownContracts.SCOPE_GUARD, KnownContracts.META_
 const isKnownZodiacGuard = (chainId: string, guardAddress: string): boolean => {
   try {
     const chainContracts = ContractVersions[Number(chainId) as SupportedNetworks]
-    if (!chainContracts) return false
+    if (!chainContracts) {
+      return false
+    }
 
     return ZODIAC_GUARD_CONTRACTS.some((contract) => {
       const versions = chainContracts[contract]
@@ -34,7 +36,9 @@ const isKnownZodiacGuard = (chainId: string, guardAddress: string): boolean => {
 // needs a JSON-RPC provider, which the scanner intentionally avoids. We start the name with
 // the canonical prefix to keep false positives down.
 const nameSuggestsHypernativeGuard = (name?: string | null): boolean => {
-  if (!name) return false
+  if (!name) {
+    return false
+  }
   return name.trim().toLowerCase().startsWith(HYPERNATIVE_GUARD_NAME)
 }
 
@@ -47,7 +51,9 @@ const isTrustedGuard = (name: string | null | undefined, chainId: string, addres
   // Layer 1: API-provided name
   if (name) {
     const lower = name.toLowerCase()
-    if (TRUSTED_GUARD_NAMES.some((trusted) => lower.includes(trusted))) return true
+    if (TRUSTED_GUARD_NAMES.some((trusted) => lower.includes(trusted))) {
+      return true
+    }
   }
 
   // Layer 2: Known Zodiac guard deployment addresses

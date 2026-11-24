@@ -11,7 +11,9 @@ export { PRIVATE_KEY_MODULE_LABEL }
 
 async function getPrivateKey() {
   const savedKey = pkPopupStore.getStore()?.privateKey
-  if (savedKey) return savedKey
+  if (savedKey) {
+    return savedKey
+  }
 
   pkPopupStore.setStore({
     isOpen: true,

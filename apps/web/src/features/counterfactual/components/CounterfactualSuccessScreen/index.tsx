@@ -40,7 +40,9 @@ const CounterfactualSuccessScreen = () => {
           setOpen(true)
         }
         if (event === SafeCreationEvent.AWAITING_EXECUTION) {
-          if ('networks' in detail) setNetworks(detail.networks)
+          if ('networks' in detail) {
+            setNetworks(detail.networks)
+          }
           setSafeAddress(detail.safeAddress)
           setOpen(true)
         }

@@ -21,13 +21,17 @@ const ChainSwitcher = ({
   const [loading, setIsLoading] = useState<boolean>(false)
 
   const handleChainSwitch = useCallback(async () => {
-    if (!onboard || !chain) return
+    if (!onboard || !chain) {
+      return
+    }
     setIsLoading(true)
     await switchWalletChain(onboard, chain.chainId)
     setIsLoading(false)
   }, [chain, onboard])
 
-  if (!isWrongChain) return null
+  if (!isWrongChain) {
+    return null
+  }
 
   return (
     <Button

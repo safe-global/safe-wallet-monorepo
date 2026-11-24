@@ -27,7 +27,9 @@ const SignerSelector = ({ options, value, onChange, label, isOptionDisabled, dis
         <Select
           value={value || null}
           onValueChange={(next) => {
-            if (next != null) onChange(next)
+            if (next != null) {
+              onChange(next)
+            }
           }}
         >
           <SelectTrigger

@@ -20,7 +20,9 @@ export const HnViewMoreOnHypernativeRow = ({
   overflowCount,
   assessmentUrl,
 }: HnViewMoreOnHypernativeRowProps): ReactElement | null => {
-  if (overflowCount <= 0 || !assessmentUrl) return null
+  if (overflowCount <= 0 || !assessmentUrl) {
+    return null
+  }
 
   return (
     <Track {...HYPERNATIVE_EVENTS.HYPERNATIVE_FULL_REPORT_CLICKED}>

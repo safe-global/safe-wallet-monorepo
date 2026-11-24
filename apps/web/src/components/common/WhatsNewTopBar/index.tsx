@@ -45,7 +45,9 @@ const WhatsNewTopBar = (): ReactElement | null => {
   const { topBar } = useWhatsNewUpdates()
   const [dismissedPostId, setDismissedPostId] = useLocalStorage<number>(DISMISSED_POST_KEY)
 
-  if (!topBar || topBar.postId === dismissedPostId) return null
+  if (!topBar || topBar.postId === dismissedPostId) {
+    return null
+  }
 
   return <WhatsNewTopBarContent topBar={topBar} onClose={() => setDismissedPostId(topBar.postId)} />
 }

@@ -42,8 +42,11 @@ type ReorderableBodyProps = {
 /** Toggles a group's expanded state, returning a new set (parent keys are stable across reorders). */
 export const toggleExpanded = (set: Set<string>, key: string): Set<string> => {
   const next = new Set(set)
-  if (next.has(key)) next.delete(key)
-  else next.add(key)
+  if (next.has(key)) {
+    next.delete(key)
+  } else {
+    next.add(key)
+  }
   return next
 }
 
@@ -267,7 +270,9 @@ const ReorderableBody = ({
 
   const handleBeforeCapture = () => {
     expandedBeforeDrag.current = expanded
-    if (expanded.size > 0) setExpanded(new Set())
+    if (expanded.size > 0) {
+      setExpanded(new Set())
+    }
   }
 
   // Similarity clusters are pinned (non-draggable) at the top in Manual mode; only the rest reorder.
@@ -277,7 +282,9 @@ const ReorderableBody = ({
   const handleDragEnd = (result: DropResult) => {
     setExpanded(expandedBeforeDrag.current)
     const { source, destination } = result
-    if (!destination || destination.index === source.index) return
+    if (!destination || destination.index === source.index) {
+      return
+    }
     // Report only the draggable rows' new order; the parent decides how it lands in the stored order.
     onReorder(reorderByKey(draggableGroups, source.index, destination.index, (group) => group.parent.address))
   }

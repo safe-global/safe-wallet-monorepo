@@ -37,8 +37,12 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes', () =
           deleteInitiate(arg)
           return {
             unwrap: () => {
-              if (deleteRejection !== null) return Promise.reject(deleteRejection)
-              if (deleteShouldFail) return Promise.reject(new Error('boom'))
+              if (deleteRejection !== null) {
+                return Promise.reject(deleteRejection)
+              }
+              if (deleteShouldFail) {
+                return Promise.reject(new Error('boom'))
+              }
               return Promise.resolve({ ok: true })
             },
           }
@@ -71,7 +75,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 const dispatched: unknown[] = []
 const dispatchFn = jest.fn((thunk: unknown) => {
   dispatched.push(thunk)
-  if (typeof thunk === 'function') return thunk()
+  if (typeof thunk === 'function') {
+    return thunk()
+  }
   return thunk
 })
 
@@ -114,8 +120,12 @@ const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 const mockSelectors = (authenticated: boolean, hydrated: boolean, spaceId: string | null) => {
   urlSpaceId = spaceId
   ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) => {
-    if (selector === isAuthenticated) return authenticated
-    if (selector === selectIsStoreHydrated) return hydrated
+    if (selector === isAuthenticated) {
+      return authenticated
+    }
+    if (selector === selectIsStoreHydrated) {
+      return hydrated
+    }
     return undefined
   })
 }

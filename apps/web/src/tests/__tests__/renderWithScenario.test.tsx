@@ -7,7 +7,9 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 // Minimal component that displays safeAddress from Redux store
 function SafeAddressDisplay() {
   const { safeAddress, safeLoaded } = useSafeInfo()
-  if (!safeLoaded) return <span>loading</span>
+  if (!safeLoaded) {
+    return <span>loading</span>
+  }
   return <span data-testid="safe-address">{safeAddress}</span>
 }
 

@@ -33,7 +33,9 @@ const useMigrationPrompt = (): UseMigrationPromptReturn => {
 
   // Count unique safes by address (safes can exist on multiple chains)
   const availableSafeCount = useMemo(() => {
-    if (!allSafes) return 0
+    if (!allSafes) {
+      return 0
+    }
     const uniqueAddresses = new Set(allSafes.map((safe) => safe.address.toLowerCase()))
     return uniqueAddresses.size
   }, [allSafes])

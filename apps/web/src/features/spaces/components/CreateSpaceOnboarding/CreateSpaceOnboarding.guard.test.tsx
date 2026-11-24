@@ -18,7 +18,9 @@ type Location = { pathname: string; query: Record<string, string> }
 type Url = string | { pathname?: string; query?: Record<string, string> }
 
 const toLocation = (url: Url, current: Location): Location => {
-  if (typeof url !== 'string') return { pathname: url.pathname ?? current.pathname, query: url.query ?? {} }
+  if (typeof url !== 'string') {
+    return { pathname: url.pathname ?? current.pathname, query: url.query ?? {} }
+  }
   const parsed = new URL(url, 'http://localhost')
   return { pathname: parsed.pathname, query: Object.fromEntries(parsed.searchParams) }
 }

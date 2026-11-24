@@ -48,7 +48,9 @@ export const mapConsolidatedAnalysisResults = (
   const consolidatedResults = addressResults.reduce<ConsolidatedResults>(
     (acc, currentAddressResults, currentAddressResultIndex) => {
       for (const [group, groupResults] of Object.entries(currentAddressResults) as [StatusGroup, AnalysisResult[]][]) {
-        if (!Array.isArray(groupResults)) continue
+        if (!Array.isArray(groupResults)) {
+          continue
+        }
         const primaryGroupResult = getPrimaryResult(groupResults || [])
 
         if (primaryGroupResult) {

@@ -78,7 +78,9 @@ export async function createDelegationMessage(
 
       // Find the existing message for this delegate
       const existingMessage = messagesResult.results?.find((msg) => {
-        if (msg.type !== 'MESSAGE') return false
+        if (msg.type !== 'MESSAGE') {
+          return false
+        }
         const msgDelegation = parseDelegation(msg)
         const msgDelegate = (msg.message as { message?: { delegateAddress?: string } })?.message?.delegateAddress
         return sameAddress(msgDelegate, typedDataDelegate) && msgDelegation !== null

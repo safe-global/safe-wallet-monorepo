@@ -17,8 +17,12 @@ const USER_REJECTED_REQUEST = 4001
 
 /** Whether the wallet's user refused the request; takes the raw thrown value, which need not be an Error. */
 export const isWalletRejection = (err: unknown): boolean => {
-  if (typeof err !== 'object' || err === null) return false
-  if ('code' in err && (err.code === 'ACTION_REJECTED' || err.code === USER_REJECTED_REQUEST)) return true
+  if (typeof err !== 'object' || err === null) {
+    return false
+  }
+  if ('code' in err && (err.code === 'ACTION_REJECTED' || err.code === USER_REJECTED_REQUEST)) {
+    return true
+  }
   return 'message' in err && typeof err.message === 'string' && /rejected/.test(err.message)
 }
 
@@ -110,12 +114,18 @@ const getInjectedProviderByLabel = (label: string): Eip1193Provider | undefined 
 
 /* Check if the last-used wallet can be reconnected without prompting the user. */
 export const isWalletUnlocked = async (walletName: string): Promise<boolean> => {
-  if ([PRIVATE_KEY_MODULE_LABEL, WALLETCONNECT].includes(walletName)) return true
+  if ([PRIVATE_KEY_MODULE_LABEL, WALLETCONNECT].includes(walletName)) {
+    return true
+  }
 
-  if (typeof window === 'undefined') return false
+  if (typeof window === 'undefined') {
+    return false
+  }
 
   const provider = getInjectedProviderByLabel(walletName)
-  if (!provider) return false
+  if (!provider) {
+    return false
+  }
 
   try {
     // eth_accounts never prompts; empty means locked or not authorized for this site

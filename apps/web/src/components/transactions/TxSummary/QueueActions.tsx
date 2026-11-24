@@ -19,7 +19,9 @@ const QueueActions = ({ tx, dense = false }: { tx: Transaction; dense?: boolean 
 
   const showSpeedUp = pendingTx?.status === PendingStatus.PROCESSING
 
-  if (!ExecutionComponent && !showSpeedUp) return null
+  if (!ExecutionComponent && !showSpeedUp) {
+    return null
+  }
 
   return (
     <div data-testid="tx-actions" className="flex items-center">

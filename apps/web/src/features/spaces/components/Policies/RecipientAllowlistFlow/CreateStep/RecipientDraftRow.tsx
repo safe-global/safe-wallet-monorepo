@@ -61,13 +61,17 @@ const RecipientDraftRow = ({
   })
 
   const handleSubmit = (event: FormEvent) => {
-    if (step === 'address') return submitAddress(event)
+    if (step === 'address') {
+      return submitAddress(event)
+    }
     event.preventDefault()
     setStep('address')
   }
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape') return
+    if (event.key !== 'Escape') {
+      return
+    }
     event.preventDefault()
     event.stopPropagation()
     onCancel()

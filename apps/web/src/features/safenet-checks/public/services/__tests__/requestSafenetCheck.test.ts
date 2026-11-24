@@ -43,7 +43,9 @@ const setupStore = async ({ features, signedIn = true }: { features: FEATURES[];
       chainsAdapter.setAll(chainsInitialState, [chain]),
     ),
   )
-  if (signedIn) store.dispatch(setAuthenticated(Date.now() + 60_000))
+  if (signedIn) {
+    store.dispatch(setAuthenticated(Date.now() + 60_000))
+  }
   return chain.chainId
 }
 
@@ -214,7 +216,9 @@ describe('requestSafenetCheck', () => {
       void request.then(() => {
         isSettled = true
       })
-      while (!isSettled) await jest.advanceTimersByTimeAsync(1_000)
+      while (!isSettled) {
+        await jest.advanceTimersByTimeAsync(1_000)
+      }
     }
 
     it.each<[string, Reply]>([

@@ -20,7 +20,9 @@ const ConfirmBatch = (props: ReviewTransactionProps) => {
   const isBatchEmpty = batchTxs.length === 0
 
   useEffect(() => {
-    if (isBatchEmpty) setTxFlow(undefined)
+    if (isBatchEmpty) {
+      setTxFlow(undefined)
+    }
   }, [isBatchEmpty, setTxFlow])
 
   useEffect(() => {

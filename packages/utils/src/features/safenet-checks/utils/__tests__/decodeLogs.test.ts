@@ -89,7 +89,9 @@ describe('deployed Gnosis terminal events', () => {
     const encoded = iface.encodeEventLog(name, [requestId, ...values])
     const [event] = decodeLogs([{ ...encoded, blockNumber: 100, logIndex: 0, transactionHash: '0x123' }])
     expect(event).toMatchObject({ type, requestId })
-    if (type === CheckEventType.DISPUTE_TRIGGERED) expect(event).toHaveProperty('deadlineBlock', '200')
+    if (type === CheckEventType.DISPUTE_TRIGGERED) {
+      expect(event).toHaveProperty('deadlineBlock', '200')
+    }
   })
 })
 

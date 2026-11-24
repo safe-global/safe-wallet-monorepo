@@ -95,7 +95,9 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
   // Check if the proposer is actually a delegate
   const isProposerDelegate = useMemo(() => {
-    if (!proposer || !proposersData?.results) return false
+    if (!proposer || !proposersData?.results) {
+      return false
+    }
     return proposersData.results.some((p) => sameAddress(p.delegate, proposer))
   }, [proposer, proposersData])
 

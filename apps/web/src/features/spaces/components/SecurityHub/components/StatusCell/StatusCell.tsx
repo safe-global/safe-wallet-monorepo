@@ -21,7 +21,9 @@ const formatNonPassingLabel = (grade: SafeGrade, count: number): string =>
 const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   if (!grade) {
     // Width chosen to comfortably fit the longest expected label ("Needs review · 99 issues found").
-    if (isScanning) return <Skeleton className="h-5 w-40 rounded-md" />
+    if (isScanning) {
+      return <Skeleton className="h-5 w-40 rounded-md" />
+    }
     return (
       <Typography variant="paragraph-small" color="muted">
         {DASH}

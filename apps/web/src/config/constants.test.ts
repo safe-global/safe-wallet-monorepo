@@ -1,7 +1,10 @@
 const loadPollingInterval = (value: string | undefined): number => {
   const previous = process.env.NEXT_PUBLIC_POLLING_INTERVAL
-  if (value === undefined) delete process.env.NEXT_PUBLIC_POLLING_INTERVAL
-  else process.env.NEXT_PUBLIC_POLLING_INTERVAL = value
+  if (value === undefined) {
+    delete process.env.NEXT_PUBLIC_POLLING_INTERVAL
+  } else {
+    process.env.NEXT_PUBLIC_POLLING_INTERVAL = value
+  }
   try {
     let interval = 0
     jest.isolateModules(() => {
@@ -9,8 +12,11 @@ const loadPollingInterval = (value: string | undefined): number => {
     })
     return interval
   } finally {
-    if (previous === undefined) delete process.env.NEXT_PUBLIC_POLLING_INTERVAL
-    else process.env.NEXT_PUBLIC_POLLING_INTERVAL = previous
+    if (previous === undefined) {
+      delete process.env.NEXT_PUBLIC_POLLING_INTERVAL
+    } else {
+      process.env.NEXT_PUBLIC_POLLING_INTERVAL = previous
+    }
   }
 }
 

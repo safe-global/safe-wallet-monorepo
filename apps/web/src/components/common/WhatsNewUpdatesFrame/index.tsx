@@ -9,7 +9,9 @@ const WhatsNewUpdatesFrame = (): ReactElement | null => {
   const hasConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.UPDATES))
   useWhatsNewUpdateListener()
 
-  if (!hasConsent || !BEAMER_ID) return null
+  if (!hasConsent || !BEAMER_ID) {
+    return null
+  }
 
   return (
     <iframe

@@ -64,9 +64,13 @@ export const ExistingSpendingLimitsProvider = ({ children }: { children: ReactNo
 
   const [limits, error, loading] = useAsync<SpendingLimitState[] | undefined>(
     () => {
-      if (!scope || !isSpendingLimitEnabled || !provider || !safeLoaded) return
+      if (!scope || !isSpendingLimitEnabled || !provider || !safeLoaded) {
+        return
+      }
       // No modules means no AllowanceModule, so nothing to ask the chain for.
-      if (!modules?.length) return Promise.resolve([])
+      if (!modules?.length) {
+        return Promise.resolve([])
+      }
 
       return import('@/features/spending-limits/public/services/spendingLimitLoader')
         .then(({ loadSpendingLimits }) =>

@@ -16,7 +16,9 @@ export const getERC20TokenInfoOnChain = async (
   address: string | string[],
   provider: JsonRpcProvider | undefined = getWeb3ReadOnly(),
 ): Promise<Omit<Erc20Token, 'name' | 'logoUri'>[] | undefined> => {
-  if (!provider) return
+  if (!provider) {
+    return
+  }
 
   let tokenAddresses = Array.isArray(address) ? address : [address]
 
@@ -38,7 +40,9 @@ export const getERC20TokenInfoOnChain = async (
   const tokenInfos: Omit<Erc20Token, 'name' | 'logoUri'>[] = []
   for (let i = 0; i < results.length; i += 2) {
     const address = tokenAddresses[i / 2]
-    if (!address) break
+    if (!address) {
+      break
+    }
     let symbol: string
     try {
       symbol = erc20_interface.decodeFunctionResult('symbol', results[i].returnData)[0]
@@ -63,7 +67,9 @@ export const getERC20TokenInfoOnChain = async (
 
 export const getErc721Symbol = async (address: string) => {
   const web3 = getWeb3ReadOnly()
-  if (!web3) return ''
+  if (!web3) {
+    return ''
+  }
 
   const erc721 = ERC721__factory.connect(address, web3)
 
@@ -76,7 +82,9 @@ export const getErc721Symbol = async (address: string) => {
 
 export const isErc721Token = async (address: string) => {
   const web3 = getWeb3ReadOnly()
-  if (!web3) return false
+  if (!web3) {
+    return false
+  }
 
   const erc721 = ERC721__factory.connect(address, web3)
 

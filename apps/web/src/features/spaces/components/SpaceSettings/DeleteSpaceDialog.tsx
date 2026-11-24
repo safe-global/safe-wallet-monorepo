@@ -52,7 +52,9 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
   const canConfirm = !!space && confirmName.trim() === space.name.trim() && !isLoading
 
   const onDelete = async () => {
-    if (!space || !canConfirm) return
+    if (!space || !canConfirm) {
+      return
+    }
 
     setError(undefined)
 
@@ -70,7 +72,9 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
-      if (isElevationRequiredError(e)) return
+      if (isElevationRequiredError(e)) {
+        return
+      }
       console.error(e)
       setError('Error deleting the Workspace. Please try again.')
     }

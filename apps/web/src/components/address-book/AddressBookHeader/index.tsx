@@ -28,7 +28,9 @@ const SpaceAddressBookCTA = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
 
-  if (!isQualifiedSafe || !isAdmin) return null
+  if (!isQualifiedSafe || !isAdmin) {
+    return null
+  }
 
   return (
     <Typography className="max-w-[500px] text-sm">

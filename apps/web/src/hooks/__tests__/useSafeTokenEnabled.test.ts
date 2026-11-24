@@ -21,7 +21,9 @@ jest.mock('react', () => ({
   ...jest.requireActual('react'),
   useContext: (context: unknown) => {
     const { GeoblockingContext } = require('@/components/common/GeoblockingProvider')
-    if (context === GeoblockingContext) return mockIsBlockedCountry
+    if (context === GeoblockingContext) {
+      return mockIsBlockedCountry
+    }
     return jest.requireActual('react').useContext(context)
   },
 }))

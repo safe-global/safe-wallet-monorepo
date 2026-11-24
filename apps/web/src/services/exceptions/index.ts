@@ -25,14 +25,20 @@ const lastLoggedAt = new Map<string, number>()
 const isThrottled = (key: string): boolean => {
   const now = Date.now()
   const last = lastLoggedAt.get(key)
-  if (last !== undefined && now - last < LOG_THROTTLE_MS) return true
+  if (last !== undefined && now - last < LOG_THROTTLE_MS) {
+    return true
+  }
 
   if (lastLoggedAt.size >= MAX_THROTTLED_KEYS) {
     for (const [tracked, at] of lastLoggedAt) {
-      if (now - at >= LOG_THROTTLE_MS) lastLoggedAt.delete(tracked)
+      if (now - at >= LOG_THROTTLE_MS) {
+        lastLoggedAt.delete(tracked)
+      }
     }
     for (const oldest of lastLoggedAt.keys()) {
-      if (lastLoggedAt.size < MAX_THROTTLED_KEYS) break
+      if (lastLoggedAt.size < MAX_THROTTLED_KEYS) {
+        break
+      }
       lastLoggedAt.delete(oldest)
     }
   }
@@ -86,7 +92,9 @@ export class CodedException extends Error {
    * explicit `context.httpStatus` wins over the extracted one.
    */
   private withHttpStatus(context?: ErrorContext): ErrorContext | undefined {
-    if (this.httpStatus === undefined) return context
+    if (this.httpStatus === undefined) {
+      return context
+    }
     return { httpStatus: this.httpStatus, ...context }
   }
 
@@ -124,7 +132,9 @@ export class CodedException extends Error {
   }
 
   public log(context?: ErrorContext): void {
-    if (isThrottled(`${this.message}|${JSON.stringify(context ?? {})}`)) return
+    if (isThrottled(`${this.message}|${JSON.stringify(context ?? {})}`)) {
+      return
+    }
 
     // Filter out the logError fn from the stack trace
     if (this.stack) {

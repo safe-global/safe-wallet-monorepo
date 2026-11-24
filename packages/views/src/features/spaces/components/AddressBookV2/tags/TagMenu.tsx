@@ -77,27 +77,39 @@ const TagMenu = ({
   const select = (tagIds: number[]) => setError(onSelect(tagIds))
 
   const handleCreate = async (text: string): Promise<boolean> => {
-    if (!actions) return false
+    if (!actions) {
+      return false
+    }
     setError(undefined)
     const refusal =
       validateTagName(text) ?? (tags.length >= MAX_TAGS_PER_WORKSPACE ? WORKSPACE_TAG_LIMIT_MESSAGE : beforeCreate?.())
     if (refusal) {
       setError(refusal)
-      if (refusal === WORKSPACE_TAG_LIMIT_MESSAGE) onLimitReached?.()
+      if (refusal === WORKSPACE_TAG_LIMIT_MESSAGE) {
+        onLimitReached?.()
+      }
       return false
     }
     const { tag, error: createError } = await actions.onCreate(normalizeTagName(text))
-    if (createError) setError(createError)
-    if (tag) onCreated?.(tag)
+    if (createError) {
+      setError(createError)
+    }
+    if (tag) {
+      onCreated?.(tag)
+    }
     return Boolean(tag)
   }
 
   const tagEditing: TagEditing<WorkspaceTag> | undefined = actions && {
     onRename: async (tag, name) => {
       const refusal = validateTagName(name)
-      if (refusal) return refusal
+      if (refusal) {
+        return refusal
+      }
       const { error: renameError, mergedIntoId } = await actions.onRename(tag, normalizeTagName(name))
-      if (renameError) return renameError
+      if (renameError) {
+        return renameError
+      }
       if (mergedIntoId !== undefined && selected.includes(tag.id)) {
         onSelectionRemapped([...new Set(selected.map((id) => (id === tag.id ? mergedIntoId : id)))])
       }
@@ -105,7 +117,9 @@ const TagMenu = ({
     },
     onDelete: async (tag) => {
       const deleted = await actions.onDelete(tag)
-      if (deleted && selected.includes(tag.id)) onSelectionRemapped(selected.filter((id) => id !== tag.id))
+      if (deleted && selected.includes(tag.id)) {
+        onSelectionRemapped(selected.filter((id) => id !== tag.id))
+      }
     },
   }
 

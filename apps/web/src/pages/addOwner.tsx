@@ -14,7 +14,9 @@ const AddOwner = () => {
 
   useEffect(() => {
     router.push({ pathname: AppRoutes.settings.setup, query: router.query }).then(() => {
-      if (!ownerAddress) return
+      if (!ownerAddress) {
+        return
+      }
 
       setTxFlow(<AddOwnerFlow address={ownerAddress} />)
     })

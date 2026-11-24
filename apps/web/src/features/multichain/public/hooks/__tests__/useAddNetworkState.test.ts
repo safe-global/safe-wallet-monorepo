@@ -74,7 +74,9 @@ const setupDefaults = (
     overrides.compatible ?? configs.map((c) => ({ ...c, available: true })),
   )
   ;(hasMultiChainAddNetworkFeature as jest.Mock).mockImplementation((chain: Chain | undefined) => {
-    if (!chain) return false
+    if (!chain) {
+      return false
+    }
     const flags = overrides.featureEnabledByChainId
     return flags ? (flags[chain.chainId] ?? true) : true
   })

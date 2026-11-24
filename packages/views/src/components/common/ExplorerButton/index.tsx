@@ -30,7 +30,9 @@ const ExplorerButton = ({
   isCompact = true,
   fontSize = '0.875rem',
 }: ExplorerButtonProps): ReactElement | null => {
-  if (!href) return null
+  if (!href) {
+    return null
+  }
 
   return isCompact ? (
     <Tooltip>

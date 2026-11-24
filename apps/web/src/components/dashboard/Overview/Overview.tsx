@@ -14,7 +14,9 @@ const Overview = (): ReactElement => {
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
 
-  if (isLoading) return <OverviewSkeleton />
+  if (isLoading) {
+    return <OverviewSkeleton />
+  }
 
   return (
     <section

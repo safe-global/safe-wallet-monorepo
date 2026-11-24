@@ -7,7 +7,9 @@ const OPEN_URL = 'openUrl:'
 
 // Beamer's feed does not follow its links itself: it posts "openUrl:" followed by a JSON object with the url.
 const parseOpenUrl = (data: unknown): string | undefined => {
-  if (typeof data !== 'string' || !data.startsWith(OPEN_URL)) return undefined
+  if (typeof data !== 'string' || !data.startsWith(OPEN_URL)) {
+    return undefined
+  }
 
   let payload: { url?: unknown } | null
   try {
@@ -28,14 +30,22 @@ export const WhatsNewDrawer = ({ productId, open, onClose }: WhatsNewDrawerProps
   const feedParams = new URLSearchParams({ app_id: productId, url: window.location.host })
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      return
+    }
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== BEAMER_ORIGIN) return
-      if (event.data === 'hide') onClose()
+      if (event.origin !== BEAMER_ORIGIN) {
+        return
+      }
+      if (event.data === 'hide') {
+        onClose()
+      }
 
       const url = parseOpenUrl(event.data)
-      if (url) window.open(url, '_blank', 'noopener,noreferrer')
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer')
+      }
     }
 
     window.addEventListener('message', handleMessage)

@@ -20,7 +20,9 @@ export const useParentSafeWalletNotice = (
   const parentContact = useAddressBookItem(parentSafeAddress ?? '', account?.chainId)
   const closeWithoutPrompt = useCallback(() => setTxFlow(undefined, undefined, false), [setTxFlow])
 
-  if (!account || !parentSafeAddress) return undefined
+  if (!account || !parentSafeAddress) {
+    return undefined
+  }
 
   return {
     ...copy,

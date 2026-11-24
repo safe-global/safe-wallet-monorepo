@@ -3,7 +3,11 @@
  * Returns null if fiat conversion is unavailable or the amount is non-positive.
  */
 export const computeFiatValue = (tokenAmount: number, fiatConversion: string | undefined): number | null => {
-  if (!fiatConversion || parseFloat(fiatConversion) === 0) return null
-  if (!tokenAmount || tokenAmount <= 0) return null
+  if (!fiatConversion || parseFloat(fiatConversion) === 0) {
+    return null
+  }
+  if (!tokenAmount || tokenAmount <= 0) {
+    return null
+  }
   return tokenAmount * parseFloat(fiatConversion)
 }

@@ -67,7 +67,9 @@ const noopEvents: NextRouterLike['events'] = {
 let beforePopStateCallback: ((state: NextHistoryStateLike) => boolean) | undefined
 
 const handlePopState = () => {
-  if (!beforePopStateCallback) return
+  if (!beforePopStateCallback) {
+    return
+  }
   const url = `${window.location.pathname}${window.location.search}`
   // `as` mirrors `url`: this app has no rewrites, so Next's internal/displayed URLs coincide.
   beforePopStateCallback({ url, as: url })
@@ -119,7 +121,9 @@ export function useRouter(): NextRouterLike {
       back: () => tsRouter.history.back(),
       forward: () => tsRouter.history.forward(),
       reload: () => {
-        if (typeof window !== 'undefined') window.location.reload()
+        if (typeof window !== 'undefined') {
+          window.location.reload()
+        }
       },
       prefetch: async () => undefined,
       beforePopState: registerBeforePopState,

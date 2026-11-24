@@ -25,7 +25,9 @@ export const getSafeOptions = (safes: SpaceQueueCounts['safes']): SafeOption[] =
   safes
     .reduce<SafeOption[]>((options, { safeAddress, chainId, count }) => {
       const option = options.find((other) => sameAddress(other.safeAddress, safeAddress))
-      if (!option) return [...options, { safeAddress, chainIds: [chainId], count }]
+      if (!option) {
+        return [...options, { safeAddress, chainIds: [chainId], count }]
+      }
       return options.map((other) =>
         other === option ? { ...other, chainIds: [...other.chainIds, chainId], count: other.count + count } : other,
       )

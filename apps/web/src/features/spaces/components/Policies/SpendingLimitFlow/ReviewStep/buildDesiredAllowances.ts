@@ -27,7 +27,9 @@ export const buildDesiredAllowances = (
   for (const spender of values.spenders) {
     for (const limit of spender.limits) {
       const token = findTokenOption(tokens, limit.tokenAddress)
-      if (!token) return { error: new Error(UNKNOWN_TOKEN_IN_POLICY_ERROR) }
+      if (!token) {
+        return { error: new Error(UNKNOWN_TOKEN_IN_POLICY_ERROR) }
+      }
 
       desired.push({
         beneficiary: spender.address,

@@ -73,10 +73,14 @@ export const TenderlySimulation = ({
   const { nestedSafeInfo, nestedSafeTx, isNested, isNestedLoading } = useNestedTransaction(safeTx, chain)
 
   const handleRunSimulation = () => {
-    if (!safeTx) return
+    if (!safeTx) {
+      return
+    }
 
     const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0]?.value
-    if (!executionOwner) return
+    if (!executionOwner) {
+      return
+    }
 
     const simulationParams = {
       safe,
@@ -104,12 +108,20 @@ export const TenderlySimulation = ({
   // Once per transaction: the reset effect above clears the previous result, this one starts the next run.
   const autoRanKeyRef = useRef<string | null>(null)
   useEffect(() => {
-    if (!autoRun || !showSimulation || !safeTx) return
+    if (!autoRun || !showSimulation || !safeTx) {
+      return
+    }
     // A nested Safe's data arrives later; running before it would skip the nested simulation for good.
-    if (isNestedLoading) return
-    if (!signer?.address && !safe.owners[0]?.value) return
+    if (isNestedLoading) {
+      return
+    }
+    if (!signer?.address && !safe.owners[0]?.value) {
+      return
+    }
     const key = JSON.stringify(safeTx.data)
-    if (autoRanKeyRef.current === key) return
+    if (autoRanKeyRef.current === key) {
+      return
+    }
     autoRanKeyRef.current = key
     handleRunSimulation()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the tx data; the handler reads live values
@@ -156,12 +168,18 @@ export const TenderlySimulation = ({
   const showExpandable = isNested && isSimulationFinished
 
   const handleRevealEnd = (e: AnimationEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) setRevealed(true)
+    if (e.target === e.currentTarget) {
+      setRevealed(true)
+    }
   }
 
   const getSimulationHeaderText = () => {
-    if (!isSimulationFinished) return 'Transaction simulation'
-    if (isNested) return 'Transaction simulations'
+    if (!isSimulationFinished) {
+      return 'Transaction simulation'
+    }
+    if (isNested) {
+      return 'Transaction simulations'
+    }
     return isSimulationSuccess ? 'Simulation successful' : 'Simulation failed'
   }
 

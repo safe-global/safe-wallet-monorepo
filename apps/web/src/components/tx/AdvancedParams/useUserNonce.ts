@@ -6,7 +6,9 @@ const useUserNonce = (): number | undefined => {
   const wallet = useWallet()
 
   const [userNonce] = useAsync<number>(() => {
-    if (!wallet) return
+    if (!wallet) {
+      return
+    }
     return getUserNonce(wallet.address)
   }, [wallet])
 

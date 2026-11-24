@@ -22,15 +22,25 @@ const SELF_REDIRECTING_PATHS = new Set(['/', '/welcome', '/welcome/spaces'])
 // back here.
 const normalisePathForSelfRedirectCheck = (path: string): string => {
   const pathOnly = path.split('?')[0].split('#')[0]
-  if (pathOnly.length > 1 && pathOnly.endsWith('/')) return pathOnly.slice(0, -1)
+  if (pathOnly.length > 1 && pathOnly.endsWith('/')) {
+    return pathOnly.slice(0, -1)
+  }
   return pathOnly
 }
 
 export const sanitizeNextUrl = (next: unknown): string | null => {
-  if (typeof next !== 'string' || next.length === 0) return null
-  if (!next.startsWith('/')) return null
-  if (next.startsWith('//') || next.startsWith('/\\')) return null
-  if (SELF_REDIRECTING_PATHS.has(normalisePathForSelfRedirectCheck(next))) return null
+  if (typeof next !== 'string' || next.length === 0) {
+    return null
+  }
+  if (!next.startsWith('/')) {
+    return null
+  }
+  if (next.startsWith('//') || next.startsWith('/\\')) {
+    return null
+  }
+  if (SELF_REDIRECTING_PATHS.has(normalisePathForSelfRedirectCheck(next))) {
+    return null
+  }
   return next
 }
 
@@ -54,13 +64,17 @@ type ParsedNextUrl = {
  */
 export const parseNextUrlForRouter = (next: unknown): ParsedNextUrl | null => {
   const sanitized = sanitizeNextUrl(next)
-  if (!sanitized) return null
+  if (!sanitized) {
+    return null
+  }
 
   const url = new URL(sanitized, 'http://localhost')
   // Re-check the resolved pathname against the self-redirect blocklist: path
   // traversal (e.g. `/foo/..`) collapses to `/` after URL normalisation, which
   // sanitizeNextUrl can't see by inspecting the raw string.
-  if (SELF_REDIRECTING_PATHS.has(normalisePathForSelfRedirectCheck(url.pathname))) return null
+  if (SELF_REDIRECTING_PATHS.has(normalisePathForSelfRedirectCheck(url.pathname))) {
+    return null
+  }
   const query: Record<string, string | string[]> = {}
   url.searchParams.forEach((value, key) => {
     const existing = query[key]
@@ -87,7 +101,9 @@ export const parseNextUrlForRouter = (next: unknown): ParsedNextUrl | null => {
  */
 export const parseSpaceReturnUrl = (next: unknown, spaceId: string): ParsedNextUrl | null => {
   const parsed = parseNextUrlForRouter(next)
-  if (!parsed) return null
+  if (!parsed) {
+    return null
+  }
   const isSpacesPage =
     parsed.pathname === AppRoutes.spaces.index || parsed.pathname.startsWith(`${AppRoutes.spaces.index}/`)
   return isSpacesPage && parsed.query.spaceId === spaceId ? parsed : null
@@ -100,11 +116,15 @@ export const parseSpaceReturnUrl = (next: unknown, spaceId: string): ParsedNextU
 export const buildCurrentNextUrl = (pathname: string, query: Record<string, string | string[] | undefined>): string => {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {
-    if (key === 'next') continue
+    if (key === 'next') {
+      continue
+    }
     if (typeof value === 'string') {
       params.set(key, value)
     } else if (Array.isArray(value)) {
-      for (const v of value) params.append(key, v)
+      for (const v of value) {
+        params.append(key, v)
+      }
     }
   }
   const qs = params.toString()

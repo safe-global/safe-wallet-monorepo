@@ -15,13 +15,17 @@ export const deriveSidePanelAccountsFromSpace = (
   const accounts: SafeAppMockupAccount[] = []
 
   const resolveName = (address: string, name: string | undefined): string | undefined => {
-    if (name && name.trim()) return name
+    if (name && name.trim()) {
+      return name
+    }
     return nameLookup?.get(address.toLowerCase())
   }
 
   const pushOnce = (address: string, name: string | undefined, safeItem: SafeItem | undefined) => {
     const key = address.toLowerCase()
-    if (seen.has(key)) return
+    if (seen.has(key)) {
+      return
+    }
     seen.add(key)
     accounts.push({ address, name: resolveName(address, name), _safeItem: safeItem })
   }

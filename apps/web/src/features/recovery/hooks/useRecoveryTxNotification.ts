@@ -50,7 +50,9 @@ export function useRecoveryTxNotifications(): void {
       recoverySubscribe(event, async (detail) => {
         const isSuccess = SUCCESS_EVENTS.includes(event)
         const isError = 'error' in detail
-        if (isError && isWalletRejection(detail.error)) return
+        if (isError && isWalletRejection(detail.error)) {
+          return
+        }
 
         const txHash = 'txHash' in detail ? detail.txHash : undefined
         const recoveryTxHash = 'recoveryTxHash' in detail ? detail.recoveryTxHash : undefined

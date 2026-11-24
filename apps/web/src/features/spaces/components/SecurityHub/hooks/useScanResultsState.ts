@@ -43,7 +43,9 @@ const useScanResultsState = (security: SecurityHandle): ScanResultsState => {
 
   const handleScanComplete = useCallback(
     (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
-      if (!security) return
+      if (!security) {
+        return
+      }
       const key = security.scanKey(address, chainId)
       setAllScanResults((prev) => ({ ...prev, [key]: results }))
       setScanTimestamps((prev) => ({ ...prev, [key]: timestamp }))

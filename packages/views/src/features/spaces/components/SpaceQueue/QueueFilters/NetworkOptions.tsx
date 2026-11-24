@@ -18,7 +18,9 @@ export type NetworkOptionsProps = {
 
 /** The Network filter's checkboxes, in the Filter menu */
 const NetworkOptions = ({ options, onToggle }: NetworkOptionsProps): ReactElement => {
-  if (options.length === 0) return <NoFilterOptions>No networks</NoFilterOptions>
+  if (options.length === 0) {
+    return <NoFilterOptions>No networks</NoFilterOptions>
+  }
 
   return (
     <>

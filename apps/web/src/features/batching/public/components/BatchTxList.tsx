@@ -60,7 +60,9 @@ const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelet
   const safeSDK = useSafeSDK()
 
   const [batchSafeTx] = useAsync(() => {
-    if (!safeSDK) return
+    if (!safeSDK) {
+      return
+    }
 
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = txItems.length > 1

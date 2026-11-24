@@ -146,7 +146,9 @@ export const useCustomAppCommunicator = (
         : Promise.resolve(balances)
     },
     onGetChainInfo: () => {
-      if (!chain) return
+      if (!chain) {
+        return
+      }
 
       const { nativeCurrency, chainName, chainId, shortName, blockExplorerUriTemplate } = chain
 

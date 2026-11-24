@@ -67,9 +67,15 @@ const CheckWalletWithPermission = <P extends Permission>({
     }
   }, [allowUndeployedSafe, hasPermission, isUndeployedSafe, sdk, wallet, safeLoaded])
 
-  if (checkNetwork && isWrongChain) return children(false)
-  if (!message) return children(true)
-  if (noTooltip) return children(false)
+  if (checkNetwork && isWrongChain) {
+    return children(false)
+  }
+  if (!message) {
+    return children(true)
+  }
+  if (noTooltip) {
+    return children(false)
+  }
 
   return (
     <Tooltip>

@@ -35,8 +35,12 @@ const isUsableAim = (timestampMs: number | null | undefined): timestampMs is num
 export const recordAim = (identity: CheckIdentity, timestampMs: number | null | undefined): number | null => {
   const key = checkKey(identity)
   const current = aims.get(key)
-  if (!isUsableAim(timestampMs)) return current ?? null
-  if (current !== undefined && current <= timestampMs) return current
+  if (!isUsableAim(timestampMs)) {
+    return current ?? null
+  }
+  if (current !== undefined && current <= timestampMs) {
+    return current
+  }
   aims.set(key, timestampMs)
   return timestampMs
 }

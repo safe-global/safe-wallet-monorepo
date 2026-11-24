@@ -13,7 +13,9 @@ const NO_TRANSACTIONS: SpacePendingTxItem[] = []
 
 // Without `count`, a page that reached the limit may hide more transactions, so the total is unknown
 const toTotalCount = (count: number | null, shown: number, limit: number): number | undefined => {
-  if (count !== null) return Math.max(count, shown)
+  if (count !== null) {
+    return Math.max(count, shown)
+  }
   return shown < limit ? shown : undefined
 }
 
@@ -33,7 +35,9 @@ export const useSpacePendingTransactions = (limit = 3) => {
 
   const page = spaceQueue.currentData
   const transactions = useMemo<SpacePendingTxItem[]>(() => {
-    if (!page) return NO_TRANSACTIONS
+    if (!page) {
+      return NO_TRANSACTIONS
+    }
 
     return Object.entries(page.results)
       .flatMap(([safeAddress, chainItems]) =>
@@ -45,7 +49,9 @@ export const useSpacePendingTransactions = (limit = 3) => {
       .slice(0, limit)
   }, [page, limit])
 
-  if (hasSpaceQueue === false) return { ...perSafe, totalCount: undefined }
+  if (hasSpaceQueue === false) {
+    return { ...perSafe, totalCount: undefined }
+  }
 
   return {
     transactions,
@@ -54,7 +60,9 @@ export const useSpacePendingTransactions = (limit = 3) => {
     isLoading: hasSpaceQueue === undefined || !spaceId || (spaceQueue.isFetching && !page),
     error: spaceQueue.isError ? 'Failed to load pending transactions' : undefined,
     refetch: () => {
-      if (!skipSpaceQueue) spaceQueue.refetch()
+      if (!skipSpaceQueue) {
+        spaceQueue.refetch()
+      }
     },
   }
 }

@@ -128,11 +128,21 @@ const compareNullable = (
   factor: number,
 ) => {
   // Empty values always sort to the end, regardless of direction
-  if (a == null && b == null) return 0
-  if (a == null) return 1
-  if (b == null) return -1
-  if (a < b) return -1 * factor
-  if (a > b) return factor
+  if (a == null && b == null) {
+    return 0
+  }
+  if (a == null) {
+    return 1
+  }
+  if (b == null) {
+    return -1
+  }
+  if (a < b) {
+    return -1 * factor
+  }
+  if (a > b) {
+    return factor
+  }
   return 0
 }
 
@@ -162,7 +172,9 @@ function PaginatedDataTable<T>({
   // Guarded for environments without ResizeObserver (jsdom) — there compact mode is viewport-only
   useEffect(() => {
     const element = containerRef.current
-    if (!element || typeof ResizeObserver === 'undefined') return
+    if (!element || typeof ResizeObserver === 'undefined') {
+      return
+    }
     const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width))
     observer.observe(element)
     return () => observer.disconnect()
@@ -185,16 +197,24 @@ function PaginatedDataTable<T>({
   const handleSort = (columnId: string) => {
     setPage(0)
     setSort((current) => {
-      if (current?.id !== columnId) return { id: columnId, direction: 'asc' }
-      if (current.direction === 'asc') return { id: columnId, direction: 'desc' }
+      if (current?.id !== columnId) {
+        return { id: columnId, direction: 'asc' }
+      }
+      if (current.direction === 'asc') {
+        return { id: columnId, direction: 'desc' }
+      }
       return null
     })
   }
 
   const sortedRows = useMemo(() => {
-    if (!sort) return rows
+    if (!sort) {
+      return rows
+    }
     const sortValue = columns.find((column) => column.id === sort.id)?.sortValue
-    if (!sortValue) return rows
+    if (!sortValue) {
+      return rows
+    }
     const factor = sort.direction === 'asc' ? 1 : -1
     return [...rows].sort((a, b) => compareNullable(sortValue(a), sortValue(b), factor))
   }, [rows, sort, columns])
@@ -219,9 +239,13 @@ function PaginatedDataTable<T>({
   const spareShare =
     containerWidth !== null && shareColumns.length > 0 ? (containerWidth - tableMinWidth) / shareColumns.length : null
   const headStyle = (column: DataTableColumn<T>): Record<string, string> | undefined => {
-    if (isCompact) return undefined
+    if (isCompact) {
+      return undefined
+    }
     const style = minWidthStyle(column)
-    if (spareShare === null || column.width !== 'share' || column === shareColumns.at(-1)) return style
+    if (spareShare === null || column.width !== 'share' || column === shareColumns.at(-1)) {
+      return style
+    }
     return { ...style, width: `${(column.minWidth ?? 0) + spareShare}px` }
   }
 
@@ -241,21 +265,30 @@ function PaginatedDataTable<T>({
 
   const togglePage = () =>
     updateSelection((next) => {
-      if (allPageSelected) pageKeys.forEach((key) => next.delete(key))
-      else pageKeys.forEach((key) => next.add(key))
+      if (allPageSelected) {
+        pageKeys.forEach((key) => next.delete(key))
+      } else {
+        pageKeys.forEach((key) => next.add(key))
+      }
     })
 
   const toggleRow = (key: string) =>
     updateSelection((next) => {
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
     })
 
   const toggleExpanded = (key: string) =>
     setExpanded((current) => {
       const next = new Set(current)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
       return next
     })
 
@@ -331,7 +364,9 @@ function PaginatedDataTable<T>({
                   onClick={
                     onRowClick
                       ? (event) => {
-                          if ((event.target as HTMLElement).closest(NESTED_CONTROLS)) return
+                          if ((event.target as HTMLElement).closest(NESTED_CONTROLS)) {
+                            return
+                          }
                           onRowClick(row)
                         }
                       : undefined

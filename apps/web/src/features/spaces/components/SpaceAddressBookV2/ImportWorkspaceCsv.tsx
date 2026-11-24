@@ -41,19 +41,27 @@ const ImportWorkspaceCsv = ({ items, tags, size = 'action' }: ImportWorkspaceCsv
   const validateRows = (rows: AddressBookCSVRow[]) => {
     const supportedChainIds = configs.map((chain) => chain.chainId)
     const rowError = validateWorkspaceRows(rows, items, tags, supportedChainIds)
-    if (rowError) return rowError
+    if (rowError) {
+      return rowError
+    }
     return toWorkspaceImport(rows, items, tags).items.length === 0 ? NOTHING_TO_IMPORT : undefined
   }
 
   const onImport = async (rows: AddressBookCSVRow[]): Promise<ImportOutcome> => {
     const { items: contacts, newCount, updatedCount, networkCount } = toWorkspaceImport(rows, items, tags)
     // Skipping look-alikes can leave nothing to send
-    if (contacts.length === 0) return { done: true }
+    if (contacts.length === 0) {
+      return { done: true }
+    }
 
     const result = await upsertAddressBook({ spaceId: spaceId ?? '', upsertAddressBookItemsDto: { items: contacts } })
     // A cancelled step-up keeps the dialog and its file, with no error
-    if (isElevationRequiredError(result.error)) return { done: false }
-    if (result.error) return { done: false, error: getRtkQueryErrorMessage(result.error) }
+    if (isElevationRequiredError(result.error)) {
+      return { done: false }
+    }
+    if (result.error) {
+      return { done: false, error: getRtkQueryErrorMessage(result.error) }
+    }
 
     dispatch(
       showNotification({

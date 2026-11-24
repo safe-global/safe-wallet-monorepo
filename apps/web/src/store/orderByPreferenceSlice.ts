@@ -34,7 +34,9 @@ export const orderByPreferenceSlice = createSlice({
     },
     setManualOrder: (state, { payload }: PayloadAction<{ scope: string; order: string[] }>) => {
       const { scope, order } = payload
-      if (!state.manualOrder) state.manualOrder = {}
+      if (!state.manualOrder) {
+        state.manualOrder = {}
+      }
       state.manualOrder[scope] = order.map((address) => address.toLowerCase())
     },
   },

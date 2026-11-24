@@ -81,15 +81,23 @@ const resolveUnenforced = (viewer: Viewer): UnenforcedDrawerState => {
     bannerLine2: UNENFORCED_BANNER_LINE,
   } as const
 
-  if (!viewer.address) return { ...base, action: 'connect', disabled: false, helper: UNENFORCED_CONNECT_HELPER }
-  if (!viewer.isSigner) return { ...base, action: 'enable', disabled: true, helper: UNENFORCED_NOT_A_SIGNER_HELPER }
+  if (!viewer.address) {
+    return { ...base, action: 'connect', disabled: false, helper: UNENFORCED_CONNECT_HELPER }
+  }
+  if (!viewer.isSigner) {
+    return { ...base, action: 'enable', disabled: true, helper: UNENFORCED_NOT_A_SIGNER_HELPER }
+  }
 
   return { ...base, action: 'enable', disabled: false }
 }
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
-  if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
-  if (!viewer.isSigner) return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_HELPER }
+  if (!viewer.address) {
+    return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
+  }
+  if (!viewer.isSigner) {
+    return { kind: 'active', action: 'manage', disabled: true, helper: NOT_A_SIGNER_HELPER }
+  }
 
   return { kind: 'active', action: 'manage', disabled: false }
 }
@@ -112,9 +120,13 @@ const resolvePending = (policy: PendingSpendingLimitPolicy, viewer: Viewer, safe
     return { ...base, action: 'review', bannerLine2: executeLine(policy.operation) }
   }
 
-  if (!viewer.isSigner) return { ...base, action: 'copy-link' }
+  if (!viewer.isSigner) {
+    return { ...base, action: 'copy-link' }
+  }
 
-  if (viewer.hasSigned === undefined) return { ...base, action: 'review' }
+  if (viewer.hasSigned === undefined) {
+    return { ...base, action: 'review' }
+  }
 
   if (viewer.hasSigned) {
     const missing = policy.confirmationsRequired - policy.confirmationsSubmitted

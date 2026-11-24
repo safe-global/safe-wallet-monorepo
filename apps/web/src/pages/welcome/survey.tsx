@@ -14,14 +14,18 @@ const SurveyPage = () => {
   // Hold off while chain config is still loading (`undefined`) so users
   // don't get bounced away before we know the survey is actually disabled.
   useEffect(() => {
-    if (!router.isReady || isEnabled !== false) return
+    if (!router.isReady || isEnabled !== false) {
+      return
+    }
     const spaceId = router.query.spaceId as string | undefined
     router.replace(
       spaceId ? { pathname: AppRoutes.spaces.index, query: { spaceId } } : { pathname: AppRoutes.welcome.createSpace },
     )
   }, [router, isEnabled])
 
-  if (isEnabled !== true) return null
+  if (isEnabled !== true) {
+    return null
+  }
 
   return (
     <>

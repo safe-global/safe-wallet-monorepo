@@ -35,7 +35,9 @@ const renderAppFrameWithLoadedSafe = async (addressBook: AddressBookState = {}) 
 
   const iframe = await screen.findByTitle<HTMLIFrameElement>(permissionsTestApp.name)
   const appWindow = iframe.contentWindow
-  if (!appWindow) throw new Error('The Safe App iframe has no window')
+  if (!appWindow) {
+    throw new Error('The Safe App iframe has no window')
+  }
 
   return { appWindow, replyToApp: jest.spyOn(appWindow, 'postMessage') }
 }

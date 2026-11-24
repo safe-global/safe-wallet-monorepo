@@ -30,7 +30,9 @@ export async function getTrezorSdk() {
       const result = await TrezorConnect.ethereumGetAddress({
         bundle: paths.map((path) => ({ path, showOnTrezor: false })),
       })
-      if (!result.success) throw mapTrezorError(result.payload)
+      if (!result.success) {
+        throw mapTrezorError(result.payload)
+      }
       return result.payload.map((item) => ({ address: getAddress(item.address), path: item.serializedPath }))
     },
 
@@ -38,7 +40,9 @@ export async function getTrezorSdk() {
       // Trezor expects the raw hex bytes without the 0x prefix when hex: true
       const hex = message.startsWith('0x') ? message.slice(2) : message
       const result = await TrezorConnect.ethereumSignMessage({ path: derivationPath, message: hex, hex: true })
-      if (!result.success) throw mapTrezorError(result.payload)
+      if (!result.success) {
+        throw mapTrezorError(result.payload)
+      }
       const sig = result.payload.signature
       // Trezor returns raw hex without 0x; ethers Signature.from() requires the prefix
       return sig.startsWith('0x') ? sig : `0x${sig}`
@@ -52,7 +56,9 @@ export async function getTrezorSdk() {
         path: derivationPath,
         transaction,
       })
-      if (!result.success) throw mapTrezorError(result.payload)
+      if (!result.success) {
+        throw mapTrezorError(result.payload)
+      }
       return result.payload
     },
 
@@ -69,7 +75,9 @@ export async function getTrezorSdk() {
         domain_separator_hash: domainSeparatorHash,
         ...(messageHash != null && { message_hash: messageHash }),
       })
-      if (!result.success) throw mapTrezorError(result.payload)
+      if (!result.success) {
+        throw mapTrezorError(result.payload)
+      }
       const typedSig = result.payload.signature
       // Trezor returns raw hex without 0x; ethers Signature.from() requires the prefix
       return typedSig.startsWith('0x') ? typedSig : `0x${typedSig}`

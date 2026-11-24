@@ -32,7 +32,9 @@ const goldenAttested = (): OracleAttestedEvent => {
   const attested = decodeLogs(golden.logs).find(
     (event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED,
   )
-  if (!attested) throw new Error('golden fixture carries no decodable TransactionAttested log')
+  if (!attested) {
+    throw new Error('golden fixture carries no decodable TransactionAttested log')
+  }
   return attested
 }
 

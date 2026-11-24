@@ -22,7 +22,9 @@ const useUntrustedSafeAnalysis = (): UntrustedSafeAnalysisResult => {
 
   const safeAnalysis: SafeAnalysisResult | null = useMemo(() => {
     // No Safe picked yet, so there is nothing to vouch for.
-    if (!safeLoaded || isTrusted) return null
+    if (!safeLoaded || isTrusted) {
+      return null
+    }
     return {
       severity: Severity.CRITICAL,
       type: SafeStatus.UNTRUSTED,
@@ -33,7 +35,9 @@ const useUntrustedSafeAnalysis = (): UntrustedSafeAnalysisResult => {
 
   const addToTrustedList = useCallback(() => {
     const chainId = safe?.chainId
-    if (!chainId || !safeAddress) return
+    if (!chainId || !safeAddress) {
+      return
+    }
 
     trustSafe({
       chainId,

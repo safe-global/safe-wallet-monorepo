@@ -28,8 +28,12 @@ export const useSuggestedContacts = (): {
 
   const isRequestsError = hidesPending && requests.isError
   const reload = () => {
-    if (isError) refetch()
-    if (isRequestsError) requests.refetch()
+    if (isError) {
+      refetch()
+    }
+    if (isRequestsError) {
+      requests.refetch()
+    }
   }
 
   return {

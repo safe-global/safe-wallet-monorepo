@@ -61,7 +61,9 @@ const parseCornerCard = (post: Post, response: NumberFeaturesResponse): WhatsNew
 export const parseBeamerUpdates = (response: NumberFeaturesResponse): WhatsNewUpdates => {
   const unreadCount = response.number ?? 0
   const { lastPostId: postId, lastPostTitle: title, lastPostBoostedAnnouncementType: type } = response
-  if (!postId || !title) return { unreadCount }
+  if (!postId || !title) {
+    return { unreadCount }
+  }
 
   const post = { postId, title }
   return {

@@ -33,7 +33,9 @@ export const MastercopyWarning = ({ variant = 'dashboard' }: MastercopyWarningPr
   const openUpdateModal = useCallback(() => setTxFlow(<UpdateSafeFlow />), [setTxFlow])
 
   // Don't show a warning while the bytecode comparison is still resolving
-  if (isBytecodeLoading) return null
+  if (isBytecodeLoading) {
+    return null
+  }
 
   if (action === 'migrate') {
     return (

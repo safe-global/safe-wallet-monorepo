@@ -14,7 +14,9 @@ export const useCappedReread = (
   const rereadCount = rereads.readKey === readKey ? rereads.count : 0
 
   useEffect(() => {
-    if (!shouldReread || rereadCount >= maxRereads) return
+    if (!shouldReread || rereadCount >= maxRereads) {
+      return
+    }
     const timer = setTimeout(() => {
       setRereads({ readKey, count: rereadCount + 1 })
       refetch()

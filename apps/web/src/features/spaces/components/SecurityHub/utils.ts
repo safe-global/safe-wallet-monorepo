@@ -15,7 +15,9 @@ export const flattenSafes = (
       // never produces one in practice). Skip rather than synthesising a mainnet
       // entry — a bogus chainId would queue scans for a Safe that doesn't exist there.
       const firstChainId = item.safes[0]?.chainId
-      if (!firstChainId) return []
+      if (!firstChainId) {
+        return []
+      }
       return [
         {
           address: item.address,
@@ -84,7 +86,9 @@ export const reconcileDeployedSafes = (
   confirmedDeployedKeys: Set<string> | null,
   scanKey: (address: string, chainId: string) => string,
 ): SpaceSafeEntry[] => {
-  if (!confirmedDeployedKeys) return safes
+  if (!confirmedDeployedKeys) {
+    return safes
+  }
   return safes.map((safe) => {
     const reconciled = safe.chainEntries.map((c) =>
       c.isDeployed && !confirmedDeployedKeys.has(scanKey(safe.address, c.chainId)) ? { ...c, isDeployed: false } : c,

@@ -13,7 +13,9 @@ type FilterFn<T> = (item: T, query: string) => boolean
 const useSearchFilter = <T>(items: T[], query: string, filterBy: keyof T | FilterFn<T>): T[] => {
   return useMemo(() => {
     const trimmed = query.trim().toLowerCase()
-    if (!trimmed) return items
+    if (!trimmed) {
+      return items
+    }
 
     const matchFn: FilterFn<T> =
       typeof filterBy === 'function' ? filterBy : (item) => String(item[filterBy]).toLowerCase().includes(trimmed)

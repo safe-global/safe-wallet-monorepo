@@ -4,7 +4,9 @@ import { formatTimeInWords } from '@safe-global/utils/utils/date'
 export type RecipientContact = ExtendedContact
 
 const parseTimestamp = (timestamp?: string): number | undefined => {
-  if (!timestamp) return undefined
+  if (!timestamp) {
+    return undefined
+  }
   const time = Date.parse(timestamp)
   return Number.isNaN(time) ? undefined : time
 }

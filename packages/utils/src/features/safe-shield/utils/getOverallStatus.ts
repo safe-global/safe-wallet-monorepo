@@ -63,7 +63,9 @@ export const getOverallStatus = (
     if (data) {
       for (const addressResults of Object.values(data)) {
         for (const groupResults of Object.values(addressResults)) {
-          if (!Array.isArray(groupResults)) continue
+          if (!Array.isArray(groupResults)) {
+            continue
+          }
           if (groupResults) {
             const results = groupResults.map((result) => ({
               ...result,
@@ -79,7 +81,9 @@ export const getOverallStatus = (
   // Add threat result (skip primitive values like request_id string)
   if (threatResults) {
     for (const addressResults of Object.values(threatResults)) {
-      if (typeof addressResults !== 'object' || addressResults === null) continue
+      if (typeof addressResults !== 'object' || addressResults === null) {
+        continue
+      }
       for (const groupResults of Object.values(addressResults)) {
         if (groupResults && isThreatAnalysisResult(groupResults)) {
           allResults.push({ ...groupResults, title: SEVERITY_TO_TITLE[groupResults.severity as Severity] })

@@ -38,7 +38,9 @@ const InviteStep = (): ReactElement => {
     const invites = toDraftInvites(members)
     const stepError = validateStep('invite', { ...draft, invites }, { ownAddresses })
     setError(stepError ?? undefined)
-    if (!stepError) advance({ invites })
+    if (!stepError) {
+      advance({ invites })
+    }
   })
 
   const shownError = error ?? submitError

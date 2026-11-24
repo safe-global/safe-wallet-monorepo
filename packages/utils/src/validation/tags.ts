@@ -21,11 +21,20 @@ export const sameTagName = (a: string, b: string): boolean =>
 export const validateTagName = (raw: string): string | undefined => {
   const name = normalizeTagName(raw)
   const length = [...name].length
-  if (length === 0) return 'Tags cannot be empty'
-  if (RESERVED_TAG_NAMES.has(name.toLowerCase()))
+  if (length === 0) {
+    return 'Tags cannot be empty'
+  }
+  if (RESERVED_TAG_NAMES.has(name.toLowerCase())) {
     return `'${name}' is added automatically and can't be used as a tag name`
-  if (length > TAG_NAME_MAX_LENGTH) return `Tags must be at most ${TAG_NAME_MAX_LENGTH} characters long`
-  if (FORBIDDEN_TAG_PREFIX.test(name)) return 'Tags cannot start with =, +, - or @'
-  if (!ALLOWED_TAG_NAME.test(name)) return 'Tags can only contain letters, numbers, spaces and the characters - _ & /'
+  }
+  if (length > TAG_NAME_MAX_LENGTH) {
+    return `Tags must be at most ${TAG_NAME_MAX_LENGTH} characters long`
+  }
+  if (FORBIDDEN_TAG_PREFIX.test(name)) {
+    return 'Tags cannot start with =, +, - or @'
+  }
+  if (!ALLOWED_TAG_NAME.test(name)) {
+    return 'Tags can only contain letters, numbers, spaces and the characters - _ & /'
+  }
   return undefined
 }

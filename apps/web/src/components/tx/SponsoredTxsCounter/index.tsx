@@ -24,9 +24,13 @@ const PROMPT = {
 
 /** "Nov 1, 00:00 UTC": the reset moment of a sponsored-transactions cycle, always in UTC so every member reads the same. */
 export const formatResetsAt = (iso: string | null): string | null => {
-  if (!iso) return null
+  if (!iso) {
+    return null
+  }
   const timestamp = Date.parse(iso)
-  if (Number.isNaN(timestamp)) return null
+  if (Number.isNaN(timestamp)) {
+    return null
+  }
   const formatted = new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',

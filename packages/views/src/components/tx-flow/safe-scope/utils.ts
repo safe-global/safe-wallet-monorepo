@@ -5,6 +5,8 @@ export const buildSafeScopeKey = (chainId: string, safeAddress: string): SafeSco
 
 export const parseSafeScopeKey = (key: string): SafeScopeTarget | undefined => {
   const separator = key.indexOf(':')
-  if (separator <= 0 || separator === key.length - 1) return undefined
+  if (separator <= 0 || separator === key.length - 1) {
+    return undefined
+  }
   return { chainId: key.slice(0, separator), safeAddress: key.slice(separator + 1) }
 }

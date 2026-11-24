@@ -25,7 +25,9 @@ export const isClipboardGranted = async (): Promise<boolean> => {
 }
 
 export const getClipboard = async (): Promise<string> => {
-  if (isClipboardSupported()) return ''
+  if (isClipboardSupported()) {
+    return ''
+  }
 
   let clipboard = ''
 

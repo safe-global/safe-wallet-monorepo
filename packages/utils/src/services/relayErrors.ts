@@ -31,13 +31,19 @@ const isRelaySimulationCode = (code: unknown): code is RelaySimulationCode =>
  * caller can fall back to the generic error handling.
  */
 export const getRelaySimulationError = (thrown: unknown): RelaySimulationError | undefined => {
-  if (typeof thrown !== 'object' || thrown === null || !('data' in thrown)) return undefined
+  if (typeof thrown !== 'object' || thrown === null || !('data' in thrown)) {
+    return undefined
+  }
 
   const data = (thrown as { data?: unknown }).data
-  if (typeof data !== 'object' || data === null || !('code' in data)) return undefined
+  if (typeof data !== 'object' || data === null || !('code' in data)) {
+    return undefined
+  }
 
   const code = (data as { code?: unknown }).code
-  if (!isRelaySimulationCode(code)) return undefined
+  if (!isRelaySimulationCode(code)) {
+    return undefined
+  }
 
   const message = 'message' in data ? String((data as { message?: unknown }).message) : ''
   return new RelaySimulationError(code, message)

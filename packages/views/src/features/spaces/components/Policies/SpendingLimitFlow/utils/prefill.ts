@@ -29,8 +29,11 @@ export const toSpendingLimitFormValues = (
 
   for (const limit of limits) {
     const card = spenders.find((spender) => sameAddress(spender.address, limit.beneficiary))
-    if (card) card.limits.push(toLimit(limit))
-    else spenders.push({ address: limit.beneficiary, limits: [toLimit(limit)] })
+    if (card) {
+      card.limits.push(toLimit(limit))
+    } else {
+      spenders.push({ address: limit.beneficiary, limits: [toLimit(limit)] })
+    }
   }
 
   return { safe, spenders }

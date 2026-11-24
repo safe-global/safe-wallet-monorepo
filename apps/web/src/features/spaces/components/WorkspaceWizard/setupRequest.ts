@@ -25,7 +25,9 @@ const toAddressBookItems = (draft: WorkspaceDraft): CreateSpaceSetupDto['address
 
 const toSurvey = (draft: WorkspaceDraft): CreateSpaceSetupDto['survey'] => {
   const answered = Object.entries(draft.surveySelections).filter(([, keys]) => keys.length > 0)
-  if (answered.length === 0) return null
+  if (answered.length === 0) {
+    return null
+  }
   // Sorted, so the same answers always store the same array and group together server-side.
   return {
     slug: ONBOARDING_SURVEY_SLUG,

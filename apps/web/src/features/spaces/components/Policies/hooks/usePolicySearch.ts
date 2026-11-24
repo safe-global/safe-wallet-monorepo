@@ -31,7 +31,9 @@ const getProposers = (policy: Policy): string[] =>
   policy.type === 'proposer' ? policy.data.proposers.map((proposer) => proposer.proposer) : []
 
 const getProposerLabels = (policy: Policy): string[] => {
-  if (policy.type !== 'proposer') return []
+  if (policy.type !== 'proposer') {
+    return []
+  }
   return policy.data.proposers.flatMap((proposer) => proposer.delegatedBy.map((grant) => grant.label))
 }
 
@@ -93,14 +95,18 @@ const usePolicySearch = (policies: Policy[], query: string): PolicySearchResult 
   )
 
   return useMemo(() => {
-    if (!query) return { policies, matchedSpenderNames: new Map() }
+    if (!query) {
+      return { policies, matchedSpenderNames: new Map() }
+    }
 
     const results = fuse.search(query)
     const matchedSpenderNames = new Map<string, string>()
 
     for (const { item, matches } of results) {
       const spenderName = matches?.find((match) => match.key === 'spenderNames')?.value
-      if (spenderName) matchedSpenderNames.set(item.policy.id, spenderName)
+      if (spenderName) {
+        matchedSpenderNames.set(item.policy.id, spenderName)
+      }
     }
 
     return { policies: results.map((result) => result.item.policy), matchedSpenderNames }

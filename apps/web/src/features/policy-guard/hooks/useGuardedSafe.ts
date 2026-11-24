@@ -31,14 +31,18 @@ export const useGuardedSafe = (target?: PolicyGuardTarget): UseGuardedSafeResult
   // CGW only serves deployed Safes, so a 404 means the target is counterfactual (not eligible), not an error
   const targetError = useMemo(() => {
     const error = targetQuery.error
-    if (!error || ('status' in error && error.status === 404)) return undefined
+    if (!error || ('status' in error && error.status === 404)) {
+      return undefined
+    }
     return new Error(getRtkQueryErrorMessage(error), { cause: error })
   }, [targetQuery.error])
 
   // `refetch()` throws on a query that never started, which is the case without a target
   const { refetch: refetchTarget, isUninitialized } = targetQuery
   const refetch = useCallback(() => {
-    if (!isUninitialized) refetchTarget()
+    if (!isUninitialized) {
+      refetchTarget()
+    }
   }, [isUninitialized, refetchTarget])
 
   if (!target) {

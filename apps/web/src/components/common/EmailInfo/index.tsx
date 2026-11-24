@@ -16,7 +16,9 @@ const EmailInfo = ({
   rounded = true,
   showTooltip = false,
 }: EmailInfoProps): ReactElement | null => {
-  if (!email || !email.trim()) return null
+  if (!email || !email.trim()) {
+    return null
+  }
 
   const emailNode = <span className={css.email}>{email}</span>
 

@@ -15,10 +15,14 @@ export const useRememberSpace = (): void => {
   useEffect(() => {
     // Before hydration, the persisted state would overwrite the value. A legacy id matches no
     // Workspace in the list, so keep the previous hint instead.
-    if (!isStoreHydrated || !spaceId || isLegacySpaceId(spaceId)) return
+    if (!isStoreHydrated || !spaceId || isLegacySpaceId(spaceId)) {
+      return
+    }
 
     const rememberIfVisible = () => {
-      if (document.visibilityState === 'visible') dispatch(setLandingSpaceHint(spaceId))
+      if (document.visibilityState === 'visible') {
+        dispatch(setLandingSpaceHint(spaceId))
+      }
     }
 
     rememberIfVisible()

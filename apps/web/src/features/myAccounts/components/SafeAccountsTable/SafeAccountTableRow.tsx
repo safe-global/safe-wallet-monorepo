@@ -238,7 +238,9 @@ const CellContent = ({ column, line }: { column: SafeAccountColumn; line: Accoun
         />
       )
       // Only a rendered badge (loaded and non-zero) gets the hover breakdown; a skeleton/empty cell has nothing to explain.
-      if (!line.dataLoaded || line.pending <= 0) return pendingBadge
+      if (!line.dataLoaded || line.pending <= 0) {
+        return pendingBadge
+      }
       return (
         <Tooltip>
           <TooltipTrigger render={<span className="inline-flex" />}>{pendingBadge}</TooltipTrigger>
@@ -376,7 +378,9 @@ const SafeAccountTableRow = ({
   const setRowRef = useCallback(
     (element: HTMLTableRowElement | null) => {
       observerRef.current = element
-      if (typeof rowRef === 'function') rowRef(element)
+      if (typeof rowRef === 'function') {
+        rowRef(element)
+      }
     },
     [observerRef, rowRef],
   )
@@ -392,9 +396,12 @@ const SafeAccountTableRow = ({
   const rowNavigable = !checkbox && !renderName && (line.expandable || line.href != null)
 
   const handleRowClick = (event: MouseEvent<HTMLElement>) => {
-    if ((event.target as HTMLElement).closest('a, button, [role="button"]')) return
-    if (line.expandable) onToggle?.()
-    else if (line.href != null) {
+    if ((event.target as HTMLElement).closest('a, button, [role="button"]')) {
+      return
+    }
+    if (line.expandable) {
+      onToggle?.()
+    } else if (line.href != null) {
       onLinkClick?.(line)
       router.push(line.href)
     }

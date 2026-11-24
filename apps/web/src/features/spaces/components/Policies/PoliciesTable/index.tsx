@@ -107,7 +107,9 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
         }
 
         const [proposer] = policy.data.proposers
-        if (!proposer) return null
+        if (!proposer) {
+          return null
+        }
 
         return (
           <EthHashInfo
@@ -156,7 +158,9 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       cell: (policy) => {
         const chip = <PolicyStatusChip status={getPolicyStatus(policy)} />
         const detail = getPendingStatusDetail(policy)
-        if (!detail) return chip
+        if (!detail) {
+          return chip
+        }
 
         return (
           <Tooltip>

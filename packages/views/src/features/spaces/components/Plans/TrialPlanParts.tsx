@@ -26,7 +26,9 @@ export const TrialSizeTabs = ({
     value={value.paymentLinkId}
     onValueChange={(id) => {
       const next = sizes.find((size) => size.paymentLinkId === id)
-      if (next) onChange(next)
+      if (next) {
+        onChange(next)
+      }
     }}
   >
     <TabsList className="w-full" aria-label="Safe accounts" data-testid="trial-size-tabs">

@@ -108,7 +108,9 @@ const TokenAmountInput = ({
   )
 
   const onMaxAmountClick = useCallback(() => {
-    if (!selectedToken || maxAmount === undefined) return
+    if (!selectedToken || maxAmount === undefined) {
+      return
+    }
 
     setValue(amountField, safeFormatUnits(maxAmount.toString(), selectedToken.tokenInfo.decimals), {
       shouldValidate: true,
@@ -124,12 +126,18 @@ const TokenAmountInput = ({
   // balance only after this render, so re-run them here rather than in the change handler.
   const previousTokenAddress = useRef(tokenAddress)
   useEffect(() => {
-    if (sameAddress(previousTokenAddress.current, tokenAddress)) return
+    if (sameAddress(previousTokenAddress.current, tokenAddress)) {
+      return
+    }
     previousTokenAddress.current = tokenAddress
 
-    if (!watchedAmount) return
+    if (!watchedAmount) {
+      return
+    }
     trigger(amountField)
-    if (deps) trigger(deps)
+    if (deps) {
+      trigger(deps)
+    }
   }, [tokenAddress, watchedAmount, amountField, deps, trigger])
 
   const selectedBalance = balances.find((item) => item.tokenInfo.address === tokenAddress)

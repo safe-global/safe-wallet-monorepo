@@ -97,8 +97,12 @@ const SignInButton = ({ afterSignIn, redirectLoading = false, buttonStyle, butto
   // propagate the new wallet into context before SIWE can sign — fire the
   // prompt as soon as wallet becomes non-null.
   useEffect(() => {
-    if (!autoSignInPending.current) return
-    if (!wallet || isUserSignedIn) return
+    if (!autoSignInPending.current) {
+      return
+    }
+    if (!wallet || isUserSignedIn) {
+      return
+    }
     autoSignInPending.current = false
     void handleSignIn()
     // eslint-disable-next-line react-hooks/exhaustive-deps

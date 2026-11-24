@@ -31,8 +31,12 @@ export const useTrackSafenetChecked = ({
   const { chainId, safeAddress, safeTxHash } = identity
 
   useEffect(() => {
-    if (!isShown || !publicStatus || !safeTxHash) return
-    if (snapshotTxHash && snapshotTxHash.toLowerCase() !== safeTxHash.toLowerCase()) return
+    if (!isShown || !publicStatus || !safeTxHash) {
+      return
+    }
+    if (snapshotTxHash && snapshotTxHash.toLowerCase() !== safeTxHash.toLowerCase()) {
+      return
+    }
     trackSafenetChecked({
       identity: { chainId, safeAddress, safeTxHash },
       publicStatus,

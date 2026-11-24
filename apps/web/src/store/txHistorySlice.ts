@@ -50,7 +50,9 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
           ? txId
           : pendingTxIds.find((id) => pendingTxs[id].nonce === nonce)
 
-        if (!pendingTxId) continue
+        if (!pendingTxId) {
+          continue
+        }
 
         // Invalidate getOwnedSafe cache as nested Safe was (likely) created
         if (isCustomTxInfo(result.transaction.txInfo)) {

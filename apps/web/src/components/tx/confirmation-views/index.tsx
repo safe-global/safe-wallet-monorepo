@@ -62,31 +62,57 @@ const getConfirmationViewComponent = ({
   txFlow,
   chainId,
 }: TransactionPreview & { txFlow?: ReactElement; chainId: string }) => {
-  if (txData && isManageSignersView(txInfo, txData)) return <ManageSigners txInfo={txInfo} txData={txData} />
+  if (txData && isManageSignersView(txInfo, txData)) {
+    return <ManageSigners txInfo={txInfo} txData={txData} />
+  }
 
-  if (isChangeThresholdView(txInfo)) return <ChangeThreshold txInfo={txInfo} />
+  if (isChangeThresholdView(txInfo)) {
+    return <ChangeThreshold txInfo={txInfo} />
+  }
 
-  if (isConfirmBatchView(txFlow)) return <BatchTransactions />
+  if (isConfirmBatchView(txFlow)) {
+    return <BatchTransactions />
+  }
 
-  if (isBridgeOrderTxInfo(txInfo)) return <BridgeTransaction txInfo={txInfo} />
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return <BridgeTransaction txInfo={txInfo} />
+  }
 
-  if (isLifiSwapTxInfo(txInfo)) return <LifiSwapTransaction txInfo={txInfo} isPreview={true} />
+  if (isLifiSwapTxInfo(txInfo)) {
+    return <LifiSwapTransaction txInfo={txInfo} isPreview={true} />
+  }
 
-  if (isSettingsChangeView(txInfo)) return <SettingsChange txInfo={txInfo} />
+  if (isSettingsChangeView(txInfo)) {
+    return <SettingsChange txInfo={txInfo} />
+  }
 
-  if (isOnChainConfirmationTxData(txData)) return <OnChainConfirmation data={txData} isConfirmationView />
+  if (isOnChainConfirmationTxData(txData)) {
+    return <OnChainConfirmation data={txData} isConfirmationView />
+  }
 
-  if (isExecTxData(txData)) return <ExecTransaction data={txData} isConfirmationView />
+  if (isExecTxData(txData)) {
+    return <ExecTransaction data={txData} isConfirmationView />
+  }
 
-  if (isSwapOrderTxInfo(txInfo) || isTwapOrderTxInfo(txInfo)) return <SwapOrder txInfo={txInfo} txData={txData} />
+  if (isSwapOrderTxInfo(txInfo) || isTwapOrderTxInfo(txInfo)) {
+    return <SwapOrder txInfo={txInfo} txData={txData} />
+  }
 
-  if (isAnyStakingTxInfo(txInfo)) return <StakingTx txInfo={txInfo} />
+  if (isAnyStakingTxInfo(txInfo)) {
+    return <StakingTx txInfo={txInfo} />
+  }
 
-  if (isVaultDepositTxInfo(txInfo)) return <VaultDepositConfirmation txInfo={txInfo} />
+  if (isVaultDepositTxInfo(txInfo)) {
+    return <VaultDepositConfirmation txInfo={txInfo} />
+  }
 
-  if (isVaultRedeemTxInfo(txInfo)) return <VaultRedeemConfirmation txInfo={txInfo} />
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return <VaultRedeemConfirmation txInfo={txInfo} />
+  }
 
-  if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe txData={txData} />
+  if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) {
+    return <UpdateSafe txData={txData} />
+  }
 
   if (isCustomTxInfo(txInfo) && isSafeMigrationTxData(txData)) {
     return <MigrateToL2Information variant="queue" />
@@ -97,7 +123,9 @@ const getConfirmationViewComponent = ({
   }
 
   const spendingLimitBatch = getSpendingLimitBatch(txData, chainId)
-  if (txData && spendingLimitBatch) return <SpendingLimitBatchSummary txData={txData} batch={spendingLimitBatch} />
+  if (txData && spendingLimitBatch) {
+    return <SpendingLimitBatchSummary txData={txData} batch={spendingLimitBatch} />
+  }
 
   return null
 }

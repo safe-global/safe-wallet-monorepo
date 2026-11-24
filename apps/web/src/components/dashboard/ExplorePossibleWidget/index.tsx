@@ -120,7 +120,9 @@ const ExplorePossibleWidget = () => {
 
   const updateScrollState = () => {
     const container = scrollContainerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const newCanScrollLeft = container.scrollLeft > 0
     const newCanScrollRight = container.scrollLeft < container.scrollWidth - container.clientWidth - 1
@@ -137,10 +139,14 @@ const ExplorePossibleWidget = () => {
 
   const scrollList = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current
-    if (!container) return
+    if (!container) {
+      return
+    }
 
     const items = container.querySelectorAll('li')
-    if (items.length === 0) return
+    if (items.length === 0) {
+      return
+    }
 
     const scrollPosition = container.scrollLeft
     let targetIndex = 0

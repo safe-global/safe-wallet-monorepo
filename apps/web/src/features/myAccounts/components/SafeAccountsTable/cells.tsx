@@ -11,7 +11,9 @@ const MAX_VISIBLE_WORKSPACES = 2
  * only shows initials).
  */
 export function WorkspaceAvatars({ spaces }: { spaces: GetSpaceResponse[] }) {
-  if (spaces.length === 0) return null
+  if (spaces.length === 0) {
+    return null
+  }
 
   const visible = spaces.slice(0, MAX_VISIBLE_WORKSPACES)
   const overflow = spaces.slice(MAX_VISIBLE_WORKSPACES)

@@ -9,7 +9,9 @@ export const useVulnerableSafe = (): boolean => {
 
   const [isAffected] = useAsync<boolean>(
     () => {
-      if (!safeAddress || !safe.deployed) return undefined
+      if (!safeAddress || !safe.deployed) {
+        return undefined
+      }
       return isSafeAffectedByZodiacVulnerability(safe.chainId, safeAddress)
     },
     [safeAddress, safe.chainId, safe.deployed],

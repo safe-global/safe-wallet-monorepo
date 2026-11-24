@@ -37,7 +37,9 @@ const resolveComparison = (
   recommendedVersion: string,
 ): Promise<BytecodeComparisonResult> => {
   const existing = inFlight.get(key)
-  if (existing) return existing
+  if (existing) {
+    return existing
+  }
 
   const promise = provider
     .getCode(implementationAddress)

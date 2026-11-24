@@ -51,8 +51,12 @@ describe('useNameResolver', () => {
     _clearSharedReadOnlyProviders()
     mockUseCurrentChain.mockReturnValue(currentChain)
     mockUseChain.mockImplementation((chainId: string) => {
-      if (chainId === '1') return mainnetChain
-      if (chainId === '11155111') return sepoliaChain
+      if (chainId === '1') {
+        return mainnetChain
+      }
+      if (chainId === '11155111') {
+        return sepoliaChain
+      }
       return undefined
     })
   })

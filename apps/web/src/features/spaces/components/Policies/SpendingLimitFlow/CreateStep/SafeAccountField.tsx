@@ -43,7 +43,9 @@ const SafeAccountField = ({
           onChange={(id) => {
             field.onChange(id)
             const target = parseSafeScopeKey(id)
-            if (target) onSafeChange(target.chainId, target.safeAddress)
+            if (target) {
+              onSafeChange(target.chainId, target.safeAddress)
+            }
           }}
           isLoading={isLoading}
           isError={isError}

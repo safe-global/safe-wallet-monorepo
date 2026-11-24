@@ -23,7 +23,9 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
   const [leaveSpace, { isLoading }] = useMembersSelfRemoveV1Mutation()
 
   const onLeave = async () => {
-    if (!space) return
+    if (!space) {
+      return
+    }
 
     setError(undefined)
 

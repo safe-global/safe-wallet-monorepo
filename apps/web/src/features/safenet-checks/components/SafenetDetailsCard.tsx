@@ -78,7 +78,9 @@ const NEUTRAL_ACCENT = {
 } as CSSProperties
 
 const cardAccent = (publicStatus: VerdictStatus, isWarning: boolean): CSSProperties => {
-  if (isWarning) return WARNING_ACCENT
+  if (isWarning) {
+    return WARNING_ACCENT
+  }
   return publicStatus === CheckStatus.MALICIOUS ? RISK_ACCENT : NEUTRAL_ACCENT
 }
 
@@ -89,7 +91,9 @@ const proofLinkFor = (publicStatus: VerdictStatus, links: SafenetLinks, isInFlig
   if (publicStatus === CheckStatus.BENIGN && links.attestationHref) {
     return { href: links.attestationHref, testId: 'safenet-details-attestation', label: SAFENET_ATTESTATION_LINK_LABEL }
   }
-  if (isInFlight) return null
+  if (isInFlight) {
+    return null
+  }
 
   return { href: links.explorerHref, testId: 'safenet-details-explorer', label: SAFENET_EXPLORER_LINK_LABEL }
 }
@@ -102,7 +106,9 @@ const FailureReason = ({
   publicStatus: VerdictStatus
   snapshot: SafenetCheckSnapshot
 }): ReactElement | null => {
-  if (publicStatus !== CheckStatus.TIMED_OUT && publicStatus !== CheckStatus.DISPUTED) return null
+  if (publicStatus !== CheckStatus.TIMED_OUT && publicStatus !== CheckStatus.DISPUTED) {
+    return null
+  }
 
   return (
     <Typography variant="paragraph-small" className={META_TEXT_CLASS} data-testid="safenet-failure-reason">
@@ -152,7 +158,9 @@ const ResultBlock = ({
   isQueued?: boolean
   attestationHref: string | null
 }): ReactElement | null => {
-  if (publicStatus === CheckStatus.MALICIOUS && summary.rules.length > 0) return null
+  if (publicStatus === CheckStatus.MALICIOUS && summary.rules.length > 0) {
+    return null
+  }
 
   return (
     <div className="flex flex-col gap-1">
@@ -169,7 +177,9 @@ const ResultBlock = ({
 
 /** One block per rule a sentinel cited, like Copilot's threat results. */
 const FlaggedRuleBlocks = ({ summary }: { summary: RejectionSummary }): ReactElement | null => {
-  if (summary.rules.length === 0) return null
+  if (summary.rules.length === 0) {
+    return null
+  }
 
   return (
     <SafenetDetailsPanel>
@@ -330,7 +340,9 @@ const SafenetDetailsCard = ({
     isShown: !!display,
   })
 
-  if (!safeTxHash || !display) return null
+  if (!safeTxHash || !display) {
+    return null
+  }
   if (display.publicStatus === CheckStatus.UNAVAILABLE) {
     return <SafenetUnavailableCardView reason={display.unavailableReason} safeTxHash={safeTxHash} chainId={chainId} />
   }

@@ -31,7 +31,9 @@ export const useSetupWidgetDismissal = (spaceId: string | null | undefined) => {
   const isMarkedCompleted = spaceId ? completedSpaces[spaceId] === true : false
 
   const dismiss = useCallback(() => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
 
     setDismissedSpaces((prev = {}) => ({
       ...prev,

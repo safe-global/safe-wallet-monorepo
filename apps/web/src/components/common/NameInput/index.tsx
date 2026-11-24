@@ -91,10 +91,14 @@ const NameInput = ({
         validate: (value) => {
           if (validateCharset) {
             const sanitized = sanitizeName(value ?? '')
-            if (sanitized === '') return required ? 'Required' : true
+            if (sanitized === '') {
+              return required ? 'Required' : true
+            }
             return validateName(sanitized, { minLength, maxLength }) ?? true
           }
-          if (value?.trim() === '' && required) return 'Required'
+          if (value?.trim() === '' && required) {
+            return 'Required'
+          }
           return true
         },
       }}

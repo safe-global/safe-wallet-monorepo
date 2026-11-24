@@ -47,8 +47,12 @@ const mkOverview = (address: string, chainId: string, fiatTotal = '1000', queued
 
 const setSelectors = ({ undeployed = {}, currency = 'usd' } = {}) => {
   useAppSelectorMock.mockImplementation((selector: string) => {
-    if (selector === 'selectUndeployedSafes') return undeployed
-    if (selector === 'selectCurrency') return currency
+    if (selector === 'selectUndeployedSafes') {
+      return undeployed
+    }
+    if (selector === 'selectCurrency') {
+      return currency
+    }
     return undefined
   })
 }

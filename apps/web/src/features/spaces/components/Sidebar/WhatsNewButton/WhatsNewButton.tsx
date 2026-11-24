@@ -29,7 +29,9 @@ export const WhatsNewButton = (): ReactElement | null => {
     setIsOpen(false)
   }, [])
 
-  if (!hasUpdatesConsent) return null
+  if (!hasUpdatesConsent) {
+    return null
+  }
 
   return (
     <>

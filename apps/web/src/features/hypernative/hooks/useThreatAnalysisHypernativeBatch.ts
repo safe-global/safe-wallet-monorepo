@@ -28,10 +28,14 @@ type FetchContext = { safeAddress: string; authToken?: string }
  * @returns The Safe transaction hash or null if not found
  */
 const extractSafeTxHashFromItem = (item: QueuedItemPage['results'][number]): `0x${string}` | null => {
-  if (!isTransactionQueuedItem(item)) return null
+  if (!isTransactionQueuedItem(item)) {
+    return null
+  }
 
   const txId = item.transaction.id
-  if (!txId) return null
+  if (!txId) {
+    return null
+  }
 
   const safeTxHash = getSafeTxHashFromTxId(txId)
   return safeTxHash ? (safeTxHash as `0x${string}`) : null
@@ -49,7 +53,9 @@ const extractSafeTxHashesFromPages = (pages: (QueuedItemPage | undefined)[]): `0
     const results = page?.results ?? []
     for (const item of results) {
       const hash = extractSafeTxHashFromItem(item)
-      if (hash) hashSet.add(hash)
+      if (hash) {
+        hashSet.add(hash)
+      }
     }
   }
 
@@ -68,7 +74,9 @@ const collectCompletedResults = (
 
   for (const [hash, result] of Object.entries(fetchedAssessments)) {
     const [data, error, loading] = result
-    if (loading) continue
+    if (loading) {
+      continue
+    }
 
     if (error) {
       results[hash as `0x${string}`] = null
@@ -88,8 +96,12 @@ const collectCompletedResults = (
 const cachedToAsyncResult = (
   cached: ThreatAnalysisResults | null | undefined,
 ): AsyncResult<ThreatAnalysisResults> | null => {
-  if (cached === undefined) return null
-  if (cached === null) return [undefined, new Error('Assessment failed'), false]
+  if (cached === undefined) {
+    return null
+  }
+  if (cached === null) {
+    return [undefined, new Error('Assessment failed'), false]
+  }
   return [cached, undefined, false]
 }
 
@@ -137,7 +149,9 @@ export function useThreatAnalysisHypernativeBatch({
 
   useEffect(() => {
     const resultsToStore = collectCompletedResults(fetchedAssessments)
-    if (Object.keys(resultsToStore).length === 0) return
+    if (Object.keys(resultsToStore).length === 0) {
+      return
+    }
 
     const fetchContext = fetchContextRef.current
     const contextMatches =

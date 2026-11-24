@@ -30,7 +30,9 @@ export const OnChainConfirmation = ({
 
   const verifiedEnvelopeTx = useMemo<NestedTxEnvelope | undefined>(() => {
     // A batch can hold several approveHash calls but the flow carries only one envelope
-    if (!envelopeChildTx || !signedHash) return undefined
+    if (!envelopeChildTx || !signedHash) {
+      return undefined
+    }
     if (deriveEnvelopeSafeTxHash(envelopeChildTx).toLowerCase() !== signedHash.toLowerCase()) {
       console.info('[NestedTxEnvelope] flow envelope does not match the displayed approveHash, ignoring it', {
         signedHash,

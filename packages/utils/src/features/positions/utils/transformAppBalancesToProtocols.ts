@@ -2,7 +2,9 @@ import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positio
 import type { AppBalance } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 
 export const transformAppBalancesToProtocols = (appBalances?: AppBalance[]): Protocol[] | undefined => {
-  if (!appBalances) return undefined
+  if (!appBalances) {
+    return undefined
+  }
 
   return appBalances.map((appBalance) => ({
     protocol: appBalance.appInfo.name,

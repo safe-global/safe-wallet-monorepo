@@ -91,7 +91,9 @@ export const usePendingTxsQueue = (): {
 
   const [untrustedNext, error, loading] = useAsync<QueuedItemPage | undefined>(
     async () => {
-      if (!hasPending) return
+      if (!hasPending) {
+        return
+      }
       const untrustedQueue = await getTransactionQueue(chainId, safeAddress, { trusted: false })
       return getNextTransactions(untrustedQueue)
     },
@@ -100,7 +102,9 @@ export const usePendingTxsQueue = (): {
   )
 
   const pendingTxPage = useMemo(() => {
-    if (!untrustedNext || !pendingIds.length) return
+    if (!untrustedNext || !pendingIds.length) {
+      return
+    }
 
     return filterUntrustedQueue(untrustedNext, pendingIds, trustedIds)
   }, [untrustedNext, pendingIds, trustedIds])

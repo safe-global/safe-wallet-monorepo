@@ -191,7 +191,9 @@ export const getRedirect = (
   const address = `${chainPrefix}:${safeAddress}`
 
   // Should never happen in practice
-  if (!chainPrefix) return AppRoutes.index
+  if (!chainPrefix) {
+    return AppRoutes.index
+  }
 
   // Go to the dashboard if no specific redirect is provided
   if (!redirectUrl || !redirectUrl.startsWith(AppRoutes.apps.index)) {

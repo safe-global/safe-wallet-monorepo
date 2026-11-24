@@ -13,7 +13,9 @@ const useSpendingLimitGas = (params: SpendingLimitTxParams) => {
   const { safe } = useSafeInfo()
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
-    if (!provider || !wallet || !safe.modules?.length) return
+    if (!provider || !wallet || !safe.modules?.length) {
+      return
+    }
 
     const contract = getSpendingLimitContract(chainId, safe.modules, provider)
 

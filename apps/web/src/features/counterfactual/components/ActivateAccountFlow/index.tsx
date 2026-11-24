@@ -96,7 +96,9 @@ const ActivateAccountFlow = () => {
   const canRelay = hasRemainingRelays(minRelays)
   const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
 
-  if (!undeployedSafe || !undeployedSafeSetup) return null
+  if (!undeployedSafe || !undeployedSafeSetup) {
+    return null
+  }
 
   const { owners, threshold } = undeployedSafeSetup
 
@@ -118,7 +120,9 @@ const ActivateAccountFlow = () => {
   }
 
   const createSafe = async () => {
-    if (!wallet || !chain) return
+    if (!wallet || !chain) {
+      return
+    }
 
     trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: TX_TYPES.activate_without_tx })
 

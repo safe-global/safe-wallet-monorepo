@@ -30,11 +30,15 @@ const WidgetEmptyState = ({
   const iconRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!iconRef.current) return
+    if (!iconRef.current) {
+      return
+    }
     const elements = iconRef.current.querySelectorAll('path, line, polyline, circle, rect')
     elements.forEach((el) => {
       const svgEl = el as SVGGeometryElement
-      if (typeof svgEl.getTotalLength !== 'function') return
+      if (typeof svgEl.getTotalLength !== 'function') {
+        return
+      }
       const length = svgEl.getTotalLength()
       svgEl.style.strokeDasharray = `${length}`
       svgEl.style.strokeDashoffset = `${length}`

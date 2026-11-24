@@ -26,7 +26,9 @@ const useTxPreview = (
   const [triggerPreview, { data: txPreview, error, isLoading }] = useTransactionsPreviewTransactionV1Mutation()
 
   useEffect(() => {
-    if (skip) return
+    if (skip) {
+      return
+    }
 
     triggerPreview({
       chainId,

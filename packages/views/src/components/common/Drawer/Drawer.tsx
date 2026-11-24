@@ -15,7 +15,9 @@ export const Drawer = ({ open, onClose, size = 'md', ariaLabel, children }: Draw
   <Sheet
     open={open}
     onOpenChange={(isOpen) => {
-      if (!isOpen) onClose()
+      if (!isOpen) {
+        onClose()
+      }
     }}
   >
     <SheetContent

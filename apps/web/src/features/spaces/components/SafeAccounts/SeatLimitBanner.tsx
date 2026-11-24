@@ -38,7 +38,9 @@ export default function SeatLimitBanner({
   const spaceId = useCurrentSpaceId()
   const [isDismissed, setIsDismissed] = useState(() => Boolean(spaceId && dismissedBanners.get()?.[spaceId]))
   useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, limit !== null && Boolean(upgradePlanName))
-  if (limit === null) return null
+  if (limit === null) {
+    return null
+  }
 
   const title = `${tierName ? `The ${tierName} plan` : 'Your plan'} includes ${limit} Safe accounts`
   const body = upgradePlanName
@@ -86,10 +88,14 @@ export default function SeatLimitBanner({
     )
   }
 
-  if (isDismissed) return null
+  if (isDismissed) {
+    return null
+  }
 
   const dismiss = () => {
-    if (spaceId) dismissedBanners.set({ ...(dismissedBanners.get() ?? {}), [spaceId]: true })
+    if (spaceId) {
+      dismissedBanners.set({ ...(dismissedBanners.get() ?? {}), [spaceId]: true })
+    }
     setIsDismissed(true)
   }
 

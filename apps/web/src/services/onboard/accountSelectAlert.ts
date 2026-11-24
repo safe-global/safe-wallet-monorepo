@@ -83,13 +83,17 @@ const isDarkMode = (): boolean => document.documentElement.getAttribute('data-th
  * an already-styled one is only refreshed (the theme may have changed since).
  */
 export const styleAccountSelectAlert = (): void => {
-  if (typeof document === 'undefined') return
+  if (typeof document === 'undefined') {
+    return
+  }
 
   const css = buildCss(ALERT_PALETTE[isDarkMode() ? 'dark' : 'light'])
 
   document.querySelectorAll('account-select').forEach((host) => {
     const root = host.shadowRoot
-    if (!root) return
+    if (!root) {
+      return
+    }
 
     const existing = root.getElementById(STYLE_ID)
     if (existing) {

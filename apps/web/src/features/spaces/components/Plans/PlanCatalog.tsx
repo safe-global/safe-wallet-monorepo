@@ -70,7 +70,9 @@ export function PlanCatalog({
             variant="muted"
             className="hidden whitespace-nowrap @2xl:inline"
             onClick={(event) => {
-              if (!onCompareFeatures) return
+              if (!onCompareFeatures) {
+                return
+              }
               event.preventDefault()
               onCompareFeatures()
             }}
@@ -101,7 +103,9 @@ export function PlanCatalog({
     </div>
   )
 
-  if (embedded) return catalog
+  if (embedded) {
+    return catalog
+  }
 
   return (
     <Card radius="xl" size="sm">

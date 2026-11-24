@@ -14,7 +14,9 @@ type CallParams = Parameters<SafeAppsSDK['eth']['call']>[0]
 const ethCallTransport = (sdk: SafeAppsSDK) =>
   custom({
     async request({ method, params }) {
-      if (method !== 'eth_call') throw new Error(`The Safe App transport does not support ${method}`)
+      if (method !== 'eth_call') {
+        throw new Error(`The Safe App transport does not support ${method}`)
+      }
       return sdk.eth.call(params as CallParams)
     },
   })

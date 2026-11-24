@@ -267,7 +267,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const handleCreateSafeClick = async () => {
     try {
-      if (!wallet || !chain || !newSafeProps) return
+      if (!wallet || !chain || !newSafeProps) {
+        return
+      }
 
       setIsCreating(true)
 
@@ -281,7 +283,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const customRpcUrl = customRpc[chain.chainId]
       const provider = createWeb3ReadOnly(chain, customRpcUrl)
-      if (!provider) return
+      if (!provider) {
+        return
+      }
 
       const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
@@ -316,7 +320,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       gtmSetChainId(chain.chainId)
 
       if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        if (successfulChains.length === 0) return
+        if (successfulChains.length === 0) {
+          return
+        }
 
         await router?.push(getNewSafeHomeUrl(successfulChains[0].chain.shortName, safeAddress, spaceId))
 
@@ -357,7 +363,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     safeAddress: string,
     chainIdsToAddToSpace: string[],
   ): Promise<CreateSafeResult> => {
-    if (!wallet) return { chain, safeAddress, success: false }
+    if (!wallet) {
+      return { chain, safeAddress, success: false }
+    }
 
     gtmSetChainId(chain.chainId)
 

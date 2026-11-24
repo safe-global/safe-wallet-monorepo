@@ -87,12 +87,16 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
   const handleWalletSwitch = () => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
     trackEvent({ ...SPACE_EVENTS.WALLET_SWITCHED, label: spaceId }, { spaceId })
   }
 
   const handleWalletDisconnect = () => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
     trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId }, { spaceId })
   }
 

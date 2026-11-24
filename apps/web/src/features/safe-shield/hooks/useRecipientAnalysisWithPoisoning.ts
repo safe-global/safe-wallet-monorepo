@@ -32,7 +32,9 @@ export const useRecipientAnalysisWithPoisoning = (
     for (const chainAddressBook of Object.values(allAddressBooks)) {
       for (const [address, name] of Object.entries(chainAddressBook ?? {})) {
         const normalized = normalizeAddress(address)
-        if (name && !map.has(normalized)) map.set(normalized, name)
+        if (name && !map.has(normalized)) {
+          map.set(normalized, name)
+        }
       }
     }
     return map
@@ -67,13 +69,19 @@ export const useRecipientAnalysisWithPoisoning = (
 
     // Poisoning-only entries for non-recipient addresses (skip partial input as the user types).
     for (const address of extraAddresses ?? []) {
-      if (!isAddress(address)) continue
+      if (!isAddress(address)) {
+        continue
+      }
 
       // Dedupe case-insensitively — data-path keys are lowercased, a checksummed key would double-add.
-      if (Object.keys(next).some((k) => sameAddress(k, address))) continue
+      if (Object.keys(next).some((k) => sameAddress(k, address))) {
+        continue
+      }
 
       const match = anchorIndex.query(address)
-      if (!match) continue
+      if (!match) {
+        continue
+      }
 
       next[checksumAddress(address)] = { [StatusGroup.ADDRESS_POISONING]: poisoningGroup(address, match) }
       changed = true

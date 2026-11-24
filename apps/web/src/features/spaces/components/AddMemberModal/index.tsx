@@ -155,7 +155,9 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
         onClose()
       }
-      if (isElevationRequiredError(response.error)) return
+      if (isElevationRequiredError(response.error)) {
+        return
+      }
       if (response.error) {
         setError(getRtkQueryErrorMessage(response.error) || 'Invite failed. Please try again.')
       }

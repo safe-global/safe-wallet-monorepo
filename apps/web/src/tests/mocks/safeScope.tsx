@@ -41,7 +41,9 @@ type ScopeProviderProps = { initial?: SafeScopeTarget; pollSafeInfo?: boolean; c
 export const unwrapScopedFlow = (
   txFlow: ReactElement | undefined,
 ): { flow: ReactElement | undefined; target?: SafeScopeTarget; pollSafeInfo?: boolean } => {
-  if (txFlow?.type !== SafeScopeProvider) return { flow: txFlow }
+  if (txFlow?.type !== SafeScopeProvider) {
+    return { flow: txFlow }
+  }
   const { initial, pollSafeInfo, children } = txFlow.props as ScopeProviderProps
   return { flow: children, target: initial, pollSafeInfo }
 }

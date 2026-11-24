@@ -10,11 +10,15 @@ import IframeIcon from '@/components/common/IframeIcon'
 
 // TODO: Check if additional rewards can actually appear for a withdraw/redeem
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultRedeemTransactionInfo }) => {
-  if (!txInfo.additionalRewards[0]) return null
+  if (!txInfo.additionalRewards[0]) {
+    return null
+  }
 
   const additionalRewardsClaimable = Number(txInfo.additionalRewards[0].claimable) > 0
 
-  if (!additionalRewardsClaimable) return null
+  if (!additionalRewardsClaimable) {
+    return null
+  }
 
   return (
     <div className="mt-2 flex flex-col rounded-md border border-[var(--color-border-light)] p-3">

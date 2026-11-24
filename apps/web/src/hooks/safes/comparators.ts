@@ -8,9 +8,15 @@ const byAddress = (a: SortableSafe, b: SortableSafe) => a.address.toLowerCase().
 
 export const nameComparator = (a: SortableSafe, b: SortableSafe) => {
   // Named safes sort A→Z first; unnamed ones sort by address, always after the named ones.
-  if (!a.name && !b.name) return byAddress(a, b)
-  if (!a.name) return 1
-  if (!b.name) return -1
+  if (!a.name && !b.name) {
+    return byAddress(a, b)
+  }
+  if (!a.name) {
+    return 1
+  }
+  if (!b.name) {
+    return -1
+  }
   return a.name.localeCompare(b.name) || byAddress(a, b)
 }
 
@@ -28,7 +34,9 @@ export const manualComparator = (order: string[]) => {
   return (a: SortableSafe, b: SortableSafe) => {
     const ai = rank.get(a.address.toLowerCase()) ?? Infinity
     const bi = rank.get(b.address.toLowerCase()) ?? Infinity
-    if (ai !== bi) return ai - bi
+    if (ai !== bi) {
+      return ai - bi
+    }
     return nameComparator(a, b)
   }
 }

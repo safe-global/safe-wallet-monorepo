@@ -52,7 +52,9 @@ const useSafeNotifications = (): void => {
     (groupKey: string) => {
       const EXPIRY_DAYS = 90
 
-      if (!isUpdateSafeNotification(groupKey)) return
+      if (!isUpdateSafeNotification(groupKey)) {
+        return
+      }
 
       const expiryDate = Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000
 
@@ -73,8 +75,12 @@ const useSafeNotifications = (): void => {
    * Show a notification when the Safe version is out of date
    */
   useEffect(() => {
-    if (safeAddress !== urlSafeAddress) return
-    if (!isOwner) return
+    if (safeAddress !== urlSafeAddress) {
+      return
+    }
+    if (!isOwner) {
+      return
+    }
 
     const dismissedNotificationTimestamp = dismissedUpdateNotifications?.[chainId]?.[safeAddress]
 
@@ -91,7 +97,9 @@ const useSafeNotifications = (): void => {
 
     // Is Safe version outdated?
     // Non-critical Safe upgrades (versions >= '1.3.0') intentionally skip notifications
-    if (mastercopyAction !== 'update' || !isCriticalUpdate) return
+    if (mastercopyAction !== 'update' || !isCriticalUpdate) {
+      return
+    }
 
     const isUnsupported = !isSupportedVersion
 

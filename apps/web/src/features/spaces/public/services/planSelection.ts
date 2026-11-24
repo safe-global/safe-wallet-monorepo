@@ -16,7 +16,9 @@ export const trackPlanSelectionStarted = (props: Props): void => {
 export const takePlansEntry = (): Props => {
   const entry = pendingEntry
   pendingEntry = undefined
-  if (entry) return entry
+  if (entry) {
+    return entry
+  }
   const direct = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.DIRECT }
   trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, direct)
   return direct

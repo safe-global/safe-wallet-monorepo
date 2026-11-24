@@ -43,7 +43,9 @@ const useSpaceSubmit = (
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
 
-    if (isElevationRequiredError(response.error)) throw response.error
+    if (isElevationRequiredError(response.error)) {
+      throw response.error
+    }
     if (response.error) {
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
@@ -76,7 +78,9 @@ const useSpaceSubmit = (
 
   const onSubmit = handleSubmit(async (data) => {
     // The Workspace exists and waits on its trial offer; submitting again would create a second one.
-    if (createdSpaceId) return
+    if (createdSpaceId) {
+      return
+    }
     setError(undefined)
 
     try {
@@ -89,7 +93,9 @@ const useSpaceSubmit = (
       }
     } catch (error) {
       setIsSubmitting(false)
-      if (isElevationRequiredError(error)) return
+      if (isElevationRequiredError(error)) {
+        return
+      }
       const errorMessage =
         error instanceof Error
           ? error.message

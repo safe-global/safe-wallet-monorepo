@@ -39,8 +39,12 @@ export const useSafeWorkspaceAttach = (): void => {
 
   useEffect(() => {
     // Another Safe, or a page without one, ends the visit
-    if (attachedSafe.current !== safeKey) attachedSafe.current = undefined
-    if (attachedSafe.current !== undefined || pick?.kind !== 'one') return
+    if (attachedSafe.current !== safeKey) {
+      attachedSafe.current = undefined
+    }
+    if (attachedSafe.current !== undefined || pick?.kind !== 'one') {
+      return
+    }
 
     attachedSafe.current = safeKey
     addUrlSpaceId(pick.spaceId)

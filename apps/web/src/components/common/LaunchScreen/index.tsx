@@ -23,7 +23,9 @@ function LaunchScreen(): ReactElement | null {
   const [stepIndex, setStepIndex] = useState(0)
 
   useEffect(() => {
-    if (!visible) return
+    if (!visible) {
+      return
+    }
     const id = setInterval(
       () => setStepIndex((index) => Math.min(index + 1, LAUNCH_STEPS.length - 1)),
       STEP_INTERVAL_MS,
@@ -32,12 +34,16 @@ function LaunchScreen(): ReactElement | null {
   }, [visible])
 
   useEffect(() => {
-    if (visible) return
+    if (visible) {
+      return
+    }
     const id = setTimeout(() => setRendered(false), EXIT_DURATION_MS)
     return () => clearTimeout(id)
   }, [visible])
 
-  if (!rendered) return null
+  if (!rendered) {
+    return null
+  }
 
   const exiting = !visible
   const { progress, caption } = LAUNCH_STEPS[stepIndex]

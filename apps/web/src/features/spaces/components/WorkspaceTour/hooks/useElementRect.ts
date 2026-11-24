@@ -11,7 +11,9 @@ export const useElementRect = (element: Element | null): SpotlightRect | null =>
   const [rect, setRect] = useState<SpotlightRect | null>(null)
 
   useEffect(() => {
-    if (!element) return
+    if (!element) {
+      return
+    }
 
     const measure = () => setRect(toSpotlightRect(element))
     const resizeObserver = new ResizeObserver(measure)

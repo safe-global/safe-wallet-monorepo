@@ -63,7 +63,9 @@ export const toEditSummaryModel = (
 
     const limits = spender.limits.map((row) => {
       const existing = onChain.find((limit) => sameAddress(limit.token.address, row.token.address))
-      if (!existing) return { ...row, change: 'added' as const }
+      if (!existing) {
+        return { ...row, change: 'added' as const }
+      }
 
       const marked: LimitSummary = {
         ...row,
@@ -88,7 +90,9 @@ export const toEditSummaryModel = (
 
   const goneSpenders = baseline.reduce<SpenderSummary[]>((spenders, limit) => {
     const isKept = base.spenders.some((spender) => sameAddress(spender.address, limit.beneficiary))
-    if (isKept) return spenders
+    if (isKept) {
+      return spenders
+    }
 
     const already = spenders.find((spender) => sameAddress(spender.address, limit.beneficiary))
     if (already) {

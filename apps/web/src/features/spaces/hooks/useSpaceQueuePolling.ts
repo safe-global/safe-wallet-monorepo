@@ -44,7 +44,9 @@ export const useSpaceQueuePolling = (): void => {
   const { queue } = useSpaceQueue(spaceId ?? '', {}, { skip: !isActive, poll: true })
 
   useEffect(() => {
-    if (!isActive || !queue || !walletAddress) return
+    if (!isActive || !queue || !walletAddress) {
+      return
+    }
 
     const newKeys = getTxIdsAwaitingSignature(queue, walletAddress, pendingTxs)
       .map((txId) => `${walletAddress}:${txId}`)
@@ -56,7 +58,9 @@ export const useSpaceQueuePolling = (): void => {
       seenQueues.add(queueKey)
       return
     }
-    if (newKeys.length === 0) return
+    if (newKeys.length === 0) {
+      return
+    }
 
     dispatch(
       showNotification({

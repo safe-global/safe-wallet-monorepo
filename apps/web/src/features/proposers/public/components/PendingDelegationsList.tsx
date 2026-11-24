@@ -15,7 +15,9 @@ import { usePendingDelegations } from '../../hooks/usePendingDelegations'
 function PendingDelegationsList(): ReactElement | null {
   const { pendingDelegations, isLoading, refetch } = usePendingDelegations()
 
-  if (isLoading || pendingDelegations.length === 0) return null
+  if (isLoading || pendingDelegations.length === 0) {
+    return null
+  }
 
   return (
     <div className="mb-4">

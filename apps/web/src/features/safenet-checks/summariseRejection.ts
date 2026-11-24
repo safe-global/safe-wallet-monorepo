@@ -41,7 +41,9 @@ export const summariseRejection = (events: ReadonlyArray<NormalizedCheckEvent>):
   // Events arrive sorted by (block, logIndex), so the latest reveal per sentinel wins.
   const votes = new Map<string, SentinelRevealedEvent>()
   for (const event of events) {
-    if (isReveal(event)) votes.set(event.sentinel.toLowerCase(), event)
+    if (isReveal(event)) {
+      votes.set(event.sentinel.toLowerCase(), event)
+    }
   }
 
   const citations = new Map<SafenetRuleId, number>()
@@ -49,7 +51,9 @@ export const summariseRejection = (events: ReadonlyArray<NormalizedCheckEvent>):
   let unrecognised = false
 
   for (const vote of votes.values()) {
-    if (vote.approved) continue
+    if (vote.approved) {
+      continue
+    }
     flagged++
     const reason = vote.reason.trim()
     if (isSafenetRuleId(reason)) {

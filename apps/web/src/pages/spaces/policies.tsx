@@ -11,7 +11,9 @@ export default function SpacePoliciesPage() {
   const { spaceId } = router.query
   useFeatureRedirect(FEATURES.POLICIES, AppRoutes.spaces.index)
 
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

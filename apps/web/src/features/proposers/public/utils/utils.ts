@@ -31,7 +31,9 @@ const signDelegateTypedData = async (signer: JsonRpcSigner, typedData: DelegateT
     signature = await signer.provider.send('eth_signTypedData_v4', [address, JSON.stringify(typedData)])
   } catch (error) {
     // Same Ledger fallback as the shared signTypedData helper
-    if (!isError(error, 'UNSUPPORTED_OPERATION')) throw error
+    if (!isError(error, 'UNSUPPORTED_OPERATION')) {
+      throw error
+    }
     signature = await signer.provider.send('eth_signTypedData', [address, typedData])
   }
   return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
@@ -113,8 +115,12 @@ export const signProposerDelegation = async ({
   action,
   signer,
 }: ProposerDelegation): Promise<string> => {
-  if (usesV1DelegateEndpoint(chain, wallet)) return signProposerData(proposerAddress, signer)
-  if (isEthSignWallet(wallet)) return ethSignProposerTypedDataHash(chain, proposerAddress, safeAddress, action, signer)
+  if (usesV1DelegateEndpoint(chain, wallet)) {
+    return signProposerData(proposerAddress, signer)
+  }
+  if (isEthSignWallet(wallet)) {
+    return ethSignProposerTypedDataHash(chain, proposerAddress, safeAddress, action, signer)
+  }
   if (await isSmartContractWallet(chain.chainId, wallet.address)) {
     return signProposerTypedDataAsContract(chain, proposerAddress, safeAddress, action, signer)
   }

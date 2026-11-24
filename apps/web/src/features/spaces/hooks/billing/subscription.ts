@@ -13,7 +13,9 @@ const CANCELED_STATUSES = new Set<Subscription['status']>(['canceled', 'incomple
 export const TRIAL_ENDING_SOON_DAYS = 7
 
 export const trialLabel = (daysLeft: number | null | undefined, countdownDays = TRIAL_ENDING_SOON_DAYS): string => {
-  if (daysLeft == null || daysLeft > countdownDays) return 'Free access'
+  if (daysLeft == null || daysLeft > countdownDays) {
+    return 'Free access'
+  }
   return `Free access · ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`
 }
 
@@ -37,19 +39,33 @@ export const toPlanStatus = (status: PlanStatus): string =>
   status === 'trialing' ? 'free_access' : status === 'active' || status === 'none' ? status : 'locked'
 
 export const getPlanStatus = (subscription: Subscription | undefined): PlanStatus => {
-  if (!subscription) return 'none'
-  if (subscription.status === 'trialing') return 'trialing'
-  if (subscription.status === 'active') return 'active'
-  if (PAYMENT_FAILED_STATUSES.has(subscription.status)) return 'payment_failed'
-  if (CANCELED_STATUSES.has(subscription.status)) return 'canceled'
+  if (!subscription) {
+    return 'none'
+  }
+  if (subscription.status === 'trialing') {
+    return 'trialing'
+  }
+  if (subscription.status === 'active') {
+    return 'active'
+  }
+  if (PAYMENT_FAILED_STATUSES.has(subscription.status)) {
+    return 'payment_failed'
+  }
+  if (CANCELED_STATUSES.has(subscription.status)) {
+    return 'canceled'
+  }
   return 'pending'
 }
 
 /** Whole days until the period ends, never negative; null without a known end. */
 export const getDaysLeft = (periodEndsAt: string | null | undefined, now = Date.now()): number | null => {
-  if (!periodEndsAt) return null
+  if (!periodEndsAt) {
+    return null
+  }
   const end = Date.parse(periodEndsAt)
-  if (Number.isNaN(end)) return null
+  if (Number.isNaN(end)) {
+    return null
+  }
   return Math.max(Math.ceil((end - now) / DAY_MS), 0)
 }
 
@@ -68,7 +84,9 @@ export const getSubscriptionEndedAt = (subscription: Subscription | undefined): 
 
 /** The plan's display name: the CGW puts it on the plan or, for Stripe-tagged subscriptions, in `metadata.planName`. */
 export const getSubscriptionPlanName = (subscription: Subscription | undefined): string | null => {
-  if (!subscription) return null
+  if (!subscription) {
+    return null
+  }
   const metadata = (subscription.metadata ?? {}) as Record<string, unknown>
   const fromMetadata = metadata.planName
   return subscription.plan.name ?? (typeof fromMetadata === 'string' && fromMetadata ? fromMetadata : null)

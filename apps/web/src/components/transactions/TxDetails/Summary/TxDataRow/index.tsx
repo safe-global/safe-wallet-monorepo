@@ -13,7 +13,9 @@ export const generateDataRowValue = (
   hasExplorer?: boolean,
   addressInfo?: AddressInfo,
 ): ReactElement | null => {
-  if (value == undefined) return null
+  if (value == undefined) {
+    return null
+  }
 
   switch (type) {
     case 'hash':

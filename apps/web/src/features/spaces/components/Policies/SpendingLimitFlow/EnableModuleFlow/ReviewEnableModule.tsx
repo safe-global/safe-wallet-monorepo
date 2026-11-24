@@ -42,7 +42,9 @@ const ReviewEnableModule = ({ onSubmit, children }: ReviewTransactionProps): Rea
   useEffect(() => {
     setSafeTx(undefined)
     setSafeTxError(undefined)
-    if (!moduleAddress || !chainId || !sdk || !safeLoaded) return
+    if (!moduleAddress || !chainId || !sdk || !safeLoaded) {
+      return
+    }
 
     // The address comes from the Policy Indexer, so it is never enabled unless it is a known AllowanceModule.
     if (!isAllowanceModuleAddress(chainId, moduleAddress)) {
@@ -58,10 +60,14 @@ const ReviewEnableModule = ({ onSubmit, children }: ReviewTransactionProps): Rea
     getAndValidateSafeSDK(scope)
       .createEnableModuleTx(moduleAddress)
       .then((tx) => {
-        if (!isStale) setSafeTx(tx)
+        if (!isStale) {
+          setSafeTx(tx)
+        }
       })
       .catch((e) => {
-        if (!isStale) setSafeTxError(e)
+        if (!isStale) {
+          setSafeTxError(e)
+        }
       })
     return () => {
       isStale = true

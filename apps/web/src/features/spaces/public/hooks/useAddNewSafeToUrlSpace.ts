@@ -22,7 +22,9 @@ export const useAddNewSafeToUrlSpace = (): ((chainId: string, safeAddress: strin
 
   return useCallback(
     async (chainId: string, safeAddress: string) => {
-      if (spaceId === null || !isSignedIn) return null
+      if (spaceId === null || !isSignedIn) {
+        return null
+      }
 
       if (!isAdmin) {
         dispatch(
@@ -39,10 +41,14 @@ export const useAddNewSafeToUrlSpace = (): ((chainId: string, safeAddress: strin
         spaceId,
         createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
       })
-      if (!result.error) return spaceId
+      if (!result.error) {
+        return spaceId
+      }
 
       const isQuotaRefusal = getQuotaExceededError(result.error) !== undefined
-      if (isQuotaRefusal) refreshSpaceEntitlements(dispatch, spaceId)
+      if (isQuotaRefusal) {
+        refreshSpaceEntitlements(dispatch, spaceId)
+      }
       dispatch(
         showNotification({
           message: `Safe created in My accounts, but not added to the Workspace. ${getRtkQueryErrorMessage(result.error)}`,

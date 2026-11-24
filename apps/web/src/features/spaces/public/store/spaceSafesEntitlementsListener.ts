@@ -8,7 +8,9 @@ export const spaceSafesEntitlementsListener = (listenerMiddleware: typeof listen
   const create = spacesApi?.endpoints?.spaceSafesCreateV1?.matchFulfilled
   const remove = spacesApi?.endpoints?.spaceSafesDeleteV1?.matchFulfilled
   // Tests that mock the spaces module leave no endpoints to watch.
-  if (!create || !remove) return
+  if (!create || !remove) {
+    return
+  }
 
   listenerMiddleware.startListening({
     matcher: isAnyOf(create, remove),

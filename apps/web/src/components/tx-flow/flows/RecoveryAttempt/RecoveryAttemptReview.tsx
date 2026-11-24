@@ -40,7 +40,9 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
     async (e: SyntheticEvent) => {
       e.preventDefault()
 
-      if (!wallet || !gasPrice) return
+      if (!wallet || !gasPrice) {
+        return
+      }
 
       const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
       const overrides = isEIP1559

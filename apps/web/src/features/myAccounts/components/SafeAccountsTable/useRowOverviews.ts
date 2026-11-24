@@ -36,7 +36,9 @@ export function useRowOverviews(safes: SafeItem[], enabled: boolean, onLoaded: (
   const onLoadedRef = useRef(onLoaded)
   onLoadedRef.current = onLoaded
   useEffect(() => {
-    if (data && data.length > 0) onLoadedRef.current(data)
+    if (data && data.length > 0) {
+      onLoadedRef.current(data)
+    }
   }, [data])
 
   return ref

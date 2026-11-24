@@ -7,7 +7,9 @@ import type { KeyboardEvent } from 'react'
  * native button semantics.
  */
 export const clickOnEnterOrSpace = (event: KeyboardEvent<HTMLElement>): void => {
-  if (event.target !== event.currentTarget) return
+  if (event.target !== event.currentTarget) {
+    return
+  }
 
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()

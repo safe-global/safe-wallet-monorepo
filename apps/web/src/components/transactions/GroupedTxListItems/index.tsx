@@ -53,7 +53,9 @@ const TxGroup = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] 
 }
 
 const GroupedTxListItems = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] }): ReactElement | null => {
-  if (groupedListItems.length === 0) return null
+  if (groupedListItems.length === 0) {
+    return null
+  }
 
   return (
     <ReplaceTxHoverProvider groupedListItems={groupedListItems}>

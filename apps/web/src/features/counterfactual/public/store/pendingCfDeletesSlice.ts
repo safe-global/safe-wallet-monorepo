@@ -18,7 +18,9 @@ export const pendingCfDeletesSlice = createSlice({
   initialState,
   reducers: {
     enqueuePendingCfDelete: (state, action: PayloadAction<PendingCfDelete>) => {
-      if (state.some((entry) => matches(entry, action.payload))) return state
+      if (state.some((entry) => matches(entry, action.payload))) {
+        return state
+      }
       state.push(action.payload)
     },
 

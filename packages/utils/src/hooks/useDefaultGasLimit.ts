@@ -43,7 +43,9 @@ export const useGasLimit = ({
   const hasSafeTxGas = !!safeTx?.data?.safeTxGas
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
-    if (!safeAddress || !walletAddress || !safeSDK || !web3ReadOnly || !safeTx) return
+    if (!safeAddress || !walletAddress || !safeSDK || !web3ReadOnly || !safeTx) {
+      return
+    }
 
     const encodedSafeTx = getEncodedSafeTx(
       safeSDK,

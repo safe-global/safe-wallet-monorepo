@@ -32,7 +32,9 @@ const ExperimentalPage = () => {
   const serverFeatures = space?.experimentalFeatures
 
   useEffect(() => {
-    if (!isFetching && !isSaving) setPending(undefined)
+    if (!isFetching && !isSaving) {
+      setPending(undefined)
+    }
   }, [serverFeatures, isFetching, isSaving])
 
   const available: ExperimentalFeature[] = isAllowlistAvailable
@@ -40,13 +42,17 @@ const ExperimentalPage = () => {
     : []
 
   const handleChange = async (next: ExperimentalFeature[]) => {
-    if (!space) return
+    if (!space) {
+      return
+    }
     setPending(next)
     try {
       await updateSpace({ id: space.uuid, updateSpaceDto: { experimentalFeatures: next } }).unwrap()
     } catch (e) {
       setPending(undefined)
-      if (isElevationRequiredError(e)) return
+      if (isElevationRequiredError(e)) {
+        return
+      }
       console.error(e)
       dispatch(
         showNotification({

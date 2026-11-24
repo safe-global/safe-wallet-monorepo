@@ -89,7 +89,9 @@ export function HeaderNavigation({
   const walletDisplayName = walletEns || truncatedAddress
 
   const providerIconSrc = useMemo(() => {
-    if (!walletIcon) return null
+    if (!walletIcon) {
+      return null
+    }
     return walletIcon.startsWith('data:') ? walletIcon : `data:image/svg+xml;utf8,${encodeURIComponent(walletIcon)}`
   }, [walletIcon])
 

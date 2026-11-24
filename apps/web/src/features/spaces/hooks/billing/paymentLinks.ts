@@ -26,8 +26,12 @@ export const _getPlanName = (link: PaymentLink): string | null => readMetadata(l
 /** The seat quota a link or subscription carries in its Stripe metadata; null when absent or malformed. */
 export const getSeatsFromMetadata = (metadata: Metadata): PlanOffer['seats'] => {
   const raw = metadata[SAFE_SEATS_METADATA_KEY]?.trim()
-  if (!raw) return null
-  if (raw.toLowerCase() === UNLIMITED) return UNLIMITED
+  if (!raw) {
+    return null
+  }
+  if (raw.toLowerCase() === UNLIMITED) {
+    return UNLIMITED
+  }
   const parsed = Number.parseInt(raw, 10)
   return Number.isNaN(parsed) || parsed < 0 ? null : parsed
 }
@@ -37,7 +41,9 @@ export const _getSeats = (link: PaymentLink): PlanOffer['seats'] => getSeatsFrom
 /** The JSON-encoded list of selling points on the link, or an empty list when missing or malformed. */
 export const getPlanDescriptions = (metadata: Metadata): string[] => {
   const raw = metadata[PLAN_DESCRIPTIONS_METADATA_KEY]
-  if (!raw) return []
+  if (!raw) {
+    return []
+  }
   try {
     const parsed: unknown = JSON.parse(raw)
     return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : []
@@ -70,7 +76,9 @@ export const _getPrice = (link: PaymentLink): Pick<PlanOffer, 'price' | 'currenc
 
 export const _toPlanOffer = (link: PaymentLink): PlanOffer | null => {
   const planName = _getPlanName(link)
-  if (!link.active || !planName) return null
+  if (!link.active || !planName) {
+    return null
+  }
 
   return {
     paymentLinkId: link.id,
@@ -98,7 +106,9 @@ export const groupOffersByPlan = (links: PaymentLink[]): PlanGroup[] => {
 
   for (const link of links) {
     const offer = _toPlanOffer(link)
-    if (!offer) continue
+    if (!offer) {
+      continue
+    }
     const offers = groups.get(offer.planName) ?? []
     offers.push(offer)
     groups.set(offer.planName, offers)

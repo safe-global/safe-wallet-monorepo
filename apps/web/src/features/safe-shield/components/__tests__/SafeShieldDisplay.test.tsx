@@ -266,7 +266,9 @@ describe('SafeShieldDisplay', () => {
 
     it('should show "Analyzing..." during loading', () => {
       const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
-      if (loadingRecipient) loadingRecipient[2] = true
+      if (loadingRecipient) {
+        loadingRecipient[2] = true
+      }
 
       render(
         <SafeShieldDisplay
@@ -325,7 +327,9 @@ describe('SafeShieldDisplay', () => {
   describe('Content States', () => {
     it('should show loading state in content', () => {
       const loadingRecipient = RecipientAnalysisBuilder.knownRecipient(mockRecipientAddress).build()
-      if (loadingRecipient) loadingRecipient[2] = true
+      if (loadingRecipient) {
+        loadingRecipient[2] = true
+      }
 
       render(
         <SafeShieldDisplay

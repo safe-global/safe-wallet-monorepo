@@ -23,7 +23,9 @@ export const deadlineBlockOf = (events: ReadonlyArray<NormalizedCheckEvent>): bi
   for (const event of events) {
     if (event.type === CheckEventType.REQUEST_CREATED || event.type === CheckEventType.DISPUTE_TRIGGERED) {
       const value = BigInt(event.deadlineBlock)
-      if (deadline === null || value > deadline) deadline = value
+      if (deadline === null || value > deadline) {
+        deadline = value
+      }
     }
   }
   return deadline
@@ -79,29 +81,43 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
  *     is also what a read over too narrow a block window produces.
  */
 export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheckStateInput): CheckStatus => {
-  if (hasNegativeVerdict(events)) return CheckStatus.MALICIOUS
+  if (hasNegativeVerdict(events)) {
+    return CheckStatus.MALICIOUS
+  }
 
   // No proposal-event gate on the attested branches: an attestation is
   // self-authenticating, and a targeted window can clip the proposal.
   const attested = events.some((event) => event.type === CheckEventType.ORACLE_ATTESTED)
   if (attested) {
-    if (attestation.status === AttestationVerificationStatus.VERIFIED) return CheckStatus.BENIGN
-    if (attestation.status === AttestationVerificationStatus.INVALID) return CheckStatus.VERIFICATION_FAILED
+    if (attestation.status === AttestationVerificationStatus.VERIFIED) {
+      return CheckStatus.BENIGN
+    }
+    if (attestation.status === AttestationVerificationStatus.INVALID) {
+      return CheckStatus.VERIFICATION_FAILED
+    }
     return CheckStatus.AWAITING_VERIFICATION
   }
 
-  if (openDisputeRequestIds(events).length > 0) return CheckStatus.DISPUTED
+  if (openDisputeRequestIds(events).length > 0) {
+    return CheckStatus.DISPUTED
+  }
 
-  if (hasInconclusiveResult(events)) return CheckStatus.TIMED_OUT
+  if (hasInconclusiveResult(events)) {
+    return CheckStatus.TIMED_OUT
+  }
 
   const deadline = deadlineBlockOf(events)
   if (deadline !== null && headBlock !== null && BigInt(headBlock) > deadline) {
     return CheckStatus.TIMED_OUT
   }
 
-  if (hasOracleActivity(events)) return CheckStatus.IN_PROGRESS
+  if (hasOracleActivity(events)) {
+    return CheckStatus.IN_PROGRESS
+  }
 
-  if (hasAnyProposal(events)) return CheckStatus.SUBMITTED
+  if (hasAnyProposal(events)) {
+    return CheckStatus.SUBMITTED
+  }
 
   return CheckStatus.UNAVAILABLE
 }

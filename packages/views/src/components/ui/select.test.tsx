@@ -13,7 +13,9 @@ const renderTrigger = (props: Omit<TriggerProps, 'children'> = {}) => {
     </Select>,
   )
   const trigger = container.querySelector('[data-slot="select-trigger"]')
-  if (!trigger) throw new Error('SelectTrigger did not render')
+  if (!trigger) {
+    throw new Error('SelectTrigger did not render')
+  }
   return trigger
 }
 

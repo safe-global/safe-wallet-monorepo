@@ -46,7 +46,9 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
       }
 
       const { success, redirectTo } = await activationGuard()
-      if (cancelled) return
+      if (cancelled) {
+        return
+      }
 
       if (success) {
         allowedPathnameRef.current = pathname

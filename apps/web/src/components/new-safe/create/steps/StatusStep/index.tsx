@@ -48,7 +48,9 @@ export const CreateSafeStatus = ({ setProgressColor, setStep, setStepData }: Ste
   }, [])
 
   useEffect(() => {
-    if (!chain || !safeAddress || status !== SafeCreationEvent.SUCCESS || hasRedirected.current) return
+    if (!chain || !safeAddress || status !== SafeCreationEvent.SUCCESS || hasRedirected.current) {
+      return
+    }
     hasRedirected.current = true
 
     addNewSafeToUrlSpace(chain.chainId, safeAddress).then((spaceId) => {
@@ -60,7 +62,9 @@ export const CreateSafeStatus = ({ setProgressColor, setStep, setStepData }: Ste
   }, [addNewSafeToUrlSpace, chain, router, safeAddress, status])
 
   useEffect(() => {
-    if (!setProgressColor) return
+    if (!setProgressColor) {
+      return
+    }
 
     if (isError) {
       setProgressColor(lightPalette.error.main)

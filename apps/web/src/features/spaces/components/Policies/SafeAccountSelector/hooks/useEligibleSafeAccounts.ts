@@ -21,7 +21,9 @@ import type {
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
 const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountEligibility => {
-  if (isSigner && isProposer) return 'signer-and-proposer'
+  if (isSigner && isProposer) {
+    return 'signer-and-proposer'
+  }
   return isSigner ? 'signer' : 'proposer'
 }
 
@@ -100,14 +102,18 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
   }, [chains])
 
   const accounts = useMemo<SafeAccountEntry[]>(() => {
-    if (!wallet || isLoading) return []
+    if (!wallet || isLoading) {
+      return []
+    }
 
     const options = safeItems.flatMap<SafeAccountOption>((item) => {
       const isSigner = !item.isReadOnly
       const isProposer =
         !signersOnly && (proposerSafes?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
 
-      if (!isSigner && !isProposer) return []
+      if (!isSigner && !isProposer) {
+        return []
+      }
 
       const overview = overviewsByKey.get(overviewKey(item.chainId, item.address))
 
@@ -136,9 +142,15 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
 
   // All three skip in normal states, and `refetch()` throws on a query that never started.
   const refetch = useCallback(() => {
-    if (!isSpaceSafesUninitialized) refetchSpaceSafes()
-    if (!isOverviewsUninitialized) refetchOverviews()
-    if (!isProposerSafesUninitialized) refetchProposerSafes()
+    if (!isSpaceSafesUninitialized) {
+      refetchSpaceSafes()
+    }
+    if (!isOverviewsUninitialized) {
+      refetchOverviews()
+    }
+    if (!isProposerSafesUninitialized) {
+      refetchProposerSafes()
+    }
   }, [
     isSpaceSafesUninitialized,
     refetchSpaceSafes,

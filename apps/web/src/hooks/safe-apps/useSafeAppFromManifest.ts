@@ -18,7 +18,9 @@ const useSafeAppFromManifest = (
   safeAppData?: SafeAppData,
 ): UseSafeAppFromManifestReturnType => {
   const [data, , isLoading] = useAsync<SafeAppDataWithPermissions>(() => {
-    if (!appUrl || !chainId || !safeAppData) return
+    if (!appUrl || !chainId || !safeAppData) {
+      return
+    }
 
     return fetchSafeAppFromManifest(appUrl, chainId).catch((e) => {
       logError(Errors._903, `${appUrl}, ${asError(e).message}`)

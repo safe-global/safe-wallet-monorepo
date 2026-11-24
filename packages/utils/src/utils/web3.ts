@@ -12,14 +12,18 @@ import {
 
 export const hashTypedData = (typedData: TypedData): string => {
   // ethers rejects the queue service delegate's non-standard `safe` domain key
-  if (isQueueServiceDelegateMessage(typedData)) return hashDelegateTypedData(typedData)
+  if (isQueueServiceDelegateMessage(typedData)) {
+    return hashDelegateTypedData(typedData)
+  }
   // `ethers` doesn't require `EIP712Domain` and otherwise throws
   const { EIP712Domain: _, ...types } = typedData.types
   return TypedDataEncoder.hash(typedData.domain as TypedDataDomain, types, typedData.message)
 }
 
 export const normalizeTypedData = (typedData: TypedData): TypedData => {
-  if (isQueueServiceDelegateMessage(typedData)) return normalizeDelegateTypedData(typedData)
+  if (isQueueServiceDelegateMessage(typedData)) {
+    return normalizeDelegateTypedData(typedData)
+  }
   const { EIP712Domain: _, ...types } = typedData.types
   const payload = TypedDataEncoder.getPayload(typedData.domain as TypedDataDomain, types, typedData.message)
 

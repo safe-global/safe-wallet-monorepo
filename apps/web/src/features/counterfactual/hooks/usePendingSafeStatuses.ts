@@ -51,7 +51,9 @@ const usePendingSafeMonitor = (): void => {
           const isRelaying = status === PendingSafeStatus.RELAYING && taskId !== undefined
           const isMonitored = monitoredSafes.current[safeAddress]
 
-          if ((!isProcessing && !isRelaying) || isMonitored) return
+          if ((!isProcessing && !isRelaying) || isMonitored) {
+            return
+          }
 
           monitoredSafes.current[safeAddress] = true
 
@@ -82,12 +84,16 @@ const usePendingSafeStatus = (): void => {
 
   // Clear undeployed safe state if already deployed
   useEffect(() => {
-    if (!provider || !safeAddress) return
+    if (!provider || !safeAddress) {
+      return
+    }
 
     const checkDeploymentStatus = async () => {
       // In case the safe info hasn't been updated yet when switching safes
       const { chainId } = await provider.getNetwork()
-      if (chainId !== BigInt(safe.chainId)) return
+      if (chainId !== BigInt(safe.chainId)) {
+        return
+      }
 
       const isContractDeployed = await isSmartContract(safeAddress)
 

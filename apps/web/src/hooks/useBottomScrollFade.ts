@@ -17,7 +17,9 @@ export function useBottomScrollFade(deps: ReadonlyArray<unknown> = []) {
 
   const measure = useCallback(() => {
     const el = scrollRef.current
-    if (!el) return
+    if (!el) {
+      return
+    }
     const hasOverflow = el.scrollHeight > el.clientHeight + 1
     const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
     setShowFade(hasOverflow && !atBottom)
@@ -28,7 +30,9 @@ export function useBottomScrollFade(deps: ReadonlyArray<unknown> = []) {
       detachRef.current?.()
       detachRef.current = null
       scrollRef.current = node
-      if (!node) return
+      if (!node) {
+        return
+      }
       node.addEventListener('scroll', measure, { passive: true })
       const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null
       resizeObserver?.observe(node)

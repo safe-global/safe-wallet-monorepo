@@ -22,7 +22,9 @@ export const useWalletName = (wallet?: ConnectedWallet | null): string | undefin
   const canResolve = isDomainLookupEnabled && !!provider && !!address
 
   const [ens] = useAsync<string | undefined>(() => {
-    if (!canResolve || !provider || !address) return
+    if (!canResolve || !provider || !address) {
+      return
+    }
     return lookupAddress(provider, address, ETH_COIN_TYPE)
   }, [canResolve, provider, address])
 

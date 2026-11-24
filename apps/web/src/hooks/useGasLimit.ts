@@ -36,7 +36,9 @@ const useGasLimit = (
   const hasSafeTxGas = !!safeTx?.data?.safeTxGas
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
-    if (!safeAddress || !walletAddress || !safeSDK || !web3ReadOnly || !safeTx) return
+    if (!safeAddress || !walletAddress || !safeSDK || !web3ReadOnly || !safeTx) {
+      return
+    }
 
     const encodedSafeTx = getEncodedSafeTx(
       safeSDK,
@@ -70,7 +72,9 @@ const useGasLimit = (
       return gasLimit
     } catch (e) {
       // A revert or a throttle is the estimate's expected answer, not a fault.
-      if (!isExpectedEstimationError(e)) logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+      if (!isExpectedEstimationError(e)) {
+        logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+      }
       throw e
     }
   }, [

@@ -12,15 +12,21 @@ export const getBatchableTransactions = (items: QueuedItemPage['results'], nonce
 
   const grouped = groupConflictingTxs(items)
     .map((item) => {
-      if (Array.isArray(item)) return item
-      if (isTransactionQueuedItem(item)) return [item]
+      if (Array.isArray(item)) {
+        return item
+      }
+      if (isTransactionQueuedItem(item)) {
+        return [item]
+      }
     })
     .filter(Boolean) as ModuleTransaction[][]
 
   grouped.forEach((txs) => {
     const sorted = txs.slice().sort((a, b) => b.transaction.timestamp - a.transaction.timestamp)
     sorted.forEach((tx) => {
-      if (!isMultisigExecutionInfo(tx.transaction.executionInfo)) return
+      if (!isMultisigExecutionInfo(tx.transaction.executionInfo)) {
+        return
+      }
 
       const { nonce, confirmationsSubmitted, confirmationsRequired } = tx.transaction.executionInfo
       if (

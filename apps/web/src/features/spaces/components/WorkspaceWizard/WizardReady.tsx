@@ -19,7 +19,9 @@ const WizardReady = ({ children }: { children: ReactNode }): ReactElement => {
       />
     )
   }
-  if (!isReady || !steps) return <SetupProgress isWorking title="Loading" />
+  if (!isReady || !steps) {
+    return <SetupProgress isWorking title="Loading" />
+  }
   return <>{children}</>
 }
 

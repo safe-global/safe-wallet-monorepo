@@ -7,8 +7,12 @@ import { SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
 
 // Get apps from fixtures for props
 const getAppsForStory = (count: 'full' | 'few' | 'empty' = 'full') => {
-  if (count === 'empty') return []
-  if (count === 'few') return safeAppsFixtures.mainnet.slice(0, 8)
+  if (count === 'empty') {
+    return []
+  }
+  if (count === 'few') {
+    return safeAppsFixtures.mainnet.slice(0, 8)
+  }
   return safeAppsFixtures.mainnet.slice(0, 12)
 }
 

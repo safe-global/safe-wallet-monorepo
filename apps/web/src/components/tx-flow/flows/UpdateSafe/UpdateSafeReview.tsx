@@ -14,7 +14,9 @@ export const UpdateSafeReview = (props: ReviewTransactionProps) => {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
   useAsync(async () => {
-    if (!chain || !safeLoaded) return
+    if (!chain || !safeLoaded) {
+      return
+    }
 
     // Route every failure to setSafeTxError — an uncaught throw here would leave the
     // review screen on its loading spinner forever.

@@ -52,10 +52,18 @@ export const validateName = (value: string, opts?: { minLength?: number; maxLeng
   const max = opts?.maxLength ?? NAME_MAX_LENGTH
   const length = [...value].length // code points
 
-  if (length === 0 && min > 0) return EMPTY_NAME_MESSAGE
-  if (!ALLOWED_NAME_REGEX.test(value)) return DISALLOWED_CHARACTER_MESSAGE
-  if (length > 0 && length < min) return `Names must be at least ${min} character(s) long`
-  if (length > max) return `Names must be at most ${max} characters long`
+  if (length === 0 && min > 0) {
+    return EMPTY_NAME_MESSAGE
+  }
+  if (!ALLOWED_NAME_REGEX.test(value)) {
+    return DISALLOWED_CHARACTER_MESSAGE
+  }
+  if (length > 0 && length < min) {
+    return `Names must be at least ${min} character(s) long`
+  }
+  if (length > max) {
+    return `Names must be at most ${max} characters long`
+  }
 
   return undefined
 }

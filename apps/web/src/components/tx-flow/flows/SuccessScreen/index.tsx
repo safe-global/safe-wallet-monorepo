@@ -51,13 +51,17 @@ const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
   const [predictedSafeAddress] = usePredictSafeAddressFromTxDetails(txDetails)
 
   useEffect(() => {
-    if (!pendingTxHash) return
+    if (!pendingTxHash) {
+      return
+    }
 
     setLocalTxHash(pendingTxHash)
   }, [pendingTxHash])
 
   useEffect(() => {
-    if (!txId) return
+    if (!txId) {
+      return
+    }
 
     hasSucceededRef.current = false
 
@@ -69,7 +73,9 @@ const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
     const unsubFns: Array<() => void> = [
       ...([TxEvent.PROCESSED, TxEvent.SUCCESS] as const).map((event) =>
         txSubscribe(event, (detail) => {
-          if (detail.txId !== txId) return
+          if (detail.txId !== txId) {
+            return
+          }
 
           hasSucceededRef.current = true
           setError(undefined)
@@ -77,7 +83,9 @@ const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
       ),
       ...([TxEvent.FAILED, TxEvent.REVERTED] as const).map((event) =>
         txSubscribe(event, (detail) => {
-          if (detail.txId === txId && !hasSucceededRef.current) setError(detail.error)
+          if (detail.txId === txId && !hasSucceededRef.current) {
+            setError(detail.error)
+          }
         }),
       ),
     ]

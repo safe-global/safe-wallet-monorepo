@@ -48,7 +48,9 @@ const useTxQueue = (
 
   // If pageUrl is passed, load a new queue page from the API
   const [page, error, loading] = useAsync<QueuedItemPage>(() => {
-    if (!pageUrl || !safeLoaded) return
+    if (!pageUrl || !safeLoaded) {
+      return
+    }
     return getTransactionQueue(chainId, safeAddress, undefined, pageUrl)
   }, [chainId, safeAddress, safeLoaded, pageUrl])
 
@@ -73,7 +75,9 @@ export const useQueuedTxsLength = (): string => {
   const { length } = (queue.data?.results as Array<any>)?.filter(isTransactionQueuedItem) ?? []
   const recoveryQueueSize = useRecoveryQueue().length
   const totalSize = length + recoveryQueueSize
-  if (totalSize === 0) return ''
+  if (totalSize === 0) {
+    return ''
+  }
   const hasNextPage = queue.data?.next != null
   return `${totalSize}${hasNextPage ? '+' : ''}`
 }

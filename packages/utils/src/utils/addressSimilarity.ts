@@ -67,7 +67,9 @@ export const detectSimilarAddresses = (
   for (const [bucketKey, addrs] of buckets) {
     // A shared prefix+suffix bucket IS the similarity signal; dedupe case-insensitively.
     const similarAddresses = Array.from(new Set(addrs))
-    if (similarAddresses.length < 2) continue
+    if (similarAddresses.length < 2) {
+      continue
+    }
 
     // Create similarity group - flag ALL similar addresses
     const group: SimilarityGroup = {
@@ -94,7 +96,9 @@ export const detectSimilarAddresses = (
     getGroup: (address: string) => {
       const normalizedAddr = address.toLowerCase()
       const groupKeys = addressToGroups.get(normalizedAddr)
-      if (!groupKeys || groupKeys.length === 0) return undefined
+      if (!groupKeys || groupKeys.length === 0) {
+        return undefined
+      }
       return groups.find((g) => g.bucketKey === groupKeys[0])
     },
   }
@@ -131,7 +135,9 @@ const createClusters = (): Clusters => {
     putInSameCluster: (a, b) => {
       const leaderA = leaderOf(a)
       const leaderB = leaderOf(b)
-      if (leaderA !== leaderB) leader.set(leaderA, leaderB) // A's cluster now follows B's → one cluster
+      if (leaderA !== leaderB) {
+        leader.set(leaderA, leaderB)
+      } // A's cluster now follows B's → one cluster
     },
   }
 }
@@ -167,7 +173,9 @@ const mergeAddressesSharingKey = (
 
   for (const bucket of bucketByKey.values()) {
     // Everyone in this bucket looks alike → put them all in one cluster.
-    for (const address of bucket.slice(1)) clusters.putInSameCluster(address, bucket[0])
+    for (const address of bucket.slice(1)) {
+      clusters.putInSameCluster(address, bucket[0])
+    }
   }
 }
 
@@ -190,14 +198,19 @@ const collectClusters = (
   for (const address of uniqueAddresses) {
     const leader = clusters.leaderOf(address)
     const members = membersByLeader.get(leader)
-    if (members) members.push(address)
-    else membersByLeader.set(leader, [address])
+    if (members) {
+      members.push(address)
+    } else {
+      membersByLeader.set(leader, [address])
+    }
   }
 
   const flagged = new Set<string>()
   const groupIdByAddress = new Map<string, string>()
   for (const [leader, members] of membersByLeader) {
-    if (members.length < 2) continue
+    if (members.length < 2) {
+      continue
+    }
     for (const address of members) {
       const original = originalByNorm.get(address) as string
       flagged.add(original)
@@ -218,7 +231,9 @@ export const detectIntraListClusters = (
 ): ListClusterResult => {
   const originalByNorm = dedupeUsableAddresses(addresses)
   const uniqueAddresses = Array.from(originalByNorm.keys())
-  if (uniqueAddresses.length < 2) return { flagged: new Set(), groupIdByAddress: new Map() }
+  if (uniqueAddresses.length < 2) {
+    return { flagged: new Set(), groupIdByAddress: new Map() }
+  }
 
   const clusters = createClusters()
   linkBySharedAffix(uniqueAddresses, clusters, config)
@@ -248,7 +263,9 @@ const isUsableAddress = (normalized: string): boolean =>
 export const longestCommonPrefixLen = (a: string, b: string): number => {
   const max = Math.min(a.length, b.length)
   let i = 0
-  while (i < max && a[i] === b[i]) i++
+  while (i < max && a[i] === b[i]) {
+    i++
+  }
   return i
 }
 
@@ -256,7 +273,9 @@ export const longestCommonPrefixLen = (a: string, b: string): number => {
 export const longestCommonSuffixLen = (a: string, b: string): number => {
   const max = Math.min(a.length, b.length)
   let i = 0
-  while (i < max && a[a.length - 1 - i] === b[b.length - 1 - i]) i++
+  while (i < max && a[a.length - 1 - i] === b[b.length - 1 - i]) {
+    i++
+  }
   return i
 }
 
@@ -272,12 +291,16 @@ export const getCommonAffixLengths = (a: string, b: string): { prefixLen: number
 
 /** Build a match for a candidate against one anchor, or null if not similar / identical. */
 const buildMatch = (candidate: string, anchor: string, config: AnchorSimilarityConfig): SimilarityMatch | null => {
-  if (candidate === anchor) return null // identity, not poisoning
+  if (candidate === anchor) {
+    return null
+  } // identity, not poisoning
   const prefixLen = longestCommonPrefixLen(candidate, anchor)
   const suffixLen = longestCommonSuffixLen(candidate, anchor)
   const hitPrefix = prefixLen >= config.prefixThreshold
   const hitSuffix = suffixLen >= config.suffixThreshold
-  if (!hitPrefix && !hitSuffix) return null
+  if (!hitPrefix && !hitSuffix) {
+    return null
+  }
   const severity = hitPrefix && hitSuffix ? Severity.CRITICAL : Severity.WARN
   return { anchor, prefixLen, suffixLen, severity }
 }
@@ -314,15 +337,20 @@ export const buildSimilarityIndex = (
 
   const pushTo = (map: Map<string, string[]>, key: string, value: string): void => {
     const bucket = map.get(key)
-    if (bucket) bucket.push(value)
-    else map.set(key, [value])
+    if (bucket) {
+      bucket.push(value)
+    } else {
+      map.set(key, [value])
+    }
   }
 
   for (const raw of anchors) {
     const normalized = normalizeAddress(raw)
     // Only index well-formed, non-zero 20-byte addresses (a corrupted persisted value must not seed
     // the index), and dedupe.
-    if (!isUsableAddress(normalized) || anchorSet.has(normalized)) continue
+    if (!isUsableAddress(normalized) || anchorSet.has(normalized)) {
+      continue
+    }
     anchorSet.add(normalized)
     pushTo(prefixBuckets, normalized.slice(0, keyLen), normalized)
     pushTo(suffixBuckets, normalized.slice(-keyLen), normalized)
@@ -333,16 +361,24 @@ export const buildSimilarityIndex = (
   const query = (address: string): SimilarityMatch | null => {
     const normalized = normalizeAddress(address)
     // Skip malformed/zero, or exact-anchor (incl. cross-chain replica = identity) candidates.
-    if (!isUsableAddress(normalized) || anchorSet.has(normalized)) return null
+    if (!isUsableAddress(normalized) || anchorSet.has(normalized)) {
+      return null
+    }
 
     const candidates = new Set<string>()
-    for (const anchor of prefixBuckets.get(normalized.slice(0, keyLen)) ?? []) candidates.add(anchor)
-    for (const anchor of suffixBuckets.get(normalized.slice(-keyLen)) ?? []) candidates.add(anchor)
+    for (const anchor of prefixBuckets.get(normalized.slice(0, keyLen)) ?? []) {
+      candidates.add(anchor)
+    }
+    for (const anchor of suffixBuckets.get(normalized.slice(-keyLen)) ?? []) {
+      candidates.add(anchor)
+    }
 
     let best: SimilarityMatch | null = null
     for (const anchor of candidates) {
       const match = buildMatch(normalized, anchor, safeConfig)
-      if (match && (best === null || isStrongerMatch(match, best))) best = match
+      if (match && (best === null || isStrongerMatch(match, best))) {
+        best = match
+      }
     }
     return best
   }

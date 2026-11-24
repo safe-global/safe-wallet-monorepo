@@ -18,7 +18,9 @@ type ImageFallbackProps = ImageAttributes &
 const ImageFallback = ({ src, fallbackSrc, fallbackComponent, ...props }: ImageFallbackProps): React.ReactElement => {
   const [isError, setIsError] = useState<boolean>(false)
 
-  if (isError && fallbackComponent) return fallbackComponent
+  if (isError && fallbackComponent) {
+    return fallbackComponent
+  }
 
   return (
     <img

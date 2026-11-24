@@ -27,11 +27,15 @@ export const moduleGuardApi = gatewayApi.injectEndpoints({
         const state = getState() as RootState
         const chains = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)(state).data
         const chain = chains ? chainsAdapter.getSelectors().selectById(chains, chainId) : undefined
-        if (!chain) return { error: new Error('Chain config not found') }
+        if (!chain) {
+          return { error: new Error('Chain config not found') }
+        }
 
         try {
           const provider = await getReadOnlyProvider(chain, customRpc)
-          if (!provider) return { error: new Error('No RPC is configured for this chain') }
+          if (!provider) {
+            return { error: new Error('No RPC is configured for this chain') }
+          }
           const readModuleGuard = await loadReadModuleGuard()
           return { data: await readModuleGuard(provider, safeAddress) }
         } catch (error) {

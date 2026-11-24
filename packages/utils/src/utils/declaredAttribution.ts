@@ -17,9 +17,13 @@ type DeclaredApp = { name?: string; url?: string; listedAppId?: number }
 const HTTP_PROTOCOLS = new Set(['http:', 'https:'])
 
 const toHttpOriginPath = (url?: string): string | undefined => {
-  if (!url) return
+  if (!url) {
+    return
+  }
   try {
-    if (!HTTP_PROTOCOLS.has(new URL(url).protocol)) return
+    if (!HTTP_PROTOCOLS.has(new URL(url).protocol)) {
+      return
+    }
   } catch {
     return
   }
@@ -29,7 +33,9 @@ const toHttpOriginPath = (url?: string): string | undefined => {
 export function buildDeclared(channel: NativeChannel): DeclaredAttribution
 export function buildDeclared(channel: AppChannel, app?: DeclaredApp): DeclaredAttribution
 export function buildDeclared(channel: DeclaredChannel, app?: DeclaredApp): DeclaredAttribution {
-  if (!app) return { channel }
+  if (!app) {
+    return { channel }
+  }
 
   const appUrl = toHttpOriginPath(app.url)
   const appId = channel === 'SAFE_APP' ? app.listedAppId : undefined

@@ -51,8 +51,12 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
   const secondaryVariant = isSpace ? 'outline' : 'secondary'
 
   const getDisabledTooltip = (action: 'Send' | 'Swap') => {
-    if (isBlockedCountry) return `${action} ${NOT_ALLOWED_COUNTRY_MESSAGE}`
-    if (noAssets) return NO_ASSETS_MESSAGE
+    if (isBlockedCountry) {
+      return `${action} ${NOT_ALLOWED_COUNTRY_MESSAGE}`
+    }
+    if (noAssets) {
+      return NO_ASSETS_MESSAGE
+    }
     return ''
   }
   const sendTooltip = getDisabledTooltip('Send')
@@ -80,32 +84,35 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
   }, [isSpace, openModal, setTxFlow, spaceId])
 
   const handleOnSwap = useCallback(() => {
-    if (isSpace)
+    if (isSpace) {
       trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
         workspace_id: spaceId,
         action: 'swap',
         entry_point: 'actions_tray',
       })
+    }
     openModal(ESafeAction.Swap)
   }, [openModal, isSpace, spaceId])
 
   const handleOnReceive = useCallback(() => {
-    if (isSpace)
+    if (isSpace) {
       trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
         workspace_id: spaceId,
         action: 'receive',
         entry_point: 'actions_tray',
       })
+    }
     openModal(ESafeAction.Receive)
   }, [openModal, isSpace, spaceId])
 
   const handleOnBuildTx = useCallback(() => {
-    if (isSpace)
+    if (isSpace) {
       trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
         workspace_id: spaceId,
         action: 'build_tx',
         entry_point: 'actions_tray',
       })
+    }
     openModal(ESafeAction.BuildTransaction)
   }, [openModal, isSpace, spaceId])
 

@@ -31,7 +31,9 @@ const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
   }
 
   const onDisconnect = useCallback(async () => {
-    if (!walletConnect) return
+    if (!walletConnect) {
+      return
+    }
 
     const label = session.peer.metadata.url
     trackEvent({ ...WALLETCONNECT_EVENTS.DISCONNECT_CLICK, label })

@@ -30,7 +30,9 @@ const filterHiddenTokens = (items: PortfolioBalances['items'], hiddenAssets: str
   items.filter((balanceItem) => !hiddenAssets.includes(balanceItem.tokenInfo.address))
 
 const filterDustTokens = (items: PortfolioBalances['items'], hideDust: boolean) => {
-  if (!hideDust) return items
+  if (!hideDust) {
+    return items
+  }
   return items.filter((balanceItem) => Number(balanceItem.fiatBalance) >= DUST_THRESHOLD)
 }
 

@@ -58,9 +58,15 @@ const ALLOWED_TRANSITIONS: Record<CheckStatus, ReadonlyArray<CheckStatus>> = {
 
 /** Merge a freshly-derived status onto the pinned one (null = first observation). */
 export const mergeMonotonic = (pinned: CheckStatus | null | undefined, next: CheckStatus): CheckStatus => {
-  if (pinned == null) return next
-  if (pinned === next) return pinned
+  if (pinned == null) {
+    return next
+  }
+  if (pinned === next) {
+    return pinned
+  }
   // A transient fetch failure must never clobber a known status.
-  if (next === CheckStatus.UNAVAILABLE) return pinned
+  if (next === CheckStatus.UNAVAILABLE) {
+    return pinned
+  }
   return ALLOWED_TRANSITIONS[pinned].includes(next) ? next : pinned
 }

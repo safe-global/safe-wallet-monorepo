@@ -10,13 +10,17 @@ export const useStartCheckout = (spaceId?: string | null, returnPathname?: strin
 
   const startCheckout = useCallback(
     async (paymentLinkId: string) => {
-      if (!gatedSpaceId) return
+      if (!gatedSpaceId) {
+        return
+      }
       const result = await trigger({
         spaceId: gatedSpaceId,
         paymentLinkId,
         returnUrl: getCheckoutReturnUrl(gatedSpaceId, returnPathname),
       })
-      if (result.data) navigateTo(result.data.url)
+      if (result.data) {
+        navigateTo(result.data.url)
+      }
     },
     [gatedSpaceId, returnPathname, trigger],
   )

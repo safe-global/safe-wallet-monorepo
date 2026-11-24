@@ -5,7 +5,9 @@ import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { isExecutable, isSignableBy } from '@/utils/transaction-guards'
 
 export function getTxStatus(tx: TransactionQueuedItem): string {
-  if (!isMultisigExecutionInfo(tx.transaction.executionInfo)) return ''
+  if (!isMultisigExecutionInfo(tx.transaction.executionInfo)) {
+    return ''
+  }
 
   const { confirmationsSubmitted, confirmationsRequired } = tx.transaction.executionInfo
   if (confirmationsSubmitted >= confirmationsRequired) {

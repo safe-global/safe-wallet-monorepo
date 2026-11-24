@@ -46,7 +46,9 @@ const useOnboardingSelection = ({ items, control, setValue, flaggedAddresses, li
   }
 
   const confirmPending = () => {
-    if (pendingConfirmation) applyToggle(pendingConfirmation, true)
+    if (pendingConfirmation) {
+      applyToggle(pendingConfirmation, true)
+    }
     setPendingConfirmation(null)
   }
 

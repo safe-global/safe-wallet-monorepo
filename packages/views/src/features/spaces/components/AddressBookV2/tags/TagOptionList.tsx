@@ -71,7 +71,9 @@ function TagOptionList<T>({ options, value, onChange, onCreate, tagEditing }: Ta
           tagEditing &&
           (async (optionValue) => {
             const option = optionOf(optionValue)
-            if (option) await tagEditing.onDelete(option.tag)
+            if (option) {
+              await tagEditing.onDelete(option.tag)
+            }
           })
         }
         deleteConfirmation={(facetOption) => {

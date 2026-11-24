@@ -16,7 +16,9 @@ export function useSafeProAnnouncementModal(isWorkspaceReady: boolean) {
   const isReady = isAnnounced && !isLive && isWorkspaceReady
 
   useEffect(() => {
-    if (!isReady || seenStore.get()) return
+    if (!isReady || seenStore.get()) {
+      return
+    }
 
     // Marked on open, not on dismiss: leaving the page counts as having seen it.
     seenStore.set(true)

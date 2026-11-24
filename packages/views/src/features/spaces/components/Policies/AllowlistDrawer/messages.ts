@@ -28,7 +28,9 @@ export const OUTCOME_TITLE: Record<AllowlistTxOutcome, string> = {
 const EXPIRED_LINE = 'It can no longer be signed. Set up the allowlist again to retry.'
 
 export const outcomeLine = (outcome: AllowlistTxOutcome, operation: PendingPolicyOperation): string => {
-  if (outcome === 'executed') return EXECUTED_LINE[operation]
+  if (outcome === 'executed') {
+    return EXECUTED_LINE[operation]
+  }
 
   return outcome === 'expired' ? EXPIRED_LINE : 'Close this panel to see the current policies.'
 }

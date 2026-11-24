@@ -100,7 +100,9 @@ describe('Drain Account', () => {
   ])('asks for a valid recipient when the recipient %s', async (_, input) => {
     const user = renderApp([nativeBalance()])
 
-    if (input) await user.type(await screen.findByLabelText('Recipient'), input)
+    if (input) {
+      await user.type(await screen.findByLabelText('Recipient'), input)
+    }
     await user.click(await screen.findByRole('button', { name: 'Transfer everything' }))
 
     expect(await screen.findByText('Please enter a valid recipient address')).toBeInTheDocument()

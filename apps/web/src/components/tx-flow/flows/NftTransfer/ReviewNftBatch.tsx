@@ -18,7 +18,9 @@ const ReviewNftBatch = ({ onSubmit, children }: ReviewTransactionProps): ReactEl
   const { tokens = [] } = data || {}
 
   useEffect(() => {
-    if (!safeAddress || !data) return
+    if (!safeAddress || !data) {
+      return
+    }
 
     const calls = tokens.map((token) => {
       return createNftTransferParams(safeAddress, data.recipient, token.id, token.address)

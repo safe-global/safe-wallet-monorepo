@@ -35,8 +35,11 @@ const ProposerRoleFlowContent = (): ReactElement => {
       reset()
       setSafeAccount(value)
       const target = parseSafeScopeKey(value)
-      if (target) setScope(target.chainId, target.safeAddress)
-      else clearScope()
+      if (target) {
+        setScope(target.chainId, target.safeAddress)
+      } else {
+        clearScope()
+      }
     },
     [reset, setScope, clearScope],
   )
@@ -44,7 +47,9 @@ const ProposerRoleFlowContent = (): ReactElement => {
   const onSubmit = useCallback(
     async (values: ProposerRoleFormValues) => {
       const safeLabel = account && formatContactLabel(account.address, account.name)
-      if (await grantProposerRole(values, safeLabel)) setTxFlow(undefined)
+      if (await grantProposerRole(values, safeLabel)) {
+        setTxFlow(undefined)
+      }
     },
     [grantProposerRole, setTxFlow, account],
   )

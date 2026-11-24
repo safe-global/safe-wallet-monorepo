@@ -23,11 +23,15 @@ const WorkspaceChooser = ({ pick }: { pick: SafeWorkspacePick | undefined }): Re
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isChoosing })
   const [isAnswered, setIsAnswered] = useState(false)
 
-  if (!isChoosing || isAnswered || !spaces) return null
+  if (!isChoosing || isAnswered || !spaces) {
+    return null
+  }
 
   // The Workspace list and the Safes of the Workspaces are separate caches, so the list can lag behind
   const choices = spaces.filter((space) => pick.spaceIds.includes(space.uuid))
-  if (choices.length === 0) return null
+  if (choices.length === 0) {
+    return null
+  }
 
   const close = () => setIsAnswered(true)
   const choose = (spaceId: string) => {

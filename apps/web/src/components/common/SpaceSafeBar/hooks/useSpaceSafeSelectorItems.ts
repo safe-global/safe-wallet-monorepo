@@ -65,8 +65,12 @@ const deriveIsReadOnly = (
   walletAddress: string | undefined,
   fallback: boolean,
 ): boolean => {
-  if (!walletAddress) return true
-  if (!overview) return fallback
+  if (!walletAddress) {
+    return true
+  }
+  if (!overview) {
+    return fallback
+  }
   return !overview.owners.some((owner) => sameAddress(owner.value, walletAddress))
 }
 
@@ -187,8 +191,12 @@ export function useResolveBalance(safes: SafeItem[], overviewsLoading: boolean):
     (chainId, address, overview) => {
       if (summaries.isEnabled(chainId)) {
         const summary = summaries.getSummary(chainId, address)
-        if (summary) return { balance: summary.fiatTotal, isLoading: false }
-        if (summaries.isLoading) return { balance: undefined, isLoading: true }
+        if (summary) {
+          return { balance: summary.fiatTotal, isLoading: false }
+        }
+        if (summaries.isLoading) {
+          return { balance: undefined, isLoading: true }
+        }
       }
       return { balance: overview?.fiatTotal, isLoading: overviewsLoading && !overview }
     },
@@ -281,7 +289,9 @@ export function useSpaceSafeSelectorItems() {
       const chainId = itemId.slice(0, colonIndex)
       const address = itemId.slice(colonIndex + 1)
       const chain = chainConfigs.find((c) => c.chainId === chainId)
-      if (!chain) return
+      if (!chain) {
+        return
+      }
       trackEvent(
         { ...SPACE_EVENTS.SAFE_SELECTED, label: spaceId ?? undefined },
         {

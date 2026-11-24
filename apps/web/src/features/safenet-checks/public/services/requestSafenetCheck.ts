@@ -35,9 +35,15 @@ type Failure = 'refusal' | 'transient' | 'fault'
 
 const classifyFailure = (error: unknown): Failure => {
   const status = getHttpStatusFromError(error)
-  if (status === undefined) return isNetworkError(error) ? 'transient' : 'fault'
-  if (status === 429) return hasJsonBody(error) ? 'refusal' : 'transient'
-  if (REFUSAL_STATUSES.includes(status)) return 'refusal'
+  if (status === undefined) {
+    return isNetworkError(error) ? 'transient' : 'fault'
+  }
+  if (status === 429) {
+    return hasJsonBody(error) ? 'refusal' : 'transient'
+  }
+  if (REFUSAL_STATUSES.includes(status)) {
+    return 'refusal'
+  }
   return status === 408 || status >= 500 ? 'transient' : 'fault'
 }
 
@@ -48,7 +54,9 @@ const sendWithRetry = async (send: () => Promise<unknown>): Promise<void> => {
       await send()
       return
     } catch (error) {
-      if (classifyFailure(error) !== 'transient' || attempt >= RETRY_DELAYS_MS.length) throw error
+      if (classifyFailure(error) !== 'transient' || attempt >= RETRY_DELAYS_MS.length) {
+        throw error
+      }
       await delay(RETRY_DELAYS_MS[attempt])
     }
   }
@@ -82,15 +90,23 @@ export const requestSafenetCheck = async ({
     const state = store.getState()
     const spaceId = parseSpaceId(getLocationSpaceId())
     // CGW accepts only a Workspace UUID in the route
-    if (!spaceId || isLegacySpaceId(spaceId)) return
-    if (!isAuthenticated(state) || !isEnabledOnChain(state, chainId)) return
+    if (!spaceId || isLegacySpaceId(spaceId)) {
+      return
+    }
+    if (!isAuthenticated(state) || !isEnabledOnChain(state, chainId)) {
+      return
+    }
 
     const { initiate } = safenetApi.endpoints.safenetChecksRequestCheckV1
     const check = { spaceId, chainId, safeAddress, createSafenetCheckDto: { safeTxHash } }
     await sendWithRetry(() => store.dispatch(initiate(check)).unwrap())
     store.dispatch(recordCheckRequest({ chainId, safeAddress, safeTxHash, requestedAtMs: Date.now() }))
-    if (isFirstSignature) trackEvent(SAFENET_EVENTS.SUBMITTED, { [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash })
+    if (isFirstSignature) {
+      trackEvent(SAFENET_EVENTS.SUBMITTED, { [MixpanelEventParams.SAFE_TX_HASH]: safeTxHash })
+    }
   } catch (error) {
-    if (classifyFailure(error) !== 'refusal') logError(Errors._652, error)
+    if (classifyFailure(error) !== 'refusal') {
+      logError(Errors._652, error)
+    }
   }
 }

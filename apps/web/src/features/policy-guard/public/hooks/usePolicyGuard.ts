@@ -41,9 +41,15 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const readError = moduleGuard ? undefined : (moduleGuardQuery.error as Error | undefined)
 
   const state = useMemo((): PolicyGuardState | undefined => {
-    if (!safeLoaded) return
-    if (isUnsupported) return { status: 'unsupported' }
-    if (!moduleGuard || !policyGuardAddress) return
+    if (!safeLoaded) {
+      return
+    }
+    if (isUnsupported) {
+      return { status: 'unsupported' }
+    }
+    if (!moduleGuard || !policyGuardAddress) {
+      return
+    }
     return resolvePolicyGuardState({
       txGuard: safe.guard?.value ?? ZERO_ADDRESS,
       moduleGuard,
@@ -60,7 +66,9 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const { refetch: refetchModuleGuard, isUninitialized: isModuleGuardUninitialized } = moduleGuardQuery
   const refetch = useCallback(() => {
     refetchSafe()
-    if (!isModuleGuardUninitialized) refetchModuleGuard()
+    if (!isModuleGuardUninitialized) {
+      refetchModuleGuard()
+    }
   }, [refetchSafe, isModuleGuardUninitialized, refetchModuleGuard])
 
   return {

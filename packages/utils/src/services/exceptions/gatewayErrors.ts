@@ -49,7 +49,9 @@ const isServerErrorStatus = (status: number): boolean => status >= 500 && status
 
 /** Resolve an HTTP status to its copy contract, or `undefined` if unmapped. */
 export const getCgwErrorMeta = (status: number | undefined): CgwErrorMeta | undefined => {
-  if (status === undefined) return undefined
+  if (status === undefined) {
+    return undefined
+  }
   return CGW_ERRORS[status] ?? (isServerErrorStatus(status) ? CGW_SERVER_ERROR : undefined)
 }
 

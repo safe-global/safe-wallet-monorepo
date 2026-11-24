@@ -17,7 +17,9 @@ const STYLES = join(__dirname)
 const readBlock = (file: string, selector: string): string => {
   const css = readFileSync(join(STYLES, file), 'utf8')
   const start = css.indexOf(selector)
-  if (start === -1) throw new Error(`selector ${selector} not found in ${file}`)
+  if (start === -1) {
+    throw new Error(`selector ${selector} not found in ${file}`)
+  }
   const open = css.indexOf('{', start)
   const close = css.indexOf('\n}', open)
   return css.slice(open, close)
@@ -25,7 +27,9 @@ const readBlock = (file: string, selector: string): string => {
 
 const readVar = (block: string, name: string): string => {
   const m = block.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`))
-  if (!m) throw new Error(`${name} not found (or not a 6-digit hex) in the given block`)
+  if (!m) {
+    throw new Error(`${name} not found (or not a 6-digit hex) in the given block`)
+  }
   return m[1]
 }
 

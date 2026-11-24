@@ -15,7 +15,9 @@ type ContactRowActionsProps = {
 }
 
 const ContactRowActions = ({ name, onEdit, onDelete, onEditTags }: ContactRowActionsProps) => {
-  if (!onEdit && !onDelete && !onEditTags) return null
+  if (!onEdit && !onDelete && !onEditTags) {
+    return null
+  }
 
   return (
     <DropdownMenu>

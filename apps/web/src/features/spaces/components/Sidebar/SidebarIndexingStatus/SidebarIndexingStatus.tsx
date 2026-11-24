@@ -19,8 +19,12 @@ const STATUS_LABEL: Record<Status, string> = {
 }
 
 const getStatus = (synced: boolean, lastSync: number): Status => {
-  if (synced) return 'synced'
-  if (Date.now() - lastSync > MAX_SYNC_DELAY) return 'slow'
+  if (synced) {
+    return 'synced'
+  }
+  if (Date.now() - lastSync > MAX_SYNC_DELAY) {
+    return 'slow'
+  }
   return 'outOfSync'
 }
 

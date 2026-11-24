@@ -23,12 +23,18 @@ export const useAllowlistDetails = (policy: ActiveAllowlistPolicy, policies: Pol
   const base = usePolicyDetailsBase(policy.safe, recipients)
 
   const uncoveredSpendingLimitCount = useMemo(() => {
-    if (policy.spendingLimitsCovered) return undefined
+    if (policy.spendingLimitsCovered) {
+      return undefined
+    }
 
     let count = 0
     for (const other of policies) {
-      if (!isSpendingLimitPolicy(other) || getPolicyStatus(other) !== 'active') continue
-      if (other.safe.chainId !== chainId || !sameAddress(other.safe.address, safeAddress)) continue
+      if (!isSpendingLimitPolicy(other) || getPolicyStatus(other) !== 'active') {
+        continue
+      }
+      if (other.safe.chainId !== chainId || !sameAddress(other.safe.address, safeAddress)) {
+        continue
+      }
       count += other.data.spenders.reduce(
         (sum, { isActive, allowances }) => (isActive === false ? sum : sum + allowances.length),
         0,

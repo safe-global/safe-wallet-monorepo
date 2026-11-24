@@ -47,10 +47,14 @@ export const useOidcLoginCallback = () => {
   routerRef.current = router
 
   useEffect(() => {
-    if (!isOidcAuthEnabled || hasProcessed.current) return
+    if (!isOidcAuthEnabled || hasProcessed.current) {
+      return
+    }
 
     const pending = sessionStorage.getItem(OIDC_AUTH_PENDING_KEY)
-    if (!pending) return
+    if (!pending) {
+      return
+    }
 
     hasProcessed.current = true
     dispatch(setIsOidcLoginPending(true))

@@ -28,11 +28,15 @@ export const safeInfoListener = (listenerMiddleware: typeof listenerMiddlewareIn
       const { chainId, safeAddress } = action.meta.arg.originalArgs
 
       // A counterfactual Safe is not known to CGW yet, so its 404 is the expected answer.
-      if (state.undeployedSafes?.[chainId]?.[safeAddress]) return
+      if (state.undeployedSafes?.[chainId]?.[safeAddress]) {
+        return
+      }
 
       // Until the counterfactual sync settles, a 404 may still turn out to be a counterfactual Safe.
       const awaitingCfSync = !selectIsStoreHydrated(state) || (isAuthenticated(state) && !selectCfSafeSynced(state))
-      if (awaitingCfSync && getHttpStatusFromError(action.payload) === 404) return
+      if (awaitingCfSync && getHttpStatusFromError(action.payload) === 404) {
+        return
+      }
 
       logError(Errors._600, action.payload)
     },

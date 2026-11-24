@@ -149,7 +149,9 @@ const CsvTxExportModal = ({ onClose, onExport, hasActiveFilter }: CsvTxExportMod
   }, [selectedRange, from, to, errors.from, errors.to, isOverYear])
 
   const onSubmit = handleSubmit(async ({ range, from, to }) => {
-    if (!range) return
+    if (!range) {
+      return
+    }
     const { executionDateGte, executionDateLte } = getExportDates(range, from, to)
 
     try {

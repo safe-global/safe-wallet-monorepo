@@ -19,7 +19,9 @@ type CacheEntry = {
 const cache = new Map<string, CacheEntry>()
 
 const evictOldest = (): void => {
-  if (cache.size <= MAX_CACHE_SIZE) return
+  if (cache.size <= MAX_CACHE_SIZE) {
+    return
+  }
   let oldestKey: string | null = null
   let oldestTs = Infinity
   for (const [k, v] of cache) {
@@ -28,14 +30,20 @@ const evictOldest = (): void => {
       oldestKey = k
     }
   }
-  if (oldestKey) cache.delete(oldestKey)
+  if (oldestKey) {
+    cache.delete(oldestKey)
+  }
 }
 
 /** Returns the cached entry if it exists and is still within TTL, else null. */
 export const getCachedScan = (key: string): CacheEntry | null => {
   const entry = cache.get(key)
-  if (!entry) return null
-  if (Date.now() - entry.timestamp >= CACHE_TTL_MS) return null
+  if (!entry) {
+    return null
+  }
+  if (Date.now() - entry.timestamp >= CACHE_TTL_MS) {
+    return null
+  }
   return entry
 }
 
@@ -49,7 +57,9 @@ export const setCachedScan = (
   timestamp: number,
 ): void => {
   const existing = cache.get(key)
-  if (existing && existing.timestamp >= timestamp) return
+  if (existing && existing.timestamp >= timestamp) {
+    return
+  }
   cache.set(key, { results, timestamp })
   evictOldest()
 }

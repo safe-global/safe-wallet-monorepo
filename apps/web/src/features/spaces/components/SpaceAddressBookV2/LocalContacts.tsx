@@ -90,13 +90,21 @@ const LocalContacts = ({
   )
 
   const renderShareAction = (contact: AddressBookContact, { isCompact }: { isCompact: boolean }) => {
-    if (!isWorkspaceSettled) return null
-    if (contact.isShared) return <AlreadyShared isCompact={isCompact} />
+    if (!isWorkspaceSettled) {
+      return null
+    }
+    if (contact.isShared) {
+      return <AlreadyShared isCompact={isCompact} />
+    }
 
     const shareProps = { address: contact.address, name: contact.name, chainIds: chainIdsOf(contact), isCompact }
-    if (isAdmin) return <AddToWorkspaceButton {...shareProps} />
+    if (isAdmin) {
+      return <AddToWorkspaceButton {...shareProps} />
+    }
     // Invitees cannot propose contacts, and an unread request list would offer to request an open request again
-    if (isInvited || !isRequestsSettled) return null
+    if (isInvited || !isRequestsSettled) {
+      return null
+    }
     return <RequestToAddButton {...shareProps} alreadyRequested={pendingAddresses.has(contact.address.toLowerCase())} />
   }
 

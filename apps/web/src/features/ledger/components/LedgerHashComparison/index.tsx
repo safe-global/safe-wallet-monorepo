@@ -26,7 +26,9 @@ const LedgerHashComparison = () => {
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) handleClose()
+        if (!isOpen) {
+          handleClose()
+        }
       }}
     >
       <DialogContent showCloseButton={false} size="sm">

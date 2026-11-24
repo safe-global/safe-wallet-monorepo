@@ -7,7 +7,9 @@ const useSafeAppUrl = (): string | undefined => {
   const [appUrl, setAppUrl] = useState<string | undefined>()
 
   useEffect(() => {
-    if (!router.isReady) return
+    if (!router.isReady) {
+      return
+    }
     setAppUrl(router.query.appUrl?.toString())
   }, [router])
 

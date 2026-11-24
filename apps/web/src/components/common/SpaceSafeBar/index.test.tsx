@@ -260,7 +260,9 @@ describe('SpaceSafeBar', () => {
   describe('mobile stacking order', () => {
     const pillChildren = (container: HTMLElement) => {
       const pill = container.querySelector('[data-testid="safe-level-navigation"] > div')
-      if (!pill) throw new Error('safe bar pill not found')
+      if (!pill) {
+        throw new Error('safe bar pill not found')
+      }
       return [...pill.children]
     }
 

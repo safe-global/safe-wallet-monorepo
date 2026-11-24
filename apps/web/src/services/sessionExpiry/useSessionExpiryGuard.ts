@@ -54,12 +54,16 @@ export const useSessionExpiryGuard = (): void => {
   const lastProcessedRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (!isHydrated) return
+    if (!isHydrated) {
+      return
+    }
     if (sessionExpiresAt === null) {
       lastProcessedRef.current = null
       return
     }
-    if (lastProcessedRef.current === sessionExpiresAt) return
+    if (lastProcessedRef.current === sessionExpiresAt) {
+      return
+    }
     lastProcessedRef.current = sessionExpiresAt
 
     let cancelled = false
@@ -94,7 +98,9 @@ export const useSessionExpiryGuard = (): void => {
     if (inFlow) {
       return () => {
         cancelled = true
-        if (timer !== undefined) clearTimeout(timer)
+        if (timer !== undefined) {
+          clearTimeout(timer)
+        }
       }
     }
 
@@ -103,11 +109,15 @@ export const useSessionExpiryGuard = (): void => {
     probe
       .unwrap()
       .catch((error: unknown) => {
-        if (cancelled) return
+        if (cancelled) {
+          return
+        }
         // 403 → cookie is gone; expire now (the timer is also cleared in
         // cleanup, but expireNow's setUnauthenticated triggers a re-render
         // with sessionExpiresAt=null which will run the cleanup anyway).
-        if (isForbidden(error)) expireNow()
+        if (isForbidden(error)) {
+          expireNow()
+        }
         // Transient (5xx / network): we have no proof the cookie is invalid;
         // fall through and let the timer enforce local expiry.
       })
@@ -118,7 +128,9 @@ export const useSessionExpiryGuard = (): void => {
 
     return () => {
       cancelled = true
-      if (timer !== undefined) clearTimeout(timer)
+      if (timer !== undefined) {
+        clearTimeout(timer)
+      }
     }
   }, [dispatch, isHydrated, sessionExpiresAt])
 }

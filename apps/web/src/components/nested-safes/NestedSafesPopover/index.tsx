@@ -56,7 +56,9 @@ function PopoverHeaderAction({
     )
   }
 
-  if (showIntroScreen || !hasNestedSafes || isLoading) return null
+  if (showIntroScreen || !hasNestedSafes || isLoading) {
+    return null
+  }
 
   return (
     <Tooltip>
@@ -307,7 +309,9 @@ export function NestedSafesPopover({
     <Popover
       open={!!anchorEl}
       onOpenChange={(open) => {
-        if (!open && canClose) onClose()
+        if (!open && canClose) {
+          onClose()
+        }
       }}
     >
       <PopoverContent

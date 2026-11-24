@@ -109,7 +109,9 @@ export const getOwnerAwaitingConfirmations = (
   walletAddress: string | undefined,
 ): number => {
   const awaiting = overview?.awaitingConfirmation ?? 0
-  if (awaiting <= 0) return 0
+  if (awaiting <= 0) {
+    return 0
+  }
   return isOwner(overview?.owners, walletAddress) ? awaiting : 0
 }
 
@@ -440,7 +442,9 @@ export const isNestedConfirmationTxInfo = (info: TransactionInfo): boolean => {
 }
 
 export const isSafeUpdateTxData = (data?: TransactionData | null): boolean => {
-  if (!data || !data.hexData) return false
+  if (!data || !data.hexData) {
+    return false
+  }
 
   // Must be a trusted delegate call
   if (!(data.trustedDelegateCallTarget && data.operation === Operation.DELEGATE)) {
@@ -464,7 +468,9 @@ export const isSafeUpdateTxData = (data?: TransactionData | null): boolean => {
 }
 
 export const isSafeMigrationTxData = (data?: TransactionData | null): boolean => {
-  if (!data || !data.hexData) return false
+  if (!data || !data.hexData) {
+    return false
+  }
   return isMigrateToL2CallData({
     data: data.hexData,
     to: data.to.value,

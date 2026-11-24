@@ -103,7 +103,9 @@ const useSafePermissions = (): UseSafePermissionsReturnType => {
 
   const confirmPermissionRequest = useCallback(
     (result: PermissionStatus) => {
-      if (!permissionsRequest) return []
+      if (!permissionsRequest) {
+        return []
+      }
 
       const updatedPermissionsByOrigin = [...(permissions[permissionsRequest.origin] || [])]
 

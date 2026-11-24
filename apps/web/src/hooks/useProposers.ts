@@ -53,8 +53,12 @@ export const useGetIsWalletProposer = (): (() => Promise<boolean>) => {
   const walletAddress = wallet?.address
 
   return useCallback(async () => {
-    if (isProposer !== undefined) return isProposer
-    if (!walletAddress || !chainId || !safeAddress) return false
+    if (isProposer !== undefined) {
+      return isProposer
+    }
+    if (!walletAddress || !chainId || !safeAddress) {
+      return false
+    }
 
     try {
       return hasDelegate(await fetchProposers({ chainId, safe: safeAddress }, true).unwrap(), walletAddress)

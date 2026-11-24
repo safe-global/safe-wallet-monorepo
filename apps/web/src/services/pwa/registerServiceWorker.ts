@@ -12,14 +12,22 @@ let hasAttemptedRegistration = false
  * briefly unreachable) — both surfaced as uncaught errors. See WA-2949.
  */
 export const registerServiceWorker = async (): Promise<void> => {
-  if (hasAttemptedRegistration) return
+  if (hasAttemptedRegistration) {
+    return
+  }
   hasAttemptedRegistration = true
 
   // next-pwa is disabled under `next dev`, so there is no worker to register.
-  if (IS_DEV) return
+  if (IS_DEV) {
+    return
+  }
 
-  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
-  if (typeof window === 'undefined') return
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    return
+  }
+  if (typeof window === 'undefined') {
+    return
+  }
 
   if (!window.workbox) {
     // next-pwa always assigns `window.workbox` when `serviceWorker` is supported,

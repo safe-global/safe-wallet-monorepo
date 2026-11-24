@@ -27,7 +27,9 @@ import { getCounterparty, getNonce } from './utils'
 
 const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: string }): ReactElement | null => {
   const counterparty = getCounterparty(txInfo)
-  if (!counterparty) return null
+  if (!counterparty) {
+    return null
+  }
   return (
     <span className="flex min-w-0 items-center gap-2 text-sm">
       {/* Fixed width so the names line up whichever word the pill says */}

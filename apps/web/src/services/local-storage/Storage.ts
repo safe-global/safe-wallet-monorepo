@@ -31,7 +31,9 @@ class Storage {
       logError(Errors._700, `key ${key} – ${asError(err).message}`)
     }
 
-    if (saved == null) return null
+    if (saved == null) {
+      return null
+    }
 
     try {
       return JSON.parse(saved, reviver) as T

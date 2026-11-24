@@ -26,7 +26,9 @@ export const getGenericErrorWithStatus = (status: number): string =>
 
 // Backend messages are written for users, except the typed CGW refusals translated earlier (elevation, quota).
 const getBackendMessage = (error: FetchBaseQueryError): string | undefined => {
-  if (!('data' in error) || typeof error.data !== 'object' || !error.data) return undefined
+  if (!('data' in error) || typeof error.data !== 'object' || !error.data) {
+    return undefined
+  }
   const { message } = error.data as Record<string, unknown>
   return typeof message === 'string' ? message : undefined
 }
@@ -38,7 +40,9 @@ const getBackendMessage = (error: FetchBaseQueryError): string | undefined => {
 export const getSafeUnavailableMessage = (
   error: FetchBaseQueryError | SerializedError | undefined,
 ): string | undefined => {
-  if (!error || !('status' in error) || error.status !== HTTP_UNAVAILABLE_FOR_LEGAL_REASONS) return undefined
+  if (!error || !('status' in error) || error.status !== HTTP_UNAVAILABLE_FOR_LEGAL_REASONS) {
+    return undefined
+  }
   return SAFE_UNAVAILABLE_MESSAGE
 }
 
@@ -56,27 +60,41 @@ export const getRtkQueryErrorMessage = (error: FetchBaseQueryError | SerializedE
     // FetchBaseQueryError
     const { status } = error
 
-    if (status === 'FETCH_ERROR') return RTK_QUERY_ERROR_MESSAGES.network
-    if (status === 'TIMEOUT_ERROR') return RTK_QUERY_ERROR_MESSAGES.timeout
+    if (status === 'FETCH_ERROR') {
+      return RTK_QUERY_ERROR_MESSAGES.network
+    }
+    if (status === 'TIMEOUT_ERROR') {
+      return RTK_QUERY_ERROR_MESSAGES.timeout
+    }
     if (status === 'PARSING_ERROR') {
       return error.originalStatus === HTTP_TOO_MANY_REQUESTS
         ? RTK_QUERY_ERROR_MESSAGES.rateLimit
         : RTK_QUERY_ERROR_MESSAGES.generic
     }
 
-    if (isElevationRequiredError(error)) return ELEVATION_REQUIRED_MESSAGE
+    if (isElevationRequiredError(error)) {
+      return ELEVATION_REQUIRED_MESSAGE
+    }
 
     const quotaMessage = getQuotaExceededMessage(error)
-    if (quotaMessage) return quotaMessage
+    if (quotaMessage) {
+      return quotaMessage
+    }
 
     // HTTP error response: prefer the backend's own message when present.
     const backendMessage = getBackendMessage(error)
-    if (backendMessage) return backendMessage
+    if (backendMessage) {
+      return backendMessage
+    }
 
-    if (status === HTTP_TOO_MANY_REQUESTS) return RTK_QUERY_ERROR_MESSAGES.rateLimit
+    if (status === HTTP_TOO_MANY_REQUESTS) {
+      return RTK_QUERY_ERROR_MESSAGES.rateLimit
+    }
 
     // CUSTOM_ERROR carries a developer-provided message string.
-    if ('error' in error) return error.error
+    if ('error' in error) {
+      return error.error
+    }
 
     return typeof status === 'number' ? getGenericErrorWithStatus(status) : RTK_QUERY_ERROR_MESSAGES.generic
   }

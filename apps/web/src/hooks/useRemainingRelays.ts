@@ -24,7 +24,9 @@ export const useRelaysBySafe = (): AsyncResult<RelaysRemaining> => {
   )
 
   const convertedError = useMemo(() => {
-    if (!error) return undefined
+    if (!error) {
+      return undefined
+    }
     return new Error('message' in error ? String(error.message) : 'Failed to fetch relay count')
   }, [error])
 
@@ -37,7 +39,9 @@ export const useLeastRemainingRelays = (ownerAddresses: string[]): AsyncResult<R
   const [trigger] = useLazyRelayGetRelaysRemainingV1Query()
 
   return useAsync(() => {
-    if (!chain?.relayer?.safeCreationSponsored) return
+    if (!chain?.relayer?.safeCreationSponsored) {
+      return
+    }
 
     return Promise.all(
       ownerAddresses.map((address) => trigger({ chainId: chain.chainId, safeAddress: address }).unwrap()),

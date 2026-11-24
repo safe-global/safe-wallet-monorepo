@@ -22,10 +22,14 @@ const RemoveSpendingLimitReview = ({
   const { safe } = useSafeInfo()
 
   useEffect(() => {
-    if (!safe.modules?.length) return
+    if (!safe.modules?.length) {
+      return
+    }
 
     const spendingLimitAddress = getDeployedSpendingLimitModuleAddress(chainId, safe.modules)
-    if (!spendingLimitAddress) return
+    if (!spendingLimitAddress) {
+      return
+    }
 
     const spendingLimitInterface = getSpendingLimitInterface()
     const txData = spendingLimitInterface.encodeFunctionData('deleteAllowance', [

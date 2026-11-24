@@ -33,7 +33,9 @@ const OnlyOwnerOrProposer = ({ children, placement = 'bottom' }: OnlyOwnerOrProp
     }
   }, [isSafeOwner, isProposer, wallet])
 
-  if (!message) return children(true)
+  if (!message) {
+    return children(true)
+  }
 
   return (
     <Tooltip>

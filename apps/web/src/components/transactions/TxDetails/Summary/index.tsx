@@ -30,7 +30,9 @@ interface Props {
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
   const feesData = useHistoryFeesBreakdown(txDetails)
 
-  if (!feesData) return null
+  if (!feesData) {
+    return null
+  }
 
   return <HistoryFeesAccordion data={feesData} txInfo={txDetails.txInfo} />
 }

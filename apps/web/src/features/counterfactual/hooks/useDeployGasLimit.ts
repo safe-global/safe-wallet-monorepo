@@ -31,7 +31,9 @@ const useDeployGasLimit = (safeTx?: SafeTransaction) => {
   const chainId = useChainId()
 
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<DeployGasLimitProps | undefined>(async () => {
-    if (!wallet || !onboard) return
+    if (!wallet || !onboard) {
+      return
+    }
 
     const sdk = await getSafeSDKWithSigner(wallet.provider)
 
@@ -81,7 +83,9 @@ export const estimateBatchDeploymentTransaction = async (
   const simulateTxAccessorDeployment = getSimulateTxAccessorDeployment({ version: safeVersion })
   const simulateTxAccessorAddress =
     customContracts?.simulateTxAccessorAddress ?? simulateTxAccessorDeployment?.defaultAddress
-  if (!simulateTxAccessorAddress) throw new Error('SimulateTxAccessor deployment not found')
+  if (!simulateTxAccessorAddress) {
+    throw new Error('SimulateTxAccessor deployment not found')
+  }
   const simulateTxAccessorIface = new Interface(SIMULATE_TX_ACCESSOR_ABI)
 
   // 1. Get Deploy tx

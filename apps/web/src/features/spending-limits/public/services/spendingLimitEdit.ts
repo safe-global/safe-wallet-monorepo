@@ -62,9 +62,11 @@ export const buildSpendingLimitEdit = (
   // Each row of the form against the limit the Safe already holds for that same spender and token.
   for (const allowance of desired) {
     const existing = onChain.find((limit) => isSpendingLimitFor(limit, allowance.beneficiary, allowance.tokenAddress))
-    if (!existing) added.push(allowance)
-    else if (!isSameAllowance({ amount: allowance.amount, resetTime: allowance.resetTime }, existing))
+    if (!existing) {
+      added.push(allowance)
+    } else if (!isSameAllowance({ amount: allowance.amount, resetTime: allowance.resetTime }, existing)) {
       modified.push(allowance)
+    }
   }
 
   // The other direction: a limit the chain holds that no row of the form still claims.

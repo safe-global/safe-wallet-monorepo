@@ -47,7 +47,9 @@ const StepUpDialog = (): ReactElement | null => {
   const isOpen = status !== 'idle'
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      return
+    }
 
     return listenForStepUp((outcome) => {
       if (outcome === 'failed') {
@@ -58,7 +60,9 @@ const StepUpDialog = (): ReactElement | null => {
     })
   }, [isOpen, dispatch])
 
-  if (!isOpen) return null
+  if (!isOpen) {
+    return null
+  }
 
   const onVerify = () => {
     dispatch(openStepUpPopup() ? stepUpPopupOpened() : stepUpPopupBlocked())

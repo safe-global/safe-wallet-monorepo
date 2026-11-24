@@ -65,7 +65,9 @@ describe('spaceQueuePollingSlice', () => {
     answerWith([429, 503, 500])
     const store = makeStore()
 
-    for (let i = 0; i < 3; i++) await request(store, unfiltered)
+    for (let i = 0; i < 3; i++) {
+      await request(store, unfiltered)
+    }
 
     expect(failuresOf(store, unfiltered)).toBe(3)
   })
@@ -74,7 +76,9 @@ describe('spaceQueuePollingSlice', () => {
     answerWith([401, 403, 404])
     const store = makeStore()
 
-    for (let i = 0; i < 3; i++) await request(store, unfiltered)
+    for (let i = 0; i < 3; i++) {
+      await request(store, unfiltered)
+    }
 
     expect(failuresOf(store, unfiltered)).toBe(0)
   })
@@ -123,7 +127,9 @@ describe('spaceQueuePollingSlice', () => {
     answerWith([503, 503, 200])
     const store = makeStore()
 
-    for (let i = 0; i < 3; i++) await request(store, unfiltered)
+    for (let i = 0; i < 3; i++) {
+      await request(store, unfiltered)
+    }
 
     expect(failuresOf(store, unfiltered)).toBe(0)
   })

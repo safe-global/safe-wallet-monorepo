@@ -18,7 +18,9 @@ export function useCssHeightVar(cssVar: string) {
       detachRef.current = null
 
       // No ResizeObserver (SSR / jsdom): keep the static default from globals.css.
-      if (typeof ResizeObserver === 'undefined') return
+      if (typeof ResizeObserver === 'undefined') {
+        return
+      }
 
       const root = document.documentElement
       if (!node) {

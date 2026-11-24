@@ -10,9 +10,15 @@ const STATUS_TONES: Record<QueueStatus, 'success' | 'warning'> = {
 }
 
 const getStatusLabel = (status: QueueStatus, nextNonce: number | undefined): string => {
-  if (status === 'execute') return 'Execute'
-  if (status === 'sign') return 'Sign'
-  if (status === 'waiting') return 'Waiting'
+  if (status === 'execute') {
+    return 'Execute'
+  }
+  if (status === 'sign') {
+    return 'Sign'
+  }
+  if (status === 'waiting') {
+    return 'Waiting'
+  }
   return nextNonce === undefined ? 'Blocked' : `Blocked by #${nextNonce}`
 }
 

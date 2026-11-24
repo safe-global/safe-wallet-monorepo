@@ -32,7 +32,9 @@ const SafeCreationNetworkInput = ({
 
   const updateCurrentNetwork = useCallback(
     (chains: Chain[]) => {
-      if (chains.length !== 1) return
+      if (chains.length !== 1) {
+        return
+      }
       const href = buildChainSwitchHref(router, safeAddress, chains[0])
       router.replace(href)
     },
@@ -49,7 +51,9 @@ const SafeCreationNetworkInput = ({
       const firstSelectedNetwork = selectedNetworks[0]
 
       // do not allow multi chain safes for advanced setup flow.
-      if (isAdvancedFlow) return optionNetwork.chainId != firstSelectedNetwork.chainId
+      if (isAdvancedFlow) {
+        return optionNetwork.chainId != firstSelectedNetwork.chainId
+      }
 
       // Check required feature toggles
       const optionIsSelectedNetwork = firstSelectedNetwork.chainId === optionNetwork.chainId
@@ -89,7 +93,9 @@ const SafeCreationNetworkInput = ({
         )
 
       // Only 1.4.1+ safes with canonical deployment addresses and SafeToL2Setup can be deployed as part of a multichain group
-      if (!selectedHasCanonicalSingletonDeployment) return !optionIsSelectedNetwork
+      if (!selectedHasCanonicalSingletonDeployment) {
+        return !optionIsSelectedNetwork
+      }
       return !optionHasCanonicalSingletonDeployment
     },
     [isAdvancedFlow, selectedNetworks],

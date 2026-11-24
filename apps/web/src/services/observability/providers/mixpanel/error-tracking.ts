@@ -38,7 +38,9 @@ const sentErrors = new Map<string, DedupeState>()
  * Only present keys are emitted, so events stay compact and free of `undefined`.
  */
 const mapContext = (context?: ErrorContext): Record<string, string | number | boolean> => {
-  if (!context) return {}
+  if (!context) {
+    return {}
+  }
   return {
     ...(context.txHash && { [MixpanelEventParams.TX_HASH]: context.txHash }),
     ...(context.targetContractLabel && { [MixpanelEventParams.TARGET_CONTRACT_LABEL]: context.targetContractLabel }),
@@ -80,7 +82,9 @@ const pruneSentErrors = (now: number): void => {
   }
 
   for (const key of sentErrors.keys()) {
-    if (sentErrors.size <= MAX_TRACKED_ERRORS) break
+    if (sentErrors.size <= MAX_TRACKED_ERRORS) {
+      break
+    }
     forget(key)
   }
 }
@@ -96,7 +100,9 @@ const pruneSentErrors = (now: number): void => {
 const scheduleFlush = (key: string): ReturnType<typeof setTimeout> =>
   setTimeout(() => {
     const state = sentErrors.get(key)
-    if (!state) return
+    if (!state) {
+      return
+    }
 
     if (state.suppressed === 0) {
       sentErrors.delete(key)

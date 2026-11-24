@@ -24,8 +24,12 @@ type MonitorTarget = { type: 'tx'; id: string } | { type: 'relay'; id: string }
 
 /** What a pending tx is currently watched by: its on-chain hash, or the relay task id */
 const getMonitorTarget = (pendingTx: PendingTx): MonitorTarget | undefined => {
-  if (pendingTx.status === PendingStatus.PROCESSING) return { type: 'tx', id: pendingTx.txHash }
-  if (pendingTx.status === PendingStatus.RELAYING) return { type: 'relay', id: pendingTx.taskId }
+  if (pendingTx.status === PendingStatus.PROCESSING) {
+    return { type: 'tx', id: pendingTx.txHash }
+  }
+  if (pendingTx.status === PendingStatus.RELAYING) {
+    return { type: 'relay', id: pendingTx.taskId }
+  }
 }
 
 export const useTxMonitor = (): void => {
@@ -130,7 +134,9 @@ const useTxPendingStatuses = (): void => {
       const txId = 'txId' in detail && detail.txId
       const nonce = 'nonce' in detail ? detail.nonce : undefined
 
-      if (!txId || nonce === undefined) return
+      if (!txId || nonce === undefined) {
+        return
+      }
 
       // If we have future issues with statuses, we should refactor `useTxPendingStatuses`
       // @see https://github.com/safe-global/safe-wallet-web/issues/1754
@@ -157,7 +163,9 @@ const useTxPendingStatuses = (): void => {
       const txId = 'txId' in detail && detail.txId
       const nonce = 'nonce' in detail ? detail.nonce : undefined
 
-      if (!txId || nonce === undefined) return
+      if (!txId || nonce === undefined) {
+        return
+      }
 
       // If we have future issues with statuses, we should refactor `useTxPendingStatuses`
       // @see https://github.com/safe-global/safe-wallet-web/issues/1754
@@ -203,7 +211,9 @@ const useTxPendingStatuses = (): void => {
       const txId = 'txId' in detail && detail.txId
       const nonce = 'nonce' in detail ? detail.nonce : undefined
 
-      if (!txId || nonce === undefined) return
+      if (!txId || nonce === undefined) {
+        return
+      }
 
       // If we have future issues with statuses, we should refactor `useTxPendingStatuses`
       // @see https://github.com/safe-global/safe-wallet-web/issues/1754
@@ -229,7 +239,9 @@ const useTxPendingStatuses = (): void => {
       const txId = 'txId' in detail && detail.txId
       const nonce = 'nonce' in detail ? detail.nonce : undefined
 
-      if (!txId || nonce === undefined) return
+      if (!txId || nonce === undefined) {
+        return
+      }
 
       // If we have future issues with statuses, we should refactor `useTxPendingStatuses`
       // @see https://github.com/safe-global/safe-wallet-web/issues/1754
@@ -255,7 +267,9 @@ const useTxPendingStatuses = (): void => {
       const txId = 'txId' in detail && detail.txId
       const nonce = 'nonce' in detail ? detail.nonce : undefined
 
-      if (!txId || nonce === undefined) return
+      if (!txId || nonce === undefined) {
+        return
+      }
 
       // If we have future issues with statuses, we should refactor `useTxPendingStatuses`
       // @see https://github.com/safe-global/safe-wallet-web/issues/1754
@@ -281,7 +295,9 @@ const useTxPendingStatuses = (): void => {
       const txId = detail.txId
       const nonce = detail.nonce
 
-      if (!txId || nonce === undefined) return
+      if (!txId || nonce === undefined) {
+        return
+      }
 
       // If we have future issues with statuses, we should refactor `useTxPendingStatuses`
       // @see https://github.com/safe-global/safe-wallet-web/issues/1754
@@ -310,7 +326,9 @@ const useTxPendingStatuses = (): void => {
       txSubscribe(event, (detail) => {
         // All pending txns should have a txId
         const txId = 'txId' in detail && detail.txId
-        if (!txId) return
+        if (!txId) {
+          return
+        }
 
         // Clear the pending status if the tx is no longer pending
         if ('txHash' in detail && detail.txHash) {

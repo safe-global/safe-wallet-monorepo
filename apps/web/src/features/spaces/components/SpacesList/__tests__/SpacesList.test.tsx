@@ -156,8 +156,12 @@ describe('SpacesList — auth/expiry state rendering', () => {
   // independently; hydration defaults to true (a settled store).
   const setAuth = (signedIn: boolean, storeHydrated = true) => {
     mockUseAppSelector.mockImplementation((selector: unknown) => {
-      if (selector === isAuthenticated) return signedIn
-      if (selector === selectIsStoreHydrated) return storeHydrated
+      if (selector === isAuthenticated) {
+        return signedIn
+      }
+      if (selector === selectIsStoreHydrated) {
+        return storeHydrated
+      }
       return undefined
     })
   }

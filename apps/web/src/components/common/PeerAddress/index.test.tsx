@@ -40,8 +40,11 @@ describe('PeerAddress', () => {
 
       expect(writeText).toHaveBeenCalledWith(address)
     } finally {
-      if (originalClipboard) Object.defineProperty(navigator, 'clipboard', originalClipboard)
-      else Reflect.deleteProperty(navigator, 'clipboard')
+      if (originalClipboard) {
+        Object.defineProperty(navigator, 'clipboard', originalClipboard)
+      } else {
+        Reflect.deleteProperty(navigator, 'clipboard')
+      }
     }
   })
 

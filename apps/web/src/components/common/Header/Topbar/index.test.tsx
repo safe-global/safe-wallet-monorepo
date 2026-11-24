@@ -543,7 +543,9 @@ describe('Topbar', () => {
   describe('single-row layout on logo routes', () => {
     const groups = (container: HTMLElement) => {
       const header = container.querySelector('header')
-      if (!header) throw new Error('header not found')
+      if (!header) {
+        throw new Error('header not found')
+      }
       const [context, actions] = [...header.children].slice(-2)
       return { header, context, actions }
     }

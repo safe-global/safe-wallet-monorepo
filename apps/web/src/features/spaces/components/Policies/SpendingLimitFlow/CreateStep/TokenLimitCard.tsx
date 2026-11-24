@@ -60,7 +60,9 @@ const HelperLine = ({ children }: { children?: ReactNode }): ReactElement => (
 
 const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): ReactElement | null => {
   const fiat = computeFiatValue(parseFloat(amount), token.fiatConversion)
-  if (fiat === null) return null
+  if (fiat === null) {
+    return null
+  }
 
   return (
     <span data-testid="amount-fiat">
@@ -70,7 +72,9 @@ const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): Re
 }
 
 const SelectedTokenHelper = ({ error, token }: { error?: string; token?: TokenOption }): ReactElement | null => {
-  if (error) return <span data-testid="token-error">{error}</span>
+  if (error) {
+    return <span data-testid="token-error">{error}</span>
+  }
 
   if (token?.untrusted) {
     return (
@@ -80,7 +84,9 @@ const SelectedTokenHelper = ({ error, token }: { error?: string; token?: TokenOp
     )
   }
 
-  if (token?.balance === undefined) return null
+  if (token?.balance === undefined) {
+    return null
+  }
 
   return (
     <span data-testid="token-balance">
@@ -145,14 +151,18 @@ const TokenLimitCard = ({
 
   // The amount's rule needs the token's decimals, so re-check a typed amount when the token changes.
   useEffect(() => {
-    if (getValues(amountPath)) trigger(amountPath)
+    if (getValues(amountPath)) {
+      trigger(amountPath)
+    }
   }, [decimals, amountPath, getValues, trigger])
 
   // Keyed on the exclusions' values, not the array: every spender keystroke produces a new one, and re-validating
   // on each would show this row's errors before it has been filled in.
   const existingTokensKey = existingTokens.join(',')
   useEffect(() => {
-    if (existingLimits !== undefined && getValues(tokenPath)) trigger(tokenPath)
+    if (existingLimits !== undefined && getValues(tokenPath)) {
+      trigger(tokenPath)
+    }
   }, [existingTokensKey, existingLimits, tokenPath, getValues, trigger])
 
   // Read at validation time: a memo of the sibling rows would be one render behind.
@@ -162,7 +172,9 @@ const TokenLimitCard = ({
       .filter((_, index) => index !== limitIndex)
     const spender = getValues(spenderAddressPath(spenderIndex)) ?? ''
 
-    if (isEditMode) return validateUniqueToken(tokenAddress, siblingTokens)
+    if (isEditMode) {
+      return validateUniqueToken(tokenAddress, siblingTokens)
+    }
 
     return (
       validateUniqueToken(tokenAddress, siblingTokens) ?? validateNoExistingLimit(tokenAddress, spender, existingLimits)

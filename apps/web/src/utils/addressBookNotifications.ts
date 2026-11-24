@@ -24,7 +24,9 @@ export const getImportSuccessMessage = ({
   const contactLabel = count === 1 ? 'contact' : 'contacts'
   const base = `${count} ${contactLabel} imported to ${bookLabel}`
 
-  if (networkCount <= 1) return base
+  if (networkCount <= 1) {
+    return base
+  }
   const acrossNetworks = `${base} across ${networkCount} networks`
   return showsEveryNetwork ? acrossNetworks : `${acrossNetworks}. Only contacts on the current network are shown here`
 }

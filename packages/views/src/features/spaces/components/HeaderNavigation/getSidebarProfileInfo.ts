@@ -5,7 +5,9 @@ const MAX_LOCAL_PART = 8
 
 const shortenEmail = (email: string): string => {
   const atIndex = email.lastIndexOf('@')
-  if (atIndex <= MAX_LOCAL_PART) return email
+  if (atIndex <= MAX_LOCAL_PART) {
+    return email
+  }
 
   return `${email.slice(0, MAX_LOCAL_PART)}…${email.slice(atIndex)}`
 }

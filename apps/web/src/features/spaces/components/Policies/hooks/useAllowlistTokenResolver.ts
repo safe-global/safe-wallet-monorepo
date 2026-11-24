@@ -31,7 +31,9 @@ const toResolver = (
 
   args.forEach(({ chainId }, index) => {
     for (const token of responses[index] ?? []) {
-      if (token.type !== TokenType.ERC20) continue
+      if (token.type !== TokenType.ERC20) {
+        continue
+      }
       byKey.set(toChainAddressKey(chainId, token.address), {
         address: token.address,
         symbol: token.symbol,

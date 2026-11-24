@@ -64,11 +64,18 @@ const ProUpsell = (): ReactElement => {
 }
 
 const FeeCardFooter = ({ footer }: { footer: FeePayerFooter }): ReactElement | null => {
-  if (footer.kind === 'none') return null
-  if (footer.kind === 'upsell') return <ProUpsell />
-  if (footer.kind === 'campaign') return <CampaignQuota left={footer.left} limit={footer.limit} />
-  if (footer.isSubscription && footer.left !== null && footer.quota !== null)
+  if (footer.kind === 'none') {
+    return null
+  }
+  if (footer.kind === 'upsell') {
+    return <ProUpsell />
+  }
+  if (footer.kind === 'campaign') {
+    return <CampaignQuota left={footer.left} limit={footer.limit} />
+  }
+  if (footer.isSubscription && footer.left !== null && footer.quota !== null) {
     return <SponsoredQuota left={footer.left} resetsAt={formatResetsAt(footer.resetsAt)} />
+  }
   return (
     <SponsoredTxsCounter
       left={footer.left}
@@ -90,7 +97,9 @@ const GasPayerSelector = ({
 }): ReactElement | null => {
   const currency = useAppSelector(selectCurrency)
   const { view } = selection
-  if (!view) return null
+  if (!view) {
+    return null
+  }
 
   return (
     <GasPayerSelectorView

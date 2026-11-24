@@ -18,7 +18,9 @@ const EarnPage = () => {
     )
   }
 
-  if (isConsentAccepted === undefined) return null
+  if (isConsentAccepted === undefined) {
+    return null
+  }
 
   return (
     <>

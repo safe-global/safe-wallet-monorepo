@@ -32,7 +32,9 @@ import type {
 
 const decodeOne = <T extends NormalizedCheckEvent>(log: RawLog): T => {
   const [event] = decodeLogs([log])
-  if (!event) throw new Error('checkEvents builder produced a log the decoder rejects')
+  if (!event) {
+    throw new Error('checkEvents builder produced a log the decoder rejects')
+  }
   return event as T
 }
 

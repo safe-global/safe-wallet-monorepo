@@ -7,7 +7,9 @@ const NetworkWarning = ({ action }: { action?: string }) => {
   const chain = useCurrentChain()
   const isWrongChain = useIsWrongChain()
 
-  if (!chain || !isWrongChain) return null
+  if (!chain || !isWrongChain) {
+    return null
+  }
 
   return (
     <Alert variant="warning" outlined={false}>

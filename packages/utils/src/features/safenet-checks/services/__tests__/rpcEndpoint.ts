@@ -59,9 +59,15 @@ const filterLogs = (logs: RawLog[], filter: GetLogsFilter): RawLog[] => {
       ? null
       : ((Array.isArray(filter.topics[1]) ? filter.topics[1] : [filter.topics[1]]) as string[])
   return logs.filter((log) => {
-    if (filter.address && (log.address ?? '').toLowerCase() !== filter.address.toLowerCase()) return false
-    if (!topic0s.includes(log.topics[0])) return false
-    if (topic1s && !topic1s.includes(log.topics[1])) return false
+    if (filter.address && (log.address ?? '').toLowerCase() !== filter.address.toLowerCase()) {
+      return false
+    }
+    if (!topic0s.includes(log.topics[0])) {
+      return false
+    }
+    if (topic1s && !topic1s.includes(log.topics[1])) {
+      return false
+    }
     return log.blockNumber >= filter.fromBlock && log.blockNumber <= filter.toBlock
   })
 }
@@ -73,7 +79,9 @@ export const makeEndpoint = (config: RpcConfig) => {
   const requestReads: string[] = []
 
   const blockTimestamp = (number: number): number => {
-    if (config.timestampAt) return config.timestampAt(number)
+    if (config.timestampAt) {
+      return config.timestampAt(number)
+    }
     const head = config.head ?? 0
     return Math.max(0, (config.headTimestamp ?? 1_000_000) - (head - number) * (config.blockTimeSeconds ?? 5))
   }
@@ -144,13 +152,17 @@ export const makeEndpoint = (config: RpcConfig) => {
           )
         }
         if (selector === coordinatorRead.getFunction('groupKey')!.selector) {
-          if (config.failGroupKey) return err('group key not ready')
+          if (config.failGroupKey) {
+            return err('group key not ready')
+          }
           const gk = config.groupKey ?? { x: '1', y: '2' }
           return ok(coordinatorRead.encodeFunctionResult('groupKey', [[BigInt(gk.x), BigInt(gk.y)]]))
         }
         if (selector === oracleRead.getFunction('getRequest')!.selector) {
           requestReads.push(oracleRead.decodeFunctionData('getRequest', call.data)[0])
-          if (config.requestState === undefined) return err('unexpected eth_call')
+          if (config.requestState === undefined) {
+            return err('unexpected eth_call')
+          }
           const progress = [config.requestState, 400_000n, 49_322_741, 2, 2, 1, 1, 0]
           return ok(oracleRead.encodeFunctionResult('getRequest', [[REQUEST_TERMS, progress]]))
         }

@@ -40,7 +40,9 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
   }, [isLoading, backendApp, safeApp, backendAppLoading, chain])
 
   const handleConnectWallet = async () => {
-    if (!onboard) return
+    if (!onboard) {
+      return
+    }
 
     trackEvent(OVERVIEW_EVENTS.OPEN_ONBOARD)
 

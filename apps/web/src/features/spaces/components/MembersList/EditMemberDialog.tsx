@@ -95,7 +95,9 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
           updateRoleDto: { role: roleValue },
         })
 
-        if (isElevationRequiredError(error)) return
+        if (isElevationRequiredError(error)) {
+          return
+        }
         if (error) {
           setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
           return

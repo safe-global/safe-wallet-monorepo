@@ -89,7 +89,9 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   const setTxFlow = useCallback(
     (newTxFlow: TxModalContextType['txFlow'], newOnClose?: () => void, newShouldWarn?: boolean) => {
       const prev = flowRef.current
-      if (prev === newTxFlow) return
+      if (prev === newTxFlow) {
+        return
+      }
 
       // A new flow replacing one in progress discards it — success screens are a continuation of the
       // flow that opened them, so they are exempt.
@@ -114,7 +116,9 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
       ? (proceed) =>
           requestDiscard((wasParked) => {
             closeFlow()
-            if (wasParked) proceed()
+            if (wasParked) {
+              proceed()
+            }
           })
       : undefined,
   )
@@ -134,7 +138,9 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
       <AlertDialog
         open={!!pendingDiscard}
         onOpenChange={(nextOpen) => {
-          if (!nextOpen) setPendingDiscard(null)
+          if (!nextOpen) {
+            setPendingDiscard(null)
+          }
         }}
       >
         {/* The tx dialog is z-index 1300 below 900px, which would paint over AlertDialogContent's

@@ -41,7 +41,9 @@ const ExecuteThroughRole = ({
   )
 
   // `role` is guaranteed by `useShouldRegisterSlot`, but narrow the type explicitly
-  if (!role) return null
+  if (!role) {
+    return null
+  }
 
   return (
     <ExecuteThroughRoleForm

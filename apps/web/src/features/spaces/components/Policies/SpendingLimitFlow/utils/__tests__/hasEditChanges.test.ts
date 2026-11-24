@@ -30,8 +30,11 @@ const form = (rows: Array<[string, string, string, string]>): SpendingLimitPolic
   for (const [address, tokenAddress, amount, resetTime] of rows) {
     const card = spenders.find((s) => s.address === address)
     const limit = { tokenAddress, amount, resetTime }
-    if (card) card.limits.push(limit)
-    else spenders.push({ address, limits: [limit] })
+    if (card) {
+      card.limits.push(limit)
+    } else {
+      spenders.push({ address, limits: [limit] })
+    }
   }
   return { safe: SAFE, spenders }
 }

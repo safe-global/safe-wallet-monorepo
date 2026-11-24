@@ -135,7 +135,9 @@ export function NestedSafesList({
 
   // Helper to convert NestedSafeWithStatus to SafeItemWithStatus
   const toSafeItem = (safe: NestedSafeWithStatus): SafeItemWithStatus | null => {
-    if (!chain) return null
+    if (!chain) {
+      return null
+    }
     return {
       address: safe.address,
       chainId: chain.chainId,
@@ -149,7 +151,9 @@ export function NestedSafesList({
   }
 
   const safeItems: SafeItemWithStatus[] = useMemo(() => {
-    if (!chain) return []
+    if (!chain) {
+      return []
+    }
     return safesWithStatus.map((safe) => ({
       address: safe.address,
       chainId: chain.chainId,

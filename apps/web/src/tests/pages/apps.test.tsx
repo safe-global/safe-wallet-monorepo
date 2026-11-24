@@ -901,7 +901,9 @@ describe('AppsPage', () => {
 const getSafeAppCard = (appName: string): HTMLElement => {
   const title = screen.getByText(appName, { selector: '[data-variant="paragraph-bold"]' })
   const card = title.closest('[data-slot="card"]')
-  if (!card) throw new Error(`Safe App card not found: ${appName}`)
+  if (!card) {
+    throw new Error(`Safe App card not found: ${appName}`)
+  }
   return card as HTMLElement
 }
 
@@ -935,7 +937,9 @@ const serveSafeApps = (safeApps: SafeApp[]): void => {
 // Each section is a list header followed by the list of its app cards.
 const getAppListBelow = (sectionHeading: HTMLElement): HTMLElement => {
   const list = sectionHeading.nextElementSibling
-  if (!(list instanceof HTMLElement)) throw new Error(`No app list below: ${sectionHeading.textContent}`)
+  if (!(list instanceof HTMLElement)) {
+    throw new Error(`No app list below: ${sectionHeading.textContent}`)
+  }
   return list
 }
 

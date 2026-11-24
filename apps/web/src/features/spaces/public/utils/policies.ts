@@ -166,7 +166,9 @@ export const mockPendingPolicy = (overrides: Partial<QueuedSpendingLimitPolicy> 
     proposedAt: 1_781_300_000,
     ...overrides,
   }
-  if (policy.operation === 'remove') return policy
+  if (policy.operation === 'remove') {
+    return policy
+  }
 
   // mapPendingPolicies builds a queued set-allowance from scratch, so it has no createdAt.
   const spenders = policy.data.spenders.map((spender) => ({

@@ -14,7 +14,9 @@ export const chainLabel = (option: SafeAccountOption): string => option.chain?.c
 /** Undefined while nothing has resolved: an unknown balance must read empty, not a confident `0`. */
 const totalFiat = (options: SafeAccountOption[]): string | undefined => {
   const resolved = options.filter((option) => option.fiatTotal !== undefined)
-  if (resolved.length === 0) return undefined
+  if (resolved.length === 0) {
+    return undefined
+  }
 
   return String(resolved.reduce((sum, option) => sum + Number(option.fiatTotal), 0))
 }

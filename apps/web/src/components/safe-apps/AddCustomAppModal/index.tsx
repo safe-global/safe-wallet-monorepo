@@ -71,7 +71,9 @@ export const AddCustomAppModal = ({ open, onClose, onSave, safeAppsList }: Props
   const debouncedUrl = useDebounce(trimTrailingSlash(appUrl || ''), 300)
 
   const [safeApp, manifestError] = useAsync<SafeAppData | undefined>(() => {
-    if (!isValidURL(debouncedUrl)) return
+    if (!isValidURL(debouncedUrl)) {
+      return
+    }
 
     return fetchSafeAppFromManifest(debouncedUrl, currentChain?.chainId || '')
   }, [currentChain, debouncedUrl])

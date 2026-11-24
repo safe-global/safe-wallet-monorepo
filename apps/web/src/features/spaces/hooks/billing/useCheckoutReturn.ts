@@ -88,7 +88,9 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
   useEffect(() => setIsSubscriptionDone(isComplete), [isComplete])
 
   useEffect(() => {
-    if (!sessionId || !(isComplete || isCanceled) || trackedSessions.has(sessionId)) return
+    if (!sessionId || !(isComplete || isCanceled) || trackedSessions.has(sessionId)) {
+      return
+    }
     trackedSessions.add(sessionId)
     trackEvent(SAFE_PRO_EVENTS.CHECKOUT_RETURNED, {
       [MixpanelEventParams.OUTCOME]: isComplete ? CheckoutOutcome.SUCCESS : CheckoutOutcome.CANCELLED,
@@ -102,13 +104,17 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
   }, [sessionId, isComplete, isCanceled])
 
   useEffect(() => {
-    if (deadline === undefined || isComplete) return
+    if (deadline === undefined || isComplete) {
+      return
+    }
     const id = setTimeout(() => setNow(Date.now()), Math.max(deadline - Date.now(), 0))
     return () => clearTimeout(id)
   }, [deadline, isComplete])
 
   const retry = () => {
-    if (sessionId) setDeadline(sessionId, Date.now() + POLL_TIMEOUT)
+    if (sessionId) {
+      setDeadline(sessionId, Date.now() + POLL_TIMEOUT)
+    }
   }
 
   const dismiss = () => {
@@ -118,7 +124,9 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
 
   // Back from Stripe is silent: drop the session id so the Workspace shows whatever it showed before checkout.
   useEffect(() => {
-    if (!isCanceled || !sessionId || dismissedSessions.has(sessionId)) return
+    if (!isCanceled || !sessionId || dismissedSessions.has(sessionId)) {
+      return
+    }
     dismissedSessions.add(sessionId)
     dismiss()
   }, [isCanceled, sessionId]) // eslint-disable-line react-hooks/exhaustive-deps -- dismiss is a new function every render

@@ -36,7 +36,9 @@ const useSimulation = (): UseSimulationReturn => {
   const [simulationSupported = false] = useAsync(() => isSimulationSupported(safe.chainId.toString()), [safe.chainId])
 
   const simulateTransaction = useCallback(async () => {
-    if (!provider) return
+    if (!provider) {
+      return
+    }
 
     setSimulationRequestStatus(FETCH_STATUS.LOADING)
     try {

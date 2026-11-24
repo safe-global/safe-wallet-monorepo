@@ -28,8 +28,11 @@ const SurveyStep = (): ReactElement => {
 
   const toggle = (key: string) => {
     const next = new Set(selected)
-    if (next.has(key)) next.delete(key)
-    else next.add(key)
+    if (next.has(key)) {
+      next.delete(key)
+    } else {
+      next.add(key)
+    }
     setPicked(Array.from(next))
   }
 

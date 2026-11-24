@@ -20,7 +20,9 @@ const SafeAppsDashboardSection = () => {
 
   useEffect(() => {
     const list = listRef.current
-    if (!list) return
+    if (!list) {
+      return
+    }
 
     setCanScrollLeft(list.scrollLeft > 0)
     setCanScrollRight(list.scrollLeft + list.clientWidth < list.scrollWidth)
@@ -28,10 +30,14 @@ const SafeAppsDashboardSection = () => {
 
   const scrollList = (direction: 'left' | 'right') => {
     const list = listRef.current
-    if (!list) return
+    if (!list) {
+      return
+    }
 
     const firstItem = list.firstElementChild as HTMLElement | null
-    if (!firstItem) return
+    if (!firstItem) {
+      return
+    }
 
     const itemWidth = firstItem.offsetWidth + ITEM_GAP
     const itemsInView = Math.max(1, Math.floor(list.clientWidth / itemWidth))
@@ -46,7 +52,9 @@ const SafeAppsDashboardSection = () => {
     setCanScrollRight(newScrollLeft + list.clientWidth < list.scrollWidth)
   }
 
-  if (rankedSafeApps.length === 0) return null
+  if (rankedSafeApps.length === 0) {
+    return null
+  }
 
   const showNav = canScrollLeft || canScrollRight
 

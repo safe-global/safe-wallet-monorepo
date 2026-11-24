@@ -27,7 +27,9 @@ export const useStepAdvance = (stepId: WizardStepId) => {
     (changes: DraftChanges) => {
       if (isLastStep) {
         // The seat cap needs the sizes; they load on the plan step, so a submit before them is ignored.
-        if (isSafePro && !sizes) return
+        if (isSafePro && !sizes) {
+          return
+        }
         // The last step validates itself in its form, which also knows when its answers are optional.
         const earlierSteps = steps.filter((step) => step.id !== stepId)
         const invalid = findFirstInvalidStep(earlierSteps, { ...draft, ...changes }, { sizes, ownAddresses })

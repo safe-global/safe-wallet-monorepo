@@ -22,7 +22,9 @@ export const scheduleWhileVisible = (delay: number, onTimeout: () => void): (() 
   // (re)starts the full delay, becoming hidden just cancels it.
   const restartCountdown = () => {
     clearTimeout(timer)
-    if (document.visibilityState !== 'visible') return
+    if (document.visibilityState !== 'visible') {
+      return
+    }
     timer = setTimeout(onTimeout, delay)
   }
 

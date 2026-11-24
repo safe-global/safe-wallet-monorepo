@@ -13,7 +13,9 @@ export const aggregateBalance = (
 ): number =>
   safes.reduce((total, { chainId, address }) => {
     const usesSummary = summaries.isEnabled(chainId)
-    if (usesSummary && testnetChainIds.has(chainId)) return total
+    if (usesSummary && testnetChainIds.has(chainId)) {
+      return total
+    }
 
     const overview = overviews?.find((o) => o.chainId === chainId && sameAddress(o.address.value, address))
     const fiatTotal =

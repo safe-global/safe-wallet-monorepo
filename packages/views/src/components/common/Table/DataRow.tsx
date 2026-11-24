@@ -8,7 +8,9 @@ type DataRowProps = {
 }
 
 export const DataRow = ({ datatestid, title, children }: DataRowProps): ReactElement | null => {
-  if (children == undefined) return null
+  if (children == undefined) {
+    return null
+  }
 
   return (
     <FieldsGrid testId={datatestid || ''} title={title}>

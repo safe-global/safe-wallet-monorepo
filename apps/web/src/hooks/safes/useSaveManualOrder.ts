@@ -17,9 +17,13 @@ export const useSaveManualOrder = (scope?: string) => {
 
   return useCallback(
     (order: string[]) => {
-      if (!scope) return
+      if (!scope) {
+        return
+      }
       dispatch(setManualOrder({ scope, order }))
-      if (orderBy !== OrderByOption.MANUAL) dispatch(setOrderByPreference({ orderBy: OrderByOption.MANUAL }))
+      if (orderBy !== OrderByOption.MANUAL) {
+        dispatch(setOrderByPreference({ orderBy: OrderByOption.MANUAL }))
+      }
     },
     [dispatch, scope, orderBy],
   )

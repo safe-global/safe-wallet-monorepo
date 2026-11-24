@@ -54,7 +54,9 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const offersTrial = Boolean(createdSpaceId) && trialLock.isLocked && trialLock.reason === 'trial-offered'
   const isTrialCheckFailed = Boolean(createdSpaceId) && trialLock.isError
   useEffect(() => {
-    if (createdSpaceId && !trialLock.isResolving && !trialLock.isError && !offersTrial) goToSelectSafes(createdSpaceId)
+    if (createdSpaceId && !trialLock.isResolving && !trialLock.isError && !offersTrial) {
+      goToSelectSafes(createdSpaceId)
+    }
   }, [createdSpaceId, trialLock.isResolving, trialLock.isError, offersTrial, goToSelectSafes])
   const watchedName = useWatch({ control, name: 'name' }) ?? ''
 
@@ -68,7 +70,9 @@ const CreateSpaceOnboarding = (): ReactElement => {
     required: true,
     validate: (value) => {
       const sanitized = sanitizeName(value ?? '')
-      if (sanitized === '') return 'Required'
+      if (sanitized === '') {
+        return 'Required'
+      }
       return validateName(sanitized, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH }) ?? true
     },
   })

@@ -43,7 +43,9 @@ const RefreshPositionsButton = ({
   const isOnCooldown = cooldownUntil !== null && Date.now() < cooldownUntil
 
   useEffect(() => {
-    if (!cooldownUntil) return
+    if (!cooldownUntil) {
+      return
+    }
 
     const remainingTime = cooldownUntil - Date.now()
     if (remainingTime <= 0) {
@@ -68,7 +70,9 @@ const RefreshPositionsButton = ({
   const displayTooltip = isOnCooldown ? defaultTooltip : (tooltip ?? defaultTooltip)
 
   const handleRefresh = useCallback(async () => {
-    if (isLoading || isOnCooldown) return
+    if (isLoading || isOnCooldown) {
+      return
+    }
 
     trackEvent(POSITIONS_EVENTS.POSITIONS_REFRESH_CLICKED, {
       [MixpanelEventParams.ENTRY_POINT]: entryPoint,

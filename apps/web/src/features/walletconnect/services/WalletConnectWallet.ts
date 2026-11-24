@@ -30,7 +30,9 @@ class WalletConnectWallet {
    * Initialize WalletConnect wallet SDK
    */
   public async init() {
-    if (this.web3Wallet) return
+    if (this.web3Wallet) {
+      return
+    }
 
     const core = new Core({
       projectId: WC_PROJECT_ID,

@@ -41,7 +41,9 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
   const onConfirmClick = useCallback(
     async (e: SyntheticEvent) => {
       e.preventDefault()
-      if (!batchTxs.length) return
+      if (!batchTxs.length) {
+        return
+      }
       closeSidebar()
       setTxFlow(<ConfirmBatchFlow onSubmit={clearBatch} />, undefined, false)
     },
@@ -50,14 +52,18 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
 
   // Close sidebar when txFlow modal is opened
   useEffect(() => {
-    if (txFlow) closeSidebar()
+    if (txFlow) {
+      closeSidebar()
+    }
   }, [txFlow, closeSidebar])
 
   return (
     <Sheet
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) closeSidebar()
+        if (!open) {
+          closeSidebar()
+        }
       }}
     >
       <SheetContent

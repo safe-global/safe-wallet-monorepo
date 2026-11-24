@@ -48,10 +48,18 @@ const getTooltip = ({
   detailsStatus: BatchTxDetailsStatus
   allSafePaid: boolean
 }): string => {
-  if (!isBatchable || hasPendingTx || !hasWallet) return NOT_BATCHABLE_TOOLTIP
-  if (detailsStatus === 'loading') return DETAILS_LOADING_TOOLTIP
-  if (detailsStatus === 'error') return DETAILS_ERROR_TOOLTIP
-  if (allSafePaid) return ALL_SAFE_PAID_TOOLTIP
+  if (!isBatchable || hasPendingTx || !hasWallet) {
+    return NOT_BATCHABLE_TOOLTIP
+  }
+  if (detailsStatus === 'loading') {
+    return DETAILS_LOADING_TOOLTIP
+  }
+  if (detailsStatus === 'error') {
+    return DETAILS_ERROR_TOOLTIP
+  }
+  if (allSafePaid) {
+    return ALL_SAFE_PAID_TOOLTIP
+  }
   return BATCHABLE_TOOLTIP
 }
 

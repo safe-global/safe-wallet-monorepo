@@ -108,7 +108,9 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
       )
     }
 
-    if (!exportStatus && !error) return
+    if (!exportStatus && !error) {
+      return
+    }
 
     const url = (exportStatus?.returnValue as CsvExportReturnValue)?.downloadUrl
     if (url) {

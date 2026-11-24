@@ -55,9 +55,15 @@ function getComparator(order: SortDirection, orderBy: string) {
     const bValue = b.cells[orderBy].rawValue
 
     // Handle null/undefined values - always sort to end
-    if (aValue == null) return 1
-    if (bValue == null) return -1
-    if (aValue == null && bValue == null) return 0
+    if (aValue == null) {
+      return 1
+    }
+    if (bValue == null) {
+      return -1
+    }
+    if (aValue == null && bValue == null) {
+      return 0
+    }
 
     // Use existing comparator for non-null values
     return order === 'desc' ? descendingComparator(aValue, bValue) : -descendingComparator(aValue, bValue)
@@ -163,7 +169,9 @@ function EnhancedTable({ rows, headCells, compact, footer, panel }: EnhancedTabl
   }
 
   const handleChangeRowsPerPage = (value: string | null) => {
-    if (value == null) return
+    if (value == null) {
+      return
+    }
     setRowsPerPage(parseInt(value, 10))
     setPage(0)
   }

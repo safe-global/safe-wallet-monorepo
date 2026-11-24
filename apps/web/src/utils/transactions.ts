@@ -353,7 +353,9 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransact
     confirmations,
     confirmationsRequired,
   }: MultisigExecutionDetails): MultisigExecutionInfo['missingSigners'] => {
-    if (confirmations.length >= confirmationsRequired) return
+    if (confirmations.length >= confirmationsRequired) {
+      return
+    }
 
     const missingSigners = signers.filter(({ value }) => {
       const hasConfirmed = confirmations?.some(({ signer }) => signer?.value === value)
@@ -366,7 +368,9 @@ export const makeTxFromDetails = (txDetails: TransactionDetails): ModuleTransact
   const getMultisigExecutionInfo = ({
     detailedExecutionInfo,
   }: TransactionDetails): MultisigExecutionInfo | undefined => {
-    if (!isMultisigDetailedExecutionInfo(detailedExecutionInfo)) return undefined
+    if (!isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
+      return undefined
+    }
 
     return {
       type: detailedExecutionInfo.type,
@@ -431,7 +435,9 @@ export const getMultiSendTxs = async (
 
   return txs
     .map((tx) => {
-      if (!isMultisigDetailedExecutionInfo(tx.detailedExecutionInfo)) return
+      if (!isMultisigDetailedExecutionInfo(tx.detailedExecutionInfo)) {
+        return
+      }
 
       const args = extractTxInfo(tx)
       const sigs = getSignatures(args.signatures)
@@ -497,7 +503,9 @@ export const getQueuedTransactionCount = (txPage?: QueuedItemPage): string => {
 }
 
 export const getTxOrigin = (app?: Partial<SafeAppData>): string | undefined => {
-  if (!app) return
+  if (!app) {
+    return
+  }
 
   const MAX_ORIGIN_LENGTH = 200
   const { url = '', name = '' } = app

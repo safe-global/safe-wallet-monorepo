@@ -22,11 +22,15 @@ export const useAddressBookRequestActions = () => {
   const [reviewingId, setReviewingId] = useState<number | null>(null)
 
   const approve = async (requestId: number) => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
     setReviewingId(requestId)
     try {
       const result = await approveRequest({ spaceId, requestId })
-      if (isElevationRequiredError(result.error)) return
+      if (isElevationRequiredError(result.error)) {
+        return
+      }
       if (result.error) {
         dispatch(
           showNotification({
@@ -52,7 +56,9 @@ export const useAddressBookRequestActions = () => {
   }
 
   const reject = async (requestId: number) => {
-    if (!spaceId) return
+    if (!spaceId) {
+      return
+    }
     setReviewingId(requestId)
     try {
       const result = await rejectRequest({ spaceId, requestId })

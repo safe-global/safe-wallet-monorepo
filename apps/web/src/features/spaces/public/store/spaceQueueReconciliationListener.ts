@@ -55,12 +55,18 @@ const isSpaceSafe = (state: unknown, spaceId: string, safe: SpaceQueueSafe): boo
 
 /** True when the queue proves the pending tx's nonce has left its Safe's queue on that chain. */
 const hasLeftQueue = (queue: SpaceQueue, pendingTx: PendingTx, txId: string, isListedSafe: boolean): boolean => {
-  if (queue.unavailableSafes.some((safe) => isSameSafe(safe, pendingTx))) return false
+  if (queue.unavailableSafes.some((safe) => isSameSafe(safe, pendingTx))) {
+    return false
+  }
 
   const queued = getQueuedTransactions(queue, pendingTx)
   // A Safe missing from a capped queue may still have transactions past the cap
-  if (queued.length === 0) return isListedSafe && queue.isComplete
-  if (queued.some((item) => item.transaction.id === txId)) return false
+  if (queued.length === 0) {
+    return isListedSafe && queue.isComplete
+  }
+  if (queued.some((item) => item.transaction.id === txId)) {
+    return false
+  }
 
   const nonces = queued.map(getNonce).filter((nonce): nonce is number => nonce !== undefined)
   return nonces.length > 0 && Math.min(...nonces) > pendingTx.nonce
@@ -72,7 +78,9 @@ const reconcileSignatures = (queue: SpaceQueue, getState: () => RootState): void
     for (const item of chain.items.filter(isTransactionQueuedItem)) {
       const txId = item.transaction.id
       const pendingTx = selectPendingTxs(getState())[txId]
-      if (!pendingTx || !SIGNING_STATES.includes(pendingTx.status) || !('signerAddress' in pendingTx)) continue
+      if (!pendingTx || !SIGNING_STATES.includes(pendingTx.status) || !('signerAddress' in pendingTx)) {
+        continue
+      }
 
       const { executionInfo } = item.transaction
       if (
@@ -106,7 +114,9 @@ const settleExecution = async (
 
   // Another tab or listener may have settled the entry while the details were loading
   const current = selectPendingTxs(getState())[txId]
-  if (!current || !POST_EXECUTION_STATES.includes(current.status)) return
+  if (!current || !POST_EXECUTION_STATES.includes(current.status)) {
+    return
+  }
 
   if (details.txStatus === TransactionStatus.SUCCESS) {
     txDispatch(TxEvent.SUCCESS, {
@@ -144,7 +154,9 @@ const settleExecution = async (
 export const spaceQueueReconciliationListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const matcher = spacesApi?.endpoints?.spaceTransactionsGetTransactionQueueV1?.matchFulfilled
   // Tests that mock the spaces module leave no endpoint to watch.
-  if (!matcher) return
+  if (!matcher) {
+    return
+  }
 
   listenerMiddleware.startListening({
     matcher,
@@ -153,7 +165,9 @@ export const spaceQueueReconciliationListener = (listenerMiddleware: typeof list
       const queue = toSpaceQueue(action.payload, isNarrowed(args))
       reconcileSignatures(queue, getState)
       // A filtered or searched queue leaves out transactions on purpose, so it cannot tell that one left the queue
-      if (isNarrowed(args)) return
+      if (isNarrowed(args)) {
+        return
+      }
 
       const settled = Object.entries(selectPendingTxs(getState())).filter(
         ([txId, pendingTx]) =>

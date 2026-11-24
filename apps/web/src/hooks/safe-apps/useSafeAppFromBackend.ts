@@ -9,7 +9,9 @@ const useSafeAppFromBackend = (url: string, chainId: string): AsyncResult<SafeAp
   const [trigger] = useLazySafeAppsGetSafeAppsV1Query()
 
   const [backendApp, error, loading] = useAsync(async () => {
-    if (!chainId) return
+    if (!chainId) {
+      return
+    }
 
     // We do not have a single standard for storing URLs, it may be stored with or without a trailing slash.
     // But for the request it has to be an exact match.

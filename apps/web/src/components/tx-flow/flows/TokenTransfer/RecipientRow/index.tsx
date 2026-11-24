@@ -90,7 +90,9 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   // Probe only after Max click — eager probing on every edit wastes network for the common case.
   const previewTx = useMemo<FeePreviewTx | undefined>(() => {
-    if (!isPayFromSafeEnabled || !maxPressed || !isAddressValid || !selectedToken) return undefined
+    if (!isPayFromSafeEnabled || !maxPressed || !isAddressValid || !selectedToken) {
+      return undefined
+    }
     const params = createTokenTransferParams(recipient, '1', selectedToken.tokenInfo.decimals, tokenAddress)
     return { ...params, operation: OperationType.Call }
   }, [isPayFromSafeEnabled, maxPressed, isAddressValid, recipient, selectedToken, tokenAddress])

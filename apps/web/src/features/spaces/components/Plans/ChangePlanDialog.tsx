@@ -85,7 +85,9 @@ export default function ChangePlanDialog({
   const isTrialSwitch = currentPlan.isTrialing
 
   useEffect(() => {
-    if (priceId && !isTrialSwitch) previewChange(priceId)
+    if (priceId && !isTrialSwitch) {
+      previewChange(priceId)
+    }
   }, [priceId, isTrialSwitch, previewChange])
 
   const changeProps = {
@@ -96,7 +98,9 @@ export default function ChangePlanDialog({
     [MixpanelEventParams.AMOUNT_DUE]: preview ? preview.amountDue / 100 : undefined,
   }
   const onConfirm = async () => {
-    if (!priceId || !paymentLinkId) return
+    if (!priceId || !paymentLinkId) {
+      return
+    }
     if (await changePlan(priceId, paymentLinkId, removed)) {
       trackEvent(SAFE_PRO_EVENTS.PLAN_CHANGE_CONFIRMED, { ...changeProps, ...entry })
       onChanged()

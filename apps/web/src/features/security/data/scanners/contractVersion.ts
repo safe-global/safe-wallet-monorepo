@@ -26,7 +26,9 @@ const isKnownImplementation = (address: string, chainId: string): boolean =>
 
 /** `'unknown'` when either version is missing or not semver; build metadata (`+L2`) is ignored. */
 const compareVersionToLatest = (version: string | null, latestVersion: string): 'older' | 'not-older' | 'unknown' => {
-  if (!version || !semverValid(version) || !semverValid(latestVersion)) return 'unknown'
+  if (!version || !semverValid(version) || !semverValid(latestVersion)) {
+    return 'unknown'
+  }
   return semverLt(version, latestVersion) ? 'older' : 'not-older'
 }
 
@@ -108,7 +110,9 @@ export const contractVersionScanner: SecurityScanner = {
       )
     }
 
-    if (isOutdated) return result('clear', 100, versions, upgrade)
+    if (isOutdated) {
+      return result('clear', 100, versions, upgrade)
+    }
 
     return result('clear', 100, [currentVersion, { label: 'Status', value: 'Up to date' }])
   },

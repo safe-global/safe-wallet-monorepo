@@ -26,7 +26,9 @@ export const useWorkspaceDraft = () => {
   const update = useCallback(
     (changes: Partial<WorkspaceDraftFields>) => {
       // Steps only act once `isReady`; a write before that would belong to nobody.
-      if (ownerId === undefined) throw new Error('The onboarding draft cannot be saved before the user is known')
+      if (ownerId === undefined) {
+        throw new Error('The onboarding draft cannot be saved before the user is known')
+      }
       dispatch(updateWorkspaceDraft(ownerId, changes))
     },
     [dispatch, ownerId],
@@ -34,7 +36,9 @@ export const useWorkspaceDraft = () => {
 
   // A skipped query cannot refetch, and a signed-out user has nothing to retry.
   const retryUser = useCallback(() => {
-    if (isSignedIn) void refetch()
+    if (isSignedIn) {
+      void refetch()
+    }
   }, [isSignedIn, refetch])
 
   return {

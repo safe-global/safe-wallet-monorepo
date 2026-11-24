@@ -10,7 +10,9 @@ import useChains from './useChains'
 
 // Use the location object directly because Next.js's router.query is available only on mount
 const getLocationQuery = (): ParsedUrlQuery => {
-  if (typeof location === 'undefined') return {}
+  if (typeof location === 'undefined') {
+    return {}
+  }
   const query = parse(location.search.slice(1))
   return query
 }
@@ -40,8 +42,12 @@ export const useUrlChain = (): UrlChain => {
   const hasConfigs = configs.length > 0
 
   return useMemo(() => {
-    if (!shortName) return { status: 'absent' }
-    if (chainId) return { status: 'resolved', chainId }
+    if (!shortName) {
+      return { status: 'absent' }
+    }
+    if (chainId) {
+      return { status: 'resolved', chainId }
+    }
     // The static EIP-3770 list misses chains only the runtime config knows.
     return hasConfigs ? { status: 'unknown', shortName } : { status: 'pending', shortName }
   }, [shortName, chainId, hasConfigs])
@@ -60,10 +66,16 @@ const useChainId = (): string => {
   const urlChain = useUrlChain()
   const walletChainId = useWalletChainId()
 
-  if (scope?.chainId) return scope.chainId
-  if (urlChain.status === 'resolved') return urlChain.chainId
+  if (scope?.chainId) {
+    return scope.chainId
+  }
+  if (urlChain.status === 'resolved') {
+    return urlChain.chainId
+  }
   // A default here would query the wrong chain for the Safe in the URL; '' makes consumers skip.
-  if (urlChain.status !== 'absent') return ''
+  if (urlChain.status !== 'absent') {
+    return ''
+  }
 
   return walletChainId || String(DEFAULT_CHAIN_ID)
 }

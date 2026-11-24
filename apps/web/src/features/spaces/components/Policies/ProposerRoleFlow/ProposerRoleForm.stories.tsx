@@ -47,7 +47,9 @@ const opsChain = (chainId: string, fiatTotal: string) =>
 
 const [opsEntry] = groupSafeAccounts([opsChain(ETHEREUM, '48210.42'), opsChain(POLYGON, '0')])
 
-if (!isSafeAccountGroup(opsEntry)) throw new Error('Expected the two-chain fixture to group')
+if (!isSafeAccountGroup(opsEntry)) {
+  throw new Error('Expected the two-chain fixture to group')
+}
 
 const opsGroup = opsEntry
 

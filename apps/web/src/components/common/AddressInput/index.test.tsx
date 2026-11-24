@@ -23,8 +23,12 @@ const mockMainnetChain = chainBuilder()
   .build()
 
 const mockUseChain = jest.fn((chainId: string) => {
-  if (chainId === '1') return mockMainnetChain
-  if (chainId === '11155111') return mockChain
+  if (chainId === '1') {
+    return mockMainnetChain
+  }
+  if (chainId === '11155111') {
+    return mockChain
+  }
   return undefined
 })
 
@@ -123,8 +127,12 @@ describe('AddressInput tests', () => {
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
     mockUseChain.mockImplementation((chainId: string) => {
-      if (chainId === '1') return mockMainnetChain
-      if (chainId === '11155111') return mockChain
+      if (chainId === '1') {
+        return mockMainnetChain
+      }
+      if (chainId === '11155111') {
+        return mockChain
+      }
       return undefined
     })
     jest.spyOn(addressBook, 'default').mockReturnValue({})

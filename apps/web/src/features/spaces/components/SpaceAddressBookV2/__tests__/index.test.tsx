@@ -252,7 +252,9 @@ const renderAddressBook = (localBook: AddressBookState = {}) =>
 
 const rowOf = (name: string) => {
   const row = screen.getAllByTestId('table-row').find((tableRow) => within(tableRow).queryByText(name))
-  if (!row) throw new Error(`No row for ${name}`)
+  if (!row) {
+    throw new Error(`No row for ${name}`)
+  }
   return row
 }
 

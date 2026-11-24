@@ -30,7 +30,9 @@ export const getTxHistory = (
  */
 export const getModuleTransactionId = async (chainId: string, safeAddress: string, txHash: string) => {
   const { results } = await getModuleTransactions(chainId, safeAddress, { transaction_hash: txHash })
-  if (results.length === 0) throw new Error('module transaction not found')
+  if (results.length === 0) {
+    throw new Error('module transaction not found')
+  }
   return results[0].transaction.id
 }
 

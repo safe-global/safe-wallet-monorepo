@@ -69,7 +69,9 @@ function AllNetworksSection({
       </Typography>
     ) : null
 
-  if (!isFeatureEnabled) return nothingToShow
+  if (!isFeatureEnabled) {
+    return nothingToShow
+  }
 
   if (unavailableReason) {
     const infoIcon = <Info className="size-4 shrink-0 text-muted-foreground mt-0.5" />
@@ -111,9 +113,13 @@ function AllNetworksSection({
     )
   }
 
-  if (availableNetworks.length === 0) return nothingToShow
+  if (availableNetworks.length === 0) {
+    return nothingToShow
+  }
 
-  if (search && matchingNetworks.length === 0) return nothingToShow
+  if (search && matchingNetworks.length === 0) {
+    return nothingToShow
+  }
 
   const handleAccordionChange = (value: unknown) => {
     const openedIds = Array.isArray(value) ? (value as string[]) : []

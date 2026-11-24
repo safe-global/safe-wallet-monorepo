@@ -13,11 +13,15 @@ export const getSafeAppHostname = (url: string): string | undefined => {
 // When several apps share a hostname, only an exact path match is trusted, so no wrong app is suggested
 export const findMatchingSafeApp = (apps: SafeAppData[] = [], dappUrl = ''): SafeAppData | undefined => {
   const hostname = getSafeAppHostname(dappUrl)
-  if (!hostname) return undefined
+  if (!hostname) {
+    return undefined
+  }
 
   const matches = apps.filter((app) => getSafeAppHostname(app.url) === hostname)
 
-  if (matches.length === 1) return matches[0]
+  if (matches.length === 1) {
+    return matches[0]
+  }
 
   const dappOriginPath = trimTrailingSlash(getOriginPath(dappUrl))
   return matches.find((app) => trimTrailingSlash(getOriginPath(app.url)) === dappOriginPath)

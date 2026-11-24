@@ -125,14 +125,20 @@ const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = '16rem'
 
 function getSidebarStateFromCookie(fallback: boolean): boolean {
-  if (typeof document === 'undefined') return fallback
+  if (typeof document === 'undefined') {
+    return fallback
+  }
   try {
     const match = document.cookie.match(
       new RegExp(`(?:^|; )${SIDEBAR_COOKIE_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}=([^;]*)`),
     )
     const value = match?.[1]?.trim()
-    if (value === 'true') return true
-    if (value === 'false') return false
+    if (value === 'true') {
+      return true
+    }
+    if (value === 'false') {
+      return false
+    }
   } catch {
     // ignore - falling back to the default sidebar state
   }

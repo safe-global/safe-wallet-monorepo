@@ -41,7 +41,9 @@ export const WhatsNewCornerCard = ({ onOpen }: { onOpen: () => void }): ReactEle
   const { cornerCard } = useWhatsNewUpdates()
   const [dismissedPostId, setDismissedPostId] = useLocalStorage<number>(DISMISSED_POST_KEY)
 
-  if (!cornerCard || cornerCard.postId === dismissedPostId) return null
+  if (!cornerCard || cornerCard.postId === dismissedPostId) {
+    return null
+  }
 
   const dismiss = () => setDismissedPostId(cornerCard.postId)
 

@@ -11,10 +11,14 @@ const WorkspaceTour = () => {
   useWorkspaceTourVisit(canShowTour, open)
 
   useEffect(() => {
-    if (!canShowTour) close()
+    if (!canShowTour) {
+      close()
+    }
   }, [canShowTour, close])
 
-  if (!canShowTour || !isOpen) return null
+  if (!canShowTour || !isOpen) {
+    return null
+  }
 
   return <ActiveWorkspaceTour onClose={close} />
 }

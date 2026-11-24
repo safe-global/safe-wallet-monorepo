@@ -123,25 +123,35 @@ export const useSpaceQueue = (
   // A query that failed stays failed while Try again refetches it, so the error view doesn't flash other content
   const argsKey = JSON.stringify(args)
   const [failedArgsKey, setFailedArgsKey] = useState<string>()
-  if (isError && !currentData && failedArgsKey !== argsKey) setFailedArgsKey(argsKey)
-  if (currentData && failedArgsKey === argsKey) setFailedArgsKey(undefined)
+  if (isError && !currentData && failedArgsKey !== argsKey) {
+    setFailedArgsKey(argsKey)
+  }
+  if (currentData && failedArgsKey === argsKey) {
+    setFailedArgsKey(undefined)
+  }
   const isRetryingError = !isError && !currentData && !skip && failedArgsKey === argsKey
   const hasError = isError || isRetryingError
 
   // A second refetch of an entry already loading sends no request, so the page and the poller can both listen
   useEffect(() => {
-    if (skip) return
+    if (skip) {
+      return
+    }
     const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
     return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
   }, [skip, refetch])
 
   // Not RTK Query's pollingInterval: it only ever reschedules sooner, so it can't back off
   useEffect(() => {
-    if (skip || !poll || isFetching || !isFocused) return
+    if (skip || !poll || isFetching || !isFocused) {
+      return
+    }
     const timer = setInterval(() => {
       // Another view polling the same queue may have just asked for it
       const { lastStartedAt } = selectSpaceQueuePolling(store.getState(), queueKey)
-      if (Date.now() - lastStartedAt >= interval) refetch()
+      if (Date.now() - lastStartedAt >= interval) {
+        refetch()
+      }
     }, interval)
     return () => clearInterval(timer)
   }, [skip, poll, queueKey, isFetching, isFocused, interval, refetch, requestId, store])

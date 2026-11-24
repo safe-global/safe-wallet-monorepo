@@ -20,8 +20,12 @@ export const useEnsHubProvider = (
   const hubChain = useChain(hubChainId || '')
 
   const provider = useMemo(() => {
-    if (!hubChain) return undefined
-    if (hubChain.chainId === currentChain?.chainId) return globalProvider
+    if (!hubChain) {
+      return undefined
+    }
+    if (hubChain.chainId === currentChain?.chainId) {
+      return globalProvider
+    }
     return getSharedReadOnlyProvider(hubChain, customRpc?.[hubChain.chainId])
   }, [hubChain, currentChain?.chainId, globalProvider, customRpc])
 

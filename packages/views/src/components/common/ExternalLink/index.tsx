@@ -15,7 +15,9 @@ const ExternalLink = ({
   className,
   ...props
 }: Omit<ComponentProps<'a'>, 'target' | 'rel'> & { noIcon?: boolean; mode?: 'button' | 'link' }): ReactElement => {
-  if (!href) return <>{children}</>
+  if (!href) {
+    return <>{children}</>
+  }
 
   const linkContent = (
     <span className="inline-flex cursor-pointer items-center gap-0.5">

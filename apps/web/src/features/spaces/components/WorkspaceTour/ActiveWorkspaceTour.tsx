@@ -14,7 +14,9 @@ const ActiveWorkspaceTour = ({ onClose }: { onClose: () => void }) => {
 
   useArrowKeyNavigation({ onNext: tour.next, onBack: tour.back })
 
-  if (tour.isWelcome) return <TourWelcomeDialog onStart={tour.next} onSkip={onClose} />
+  if (tour.isWelcome) {
+    return <TourWelcomeDialog onStart={tour.next} onSkip={onClose} />
+  }
 
   if (tour.isDone) {
     const actions = TOUR_NEXT_ACTIONS.map(({ route, ...action }) => ({

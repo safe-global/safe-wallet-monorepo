@@ -22,7 +22,9 @@ const HOST_PATTERN = /^(\[[0-9a-f:.]+]|[a-z0-9.-]+)(:\d+)?$/i
  * `HOST_PATTERN` is the second line of defence for exotic inputs.
  */
 export const getRpcHost = (url?: string): string | undefined => {
-  if (!url) return undefined
+  if (!url) {
+    return undefined
+  }
   try {
     const { host } = new URL(url)
     return HOST_PATTERN.test(host) ? host : undefined

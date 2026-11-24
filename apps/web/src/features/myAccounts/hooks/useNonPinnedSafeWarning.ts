@@ -54,7 +54,9 @@ const useNonPinnedSafeWarning = (): NonPinnedWarningState => {
   // Add safe to pinned list (called after confirmation)
   const confirmAndAddToPinnedList = useCallback(
     (name: string) => {
-      if (!chainId || !safeAddress) return
+      if (!chainId || !safeAddress) {
+        return
+      }
 
       trustSafe({
         chainId,

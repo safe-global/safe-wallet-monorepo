@@ -29,10 +29,18 @@ export const resolveChoice = ({
   explicitChoice?: GasPayerChoice
   preferredChoice?: GasPayerChoice
 }): GasPayerChoice => {
-  if (isLocked) return 'PAY_FROM_SAFE'
-  if (isChoiceAvailable(explicitChoice, availability)) return explicitChoice
-  if (availability.hasSponsoredOffer && availability.step === 'execute') return 'SPONSORED'
-  if (isChoiceAvailable(preferredChoice, availability)) return preferredChoice
+  if (isLocked) {
+    return 'PAY_FROM_SAFE'
+  }
+  if (isChoiceAvailable(explicitChoice, availability)) {
+    return explicitChoice
+  }
+  if (availability.hasSponsoredOffer && availability.step === 'execute') {
+    return 'SPONSORED'
+  }
+  if (isChoiceAvailable(preferredChoice, availability)) {
+    return preferredChoice
+  }
   return 'WALLET'
 }
 
@@ -57,10 +65,16 @@ export const buildPayerControl = ({
   hasSponsoredOffer: boolean
   choice: GasPayerChoice
 }): FeePayerControl => {
-  if (isLocked) return { kind: 'locked', value: 'PAY_FROM_SAFE' }
+  if (isLocked) {
+    return { kind: 'locked', value: 'PAY_FROM_SAFE' }
+  }
   if (step === 'sign') {
-    if (planState === 'PRO_SPONSORED_LEFT') return { kind: 'locked', value: 'SPONSORED' }
-    if (offersSafeToggle) return safeOrWallet(choice)
+    if (planState === 'PRO_SPONSORED_LEFT') {
+      return { kind: 'locked', value: 'SPONSORED' }
+    }
+    if (offersSafeToggle) {
+      return safeOrWallet(choice)
+    }
     return { kind: 'locked', value: 'WALLET' }
   }
   if (hasSponsoredOffer) {
@@ -70,7 +84,9 @@ export const buildPayerControl = ({
       options: ['SPONSORED', 'WALLET'],
     }
   }
-  if (offersSafeToggle) return safeOrWallet(choice)
+  if (offersSafeToggle) {
+    return safeOrWallet(choice)
+  }
   return { kind: 'locked', value: 'WALLET' }
 }
 
@@ -109,7 +125,11 @@ export const buildFooter = ({
   if (offer?.option === 'NO_FEE_CAMPAIGN') {
     return { kind: 'campaign', left: offer.remaining, limit: offer.limit }
   }
-  if (!chainSponsorsPlans) return { kind: 'none' }
-  if (planState === 'FREE') return { kind: 'upsell' }
+  if (!chainSponsorsPlans) {
+    return { kind: 'none' }
+  }
+  if (planState === 'FREE') {
+    return { kind: 'upsell' }
+  }
   return { kind: 'counter', left, quota: meter?.quota ?? null, resetsAt: meter?.resetsAt ?? null, isSubscription: true }
 }

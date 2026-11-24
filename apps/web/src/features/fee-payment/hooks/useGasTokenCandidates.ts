@@ -42,15 +42,21 @@ export const useGasTokenCandidates = (
   const chain = useCurrentChain()
 
   const candidates = useMemo<GasTokenCandidate[]>(() => {
-    if (!tx || !balances?.items || !chain?.chainId || safe.threshold <= 0) return []
+    if (!tx || !balances?.items || !chain?.chainId || safe.threshold <= 0) {
+      return []
+    }
 
     return balances.items
       .filter((b) => BigInt(b.balance) > 0n)
       .filter((b) => {
         // Native always passes — required for chains absent from the allowlist,
         // where POL is returned with a non-ZERO address and would otherwise be filtered out.
-        if (b.tokenInfo.type === 'NATIVE_TOKEN' || sameAddress(b.tokenInfo.address, ZERO_ADDRESS)) return true
-        if (nativeOnly) return false
+        if (b.tokenInfo.type === 'NATIVE_TOKEN' || sameAddress(b.tokenInfo.address, ZERO_ADDRESS)) {
+          return true
+        }
+        if (nativeOnly) {
+          return false
+        }
         return isAllowlistedGasToken(chain.chainId, b.tokenInfo.address)
       })
       .map((b) => ({
@@ -70,9 +76,15 @@ export const useGasTokenCandidates = (
         // on chains absent from the allowlist) goes last.
         const aOrder = getGasTokenAllowlistOrder(chain.chainId, a.address)
         const zOrder = getGasTokenAllowlistOrder(chain.chainId, z.address)
-        if (aOrder === -1 && zOrder === -1) return 0
-        if (aOrder === -1) return 1
-        if (zOrder === -1) return -1
+        if (aOrder === -1 && zOrder === -1) {
+          return 0
+        }
+        if (aOrder === -1) {
+          return 1
+        }
+        if (zOrder === -1) {
+          return -1
+        }
         return aOrder - zOrder
       })
   }, [tx, balances, chain?.chainId, chain?.nativeCurrency.logoUri, safe.threshold, nativeOnly])

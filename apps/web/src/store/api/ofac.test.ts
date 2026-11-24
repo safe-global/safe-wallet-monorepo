@@ -31,7 +31,9 @@ const serveChains = (chains: Chain[]) => {
 const serveRpc = (rpcUrl: string, reply: RpcReply): EthCall[] => {
   const ethCalls: EthCall[] = []
   const answer = ({ id, method, params }: RpcRequest) => {
-    if (method === 'eth_call') ethCalls.push({ to: params[0].to, data: params[0].data })
+    if (method === 'eth_call') {
+      ethCalls.push({ to: params[0].to, data: params[0].data })
+    }
     return { jsonrpc: '2.0', id, ...reply }
   }
   server.use(

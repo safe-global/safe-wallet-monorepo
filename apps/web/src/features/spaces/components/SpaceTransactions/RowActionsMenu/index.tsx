@@ -50,7 +50,9 @@ const useTxLink = (txId: string): string | undefined => {
   const chain = useChain(scope?.chainId ?? '')
   const spaceId = useUrlSpaceId()
   const origin = useOrigin()
-  if (!scope || !chain) return undefined
+  if (!scope || !chain) {
+    return undefined
+  }
   return getTxLink({ origin, chainShortName: chain.shortName, safeAddress: scope.safeAddress, txId, spaceId })
 }
 
@@ -82,11 +84,19 @@ const useDeleteState = (txId: string): DeleteState => {
   const { currentData } = useTransactionsGetTransactionByIdV1Query(
     scope && wallet && isDeleteEnabled ? { chainId: scope.chainId, id: txId } : skipToken,
   )
-  if (!isDeleteEnabled) return { status: 'hidden' }
-  if (!wallet) return { status: 'blocked', reason: NOT_PROPOSER }
+  if (!isDeleteEnabled) {
+    return { status: 'hidden' }
+  }
+  if (!wallet) {
+    return { status: 'blocked', reason: NOT_PROPOSER }
+  }
   const executionInfo = currentData?.detailedExecutionInfo
-  if (!currentData) return { status: 'loading' }
-  if (!isMultisigDetailedExecutionInfo(executionInfo)) return { status: 'hidden' }
+  if (!currentData) {
+    return { status: 'loading' }
+  }
+  if (!isMultisigDetailedExecutionInfo(executionInfo)) {
+    return { status: 'hidden' }
+  }
   const proposer = executionInfo.proposer?.value
   return proposer && sameAddress(wallet.address, proposer)
     ? { status: 'proposer', safeTxHash: executionInfo.safeTxHash }
@@ -95,7 +105,9 @@ const useDeleteState = (txId: string): DeleteState => {
 
 const ProposerDeleteItem = ({ nonce, onDelete }: { nonce: number; onDelete: () => void }): ReactElement => {
   const isDeletable = useIsNonceDeletable(nonce)
-  if (!isDeletable) return <RowDeleteMenuItem disabledReason={NOT_DELETABLE} />
+  if (!isDeletable) {
+    return <RowDeleteMenuItem disabledReason={NOT_DELETABLE} />
+  }
   const onClick = () => {
     trackEvent(REJECT_TX_EVENTS.DELETE_OFFCHAIN_BUTTON)
     onDelete()
@@ -107,7 +119,9 @@ const ProposerDeleteItem = ({ nonce, onDelete }: { nonce: number; onDelete: () =
 const DeleteItem = ({ tx, onDelete }: { tx: Transaction; onDelete: (safeTxHash: string) => void }) => {
   const state = useDeleteState(tx.id)
   const nonce = getNonce(tx)
-  if (state.status === 'hidden' || nonce === undefined) return null
+  if (state.status === 'hidden' || nonce === undefined) {
+    return null
+  }
   if (state.status === 'proposer') {
     return <ProposerDeleteItem nonce={nonce} onDelete={() => onDelete(state.safeTxHash)} />
   }
@@ -130,7 +144,9 @@ const RowActionsMenu = ({ tx, canReject }: RowActionsMenuProps): ReactElement =>
   const nonce = getNonce(tx)
 
   const copyLink = async () => {
-    if (!link) return
+    if (!link) {
+      return
+    }
     try {
       await navigator.clipboard.writeText(link)
       dispatch(showNotification({ message: 'Link copied', variant: 'success', groupKey: 'space-queue-copy-link' }))

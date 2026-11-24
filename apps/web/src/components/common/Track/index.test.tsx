@@ -13,7 +13,9 @@ const trackData = { category: 'nested-safes', action: 'Open nested Safe' }
 
 const getWrapper = (container: HTMLElement): HTMLElement => {
   const wrapper = container.querySelector<HTMLElement>('[data-track]')
-  if (!wrapper) throw new Error('Track wrapper not found')
+  if (!wrapper) {
+    throw new Error('Track wrapper not found')
+  }
   return wrapper
 }
 

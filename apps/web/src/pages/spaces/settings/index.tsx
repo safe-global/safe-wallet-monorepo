@@ -8,7 +8,9 @@ export default function SpaceSettingsIndexPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!router.isReady) return
+    if (!router.isReady) {
+      return
+    }
     router.replace({ pathname: AppRoutes.spaces.settingsGeneral, query: router.query })
   }, [router])
 

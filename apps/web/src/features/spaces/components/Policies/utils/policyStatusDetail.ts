@@ -7,8 +7,12 @@ export const getPendingStatusDetail = (policy: Policy, nowMs = Date.now()): stri
   if (isActiveAllowlistPolicy(policy) && policy.scheduledChange) {
     return formatAppliesAt(policy.scheduledChange.appliesAt, nowMs)
   }
-  if (policy.status === 'failed') return 'The transaction failed. Nothing changed on this account.'
-  if (policy.status !== 'pending') return undefined
+  if (policy.status === 'failed') {
+    return 'The transaction failed. Nothing changed on this account.'
+  }
+  if (policy.status !== 'pending') {
+    return undefined
+  }
 
   const { confirmationsSubmitted, confirmationsRequired } = policy
 

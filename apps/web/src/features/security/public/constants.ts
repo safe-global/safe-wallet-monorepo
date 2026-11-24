@@ -49,7 +49,9 @@ export const SEVERITY_SCORE_THRESHOLDS: Array<{ minScore: number; severity: Secu
  * (see Security Hub — Documentation, "Excluded check rendering").
  */
 export const getSeverityFromScore = (score: number, options: { excluded?: boolean } = {}): SecurityGrade => {
-  if (options.excluded) return 'Low'
+  if (options.excluded) {
+    return 'Low'
+  }
   const match = SEVERITY_SCORE_THRESHOLDS.find((t) => score >= t.minScore)
   return match?.severity ?? 'Critical'
 }

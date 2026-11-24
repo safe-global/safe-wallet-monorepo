@@ -46,7 +46,9 @@ const allowanceInterface = AllowanceModule__factory.createInterface()
 
 const requireModuleAddress = (): string => {
   const address = getLatestSpendingLimitAddress(REGISTERED_CHAIN_ID)
-  if (!address) throw new Error('fixture: Sepolia has no AllowanceModule deployment')
+  if (!address) {
+    throw new Error('fixture: Sepolia has no AllowanceModule deployment')
+  }
   return address
 }
 
@@ -56,9 +58,13 @@ type DecodedCall = { to: string; name: string; args: unknown[] }
 const decodeBatch = (): DecodedCall[] => {
   const [txs] = (txSender.createMultiSendCallOnlyTx as jest.Mock).mock.calls[0] as [MetaTransactionData[]]
   return txs.map((tx) => {
-    if (tx.data.startsWith(ENABLE_MODULE_DATA)) return { to: tx.to, name: 'enableModule', args: [] }
+    if (tx.data.startsWith(ENABLE_MODULE_DATA)) {
+      return { to: tx.to, name: 'enableModule', args: [] }
+    }
     const parsed = allowanceInterface.parseTransaction({ data: tx.data })
-    if (!parsed) throw new Error(`cannot decode ${tx.data}`)
+    if (!parsed) {
+      throw new Error(`cannot decode ${tx.data}`)
+    }
     return { to: tx.to, name: parsed.name, args: Array.from(parsed.args) }
   })
 }

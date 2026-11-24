@@ -32,7 +32,9 @@ const WalletConnectWidget = () => {
   // A pending proposal is rejected on close, so the dApp gets an answer instead of waiting forever
   const onClose = useCallback(() => {
     setOpen(false)
-    if (!sessionProposal || loading) return
+    if (!sessionProposal || loading) {
+      return
+    }
 
     const { isShown, safeApp, remember } = safeAppSuggestion
     if (isShown && safeApp) {

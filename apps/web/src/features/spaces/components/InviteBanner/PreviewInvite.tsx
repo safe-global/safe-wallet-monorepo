@@ -23,7 +23,9 @@ const PreviewInvite = () => {
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const invitedByName = getInvitedByName(space, currentUser?.id)
 
-  if (!space) return null
+  if (!space) {
+    return null
+  }
 
   return (
     <div

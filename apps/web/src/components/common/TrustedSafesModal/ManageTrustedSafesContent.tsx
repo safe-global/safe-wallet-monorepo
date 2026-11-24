@@ -103,7 +103,9 @@ const ManageTrustedSafesContent = ({ modal, secondaryLabel, onSecondary, onSaved
     const keys = new Set<string>()
     for (const item of availableItems) {
       if (isSelectableMultiChainSafe(item)) {
-        if (item.isSelected) item.safes.forEach((safe) => keys.add(`${safe.chainId}:${safe.address}`))
+        if (item.isSelected) {
+          item.safes.forEach((safe) => keys.add(`${safe.chainId}:${safe.address}`))
+        }
       } else if (item.isSelected) {
         keys.add(`${item.chainId}:${item.address}`)
       }

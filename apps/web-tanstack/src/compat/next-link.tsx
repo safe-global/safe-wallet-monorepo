@@ -48,10 +48,18 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event)
-    if (event.defaultPrevented) return
-    if (target && target !== '_self') return
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
-    if (/^https?:|^mailto:|^tel:/i.test(hrefStr)) return
+    if (event.defaultPrevented) {
+      return
+    }
+    if (target && target !== '_self') {
+      return
+    }
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+      return
+    }
+    if (/^https?:|^mailto:|^tel:/i.test(hrefStr)) {
+      return
+    }
     event.preventDefault()
     void navigate({ ...toNavigateOptions(href), replace })
   }

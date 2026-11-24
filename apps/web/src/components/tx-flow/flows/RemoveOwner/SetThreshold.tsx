@@ -27,7 +27,9 @@ export const SetThreshold = ({
   const [selectedThreshold, setSelectedThreshold] = useState<number>(params.threshold ?? 1)
 
   const handleChange = (value: number | null) => {
-    if (value != null) setSelectedThreshold(value)
+    if (value != null) {
+      setSelectedThreshold(value)
+    }
   }
 
   const newNumberOfOwners = safe ? safe.owners.length - 1 : 1
@@ -39,7 +41,9 @@ export const SetThreshold = ({
 
   const onSubmitHandler = (e: SyntheticEvent) => {
     e.preventDefault()
-    if (thresholdError) return
+    if (thresholdError) {
+      return
+    }
     onSubmit({ ...params, threshold: selectedThreshold })
   }
 

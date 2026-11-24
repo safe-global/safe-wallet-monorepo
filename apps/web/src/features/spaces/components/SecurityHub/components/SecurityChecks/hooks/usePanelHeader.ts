@@ -26,8 +26,12 @@ export const usePanelHeader = (results: Record<string, ScanResult>, isComplete: 
   const security = useSecurityServices()
   const summary = useMemo(() => (security ? security.computeSummary(results) : null), [results, security])
 
-  if (!security || (!isComplete && !summary)) return { status: 'loading' }
-  if (!summary) return { status: 'empty' }
+  if (!security || (!isComplete && !summary)) {
+    return { status: 'loading' }
+  }
+  if (!summary) {
+    return { status: 'empty' }
+  }
 
   const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0
   const score = Math.round(clearRatio * 100)

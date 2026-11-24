@@ -26,12 +26,16 @@ const createElevationHooks = <Id extends string>() => {
   }
 
   const notify = () => {
-    for (const listener of listeners) listener()
+    for (const listener of listeners) {
+      listener()
+    }
   }
 
   const useElevation = (id: Id, isOpen: boolean): void => {
     useEffect(() => {
-      if (!isOpen) return
+      if (!isOpen) {
+        return
+      }
       openPopups.add(id)
       notify()
       return () => {

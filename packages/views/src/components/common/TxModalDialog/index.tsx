@@ -20,7 +20,9 @@ const TxModalDialog = ({ children, open, onClose, fullWidth = false }: TxModalDi
     <DialogPrimitive.Root
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose?.()
+        if (!nextOpen) {
+          onClose?.()
+        }
       }}
     >
       <DialogPrimitive.Portal container={portalContainer}>

@@ -170,8 +170,12 @@ export function getAuditEventDescription(
       }
 
       const parts: string[] = []
-      if (created.length > 0) parts.push(`added ${pluralize(created.length, 'contact')}`)
-      if (updated.length > 0) parts.push(`updated ${pluralize(updated.length, 'contact')}`)
+      if (created.length > 0) {
+        parts.push(`added ${pluralize(created.length, 'contact')}`)
+      }
+      if (updated.length > 0) {
+        parts.push(`updated ${pluralize(updated.length, 'contact')}`)
+      }
       const summary = parts.length > 0 ? parts.join(' and ') : 'updated the address book'
       return `${summary}${approvedSuffix}`
     }
@@ -207,8 +211,12 @@ export function getAuditEventDescription(
     }
     case 'ADDRESS_BOOK_TAGS_UPDATED': {
       const changes = Array.isArray(payload.changes) ? payload.changes.map((change) => asPayload(change)) : []
-      if (changes.length === 0) return 'changed the tags of contacts'
-      if (changes.length !== 1) return `changed the tags of ${pluralize(changes.length, 'contact')}`
+      if (changes.length === 0) {
+        return 'changed the tags of contacts'
+      }
+      if (changes.length !== 1) {
+        return `changed the tags of ${pluralize(changes.length, 'contact')}`
+      }
       const [change] = changes
       const address = asString(change.address)
       return (
@@ -231,7 +239,9 @@ export function getAuditEventDescription(
     case 'ADDRESS_BOOK_TAG_RENAMED': {
       const oldName = asString(payload.oldName)
       const newName = asString(payload.newName)
-      if (!oldName || !newName) return 'renamed a tag'
+      if (!oldName || !newName) {
+        return 'renamed a tag'
+      }
       return (
         <>
           renamed the tag <Em>{oldName}</Em> to <Em>{newName}</Em>
@@ -242,7 +252,9 @@ export function getAuditEventDescription(
     case 'ADDRESS_BOOK_TAG_DELETED': {
       const name = asString(payload.name)
       const contactCount = typeof payload.contactCount === 'number' ? payload.contactCount : 0
-      if (!name) return 'deleted a tag'
+      if (!name) {
+        return 'deleted a tag'
+      }
       return (
         <>
           deleted the tag <Em>{name}</Em>

@@ -52,8 +52,12 @@ const respondWith = (...responses: Array<TransactionDetails | 'error' | 'pending
     http.get(TX_DETAILS_URL, async ({ request }) => {
       const response = responses[Math.min(requests.length, responses.length - 1)]
       requests.push(request)
-      if (response === 'pending') await delay('infinite')
-      if (response === 'error' || response === 'pending') return new HttpResponse(null, { status: 500 })
+      if (response === 'pending') {
+        await delay('infinite')
+      }
+      if (response === 'error' || response === 'pending') {
+        return new HttpResponse(null, { status: 500 })
+      }
       return HttpResponse.json(response)
     }),
   )

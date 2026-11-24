@@ -17,7 +17,9 @@ export default function SpacePlansPage() {
   // Wait for the chain config: both flags read as off until it arrives.
   useRedirectWhenOff(chain ? isAnnounced || isSafePro : undefined, AppRoutes.spaces.index)
 
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

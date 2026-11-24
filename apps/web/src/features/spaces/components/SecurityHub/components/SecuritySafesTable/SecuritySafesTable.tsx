@@ -48,11 +48,15 @@ const SecuritySafesTable = ({
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const spaceId = useUrlSpaceId()
   const chainShortNames = useMemo(() => {
-    if (!chainsData) return {}
+    if (!chainsData) {
+      return {}
+    }
     const map: Record<string, string> = {}
     for (const id of chainsData.ids) {
       const chain = chainsData.entities[id]
-      if (chain) map[chain.chainId] = chain.shortName
+      if (chain) {
+        map[chain.chainId] = chain.shortName
+      }
     }
     return map
   }, [chainsData])
@@ -74,8 +78,11 @@ const SecuritySafesTable = ({
   const toggleExpand = useCallback((address: string) => {
     setExpandedAddresses((prev) => {
       const next = new Set(prev)
-      if (next.has(address)) next.delete(address)
-      else next.add(address)
+      if (next.has(address)) {
+        next.delete(address)
+      } else {
+        next.add(address)
+      }
       return next
     })
   }, [])
@@ -88,21 +95,29 @@ const SecuritySafesTable = ({
 
   // Filter safes by grade when a chip filter is active
   const filteredSafes = useMemo(() => {
-    if (!gradeFilter) return safes
-    if (!security) return safes
+    if (!gradeFilter) {
+      return safes
+    }
+    if (!security) {
+      return safes
+    }
     return safes.filter((safe) => {
       // For multichain Safes, match if ANY chain matches the grade
       for (const chain of safe.chainEntries) {
         const key = security.scanKey(safe.address, chain.chainId)
         const results = scanResults[key]
-        if (results && security.getSafeGrade(results) === gradeFilter) return true
+        if (results && security.getSafeGrade(results) === gradeFilter) {
+          return true
+        }
       }
       return false
     })
   }, [safes, scanResults, gradeFilter, security])
 
   // The services are undefined while the chain has the Security Hub flag off.
-  if (!security) return <></>
+  if (!security) {
+    return <></>
+  }
 
   return (
     <div className="mb-10 w-full overflow-x-auto">

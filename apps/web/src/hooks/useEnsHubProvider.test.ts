@@ -43,8 +43,12 @@ describe('useEnsHubProvider', () => {
     _clearSharedReadOnlyProviders()
     mockUseCurrentChain.mockReturnValue(baseChain)
     mockUseChain.mockImplementation((chainId: string) => {
-      if (chainId === '1') return mainnetChain
-      if (chainId === '11155111') return sepoliaChain
+      if (chainId === '1') {
+        return mainnetChain
+      }
+      if (chainId === '11155111') {
+        return sepoliaChain
+      }
       return undefined
     })
     mockUseAppSelector.mockReturnValue(undefined)
@@ -111,7 +115,9 @@ describe('useEnsHubProvider', () => {
       .build()
     // Hub (mainnet) lacks the flag — L2 having it must not enable ENS
     mockUseChain.mockImplementation((chainId: string) => {
-      if (chainId === '1') return { ...mainnetChain, features: [] }
+      if (chainId === '1') {
+        return { ...mainnetChain, features: [] }
+      }
       return undefined
     })
 

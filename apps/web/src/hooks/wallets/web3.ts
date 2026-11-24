@@ -33,7 +33,9 @@ export const getRpcServiceUrl = (rpcUri: RpcUri): string => {
 
 export const createWeb3ReadOnly = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || getRpcServiceUrl(chain.rpcUri)
-  if (!url) return
+  if (!url) {
+    return
+  }
   const provider = new JsonRpcProvider(url, Number(chain.chainId), {
     staticNetwork: true,
     batchMaxCount: BATCH_MAX_COUNT,
@@ -47,7 +49,9 @@ export const createWeb3 = (walletProvider: Eip1193Provider): BrowserProvider => 
 
 export const createSafeAppsWeb3Provider = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || formatRpcServiceUrl(chain.rpcUri, SAFE_APPS_INFURA_TOKEN)
-  if (!url) return
+  if (!url) {
+    return
+  }
   const provider = new JsonRpcProvider(url, undefined, {
     staticNetwork: true,
     batchMaxCount: BATCH_MAX_COUNT,
@@ -57,7 +61,9 @@ export const createSafeAppsWeb3Provider = (chain: Chain, customRpc?: string): Js
 
 export const getUserNonce = async (userAddress: string): Promise<number> => {
   const web3 = getWeb3ReadOnly()
-  if (!web3) return -1
+  if (!web3) {
+    return -1
+  }
   try {
     return await web3.getTransactionCount(userAddress, 'pending')
   } catch (error) {

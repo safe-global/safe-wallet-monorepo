@@ -27,7 +27,9 @@ export const useSafenetLinks = (
 
   // A session-pinned BENIGN can outlive the read that carried its attestation; only a present one is proof.
   const attested = publicStatus === CheckStatus.BENIGN && snapshot ? verdictAttestation(snapshot) : undefined
-  if (!attested) return { attestationHref: null, explorerHref }
+  if (!attested) {
+    return { attestationHref: null, explorerHref }
+  }
 
   const txLink = safenetChain ? getExplorerLink(attested.transactionHash, safenetChain.blockExplorerUriTemplate) : null
   return { attestationHref: txLink?.href ?? null, explorerHref }

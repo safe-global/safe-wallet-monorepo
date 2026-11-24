@@ -102,7 +102,9 @@ export const buildQueueList = (args: {
       collapsed: safeCollapsed,
       summary: getSummary(chains.flatMap((chain) => chain.statuses.filter((status) => status !== undefined))),
     }
-    if (safeCollapsed) return [band]
+    if (safeCollapsed) {
+      return [band]
+    }
 
     return [
       band,
@@ -118,7 +120,9 @@ export const buildQueueList = (args: {
           nextNonce,
           collapsed: chainCollapsed,
         }
-        if (chainCollapsed) return [header]
+        if (chainCollapsed) {
+          return [header]
+        }
 
         return [
           header,
@@ -181,7 +185,9 @@ export const buildGroupedQueueList = (args: {
 }): QueueListItem[] =>
   args.groups.flatMap((group) => {
     const rows = group.units.flatMap(toUnitRows)
-    if (group.kind === 'all') return rows
+    if (group.kind === 'all') {
+      return rows
+    }
     const id = getGroupId(group)
     const collapsed = args.collapsedGroups.has(id)
     const band: QueueListItem = {

@@ -69,8 +69,12 @@ export const useAddOrRequestWorkspaceContact = ({ source, location }: TrackingOp
       }
 
       const { error } = await createRequest({ spaceId, createAddressBookRequestDto: contact })
-      if (!error) return { result: 'requested' }
-      if ('status' in error && error.status === 409) return { result: 'pending' }
+      if (!error) {
+        return { result: 'requested' }
+      }
+      if ('status' in error && error.status === 409) {
+        return { result: 'pending' }
+      }
       return { result: 'failed', error: getRtkQueryErrorMessage(error) }
     },
     [isAdmin, upsertWorkspaceNames, createRequest],
@@ -81,7 +85,9 @@ export const useAddOrRequestWorkspaceContact = ({ source, location }: TrackingOp
       const name = sanitizeName(rawName)
       const shared = items.find((item) => sameAddress(item.address, address))
       const isShared = shared?.name === name && chainIds.every((chainId) => shared.chainIds.includes(chainId))
-      if (!name || !spaceId || isInvited || isShared) return 'skipped'
+      if (!name || !spaceId || isInvited || isShared) {
+        return 'skipped'
+      }
 
       const { result, error } = await submit(spaceId, { address, name, chainIds })
       const confirmation = CONFIRMATIONS[result]
@@ -92,12 +98,17 @@ export const useAddOrRequestWorkspaceContact = ({ source, location }: TrackingOp
             ...(source && { [MixpanelEventParams.SOURCE]: source }),
             ...(location && { [MixpanelEventParams.LOCATION]: location }),
           }
-          if (Object.keys(params).length) trackEvent(event, params)
-          else trackEvent(event)
+          if (Object.keys(params).length) {
+            trackEvent(event, params)
+          } else {
+            trackEvent(event)
+          }
         }
         dispatch(showNotification({ ...notification, autoHideDuration: WORKSPACE_CONFIRMATION_HIDE_MS }))
       }
-      if (error) dispatch(showNotification({ variant: 'error', groupKey: 'workspace-contact-error', message: error }))
+      if (error) {
+        dispatch(showNotification({ variant: 'error', groupKey: 'workspace-contact-error', message: error }))
+      }
 
       return result
     },

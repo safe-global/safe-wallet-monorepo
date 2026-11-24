@@ -67,7 +67,9 @@ export const _isModuleFilter = (filter: TxFilter['filter']): filter is ModuleTxF
 
 // The query string is user-editable, so drop a nonsense date rather than seeding the form with it
 const parseFilterDate = (value: string | undefined): Date | null => {
-  if (!value) return null
+  if (!value) {
+    return null
+  }
   const date = new Date(value)
   return isValid(date) ? date : null
 }
@@ -79,7 +81,9 @@ type TxFilterUrlQuery = {
 
 export const txFilter = {
   parseUrlQuery: ({ type, ...filter }: ParsedUrlQuery): TxFilter | null => {
-    if (!_isValidTxFilterType(type)) return null
+    if (!_isValidTxFilterType(type)) {
+      return null
+    }
 
     return {
       type: type as TxFilterType,

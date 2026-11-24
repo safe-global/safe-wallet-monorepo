@@ -101,8 +101,12 @@ const PendingRequests = ({
   ]
 
   const renderReview = (request: PendingRequest) => {
-    if (!canReview) return <Badge variant="secondary">Pending</Badge>
-    if (reviewingId === request.id) return <Spinner className="size-5" />
+    if (!canReview) {
+      return <Badge variant="secondary">Pending</Badge>
+    }
+    if (reviewingId === request.id) {
+      return <Spinner className="size-5" />
+    }
 
     return (
       <>

@@ -44,13 +44,17 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
   }, [dispatch, router, spaceId, sessionId])
 
   useEffect(() => {
-    if (!isComplete) return
+    if (!isComplete) {
+      return
+    }
     const timer = setTimeout(() => setIsSlow(true), SETUP_TIMEOUT)
     return () => clearTimeout(timer)
   }, [isComplete])
 
   useEffect(() => {
-    if (!isApplied || hasOpened.current) return
+    if (!isApplied || hasOpened.current) {
+      return
+    }
     hasOpened.current = true
     void openWorkspace()
   }, [isApplied, openWorkspace])

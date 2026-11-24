@@ -29,6 +29,8 @@ export const selectFeePaymentSourcePreference = (
   state: RootState,
   signerAddress: string | undefined,
 ): RememberedFeePayer | undefined => {
-  if (!signerAddress) return undefined
+  if (!signerAddress) {
+    return undefined
+  }
   return state[feePaymentSourcePreferenceSlice.name][signerAddress.toLowerCase()]
 }

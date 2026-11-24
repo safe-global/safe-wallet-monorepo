@@ -7,7 +7,9 @@ import type { TokenOption } from '../utils/tokenOptions'
 /** The loader resolves a token the option lists never offered by asking the chain, so this is complete. */
 const toTokenOption = ({ token }: SpendingLimitState): TokenOption | undefined => {
   const { address, symbol, decimals, logoUri } = token
-  if (decimals == null) return undefined
+  if (decimals == null) {
+    return undefined
+  }
 
   return { address, symbol, name: symbol, decimals, logoUri, group: 'held' }
 }

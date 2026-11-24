@@ -8,7 +8,9 @@ const LEGACY_ID_PATTERN = /^\d+$/
 
 /** The raw `spaceId` of the page location, for code that has no router (e.g. store listeners). */
 export const getLocationSpaceId = (): unknown => {
-  if (typeof location === 'undefined') return undefined
+  if (typeof location === 'undefined') {
+    return undefined
+  }
   return parse(location.search.slice(1)).spaceId
 }
 
@@ -40,7 +42,9 @@ export const withSpaceId = <Query extends object>(query: Query, spaceId: unknown
 /** {@link withSpaceId} for a URL string: appends `spaceId` to its query string. */
 export const withSpaceIdInUrl = (url: string, spaceId: unknown): string => {
   const id = parseSpaceId(spaceId)
-  if (!id) return url
+  if (!id) {
+    return url
+  }
 
   const [base, hash] = url.split('#', 2)
   const separator = base.includes('?') ? '&' : '?'

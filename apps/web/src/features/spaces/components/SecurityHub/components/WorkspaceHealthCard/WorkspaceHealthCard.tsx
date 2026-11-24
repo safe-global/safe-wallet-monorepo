@@ -54,12 +54,20 @@ const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>):
 
   for (const safeResults of Object.values(scanResults)) {
     for (const result of Object.values(safeResults)) {
-      if (result.status === 'not_applicable' || result.status === 'inconclusive') continue
+      if (result.status === 'not_applicable' || result.status === 'inconclusive') {
+        continue
+      }
       hasAny = true
       applicableCount++
-      if (result.status === 'clear') passing++
-      if (result.status === 'partial') needsAttentionCount++
-      if (result.status === 'issue') atRiskCount++
+      if (result.status === 'clear') {
+        passing++
+      }
+      if (result.status === 'partial') {
+        needsAttentionCount++
+      }
+      if (result.status === 'issue') {
+        atRiskCount++
+      }
       if (result.severity === 'Critical') {
         hasCriticalIssue = true
         criticalCount++
@@ -67,7 +75,9 @@ const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>):
     }
   }
 
-  if (!hasAny) return null
+  if (!hasAny) {
+    return null
+  }
 
   return { passing, applicableCount, criticalCount, needsAttentionCount, atRiskCount, hasCriticalIssue }
 }
@@ -86,7 +96,9 @@ const WorkspaceHealthCard = ({
 
   const aggregate = useMemo<Aggregate | null>(() => {
     const counts = computeCounts(scanResults)
-    if (!counts || !security) return null
+    if (!counts || !security) {
+      return null
+    }
     const clearRatio = counts.applicableCount > 0 ? counts.passing / counts.applicableCount : 0
     const scorePct = Math.round(clearRatio * 100)
     const band = security.getScoreBand(scorePct, counts.hasCriticalIssue)
@@ -99,16 +111,22 @@ const WorkspaceHealthCard = ({
   // the table's filter semantics ("show safes where ANY chain matches this grade").
   const gradeCounts = useMemo(() => {
     const counts: Record<SafeGrade, number> = { critical: 0, at_risk: 0, needs_attention: 0, passing: 0 }
-    if (!security) return counts
+    if (!security) {
+      return counts
+    }
     for (const safe of safes) {
       const gradesFound = new Set<SafeGrade>()
       for (const chain of safe.chainEntries) {
         const key = security.scanKey(safe.address, chain.chainId)
         const results = scanResults[key]
-        if (!results) continue
+        if (!results) {
+          continue
+        }
         gradesFound.add(security.getSafeGrade(results))
       }
-      for (const grade of gradesFound) counts[grade]++
+      for (const grade of gradesFound) {
+        counts[grade]++
+      }
     }
     return counts
   }, [safes, scanResults, security])

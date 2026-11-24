@@ -36,7 +36,9 @@ export const TRIAL_END_TOOLTIP =
 
 /** The trial offer's headline, which members of a locked Workspace see too. */
 export const claimTitle = (trialPeriodDays: number | null): string => {
-  if (trialPeriodDays === MIGRATED_TRIAL_DAYS) return 'Your Workspace moved to Safe Pro'
+  if (trialPeriodDays === MIGRATED_TRIAL_DAYS) {
+    return 'Your Workspace moved to Safe Pro'
+  }
   return trialPeriodDays === null
     ? 'Start your free access to Safe Pro'
     : `Start your ${trialPeriodDays}-day free access to Safe Pro`
@@ -73,13 +75,20 @@ export default function ClaimTrialModal({
   )
 
   const claim = () => {
-    if (!size) return
-    if (needsTrim(size.seats)) setStep('accounts')
-    else void checkout(size.paymentLinkId)
+    if (!size) {
+      return
+    }
+    if (needsTrim(size.seats)) {
+      setStep('accounts')
+    } else {
+      void checkout(size.paymentLinkId)
+    }
   }
 
   const continueToCheckout = (removed: SafeRef[]) => {
-    if (size) void checkout(size.paymentLinkId, removed)
+    if (size) {
+      void checkout(size.paymentLinkId, removed)
+    }
   }
 
   return (

@@ -70,7 +70,9 @@ const Seats = ({
       value={value ? optionKey(value) : null}
       onValueChange={(key) => {
         const next = options.find((option) => optionKey(option) === key)
-        if (next) onChange(next)
+        if (next) {
+          onChange(next)
+        }
       }}
     >
       <TabsList aria-label={label} className="w-full" data-testid="plan-seats-switch">
@@ -179,8 +181,11 @@ const PlanCta = ({
               [MixpanelEventParams.LOCATION]: location,
             })
             onCta?.(pick, cta)
-            if (cta.kind === 'billing') onManage?.()
-            else onSubscribe?.(pick)
+            if (cta.kind === 'billing') {
+              onManage?.()
+            } else {
+              onSubscribe?.(pick)
+            }
           }}
         >
           {cta.label}

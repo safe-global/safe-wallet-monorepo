@@ -43,7 +43,9 @@ export function useRecipientAnalysis({
 
   // Validate + normalize addresses and remove duplicates
   const validRecipients = useMemo(() => {
-    if (!debouncedRecipients) return []
+    if (!debouncedRecipients) {
+      return []
+    }
     const filteredRecipients = debouncedRecipients
       .filter((address) => address && isAddress(address))
       .map((address) => address.toLowerCase())

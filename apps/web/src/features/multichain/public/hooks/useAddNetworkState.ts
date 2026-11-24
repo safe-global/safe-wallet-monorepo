@@ -51,10 +51,18 @@ export function useAddNetworkState(safeAddress: string, deployedChainIds: string
   const isUnsupportedSafeCreationVersion = Boolean(safeCreationData && !allCompatibleChains?.length)
 
   const unavailableReason: AddNetworkUnavailableReason | null = (() => {
-    if (!isFeatureEnabled) return null
-    if (safeCreationError) return 'safe-specific'
-    if (safeCreationData && noAvailableNetworks) return 'safe-specific'
-    if (isUnsupportedSafeCreationVersion) return 'outdated-mastercopy'
+    if (!isFeatureEnabled) {
+      return null
+    }
+    if (safeCreationError) {
+      return 'safe-specific'
+    }
+    if (safeCreationData && noAvailableNetworks) {
+      return 'safe-specific'
+    }
+    if (isUnsupportedSafeCreationVersion) {
+      return 'outdated-mastercopy'
+    }
     return null
   })()
 

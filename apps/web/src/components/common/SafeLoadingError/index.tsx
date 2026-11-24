@@ -27,9 +27,13 @@ const SafeLoadingError = ({ children }: { children: ReactNode }): ReactElement =
   const unavailableMessage = useSafeUnavailableMessage()
   const urlChain = useUrlChain()
 
-  if (urlChain.status === 'unknown') return <ErrorPlaceholder text={unsupportedNetworkError(urlChain.shortName)} />
+  if (urlChain.status === 'unknown') {
+    return <ErrorPlaceholder text={unsupportedNetworkError(urlChain.shortName)} />
+  }
 
-  if (!safeError) return <>{children}</>
+  if (!safeError) {
+    return <>{children}</>
+  }
 
   return <ErrorPlaceholder text={unavailableMessage ?? GENERIC_LOADING_ERROR} />
 }

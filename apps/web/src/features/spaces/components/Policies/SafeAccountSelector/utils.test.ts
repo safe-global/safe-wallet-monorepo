@@ -35,7 +35,9 @@ describe('groupSafeAccounts', () => {
 
     expect(entries).toHaveLength(1)
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.address).toBe(SAFE_A)
     expect(group.accounts).toHaveLength(3)
   })
@@ -52,7 +54,9 @@ describe('groupSafeAccounts', () => {
     const entries = groupSafeAccounts([option('11155111', SAFE_A), option('1', SAFE_A), option('137', SAFE_A)])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.accounts.map((account) => account.chainId)).toEqual(['1', '137', '11155111'])
   })
 
@@ -63,7 +67,9 @@ describe('groupSafeAccounts', () => {
     ])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.accounts.map((account) => account.chainId)).toEqual(['1', '137'])
   })
 
@@ -77,7 +83,9 @@ describe('groupSafeAccounts', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A), option('137', SAFE_A, { name: 'Treasury' })])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.name).toBe('Treasury')
   })
 
@@ -85,7 +93,9 @@ describe('groupSafeAccounts', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A), option('137', SAFE_A)])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.name).toBeUndefined()
   })
 
@@ -96,7 +106,9 @@ describe('groupSafeAccounts', () => {
     ])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.fiatTotal).toBe('1300')
   })
 
@@ -104,7 +116,9 @@ describe('groupSafeAccounts', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A, { fiatTotal: '100' }), option('137', SAFE_A)])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.fiatTotal).toBe('100')
   })
 
@@ -112,7 +126,9 @@ describe('groupSafeAccounts', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A), option('137', SAFE_A)])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.fiatTotal).toBeUndefined()
   })
 
@@ -123,7 +139,9 @@ describe('groupSafeAccounts', () => {
     ])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group).toMatchObject({ threshold: 3, owners: 5 })
   })
 
@@ -134,7 +152,9 @@ describe('groupSafeAccounts', () => {
     ])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.threshold).toBeUndefined()
     expect(group.owners).toBeUndefined()
   })
@@ -143,7 +163,9 @@ describe('groupSafeAccounts', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A, { threshold: 3, owners: 5 }), option('137', SAFE_A)])
 
     const [group] = entries
-    if (!isSafeAccountGroup(group)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(group)) {
+      throw new Error('expected a group')
+    }
     expect(group.threshold).toBeUndefined()
   })
 

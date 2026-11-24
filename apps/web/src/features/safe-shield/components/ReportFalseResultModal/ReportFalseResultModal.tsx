@@ -37,7 +37,9 @@ export const ReportFalseResultModal = ({ open, onClose, requestId }: ReportFalse
   const isError = details.length > MAX_DETAILS_LENGTH
 
   const handleSubmit = useCallback(async () => {
-    if (!isFormValid) return
+    if (!isFormValid) {
+      return
+    }
 
     trackEvent(SAFE_SHIELD_EVENTS.REPORT_SUBMITTED)
 

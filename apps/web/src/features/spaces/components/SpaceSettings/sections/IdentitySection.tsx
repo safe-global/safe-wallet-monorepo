@@ -48,7 +48,9 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
   }
 
   const handleSave = async () => {
-    if (!space || !canSave) return
+    if (!space || !canSave) {
+      return
+    }
     setError(undefined)
     try {
       isAwaitingCacheSync.current = true
@@ -64,7 +66,9 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
       )
     } catch (e) {
       isAwaitingCacheSync.current = false
-      if (isElevationRequiredError(e)) return
+      if (isElevationRequiredError(e)) {
+        return
+      }
       console.error(e)
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }

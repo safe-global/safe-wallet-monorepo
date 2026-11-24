@@ -107,7 +107,9 @@ const useAutoScan = (
 
   // Run scanners when context is ready
   useEffect(() => {
-    if (!scanContext || !currentTarget || !isRunning || !services) return
+    if (!scanContext || !currentTarget || !isRunning || !services) {
+      return
+    }
 
     const { scanners, scanKey, setCachedScan, withScannerTimeout } = services
     const key = scanKey(currentTarget.address, currentTarget.chainId)
@@ -117,7 +119,9 @@ const useAutoScan = (
     }
 
     // Guard: don't re-launch scanners if already scanning this key
-    if (scanningRef.current === key) return
+    if (scanningRef.current === key) {
+      return
+    }
     scanningRef.current = key
 
     let completed = 0
@@ -170,7 +174,9 @@ const useAutoScan = (
   // stalls on a ghost-deployed chain (see SCAN_CONTEXT_BAIL_MS comment). The timer resets
   // whenever currentTarget changes and is cleared as soon as scanContext becomes non-null.
   useEffect(() => {
-    if (!currentTarget || !isRunning || !services || scanContext) return
+    if (!currentTarget || !isRunning || !services || scanContext) {
+      return
+    }
     const key = services.scanKey(currentTarget.address, currentTarget.chainId)
 
     const bailPastTarget = () => {
@@ -182,7 +188,9 @@ const useAutoScan = (
       // and leave the committed score untouched (same rationale as the commit gate).
       setScanIncomplete(true)
       setScanningKeys((prev) => {
-        if (!prev.has(key)) return prev
+        if (!prev.has(key)) {
+          return prev
+        }
         const next = new Set(prev)
         next.delete(key)
         return next
@@ -197,7 +205,9 @@ const useAutoScan = (
 
   // Stop when queue is exhausted, show brief completion state
   useEffect(() => {
-    if (!(isRunning && currentIndex >= queue.length && queue.length > 0)) return
+    if (!(isRunning && currentIndex >= queue.length && queue.length > 0)) {
+      return
+    }
 
     const finish = () => {
       setIsRunning(false)
@@ -223,7 +233,9 @@ const useAutoScan = (
 
   const startScan = useCallback(
     (options?: { isManual?: boolean }) => {
-      if (!services) return
+      if (!services) {
+        return
+      }
       completedRef.current = new Set()
       scanningRef.current = null
       setScanIncomplete(false)

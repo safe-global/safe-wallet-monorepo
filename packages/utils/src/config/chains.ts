@@ -9,7 +9,9 @@ import { getChainIdFromEip3770NetworkPrefix } from '@safe-global/protocol-kit'
  */
 const chains: Record<string, string> = new Proxy({} as Record<string, string>, {
   get(_, shortName: string | symbol) {
-    if (typeof shortName !== 'string') return undefined
+    if (typeof shortName !== 'string') {
+      return undefined
+    }
     try {
       return getChainIdFromEip3770NetworkPrefix(shortName).toString()
     } catch {

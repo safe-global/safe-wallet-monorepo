@@ -13,8 +13,12 @@ let mockUndeployedSafes: TestUndeployed = {}
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
-    if (selector === 'selectCurrency') return mockCurrency
-    if (selector === 'selectUndeployedSafes') return mockUndeployedSafes
+    if (selector === 'selectCurrency') {
+      return mockCurrency
+    }
+    if (selector === 'selectUndeployedSafes') {
+      return mockUndeployedSafes
+    }
     return undefined
   },
 }))

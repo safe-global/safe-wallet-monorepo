@@ -20,8 +20,12 @@ jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   useAddressBookItem: (address: string) => {
-    if (address === MOCK_SAFES.treasury.address) return { name: 'Treasury' }
-    if (address === PARENT_SAFE) return { name: 'Ops' }
+    if (address === MOCK_SAFES.treasury.address) {
+      return { name: 'Treasury' }
+    }
+    if (address === PARENT_SAFE) {
+      return { name: 'Ops' }
+    }
     return undefined
   },
 }))

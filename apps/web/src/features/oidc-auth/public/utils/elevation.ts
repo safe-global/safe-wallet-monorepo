@@ -16,9 +16,15 @@ export const ELEVATION_REQUIRED_MESSAGE = 'Verify your identity to continue with
  * ordinary errors instead of starting a verification.
  */
 export const isElevationRequiredError = (error: unknown): boolean => {
-  if (typeof error !== 'object' || error === null) return false
-  if (!('status' in error) || error.status !== HTTP_FORBIDDEN) return false
-  if (!('data' in error) || typeof error.data !== 'object' || error.data === null) return false
+  if (typeof error !== 'object' || error === null) {
+    return false
+  }
+  if (!('status' in error) || error.status !== HTTP_FORBIDDEN) {
+    return false
+  }
+  if (!('data' in error) || typeof error.data !== 'object' || error.data === null) {
+    return false
+  }
 
   return 'message' in error.data && error.data.message === ELEVATION_REQUIRED_ERROR
 }

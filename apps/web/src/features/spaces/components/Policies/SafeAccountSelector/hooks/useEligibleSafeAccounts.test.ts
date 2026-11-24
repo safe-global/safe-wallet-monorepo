@@ -251,7 +251,9 @@ describe('useEligibleSafeAccounts', () => {
   })
 
   const asOption = (entry: SafeAccountEntry): SafeAccountOption => {
-    if (isSafeAccountGroup(entry)) throw new Error('expected a flat row')
+    if (isSafeAccountGroup(entry)) {
+      throw new Error('expected a flat row')
+    }
     return entry
   }
 
@@ -295,7 +297,9 @@ describe('useEligibleSafeAccounts', () => {
 
     await waitFor(() => expect(result.current.accounts).toHaveLength(1))
     const [entry] = result.current.accounts
-    if (!isSafeAccountGroup(entry)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(entry)) {
+      throw new Error('expected a group')
+    }
     expect(entry.accounts.map(({ chainId, ineligibleReason }) => ({ chainId, ineligibleReason }))).toEqual([
       { chainId: '1', ineligibleReason: undefined },
       { chainId: '137', ineligibleReason: 'not-activated' },
@@ -332,7 +336,9 @@ describe('useEligibleSafeAccounts', () => {
 
     await waitFor(() => expect(result.current.accounts).toHaveLength(1))
     const [entry] = result.current.accounts
-    if (!isSafeAccountGroup(entry)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(entry)) {
+      throw new Error('expected a group')
+    }
     expect(entry.accounts.map((account) => account.chainId)).toEqual(['1', '137'])
   })
 
@@ -394,7 +400,9 @@ describe('useEligibleSafeAccounts', () => {
 
     await waitFor(() => expect(result.current.accounts).toHaveLength(1))
     const [entry] = result.current.accounts
-    if (!isSafeAccountGroup(entry)) throw new Error('expected a group')
+    if (!isSafeAccountGroup(entry)) {
+      throw new Error('expected a group')
+    }
     expect(entry.fiatTotal).toBe('1250.5')
   })
 

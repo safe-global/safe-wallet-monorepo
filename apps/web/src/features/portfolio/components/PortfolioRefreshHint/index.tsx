@@ -51,7 +51,9 @@ const PortfolioRefreshHint = ({
   const [now, setNow] = useState(Date.now)
 
   useEffect(() => {
-    if (_freezeTime) return
+    if (_freezeTime) {
+      return
+    }
     const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [_freezeTime])
@@ -61,7 +63,9 @@ const PortfolioRefreshHint = ({
   const timeAgo = fulfilledTimeStamp ? formatDistanceToNow(fulfilledTimeStamp) : null
 
   const handleRefresh = useCallback(async () => {
-    if (isFetching || isOnCooldown) return
+    if (isFetching || isOnCooldown) {
+      return
+    }
 
     trackEvent(PORTFOLIO_EVENTS.PORTFOLIO_REFRESH_CLICKED, { [MixpanelEventParams.ENTRY_POINT]: entryPoint })
 

@@ -8,7 +8,9 @@ import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSecti
 
 export default function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
   const note = txDetails?.note
-  if (!note) return null
+  if (!note) {
+    return null
+  }
 
   const creator =
     isMultisigDetailedExecutionInfo(txDetails?.detailedExecutionInfo) && txDetails?.detailedExecutionInfo.proposer

@@ -7,7 +7,9 @@ import useChains from '@/hooks/useChains'
 /** The `?safe=` value (prefix as chain ID or short name) as a `chainId:address` key, or undefined when it names no Safe. */
 export const safeParamToKey = (param: string, chains: Pick<Chain, 'chainId' | 'shortName'>[]): string | undefined => {
   const { prefix, address } = parsePrefixedAddress(param)
-  if (!prefix || !address || !isValidAddress(address)) return undefined
+  if (!prefix || !address || !isValidAddress(address)) {
+    return undefined
+  }
   const chainId = /^\d+$/.test(prefix)
     ? prefix
     : chains.find((chain) => chain.shortName.toLowerCase() === prefix.toLowerCase())?.chainId

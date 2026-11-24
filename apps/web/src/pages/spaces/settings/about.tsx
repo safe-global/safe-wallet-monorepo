@@ -7,7 +7,9 @@ import SpaceSettingsPage from '@/features/spaces/public/components/SpaceSettings
 export default function SpaceSettingsAboutPage() {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
-  if (!router.isReady || !spaceId) return null
+  if (!router.isReady || !spaceId) {
+    return null
+  }
 
   return (
     <>

@@ -4,7 +4,9 @@ export type ResolveName = (name: string) => Promise<string | null>
 
 const withoutPrefix = (input: string, networkPrefix: string): string | undefined => {
   const [prefix, rest] = input.split(':')
-  if (rest === undefined) return input
+  if (rest === undefined) {
+    return input
+  }
   return prefix === networkPrefix ? rest : undefined
 }
 
@@ -15,9 +17,13 @@ export async function resolveRecipient(
   resolveName: ResolveName,
 ): Promise<string | undefined> {
   const value = withoutPrefix(input.trim(), networkPrefix)
-  if (!value) return undefined
+  if (!value) {
+    return undefined
+  }
 
-  if (!value.includes('.')) return isAddress(value) ? getAddress(value) : undefined
+  if (!value.includes('.')) {
+    return isAddress(value) ? getAddress(value) : undefined
+  }
 
   const resolved = await resolveName(value).catch(() => null)
   return resolved ? getAddress(resolved) : undefined

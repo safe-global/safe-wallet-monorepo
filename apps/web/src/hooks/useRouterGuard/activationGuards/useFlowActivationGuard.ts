@@ -57,9 +57,15 @@ const guardRules: GuardRule[] = [
       const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
       // Keep the Workspace too, so that the welcome page opens it after sign-in
       const params = new URLSearchParams()
-      if (typeof query.safe === 'string') params.set('safe', query.safe)
-      if (typeof query.spaceId === 'string') params.set('spaceId', query.spaceId)
-      if (isSpacesPath) params.set('next', currentUrl)
+      if (typeof query.safe === 'string') {
+        params.set('safe', query.safe)
+      }
+      if (typeof query.spaceId === 'string') {
+        params.set('spaceId', query.spaceId)
+      }
+      if (isSpacesPath) {
+        params.set('next', currentUrl)
+      }
       const search = params.toString()
       return redirect(search ? `${target}?${search}` : target)
     },

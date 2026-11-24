@@ -105,7 +105,9 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
   }
 
   useEffect(() => {
-    if (!remoteApp) return
+    if (!remoteApp) {
+      return
+    }
 
     trackSafeAppOpenCount(remoteApp.id)
   }, [remoteApp])

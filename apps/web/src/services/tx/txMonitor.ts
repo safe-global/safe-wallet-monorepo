@@ -82,7 +82,9 @@ export const waitForTx = async (
       // Poll for the transaction until it has a transactionHash and start the watcher
       const interval = setInterval(async () => {
         const safeTx = await getSafeTransaction(txHash, chainId, safeAddress)
-        if (!safeTx?.txHash) return
+        if (!safeTx?.txHash) {
+          return
+        }
 
         clearInterval(interval)
 

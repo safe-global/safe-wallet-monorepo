@@ -28,7 +28,9 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   // Every flow routes a failed tx build here, so this is the one place it is reported.
   const setSafeTxError = useCallback((error: Error | undefined) => {
-    if (error) logError(Errors._103, error)
+    if (error) {
+      logError(Errors._103, error)
+    }
     setSafeTxErrorState(error)
   }, [])
 
@@ -52,11 +54,19 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {
-    if (!canEdit) return
-    if (!safeTx?.data) return
-    if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
+    if (!canEdit) {
+      return
+    }
+    if (!safeTx?.data) {
+      return
+    }
+    if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) {
+      return
+    }
     // A Space-level scope drops its SDK while it is recreated; building without it fails.
-    if (scope && !scope.sdk) return
+    if (scope && !scope.sdk) {
+      return
+    }
 
     setSafeTxError(undefined)
 

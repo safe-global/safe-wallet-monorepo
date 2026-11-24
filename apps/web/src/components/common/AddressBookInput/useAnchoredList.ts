@@ -17,7 +17,9 @@ export const useAnchoredList = (anchorRef: RefObject<HTMLElement | null>, isOpen
 
   const reposition = useCallback(() => {
     const anchor = anchorRef.current
-    if (!anchor) return
+    if (!anchor) {
+      return
+    }
 
     const rect = anchor.getBoundingClientRect()
     const below = window.innerHeight - rect.bottom - VIEWPORT_MARGIN
@@ -35,12 +37,17 @@ export const useAnchoredList = (anchorRef: RefObject<HTMLElement | null>, isOpen
 
   // Layout effect so the first paint is already in place, not one frame off to the top-left.
   useLayoutEffect(() => {
-    if (isOpen) reposition()
-    else setStyle({ visibility: 'hidden' })
+    if (isOpen) {
+      reposition()
+    } else {
+      setStyle({ visibility: 'hidden' })
+    }
   }, [isOpen, reposition])
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      return
+    }
 
     // Capture phase, so the list follows the input when any ancestor scrolls, not just the window.
     const onChange = () => {

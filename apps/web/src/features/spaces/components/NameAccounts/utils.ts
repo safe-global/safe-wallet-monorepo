@@ -31,7 +31,9 @@ export const getSafesToName = (
 
   const items = safesToAdd.flatMap<SafeItem>(({ chainId, address }) => {
     const entry = spaceAddressBook.find((item) => sameAddress(item.address, address))
-    if (entry?.chainIds.includes(chainId)) return []
+    if (entry?.chainIds.includes(chainId)) {
+      return []
+    }
 
     const known = knownSafes.find((safe) => safe.chainId === chainId && sameAddress(safe.address, address))
     return [

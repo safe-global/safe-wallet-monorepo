@@ -65,7 +65,9 @@ const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) 
   }
 
   const onCustomTransaction = () => {
-    if (!txBuilder) return
+    if (!txBuilder) {
+      return
+    }
 
     trackEvent({ ...OVERVIEW_EVENTS.CHOOSE_TRANSACTION_TYPE, label: 'tx_builder' })
     router.push(txBuilder.link)

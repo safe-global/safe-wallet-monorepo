@@ -47,7 +47,9 @@ export const canUpgradeInPlace = (safe: MastercopySafe, targetVersion: string): 
 
   // EVM Safes always have a canonical target; an EraVM Safe needs an EraVM singleton
   // at the target version too (1.5.0 ships EVM-only, so there is none).
-  if (!isEraVmSafe) return true
+  if (!isEraVmSafe) {
+    return true
+  }
   return isEraVmChain(safe.chainId, targetVersion)
 }
 
@@ -62,17 +64,27 @@ const isProvablyOfficialUnsupported = (
   opts: MastercopyMigrationOptions | undefined,
   targetVersion: string,
 ): boolean => {
-  if (isValidMasterCopy(safe.implementationVersionState)) return false
-  if (!safe.version) return false
-  if (!isSupportedMigrationVersion(safe.version, targetVersion)) return false
+  if (isValidMasterCopy(safe.implementationVersionState)) {
+    return false
+  }
+  if (!safe.version) {
+    return false
+  }
+  if (!isSupportedMigrationVersion(safe.version, targetVersion)) {
+    return false
+  }
   return Boolean(opts?.bytecodeResult?.isMatch) || isOfficialMasterCopy(safe.implementation?.value, safe.version)
 }
 
 export const isUnsupportedMastercopyMigratable = (safe: MastercopySafe, opts?: MastercopyMigrationOptions): boolean => {
   const targetVersion = opts?.recommendedVersion ?? LATEST_SAFE_VERSION
 
-  if (!isProvablyOfficialUnsupported(safe, opts, targetVersion)) return false
-  if (!canUpgradeInPlace(safe, targetVersion)) return false
+  if (!isProvablyOfficialUnsupported(safe, opts, targetVersion)) {
+    return false
+  }
+  if (!canUpgradeInPlace(safe, targetVersion)) {
+    return false
+  }
 
   return Boolean(getChainAgnosticAddress(getSafeMigrationDeployments({ version: targetVersion }), safe.chainId))
 }
@@ -83,18 +95,24 @@ export const getMastercopyAction = (safe: MastercopySafe, opts?: MastercopyMigra
   const targetVersion = opts?.recommendedVersion ?? LATEST_SAFE_VERSION
 
   if (isValidMasterCopy(safe.implementationVersionState)) {
-    if (safe.implementationVersionState !== 'OUTDATED') return 'none'
+    if (safe.implementationVersionState !== 'OUTDATED') {
+      return 'none'
+    }
     // CGW flags OUTDATED against the raw config recommendation, while our target is capped
     // at the latest version deployed on the chain. When the cap pulls the target back to
     // the current version there is nothing to offer.
     const [currentVersion] = (safe.version ?? '').split('+')
-    if (currentVersion && semverSatisfies(currentVersion, `>=${targetVersion}`)) return 'none'
+    if (currentVersion && semverSatisfies(currentVersion, `>=${targetVersion}`)) {
+      return 'none'
+    }
     // Recognized but outdated: normally an in-place update; a stranded EraVM Safe must redeploy.
     return canUpgradeInPlace(safe, targetVersion) ? 'update' : 'redeploy'
   }
 
   // Unknown master copy.
-  if (isUnsupportedMastercopyMigratable(safe, opts)) return 'migrate'
+  if (isUnsupportedMastercopyMigratable(safe, opts)) {
+    return 'migrate'
+  }
   if (isProvablyOfficialUnsupported(safe, opts, targetVersion) && !canUpgradeInPlace(safe, targetVersion)) {
     return 'redeploy'
   }

@@ -19,7 +19,9 @@ export const hasSpacePlan = (
   isSafePro: boolean,
   entitlements: EntitlementsResponse | undefined,
 ): boolean | undefined => {
-  if (!isSafePro) return true
+  if (!isSafePro) {
+    return true
+  }
   return entitlements ? entitlements.plan !== null : undefined
 }
 
@@ -34,8 +36,12 @@ export const pickSafeWorkspace = (
   spaceIds: string[],
   hasPlan: (spaceId: string) => boolean | undefined,
 ): SafeWorkspacePick => {
-  if (spaceIds.length === 0) return { kind: 'none' }
-  if (spaceIds.length === 1) return { kind: 'one', spaceId: spaceIds[0] }
+  if (spaceIds.length === 0) {
+    return { kind: 'none' }
+  }
+  if (spaceIds.length === 1) {
+    return { kind: 'one', spaceId: spaceIds[0] }
+  }
 
   const withPlan = spaceIds.filter((spaceId) => hasPlan(spaceId) === true)
   return withPlan.length === 1 ? { kind: 'one', spaceId: withPlan[0] } : { kind: 'choose', spaceIds }
