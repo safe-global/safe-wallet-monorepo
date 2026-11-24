@@ -17,8 +17,19 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Action: 204,
 }
 
-/** The queue table's floor: below it, the table scrolls sideways */
-export const QUEUE_TABLE_MIN_WIDTH = 'min-w-[1150px]'
+/**
+ * The queue table's floor, Details at 232px: below it, the table scrolls sideways inside its panel. It fits a 1280px
+ * window with the 230px sidebar open (a 1002px panel), with room for a 15px classic scrollbar.
+ */
+export const QUEUE_TABLE_MIN_WIDTH = 'min-w-[960px]'
+
+// The panel table's outer cells have a 4px transparent edge: painted the panel's colour, so nothing shows through it.
+// Important, as the table's CSS module isn't in a layer. Its header and hover fills still win over the background.
+/** The Nonce and Action cells stay in view while a panel narrower than the table's floor scrolls under them */
+export const QUEUE_STICKY_CELL: Partial<Record<QueueColumn, string>> = {
+  Nonce: 'sticky left-0 z-[1] bg-[var(--color-background-paper)] border-l-[var(--color-background-paper)]!',
+  Action: 'sticky right-0 z-[1] bg-[var(--color-background-paper)] border-r-[var(--color-background-paper)]!',
+}
 
 /** Where a column starts, as a CSS length from the table's left edge: Details and the columns after it hang off the right */
 export const getQueueColumnStart = (column: QueueColumn): string => {

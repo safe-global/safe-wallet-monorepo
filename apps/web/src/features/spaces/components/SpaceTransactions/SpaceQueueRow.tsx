@@ -21,6 +21,7 @@ import QueueTxDetails from './QueueTxDetails'
 import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import { QUEUE_COLUMNS, QUEUE_STICKY_CELL } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
@@ -108,6 +109,8 @@ type SpaceQueueRowProps = {
   canReject?: boolean
   safeAddress: string
   rowProps?: ComponentProps<'tr'>
+  /** Below the mobile breakpoint: the row is one cell beside the nonce, the gauge and the action under its summary */
+  compact?: boolean
 }
 
 const SpaceQueueRow = ({
@@ -120,6 +123,7 @@ const SpaceQueueRow = ({
   canReject = true,
   safeAddress,
   rowProps,
+  compact = false,
 }: SpaceQueueRowProps): ReactElement => {
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
@@ -148,6 +152,41 @@ const SpaceQueueRow = ({
     if (seq !== undefined && takeFocus()) rowRef.current?.focus({ preventScroll: true })
   }, [seq, takeFocus])
 
+  const gauge = executionInfo && (
+    <SignersTooltip
+      chainId={chainId}
+      txId={tx.id}
+      safeAddress={safeAddress}
+      status={status}
+      nonce={nonce}
+      nextNonce={nextNonce}
+      submitted={executionInfo.confirmationsSubmitted}
+      required={executionInfo.confirmationsRequired}
+    />
+  )
+
+  const action = (
+    <div className="flex items-center justify-end gap-1">
+      {/* The status is in the gauge: what the gauge can't show takes the place of the button */}
+      {pendingTx ? (
+        <PendingRowAction txId={tx.id} pendingTx={pendingTx} />
+      ) : expiredSwap ? (
+        <StatusLabel status="expired" />
+      ) : nonceTaken && nonce !== undefined ? (
+        <NonceTakenAction tx={tx} nonce={nonce} />
+      ) : blockedBy !== undefined ? (
+        <BlockedByButton
+          nonce={blockedBy}
+          hint={getBlockedByHint(blockedBy, nextStatus)}
+          onClick={() => goTo?.({ safeAddress, chainId, nonce: blockedBy, status: nextStatus })}
+        />
+      ) : (
+        <QueueActions tx={tx} dense />
+      )}
+      <RowActionsMenu tx={tx} canReject={canReject} />
+    </div>
+  )
+
   return (
     <TableRow
       data-testid="space-queue-row"
@@ -157,83 +196,80 @@ const SpaceQueueRow = ({
       data-highlighted={phase}
       data-no-hover={phase === 'on' ? '' : undefined}
       className={cn(
-        'group/transaction h-14 outline-hidden focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+        'group/transaction outline-hidden focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+        !compact && 'h-14',
         phase && HIGHLIGHT_CLASSES[phase],
       )}
     >
-      <TableCell className="relative py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground">
+      <TableCell
+        className={cn(
+          'py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground',
+          // A conflict's bracket is drawn off this cell: sticky positions it as relative would
+          compact ? 'relative' : QUEUE_STICKY_CELL.Nonce,
+        )}
+      >
         {conflict ? <ConflictBracket {...conflict} nonce={nonce} /> : nonce}
       </TableCell>
 
-      <TableCell className="py-2">
-        <span className="flex min-w-0">
-          <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />
-        </span>
-      </TableCell>
-
-      <TableCell className="py-2">
-        <span className="flex min-w-0">
-          <span className={TYPE_TAG}>
-            <QueueTxDetails.Type tx={tx} />
-          </span>
-        </span>
-      </TableCell>
-
-      <TableCell className="py-2">
-        <span className="flex min-h-10 min-w-0 items-center gap-3">
-          <DetailsSlot className="shrink basis-40 gap-1.5 text-sm">
-            <span className="min-w-0 truncate">
-              <QueueTxDetails.Summary tx={tx} />
+      {compact ? (
+        <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="py-2">
+          <span className="flex min-w-0 flex-col gap-1.5">
+            <span className="flex min-w-0 items-center gap-2 text-sm">
+              <span className="flex min-w-0 max-w-[50%] shrink-0">
+                <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />
+              </span>
+              <span className="min-w-0 truncate">
+                <QueueTxDetails.Summary tx={tx} />
+              </span>
+              {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
             </span>
-            {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
-          </DetailsSlot>
-          <DetailsSlot className="shrink basis-44">
-            <Counterparty txInfo={tx.txInfo} chainId={chainId} />
-          </DetailsSlot>
-          <DetailsSlot className="w-16 shrink-0 text-sm text-muted-foreground group-hover/transaction:text-foreground">
-            <ProposedTime timestamp={tx.timestamp} />
-          </DetailsSlot>
-        </span>
-      </TableCell>
+            {/* Wraps under the gauge sooner than overflow: the action has to stay in view */}
+            <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              {gauge}
+              <span className="ml-auto">{action}</span>
+            </span>
+          </span>
+        </TableCell>
+      ) : (
+        <>
+          <TableCell className="py-2">
+            <span className="flex min-w-0">
+              <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />
+            </span>
+          </TableCell>
 
-      <TableCell className="py-1">
-        <span className="flex min-w-0 items-center">
-          {executionInfo && (
-            <SignersTooltip
-              chainId={chainId}
-              txId={tx.id}
-              safeAddress={safeAddress}
-              status={status}
-              nonce={nonce}
-              nextNonce={nextNonce}
-              submitted={executionInfo.confirmationsSubmitted}
-              required={executionInfo.confirmationsRequired}
-            />
-          )}
-        </span>
-      </TableCell>
+          <TableCell className="py-2">
+            <span className="flex min-w-0">
+              <span className={TYPE_TAG}>
+                <QueueTxDetails.Type tx={tx} />
+              </span>
+            </span>
+          </TableCell>
 
-      <TableCell>
-        <div className="flex items-center justify-end gap-1">
-          {/* The status is in the gauge: what the gauge can't show takes the place of the button */}
-          {pendingTx ? (
-            <PendingRowAction txId={tx.id} pendingTx={pendingTx} />
-          ) : expiredSwap ? (
-            <StatusLabel status="expired" />
-          ) : nonceTaken && nonce !== undefined ? (
-            <NonceTakenAction tx={tx} nonce={nonce} />
-          ) : blockedBy !== undefined ? (
-            <BlockedByButton
-              nonce={blockedBy}
-              hint={getBlockedByHint(blockedBy, nextStatus)}
-              onClick={() => goTo?.({ safeAddress, chainId, nonce: blockedBy, status: nextStatus })}
-            />
-          ) : (
-            <QueueActions tx={tx} dense />
-          )}
-          <RowActionsMenu tx={tx} canReject={canReject} />
-        </div>
-      </TableCell>
+          <TableCell className="py-2">
+            <span className="flex min-h-10 min-w-0 items-center gap-3">
+              <DetailsSlot className="shrink basis-40 gap-1.5 text-sm">
+                <span className="min-w-0 truncate">
+                  <QueueTxDetails.Summary tx={tx} />
+                </span>
+                {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
+              </DetailsSlot>
+              <DetailsSlot className="shrink basis-44">
+                <Counterparty txInfo={tx.txInfo} chainId={chainId} />
+              </DetailsSlot>
+              <DetailsSlot className="w-16 shrink-0 text-sm text-muted-foreground group-hover/transaction:text-foreground">
+                <ProposedTime timestamp={tx.timestamp} />
+              </DetailsSlot>
+            </span>
+          </TableCell>
+
+          <TableCell className="py-1">
+            <span className="flex min-w-0 items-center">{gauge}</span>
+          </TableCell>
+
+          <TableCell className={QUEUE_STICKY_CELL.Action}>{action}</TableCell>
+        </>
+      )}
     </TableRow>
   )
 }

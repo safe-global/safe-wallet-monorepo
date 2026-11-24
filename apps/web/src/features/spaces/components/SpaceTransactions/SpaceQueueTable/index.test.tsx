@@ -39,8 +39,12 @@ import type SpaceQueueRowType from '../SpaceQueueRow'
 import {
   QUEUE_COLUMN_WIDTHS,
   QUEUE_COLUMNS,
+  QUEUE_STICKY_CELL,
   QUEUE_TABLE_MIN_WIDTH,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+
+const mockIsMobile = jest.fn(() => false)
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
 
 jest.mock('./queueList', () => {
   const actual = jest.requireActual('./queueList')
@@ -93,6 +97,7 @@ jest.mock('../SpaceQueueRow', () => ({
     safeAddress,
     nextNonce,
     nextStatus,
+    compact,
   }: {
     item: TransactionQueuedItem
     status: string
@@ -100,12 +105,13 @@ jest.mock('../SpaceQueueRow', () => ({
     safeAddress: string
     nextNonce?: number
     nextStatus?: string
+    compact?: boolean
   }) {
     const navigation = jest.requireActual('./queueNavigation')
     const goTo = navigation.useQueueGoTo()
     const { phase } = navigation.useRowHighlight(item.transaction.id)
     return (
-      <tr data-testid="space-queue-row" data-highlighted={phase}>
+      <tr data-testid="space-queue-row" data-highlighted={phase} data-compact={compact}>
         <td>
           {item.transaction.id} {status} {chainId} of {safeAddress}
         </td>
@@ -188,6 +194,7 @@ describe('SpaceQueueTable', () => {
     mockChainNames[chainId] = chainName
     mockChainNames[otherChainId] = otherChainName
     mockScopeMounts.mockClear()
+    mockIsMobile.mockReturnValue(false)
   })
 
   afterEach(() => {
@@ -250,6 +257,53 @@ describe('SpaceQueueTable', () => {
       )
     },
   )
+
+  it('pins the Nonce and Action headers and lets the panel scroll a narrow table without widening the page', () => {
+    const { container } = render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+
+    const headers = screen.getAllByRole('columnheader')
+    expect(headers[0].className).toContain(QUEUE_STICKY_CELL.Nonce)
+    expect(headers[5].className).toContain(QUEUE_STICKY_CELL.Action)
+    expect(container.querySelector('table')?.parentElement).toHaveClass('overflow-x-auto', '[contain:inline-size]')
+    renderedRows().forEach((row) => expect(row).toHaveAttribute('data-compact', 'false'))
+  })
+
+  describe('below the mobile breakpoint', () => {
+    beforeEach(() => mockIsMobile.mockReturnValue(true))
+
+    it.each(['safe', 'status', 'next', 'network'] as const)(
+      'drops the floor and the fixed widths but the nonce, grouped by %s',
+      (groupBy) => {
+        const { container } = render(<SpaceQueueTable sections={sections} groupBy={groupBy} />)
+
+        expect(container.querySelector('table')).not.toHaveClass(QUEUE_TABLE_MIN_WIDTH)
+        expect([...container.querySelectorAll('col')].map((col) => col.style.width)).toEqual([
+          `${QUEUE_COLUMN_WIDTHS.Nonce}px`,
+          '',
+          '',
+          '',
+          '',
+          '',
+        ])
+        expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+          'Nonce',
+          expect.stringMatching(/^Transaction/),
+        ])
+        expect(renderedRows().length).toBeGreaterThan(0)
+        renderedRows().forEach((row) => expect(row).toHaveAttribute('data-compact', 'true'))
+      },
+    )
+
+    it('keeps the Safe bands and Collapse all', () => {
+      render(<SpaceQueueTable sections={sections} groupBy="safe" />)
+
+      expect(screen.getAllByTestId('space-queue-safe')).toHaveLength(2)
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
+      expect(renderedRows()).toHaveLength(0)
+      fireEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+      expect(renderedRows()).toHaveLength(3)
+    })
+  })
 
   it("renders each chain of a multichain Safe in that chain's scope, with its own Next", () => {
     render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
@@ -657,6 +711,17 @@ describe('SpaceQueueTable', () => {
       expect(rowOf(blocker)).toHaveAttribute('data-highlighted', 'on')
       expect(rowOf(blockerOnB)).not.toHaveAttribute('data-highlighted')
       expect(rowOf(blockerOnOtherChain)).not.toHaveAttribute('data-highlighted')
+    })
+
+    it('goes to the blocker the same way in the compact list', () => {
+      mockIsMobile.mockReturnValue(true)
+      render(<SpaceQueueTable sections={sameNonceElsewhere} groupBy="safe" />)
+
+      goFromBlocked()
+
+      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'smooth' })
+      expect(rowOf(blocker)).toHaveAttribute('data-highlighted', 'on')
+      expect(rowOf(blocker)).toHaveAttribute('data-compact', 'true')
     })
 
     it('fades the highlight out after two seconds', () => {

@@ -48,6 +48,36 @@ export const BlockedBy: Story = { args: { sections: BLOCKED_SECTIONS } }
 /** Up next: the blocked rows sit behind it, so a click opens Next in line when it is collapsed. */
 export const BlockedByUpNext: Story = { args: { sections: BLOCKED_SECTIONS, groupBy: 'next' } }
 
+/**
+ * A 13-inch laptop with the sidebar open: a 1280px window less the 230px sidebar and the page's 24px padding leaves the
+ * panel 1002px, above the table's 960px floor, so nothing scrolls sideways and Details takes what is left.
+ */
+export const LaptopWithSidebar: Story = {
+  args: { sections: BLOCKED_SECTIONS },
+  decorators: [
+    (Story) => (
+      <div className="w-[1002px]">
+        <Story />
+      </div>
+    ),
+  ],
+}
+
+/** Tablet (768px): the table scrolls sideways in its panel, under the Nonce and Action columns that stay put. */
+export const Tablet: Story = {
+  args: { sections: BLOCKED_SECTIONS },
+  globals: { viewport: { value: 'tablet', isRotated: false } },
+}
+
+/**
+ * Mobile (375px): the compact list. Each row is the nonce, then the Safe and summary over the gauge and the action, so
+ * Sign, Execute and Blocked by stay in view without scrolling. The bands, Collapse all and the bracket stay.
+ */
+export const Mobile: Story = {
+  args: { sections: BLOCKED_SECTIONS },
+  globals: { viewport: { value: 'mobile', isRotated: false } },
+}
+
 // Speed up is off in the default chain config
 const speedUpChain = createChainData()
 speedUpChain.features = [...speedUpChain.features, FEATURES.SPEED_UP_TX]

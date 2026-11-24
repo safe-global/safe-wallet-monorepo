@@ -3,6 +3,7 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { TableBody, tableVariants } from '@safe-global/views/components/ui/table'
 import { TooltipDelay } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
+import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import { useSignerWallets } from '../../../hooks/useSignerWallets'
@@ -44,6 +45,8 @@ const ESTIMATED_HEIGHTS: Record<QueueListItem['kind'], number> = {
   conflict: 36,
   transaction: 56,
 }
+// Compact rows put the gauge and the action on a second line
+const COMPACT_TRANSACTION_HEIGHT = 88
 
 /** Rows rendered beyond each edge of the viewport */
 const OVERSCAN = 12
@@ -85,7 +88,15 @@ const getScopeTargets = (items: QueueListItem[]): ScopeTarget[] => {
 
 type RowProps = { ref: (element: Element | null) => void; 'data-index': number }
 
-const ScopedRow = ({ item, rowProps }: { item: ScopedItem; rowProps: RowProps }): ReactElement =>
+const ScopedRow = ({
+  item,
+  rowProps,
+  compact,
+}: {
+  item: ScopedItem
+  rowProps: RowProps
+  compact: boolean
+}): ReactElement =>
   item.kind === 'conflict' ? (
     <ConflictHeaderRow nonce={item.nonce} size={item.size} rowProps={rowProps} />
   ) : (
@@ -99,6 +110,7 @@ const ScopedRow = ({ item, rowProps }: { item: ScopedItem; rowProps: RowProps })
       canReject={item.canReject}
       safeAddress={item.safeAddress}
       rowProps={rowProps}
+      compact={compact}
     />
   )
 
@@ -107,6 +119,7 @@ type VirtualRowProps = {
   index: number
   scopeStore: ScopeStore
   measureRef: (element: Element | null) => void
+  compact: boolean
   chainConfigs: Chain[]
   onToggleSafe: (safeAddress: string) => void
   onToggleChain: (scopeKey: string) => void
@@ -119,6 +132,7 @@ const VirtualRow = memo(function VirtualRow({
   index,
   scopeStore,
   measureRef,
+  compact,
   chainConfigs,
   onToggleSafe,
   onToggleChain,
@@ -128,7 +142,7 @@ const VirtualRow = memo(function VirtualRow({
   if (isScoped(item)) {
     return (
       <PooledScope target={toTarget(item)} store={scopeStore}>
-        <ScopedRow item={item} rowProps={rowProps} />
+        <ScopedRow item={item} rowProps={rowProps} compact={compact} />
       </PooledScope>
     )
   }
@@ -186,6 +200,9 @@ const SpaceQueueTable = ({
   groupBy: QueueGroupBy
 }): ReactElement => {
   const signers = useSignerWallets()
+  // Phones get one cell per row beside the nonce, as the prototype's compact list
+  const compact = useIsMobile()
+  const transactionHeight = compact ? COMPACT_TRANSACTION_HEIGHT : ESTIMATED_HEIGHTS.transaction
   const { configs } = useChains()
   const [scopeStore] = useState(createScopeStore)
   const dispatch = useAppDispatch()
@@ -247,7 +264,8 @@ const SpaceQueueTable = ({
 
   const virtualizer = useWindowVirtualizer({
     count: items.length,
-    estimateSize: (index) => ESTIMATED_HEIGHTS[items[index].kind],
+    estimateSize: (index) =>
+      items[index].kind === 'transaction' ? transactionHeight : ESTIMATED_HEIGHTS[items[index].kind],
     getItemKey: (index) => items[index].key,
     overscan: OVERSCAN,
     scrollMargin,
@@ -314,14 +332,20 @@ const SpaceQueueTable = ({
       <DeleteTxDialogProvider>
         {/* Every tooltip in the table opens after the same delay, those of the shared components it renders too */}
         <TooltipDelay delay={QUEUE_TOOLTIP_DELAY}>
-          {/* Same panel surface as the Space accounts table, so the two line up */}
-          <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
+          {/* Same panel surface as the Space accounts table, so the two line up. Its width doesn't count towards the
+            page's (contain), so a table wider than the panel scrolls in it rather than widening the page. */}
+          <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2 [contain:inline-size]">
             <ScopePool targets={scopeTargets} store={scopeStore} />
             <table
               aria-label="Pending transactions"
-              className={cn(tableVariants({ variant: 'panel' }), 'table-fixed [&_td]:px-4', QUEUE_TABLE_MIN_WIDTH)}
+              className={cn(
+                tableVariants({ variant: 'panel' }),
+                'table-fixed [&_td]:px-4',
+                !compact && QUEUE_TABLE_MIN_WIDTH,
+              )}
             >
               <QueueTableHeader
+                compact={compact}
                 collapseAll={
                   collapseUnit && collapsibleIds.length > 0
                     ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
@@ -329,7 +353,7 @@ const SpaceQueueTable = ({
                 }
               />
               <TableBody ref={bodyRef}>
-                <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+                <QueueSkeletonRow height={paddingTop} rowHeight={transactionHeight} compact={compact} />
                 {virtualItems.map((virtualItem) => {
                   const item = items[virtualItem.index]
                   return (
@@ -339,6 +363,7 @@ const SpaceQueueTable = ({
                       index={virtualItem.index}
                       scopeStore={scopeStore}
                       measureRef={virtualizer.measureElement}
+                      compact={compact}
                       chainConfigs={configs}
                       onToggleSafe={onToggleSafe}
                       onToggleChain={onToggleChain}
@@ -346,7 +371,7 @@ const SpaceQueueTable = ({
                     />
                   )
                 })}
-                <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
+                <QueueSkeletonRow height={paddingBottom} rowHeight={transactionHeight} compact={compact} />
               </TableBody>
             </table>
           </div>
