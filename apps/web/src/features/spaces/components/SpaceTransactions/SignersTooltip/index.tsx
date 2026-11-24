@@ -108,7 +108,7 @@ const SignersTooltip = (props: SignersTooltipProps): ReactElement => {
           {submitted}/{required}
         </span>
       </TooltipTrigger>
-      <TooltipContent className="max-w-sm">
+      <TooltipContent className="max-w-xs whitespace-normal">
         <SignersTooltipContent {...props} title={title} />
       </TooltipContent>
     </Tooltip>

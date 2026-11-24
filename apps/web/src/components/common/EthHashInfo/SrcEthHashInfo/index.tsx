@@ -134,7 +134,13 @@ const SrcEthHashInfo = ({
             {showNameTooltip ? (
               <Tooltip>
                 <TooltipTrigger
-                  render={<span data-testid="eth-hash-info-name" tabIndex={0} className="min-w-0 overflow-hidden" />}
+                  render={
+                    <span
+                      data-testid="eth-hash-info-name"
+                      tabIndex={0}
+                      className="min-w-0 overflow-hidden rounded-sm outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
+                    />
+                  }
                 >
                   {nameLabel}
                 </TooltipTrigger>

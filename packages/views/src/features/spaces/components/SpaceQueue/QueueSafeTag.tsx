@@ -16,7 +16,7 @@ const QueueSafeTag = ({ address, name, chain }: { address: string; name: string;
         <span
           data-testid="queue-safe-tag"
           tabIndex={0}
-          className="flex max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted py-1 pr-2 pl-1 text-sm group-hover/transaction:bg-card"
+          className="flex max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted py-1 pr-2 pl-1 text-sm outline-hidden group-hover/transaction:bg-card focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       }
     >

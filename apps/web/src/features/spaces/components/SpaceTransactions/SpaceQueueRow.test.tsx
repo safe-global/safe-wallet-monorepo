@@ -41,6 +41,12 @@ describe('Counterparty', () => {
     expect(container.querySelector('[title]')).toBeNull()
     await user.tab()
     expect(screen.getByTestId('eth-hash-info-name')).toHaveFocus()
+    expect(screen.getByTestId('eth-hash-info-name')).toHaveClass(
+      'outline-hidden',
+      'focus-visible:ring-[3px]',
+      'focus-visible:ring-inset',
+      'focus-visible:ring-ring/50',
+    )
 
     expect(await screen.findByText(name, { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
   })

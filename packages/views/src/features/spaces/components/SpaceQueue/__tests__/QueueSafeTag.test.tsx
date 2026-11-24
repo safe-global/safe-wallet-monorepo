@@ -27,6 +27,7 @@ describe('QueueSafeTag', () => {
     } else {
       await user.tab()
       expect(tag).toHaveFocus()
+      expect(tag).toHaveClass('outline-hidden', 'focus-visible:ring-[3px]', 'focus-visible:ring-ring/50')
     }
     await advanceClock(200)
 
