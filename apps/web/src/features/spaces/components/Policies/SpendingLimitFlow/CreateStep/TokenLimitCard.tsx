@@ -69,6 +69,26 @@ const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): Re
   )
 }
 
+const SelectedTokenHelper = ({ error, token }: { error?: string; token?: TokenOption }): ReactElement | null => {
+  if (error) return <span data-testid="token-error">{error}</span>
+
+  if (token?.untrusted) {
+    return (
+      <span className="text-warning-strong" data-testid="token-untrusted-warning">
+        {UNTRUSTED_TOKEN_WARNING}
+      </span>
+    )
+  }
+
+  if (token?.balance === undefined) return null
+
+  return (
+    <span data-testid="token-balance">
+      {formatVisualAmount(token.balance, token.decimals)} {tokenOptionLabel(token)}
+    </span>
+  )
+}
+
 const TokenLimitCard = ({
   spenderIndex,
   limitIndex,
@@ -189,18 +209,10 @@ const TokenLimitCard = ({
                   error={!!tokenError}
                   helperText={
                     <HelperLine>
-                      {tokenError?.message ? (
-                        <span data-testid="token-error">{String(tokenError.message)}</span>
-                      ) : selectedToken?.untrusted ? (
-                        <span className="text-warning-strong" data-testid="token-untrusted-warning">
-                          {UNTRUSTED_TOKEN_WARNING}
-                        </span>
-                      ) : selectedToken?.balance !== undefined ? (
-                        <span data-testid="token-balance">
-                          {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
-                          {tokenOptionLabel(selectedToken)}
-                        </span>
-                      ) : null}
+                      <SelectedTokenHelper
+                        error={tokenError?.message ? String(tokenError.message) : undefined}
+                        token={selectedToken}
+                      />
                     </HelperLine>
                   }
                   data-testid="limit-token-selector"
