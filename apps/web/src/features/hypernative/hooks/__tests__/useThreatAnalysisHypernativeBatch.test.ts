@@ -444,6 +444,30 @@ describe('useThreatAnalysisHypernativeBatch', () => {
         skip: false,
       })
     })
+
+    it('keeps a stored assessment when a background refresh changes the auth token', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const storedResult = { THREAT: [] }
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+      const { result, rerender } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({ [safeTxHash]: storedResult }),
+      })
+
+      mockUseAuthToken.mockReturnValue([
+        { token: `Bearer ${faker.string.alphanumeric(32)}`, isAuthenticated: true, isExpired: false },
+        jest.fn(),
+        jest.fn(),
+      ])
+      rerender()
+
+      expect(result.current[safeTxHash]).toEqual([storedResult, undefined, false])
+    })
   })
 
   describe('return value', () => {
