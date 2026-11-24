@@ -25,14 +25,14 @@ describe('SafeProBanner', () => {
   it('renders the headline and the New tag', () => {
     render(<SafeProBanner />)
 
-    expect(screen.getByText('Safe Pro: 30 days of Business free. No card.')).toBeInTheDocument()
+    expect(screen.getByText('Safe Pro: 14 days of Business free. No card.')).toBeInTheDocument()
     expect(screen.getByText('New')).toBeInTheDocument()
   })
 
   it('makes the whole banner one link to the Safe Pro intro post in a safe new tab', () => {
     render(<SafeProBanner />)
 
-    const cta = screen.getByRole('link', { name: /Safe Pro: 30 days of Business free\. No card\./ })
+    const cta = screen.getByRole('link', { name: /Safe Pro: 14 days of Business free\. No card\./ })
     expect(cta).toHaveAttribute('href', 'https://safe.global/blog/introducing-safe-pro')
     expect(cta).toHaveAttribute('target', '_blank')
     expect(cta).toHaveAttribute('rel', 'noopener noreferrer')

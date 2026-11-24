@@ -1,8 +1,9 @@
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
-import type { SpaceSetupDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as spacesApi, type SpaceSetupDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
+import { CHECKOUT_SESSION_QUERY_PARAM } from '../../../hooks/billing/returnUrl'
 import { selectIsResumeOffered } from '../../../public/store/workspaceWizardSlice'
 import { type WorkspaceDraft } from '../../../public/store/workspaceDraftSlice'
 import { getStoreInstance } from '@/store'
@@ -71,6 +72,7 @@ const storedDraft = () => getStoreInstance().getState().workspaceDraft
 describe('WorkspaceWizard', () => {
   beforeEach(() => {
     localStorage.clear()
+    window.history.replaceState(null, '', '/')
     mockIsSafePro = false
     mockIsSurveyEnabled = false
   })
@@ -128,6 +130,46 @@ describe('WorkspaceWizard', () => {
         expect.objectContaining({ pathname: AppRoutes.spaces.index, query: expect.objectContaining({ spaceId }) }),
       ),
     )
+  })
+
+  it('opens the Workspace of a first checkout when its setup was applied before the user loaded', async () => {
+    const spaceId = faker.string.uuid()
+    const sessionId = `cs_${faker.string.alphanumeric(24)}`
+    const ownerId = fakeUserId()
+    let releaseUser = () => {}
+    const userGate = new Promise<void>((resolve) => {
+      releaseUser = resolve
+    })
+    window.history.replaceState(null, '', `${AppRoutes.welcome.survey}?${CHECKOUT_SESSION_QUERY_PARAM}=${sessionId}`)
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/users`, async () => {
+        await userGate
+        return HttpResponse.json({ id: ownerId, status: 1, wallets: [] })
+      }),
+      workspacesHandler([spaceBuilder().with({ uuid: spaceId, setupStatus: 'applied' }).build()]),
+      sessionHandler('complete'),
+      ...workspaceHandlers(spaceId, fakeWorkspaceName(), pendingSetup({ status: 'applied' })),
+    )
+    // The navigation stays in flight, so the test sees what the wizard shows while the Workspace opens.
+    const replace = jest.fn(() => new Promise<boolean>(() => {}))
+    renderWithUserEvent(<WorkspaceWizard step="survey" />, {
+      routerProps: { replace, query: { [CHECKOUT_SESSION_QUERY_PARAM]: sessionId } },
+      initialReduxState: {
+        auth: signedInAuthState(),
+        workspaceDraft: workspaceDraftBuilder().with({ ownerId, createdSpaceId: spaceId }).build(),
+      },
+    })
+
+    // The billing webhook won the race: the Workspace list reports the setup as applied before the user is known.
+    await getStoreInstance().dispatch(spacesApi.endpoints.spacesGetV1.initiate(undefined, { forceRefetch: true }))
+    releaseUser()
+
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: AppRoutes.spaces.index, query: expect.objectContaining({ spaceId }) }),
+      ),
+    )
+    expect(screen.queryByText("We couldn't find your new Workspace")).not.toBeInTheDocument()
   })
 
   it('waits for the setup after a completed checkout', async () => {
