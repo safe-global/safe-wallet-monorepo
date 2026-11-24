@@ -172,6 +172,7 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
     const nonce = getNonce(tx)
     return (
       <WithHint
+        interactive
         hint={
           <>
             {`Rejects #${nonce}. If this executes, nothing else at #${nonce} can.`}&nbsp;

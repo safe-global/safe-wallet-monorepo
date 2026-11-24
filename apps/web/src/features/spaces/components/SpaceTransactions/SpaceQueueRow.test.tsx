@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
@@ -51,7 +51,7 @@ describe('Counterparty', () => {
     expect(join).not.toHaveClass('capitalize', 'uppercase', 'rounded-md', 'bg-muted')
   })
 
-  it('opens the party card on focus, with no browser title', async () => {
+  it('opens the party card on Enter and lets the keyboard reach its actions, with no browser title', async () => {
     const txInfo = transfer('OUTGOING')
     const { name, value } = (txInfo as { recipient: { name: string; value: string } }).recipient
     const { container, user } = renderWithUserEvent(<Counterparty txInfo={txInfo} chainId="1" />)
@@ -63,10 +63,11 @@ describe('Counterparty', () => {
     expect(trigger).toHaveClass('outline-hidden', 'focus-visible:ring-[3px]', 'focus-visible:ring-ring/50')
 
     expect(screen.getByText(name, { selector: '[data-testid="counterparty-party"] span' })).not.toHaveClass('font-mono')
-    const card = await screen.findByText(name, { selector: '[data-slot="tooltip-content"] *' })
+    await user.keyboard('{Enter}')
+    const card = await screen.findByText(name, { selector: '[data-slot="popover-content"] *' })
     expect(card).toHaveClass('font-medium')
     expect(screen.getByText(value)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Copy' })).toHaveFocus())
   })
 
   it('says an unnamed party is not in the address book and shows its short address', async () => {
@@ -77,6 +78,7 @@ describe('Counterparty', () => {
     expect(screen.getByTestId('counterparty-party')).toHaveTextContent(shortenAddress(value))
     expect(screen.getByText(shortenAddress(value))).toHaveClass('font-mono', 'text-xs')
     await user.tab()
+    await user.keyboard('{Enter}')
 
     expect(await screen.findByText('Not in your address book')).toBeInTheDocument()
   })

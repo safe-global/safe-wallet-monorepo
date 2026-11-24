@@ -2,7 +2,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { ArrowUpRight, BookUser, Check, Copy } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import QueueHintPopover from './QueueHintPopover'
 
 // Light text on the dark tooltip
 const ACTION_CLASS = 'text-background hover:bg-background/10 hover:text-background'
@@ -74,7 +74,7 @@ export const QueuePartyCard = ({
 )
 
 type QueuePartyProps = {
-  /** The trigger element, focusable so the card opens on keyboard focus too */
+  /** The trigger element, focusable so Enter opens the card */
   trigger: ReactElement
   children: ReactNode
   /** A QueuePartyCard, mounted only while the card is open */
@@ -83,12 +83,11 @@ type QueuePartyProps = {
   defaultOpen?: boolean
 }
 
-/** An address in a queue row: hovering or focusing it shows its party card, which the pointer can move into */
+/** An address in a queue row: hovering, clicking or pressing Enter on it shows its party card */
 const QueueParty = ({ trigger, children, card, defaultOpen }: QueuePartyProps): ReactElement => (
-  <Tooltip defaultOpen={defaultOpen}>
-    <TooltipTrigger render={trigger}>{children}</TooltipTrigger>
-    <TooltipContent className="max-w-none">{card}</TooltipContent>
-  </Tooltip>
+  <QueueHintPopover trigger={trigger} content={card} contentClassName="max-w-none" defaultOpen={defaultOpen}>
+    {children}
+  </QueueHintPopover>
 )
 
 export default QueueParty
