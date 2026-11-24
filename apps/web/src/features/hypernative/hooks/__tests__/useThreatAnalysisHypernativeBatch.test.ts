@@ -445,8 +445,9 @@ describe('useThreatAnalysisHypernativeBatch', () => {
       })
     })
 
-    it('stops returning an assessment that failed with the previous auth token', () => {
+    it('keeps a stored assessment when a background refresh changes the auth token', () => {
       const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const storedResult = { THREAT: [] }
       const pages: QueuedItemPage[] = [
         {
           results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
@@ -455,9 +456,8 @@ describe('useThreatAnalysisHypernativeBatch', () => {
         },
       ]
       const { result, rerender } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
-        initialReduxState: createInitialState({ [safeTxHash]: null }),
+        initialReduxState: createInitialState({ [safeTxHash]: storedResult }),
       })
-      expect(result.current[safeTxHash]).toEqual([undefined, new Error('Assessment failed'), false])
 
       mockUseAuthToken.mockReturnValue([
         { token: `Bearer ${faker.string.alphanumeric(32)}`, isAuthenticated: true, isExpired: false },
@@ -466,7 +466,7 @@ describe('useThreatAnalysisHypernativeBatch', () => {
       ])
       rerender()
 
-      expect(result.current[safeTxHash]).toBeUndefined()
+      expect(result.current[safeTxHash]).toEqual([storedResult, undefined, false])
     })
   })
 

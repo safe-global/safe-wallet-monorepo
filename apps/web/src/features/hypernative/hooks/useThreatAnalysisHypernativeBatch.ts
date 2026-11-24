@@ -8,11 +8,7 @@ import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useAuthToken } from '../public/hooks/useAuthToken'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector, useAppDispatch } from '@/store'
-import {
-  clearAssessments,
-  selectAssessmentsByHashes,
-  setBatchAssessments,
-} from '../public/store/hnQueueAssessmentsSlice'
+import { selectAssessmentsByHashes, setBatchAssessments } from '../public/store/hnQueueAssessmentsSlice'
 
 type UseThreatAnalysisHypernativeBatchProps = {
   pages: (QueuedItemPage | undefined)[]
@@ -114,13 +110,6 @@ export function useThreatAnalysisHypernativeBatch({
   const { safeAddress } = useSafeInfo()
   const [{ token: authToken }] = useAuthToken()
   const dispatch = useAppDispatch()
-  const authTokenRef = useRef(authToken)
-
-  useEffect(() => {
-    if (authTokenRef.current === authToken) return
-    authTokenRef.current = authToken
-    dispatch(clearAssessments())
-  }, [authToken, dispatch])
 
   const safeTxHashes = useMemo(() => (skip ? [] : extractSafeTxHashesFromPages(pages)), [pages, skip])
 
