@@ -95,16 +95,6 @@ const answerTokenRequestWith = (status: number, body: object) => {
 
 const isRejected = (store: Store) => selectRejectedHypernativeAuthorization(store.getState()) !== undefined
 
-// The listener keeps running after the request it reacts to has settled
-const waitForSettledRefresh = async (store: Store) => {
-  await waitFor(() =>
-    expect(Object.values(store.getState().hypernativeApi.mutations)).toContainEqual(
-      expect.objectContaining({ endpointName: 'exchangeToken', status: expect.stringMatching(/fulfilled|rejected/) }),
-    ),
-  )
-  await new Promise((resolve) => setTimeout(resolve, 0))
-}
-
 describe('hnSessionListener', () => {
   afterEach(() => clearAuthCookie())
 
@@ -176,15 +166,17 @@ describe('hnSessionListener', () => {
     expect(requests).toHaveLength(1)
   })
 
-  it('keeps the session when the refresh fails for a transient reason', async () => {
+  it('keeps the session and refreshes again on the next 1038 when a refresh fails for a transient reason', async () => {
     const store = makeStore()
     const token = signIn()
     answerWith('/safe/transaction/assessment', 401, RECONNECT_REQUIRED)
-    answerTokenRequestWith(503, { success: false, data: null, error: 'temporarily_unavailable' })
+    const requests = answerTokenRequestWith(503, { success: false, data: null, error: 'temporarily_unavailable' })
+    await assessTransaction(store, token)
+    await waitFor(() => expect(requests).toHaveLength(1))
 
     await assessTransaction(store, token)
-    await waitForSettledRefresh(store)
 
+    await waitFor(() => expect(requests).toHaveLength(2))
     expect(getAuthCookieAuthorization()).toBe(token)
     expect(isRejected(store)).toBe(false)
   })

@@ -30,6 +30,7 @@ const refreshRejectedSession = async (exchange: ExchangeRefreshToken): Promise<R
 // 1038 also covers an expired token or a bad signature, so only a 1038 right after a refresh is final
 let recoveredAuthorization: string | undefined
 
+// Keep one function: every makeStore() registers the listeners again, and RTK skips an effect it already has
 const handleRejectedAssessment: Parameters<typeof listenerMiddlewareInstance.startListening>[0]['effect'] = async (
   action,
   listenerApi,
