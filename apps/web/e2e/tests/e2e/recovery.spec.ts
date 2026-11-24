@@ -1,4 +1,4 @@
-import { Wallet, ZeroHash } from 'ethers'
+import { ZeroHash } from 'ethers'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { readDelayModifier, readSafeSetup } from '../../src/chain/recovery'
 import { HomePage } from '../../src/pages/home.page'
@@ -16,8 +16,8 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const recoverer = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const recoverer = journey.newAddress()
 
     const recovery = new RecoveryPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -42,7 +42,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
   }) => {
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const { delayModifier } = await seedRecovery(safe, {
-      recoverer: Wallet.createRandom().address,
+      recoverer: journey.newAddress(),
       cooldownSeconds: 2 * DAY_IN_SECONDS,
     })
 
@@ -65,7 +65,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
   }) => {
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const { delayModifier } = await seedRecovery(safe, {
-      recoverer: Wallet.createRandom().address,
+      recoverer: journey.newAddress(),
       cooldownSeconds: 2 * DAY_IN_SECONDS,
     })
 
@@ -87,8 +87,8 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const newOwner = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const newOwner = journey.newAddress()
     const { delayModifier } = await seedRecovery(safe, {
       recoverer: journey.owners.alice.address,
       cooldownSeconds: 2 * DAY_IN_SECONDS,

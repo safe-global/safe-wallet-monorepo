@@ -4,7 +4,7 @@
  * The test plays the dApp with a real WalletConnect client in the Playwright process, so it reads the responses
  * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of Alice.
  */
-import { Wallet, hashMessage, parseEther, toQuantity } from 'ethers'
+import { hashMessage, parseEther, toQuantity } from 'ethers'
 import { HomePage } from '../../src/pages/home.page'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe, type SeededSafe } from '../../src/seed/safe'
@@ -82,7 +82,7 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     dapp,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
+    const recipient = journey.newAddress()
     const value = parseEther('0.01')
 
     const response = dapp.request('eth_sendTransaction', [
@@ -101,11 +101,11 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     expect(await balanceOf(journey.env, recipient)).toBe(value)
   })
 
-  test('should declare the dApp when the owner proposes its transaction', async ({ safePage, safe, dapp }) => {
+  test('should declare the dApp when the owner proposes its transaction', async ({ safePage, safe, dapp, journey }) => {
     const proposal = nextDeclaredAttribution(safePage, safe.address)
 
     const response = dapp.request('eth_sendTransaction', [
-      { from: safe.address, to: Wallet.createRandom().address, value: '0x1', data: '0x' },
+      { from: safe.address, to: journey.newAddress(), value: '0x1', data: '0x' },
     ])
     await new TxReviewPage(safePage).sign()
     await response
@@ -137,9 +137,10 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     safeApiClient,
     safe,
     dapp,
+    journey,
   }) => {
     const response = dapp.request('eth_sendTransaction', [
-      { from: safe.address, to: Wallet.createRandom().address, value: '0x1', data: '0x' },
+      { from: safe.address, to: journey.newAddress(), value: '0x1', data: '0x' },
     ])
     await new TxReviewPage(safePage).discard()
 

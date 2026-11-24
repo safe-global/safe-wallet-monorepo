@@ -6,7 +6,7 @@
  * connects no private key: it pairs through the onboard WalletConnect module.
  */
 import type { Page } from '@playwright/test'
-import { Wallet, hashMessage, parseEther } from 'ethers'
+import { hashMessage, parseEther } from 'ethers'
 import { HomePage } from '../../src/pages/home.page'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
@@ -121,7 +121,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     journey,
     pairing,
   }) => {
-    const recipient = Wallet.createRandom().address
+    const recipient = journey.newAddress()
     const parentReview = new TxReviewPage(safePage)
     const childReview = new TxReviewPage(childPage)
 
@@ -153,10 +153,11 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     childPage,
     safeApiClient,
     pairing,
+    journey,
   }) => {
     const send = new SendTokensPage(childPage)
     await send.open()
-    await send.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
+    await send.fillTransfer({ recipient: journey.newAddress(), amount: AMOUNT })
     await send.nextButton.click()
     await new TxReviewPage(childPage).sign()
     await new TxReviewPage(safePage).discard()
@@ -182,7 +183,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     }) => {
       const queued = await seedQueuedTransfer(pairing.child, {
         nonce: 0,
-        recipient: Wallet.createRandom().address,
+        recipient: journey.newAddress(),
         amount: AMOUNT,
       })
       const parentReview = new TxReviewPage(safePage)
@@ -215,10 +216,11 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       childPage,
       safeApiClient,
       pairing,
+      journey,
     }) => {
       const send = new SendTokensPage(childPage)
       await send.open()
-      await send.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
+      await send.fillTransfer({ recipient: journey.newAddress(), amount: AMOUNT })
       await send.nextButton.click()
       await new TxReviewPage(childPage).sign()
       await new TxReviewPage(safePage).sign()
