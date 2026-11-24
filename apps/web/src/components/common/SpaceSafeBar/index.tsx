@@ -152,16 +152,11 @@ function ManageTrustedFooter({ onManage }: { onManage: () => void }) {
   )
 }
 
-// One pill: safe selector + nested safes + network selector render as muted chips sharing a single
-// white card (see Figma topbar).
+// One pill: the Safe, nested Safes and network chips share a single white card (see Figma topbar).
 const PILL_CLASS =
   'flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]'
 
-/**
- * The bar for a tx flow whose Safe is fixed (signing or executing it from the Workspace): the same
- * Safe and network chips, read-only, and no nested Safes button, since every one of them would
- * switch away from the Safe the flow acts on.
- */
+/** Read-only bar for a Workspace tx flow's Safe; no nested Safes button, as each would switch Safe. */
 function LockedSpaceSafeBar({ safe }: { safe: SafeScopeTarget }) {
   const { item, chain } = useLockedSafeBarItem(safe)
 

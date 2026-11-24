@@ -15,10 +15,7 @@ import { buildSingleChainItem, useResolveBalance } from './useSpaceSafeSelectorI
 // Threshold and owners come from the overview (`isCurrentSafe` is false below), not the URL Safe
 const NO_URL_SAFE = { threshold: 0 }
 
-/**
- * The Safe bar's item for one fixed Safe — the Safe a Workspace tx flow acts on — built the same way
- * as the selector's own items, so the locked bar shows the same name, threshold and balance.
- */
+/** The Safe bar item for a Workspace tx flow's Safe, built like the selector's own items. */
 export function useLockedSafeBarItem({ chainId, safeAddress }: SafeScopeTarget): {
   item: SafeItemData
   chain: ChainInfo

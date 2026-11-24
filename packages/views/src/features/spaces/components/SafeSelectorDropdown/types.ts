@@ -72,9 +72,6 @@ export interface SafeSelectorDropdownProps {
    * reordered top-level addresses, in display order.
    */
   onReorder?: (orderedAddresses: string[]) => void
-  /**
-   * Shows the selected Safe read-only: no chevron, no list, and the "not allowed" tooltip. For a flow
-   * whose Safe is fixed, e.g. signing a pending transaction from the Workspace.
-   */
+  /** Shows the selected Safe read-only, e.g. for a Workspace flow whose Safe is fixed. */
   locked?: boolean
 }

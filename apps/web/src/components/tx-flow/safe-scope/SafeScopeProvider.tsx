@@ -45,7 +45,7 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
   // Tell `getAndValidateSafeSDK` a scope is live so a forgotten `scope` argument is logged, not silent.
   useEffect(() => registerActiveScope(), [])
 
-  // Inside the tx modal, tell the topbar which Safe this flow acts on so it can show it, locked.
+  // Inside the tx modal, report this flow's Safe to the topbar.
   const reportFlowSafe = useContext(TxFlowSafeReporterContext)
   useEffect(() => {
     if (!reportFlowSafe) return

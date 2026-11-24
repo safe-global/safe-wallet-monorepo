@@ -33,11 +33,7 @@ const setup = createMockStory({
   handlers: overviewHandlers,
 })
 
-/**
- * The topbar Safe bar while a Workspace tx flow (Pending → Sign/Execute, or New) is open. That flow
- * keeps its Safe in a SafeScope, not the URL, so the bar shows the scoped Safe read-only: no chevron,
- * no list, no nested Safes button, and the network chip can't open either.
- */
+/** The topbar Safe bar during a Workspace tx flow: the flow's Safe, read-only. */
 const meta = {
   title: 'Features/Spaces/SpaceSafeBar',
   component: SpaceSafeBar,
