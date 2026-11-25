@@ -20,8 +20,8 @@ import {
 import { getStoreInstance } from '@/store'
 import type * as Store from '@/store'
 import type * as AddressBookSlice from '@/store/addressBookSlice'
-import { render, screen, waitFor, within } from '@/tests/test-utils'
-import type { AddressBookState } from '@/store/addressBookSlice'
+import { act, render, screen, waitFor, within } from '@/tests/test-utils'
+import { removeAddressBookEntry, type AddressBookState } from '@/store/addressBookSlice'
 import { useWorkspaceSigners, type WorkspaceSigner } from '../../../hooks/useWorkspaceSigners'
 import { useAddressBookRequestActions } from '../../../hooks/useAddressBookRequestActions'
 import SpaceAddressBookV2 from '../index'
@@ -884,6 +884,42 @@ describe('SpaceAddressBookV2', () => {
       mockRequests({ items: [spaceAddressBookRequestBuilder().with({ address: signer.address }).build()] })
 
       renderAddressBook()
+
+      expect(screen.getByRole('tab', { name: 'Suggested (1)' })).toBeInTheDocument()
+    })
+
+    it.each(['admin', 'member'] as const)('hides suggestions saved in Local contacts from the %s', async (role) => {
+      const [saved, open] = [signerBuilder().build(), signerBuilder().build()]
+      mockRole(role)
+      mockSigners({ signers: [saved, open] })
+
+      renderAddressBook({ '137': { [saved.address]: faker.person.fullName() } })
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByText(`${open.safes[0].name} signer 1`)).toBeInTheDocument()
+      expect(screen.queryByText(`${saved.safes[0].name} signer 1`)).not.toBeInTheDocument()
+    })
+
+    it('suggests a Local contact again once it is deleted from the local book', async () => {
+      const signer = signerBuilder().build()
+      mockSigners({ signers: [signer] })
+
+      renderAddressBook({ '1': { [signer.address]: faker.person.fullName() } })
+      expect(screen.getByRole('tab', { name: 'Suggested (0)' })).toBeInTheDocument()
+
+      act(() => {
+        getStoreInstance().dispatch(removeAddressBookEntry({ chainId: '1', address: signer.address }))
+      })
+
+      expect(screen.getByRole('tab', { name: 'Suggested (1)' })).toBeInTheDocument()
+    })
+
+    it('keeps suggestions saved in Local contacts without the private address book', () => {
+      const signer = signerBuilder().build()
+      mockPrivateAddressBook(false)
+      mockSigners({ signers: [signer] })
+
+      renderAddressBook({ '1': { [signer.address]: faker.person.fullName() } })
 
       expect(screen.getByRole('tab', { name: 'Suggested (1)' })).toBeInTheDocument()
     })

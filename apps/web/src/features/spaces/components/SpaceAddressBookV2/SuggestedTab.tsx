@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
-import AddSuggestionsDialog, {
-  type AddedSuggestion,
-} from '@safe-global/views/features/spaces/components/AddressBookV2/AddSuggestionsDialog'
+import NameContactsDialog, {
+  type NamedContact,
+} from '@safe-global/views/features/spaces/components/AddressBookV2/NameContactsDialog'
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
 import { searchSuggestions } from './search'
@@ -36,7 +36,7 @@ type SuggestedTabProps = {
 
 type AddDialog = { suggestions: SuggestedContact[]; location: SuggestionAddLocation }
 
-const countRenamed = (suggestions: SuggestedContact[], contacts: AddedSuggestion[]): number =>
+const countRenamed = (suggestions: SuggestedContact[], contacts: NamedContact[]): number =>
   contacts.filter(
     (contact) => contact.name !== suggestions.find((item) => item.address === contact.address)?.suggestedName,
   ).length
@@ -85,7 +85,7 @@ const SuggestedTab = ({
     if (!isSubmitting) setDialog(undefined)
   }
 
-  const handleAdd = async (contacts: AddedSuggestion[]) => {
+  const handleAdd = async (contacts: NamedContact[]) => {
     if (!dialog) return
 
     setIsSubmitting(true)
@@ -145,10 +145,10 @@ const SuggestedTab = ({
       </TableCard>
 
       {dialog && (
-        <AddSuggestionsDialog
-          suggestions={dialog.suggestions}
+        <NameContactsDialog
+          contacts={dialog.suggestions}
           validateName={validateContactName}
-          onAdd={handleAdd}
+          onConfirm={handleAdd}
           onClose={closeDialog}
           isSubmitting={isSubmitting}
           error={error}
