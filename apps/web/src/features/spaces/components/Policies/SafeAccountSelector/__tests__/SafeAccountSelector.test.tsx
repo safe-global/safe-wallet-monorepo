@@ -559,6 +559,33 @@ describe('SafeAccountSelector', () => {
     })
   })
 
+  describe('accounts on an older Safe version', () => {
+    const outdated = option('11155111', SAFE_B, { name: 'Grants', ineligibleReason: 'unsupported-safe-version' })
+
+    it('should, when a listed Safe is older than 1.5.0, say on hover that it has to be updated to 1.5.0', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, outdated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+      const rows = await screen.findAllByRole('option')
+      await user.hover(rows[1])
+
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      expect(
+        await screen.findByText('Update this Safe account to version 1.5.0 in its settings first'),
+      ).toBeInTheDocument()
+    })
+
+    it('should, when the preselected Safe is older than 1.5.0, say that it has to be updated to 1.5.0', () => {
+      render(<SafeAccountSelector accounts={[singleChainAccount, outdated]} value={outdated.id} onChange={jest.fn()} />)
+
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Update this Safe account to version 1.5.0 in its settings first',
+      )
+    })
+  })
+
   describe('unsupported-network accounts', () => {
     const unsupported = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'unsupported-chain' })
 

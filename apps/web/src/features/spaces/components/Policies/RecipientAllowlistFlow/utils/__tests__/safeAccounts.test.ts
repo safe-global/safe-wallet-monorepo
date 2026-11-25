@@ -5,7 +5,7 @@ import {
   isSafeAccountGroup,
   type SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import { hasSelectableSafeAccount, markAllowlistIneligibility } from '../safeAccounts'
+import { hasAllowlistCandidate, hasSelectableSafeAccount, markAllowlistIneligibility } from '../safeAccounts'
 
 const SAFE_A = faker.finance.ethereumAddress()
 const SAFE_B = faker.finance.ethereumAddress()
@@ -116,5 +116,27 @@ describe('hasSelectableSafeAccount', () => {
 
   it('is false without Safes', () => {
     expect(hasSelectableSafeAccount([])).toBe(false)
+  })
+})
+
+describe('hasAllowlistCandidate', () => {
+  it('should, when a Safe can be picked, find a candidate', () => {
+    expect(hasAllowlistCandidate([option(SEPOLIA, SAFE_A)])).toBe(true)
+  })
+
+  it('should, when the only Safe needs a version update, find a candidate', () => {
+    const entries = [option(SEPOLIA, SAFE_A, { ineligibleReason: 'unsupported-safe-version' })]
+
+    expect(hasAllowlistCandidate(entries)).toBe(true)
+  })
+
+  it('should, when every Safe is on a network without allowlists, find no candidate', () => {
+    const entries = [option(GNOSIS_CHAIN, SAFE_A, { ineligibleReason: 'no-recipient-allowlists' })]
+
+    expect(hasAllowlistCandidate(entries)).toBe(false)
+  })
+
+  it('should, when there are no Safes, find no candidate', () => {
+    expect(hasAllowlistCandidate([])).toBe(false)
   })
 })

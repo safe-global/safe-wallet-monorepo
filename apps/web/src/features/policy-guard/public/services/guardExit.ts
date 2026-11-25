@@ -1,0 +1,3 @@
+export const SET_GUARD_SELECTOR = '0xe19a9dd9'
+export const SET_MODULE_GUARD_SELECTOR = '0xe068df37'
+export const SET_FALLBACK_HANDLER_SELECTOR = '0xf08a0323'

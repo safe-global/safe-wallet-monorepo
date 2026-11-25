@@ -19,6 +19,8 @@ import type { PolicyLock } from '@safe-global/views/features/spaces/components/P
 import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import RecipientAllowlistFlow from './RecipientAllowlistFlow'
+import { useRecipientAllowlistSafeAccounts } from './RecipientAllowlistFlow/hooks/useRecipientAllowlistSafeAccounts'
+import { hasAllowlistCandidate } from './RecipientAllowlistFlow/utils/safeAccounts'
 import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
 import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
@@ -87,8 +89,14 @@ const Policies = ({
   locked,
 }: PoliciesProps): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
+  const allowlistSafes = useRecipientAllowlistSafeAccounts()
+  const hasNoAllowlistSafe =
+    allowlistSafes.hasWallet &&
+    !allowlistSafes.isLoading &&
+    !allowlistSafes.isError &&
+    !hasAllowlistCandidate(allowlistSafes.accounts)
   // Existing allowlists stay listed either way; only creating one needs a chain that enables it.
-  const canCreateAllowlist = useIsAllowlistAvailableInSpace()
+  const canCreateAllowlist = useIsAllowlistAvailableInSpace() && !hasNoAllowlistSafe
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
@@ -146,7 +154,8 @@ const Policies = ({
 
   const spendingLimitIntro = usePolicyIntro(SPENDING_LIMIT_INTRO_SEEN_KEY, startSpendingLimitFlow)
   const proposerIntro = usePolicyIntro(PROPOSER_INTRO_SEEN_KEY, startProposerFlow)
-  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow)
+  // The owner confirms there that every other action will be blocked, so it opens before every setup
+  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow, { everyTime: true })
 
   const handleSelect = useCallback(
     (id: AddPolicyId) => {

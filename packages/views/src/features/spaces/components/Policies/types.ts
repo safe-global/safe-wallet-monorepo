@@ -99,6 +99,8 @@ export type ProposerPolicyData = {
 export type AllowlistRecipient = Erc20TransferRecipientDto
 
 /** CGW returns one `erc20-transfer` policy per token; the table shows one allowlist per Safe holding them all. */
+export type AllowlistItemChange = 'added' | 'removed'
+
 export type AllowlistEntry = {
   token: PolicyTokenInfo
   recipients: AllowlistRecipient[]

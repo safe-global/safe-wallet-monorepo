@@ -24,7 +24,11 @@ import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 
-export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
+export type ReviewTransactionContentProps = PropsWithChildren<{
+  onSubmit: SubmitCallback
+  withDecodedData?: boolean
+  withMultisend?: boolean
+}>
 
 export const ReviewTransactionContent = ({
   safeTx,
@@ -35,6 +39,7 @@ export const ReviewTransactionContent = ({
   txDetails,
   txPreview,
   withDecodedData = true,
+  withMultisend = true,
 }: ReviewTransactionContentProps & {
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
@@ -68,6 +73,7 @@ export const ReviewTransactionContent = ({
           isBatch={isBatch}
           isApproval={isApproval}
           withDecodedData={withDecodedData}
+          withMultisend={withMultisend}
         >
           {!isRejection && isApproval && (
             <ParsingErrorBoundary>

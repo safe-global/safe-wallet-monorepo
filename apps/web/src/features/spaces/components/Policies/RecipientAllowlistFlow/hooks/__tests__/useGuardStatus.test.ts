@@ -47,6 +47,15 @@ describe('useGuardStatus', () => {
     })
   })
 
+  it('should return the installed guard address, when the read found the policy guard', () => {
+    const guardAddress = faker.finance.ethereumAddress()
+    read({ state: { status: 'known', guardAddress } })
+
+    const { result } = renderHook(() => useGuardStatus(TARGET))
+
+    expect(result.current.guardAddress).toBe(guardAddress)
+  })
+
   it('reports a failed read, with a retry that re-reads', () => {
     const refetch = read({ error: new Error('rpc down') })
 
@@ -66,11 +75,17 @@ describe('useGuardStatus', () => {
   })
 
   it('keeps a state already read when a later read fails', () => {
-    read({ state: { status: 'known' }, error: new Error('rpc down') })
+    read({
+      state: { status: 'known', guardAddress: '0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f' },
+      error: new Error('rpc down'),
+    })
 
     const { result } = renderHook(() => useGuardStatus(TARGET))
 
-    expect(result.current.guard).toEqual({ status: 'known' })
+    expect(result.current.guard).toEqual({
+      status: 'known',
+      guardAddress: '0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f',
+    })
   })
 
   it('reports a Safe CGW does not know as not activated', () => {
