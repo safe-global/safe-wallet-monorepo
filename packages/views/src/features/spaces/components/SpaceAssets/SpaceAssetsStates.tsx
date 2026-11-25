@@ -31,13 +31,13 @@ export const SpaceAssetsNoMatches = ({ onClear }: { onClear: () => void }): Reac
         <Check />
       </EmptyMedia>
       <EmptyTitle>
-        <h2>No Safe accounts match these filters</h2>
+        <h2>No assets match your search or filters</h2>
       </EmptyTitle>
-      <EmptyDescription>Try another Safe account or network, or clear your filters.</EmptyDescription>
+      <EmptyDescription>Try other words, another Safe account or network, or clear them.</EmptyDescription>
     </EmptyHeader>
     <EmptyContent>
       <Button variant="outline" onClick={onClear}>
-        Clear filters
+        Clear search and filters
       </Button>
     </EmptyContent>
   </Empty>

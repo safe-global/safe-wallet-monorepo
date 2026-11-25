@@ -8,14 +8,22 @@ import { ASSETS_COLUMN_WIDTHS, ASSETS_COLUMNS, ASSETS_TABLE_MIN_WIDTH } from './
 
 type SpaceAssetsTableProps = {
   collapseAll?: CollapseAllButtonProps
+  /** What the rows name first: the asset, or the Safe account when grouped by asset */
+  firstColumn: string
   /** The table is wider than its panel: its first column stays pinned */
   scrollsX?: boolean
   panelRef?: Ref<HTMLDivElement>
   children: ReactNode
 }
 
-/** The queue's table, with the assets' columns: a band per Safe, a header per network, a row per token or position */
-const SpaceAssetsTable = ({ collapseAll, scrollsX, panelRef, children }: SpaceAssetsTableProps): ReactElement => (
+/** The queue's table, with the assets' columns: a band per group, then a row per token or position */
+const SpaceAssetsTable = ({
+  collapseAll,
+  firstColumn,
+  scrollsX,
+  panelRef,
+  children,
+}: SpaceAssetsTableProps): ReactElement => (
   // A container, so a wider table scrolls in the panel instead of widening the page
   <div
     ref={panelRef}
@@ -39,7 +47,7 @@ const SpaceAssetsTable = ({ collapseAll, scrollsX, panelRef, children }: SpaceAs
             </span>
           </TableHead>
           <TableHead scope="col" className="px-4 py-2.5">
-            Asset
+            {firstColumn}
           </TableHead>
           <TableHead scope="col" className="px-4 py-2.5">
             Type

@@ -32,7 +32,7 @@ const UnavailableAssetsAlert = ({ safes, onRetry }: UnavailableAssetsAlertProps)
   return (
     <UnavailableSafesAlertView
       title={getUnavailableTitle(safes.length)}
-      description="Their assets aren't counted in the totals. The network may be unreachable. Reload to try again."
+      description="Their assets aren't counted in the totals. The network may be unreachable or not supported. Reload to try again."
       maxSafes={0}
       isOverLimit={false}
       rows={rows}

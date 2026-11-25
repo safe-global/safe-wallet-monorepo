@@ -1,24 +1,42 @@
 import { faker } from '@faker-js/faker'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
-import { balanceBuilder } from '@/tests/builders/balances'
+import { balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import {
   aggregateReports,
   filterAssetsSafes,
+  groupHoldings,
   NO_ASSETS_FILTERS,
+  searchHoldings,
+  summarizeHoldings,
   toAssetsSafes,
-  toAssetsSummary,
-  toPositionRows,
-  toTokenRows,
+  toHoldings,
+  type AssetHolding,
 } from './utils'
 
 const address = () => faker.finance.ethereumAddress()
 
-const protocol = (name: string, fiatTotal: string): Protocol => ({
-  protocol: name,
-  protocol_metadata: { name, icon: { url: null } },
-  fiatTotal,
-  items: [],
+const usdc = (amount: string, fiatBalance: string) =>
+  balanceBuilder()
+    .with({
+      balance: amount,
+      fiatBalance,
+      tokenInfo: erc20TokenBuilder().with({ symbol: 'USDC', name: 'USD Coin', decimals: 6 }).build(),
+    })
+    .build()
+
+const holding = (overrides: Partial<AssetHolding>): AssetHolding => ({
+  id: faker.string.uuid(),
+  safeAddress: address(),
+  chainId: '1',
+  assetKey: 'ETH',
+  name: 'Ether',
+  symbol: 'ETH',
+  isPosition: false,
+  type: 'Token',
+  amount: 1,
+  fiat: 1,
+  ...overrides,
 })
 
 describe('toAssetsSafes', () => {
@@ -62,105 +80,166 @@ describe('filterAssetsSafes', () => {
   })
 })
 
-describe('toAssetsSummary', () => {
+describe('toHoldings', () => {
+  it('turns the non-empty tokens and the positions of a Safe on a network into holdings', () => {
+    const safe = address()
+    const staking: Protocol = {
+      protocol: 'staking',
+      protocol_metadata: { name: 'Staking', icon: { url: null } },
+      fiatTotal: '50',
+      items: [
+        {
+          name: 'Staked',
+          items: [
+            {
+              balance: '2000000',
+              fiatBalance: '50',
+              fiatConversion: '1',
+              fiatBalance24hChange: null,
+              position_type: 'staked',
+              tokenInfo: {
+                address: address(),
+                decimals: 6,
+                logoUri: '',
+                name: 'USD Coin',
+                symbol: 'USDC',
+                type: 'ERC20',
+              },
+            },
+          ],
+        },
+      ],
+    }
+    const balances = { fiatTotal: '15', items: [usdc('15000000', '15'), usdc('0', '0')] }
+
+    const holdings = toHoldings(safe, '10', balances, [staking])
+
+    expect(holdings).toEqual([
+      expect.objectContaining({
+        safeAddress: safe,
+        chainId: '10',
+        assetKey: 'USDC',
+        type: 'Token',
+        amount: 15,
+        fiat: 15,
+      }),
+      expect.objectContaining({
+        assetKey: 'USDC',
+        isPosition: true,
+        type: 'Staking',
+        protocol: 'Staking',
+        amount: 2,
+        fiat: 50,
+      }),
+    ])
+  })
+})
+
+describe('toHoldings with a loan', () => {
+  it('counts what a loan owes as a negative amount, as its value is', () => {
+    const gho = { address: address(), decimals: 18, logoUri: '', name: 'GHO', symbol: 'GHO', type: 'ERC20' as const }
+    const lending: Protocol = {
+      protocol: 'lending',
+      protocol_metadata: { name: 'Lending', icon: { url: null } },
+      fiatTotal: '-2000',
+      items: [
+        {
+          name: 'Borrowed',
+          items: [
+            {
+              balance: '2000000000000000000000',
+              fiatBalance: '-2000',
+              fiatConversion: '1',
+              fiatBalance24hChange: null,
+              position_type: 'loan',
+              tokenInfo: gho,
+            },
+          ],
+        },
+      ],
+    }
+
+    const [loan] = toHoldings(address(), '1', undefined, [lending])
+
+    expect(loan).toEqual(expect.objectContaining({ assetKey: 'GHO', amount: -2000, fiat: -2000 }))
+  })
+})
+
+describe('summarizeHoldings', () => {
   it('sums the tokens and the positions apart', () => {
-    const balances = { items: [], fiatTotal: '999', tokensFiatTotal: '100.5' }
+    const summary = summarizeHoldings([
+      holding({ fiat: 10 }),
+      holding({ fiat: 5 }),
+      holding({ fiat: 20, isPosition: true }),
+    ])
 
-    const summary = toAssetsSummary(balances, [protocol('A', '20'), protocol('B', '30')])
-
-    expect(summary).toEqual({ tokens: 100.5, positions: 50 })
-  })
-
-  it('falls back to the fiat total when the tokens total is missing', () => {
-    expect(toAssetsSummary({ items: [], fiatTotal: '42' })).toEqual({ tokens: 42, positions: 0 })
-  })
-
-  it('counts nothing without balances', () => {
-    expect(toAssetsSummary(undefined)).toEqual({ tokens: 0, positions: 0 })
+    expect(summary).toEqual({ tokens: 15, positions: 20 })
   })
 })
 
 describe('aggregateReports', () => {
-  it('sums the loaded networks and is loading while one has no report', () => {
-    const result = aggregateReports([{ state: 'ready', summary: { tokens: 10, positions: 5 } }, undefined])
+  it('is loading while a network has no report or waits for its turn', () => {
+    const result = aggregateReports([{ state: 'ready', holdings: [] }, undefined, { state: 'pending' }])
 
-    expect(result).toEqual({
-      summary: { tokens: 10, positions: 5 },
-      isLoading: true,
-      isPartial: false,
-      hasSummary: true,
-    })
+    expect(result).toEqual({ isLoading: true, loadingCount: 2, isPartial: false })
   })
 
-  it('leaves the failed networks out and marks the sum as partial', () => {
-    const result = aggregateReports([
-      { state: 'ready', summary: { tokens: 10, positions: 0 } },
-      { state: 'error' },
-      { state: 'inactive', summary: { tokens: 0, positions: 0 } },
+  it('is partial when a network failed, is unsupported or left out its positions', () => {
+    expect(aggregateReports([{ state: 'error' }]).isPartial).toBe(true)
+    expect(aggregateReports([{ state: 'unsupported' }]).isPartial).toBe(true)
+    expect(aggregateReports([{ state: 'ready', holdings: [], isPartial: true }]).isPartial).toBe(true)
+  })
+})
+
+describe('searchHoldings', () => {
+  const ether = holding({ name: 'Ether', symbol: 'ETH' })
+  const usdCoin = holding({ name: 'USD Coin', symbol: 'USDC', assetKey: 'USDC' })
+
+  it('keeps the holdings whose asset matches every word, ignoring case', () => {
+    expect(searchHoldings([ether, usdCoin], 'usd coin', () => [])).toEqual([usdCoin])
+  })
+
+  it('matches the Safe and network names it is given', () => {
+    const describe = (item: AssetHolding) => (item === ether ? ['Treasury', 'Ethereum'] : ['Ops', 'Gnosis Chain'])
+
+    expect(searchHoldings([ether, usdCoin], 'treasury', describe)).toEqual([ether])
+  })
+
+  it('keeps every holding without a search', () => {
+    expect(searchHoldings([ether, usdCoin], '  ', () => [])).toEqual([ether, usdCoin])
+  })
+})
+
+describe('groupHoldings', () => {
+  const treasury = address()
+  const ops = address()
+  const holdings = [
+    holding({ safeAddress: treasury, chainId: '1', amount: 1.5, fiat: 4500 }),
+    holding({ safeAddress: ops, chainId: '10', amount: 0.5, fiat: 1500 }),
+    holding({ safeAddress: treasury, chainId: '1', assetKey: 'USDC', symbol: 'USDC', amount: 4500, fiat: 4500.5 }),
+  ]
+
+  it('sums each asset across Safes and networks, highest value first', () => {
+    const groups = groupHoldings(holdings, 'asset')
+
+    expect(groups.map(({ key, amount, fiat, chainIds }) => ({ key, amount, fiat, chainIds }))).toEqual([
+      { key: 'ETH', amount: 2, fiat: 6000, chainIds: ['1', '10'] },
+      { key: 'USDC', amount: 4500, fiat: 4500.5, chainIds: ['1'] },
     ])
-
-    expect(result).toEqual({
-      summary: { tokens: 10, positions: 0 },
-      isLoading: false,
-      isPartial: true,
-      hasSummary: true,
-    })
   })
 
-  it('marks the sum as partial when a loaded network left its positions out', () => {
-    const result = aggregateReports([{ state: 'ready', summary: { tokens: 10, positions: 0 }, isPartial: true }])
+  it('groups by Safe, ignoring the address case', () => {
+    const groups = groupHoldings(holdings, 'safe')
 
-    expect(result.isPartial).toBe(true)
-  })
-
-  it('has no sum when every network failed or is unsupported', () => {
-    const result = aggregateReports([{ state: 'error' }, { state: 'unsupported' }])
-
-    expect(result).toEqual(expect.objectContaining({ isLoading: false, isPartial: true, hasSummary: false }))
-  })
-
-  it('is loading while a network waits for its turn', () => {
-    expect(aggregateReports([{ state: 'pending' }]).isLoading).toBe(true)
-  })
-})
-
-describe('toTokenRows', () => {
-  it('drops empty balances and sorts by value, highest first', () => {
-    const small = balanceBuilder().with({ fiatBalance: '1' }).build()
-    const large = balanceBuilder().with({ fiatBalance: '100' }).build()
-    const empty = balanceBuilder().with({ balance: '0', fiatBalance: '0' }).build()
-
-    const rows = toTokenRows([small, empty, large], 'USD')
-
-    expect(rows.map((row) => row.id)).toEqual([large.tokenInfo.address, small.tokenInfo.address])
-  })
-})
-
-const position = (name: string, fiatBalance: string, positionType: 'deposit' | 'staked') => ({
-  balance: '1000000',
-  fiatBalance,
-  fiatConversion: '1',
-  fiatBalance24hChange: null,
-  position_type: positionType,
-  tokenInfo: { address: address(), decimals: 6, logoUri: '', name, symbol: 'USDC', type: 'ERC20' as const },
-})
-
-describe('toPositionRows', () => {
-  it('lists the positions of every protocol, highest value first, with their protocol and type', () => {
-    const lending = {
-      ...protocol('Lending', '10'),
-      items: [{ name: 'Supplied', items: [position('USD Coin', '10', 'deposit')] }],
-    }
-    const staking = {
-      ...protocol('Staking', '50'),
-      items: [{ name: 'Staked', items: [position('Staked USDC', '50', 'staked')] }],
-    }
-
-    const rows = toPositionRows([lending, staking], 'USD')
-
-    expect(rows).toEqual([
-      expect.objectContaining({ name: 'Staked USDC', protocol: 'Staking', type: 'Staking' }),
-      expect.objectContaining({ name: 'USD Coin', protocol: 'Lending', type: 'Deposited', amount: '1 USDC' }),
+    expect(groups.map(({ key, holdings: items }) => [key, items.length])).toEqual([
+      [treasury.toLowerCase(), 2],
+      [ops.toLowerCase(), 1],
     ])
+  })
+
+  it('groups by network', () => {
+    const groups = groupHoldings(holdings, 'network')
+
+    expect(groups.map(({ key }) => key)).toEqual(['1', '10'])
   })
 })

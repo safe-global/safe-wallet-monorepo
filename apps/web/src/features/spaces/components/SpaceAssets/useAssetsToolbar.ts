@@ -16,7 +16,7 @@ export const useAssetsToolbar = (
   safes: AssetsSafe[],
   filters: AssetsFilters,
   onChange: (filters: AssetsFilters) => void,
-): SpaceAssetsToolbarProps => {
+): Omit<SpaceAssetsToolbarProps, 'groupBy' | 'search'> => {
   const getName = useSafeNameResolver()
   const { configs } = useChains()
 

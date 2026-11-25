@@ -1,21 +1,2 @@
-export type AssetTokenRow = {
-  id: string
-  name: string
-  symbol: string
-  logoUri?: string
-  amount: string
-  value: string
-}
-
-export type AssetPositionRow = {
-  id: string
-  name: string
-  protocol: string
-  protocolLogoUri?: string | null
-  /** Deposited, staked, reward… */
-  type: string
-  amount: string
-  value: string
-}
-
-export type ChainAssetsState = 'loading' | 'error' | 'ready' | 'inactive' | 'unsupported'
+/** How the Workspace assets are grouped: each asset across Safes and networks, or by Safe, or by network */
+export type AssetsGroupBy = 'asset' | 'safe' | 'network'

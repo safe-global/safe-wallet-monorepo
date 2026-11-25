@@ -1,18 +1,8 @@
 import type { ReactElement } from 'react'
-import { Rows3 } from 'lucide-react'
-import { Button } from '@safe-global/views/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@safe-global/views/components/ui/dropdown-menu'
+import GroupByMenu, { type GroupByOption } from '@safe-global/views/features/spaces/components/SpaceQueue/GroupByMenu'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 
-const OPTIONS: Array<{ value: QueueGroupBy; label: string; hint: string }> = [
+const OPTIONS: GroupByOption<QueueGroupBy>[] = [
   { value: 'status', label: 'Urgency', hint: 'Transactions listed by order of urgency' },
   { value: 'next', label: 'Up next', hint: 'Next transaction on each Safe' },
   { value: 'safe', label: 'Safe', hint: 'Grouped by Safe, network and nonce order' },
@@ -24,31 +14,6 @@ export type QueueGroupByMenuProps = {
   onChange: (value: QueueGroupBy) => void
 }
 
-const QueueGroupByMenu = ({ value, onChange }: QueueGroupByMenuProps): ReactElement => {
-  const selected = OPTIONS.find((option) => option.value === value) ?? OPTIONS[0]
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" aria-label={`Group by ${selected.label}`} />}>
-        <Rows3 />
-        Group by: {selected.label}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-72">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Group by</DropdownMenuLabel>
-          <DropdownMenuRadioGroup value={value} onValueChange={(next) => onChange(next as QueueGroupBy)}>
-            {OPTIONS.map((option) => (
-              <DropdownMenuRadioItem key={option.value} value={option.value}>
-                <span className="flex flex-col">
-                  {option.label}
-                  <span className="text-xs text-muted-foreground">{option.hint}</span>
-                </span>
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
+const QueueGroupByMenu = (props: QueueGroupByMenuProps): ReactElement => <GroupByMenu options={OPTIONS} {...props} />
 
 export default QueueGroupByMenu

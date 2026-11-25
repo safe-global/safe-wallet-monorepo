@@ -1,8 +1,7 @@
 import { faker } from '@faker-js/faker'
-import { balanceBuilder } from '@/tests/builders/balances'
+import { balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { SafeAssets as SafeAssetsResult } from '../../hooks/useSafeAssets'
 import SpaceAssets from './SpaceAssets'
@@ -16,11 +15,22 @@ const mockUseSpaceSafes = jest.requireMock('../../public/hooks/useSpaceSafes').u
 const mockUseSafeAssets = jest.requireMock('../../hooks/useSafeAssets').default as jest.Mock
 const mockUseChains = jest.requireMock('@/hooks/useChains').default as jest.Mock
 
-const MAINNET = chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build()
+const ETHEREUM = chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build()
 const GNOSIS = chainBuilder().with({ chainId: '100', chainName: 'Gnosis Chain' }).build()
 
-const loaded = (tokensFiatTotal: string): SafeAssetsResult => ({
-  balances: { items: [balanceBuilder().build()], fiatTotal: tokensFiatTotal, tokensFiatTotal },
+const token = (symbol: string, fiatBalance: string) =>
+  balanceBuilder()
+    .with({
+      balance: '1000000',
+      fiatBalance,
+      tokenInfo: erc20TokenBuilder()
+        .with({ symbol, name: `${symbol} token`, decimals: 6 })
+        .build(),
+    })
+    .build()
+
+const loaded = (...items: ReturnType<typeof token>[]): SafeAssetsResult => ({
+  balances: { items, fiatTotal: '0' },
   protocols: [],
   isDeployed: true,
   isUnsupported: false,
@@ -51,10 +61,15 @@ const givenAssets = (byChainAndAddress: Record<string, SafeAssetsResult>) =>
     ({ chainId, address }: { chainId: string; address: string }) => byChainAndAddress[`${chainId}:${address}`],
   )
 
+const totals = () => within(screen.getByTestId('space-assets-totals'))
+
 describe('SpaceAssets', () => {
+  const treasury = faker.finance.ethereumAddress()
+  const ops = faker.finance.ethereumAddress()
+
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseChains.mockReturnValue({ configs: [MAINNET, GNOSIS] })
+    mockUseChains.mockReturnValue({ configs: [ETHEREUM, GNOSIS], loading: false })
   })
 
   it('says the Space has no Safe accounts yet', () => {
@@ -75,86 +90,127 @@ describe('SpaceAssets', () => {
     expect(refetch).toHaveBeenCalled()
   })
 
-  it('sums the tokens of every Safe and network in the totals', () => {
-    const first = faker.finance.ethereumAddress()
-    const second = faker.finance.ethereumAddress()
-    givenSpaceSafes(
-      { address: first, chainId: '1' },
-      { address: first, chainId: '100' },
-      { address: second, chainId: '1' },
-    )
-    givenAssets({ [`1:${first}`]: loaded('10'), [`100:${first}`]: loaded('20'), [`1:${second}`]: loaded('5') })
+  describe('grouped by asset', () => {
+    beforeEach(() => {
+      givenSpaceSafes(
+        { address: treasury, chainId: '1' },
+        { address: treasury, chainId: '100' },
+        { address: ops, chainId: '1' },
+      )
+      givenAssets({
+        [`1:${treasury}`]: loaded(token('ETH', '3000'), token('USDC', '1')),
+        [`100:${treasury}`]: loaded(token('ETH', '2000')),
+        [`1:${ops}`]: loaded(token('ETH', '1000')),
+      })
+    })
 
-    render(<SpaceAssets />)
+    it('shows one collapsed band per asset with its amount and value summed across Safes and networks', () => {
+      render(<SpaceAssets />)
 
-    const totals = screen.getByTestId('space-assets-totals')
-    expect(within(totals).getAllByText('$ 35')).toHaveLength(2)
-    expect(screen.getAllByTestId('space-assets-safe')).toHaveLength(2)
-    expect(screen.getAllByTestId('space-assets-chain')).toHaveLength(3)
+      const bands = screen.getAllByTestId('space-assets-group')
+      expect(bands).toHaveLength(2)
+      expect(within(bands[0]).getByText('ETH')).toBeInTheDocument()
+      expect(within(bands[0]).getByText('3 ETH')).toBeInTheDocument()
+      expect(within(bands[0]).getByText('$ 6,000')).toBeInTheDocument()
+      expect(screen.queryAllByTestId('space-assets-row')).toHaveLength(0)
+    })
+
+    it('lists a row per Safe network when an asset is expanded', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.click(screen.getByRole('button', { name: 'Expand ETH' }))
+
+      expect(screen.getAllByTestId('space-assets-row')).toHaveLength(3)
+    })
+
+    it('expands and collapses every asset at once', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.click(screen.getByRole('button', { name: 'Expand all' }))
+      const expandedRows = screen.getAllByTestId('space-assets-row').length
+      await user.click(screen.getByRole('button', { name: 'Collapse all' }))
+
+      expect(expandedRows).toBe(4)
+      expect(screen.queryAllByTestId('space-assets-row')).toHaveLength(0)
+    })
+
+    it('sums every holding in the totals', () => {
+      render(<SpaceAssets />)
+
+      expect(totals().getAllByText('$ 6,001')).toHaveLength(2)
+    })
+
+    it('narrows the assets and the totals to the search', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.type(screen.getByRole('searchbox', { name: 'Search assets' }), 'usdc')
+
+      expect(await totals().findAllByText('$ 1')).toHaveLength(2)
+      expect(screen.getAllByTestId('space-assets-group')).toHaveLength(1)
+    })
+
+    it('offers to clear a search that matches nothing', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.type(screen.getByRole('searchbox', { name: 'Search assets' }), 'dai')
+      await user.click(await screen.findByRole('button', { name: 'Clear search and filters' }))
+
+      expect(screen.getAllByTestId('space-assets-group')).toHaveLength(2)
+    })
+  })
+
+  it('groups by Safe when picked in Group by', async () => {
+    givenSpaceSafes({ address: treasury, chainId: '1' }, { address: ops, chainId: '1' })
+    givenAssets({ [`1:${treasury}`]: loaded(token('ETH', '10')), [`1:${ops}`]: loaded(token('ETH', '5')) })
+
+    const { user } = renderWithUserEvent(<SpaceAssets />)
+    await user.click(screen.getByRole('button', { name: 'Group by Asset' }))
+    await user.click(await screen.findByRole('menuitemradio', { name: /^Safe/ }))
+
+    expect(screen.getAllByTestId('space-assets-group')).toHaveLength(2)
+    expect(screen.getAllByTestId('space-assets-row')).toHaveLength(2)
   })
 
   it('leaves a failed network out of the totals and reloads it from the alert', async () => {
-    const address = faker.finance.ethereumAddress()
     const refetch = jest.fn()
-    givenSpaceSafes({ address, chainId: '1' }, { address, chainId: '100' })
-    givenAssets({ [`1:${address}`]: loaded('10'), [`100:${address}`]: failed(refetch) })
+    givenSpaceSafes({ address: treasury, chainId: '1' }, { address: treasury, chainId: '100' })
+    givenAssets({ [`1:${treasury}`]: loaded(token('ETH', '10')), [`100:${treasury}`]: failed(refetch) })
 
     const { user } = renderWithUserEvent(<SpaceAssets />)
     await user.click(screen.getByTestId('unavailable-safes-alert'))
     await user.click(screen.getByRole('button', { name: 'Reload' }))
 
-    const totals = screen.getByTestId('space-assets-totals')
-    expect(within(totals).getAllByText('$ 10')).toHaveLength(2)
-    expect(within(totals).getByText(/couldn.t be loaded/)).toBeInTheDocument()
+    expect(totals().getAllByText('$ 10')).toHaveLength(2)
+    expect(totals().getByText(/couldn.t be loaded/)).toBeInTheDocument()
     expect(refetch).toHaveBeenCalled()
   })
 
-  it('says a Safe is not activated on a network where it is not deployed', () => {
-    const address = faker.finance.ethereumAddress()
-    givenSpaceSafes({ address, chainId: '1' })
-    givenAssets({
-      [`1:${address}`]: {
-        isDeployed: false,
-        isUnsupported: false,
-        isLoading: false,
-        isFetching: false,
-        refetch: jest.fn(),
-      },
-    })
-
-    render(<SpaceAssets />)
-
-    expect(screen.getByText(/isn.t activated on this network yet/)).toBeInTheDocument()
-  })
-
   it('marks the totals as partial when a network loaded its tokens but not its positions', () => {
-    const address = faker.finance.ethereumAddress()
-    givenSpaceSafes({ address, chainId: '1' })
-    givenAssets({
-      [`1:${address}`]: { ...loaded('10'), protocols: undefined, positionsError: new Error('Unreachable') },
-    })
+    givenSpaceSafes({ address: treasury, chainId: '1' })
+    givenAssets({ [`1:${treasury}`]: { ...loaded(token('ETH', '10')), positionsError: new Error('Unreachable') } })
 
     render(<SpaceAssets />)
 
-    expect(screen.getByText(/couldn.t load the positions on this network/i)).toBeInTheDocument()
-    expect(within(screen.getByTestId('space-assets-totals')).getByText(/couldn.t be loaded/)).toBeInTheDocument()
+    expect(totals().getByText(/couldn.t be loaded/)).toBeInTheDocument()
+    expect(screen.getByTestId('unavailable-safes-alert')).toBeInTheDocument()
   })
 
-  it('shows no total for a Safe whose networks all failed', () => {
-    const address = faker.finance.ethereumAddress()
-    givenSpaceSafes({ address, chainId: '1' })
-    givenAssets({ [`1:${address}`]: failed() })
+  it('keeps the reload alert when a search matches nothing while a network failed', async () => {
+    givenSpaceSafes({ address: treasury, chainId: '1' }, { address: treasury, chainId: '100' })
+    givenAssets({ [`1:${treasury}`]: loaded(token('ETH', '10')), [`100:${treasury}`]: failed() })
 
-    render(<SpaceAssets />)
+    const { user } = renderWithUserEvent(<SpaceAssets />)
+    await user.type(screen.getByRole('searchbox', { name: 'Search assets' }), 'dai')
 
-    expect(within(screen.getByTestId('space-assets-safe')).getByText('—')).toBeInTheDocument()
+    expect(await screen.findByText('No assets')).toBeInTheDocument()
+    expect(screen.getByTestId('unavailable-safes-alert')).toBeInTheDocument()
   })
 
-  it('says the assets of a network missing from the chain configs cannot be shown', () => {
-    const address = faker.finance.ethereumAddress()
-    givenSpaceSafes({ address, chainId: '1' })
+  it('lists a network missing from the chain configs in the alert', () => {
+    givenSpaceSafes({ address: treasury, chainId: '1' }, { address: treasury, chainId: '100' })
     givenAssets({
-      [`1:${address}`]: {
+      [`1:${treasury}`]: loaded(token('ETH', '10')),
+      [`100:${treasury}`]: {
         isDeployed: true,
         isUnsupported: true,
         isLoading: false,
@@ -165,58 +221,6 @@ describe('SpaceAssets', () => {
 
     render(<SpaceAssets />)
 
-    expect(screen.getByText(/assets on this network can.t be shown/i)).toBeInTheDocument()
-  })
-
-  describe('collapsing', () => {
-    const first = faker.finance.ethereumAddress()
-    const second = faker.finance.ethereumAddress()
-
-    beforeEach(() => {
-      givenSpaceSafes(
-        { address: first, chainId: '1' },
-        { address: first, chainId: '100' },
-        { address: second, chainId: '1' },
-      )
-      givenAssets({ [`1:${first}`]: loaded('10'), [`100:${first}`]: loaded('20'), [`1:${second}`]: loaded('5') })
-    })
-
-    it('hides the networks of a collapsed Safe but keeps its value in the totals', async () => {
-      const { user } = renderWithUserEvent(<SpaceAssets />)
-
-      await user.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(first)}` }))
-
-      expect(screen.getAllByTestId('space-assets-chain')).toHaveLength(1)
-      expect(within(screen.getByTestId('space-assets-totals')).getAllByText('$ 35')).toHaveLength(2)
-    })
-
-    it('collapses every shown Safe, then expands them again', async () => {
-      const { user } = renderWithUserEvent(<SpaceAssets />)
-
-      await user.click(screen.getByRole('button', { name: 'Collapse all' }))
-      const afterCollapse = screen.queryAllByTestId('space-assets-chain').length
-      await user.click(screen.getByRole('button', { name: 'Expand all' }))
-
-      expect(afterCollapse).toBe(0)
-      expect(screen.getAllByTestId('space-assets-chain')).toHaveLength(3)
-    })
-
-    it('hides the assets of a collapsed network but keeps its header', async () => {
-      const { user } = renderWithUserEvent(<SpaceAssets />)
-
-      await user.click(screen.getAllByRole('button', { name: 'Collapse Gnosis Chain' })[0])
-
-      expect(screen.getAllByTestId('space-assets-chain')).toHaveLength(3)
-      expect(screen.getAllByTestId('space-assets-row')).toHaveLength(2)
-    })
-
-    it('shows only the network whose logo is clicked in the Safe band', async () => {
-      const { user } = renderWithUserEvent(<SpaceAssets />)
-
-      await user.click(screen.getByRole('button', { name: 'Show Gnosis Chain' }))
-
-      expect(screen.getByRole('button', { name: 'Show all 2 networks' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Expand Ethereum' })).toBeInTheDocument()
-    })
+    expect(screen.getByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe account not loaded')
   })
 })
