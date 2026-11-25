@@ -33,7 +33,7 @@ export const playwrightSpecs = {
   'e2e/owner-management.spec.ts': {},
   'e2e/pay-from-safe.spec.ts': {},
   'e2e/policies.spec.ts': { flags: ['POLICIES'] },
-  'e2e/workspace.spec.ts': {},
+  'e2e/workspace.spec.ts': { flags: ['WORKSPACE_ONBOARDING_V2'] },
   'e2e/positions.spec.ts': {
     scenarios: ['prepareZerionPositionsScenario'],
     chains: [1],
@@ -92,6 +92,7 @@ export const playwrightSpecs = {
   },
   'regression/auth0/step-up-billing.spec.ts': {
     scenarios: ['prepareBasicScenario'],
+    flags: ['WORKSPACE_ONBOARDING_V2'],
   },
   'regression/auth0/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
