@@ -10,6 +10,7 @@ import { NO_TOKEN_SELECTED_ERROR } from '../../public/services/spendingLimitVali
 import type { TokenOption } from '@/utils/tokenOptions'
 import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import * as useSpendingLimitTokenOptionsHook from '@/hooks/useSpendingLimitTokenOptions'
+import { tokenOptionsResult } from '@/hooks/useSpendingLimitTokenOptions.testData'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
 
 jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
@@ -46,16 +47,7 @@ const nativeOption = tokenOptionBuilder()
   .build()
 
 const mockOptions = (options: TokenOption[]) => {
-  jest.spyOn(useSpendingLimitTokenOptionsHook, 'default').mockReturnValue({
-    options,
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
-    isPopularLoading: false,
-    isPopularError: false,
-    refetchPopular: jest.fn(),
-    identityKey: `1:${BENEFICIARY}`,
-  })
+  jest.spyOn(useSpendingLimitTokenOptionsHook, 'default').mockReturnValue(tokenOptionsResult(options))
 }
 
 const buildForm = (data?: Partial<NewSpendingLimitFlowProps>) => {

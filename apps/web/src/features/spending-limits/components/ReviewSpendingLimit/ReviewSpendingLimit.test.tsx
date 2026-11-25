@@ -11,6 +11,7 @@ import * as useChains from '@/hooks/useChains'
 import { erc20TokenBuilder } from '@/tests/builders/balances'
 import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import * as useSpendingLimitTokenOptionsHook from '@/hooks/useSpendingLimitTokenOptions'
+import { tokenOptionsResult } from '@/hooks/useSpendingLimitTokenOptions.testData'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
@@ -48,20 +49,16 @@ const existingLimit = (amount = ONE_USDC): SpendingLimitState =>
     .build()
 
 const givenTokenOptions = (tokens: Erc20Token[], { untrusted }: { untrusted?: boolean } = {}) => {
-  jest.spyOn(useSpendingLimitTokenOptionsHook, 'default').mockReturnValue({
-    options: tokens.map(({ address, symbol, name, decimals, logoUri }) =>
-      tokenOptionBuilder()
-        .with({ address, symbol, name, decimals: decimals ?? 0, logoUri, untrusted })
-        .build(),
+  jest.spyOn(useSpendingLimitTokenOptionsHook, 'default').mockReturnValue(
+    tokenOptionsResult(
+      tokens.map(({ address, symbol, name, decimals, logoUri }) =>
+        tokenOptionBuilder()
+          .with({ address, symbol, name, decimals: decimals ?? 0, logoUri, untrusted })
+          .build(),
+      ),
+      { chainId: MAINNET },
     ),
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
-    isPopularLoading: false,
-    isPopularError: false,
-    refetchPopular: jest.fn(),
-    identityKey: `${MAINNET}:${newLimit.beneficiary}`,
-  })
+  )
 }
 
 const renderReview = (spendingLimits: SpendingLimitState[] = [], limit: NewSpendingLimitFlowProps = newLimit) => {
