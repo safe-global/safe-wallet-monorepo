@@ -43,7 +43,6 @@ const renderOwnerList = async () => {
   await screen.findByTestId('manage-signers-btn')
 }
 
-// The current chain is the Safe's, as on the Safe's own pages
 const mockSafeWithOwners = (ownerCount: number) => {
   const safe = mockSafeInfo({
     deployed: true,
