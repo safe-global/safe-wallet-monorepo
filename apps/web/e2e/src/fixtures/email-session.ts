@@ -217,7 +217,7 @@ const offersTrial = async (session: EmailSession, uuid: string): Promise<boolean
 export async function storeSubscription(
   session: EmailSession,
   uuid: string,
-  subscription: { plan?: 'business' | 'starter'; status?: string } = {},
+  subscription: { plan?: 'business' | 'starter'; status?: string; currentPeriodEnd?: number } = {},
 ): Promise<void> {
   const url = billingSubscriptionsUrl(uuid)
   const response = await fetch(url, {
@@ -246,6 +246,14 @@ export async function planName(session: EmailSession, uuid: string): Promise<str
   if (!Array.isArray(subscriptions) || subscriptions.length === 0) return null
   const [{ metadata }] = subscriptions as Array<{ metadata?: { planName?: string } }>
   return metadata?.planName ?? null
+}
+
+/** Whether the Workspace's subscription has a payment method, as the gateway reports it; false without one. */
+export async function hasPaymentMethod(session: EmailSession, uuid: string): Promise<boolean> {
+  const subscriptions = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/subscriptions`)
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) return false
+  const [subscription] = subscriptions as Array<{ hasPaymentMethod?: boolean }>
+  return subscription.hasPaymentMethod === true
 }
 
 /** Sponsored transactions the Workspace spent in the current cycle, as the gateway counts them; null without the meter. */

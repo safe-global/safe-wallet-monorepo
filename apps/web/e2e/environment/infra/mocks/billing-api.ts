@@ -2,13 +2,15 @@
  * Answers the gateway's billing service calls (SAFE_BILLING_SERVICE_BASE_URI) in place of the hosted service.
  *
  * Every Workspace holds a Business trial, as on staging, unless a test stores another subscription through
- * POST /__test/customers/{id}/subscriptions (body: optional "plan" business|starter, "status", "metadata"), or
+ * POST /__test/customers/{id}/subscriptions (body: optional "plan" business|starter, "status", "metadata" and
+ * "currentPeriodEnd" in Unix seconds), or
  * leaves a new Workspace without one, as in production, through DELETE /__test/customers/{id}/subscriptions.
  * Like the real service, the mock announces each subscription to the gateway with a signed webhook, which is
  * what writes the Workspace's entitlements. A checkout opens a local page in place of Stripe's: its Start trial button
  * stores the trial of the link's plan and returns to the caller's URL, and its Back link returns with the session
  * still open, as Stripe's Back does. A Workspace that started a checkout gets no default trial, so its own checkout
- * decides its plan, as the onboarding wizard needs; every other Workspace keeps the default.
+ * decides its plan, as the onboarding wizard needs; every other Workspace keeps the default. The billing portal is a
+ * local page too: its Add card button gives the Workspace's subscription a payment method and returns to the caller.
  */
 import { createECDH, createPrivateKey, sign } from 'node:crypto'
 import { escapeHtml, html, isMain, json, postJson, requiredEnv, serve } from './http.ts'
@@ -86,6 +88,9 @@ const CHECKOUT_PATH = /^\/api\/v1\/payment-links\/([^/]+)\/checkout$/
 const CHECKOUT_PAGE_PATH = /^\/checkout\/([^/]+)$/
 const CHECKOUT_COMPLETE_PATH = /^\/checkout\/([^/]+)\/complete$/
 const SESSION_PATH = /^\/api\/v1\/sessions\/([^/]+)$/
+const PORTAL_URL_PATH = /^\/api\/v1\/customers\/([0-9a-fA-F-]+)\/session-url$/
+const PORTAL_PAGE_PATH = /^\/portal\/([0-9a-fA-F-]+)$/
+const PORTAL_CARD_PATH = /^\/portal\/([0-9a-fA-F-]+)\/payment-method$/
 const SESSION_ID_PLACEHOLDER = '{CHECKOUT_SESSION_ID}'
 
 export type Subscription = {
@@ -99,7 +104,7 @@ export type Subscription = {
   metadata: Record<string, string>
 } & Record<string, unknown>
 
-type Overrides = { plan?: string; status?: string; metadata?: Record<string, string> }
+type Overrides = { plan?: string; status?: string; metadata?: Record<string, string>; currentPeriodEnd?: number }
 
 export type EventType = 'customer.subscription.created' | 'customer.subscription.updated'
 export type Announce = (subscription: Subscription, eventType: EventType) => Promise<void>
@@ -195,7 +200,7 @@ function defaultSubscription(customer: string, overrides: Overrides = {}): Subsc
     cancelledAt: null,
     cancelAt: null,
     currentPeriodStart: PERIOD_START,
-    currentPeriodEnd: PERIOD_END,
+    currentPeriodEnd: overrides.currentPeriodEnd ?? PERIOD_END,
     metadata: {
       ...PLANS[plan].metadata,
       customerGroup: CUSTOMER_GROUP,
@@ -327,6 +332,21 @@ export class Billing {
     return this.sessions.get(sessionId)
   }
 
+  /** The local portal page for the Workspace, which returns to `returnUrl`, as a Stripe portal session does. */
+  portalUrl(customer: string, returnUrl: string): string {
+    return `${this.publicUrl}/portal/${customer}?returnUrl=${encodeURIComponent(returnUrl)}`
+  }
+
+  /** Gives the Workspace's subscription a payment method and announces it; false without a subscription. */
+  async addPaymentMethod(customer: string): Promise<boolean> {
+    const [current] = this.subscriptions.get(customer) ?? []
+    if (current === undefined) return false
+    const updated = { ...current, hasPaymentMethod: true }
+    this.subscriptions.set(customer, [updated])
+    await this.announce(updated, 'customer.subscription.updated')
+    return true
+  }
+
   /** Starts the link's plan for the session's Workspace and announces it, as a completed Stripe checkout does. */
   async completeCheckout(sessionId: string): Promise<CheckoutSession | undefined> {
     const session = this.sessions.get(sessionId)
@@ -418,6 +438,37 @@ function returnTo(session: CheckoutSession): string {
   return session.returnUrl.replace(SESSION_ID_PLACEHOLDER, session.id)
 }
 
+/** The portal session URL, as plain text: the billing service answers the gateway with the bare URL. */
+function portalUrl([customer]: string[], { query }: BillingRequest, billing: Billing): Reply {
+  const returnUrl = query.get('returnUrl')
+  if (!returnUrl) return json(400, { message: 'A portal session needs returnUrl' })
+  return {
+    status: 200,
+    headers: { 'Content-Type': 'text/plain' },
+    body: billing.portalUrl(customerKey(customer), returnUrl),
+  }
+}
+
+function portalPage([customer]: string[], { query }: BillingRequest): Reply {
+  const returnUrl = query.get('returnUrl') ?? ''
+  const back = `?returnUrl=${encodeURIComponent(returnUrl)}`
+  return html(
+    200,
+    `<!doctype html><html><head><title>Local billing portal</title></head><body>
+<h1>Local billing portal</h1>
+<p>Workspace: ${escapeHtml(customer)}</p>
+<p>Returns to: ${escapeHtml(returnUrl)}</p>
+<form method="post" action="${escapeHtml(customer)}/payment-method${escapeHtml(back)}"><button type="submit">Add card</button></form>
+<a href="${escapeHtml(returnUrl)}">Back</a>
+</body></html>`,
+  )
+}
+
+async function addCard([customer]: string[], { query }: BillingRequest, billing: Billing): Promise<Reply> {
+  if (!(await billing.addPaymentMethod(customerKey(customer)))) return json(404, { message: 'No subscription' })
+  return { status: 303, headers: { Location: query.get('returnUrl') ?? '/' }, body: '' }
+}
+
 /** The Stripe checkout session object, in the snake_case shape the billing service passes through. */
 function sessionObject(session: CheckoutSession): Record<string, unknown> {
   const isComplete = session.status === 'complete'
@@ -489,6 +540,9 @@ const ROUTES: Route[] = [
   { method: 'GET', path: CHECKOUT_PAGE_PATH, handle: checkoutPage },
   { method: 'POST', path: CHECKOUT_COMPLETE_PATH, handle: completeCheckout },
   { method: 'GET', path: SESSION_PATH, handle: checkoutSession },
+  { method: 'GET', path: PORTAL_URL_PATH, handle: portalUrl },
+  { method: 'GET', path: PORTAL_PAGE_PATH, handle: portalPage },
+  { method: 'POST', path: PORTAL_CARD_PATH, handle: addCard },
   { method: 'GET', path: PREVIEW_PATH, handle: previewPlanChange },
   { method: 'PATCH', path: SUBSCRIPTION_PATH, handle: changePlan },
   { method: 'GET', path: PLAN_PATH, handle: plan },

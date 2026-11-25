@@ -24,6 +24,9 @@ export class WorkspacePage {
   readonly planChooserModal: Locator
   readonly memberClaimNotice: Locator
   readonly confirmPlanChangeButton: Locator
+  readonly trialEndingModal: Locator
+  readonly portalAddCardButton: Locator
+  readonly managePlanButton: Locator
   readonly currentPlanName: Locator
   readonly selectorButton: Locator
   readonly selectorMenu: Locator
@@ -54,6 +57,9 @@ export class WorkspacePage {
     })
     this.memberClaimNotice = page.getByRole('dialog', { name: /^Start your \d+-day free access to Safe Pro/ })
     this.confirmPlanChangeButton = page.getByRole('button', { name: 'Confirm change' })
+    this.trialEndingModal = page.getByRole('dialog', { name: /^Your free access will end/ })
+    this.portalAddCardButton = page.getByRole('button', { name: 'Add card' })
+    this.managePlanButton = page.getByRole('button', { name: 'Manage plan' })
     this.currentPlanName = page.getByTestId('current-plan-card').getByRole('heading', { level: 4 })
     this.selectorButton = page.getByTestId('space-selector-button')
     this.selectorMenu = page.getByTestId('space-selector-menu')
