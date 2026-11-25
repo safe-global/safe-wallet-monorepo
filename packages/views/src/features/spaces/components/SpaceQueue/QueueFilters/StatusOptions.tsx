@@ -5,6 +5,7 @@ import { DropdownMenuSeparator } from '@safe-global/views/components/ui/dropdown
 import type { QueueStatusOption } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import FilterOptionItem from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterOptionItem'
 import { STATUS_OPTION_LABELS } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/labels'
+import SearchableOptions from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SearchableOptions'
 
 const SUCCESS_TILE = 'bg-success-subtle text-success-strong'
 const WARNING_TILE = 'bg-warning-subtle text-warning-strong'
@@ -58,11 +59,23 @@ const StatusOptions = ({ statuses, flags, counts, selected, onToggle }: StatusOp
   )
 
   return (
-    <>
-      {statuses.map(renderOption)}
-      <DropdownMenuSeparator />
-      {flags.map(renderOption)}
-    </>
+    <SearchableOptions
+      items={[...statuses, ...flags]}
+      noun="urgency"
+      getText={(option) => `${STATUS_OPTION_LABELS[option].menu} ${STATUS_OPTION_LABELS[option].chip}`}
+    >
+      {(shown) => {
+        const shownStatuses = statuses.filter((option) => shown.includes(option))
+        const shownFlags = flags.filter((option) => shown.includes(option))
+        return (
+          <>
+            {shownStatuses.map(renderOption)}
+            {shownStatuses.length > 0 && shownFlags.length > 0 && <DropdownMenuSeparator />}
+            {shownFlags.map(renderOption)}
+          </>
+        )
+      }}
+    </SearchableOptions>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector, useStore } from 'react-redux'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import {
@@ -79,7 +79,7 @@ const REFETCH_EVENTS = [
   TxEvent.DELETED,
 ] as const
 
-type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
+export type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
 
 const MAX_POLLING_INTERVAL = 5 * 60_000
 
@@ -120,6 +120,14 @@ export const useSpaceQueue = (
   const isFocused = useSelector((state: RootState) => state[cgwClient.reducerPath].config.focused)
   const interval = getPollingInterval(failures)
 
+  // A query that failed stays failed while Try again refetches it, so the error view doesn't flash other content
+  const argsKey = JSON.stringify(args)
+  const [failedArgsKey, setFailedArgsKey] = useState<string>()
+  if (isError && !currentData && failedArgsKey !== argsKey) setFailedArgsKey(argsKey)
+  if (currentData && failedArgsKey === argsKey) setFailedArgsKey(undefined)
+  const isRetryingError = !isError && !currentData && !skip && failedArgsKey === argsKey
+  const hasError = isError || isRetryingError
+
   // A second refetch of an entry already loading sends no request, so the page and the poller can both listen
   useEffect(() => {
     if (skip) return
@@ -139,10 +147,31 @@ export const useSpaceQueue = (
   }, [skip, poll, queueKey, isFetching, isFocused, interval, refetch, requestId, store])
 
   const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
-  const queue = useMemo(
+  const currentQueue = useMemo(
     () => (currentData ? toSpaceQueue(currentData, isNarrowed) : undefined),
     [currentData, isNarrowed],
   )
-  // The last answer's counts stay while a new filter loads, so the menus keep them
-  return { queue, counts: data?.counts, isError, isFetching, isRefreshFailing: failures > 0, refetch }
+
+  // The last queue loaded, kept with the Space and the query it answered
+  const [lastQueue, setLastQueue] = useState<{ spaceId: string; query: SpaceQueueQuery; queue: SpaceQueue }>()
+  if (currentQueue && lastQueue?.queue !== currentQueue) {
+    setLastQueue({ spaceId, query, queue: currentQueue })
+  }
+  // While a new search or filter loads, the last queue stays on screen instead of a skeleton. Never another Space's
+  const stale = !currentQueue && !skip && !hasError && lastQueue?.spaceId === spaceId ? lastQueue : undefined
+
+  return {
+    queue: currentQueue ?? stale?.queue,
+    /** The query the returned queue answers: an earlier one while `isStale` */
+    queueQuery: stale?.query ?? query,
+    isStale: !!stale,
+    // The last answer's counts stay while a new filter loads, so the menus keep them
+    counts: data?.counts,
+    isError: hasError,
+    /** Try again is refetching a query that failed */
+    isRetryingError,
+    isFetching,
+    isRefreshFailing: failures > 0,
+    refetch,
+  }
 }

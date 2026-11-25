@@ -12,15 +12,31 @@ const wedge = (ratio: number) => {
   return `M ${CENTER} ${CENTER} L ${CENTER} ${CENTER - INNER} A ${INNER} ${INNER} 0 ${ratio > 0.5 ? 1 : 0} 1 ${x} ${y} Z`
 }
 
+export type SignatureGaugeTone = 'success' | 'warning'
+
+const TONE_CLASSES: Record<SignatureGaugeTone, string> = {
+  success: 'text-success-strong',
+  warning: 'text-warning-strong',
+}
+
+type SignatureGaugeProps = {
+  count: number
+  threshold: number
+  /** The row's status: green when the user can sign or execute it now, amber when they must wait */
+  tone?: SignatureGaugeTone
+}
+
 // A pie, not a segmented arc: arcs read as a loading spinner.
-const SignatureGauge = ({ count, threshold }: { count: number; threshold: number }): ReactElement => {
+const SignatureGauge = ({ count, threshold, tone }: SignatureGaugeProps): ReactElement => {
   const ratio = threshold > 0 ? Math.min(count / threshold, 1) : 1
+  const color = tone ? TONE_CLASSES[tone] : ratio === 1 ? 'text-success-strong' : 'text-foreground'
   return (
     <svg
       width={SIZE}
       height={SIZE}
       viewBox={`0 0 ${SIZE} ${SIZE}`}
-      className={`shrink-0 ${ratio === 1 ? 'text-success-strong' : 'text-foreground'}`}
+      className={`shrink-0 ${color}`}
+      data-tone={tone}
       aria-hidden="true"
     >
       <circle cx={CENTER} cy={CENTER} r={OUTER} fill="none" strokeWidth={1.5} className="stroke-current" />

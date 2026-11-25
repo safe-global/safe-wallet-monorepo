@@ -73,6 +73,9 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockWallet.current,
 }))
 
+const mockIsSafeOwner = { current: true }
+jest.mock('@/hooks/useIsSafeOwner', () => ({ __esModule: true, default: () => mockIsSafeOwner.current }))
+
 const mockGetTxDetails = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/transactions'),
@@ -102,10 +105,10 @@ const tx = (nonce: number): Transaction =>
     executionInfo: { type: 'MULTISIG', nonce, confirmationsRequired: 2, confirmationsSubmitted: 1 },
   }) as Transaction
 
-const renderMenu = (transaction: Transaction, canReject = true) =>
+const renderMenu = (transaction: Transaction, canReject = true, nonceTaken = false) =>
   render(
     <DeleteTxDialogProvider>
-      <RowActionsMenu tx={transaction} canReject={canReject} />
+      <RowActionsMenu tx={transaction} canReject={canReject} nonceTaken={nonceTaken} />
     </DeleteTxDialogProvider>,
   )
 
@@ -117,6 +120,7 @@ describe('RowActionsMenu', () => {
     mockTrackEvent.mockClear()
     mockIsOk.current = true
     mockWallet.current = null
+    mockIsSafeOwner.current = true
     mockIsNonceDeletable.mockReturnValue(true)
     mockGetTxDetails.mockReset().mockReturnValue({ currentData: undefined })
   })
@@ -148,6 +152,19 @@ describe('RowActionsMenu', () => {
       'aria-disabled',
       'true',
     )
+  })
+
+  it('disables replacing and rejecting while another transaction at the nonce is executing, and says why', async () => {
+    renderMenu(tx(7), true, true)
+    openMenu()
+
+    const reject = await screen.findByRole('menuitem', { name: 'Reject' })
+    expect(reject).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByRole('menuitem', { name: 'Replace with a transfer' })).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.hover(reject.parentElement!)
+    expect(
+      await screen.findByText('Another transaction at #7 is executing. Available if it fails.'),
+    ).toBeInTheDocument()
   })
 
   it('explains why a nonce cannot be rejected twice', async () => {
@@ -204,6 +221,21 @@ describe('RowActionsMenu', () => {
     )
     expect(screen.getByRole('menuitem', { name: 'Reject' })).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByRole('menuitem', { name: 'Copy link' })).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it.each([
+    ['Replace with a transfer', 'Only signers of this Safe can replace it.'],
+    ['Reject', 'Only signers of this Safe can reject it.'],
+  ])('tells a connected wallet that does not sign for the Safe why %s is disabled', async (name, reason) => {
+    mockIsOk.current = false
+    mockIsSafeOwner.current = false
+    mockWallet.current = { address: checksumAddress(faker.finance.ethereumAddress()) }
+    renderMenu(tx(7))
+    openMenu()
+
+    const item = await screen.findByRole('menuitem', { name })
+    await userEvent.hover(item.closest('[data-slot="tooltip-trigger"]')!)
+    expect(await screen.findByText(reason)).toBeInTheDocument()
   })
 
   it('copies the link to the transaction in the Safe of the row', async () => {

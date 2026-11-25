@@ -6190,11 +6190,15 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   style="grid-area: status;"
                 >
                   <span
-                    class="flex items-center gap-2 text-xs font-bold"
+                    class="flex min-w-0 items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
                     style="color: var(--color-success-main);"
                   >
-                    Success
+                    <span
+                      class="truncate"
+                    >
+                      Success
+                    </span>
                   </span>
                 </div>
               </div>
@@ -6337,11 +6341,15 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   style="grid-area: status;"
                 >
                   <span
-                    class="flex items-center gap-2 text-xs font-bold"
+                    class="flex min-w-0 items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
                     style="color: var(--color-success-main);"
                   >
-                    Success
+                    <span
+                      class="truncate"
+                    >
+                      Success
+                    </span>
                   </span>
                 </div>
               </div>
@@ -6536,11 +6544,15 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   style="grid-area: status;"
                 >
                   <span
-                    class="flex items-center gap-2 text-xs font-bold"
+                    class="flex min-w-0 items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
                     style="color: var(--color-success-main);"
                   >
-                    Success
+                    <span
+                      class="truncate"
+                    >
+                      Success
+                    </span>
                   </span>
                 </div>
               </div>
@@ -6654,11 +6666,15 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   style="grid-area: status;"
                 >
                   <span
-                    class="flex items-center gap-2 text-xs font-bold"
+                    class="flex min-w-0 items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
                     style="color: var(--color-success-main);"
                   >
-                    Success
+                    <span
+                      class="truncate"
+                    >
+                      Success
+                    </span>
                   </span>
                 </div>
               </div>
@@ -6769,11 +6785,15 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   style="grid-area: status;"
                 >
                   <span
-                    class="flex items-center gap-2 text-xs font-bold"
+                    class="flex min-w-0 items-center gap-2 text-xs font-bold"
                     data-testid="tx-status-label"
                     style="color: var(--color-success-main);"
                   >
-                    Success
+                    <span
+                      class="truncate"
+                    >
+                      Success
+                    </span>
                   </span>
                 </div>
               </div>
@@ -7263,11 +7283,15 @@ exports[`./TxSummary.stories HistorySendNativeToken 1`] = `
                 style="grid-area: status;"
               >
                 <span
-                  class="flex items-center gap-2 text-xs font-bold"
+                  class="flex min-w-0 items-center gap-2 text-xs font-bold"
                   data-testid="tx-status-label"
                   style="color: var(--color-success-main);"
                 >
-                  Success
+                  <span
+                    class="truncate"
+                  >
+                    Success
+                  </span>
                 </span>
               </div>
             </div>
@@ -7479,11 +7503,15 @@ exports[`./TxSummary.stories HistorySwapOrder 1`] = `
                 style="grid-area: status;"
               >
                 <span
-                  class="flex items-center gap-2 text-xs font-bold"
+                  class="flex min-w-0 items-center gap-2 text-xs font-bold"
                   data-testid="tx-status-label"
                   style="color: var(--color-success-main);"
                 >
-                  Success
+                  <span
+                    class="truncate"
+                  >
+                    Success
+                  </span>
                 </span>
               </div>
             </div>
@@ -7664,13 +7692,13 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                       style="grid-area: actions;"
                     >
                       <span
-                        class="flex items-center gap-2 text-xs font-bold"
+                        class="flex min-w-0 items-center gap-2 text-xs font-bold"
                         data-testid="tx-status-label"
                         style="color: var(--color-warning-main);"
                       >
                         <svg
                           aria-label="Loading"
-                          class="lucide lucide-loader-circle animate-spin size-3.5"
+                          class="lucide lucide-loader-circle animate-spin size-3.5 shrink-0"
                           fill="none"
                           height="24"
                           role="status"
@@ -7686,7 +7714,11 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                             d="M21 12a9 9 0 1 1-6.219-8.56"
                           />
                         </svg>
-                        Signing
+                        <span
+                          class="truncate"
+                        >
+                          Signing
+                        </span>
                       </span>
                     </div>
                   </div>

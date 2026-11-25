@@ -1,8 +1,13 @@
+import { TriangleAlert } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
-import { TOKEN_ICON_SIZE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+import {
+  TOKEN_ICON_SIZE,
+  UNTRUSTED_TOKEN_WARNING,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 /** Shown under the symbol: the name when both exist, the address when only one does. */
 const secondaryLine = (option: TokenOption): string => {
@@ -30,6 +35,15 @@ const TokenOptionRow = ({ option }: { option: TokenOption }) => {
           </Typography>
         )}
       </div>
+
+      {option.untrusted && (
+        <Tooltip>
+          <TooltipTrigger render={<span className="flex shrink-0" data-testid="token-untrusted-icon" />}>
+            <TriangleAlert className="text-warning-strong size-4" aria-label={UNTRUSTED_TOKEN_WARNING} />
+          </TooltipTrigger>
+          <TooltipContent>{UNTRUSTED_TOKEN_WARNING}</TooltipContent>
+        </Tooltip>
+      )}
     </div>
   )
 }

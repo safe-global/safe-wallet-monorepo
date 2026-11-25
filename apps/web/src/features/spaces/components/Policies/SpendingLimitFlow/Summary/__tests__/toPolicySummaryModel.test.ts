@@ -67,6 +67,14 @@ describe('toPolicySummaryModel', () => {
     expect(unnamed.spenders[0].name).toBeUndefined()
   })
 
+  it('marks a token that is on no trusted list', () => {
+    const untrusted = tokenOptionBuilder().with({ address: ZERO_ADDRESS, untrusted: true }).build()
+
+    const model = toPolicySummaryModel(values, { accounts: [safe], tokens: [untrusted], names: {} })
+
+    expect(model.spenders[0].limits[0].token.untrusted).toBe(true)
+  })
+
   it('stands in a shortened-address token when the option list does not know the token', () => {
     const model = toPolicySummaryModel(values, { accounts: [safe], tokens: [], names: {} })
 

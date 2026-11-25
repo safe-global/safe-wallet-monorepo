@@ -10,6 +10,7 @@ import { cn } from '@safe-global/views/utils/cn'
 import { describeFrequency } from './frequency'
 import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import type { LimitSummary } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 const TOKEN_ICON_SIZE = 24
 
@@ -108,6 +109,12 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
           </Badge>
         )}
       </div>
+
+      {limit.token.untrusted && (
+        <Typography variant="paragraph-mini" color="warning" data-testid="token-untrusted-warning">
+          {UNTRUSTED_TOKEN_WARNING}
+        </Typography>
+      )}
 
       {spendReset && (
         <Typography variant="paragraph-mini" color="muted" data-testid="spend-reset-warning">

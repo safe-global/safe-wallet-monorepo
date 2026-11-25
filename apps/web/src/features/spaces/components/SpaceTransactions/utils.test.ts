@@ -4,14 +4,26 @@ import type { ConflictHeaderQueuedItem, TransactionQueuedItem } from '@safe-glob
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
+import { multisigExecutionInfoBuilder, multisigTransactionBuilder } from '@/tests/builders/queuedTransaction'
 import {
+  formatQueueAmount,
+  getBlockedBy,
+  getQueueAmount,
+  getBlockedByHint,
   getCounterparty,
   getNextNonce,
+  getNonceHint,
+  getNextStatus,
   getQueueStatus,
+  getQueueWarnings,
   getQueueTypeLabel,
   getRejectedNonces,
+  getSafeBandDetails,
   getSectionRows,
   getSettingsSummary,
+  getSignHint,
+  getSignedOtherOptions,
+  getTypeHint,
 } from './utils'
 
 const SAFE_TO_L2_MIGRATION = checksumAddress(getSafeToL2MigrationDeployment()!.defaultAddress)
@@ -69,6 +81,75 @@ describe('getSectionRows', () => {
     expect(rows.slice(1).map((row) => (row.kind === 'transaction' ? row.item : undefined))).toEqual(
       expect.arrayContaining([optionA, optionB]),
     )
+  })
+})
+
+describe('getNextStatus', () => {
+  const nextRows = (size: number) =>
+    getSectionRows([
+      { type: 'LABEL', label: 'Next' },
+      ...(size > 1 ? [conflictHeader(7)] : []),
+      ...Array.from({ length: size }, () => transactionItem(7, size > 1 ? 'HasNext' : 'None')),
+      { type: 'LABEL', label: 'Queued' },
+      transactionItem(8),
+    ])
+
+  it('is execute when an option at the next nonce can execute, over one the user can sign', () => {
+    const rows = nextRows(2)
+    expect(getNextStatus(rows, [undefined, 'sign', 'execute', 'blocked'])).toBe('execute')
+  })
+
+  it('is sign when the user can sign the next nonce', () => {
+    const rows = nextRows(1)
+    expect(getNextStatus(rows, ['sign', 'blocked'])).toBe('sign')
+  })
+
+  it('is waiting when the next nonce waits on others', () => {
+    const rows = nextRows(1)
+    expect(getNextStatus(rows, ['waiting', 'blocked'])).toBe('waiting')
+  })
+
+  it('is undefined when no loaded row is next', () => {
+    const rows = getSectionRows([{ type: 'LABEL', label: 'Queued' }, transactionItem(8)])
+    expect(getNextStatus(rows, ['blocked'])).toBeUndefined()
+  })
+})
+
+describe('getBlockedBy', () => {
+  it.each([
+    ['blocked', 4, 3, 3],
+    ['waiting', 4, 3, 3],
+    ['waiting', 3, 3, undefined],
+    ['sign', 4, 3, undefined],
+    ['execute', 3, 3, undefined],
+    ['blocked', 4, undefined, undefined],
+  ] as const)('a row to %s at #%s with #%s next waits on %s', (status, nonce, nextNonce, expected) => {
+    expect(getBlockedBy(status, nonce, nextNonce)).toBe(expected)
+  })
+})
+
+describe('getBlockedByHint', () => {
+  it.each([
+    ['execute', '#1234 is fully signed. Execute it first.'],
+    ['sign', '#1234 needs your signature first.'],
+    ['waiting', '#1234 is waiting on other signers.'],
+  ] as const)('says what #n needs when it is to %s', (status, hint) => {
+    expect(getBlockedByHint(1234, status)).toBe(hint)
+  })
+})
+
+describe('getNonceHint', () => {
+  it.each([
+    ['execute', 5, 5, 'Ready to execute', 'Next in line. It can run now.'],
+    ['sign', 5, 5, 'Ready to sign', 'Next in line. Needs your signature.'],
+    ['sign', 7, 5, 'Ready to sign', 'You can sign now. It runs after #6.'],
+    ['sign', 7, undefined, 'Ready to sign', 'Needs your signature.'],
+    ['waiting', 5, 5, 'Signing', 'Next in line. Waiting on other signers.'],
+    ['waiting', 7, 5, 'Blocked', "Blocked. It can't run until #5 executes."],
+    ['blocked', 7, 5, 'Blocked', "Blocked. It can't run until #5 executes."],
+    ['blocked', 7, undefined, 'Blocked', "Blocked. It can't run until the earlier nonces execute."],
+  ] as const)('a %s row at #%s, next #%s, is "%s"', (status, nonce, nextNonce, state, hint) => {
+    expect(getNonceHint(status, nonce, nextNonce)).toEqual({ state, hint })
   })
 })
 
@@ -375,5 +456,278 @@ describe('getRejectedNonces', () => {
     ])
 
     expect(getRejectedNonces(rows)).toEqual(new Set([3]))
+  })
+})
+
+describe('getTypeHint', () => {
+  const approve: Transaction['txInfo'] = {
+    type: 'Custom',
+    methodName: 'approve',
+    to: { value: checksumAddress(faker.finance.ethereumAddress()) },
+    dataSize: '68',
+    value: '0',
+    isCancellation: false,
+  }
+  const custom = ({ txInfo, ...overrides }: { txInfo?: object; safeAppInfo?: Transaction['safeAppInfo'] } = {}) =>
+    multisigTransactionBuilder()
+      .with({ ...overrides, txInfo: txInfo ? (txInfo as Transaction['txInfo']) : approve, executionInfo: undefined })
+      .build()
+
+  it.each([
+    [
+      'an outgoing transfer',
+      { txInfo: { type: 'Transfer', direction: 'OUTGOING' } },
+      'Transfers tokens out of this Safe.',
+    ],
+    ['an incoming transfer', { txInfo: { type: 'Transfer', direction: 'INCOMING' } }, undefined],
+    ['a swap order', { txInfo: { type: 'SwapOrder' } }, 'Trades one token for another through a swap protocol.'],
+    ['a bridge', { txInfo: { type: 'SwapAndBridge' } }, 'Moves tokens from this network to another one.'],
+    [
+      'a batch',
+      { txInfo: { type: 'Custom', methodName: 'multiSend', to: { value: '0x1' } } },
+      'Runs several actions together in one transaction.',
+    ],
+    [
+      'a rejection',
+      { txInfo: { type: 'Custom', isCancellation: true, to: { value: '0x1' } } },
+      'Cancels the proposal at this nonce by replacing it.',
+    ],
+    ['a stake', { txInfo: { type: 'NativeStakingDeposit' } }, 'Stakes ETH with Kiln, in 32 ETH validators.'],
+    [
+      'a withdraw request',
+      { txInfo: { type: 'NativeStakingValidatorsExit' } },
+      'Asks Kiln to exit validators, so their ETH can be claimed.',
+    ],
+    ['a claim', { txInfo: { type: 'NativeStakingWithdraw' } }, 'Claims ETH from validators that have exited.'],
+    [
+      'a settings change',
+      { txInfo: { type: 'SettingsChange', dataDecoded: { method: 'x' } } },
+      'Changes this Safe’s settings, such as its signers or threshold.',
+    ],
+    ['a contract call', {}, 'Calls a function on a smart contract.'],
+    [
+      'a nested approval',
+      { txInfo: { type: 'Custom', methodName: 'approveHash', dataSize: '36', to: { value: '0x1' } } },
+      'Approves a transaction on another Safe that this Safe co-owns.',
+    ],
+  ])('explains %s', (_, overrides, hint) => {
+    expect(getTypeHint(custom(overrides))).toBe(hint)
+  })
+
+  it('names the Safe App a transaction was made in', () => {
+    expect(getTypeHint(custom({ safeAppInfo: { id: 1, name: 'Transaction Builder', url: '' } }))).toBe(
+      'Created in the Transaction Builder Safe App. Calls a function on a smart contract.',
+    )
+  })
+})
+
+describe('getQueueWarnings', () => {
+  const SAFE = checksumAddress(faker.finance.ethereumAddress())
+  const build = (txInfo: object) =>
+    multisigTransactionBuilder()
+      .with({
+        txInfo: txInfo as Transaction['txInfo'],
+        executionInfo: multisigExecutionInfoBuilder()
+          .with({ nonce: 1, confirmationsRequired: 1, confirmationsSubmitted: 0 })
+          .build(),
+      })
+      .build()
+  const warn = (txInfo: object, flags: { expired?: boolean; unknownNetwork?: boolean } = {}) =>
+    getQueueWarnings({
+      tx: build(txInfo),
+      safeAddress: SAFE,
+      checksTokens: true,
+      expired: !!flags.expired,
+      unknownNetwork: !!flags.unknownNetwork,
+    })
+  const transfer = (recipient: string, imitation = false) => ({
+    type: 'Transfer',
+    direction: 'OUTGOING',
+    sender: { value: SAFE },
+    recipient: { value: recipient },
+    transferInfo: { type: 'ERC20', tokenAddress: '0x1', value: '1', imitation, trusted: true },
+  })
+
+  it('has none for an ordinary transfer', () => {
+    expect(warn(transfer(checksumAddress(faker.finance.ethereumAddress())))).toEqual([])
+  })
+
+  it('flags a transfer to the Safe itself', () => {
+    expect(warn(transfer(SAFE))).toEqual(['Sends to this Safe'])
+  })
+
+  it('flags an imitation transfer', () => {
+    expect(warn(transfer(checksumAddress(faker.finance.ethereumAddress()), true))).toEqual([
+      'This may be a malicious transaction',
+    ])
+  })
+
+  it('flags a module change as changing who controls funds', () => {
+    expect(
+      warn({
+        type: 'SettingsChange',
+        dataDecoded: { method: 'enableModule' },
+        settingsInfo: { type: 'ENABLE_MODULE' },
+      }),
+    ).toEqual(['Changes who controls funds'])
+  })
+
+  it('lists an expired order and an unknown network the row found', () => {
+    expect(warn({ type: 'SwapOrder' }, { expired: true })).toEqual(['Order expired'])
+    expect(warn({ type: 'SwapAndBridge' }, { unknownNetwork: true })).toEqual(['Unknown network'])
+  })
+})
+
+describe('getSignedOtherOptions', () => {
+  const ME = checksumAddress(faker.finance.ethereumAddress())
+  const OTHER = checksumAddress(faker.finance.ethereumAddress())
+  const option = (missing: string[], conflictType: TransactionQueuedItem['conflictType']) => {
+    const item = transactionItem(4, conflictType)
+    item.transaction.executionInfo = {
+      type: 'MULTISIG',
+      nonce: 4,
+      confirmationsRequired: 2,
+      confirmationsSubmitted: 0,
+      missingSigners: missing.map((value) => ({ value })),
+    }
+    return item
+  }
+  const signers = new Set([ME.toLowerCase()])
+
+  it('finds the option the user can sign after signing another one at the nonce', () => {
+    const signedByMe = option([OTHER], 'HasNext')
+    const unsigned = option([ME, OTHER], 'End')
+    const rows = getSectionRows([conflictHeader(4), signedByMe, unsigned])
+
+    expect(getSignedOtherOptions(rows, signers)).toEqual(new Set([unsigned.transaction.id]))
+  })
+
+  it('finds none while the user has signed no option', () => {
+    const rows = getSectionRows([conflictHeader(4), option([ME, OTHER], 'HasNext'), option([ME, OTHER], 'End')])
+
+    expect(getSignedOtherOptions(rows, signers).size).toBe(0)
+  })
+
+  it('cannot tell from an option no longer awaiting signatures', () => {
+    const rows = getSectionRows([conflictHeader(4), option([], 'HasNext'), option([ME, OTHER], 'End')])
+
+    expect(getSignedOtherOptions(rows, signers).size).toBe(0)
+  })
+})
+
+describe('getSignHint', () => {
+  const tx = (submitted: number, required = 2, nonce = 5) =>
+    ({
+      executionInfo: { type: 'MULTISIG', nonce, confirmationsRequired: required, confirmationsSubmitted: submitted },
+    }) as Transaction
+
+  it('says the last signature can be executed right after on the next nonce', () => {
+    expect(getSignHint({ tx: tx(1), status: 'sign', nextNonce: 5 })).toBe(
+      'Yours is the last signature. You can execute right after.',
+    )
+  })
+
+  it('has no hint for the last signature behind the next nonce, or for an earlier one', () => {
+    expect(getSignHint({ tx: tx(1), status: 'sign', nextNonce: 4 })).toBeUndefined()
+    expect(getSignHint({ tx: tx(0, 3), status: 'sign', nextNonce: 5 })).toBeUndefined()
+  })
+
+  it('says only one option can execute when the user signed another', () => {
+    expect(getSignHint({ tx: tx(1), status: 'sign', nextNonce: 5, signedOther: true })).toBe(
+      'You signed another option at #5. Only one can execute.',
+    )
+  })
+
+  it('has no hint when the user cannot sign', () => {
+    expect(getSignHint({ tx: tx(1), status: 'waiting', nextNonce: 5 })).toBeUndefined()
+  })
+})
+
+describe('getSafeBandDetails', () => {
+  it('lists one network plainly', () => {
+    expect(getSafeBandDetails([{ chainName: 'Ethereum', nextNonce: 12, threshold: 2, owners: 3 }], ['Ledger'])).toEqual(
+      [
+        { label: 'Network', value: 'Ethereum' },
+        { label: 'Threshold', value: '2 of 3 signers' },
+        { label: 'Next nonce', value: [{ text: '#12', mono: true }] },
+        { label: 'You sign with', value: 'Ledger' },
+      ],
+    )
+  })
+
+  it('says a shared threshold once and names the network of values that differ', () => {
+    expect(
+      getSafeBandDetails(
+        [
+          { chainName: 'Ethereum', nextNonce: 12, threshold: 2, owners: 3 },
+          { chainName: 'Base', nextNonce: 4, threshold: 2, owners: 3 },
+        ],
+        [],
+      ),
+    ).toEqual([
+      { label: 'Networks', value: 'Ethereum, Base' },
+      { label: 'Threshold', value: '2 of 3 signers' },
+      {
+        label: 'Next nonce',
+        value: [
+          { text: '#12', mono: true },
+          { text: ' on Ethereum' },
+          { text: ', ' },
+          { text: '#4', mono: true },
+          { text: ' on Base' },
+        ],
+      },
+    ])
+  })
+
+  it('names the network of each threshold when they differ', () => {
+    expect(
+      getSafeBandDetails(
+        [
+          { chainName: 'Ethereum', threshold: 2, owners: 3 },
+          { chainName: 'Base', threshold: 1, owners: 2 },
+        ],
+        [],
+      )[1],
+    ).toEqual({ label: 'Threshold', value: '2 of 3 signers on Ethereum, 1 of 2 signers on Base' })
+  })
+
+  it('leaves out what is not loaded', () => {
+    expect(getSafeBandDetails([{ chainName: 'Ethereum' }], [])).toEqual([{ label: 'Network', value: 'Ethereum' }])
+  })
+})
+
+describe('getQueueAmount and formatQueueAmount', () => {
+  const native = { decimals: 18, symbol: 'ETH', logoUri: 'eth.png' }
+
+  it('formats a native transfer with the chain currency', () => {
+    const amount = getQueueAmount(
+      {
+        type: 'Transfer',
+        direction: 'OUTGOING',
+        transferInfo: { type: 'NATIVE_COIN', value: '1500000000000000000' },
+      } as TransactionInfo,
+      native,
+    )
+
+    expect(amount).toEqual({ value: '1500000000000000000', decimals: 18, symbol: 'ETH', logoUri: 'eth.png' })
+    expect(formatQueueAmount(amount!)).toBe('1.5 ETH')
+  })
+
+  it('names an NFT in full, and cuts it short only on the row', () => {
+    const amount = getQueueAmount({
+      type: 'Transfer',
+      direction: 'OUTGOING',
+      transferInfo: { type: 'ERC721', tokenSymbol: 'CryptoPunksCollection', tokenId: '42' },
+    } as TransactionInfo)!
+
+    expect(formatQueueAmount(amount)).toBe('1 CryptoPunksCollection #42')
+    expect(amount.rowSymbol!.length).toBeLessThan(amount.symbol!.length)
+  })
+
+  it('has none for a type without an amount', () => {
+    expect(
+      getQueueAmount({ type: 'Custom', methodName: 'approve', to: { value: '0x1' } } as TransactionInfo),
+    ).toBeUndefined()
   })
 })
