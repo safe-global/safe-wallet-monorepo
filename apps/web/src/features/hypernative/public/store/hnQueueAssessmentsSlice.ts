@@ -2,6 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/store'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
+import { hnSessionRejectionCleared } from './hnSessionSlice'
 
 type QueueAssessmentsState = {
   assessments: Record<`0x${string}`, ThreatAnalysisResults | null>
@@ -21,6 +22,12 @@ export const hnQueueAssessmentsSlice = createSlice({
     clearAssessments: (state) => {
       state.assessments = {}
     },
+  },
+  extraReducers: (builder) => {
+    // Results from the rejected session are failures, so fetch them again after the new login
+    builder.addCase(hnSessionRejectionCleared, (state) => {
+      state.assessments = {}
+    })
   },
 })
 

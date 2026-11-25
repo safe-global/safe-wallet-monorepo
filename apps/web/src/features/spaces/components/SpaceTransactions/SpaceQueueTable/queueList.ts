@@ -3,18 +3,28 @@ import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import {
   getNextNonce,
+  getNextStatus,
   getNonce,
   getQueueStatus,
   getRejectedNonces,
   getSafeKey,
   getSectionRows,
+  getSignedOtherOptions,
   type SignerWallets,
 } from '../utils'
 import { getChainKey, getGroupId, type QueueGroup, type QueueGroupKind, type QueueUnit } from './queueGroups'
 
 /** One table row of the queue, in display order */
 export type QueueListItem =
-  | { kind: 'safe'; key: string; section: SpaceQueueSection; collapsed: boolean; summary: string }
+  | {
+      kind: 'safe'
+      key: string
+      section: SpaceQueueSection
+      collapsed: boolean
+      /** The chains whose transactions are folded away inside the band */
+      collapsedChainIds: string[]
+      summary: string
+    }
   | {
       kind: 'group'
       key: string
@@ -42,6 +52,9 @@ export type QueueListItem =
       chainId: string
       nonce?: number
       size: number
+      /** Where the group's first option stands, for the nonce tooltip */
+      status?: QueueStatus
+      nextNonce?: number
     }
   | {
       kind: 'transaction'
@@ -52,10 +65,12 @@ export type QueueListItem =
       item: TransactionQueuedItem
       status: QueueStatus
       nextNonce?: number
+      /** Where the Safe's next nonce stands for the user: what a blocked row waits on */
+      nextStatus?: QueueStatus
       conflict?: ConflictOption
       canReject: boolean
-      /** Where rows of several Safes share a list, the row names its Safe */
-      showSafe?: boolean
+      /** The user signed another option at this nonce */
+      signedOther?: boolean
     }
 
 const SUMMARY_LABELS: Record<QueueStatus, string> = {
@@ -84,14 +99,17 @@ export const buildQueueList = (args: {
     const safeCollapsed = args.collapsedSafes.has(safeKey)
     const chains = section.chains.map(({ chainId, items }) => {
       const rows = getSectionRows(items)
+      const statuses = rows.map((row) =>
+        row.kind === 'transaction' ? getQueueStatus(row.item.transaction, row.isNext, args.signers) : undefined,
+      )
       return {
         chainId,
         rows,
+        signedOther: getSignedOtherOptions(rows, args.signers),
         nextNonce: getNextNonce(rows),
+        nextStatus: getNextStatus(rows, statuses),
         rejectedNonces: getRejectedNonces(rows),
-        statuses: rows.map((row) =>
-          row.kind === 'transaction' ? getQueueStatus(row.item.transaction, row.isNext, args.signers) : undefined,
-        ),
+        statuses,
       }
     })
 
@@ -100,13 +118,16 @@ export const buildQueueList = (args: {
       key: `safe-${safeKey}`,
       section,
       collapsed: safeCollapsed,
+      collapsedChainIds: section.chains
+        .map(({ chainId }) => chainId)
+        .filter((chainId) => args.collapsedChains.has(getChainKey(section.safeAddress, chainId))),
       summary: getSummary(chains.flatMap((chain) => chain.statuses.filter((status) => status !== undefined))),
     }
     if (safeCollapsed) return [band]
 
     return [
       band,
-      ...chains.flatMap(({ chainId, rows, nextNonce, rejectedNonces, statuses }) => {
+      ...chains.flatMap(({ chainId, rows, nextNonce, nextStatus, rejectedNonces, statuses, signedOther }) => {
         const scopeKey = getChainKey(section.safeAddress, chainId)
         const chainCollapsed = args.collapsedChains.has(scopeKey)
         const header: QueueListItem = {
@@ -132,6 +153,8 @@ export const buildQueueList = (args: {
                   chainId,
                   nonce: row.nonce,
                   size: row.size,
+                  status: statuses[index + 1],
+                  nextNonce,
                 }
               : {
                   kind: 'transaction',
@@ -142,8 +165,10 @@ export const buildQueueList = (args: {
                   item: row.item,
                   status: statuses[index] ?? 'waiting',
                   nextNonce,
+                  nextStatus,
                   conflict: row.conflict,
                   canReject: !rejectedNonces.has(getNonce(row.item.transaction) ?? -1),
+                  signedOther: signedOther.has(row.item.transaction.id),
                 },
           ),
         ]
@@ -152,13 +177,25 @@ export const buildQueueList = (args: {
   })
 
 const toUnitRows = (unit: QueueUnit): QueueListItem[] => {
-  const { scopeKey, safeAddress, chainId, nextNonce, conflict } = unit
+  const { scopeKey, safeAddress, chainId, nextNonce, nextStatus, conflict } = unit
   const header: QueueListItem[] = conflict
-    ? [{ kind: 'conflict', key: unit.key, scopeKey, safeAddress, chainId, nonce: conflict.nonce, size: conflict.size }]
+    ? [
+        {
+          kind: 'conflict',
+          key: unit.key,
+          scopeKey,
+          safeAddress,
+          chainId,
+          nonce: conflict.nonce,
+          size: conflict.size,
+          status: unit.transactions[0]?.status,
+          nextNonce,
+        },
+      ]
     : []
   return [
     ...header,
-    ...unit.transactions.map<QueueListItem>(({ item, status, conflict: option, canReject }) => ({
+    ...unit.transactions.map<QueueListItem>(({ item, status, conflict: option, canReject, signedOther }) => ({
       kind: 'transaction',
       key: `tx-${item.transaction.id}`,
       scopeKey,
@@ -167,9 +204,10 @@ const toUnitRows = (unit: QueueUnit): QueueListItem[] => {
       item,
       status,
       nextNonce,
+      nextStatus,
       conflict: option,
       canReject,
-      showSafe: true,
+      signedOther,
     })),
   ]
 }

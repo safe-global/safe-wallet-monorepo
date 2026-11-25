@@ -30,12 +30,12 @@ const TxStatusLabel = ({ tx }: { tx: Transaction }) => {
 
   return (
     <span
-      className="flex items-center gap-2 text-xs font-bold"
+      className="flex min-w-0 items-center gap-2 text-xs font-bold"
       style={{ color: getStatusColor(tx) }}
       data-testid="tx-status-label"
     >
-      {isPending && <Spinner className="size-3.5" />}
-      {txStatusLabel}
+      {isPending && <Spinner className="size-3.5 shrink-0" />}
+      <span className="truncate">{txStatusLabel}</span>
     </span>
   )
 }

@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 
 export type TrackedRowAction = 'replace' | 'reject'
 
@@ -16,7 +17,7 @@ export type TrackedRowAction = 'replace' | 'reject'
 const WithReason = ({ reason, children }: { reason?: string; children: ReactElement }): ReactElement => {
   if (!reason) return children
   return (
-    <Tooltip delay={150}>
+    <Tooltip delay={QUEUE_TOOLTIP_DELAY}>
       <TooltipTrigger render={<div />}>{children}</TooltipTrigger>
       <TooltipContent side="left" className="max-w-xs whitespace-normal">
         {reason}
@@ -46,6 +47,7 @@ type RowActionsMenuViewProps = {
   nonce?: number
   canReplace: boolean
   canReject: boolean
+  replaceDisabledReason?: string
   rejectDisabledReason?: string
   link?: string
   /** Rendered only while the menu is open, e.g. a RowDeleteMenuItem */
@@ -60,6 +62,7 @@ const RowActionsMenuView = ({
   nonce,
   canReplace,
   canReject,
+  replaceDisabledReason,
   rejectDisabledReason,
   link,
   deleteItem,
@@ -75,12 +78,14 @@ const RowActionsMenuView = ({
       <MoreHorizontal />
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
-      {wrapItem(
-        'replace',
-        <DropdownMenuItem disabled={!canReplace} onClick={onReplace}>
-          Replace with a transfer
-        </DropdownMenuItem>,
-      )}
+      <WithReason reason={canReplace ? undefined : replaceDisabledReason}>
+        {wrapItem(
+          'replace',
+          <DropdownMenuItem disabled={!canReplace} onClick={onReplace}>
+            Replace with a transfer
+          </DropdownMenuItem>,
+        )}
+      </WithReason>
       <WithReason reason={canReject ? undefined : rejectDisabledReason}>
         {wrapItem(
           'reject',

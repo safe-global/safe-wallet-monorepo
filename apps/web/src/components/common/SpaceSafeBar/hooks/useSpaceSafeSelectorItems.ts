@@ -34,7 +34,7 @@ import usePortfolioSummaries from '@/features/portfolio/public/hooks/usePortfoli
 import { useSafeBarSafes } from './useSafeBarSafes'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
-type ResolveBalance = (
+export type ResolveBalance = (
   chainId: string,
   address: string,
   overview: SafeOverview | undefined,
@@ -147,7 +147,7 @@ function buildMultiChainItem(
   }
 }
 
-function buildSingleChainItem(
+export function buildSingleChainItem(
   item: SafeItem,
   isCurrentSafe: boolean,
   overviews: SafeOverview[] | undefined,
@@ -179,6 +179,23 @@ function buildSingleChainItem(
   }
 }
 
+/** Portfolio summary balance of a Safe, falling back to its overview rather than showing $0. */
+export function useResolveBalance(safes: SafeItem[], overviewsLoading: boolean): ResolveBalance {
+  const summaries = usePortfolioSummaries(safes)
+
+  return useCallback<ResolveBalance>(
+    (chainId, address, overview) => {
+      if (summaries.isEnabled(chainId)) {
+        const summary = summaries.getSummary(chainId, address)
+        if (summary) return { balance: summary.fiatTotal, isLoading: false }
+        if (summaries.isLoading) return { balance: undefined, isLoading: true }
+      }
+      return { balance: overview?.fiatTotal, isLoading: overviewsLoading && !overview }
+    },
+    [summaries, overviewsLoading],
+  )
+}
+
 /** The two lists of the Safe selector: the Workspace of the URL, and My accounts. */
 export type DropdownTab = 'workspace' | 'local'
 
@@ -206,20 +223,7 @@ export function useSpaceSafeSelectorItems() {
     refetch: refetchOverviews,
   } = useGetMultipleSafeOverviewsQuery(flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken)
 
-  const summaries = usePortfolioSummaries(flatSafes)
-
-  // A Safe missing from the summaries response falls back to its overview rather than showing $0
-  const resolveBalance = useCallback<ResolveBalance>(
-    (chainId, address, overview) => {
-      if (summaries.isEnabled(chainId)) {
-        const summary = summaries.getSummary(chainId, address)
-        if (summary) return { balance: summary.fiatTotal, isLoading: false }
-        if (summaries.isLoading) return { balance: undefined, isLoading: true }
-      }
-      return { balance: overview?.fiatTotal, isLoading: overviewsLoading && !overview }
-    },
-    [summaries, overviewsLoading],
-  )
+  const resolveBalance = useResolveBalance(flatSafes, overviewsLoading)
 
   const buildItems = useCallback(
     (safes: AllSafeItems): SafeItemData[] =>

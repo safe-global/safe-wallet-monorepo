@@ -17,7 +17,7 @@ export const countSafeAddresses = (safes: Record<string, string[]> | undefined):
   ).size
 
 export const getUnavailableTitle = (count: number): string =>
-  count === 1 ? "1 Safe account couldn't be loaded" : `${count} Safe accounts couldn't be loaded`
+  count === 1 ? '1 Safe account not loaded' : `${count} Safe accounts not loaded`
 
 type UnavailableSafesAlertProps = {
   spaceId: string

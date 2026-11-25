@@ -192,6 +192,28 @@ describe('useSpaceQueue', () => {
     expect(result.current.queue).toBeUndefined()
   })
 
+  it('keeps the loaded queue when a refetch of the same query fails', async () => {
+    let status = 200
+    let requests = 0
+    server.use(
+      http.get(queueUrl, () => {
+        requests++
+        return status === 200
+          ? HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }, { count: 1 }))
+          : new HttpResponse(null, { status })
+      }),
+    )
+    const { result } = renderHook(() => useSpaceQueue(spaceId))
+    await waitFor(() => expect(result.current.queue).toBeDefined())
+
+    status = 503
+    txDispatch(TxEvent.SUCCESS, { txId: faker.string.uuid(), nonce: 1, chainId: '1', safeAddress: safeA })
+
+    await waitFor(() => expect(requests).toBe(2))
+    await waitFor(() => expect(result.current.isFetching).toBe(false))
+    expect(result.current.queue?.sections).toHaveLength(1)
+  })
+
   const chainId = '1'
   const txDetail = { txId: faker.string.uuid(), nonce: 1, chainId, safeAddress: faker.finance.ethereumAddress() }
 

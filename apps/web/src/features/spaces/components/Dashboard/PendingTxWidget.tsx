@@ -3,7 +3,7 @@ import { Users } from 'lucide-react'
 import SafeWidget from '../../public/components/SafeWidget'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { getTxStatus } from '@/features/transactions/public/utils'
-import { formatTimeInWords } from '@safe-global/utils/utils/date'
+import { formatShortTimeAgo } from '@safe-global/utils/utils/date'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import TxInfo from '@/components/transactions/TxInfo'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -92,7 +92,7 @@ const PendingTxWidget = ({
                   <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
                 </div>
               }
-              info={formatTimeInWords(tx.transaction.timestamp)}
+              info={formatShortTimeAgo(tx.transaction.timestamp)}
               startNode={<TxIcon tx={tx} />}
               featuredNode={tx.safeAddress ? <Identicon address={tx.safeAddress} size={24} /> : undefined}
               actionNode={

@@ -37,7 +37,13 @@ export const resolveSafe = (safeId: string, accounts: readonly SafeAccountEntry[
 const resolveToken = (tokenAddress: string, tokens: readonly TokenOption[]): LimitSummaryToken => {
   const match = findTokenOption(tokens, tokenAddress)
   return match
-    ? { address: match.address, symbol: match.symbol, decimals: match.decimals, logoUri: match.logoUri }
+    ? {
+        address: match.address,
+        symbol: match.symbol,
+        decimals: match.decimals,
+        logoUri: match.logoUri,
+        untrusted: match.untrusted,
+      }
     : { address: tokenAddress, symbol: shortenAddress(tokenAddress) }
 }
 
