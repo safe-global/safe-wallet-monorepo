@@ -1,7 +1,6 @@
 import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { getResetTimeOptions } from '@/features/spending-limits/public/constants'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/public/services/spendingLimitValidation'
@@ -18,7 +17,7 @@ import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import { findTokenOption, tokenOptionLabel, type TokenOption } from '@/utils/tokenOptions'
+import { findTokenOption, tokenBalanceLabel, type TokenOption } from '@/utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
 import {
   existingTokensForSpender,
@@ -39,7 +38,7 @@ import {
   LIMIT_AMOUNT_PLACEHOLDER,
   REMOVE_LIMIT_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+import { SelectedTokenHelper } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/SelectedTokenHelper'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5
@@ -65,26 +64,6 @@ const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): Re
   return (
     <span data-testid="amount-fiat">
       <FiatValue value={fiat} />
-    </span>
-  )
-}
-
-const SelectedTokenHelper = ({ error, token }: { error?: string; token?: TokenOption }): ReactElement | null => {
-  if (error) return <span data-testid="token-error">{error}</span>
-
-  if (token?.untrusted) {
-    return (
-      <span className="text-warning-strong" data-testid="token-untrusted-warning">
-        {UNTRUSTED_TOKEN_WARNING}
-      </span>
-    )
-  }
-
-  if (token?.balance === undefined) return null
-
-  return (
-    <span data-testid="token-balance">
-      {formatVisualAmount(token.balance, token.decimals)} {tokenOptionLabel(token)}
     </span>
   )
 }
@@ -212,7 +191,8 @@ const TokenLimitCard = ({
                     <HelperLine>
                       <SelectedTokenHelper
                         error={tokenError?.message ? String(tokenError.message) : undefined}
-                        token={selectedToken}
+                        untrusted={selectedToken?.untrusted}
+                        balance={tokenBalanceLabel(selectedToken)}
                       />
                     </HelperLine>
                   }

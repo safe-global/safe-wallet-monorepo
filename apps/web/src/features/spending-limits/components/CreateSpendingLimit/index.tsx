@@ -12,16 +12,15 @@ import { getResetTimeOptions } from '../../public/constants'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import NumberField from '@/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import {
   LIMIT_AMOUNT_LABEL,
   LIMIT_AMOUNT_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+import { SelectedTokenHelper } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/SelectedTokenHelper'
 import TokenSelector from '@/components/common/TokenSelector'
 import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
-import { findTokenOption, tokenOptionLabel } from '@/utils/tokenOptions'
+import { findTokenOption, tokenBalanceLabel } from '@/utils/tokenOptions'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../public/types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
@@ -97,13 +96,10 @@ const CreateSpendingLimit = () => {
                     onChange={(next) => field.onChange(next ?? '')}
                     name={field.name}
                     helperText={
-                      selectedToken?.untrusted ? (
-                        <span className="text-warning-strong" data-testid="token-untrusted-warning">
-                          {UNTRUSTED_TOKEN_WARNING}
-                        </span>
-                      ) : selectedToken?.balance !== undefined ? (
-                        `${formatVisualAmount(selectedToken.balance, selectedToken.decimals)} ${tokenOptionLabel(selectedToken)}`
-                      ) : undefined
+                      <SelectedTokenHelper
+                        untrusted={selectedToken?.untrusted}
+                        balance={tokenBalanceLabel(selectedToken)}
+                      />
                     }
                   />
                 )}

@@ -8,6 +8,7 @@ import type { PopularToken } from '../tokenOptions'
 import {
   buildTokenOptions,
   findTokenOption,
+  tokenBalanceLabel,
   tokenOptionLabel,
   toPopularToken,
   type NativeCurrencyInfo,
@@ -201,6 +202,21 @@ describe('tokenOptionLabel', () => {
     expect(tokenOptionLabel(option)).toBe('ABC')
     expect(tokenOptionLabel({ ...option, symbol: '' })).toBe('Alphabet')
     expect(tokenOptionLabel({ ...option, symbol: '', name: '' })).toBe(shortenAddress(option.address))
+  })
+})
+
+describe('tokenBalanceLabel', () => {
+  it('formats a known balance with the token label', () => {
+    const [option] = buildTokenOptions({ popular: [popularTokenBuilder({ symbol: 'USDC', decimals: 6 })] })
+
+    expect(tokenBalanceLabel({ ...option, balance: '1500000' })).toBe('1.5 USDC')
+  })
+
+  it('has no label when the balance or the option is unknown', () => {
+    const [option] = buildTokenOptions({ popular: [popularTokenBuilder()] })
+
+    expect(tokenBalanceLabel({ ...option, balance: undefined })).toBeUndefined()
+    expect(tokenBalanceLabel(undefined)).toBeUndefined()
   })
 })
 

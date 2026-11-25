@@ -2,7 +2,7 @@ import type { Balance, Erc20Token, NativeToken } from '@safe-global/store/gatewa
 import { TokenType } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { formatVisualAmount, shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokensGetTokensV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
@@ -118,6 +118,12 @@ export const findTokenOption = (
 /** What the input shows for a selected option: symbol, else name, else the shortened address. */
 export const tokenOptionLabel = (option: TokenOption): string =>
   option.symbol || option.name || shortenAddress(option.address)
+
+/** "1.5 USDC" for an option with a known balance, else undefined. */
+export const tokenBalanceLabel = (option: TokenOption | undefined): string | undefined =>
+  option?.balance === undefined
+    ? undefined
+    : `${formatVisualAmount(option.balance, option.decimals)} ${tokenOptionLabel(option)}`
 
 /** The balances API's token shape, which the spending limit loader and review screens read. */
 export const toTokenInfo = (option: TokenOption): Erc20Token | NativeToken => {
