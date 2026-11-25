@@ -21,7 +21,9 @@ test.describe('Drain Account', { tag: '@e2e' }, () => {
     const drain = new DrainAccountPage(safePage)
     const review = new TxReviewPage(safePage)
     await drain.open(safe.prefixedAddress)
-    await drain.transferEverythingTo(recipient)
+    await drain.recipientInput.fill(recipient)
+    await expect(drain.recipientInput).toHaveValue(recipient)
+    await drain.transferEverythingButton.click()
     await review.signAndExecute()
 
     await expect.poll(() => balanceOf(journey.env, recipient)).toBe(SEEDED_ETH)

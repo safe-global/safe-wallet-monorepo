@@ -9,40 +9,49 @@ import ChainLogos from './ChainLogos'
 import GroupedAddress from './GroupedAddress'
 import { describeSuggestion, type SuggestedContact } from './types'
 
-export type AddedSuggestion = { address: string; name: string; chainIds: string[] }
+export type NamedContact = { address: string; name: string; chainIds: string[] }
 
-type AddSuggestionsDialogProps = {
-  suggestions: SuggestedContact[]
+/** A suggestion, or any contact named on its way to the Workspace, which has no reason to show. */
+export type ContactToName = Omit<SuggestedContact, 'reason'> & { reason?: SuggestedContact['reason'] }
+
+type NameContactsDialogProps = {
+  contacts: ContactToName[]
   validateName: (name: string) => string | undefined
-  onAdd: (contacts: AddedSuggestion[]) => void
+  onConfirm: (contacts: NamedContact[]) => void
   onClose: () => void
   isSubmitting?: boolean
   error?: string
+  title?: string
+  description?: string
+  confirmLabel?: string
 }
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`
 
-/** Names the chosen suggestions before they join the workspace book. An empty name keeps the suggested one. */
-const AddSuggestionsDialog = ({
-  suggestions,
+/** Names contacts before they join the workspace book. An empty name keeps the suggested one. */
+const NameContactsDialog = ({
+  contacts,
   validateName,
-  onAdd,
+  onConfirm,
   onClose,
   isSubmitting = false,
   error,
-}: AddSuggestionsDialogProps) => {
+  title = 'Add to Workspace',
+  description = 'Everyone in the Workspace will see these names. Leave a name empty to keep the suggestion.',
+  confirmLabel = `Add ${plural(contacts.length, 'contact')}`,
+}: NameContactsDialogProps) => {
   const [names, setNames] = useState<Record<string, string>>({})
   const idPrefix = useId()
 
-  const nameToSave = (item: SuggestedContact) => names[item.address]?.trim() || item.suggestedName
-  const nameError = (item: SuggestedContact) => validateName(nameToSave(item))
-  const hasInvalidName = suggestions.some((item) => nameError(item))
+  const nameToSave = (item: ContactToName) => names[item.address]?.trim() || item.suggestedName
+  const nameError = (item: ContactToName) => validateName(nameToSave(item))
+  const hasInvalidName = contacts.some((item) => nameError(item))
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
     if (hasInvalidName || isSubmitting) return
-    onAdd(
-      suggestions.map((item) => ({
+    onConfirm(
+      contacts.map((item) => ({
         address: item.address,
         name: nameToSave(item),
         chainIds: item.chains.map((chain) => chain.chainId),
@@ -55,17 +64,17 @@ const AddSuggestionsDialog = ({
       <DialogContent padding="none" size="md">
         <form onSubmit={submit} className="contents">
           <DialogHeader divided>
-            <DialogTitle className="text-xl font-bold">Add to Workspace</DialogTitle>
+            <DialogTitle className="text-xl font-bold">{title}</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-3 px-6 py-4">
             <Typography variant="paragraph-small" className="text-muted-foreground">
-              Everyone in the Workspace will see these names. Leave a name empty to keep the suggestion.
+              {description}
             </Typography>
 
             <ul className="border-border divide-border max-h-[min(24rem,50vh)] divide-y overflow-y-auto rounded-lg border">
-              {suggestions.map((item) => {
-                const reason = describeSuggestion(item.reason)
+              {contacts.map((item) => {
+                const reason = item.reason && describeSuggestion(item.reason)
                 const message = nameError(item)
                 const errorId = `${idPrefix}-${item.address}-error`
                 return (
@@ -89,14 +98,16 @@ const AddSuggestionsDialog = ({
                     )}
                     <div className="flex min-w-0 items-center gap-2 text-xs">
                       <GroupedAddress address={item.address} className="text-[11px]" />
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={<span className="text-muted-foreground min-w-0 cursor-default truncate" />}
-                        >
-                          {reason}
-                        </TooltipTrigger>
-                        <TooltipContent>{reason}</TooltipContent>
-                      </Tooltip>
+                      {reason && (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={<span className="text-muted-foreground min-w-0 cursor-default truncate" />}
+                          >
+                            {reason}
+                          </TooltipTrigger>
+                          <TooltipContent>{reason}</TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </li>
                 )
@@ -117,11 +128,11 @@ const AddSuggestionsDialog = ({
             <Button
               type="submit"
               size="submit"
-              aria-label={`Add ${plural(suggestions.length, 'contact')}`}
+              aria-label={confirmLabel}
               disabled={hasInvalidName || isSubmitting}
-              data-testid="add-suggestions-btn"
+              data-testid="name-contacts-confirm-btn"
             >
-              {isSubmitting ? <Spinner /> : `Add ${plural(suggestions.length, 'contact')}`}
+              {isSubmitting ? <Spinner /> : confirmLabel}
             </Button>
           </DialogFooter>
         </form>
@@ -130,4 +141,4 @@ const AddSuggestionsDialog = ({
   )
 }
 
-export default AddSuggestionsDialog
+export default NameContactsDialog

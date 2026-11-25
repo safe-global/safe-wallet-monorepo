@@ -48,6 +48,7 @@ export class WorkspaceAddressBookPage {
 
   async addLocalContactToWorkspace(name: string): Promise<void> {
     await this.row(name).getByRole('button', { name: 'Add to Workspace' }).click()
+    await this.page.getByRole('dialog').getByRole('button', { name: 'Add 1 contact' }).click()
   }
 
   async addTag(contactName: string, tagName: string): Promise<void> {

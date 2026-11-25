@@ -9,11 +9,13 @@ import { type Page, type Locator } from '@playwright/test'
 export class NetworkSelector {
   readonly trigger: Locator
   readonly allNetworks: Locator
+  readonly addNetworkDialog: Locator
   readonly addNetworkButton: Locator
 
   constructor(private readonly page: Page) {
     this.trigger = page.getByTestId('space-chain-navigation-button')
     this.allNetworks = page.getByTestId('all-networks-accordion-trigger')
+    this.addNetworkDialog = page.getByTestId('add-chain-dialog')
     this.addNetworkButton = page.getByTestId('modal-add-network-btn')
   }
 
@@ -29,6 +31,6 @@ export class NetworkSelector {
     await this.allNetworks.click()
     await this.page.getByRole('button', { name: `Add ${network}`, exact: true }).click()
     await this.addNetworkButton.click()
-    await this.addNetworkButton.waitFor({ state: 'hidden' })
+    await this.addNetworkDialog.waitFor({ state: 'hidden' })
   }
 }

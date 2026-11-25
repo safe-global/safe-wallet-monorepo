@@ -1,5 +1,5 @@
 import { Contract } from 'ethers'
-import { erc20 } from '../../environment/scenarios/chain.mjs'
+import { FUNDED_BALANCE, erc20 } from '../../environment/scenarios/chain.mjs'
 import { readChain } from './local-provider'
 import type { JourneyEnvironment } from '../fixtures/journey.fixture'
 
@@ -17,6 +17,13 @@ export function tokenBalanceOf(
     const balance: unknown = await new Contract(token, erc20, provider).getFunction('balanceOf')(holder)
     if (typeof balance !== 'bigint') throw new Error(`balanceOf(${holder}) on ${token} did not return a uint256`)
     return balance
+  })
+}
+
+/** Gives `address` 100 ETH on the local fork, so that it can pay gas. */
+export function fundBalance(env: JourneyEnvironment, address: string): Promise<void> {
+  return readChain(env, async (provider) => {
+    await provider.send('anvil_setBalance', [address, FUNDED_BALANCE])
   })
 }
 

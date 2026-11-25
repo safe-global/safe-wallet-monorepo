@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query/react'
 import { StatusGroup, type ThreatAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
@@ -45,11 +46,6 @@ export function useThreatAnalysisHypernativeMessage({
   authToken,
   skip = false,
 }: UseThreatAnalysisHypernativeMessageProps): AsyncResult<ThreatAnalysisResults> {
-  const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessMessageMutation()
-
-  // A new typedData object for the same message and token must not trigger another assessment
-  const lastTriggeredKeyRef = useRef<string | undefined>(undefined)
-
   // Parse origin if it's a JSON string containing url
   const origin = useParsedOrigin(originProp)
 
@@ -69,15 +65,13 @@ export function useThreatAnalysisHypernativeMessage({
     })
   }, [typedData, safeAddress, chainId, messageHash, proposer, origin, skip])
 
-  useEffect(() => {
-    if (!hypernativeRequest || !authToken) return
-
-    const key = `${hypernativeRequest.messageHash}:${authToken}`
-    if (lastTriggeredKeyRef.current === key) return
-    lastTriggeredKeyRef.current = key
-
-    triggerAssessment({ ...hypernativeRequest, authToken })
-  }, [hypernativeRequest, authToken, triggerAssessment])
+  const {
+    currentData: hypernativeData,
+    error,
+    isFetching,
+  } = hypernativeApi.useAssessMessageQuery(
+    hypernativeRequest && authToken ? { ...hypernativeRequest, authToken } : skipToken,
+  )
 
   const fetchError = useMemo(() => {
     if (!error) return undefined
@@ -89,10 +83,6 @@ export function useThreatAnalysisHypernativeMessage({
   }, [error])
 
   const threatAnalysisResult = useMemo<ThreatAnalysisResults | undefined>(() => {
-    if (skip) {
-      return undefined
-    }
-
     if (fetchError) {
       return { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] }
     }
@@ -109,11 +99,11 @@ export function useThreatAnalysisHypernativeMessage({
       },
       safeAddress,
     )
-  }, [hypernativeData, fetchError, skip, safeAddress])
+  }, [hypernativeData, fetchError, safeAddress])
 
   if (!authToken && !skip) {
     return [undefined, new Error('authToken is required'), false]
   }
 
-  return [threatAnalysisResult, skip ? undefined : fetchError, isLoading]
+  return [threatAnalysisResult, fetchError, isFetching]
 }
