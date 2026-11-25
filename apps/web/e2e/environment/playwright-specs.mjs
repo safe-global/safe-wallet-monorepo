@@ -16,6 +16,7 @@ export const playwrightSpecs = {
     devices: ['trezor'],
   },
   'e2e/batch.spec.ts': { flags: ['BATCHING'] },
+  'e2e/billing.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},

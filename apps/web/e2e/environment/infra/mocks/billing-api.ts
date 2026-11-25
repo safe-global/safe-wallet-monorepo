@@ -25,7 +25,7 @@ const TOKEN_LIFETIME_SECONDS = 3600
 const WEBHOOK_ATTEMPTS = 5
 const WEBHOOK_TIMEOUT_MS = 30_000
 const DEFAULT_PLAN = 'business'
-const TRIAL_PERIOD_DAYS = 30
+const TRIAL_PERIOD_DAYS = 14
 const PORT = 8093
 
 type Plan = { price: { id: string; currentPrice: number }; metadata: Record<string, string> }
