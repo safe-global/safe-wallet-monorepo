@@ -16,7 +16,8 @@ import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlis
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
 import { getAllowlistSafeLabel } from '../utils/allowlistDisplay'
-import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
+import { useSpendingLimitTokens } from '../hooks/useSpendingLimitTokens'
+import { toSpendingLimitTokenOption } from '../utils/spendingLimitTokens'
 import RecipientAllowlistForm from './RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
@@ -45,14 +46,7 @@ const renderGuardAddress = (address: string, name: string) => <SafeIdentity addr
 /** The guard states an allowlist can be set up on. */
 const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
 
-export type CreateRecipientAllowlistPolicyProps = {
-  /** Called on Next with whether the allowlist affects a spending limit, which adds the Existing policies step. */
-  onSpendingLimitImpact?: (affectsSpendingLimits: boolean) => void
-}
-
-const CreateRecipientAllowlistPolicy = ({
-  onSpendingLimitImpact,
-}: CreateRecipientAllowlistPolicyProps): ReactElement => {
+const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
@@ -74,7 +68,12 @@ const CreateRecipientAllowlistPolicy = ({
       : undefined
   const { guard, retry } = useGuardStatus(target)
 
-  const heldTokens = useHeldTokenAddresses()
+  const spendingLimits = useSpendingLimitTokens()
+  const spendingLimitOptions = useMemo(
+    () => spendingLimits.tokens.map(toSpendingLimitTokenOption),
+    [spendingLimits.tokens],
+  )
+  const heldTokens = useHeldTokenAddresses(spendingLimitOptions)
 
   useSafeShieldForAddressPoisoning(values.recipients.map((recipient) => recipient.address))
 
@@ -86,7 +85,6 @@ const CreateRecipientAllowlistPolicy = ({
   }
 
   const rules = useMemo(() => buildAllowlistRules(heldTokens.addresses, values), [heldTokens.addresses, values])
-  const spendingLimits = useSpendingLimitImpacts(rules)
   const isUnchangedEdit = useMemo(
     () => baseline !== undefined && !hasAllowlistChanges(toAllowlistRules(baseline), rules),
     [baseline, rules],
@@ -98,6 +96,7 @@ const CreateRecipientAllowlistPolicy = ({
     !heldTokens.isLoading &&
     !heldTokens.isError &&
     !spendingLimits.isLoading &&
+    !spendingLimits.isError &&
     isAllowlistComplete(values) &&
     !isUnchangedEdit
 
@@ -117,6 +116,7 @@ const CreateRecipientAllowlistPolicy = ({
           values={values}
           onChange={setValues}
           heldTokens={heldTokens}
+          spendingLimits={spendingLimits}
           account={
             selectedSafe && target
               ? {
@@ -184,11 +184,7 @@ const CreateRecipientAllowlistPolicy = ({
             type="button"
             size="submit"
             disabled={!canGoNext}
-            onClick={() => {
-              // A failed load shows the step with its error rather than skipping the warning.
-              onSpendingLimitImpact?.(spendingLimits.isError || spendingLimits.impacts.length > 0)
-              onNext({ ...values, rules, baseline, baselineGuard: data?.baselineGuard })
-            }}
+            onClick={() => onNext({ ...values, rules, baseline, baselineGuard: data?.baselineGuard })}
             data-testid="next-btn"
           >
             {NEXT_LABEL}

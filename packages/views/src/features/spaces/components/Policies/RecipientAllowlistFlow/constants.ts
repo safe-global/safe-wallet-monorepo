@@ -30,6 +30,12 @@ export const TOKENS_SECTION_TITLE = 'Which tokens can be sent'
 export const TOKENS_SECTION_DESCRIPTION = 'Only transfers of the tokens selected below will be allowed.'
 export const TOKENS_SEARCH_PLACEHOLDER = 'Search tokens by name or address'
 export const TOKENS_LOAD_ERROR_TEXT = 'Could not load the tokens in this account.'
+export const SPENDING_LIMITS_LOAD_ERROR_TEXT =
+  'Could not load the spending limits of this account. You can continue once they load.'
+export const SPENDING_LIMIT_TOKENS_GROUP_LABEL = 'In spending limits'
+export const OTHER_TOKENS_GROUP_LABEL = 'Other tokens'
+export const SPENDING_LIMIT_TOKEN_HINT =
+  "This Safe account has a spending limit for this token. Add the token, so the allowlist doesn't block the spending limit."
 export const SELECT_ALL_LABEL = 'Select all'
 
 export const RECIPIENTS_SECTION_TITLE = 'Who can receive funds'
@@ -83,9 +89,11 @@ export const POLICY_LABELS = {
   allowCall: 'Always allowed',
   deny: 'Block everything else',
   multiSend: 'Batched transactions',
+  reject: 'Reject transactions',
   removal: 'None, the rule is deleted',
   unknown: 'Other policy',
 } as const
+export const REJECT_RULE_DESCRIPTION = 'Lets the signers reject a queued transaction.'
 export const FALLBACK_TARGET_NAME = 'Any address'
 
 export const REVIEW_FALLBACK_LABEL = 'Every other action'
@@ -103,46 +111,6 @@ export const ALLOWLIST_GAP_DELEGATE_CALLS =
 
 export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."
 
-export const EXISTING_POLICIES_STEP_TITLE = 'Existing policies'
-export const getRestrictedSpendingLimitsTitle = (count: number): string =>
-  count === 1
-    ? "Your spending limit will follow this allowlist's rules."
-    : `Your ${count} spending limits will follow this allowlist's rules.`
-export const RESTRICTED_SPENDING_LIMITS_DESCRIPTION = 'They can only send allowed tokens to allowed recipients.'
-export const getBlockedSpendingLimitsTitle = (count: number): string =>
-  `${count} spending ${count === 1 ? 'limit' : 'limits'} will be blocked by this allowlist.`
-const onceApplied = (isEdit: boolean): string => (isEdit ? 'Once the change applies' : 'Once this allowlist is active')
-export const getBlockedSpendingLimitDescription = (
-  spender: string,
-  amount: string,
-  symbol: string,
-  isEdit = false,
-): string =>
-  `${spender} can send up to ${amount} to any address today. ${onceApplied(isEdit)}, it can't send ${symbol} anymore.`
-export const getBlockedSpendingLimitsDescription = (isEdit = false): string =>
-  `They can send their tokens to any address today. ${onceApplied(isEdit)}, they can't send them anymore.`
-export const getPendingBlockedSpendingLimitDescription = (
-  spender: string,
-  amount: string,
-  symbol: string,
-  isEdit = false,
-): string =>
-  `${spender} has a pending spending limit of ${amount}. ${onceApplied(isEdit)}, it can't send ${symbol} with this limit.`
-export const getBlockedSpendingLimitsWithPendingDescription = (isEdit = false): string =>
-  `Some of them are still pending. ${onceApplied(isEdit)}, they can't send these tokens.`
-export const getSpendingLimitsGroupTitle = (safeName: string): string => `Spending limits on ${safeName}`
-export const FOLLOWS_ALLOWLIST_LABEL = 'Follows the allowlist'
-export const WILL_BE_BLOCKED_LABEL = 'Will be blocked'
-export const PENDING_SPENDING_LIMIT_LABEL = 'Pending'
-export const getTokenInAllowlistText = (symbol: string): string => `${symbol} is in this allowlist`
-export const getTokenNotInAllowlistText = (symbol: string): string => `${symbol} isn't in this allowlist`
-export const SPENDING_LIMITS_ACKNOWLEDGEMENT_LABEL = 'I understand how this allowlist changes these spending limits.'
-export const getSpendingLimitsLoadErrorTitle = (safeName: string): string =>
-  `Couldn't load the spending limits on ${safeName}`
-export const SPENDING_LIMITS_LOAD_ERROR_DESCRIPTION =
-  'Check your connection and try again. You can continue once they load.'
-export const SPENDING_LIMITS_LOADING_TITLE = 'Loading the spending limits'
-export const NO_SPENDING_LIMITS_TITLE = 'This Safe account has no spending limits.'
 export const RETRY_LABEL = 'Retry'
 
 export const REMOVE_REVIEW_STEP_TITLE = 'Remove allowlist'

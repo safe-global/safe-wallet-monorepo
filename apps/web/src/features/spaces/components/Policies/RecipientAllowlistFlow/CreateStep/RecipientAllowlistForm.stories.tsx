@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
@@ -16,12 +16,15 @@ import {
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import {
   RECIPIENTS_SEARCH_PLACEHOLDER,
+  SPENDING_LIMIT_TOKENS_GROUP_LABEL,
   TOKENS_SEARCH_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import { toSpendingLimitTokenOption } from '../utils/spendingLimitTokens'
 import RecipientAllowlistForm, { type RecipientAllowlistFormProps } from './RecipientAllowlistForm'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
@@ -81,11 +84,16 @@ const manyTokens: AllowlistToken[] = Array.from({ length: 20 }, () => ({
   symbol: faker.finance.currencyCode(),
 }))
 
+const NO_SPENDING_LIMIT_TOKENS: PolicyTokenInfo[] = []
+const usdcLimit: PolicyTokenInfo = { address: USDC, symbol: 'USDC', decimals: 6, logoUri: null }
+
 type StoryProps = {
   initialValues?: RecipientAllowlistFormValues
   hasAccount?: boolean
   showSections?: boolean
   guard?: GuardStatus
+  /** The tokens of the Safe's spending limits. */
+  spendingLimitTokens?: PolicyTokenInfo[]
 }
 
 const StatefulForm = ({
@@ -93,12 +101,19 @@ const StatefulForm = ({
   hasAccount = true,
   showSections = true,
   guard,
+  spendingLimitTokens = NO_SPENDING_LIMIT_TOKENS,
 }: StoryProps) => {
   const [values, setValues] = useState(initialValues)
 
   return (
     <SafeScopeProvider initial={hasAccount ? efSafeTarget : undefined}>
-      <ScopedForm values={values} onChange={setValues} hasAccount={hasAccount} showSections={showSections}>
+      <ScopedForm
+        values={values}
+        onChange={setValues}
+        hasAccount={hasAccount}
+        showSections={showSections}
+        spendingLimitTokens={spendingLimitTokens}
+      >
         {guard && <GuardStatusBanner guard={guard} safeName={account.label} />}
       </ScopedForm>
     </SafeScopeProvider>
@@ -108,10 +123,23 @@ const StatefulForm = ({
 /** Reads the held tokens inside the scope, as CreateStep does. */
 const ScopedForm = ({
   hasAccount,
+  spendingLimitTokens,
   ...props
-}: Omit<RecipientAllowlistFormProps, 'heldTokens' | 'account'> & { hasAccount: boolean }) => {
-  const heldTokens = useHeldTokenAddresses()
-  return <RecipientAllowlistForm {...props} heldTokens={heldTokens} account={hasAccount ? account : undefined} />
+}: Omit<RecipientAllowlistFormProps, 'heldTokens' | 'spendingLimits' | 'account'> & {
+  hasAccount: boolean
+  spendingLimitTokens: PolicyTokenInfo[]
+}) => {
+  const extraTokens = useMemo(() => spendingLimitTokens.map(toSpendingLimitTokenOption), [spendingLimitTokens])
+  const heldTokens = useHeldTokenAddresses(extraTokens)
+  const spendingLimits = { tokens: spendingLimitTokens, isLoading: false, isError: false, refetch: () => {} }
+  return (
+    <RecipientAllowlistForm
+      {...props}
+      heldTokens={heldTokens}
+      spendingLimits={spendingLimits}
+      account={hasAccount ? account : undefined}
+    />
+  )
 }
 
 const setup = createMockStory({
@@ -160,6 +188,18 @@ export const CreatePickingTokens: Story = {
   play: async ({ canvasElement }) => {
     await openSearch(canvasElement, TOKENS_SEARCH_PLACEHOLDER)
     await expect(await screen.findByRole('button', { name: 'Select all' }, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** The Safe has a spending limit on USDC: the token search lists it first, marked, and its chip keeps the mark. */
+export const CreateWithSpendingLimits: Story = {
+  args: {
+    spendingLimitTokens: [usdcLimit],
+    initialValues: { tokens: [{ address: USDC, symbol: 'USDC' }], recipients: [] },
+  },
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, TOKENS_SEARCH_PLACEHOLDER)
+    await expect(await screen.findByText(SPENDING_LIMIT_TOKENS_GROUP_LABEL, {}, { timeout: 30000 })).toBeVisible()
   },
 }
 

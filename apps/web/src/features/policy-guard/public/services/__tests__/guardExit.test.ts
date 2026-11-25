@@ -1,3 +1,4 @@
+import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { isAllowlistRemoval, isGuardRemovalCleanup, isSetGuardAccess } from '../guardExit'
 import { buildGuardRemovalCleanupConfigurations } from '../guardRemoval'
@@ -43,9 +44,23 @@ describe('isGuardRemovalCleanup', () => {
     expect(
       isGuardRemovalCleanup(
         [
-          { target: SAFE, selector: '0xe19a9dd9', policy: ZERO_ADDRESS },
-          { target: SAFE, selector: '0xe068df37', policy: ZERO_ADDRESS },
-          { target: SAFE, selector: '0xf08a0323', policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xf08a0323', operation: OperationType.Call, policy: ZERO_ADDRESS },
+        ],
+        SAFE,
+      ),
+    ).toBe(true)
+  })
+
+  it('should, when the configurations unbind the three Safe setters and the reject access, match', () => {
+    expect(
+      isGuardRemovalCleanup(
+        [
+          { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xf08a0323', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0x00000000', operation: OperationType.Call, policy: ZERO_ADDRESS },
         ],
         SAFE,
       ),
@@ -56,9 +71,9 @@ describe('isGuardRemovalCleanup', () => {
     expect(
       isGuardRemovalCleanup(
         [
-          { target: SAFE, selector: '0xe19a9dd9', policy: ZERO_ADDRESS },
-          { target: SAFE, selector: '0xe068df37', policy: ZERO_ADDRESS },
-          { target: ZERO_ADDRESS, selector: '0x00000000', policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: ZERO_ADDRESS, selector: '0x00000000', operation: OperationType.Call, policy: ZERO_ADDRESS },
         ],
         SAFE,
       ),
@@ -70,7 +85,7 @@ describe('isGuardRemovalCleanup', () => {
       isGuardRemovalCleanup(
         [
           ...buildGuardRemovalCleanupConfigurations('11155111', SAFE),
-          { target: OTHER_SAFE, selector: '0xa9059cbb', policy: ZERO_ADDRESS },
+          { target: OTHER_SAFE, selector: '0xa9059cbb', operation: OperationType.Call, policy: ZERO_ADDRESS },
         ],
         SAFE,
       ),
@@ -81,9 +96,9 @@ describe('isGuardRemovalCleanup', () => {
     expect(
       isGuardRemovalCleanup(
         [
-          { target: SAFE, selector: '0xe19a9dd9', policy: ALLOW_POLICY },
-          { target: SAFE, selector: '0xe068df37', policy: ZERO_ADDRESS },
-          { target: SAFE, selector: '0xf08a0323', policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xe19a9dd9', operation: OperationType.Call, policy: ALLOW_POLICY },
+          { target: SAFE, selector: '0xe068df37', operation: OperationType.Call, policy: ZERO_ADDRESS },
+          { target: SAFE, selector: '0xf08a0323', operation: OperationType.Call, policy: ZERO_ADDRESS },
         ],
         SAFE,
       ),

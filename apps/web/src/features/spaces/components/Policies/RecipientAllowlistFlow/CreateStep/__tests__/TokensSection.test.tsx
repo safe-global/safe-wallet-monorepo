@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { renderWithUserEvent, screen } from '@/tests/test-utils'
+import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { erc20TokenMetadataBuilder } from '@/tests/builders/tokens'
@@ -10,6 +10,7 @@ import { TOKEN_NOT_FOUND_TEXT } from '@safe-global/views/features/spaces/compone
 import { tokenOptionBuilder } from '../../../SpendingLimitFlow/utils/tokenOptions.testData'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
 import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
+import type { SpendingLimitTokensResult } from '../../hooks/useSpendingLimitTokens'
 import { createDefaultAllowlistValues, type AllowlistToken, type RecipientAllowlistFormValues } from '../../types'
 import TokensSection from '../TokensSection'
 
@@ -35,14 +36,37 @@ const held = (overrides: Partial<HeldTokenAddresses> = {}): HeldTokenAddresses =
   ...overrides,
 })
 
+const spendingLimitsOn = (
+  tokens: TokenOption[],
+  overrides: Partial<SpendingLimitTokensResult> = {},
+): SpendingLimitTokensResult => ({
+  tokens: tokens.map(({ address, symbol, decimals }) => ({ address, symbol, decimals, logoUri: null })),
+  isLoading: false,
+  isError: false,
+  refetch: jest.fn(),
+  ...overrides,
+})
+
 const renderSection = ({
   values = createDefaultAllowlistValues(),
   heldTokens = held(),
+  spendingLimits = spendingLimitsOn([]),
   hasAccount = true,
-}: { values?: RecipientAllowlistFormValues; heldTokens?: HeldTokenAddresses; hasAccount?: boolean } = {}) => {
+}: {
+  values?: RecipientAllowlistFormValues
+  heldTokens?: HeldTokenAddresses
+  spendingLimits?: SpendingLimitTokensResult
+  hasAccount?: boolean
+} = {}) => {
   const onChange = jest.fn()
   const rendered = renderWithUserEvent(
-    <TokensSection values={values} onChange={onChange} heldTokens={heldTokens} hasAccount={hasAccount} />,
+    <TokensSection
+      values={values}
+      onChange={onChange}
+      heldTokens={heldTokens}
+      spendingLimits={spendingLimits}
+      hasAccount={hasAccount}
+    />,
   )
   return { ...rendered, onChange, values }
 }
@@ -68,6 +92,67 @@ describe('TokensSection', () => {
       'USDCUSD Coin',
       'DAIDai Stablecoin',
     ])
+  })
+
+  it('should, when the Safe has a spending limit, list its token first under its own header with a mark', async () => {
+    const { user } = renderSection({ spendingLimits: spendingLimitsOn([DAI]) })
+
+    await user.click(search())
+
+    const [spendingLimitGroup, otherGroup] = within(screen.getByRole('listbox')).getAllByRole('group')
+    expect(spendingLimitGroup).toHaveTextContent('In spending limits')
+    expect(
+      within(spendingLimitGroup)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['DAIDai Stablecoin'])
+    expect(within(spendingLimitGroup).getByTestId('spending-limit-token-mark')).toBeInTheDocument()
+    expect(otherGroup).toHaveTextContent('Other tokens')
+    expect(within(otherGroup).queryByTestId('spending-limit-token-mark')).not.toBeInTheDocument()
+  })
+
+  it('should, when the Safe has a spending limit, not pick its token by itself', () => {
+    const { onChange } = renderSection({ spendingLimits: spendingLimitsOn([DAI]) })
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Allow DAI' })).not.toBeInTheDocument()
+  })
+
+  it('should, when the token of a spending limit is picked, mark its chip', () => {
+    renderSection({
+      values: { tokens: [asToken(USDC), asToken(DAI)], recipients: [] },
+      spendingLimits: spendingLimitsOn([DAI]),
+    })
+
+    expect(
+      within(screen.getByRole('button', { name: /^Allow DAI/ })).getByTestId('spending-limit-token-mark'),
+    ).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('button', { name: 'Allow USDC' })).queryByTestId('spending-limit-token-mark'),
+    ).toBeNull()
+  })
+
+  it('should, when the mark on a chip is clicked, keep the token', async () => {
+    const { user, onChange } = renderSection({
+      values: { tokens: [asToken(DAI)], recipients: [] },
+      spendingLimits: spendingLimitsOn([DAI]),
+    })
+
+    await user.click(screen.getByTestId('spending-limit-token-mark'))
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('should, when the spending limits fail to load, offer a retry', async () => {
+    const refetch = jest.fn()
+    const { user } = renderSection({ spendingLimits: spendingLimitsOn([], { isError: true, refetch }) })
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(screen.getByTestId('allowlist-spending-limits-error')).toHaveTextContent(
+      'Could not load the spending limits of this account.',
+    )
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 
   it('should, when a token is picked from the list, add it with its symbol and logo', async () => {

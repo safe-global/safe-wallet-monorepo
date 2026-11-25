@@ -22,22 +22,23 @@ const unbind = (target: string, selector: string, operation = OperationType.Call
 })
 
 describe('buildGuardRemovalCleanupConfigurations', () => {
-  it('should unbind the three Safe setters, every MultiSendCallOnly rule and both fallback rules, when the guard comes off', () => {
+  it('should unbind the three Safe setters, the reject access, every MultiSendCallOnly rule and both fallback rules, when the guard comes off', () => {
     const configurations = buildGuardRemovalCleanupConfigurations(CHAIN_ID, SAFE)
 
-    expect(configurations.slice(0, 3)).toEqual([
+    expect(configurations.slice(0, 4)).toEqual([
       unbind(SAFE, '0xe19a9dd9'),
       unbind(SAFE, '0xe068df37'),
       unbind(SAFE, '0xf08a0323'),
+      unbind(SAFE, '0x00000000'),
     ])
     expect(
       configurations
-        .slice(3, -2)
+        .slice(4, -2)
         .map(({ target }) => target)
         .sort(),
     ).toEqual([...MULTI_SEND_CALL_ONLY].sort())
-    expect(configurations.slice(3, -2)[0]).toEqual(
-      unbind(configurations[3].target, '0x8d80ff0a', OperationType.DelegateCall),
+    expect(configurations.slice(4, -2)[0]).toEqual(
+      unbind(configurations[4].target, '0x8d80ff0a', OperationType.DelegateCall),
     )
     expect(configurations.slice(-2)).toEqual([
       unbind(ZERO_ADDRESS, '0x00000000', OperationType.Call),

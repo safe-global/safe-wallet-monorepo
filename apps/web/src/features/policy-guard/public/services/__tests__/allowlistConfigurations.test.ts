@@ -10,6 +10,7 @@ import {
   ZERO_ADDRESS_RECIPIENT_ERROR,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { getPolicyEngineAddress } from '../policyEngineDeployments'
+import { isRejectAccess } from '../rejectAccess'
 import {
   MAX_POLICY_CONFIGURATIONS,
   buildAllowlistChangeConfigurations,
@@ -178,6 +179,16 @@ describe('buildAllowlistRemovalConfigurations', () => {
       { target: BOB, selector: '0x00000000', operation: OperationType.Call, policy: ZERO_ADDRESS, data: '0x' },
       ...guardExit,
     ])
+  })
+
+  it('should, when the allowlist is removed, leave the reject access bound until the clean-up', () => {
+    const configurations = buildAllowlistRemovalConfigurations({
+      chainId: CHAIN_ID,
+      safeAddress: SAFE,
+      rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [ALICE] }],
+    })
+
+    expect(configurations.some((configuration) => isRejectAccess(configuration, SAFE))).toBe(false)
   })
 
   it('should throw that the allowlist is unavailable, when the chain has no policy deployments', () => {
@@ -352,7 +363,7 @@ describe('buildAllowlistChangeConfigurations', () => {
       [rule(USDC, ALICE, CAROL), rule(ZERO_ADDRESS, CAROL)],
     )
 
-    expect(configurations.map((configuration) => getRuleKind(CHAIN_ID, configuration))).toEqual([
+    expect(configurations.map((configuration) => getRuleKind(CHAIN_ID, configuration, SAFE))).toEqual([
       'erc20',
       'erc20Revoke',
       'erc20Revoke',

@@ -43,6 +43,7 @@ const Form = ({
     values={createDefaultAllowlistValues()}
     onChange={jest.fn()}
     heldTokens={HELD_TOKENS}
+    spendingLimits={{ tokens: [], isLoading: false, isError: false, refetch: jest.fn() }}
     account={hasAccount ? ACCOUNT : undefined}
     showSections={showSections}
   >

@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { Children } from 'react'
+import { render, screen } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowType } from '@/services/analytics/types'
 import { createDefaultAllowlistValues } from '../types'
@@ -17,11 +18,7 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
 }))
 jest.mock('../CreateStep', () => ({
   __esModule: true,
-  default: ({ onSpendingLimitImpact }: { onSpendingLimitImpact: (affectsSpendingLimits: boolean) => void }) => (
-    <div data-testid="create-step">
-      <button onClick={() => onSpendingLimitImpact(true)}>affect spending limits</button>
-    </div>
-  ),
+  default: () => <div data-testid="create-step" />,
 }))
 
 const mockTxFlow = TxFlow as jest.MockedFunction<typeof TxFlow>
@@ -48,22 +45,10 @@ describe('RecipientAllowlistFlow', () => {
     expect(mockTxFlow.mock.calls[0][0].ReviewTransactionComponent).toBe(ReviewRecipientAllowlist)
   })
 
-  it('should pass TxFlow only the Create step, when no spending limit is affected', () => {
+  it('should, before the review, pass TxFlow the Create step alone', () => {
     render(<RecipientAllowlistFlow />)
 
-    expect(mockTxFlow.mock.calls[0][0].children).toEqual([expect.objectContaining({ key: 'create' })])
-  })
-
-  it('should pass TxFlow the Existing policies step after Create, when a spending limit is affected', () => {
-    render(<RecipientAllowlistFlow />)
-
-    fireEvent.click(screen.getByRole('button', { name: 'affect spending limits' }))
-
-    const { children } = mockTxFlow.mock.calls[mockTxFlow.mock.calls.length - 1][0]
-    expect(children).toEqual([
-      expect.objectContaining({ key: 'create' }),
-      expect.objectContaining({ key: 'existing-policies' }),
-    ])
+    expect(Children.toArray(mockTxFlow.mock.calls[0][0].children)).toHaveLength(1)
   })
 
   it('seeds the flow with an empty allowlist form', () => {

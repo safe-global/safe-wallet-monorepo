@@ -6,13 +6,15 @@ import { getPolicyEngineAddress } from '@/features/policy-guard/public/services/
 import useSpendingLimitTokenOptions, {
   type TokenOptionsResult,
 } from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
+import type { TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
 
 export type HeldTokenAddresses = TokenOptionsResult & {
   addresses: string[]
 }
 
-const useHeldTokenAddresses = (): HeldTokenAddresses => {
-  const result = useSpendingLimitTokenOptions()
+/** `extraTokens` are listed whether or not the Safe holds them, such as the tokens of its spending limits. */
+const useHeldTokenAddresses = (extraTokens?: readonly TokenOption[]): HeldTokenAddresses => {
+  const result = useSpendingLimitTokenOptions(extraTokens)
   const { options: allOptions } = result
   const chainId = useSafeScope()?.chainId
   const hasNativePolicy = !chainId || !!getPolicyEngineAddress(chainId, 'NativeTransferPolicy')

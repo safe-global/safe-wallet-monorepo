@@ -3,6 +3,7 @@ import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
+import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
@@ -17,9 +18,9 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import RecipientAllowlistIcon from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/RecipientAllowlistIcon'
 import type { ActiveAllowlistPolicy } from '../../AllowlistDrawer/resolveState'
+import CreateRecipientAllowlistPolicy from '../CreateStep'
 import ReviewRecipientAllowlist from '../ReviewStep'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
-import { useRecipientAllowlistSteps } from '../hooks/useRecipientAllowlistSteps'
 import { toAllowlistEditValues } from '../utils/allowlistEdit'
 import type { RecipientAllowlistFlowData } from '../types'
 
@@ -49,21 +50,19 @@ const FormSkeleton = (): ReactElement => (
   </div>
 )
 
-const EditTxFlow = ({ initialData }: { initialData: RecipientAllowlistFlowData }): ReactElement => {
-  const steps = useRecipientAllowlistSteps(EDIT_STEP_TITLE)
-
-  return (
-    <TxFlow<RecipientAllowlistFlowData>
-      icon={RecipientAllowlistIcon}
-      subtitle={FLOW_SUBTITLE}
-      ReviewTransactionComponent={ReviewRecipientAllowlist}
-      eventCategory={TxFlowType.EDIT_SPACE_RECIPIENT_ALLOWLIST}
-      initialData={initialData}
-    >
-      {steps}
-    </TxFlow>
-  )
-}
+const EditTxFlow = ({ initialData }: { initialData: RecipientAllowlistFlowData }): ReactElement => (
+  <TxFlow<RecipientAllowlistFlowData>
+    icon={RecipientAllowlistIcon}
+    subtitle={FLOW_SUBTITLE}
+    ReviewTransactionComponent={ReviewRecipientAllowlist}
+    eventCategory={TxFlowType.EDIT_SPACE_RECIPIENT_ALLOWLIST}
+    initialData={initialData}
+  >
+    <TxFlowStep title={EDIT_STEP_TITLE} hideNonce>
+      <CreateRecipientAllowlistPolicy />
+    </TxFlowStep>
+  </TxFlow>
+)
 
 /** The form is seeded once, since `TxFlow` reads `initialData` only at mount; it waits for the tokens the form lists. */
 const EditFlowBody = ({ policy }: { policy: ActiveAllowlistPolicy }): ReactElement => {

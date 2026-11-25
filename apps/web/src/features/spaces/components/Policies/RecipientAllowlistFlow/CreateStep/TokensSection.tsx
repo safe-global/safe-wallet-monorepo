@@ -1,13 +1,17 @@
 import { useMemo, useState, type ReactElement } from 'react'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Button } from '@safe-global/views/components/ui/button'
 import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import TokenIcon from '@/components/common/TokenIcon'
 import { AllowlistSection } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
+import PickerGroupHeader from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/PickerGroupHeader'
 import SearchPicker, {
+  type SearchPickerGroup,
   type SearchPickerItem,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SearchPicker'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
+import SpendingLimitTokenMark from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SpendingLimitTokenMark'
 import {
   NO_TOKENS_FOUND_TEXT,
   POPULAR_LOAD_ERROR_TEXT,
@@ -17,7 +21,10 @@ import {
   UNTRUSTED_TOKEN_WARNING,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import {
+  OTHER_TOKENS_GROUP_LABEL,
   RETRY_LABEL,
+  SPENDING_LIMIT_TOKENS_GROUP_LABEL,
+  SPENDING_LIMITS_LOAD_ERROR_TEXT,
   TOKENS_LOAD_ERROR_TEXT,
   TOKENS_SEARCH_PLACEHOLDER,
   TOKENS_SECTION_DESCRIPTION,
@@ -26,6 +33,7 @@ import {
 import useCustomTokenLookup from '../../SpendingLimitFlow/hooks/useCustomTokenLookup'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
+import type { SpendingLimitTokensResult } from '../hooks/useSpendingLimitTokens'
 import type { AllowlistToken, RecipientAllowlistFormValues } from '../types'
 import { toAllowlistTokens } from '../utils/allowlistDisplay'
 import { selectAllowlistTokens, toggleByAddress } from '../utils/allowlistForm'
@@ -34,6 +42,8 @@ type TokensSectionProps = {
   values: RecipientAllowlistFormValues
   onChange: (next: RecipientAllowlistFormValues) => void
   heldTokens: HeldTokenAddresses
+  /** Their tokens are suggested first and marked, since the allowlist blocks a spending limit on a token it leaves out. */
+  spendingLimits: SpendingLimitTokensResult
   hasAccount: boolean
 }
 
@@ -53,11 +63,15 @@ const tokenDetail = (option: TokenOption): string | undefined => {
   return option.symbol || option.name ? shortenAddress(option.address) : undefined
 }
 
-const toPickerItem = (option: TokenOption): SearchPickerItem => {
+const isListed = (tokens: readonly { address: string }[], address: string): boolean =>
+  tokens.some((token) => sameAddress(token.address, address))
+
+const toPickerItem = (option: TokenOption, isInSpendingLimit = false): SearchPickerItem => {
   const token = toAllowlistToken(option)
   return {
     id: option.address.toLowerCase(),
     label: token.symbol,
+    labelSuffix: isInSpendingLimit ? <SpendingLimitTokenMark /> : undefined,
     detail: tokenDetail(option),
     searchText: `${option.name} ${option.address}`,
     icon: tokenIcon(token),
@@ -85,13 +99,38 @@ const LoadErrorAlert = ({
   />
 )
 
-/** The Safe's tokens and the popular ones to pick from, plus any ERC-20 whose address is pasted. */
-const TokensSection = ({ values, onChange, heldTokens, hasAccount }: TokensSectionProps): ReactElement => {
+/** The tokens of the Safe's spending limits first, then its other tokens and the popular ones, plus any pasted ERC-20. */
+const TokensSection = ({
+  values,
+  onChange,
+  heldTokens,
+  spendingLimits,
+  hasAccount,
+}: TokensSectionProps): ReactElement => {
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular } = heldTokens
   const [query, setQuery] = useState('')
   const lookup = useCustomTokenLookup(query, options)
 
-  const groups = useMemo(() => [{ id: 'tokens', items: options.map(toPickerItem) }], [options])
+  const isInSpendingLimit = (address: string) => isListed(spendingLimits.tokens, address)
+
+  const groups = useMemo<SearchPickerGroup[]>(() => {
+    const inSpendingLimits = options.filter(({ address }) => isListed(spendingLimits.tokens, address))
+    const others = options.filter((option) => !inSpendingLimits.includes(option))
+    if (inSpendingLimits.length === 0) return [{ id: 'tokens', items: others.map((option) => toPickerItem(option)) }]
+
+    return [
+      {
+        id: 'spending-limits',
+        header: <PickerGroupHeader label={SPENDING_LIMIT_TOKENS_GROUP_LABEL} count={inSpendingLimits.length} />,
+        items: inSpendingLimits.map((option) => toPickerItem(option, true)),
+      },
+      {
+        id: 'tokens',
+        header: <PickerGroupHeader label={OTHER_TOKENS_GROUP_LABEL} count={others.length} />,
+        items: others.map((option) => toPickerItem(option)),
+      },
+    ]
+  }, [options, spendingLimits.tokens])
   const selectedIds = useMemo(() => values.tokens.map(({ address }) => address.toLowerCase()), [values.tokens])
   const chips = useMemo(
     () =>
@@ -136,7 +175,7 @@ const TokensSection = ({ values, onChange, heldTokens, hasAccount }: TokensSecti
         query={query}
         onQueryChange={setQuery}
         emptyLabel={lookup.address ? TOKEN_NOT_FOUND_TEXT : NO_TOKENS_FOUND_TEXT}
-        extraItem={lookup.option && toPickerItem(lookup.option)}
+        extraItem={lookup.option && toPickerItem(lookup.option, isInSpendingLimit(lookup.option.address))}
         notice={lookup.isError ? { text: TOKEN_LOOKUP_ERROR_TEXT, onRetry: lookup.refetch } : undefined}
         isLoading={isLoading || isPopularLoading || lookup.isLoading}
         disabled={!hasAccount}
@@ -155,6 +194,14 @@ const TokensSection = ({ values, onChange, heldTokens, hasAccount }: TokensSecti
         />
       )}
 
+      {hasAccount && spendingLimits.isError && (
+        <LoadErrorAlert
+          message={SPENDING_LIMITS_LOAD_ERROR_TEXT}
+          onRetry={spendingLimits.refetch}
+          data-testid="allowlist-spending-limits-error"
+        />
+      )}
+
       {chips.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {chips.map((token) => (
@@ -165,6 +212,7 @@ const TokensSection = ({ values, onChange, heldTokens, hasAccount }: TokensSecti
               aria-label={`Allow ${token.symbol}`}
               icon={tokenIcon(token)}
               label={token.symbol}
+              labelSuffix={isInSpendingLimit(token.address) ? <SpendingLimitTokenMark /> : undefined}
             />
           ))}
         </div>

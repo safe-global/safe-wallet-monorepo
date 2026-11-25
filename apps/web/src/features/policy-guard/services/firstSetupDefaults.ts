@@ -8,6 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { PolicyConfiguration } from '../public/types'
 import { FALLBACK_SELECTOR, isFallbackAccess } from '../public/services/fallbackAccess'
 import { requirePolicy } from '../public/services/allowlistConfigurations'
+import { REJECT_SELECTOR } from '../public/services/rejectAccess'
 
 export const MULTI_SEND_SELECTOR = Multi_send_call_only__factory.createInterface().getFunction('multiSend').selector
 const MULTI_SEND_POLICY_DATA = '0x'
@@ -43,6 +44,22 @@ const withMultiSendBindings = (chainId: string, configurations: PolicyConfigurat
   return [...configurations, ...bindings]
 }
 
+const withRejectAccess = (
+  chainId: string,
+  safeAddress: string,
+  configurations: PolicyConfiguration[],
+): PolicyConfiguration[] => {
+  const access: PolicyConfiguration = {
+    target: safeAddress,
+    selector: REJECT_SELECTOR,
+    operation: OperationType.Call,
+    policy: requirePolicy(chainId, 'AllowPolicy'),
+    data: '0x',
+  }
+
+  return [...configurations.filter((configuration) => !isSameAccess(configuration, access)), access]
+}
+
 const withFallback = (chainId: string, configurations: PolicyConfiguration[]): PolicyConfiguration[] => {
   const policy = requirePolicy(chainId, 'DenyPolicy')
 
@@ -58,6 +75,10 @@ const withFallback = (chainId: string, configurations: PolicyConfiguration[]): P
   ]
 }
 
-/** What a first setup installs besides the caller's entries: MultiSendPolicy on every official batch target, then the deny fallback. */
-export const withFirstSetupDefaults = (chainId: string, configurations: PolicyConfiguration[]): PolicyConfiguration[] =>
-  withFallback(chainId, withMultiSendBindings(chainId, configurations))
+/** What a first setup adds to the caller's entries: the MultiSend bindings, the reject access, then the deny fallback. */
+export const withFirstSetupDefaults = (
+  chainId: string,
+  safeAddress: string,
+  configurations: PolicyConfiguration[],
+): PolicyConfiguration[] =>
+  withFallback(chainId, withRejectAccess(chainId, safeAddress, withMultiSendBindings(chainId, configurations)))

@@ -60,6 +60,16 @@ describe('SearchPicker', () => {
     ])
   })
 
+  it('should, when an item has a label suffix, show it after the label', async () => {
+    const marked = item('DAI', { labelSuffix: <span data-testid="mark" /> })
+    const { user } = renderWithUserEvent(<Picker groups={[{ id: 'tokens', items: [marked, USDC] }]} />)
+
+    await user.click(field())
+
+    expect(within(screen.getByRole('option', { name: /DAI/ })).getByTestId('mark')).toBeInTheDocument()
+    expect(within(screen.getByRole('option', { name: /USDC/ })).queryByTestId('mark')).not.toBeInTheDocument()
+  })
+
   it('should, when the user types, list only the items whose label, detail or search text match', async () => {
     const byAddress = item('WETH', { searchText: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' })
     const { user } = renderWithUserEvent(<Picker groups={[{ id: 'tokens', items: [USDC, DAI, byAddress] }]} />)

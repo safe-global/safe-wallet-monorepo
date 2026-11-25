@@ -8,6 +8,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { RecipientAllowlistFormValues } from '../types'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
+import type { SpendingLimitTokensResult } from '../hooks/useSpendingLimitTokens'
 import TokensSection from './TokensSection'
 import RecipientsSection from './RecipientsSection'
 
@@ -15,6 +16,7 @@ export type RecipientAllowlistFormProps = {
   values: RecipientAllowlistFormValues
   onChange: (next: RecipientAllowlistFormValues) => void
   heldTokens: HeldTokenAddresses
+  spendingLimits: SpendingLimitTokensResult
   account?: { chainId: string; address: string; label: string }
   /** False when the picked Safe cannot take an allowlist: only `children` show. */
   showSections: boolean
@@ -26,6 +28,7 @@ const RecipientAllowlistForm = ({
   values,
   onChange,
   heldTokens,
+  spendingLimits,
   account,
   showSections,
   children,
@@ -52,6 +55,7 @@ const RecipientAllowlistForm = ({
             values={values}
             onChange={onChange}
             heldTokens={heldTokens}
+            spendingLimits={spendingLimits}
             hasAccount={Boolean(account)}
           />
           <RecipientsSection

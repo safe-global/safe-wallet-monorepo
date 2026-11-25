@@ -4,6 +4,7 @@ import type { PolicyConfiguration } from '../types'
 import { getOfficialMultiSendCallOnlyAddresses, MULTI_SEND_SELECTOR } from '../../services/firstSetupDefaults'
 import { clearGuardExitConfigurations } from './allowlistConfigurations'
 import { FALLBACK_SELECTOR } from './fallbackAccess'
+import { REJECT_SELECTOR } from './rejectAccess'
 
 const unbind = (target: string, selector: string, operation: OperationType): PolicyConfiguration => ({
   target,
@@ -14,11 +15,12 @@ const unbind = (target: string, selector: string, operation: OperationType): Pol
 })
 
 /**
- * The second root of a removal: unbinds the Safe setters that the first root allows, and the MultiSend and fallback
- * rules of the first setup, so the guard holds no rule for the Safe once both are applied.
+ * The second root of a removal: unbinds the Safe setters that the first root allows, and the MultiSend, reject and
+ * fallback rules of the first setup, so the guard holds no rule for the Safe once both are applied.
  */
 export const buildGuardRemovalCleanupConfigurations = (chainId: string, safeAddress: string): PolicyConfiguration[] => [
   ...clearGuardExitConfigurations(safeAddress),
+  unbind(safeAddress, REJECT_SELECTOR, OperationType.Call),
   ...getOfficialMultiSendCallOnlyAddresses(chainId).map((target) =>
     unbind(target, MULTI_SEND_SELECTOR, OperationType.DelegateCall),
   ),

@@ -14,8 +14,7 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelec
 import { useRecipientAllowlistSafeAccounts } from '../../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
-import { useSpendingLimitImpacts, type SpendingLimitImpactsResult } from '../../hooks/useSpendingLimitImpacts'
-import type { SpendingLimitImpact, SpendingLimitImpactKind } from '../../utils/spendingLimitImpacts'
+import { useSpendingLimitTokens, type SpendingLimitTokensResult } from '../../hooks/useSpendingLimitTokens'
 import CreateRecipientAllowlistPolicy from '..'
 
 const SEPOLIA = '11155111'
@@ -34,7 +33,7 @@ jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
 }))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
-jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
+jest.mock('../../hooks/useSpendingLimitTokens', () => ({ useSpendingLimitTokens: jest.fn() }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useMergedAddressBooks: () => ({ list: [], has: () => false, get: () => undefined }),
@@ -59,27 +58,13 @@ const mockUseAccounts = useRecipientAllowlistSafeAccounts as jest.MockedFunction
 const mockUseGuardStatus = useGuardStatus as jest.MockedFunction<typeof useGuardStatus>
 const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
 const mockPoisoning = useSafeShieldForAddressPoisoning as jest.MockedFunction<typeof useSafeShieldForAddressPoisoning>
-const mockSpendingLimits = useSpendingLimitImpacts as jest.MockedFunction<typeof useSpendingLimitImpacts>
+const mockSpendingLimits = useSpendingLimitTokens as jest.MockedFunction<typeof useSpendingLimitTokens>
 
-const spendingLimitImpact = (impact: SpendingLimitImpactKind): SpendingLimitImpact => ({
-  policyId: faker.string.uuid(),
-  isPending: false,
-  spender: SAFE_B,
-  allowance: {
-    token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null },
-    amount: '1',
-    spent: '0',
-    remaining: '1',
-    resetPeriodMinutes: 1_440,
-    resetsAtMinute: null,
-  },
-  impact,
-  recipients: impact === 'restricted' ? [RECIPIENT] : [],
-})
+const ETH_LIMIT = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
 
-const spendingLimits = (overrides: Partial<SpendingLimitImpactsResult> = {}) =>
+const spendingLimits = (overrides: Partial<SpendingLimitTokensResult> = {}) =>
   mockSpendingLimits.mockReturnValue({
-    impacts: [],
+    tokens: [],
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
@@ -149,7 +134,6 @@ const guard = (status?: GuardStatus, retry = jest.fn()) => mockUseGuardStatus.mo
 const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
   const setScope = jest.fn()
   const onNext = jest.fn()
-  const onSpendingLimitImpact = jest.fn()
   const tree = (key?: string) => (
     <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() }}>
       <TxFlowContext.Provider value={{ ...initialContext, data: data && { ...data, rules: [] }, onNext }}>
@@ -168,7 +152,7 @@ const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
             clearScope: jest.fn(),
           }}
         >
-          <CreateRecipientAllowlistPolicy onSpendingLimitImpact={onSpendingLimitImpact} />
+          <CreateRecipientAllowlistPolicy />
         </SafeScopeContext.Provider>
       </TxFlowContext.Provider>
     </TxModalContext.Provider>
@@ -177,7 +161,6 @@ const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
   return {
     setScope,
     onNext,
-    onSpendingLimitImpact,
     switchTo: (key?: string) => rerender(tree(key)),
     rerender: () => rerender(tree(scopeKey)),
   }
@@ -258,60 +241,30 @@ describe('CreateRecipientAllowlistPolicy', () => {
     })
   })
 
-  it('should add Existing policies on Next, when the allowlist restricts a spending limit', () => {
+  it('should, when the Safe has a spending limit, go on to the review on Next', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    spendingLimits({ impacts: [spendingLimitImpact('restricted')] })
-    const { onNext, onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+    spendingLimits({ tokens: [ETH_LIMIT] })
+    const { onNext } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
     fireEvent.click(screen.getByTestId('next-btn'))
 
-    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
-    expect(onNext).toHaveBeenCalled()
+    expect(onNext).toHaveBeenCalledWith(
+      expect.objectContaining({ rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }] }),
+    )
   })
 
-  it('should add Existing policies on Next, when the allowlist restricts some spending limits and blocks the others', () => {
+  it('should, when the spending limits failed to load, keep Next disabled and offer to load them again', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    spendingLimits({ impacts: [spendingLimitImpact('restricted'), spendingLimitImpact('blocked')] })
-    const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+    const refetch = jest.fn()
+    spendingLimits({ isError: true, refetch })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
-    fireEvent.click(screen.getByTestId('next-btn'))
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
 
-    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
-  })
-
-  it('should add Existing policies on Next, when the allowlist blocks every spending limit', () => {
-    accounts([option(SAFE_A)])
-    guard({ status: 'none' })
-    spendingLimits({ impacts: [spendingLimitImpact('blocked')] })
-    const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
-
-    fireEvent.click(screen.getByTestId('next-btn'))
-
-    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
-  })
-
-  it('should skip Existing policies on Next, when the Safe has no spending limits', () => {
-    accounts([option(SAFE_A)])
-    guard({ status: 'none' })
-    const { onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
-
-    fireEvent.click(screen.getByTestId('next-btn'))
-
-    expect(onSpendingLimitImpact).toHaveBeenCalledWith(false)
-  })
-
-  it('should add Existing policies on Next, when the spending limits failed to load', () => {
-    accounts([option(SAFE_A)])
-    guard({ status: 'none' })
-    spendingLimits({ isError: true })
-    const { onNext, onSpendingLimitImpact } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
-
-    fireEvent.click(screen.getByTestId('next-btn'))
-
-    expect(onSpendingLimitImpact).toHaveBeenCalledWith(true)
-    expect(onNext).toHaveBeenCalled()
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+    expect(refetch).toHaveBeenCalled()
   })
 
   it('should keep Next disabled, when the spending limits are still loading', () => {

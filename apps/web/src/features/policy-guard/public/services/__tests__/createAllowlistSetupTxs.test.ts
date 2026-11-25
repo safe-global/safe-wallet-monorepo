@@ -93,7 +93,7 @@ describe('createAllowlistSetupTxs', () => {
 
   it('installs the MultiSend bindings and both fallbacks on a first setup, and returns them with their root', () => {
     const { txs, configurations: installed, root } = setup({ status: 'none' })
-    const expected = withFirstSetupDefaults(chainId, configurations)
+    const expected = withFirstSetupDefaults(chainId, safeAddress, configurations)
 
     const configured = iface.parseTransaction({ data: txs[0].data })?.args[0]
     expect(configured.map((tuple: unknown[]) => [...tuple])).toEqual(expected.map(toTuple))
@@ -103,7 +103,7 @@ describe('createAllowlistSetupTxs', () => {
   })
 
   it('counts the first-setup defaults towards the maximum', () => {
-    const defaults = withFirstSetupDefaults(chainId, []).length
+    const defaults = withFirstSetupDefaults(chainId, safeAddress, []).length
     const many = Array.from({ length: MAX_POLICY_CONFIGURATIONS - defaults + 1 }, (_, i) => ({
       ...configurations[0],
       target: getAddress(`0x${(i + 1).toString(16).padStart(40, '0')}`),

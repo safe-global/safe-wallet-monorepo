@@ -3,6 +3,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { MULTISEND_SIGNATURE_HASH } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import type { PolicyConfiguration } from '../types'
 import { isFallbackAccess } from './fallbackAccess'
+import { isRejectAccess } from './rejectAccess'
 
 export const SET_GUARD_SELECTOR = '0xe19a9dd9'
 export const SET_MODULE_GUARD_SELECTOR = '0xe068df37'
@@ -32,10 +33,10 @@ const isSafeAccess = (
 
 /**
  * Whether the configurations are the second root of a removal: they unbind the Safe's three setters, and nothing
- * else than the MultiSend and the fallback rules.
+ * else than the MultiSend, reject and fallback rules.
  */
 export const isGuardRemovalCleanup = (
-  configurations: readonly Pick<PolicyConfiguration, 'target' | 'selector' | 'policy'>[],
+  configurations: readonly Pick<PolicyConfiguration, 'target' | 'selector' | 'operation' | 'policy'>[],
   safeAddress: string,
 ): boolean =>
   SAFE_SETTER_SELECTORS.every((selector) =>
@@ -46,5 +47,6 @@ export const isGuardRemovalCleanup = (
       sameAddress(configuration.policy, ZERO_ADDRESS) &&
       (SAFE_SETTER_SELECTORS.some((selector) => isSafeAccess(configuration, safeAddress, selector)) ||
         configuration.selector.toLowerCase() === MULTISEND_SIGNATURE_HASH ||
+        isRejectAccess(configuration, safeAddress) ||
         isFallbackAccess(configuration)),
   )

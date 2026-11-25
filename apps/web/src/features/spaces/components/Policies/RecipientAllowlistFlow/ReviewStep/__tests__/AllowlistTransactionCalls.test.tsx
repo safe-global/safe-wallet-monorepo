@@ -14,6 +14,7 @@ import { buildGuardRemovalCleanupConfigurations } from '@/features/policy-guard/
 import { getPolicyEngineAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import * as encoders from '@/features/policy-guard/public/services/policyGuardEncoders'
 import * as useChainsModule from '@/hooks/useChains'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import AllowlistTransactionCalls from '../AllowlistTransactionCalls'
 
 const CHAIN_ID = '11155111'
@@ -30,7 +31,7 @@ const mockResolveName = (address: string): string => (address === RECIPIENT ? 'A
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
-  useSafeScope: () => ({ chainId: '11155111' }),
+  useSafeScope: jest.fn(),
 }))
 jest.mock('../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions', () => ({
   __esModule: true,
@@ -74,7 +75,12 @@ const multiSendOf = (calls: MetaTransactionData[]) =>
 const actionLabels = () => screen.getAllByTestId('action-item').map((item) => item.textContent)
 
 describe('AllowlistTransactionCalls', () => {
-  beforeEach(() => jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true))
+  beforeEach(() => {
+    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
+    jest
+      .mocked(useSafeScope)
+      .mockReturnValue({ chainId: CHAIN_ID, safeAddress: SAFE } as unknown as ReturnType<typeof useSafeScope>)
+  })
 
   it('should list every call of the setup and its rules, when the setup is a MultiSend that configures immediately', () => {
     const configurations = [configurationFor([RECIPIENT])]
@@ -89,6 +95,25 @@ describe('AllowlistTransactionCalls', () => {
     expect(rule).toHaveTextContent('Rule 1 of 1')
     expect(within(rule).getByText('Token withdraw allowlist')).toBeInTheDocument()
     expect(within(rule).getByText('Alice')).toBeInTheDocument()
+  })
+
+  it('should, when the setup lets the signers reject, label that rule as reject transactions', () => {
+    const rejectRule: PolicyConfiguration = {
+      target: SAFE,
+      selector: '0x00000000',
+      operation: 0,
+      policy: getPolicyEngineAddress(CHAIN_ID, 'AllowPolicy') ?? '',
+      data: '0x',
+    }
+    const configurations = [configurationFor([RECIPIENT]), rejectRule]
+    const safeTx = multiSendOf(encoders.createFirstSetupTxs({ safeAddress: SAFE, guardAddress: GUARD, configurations }))
+    render(<AllowlistTransactionCalls safeTx={safeTx} />)
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const [, reject] = screen.getAllByTestId('allowlist-rule')
+    expect(within(reject).getByText('Reject transactions')).toBeInTheDocument()
+    expect(within(reject).getByText('Lets the signers reject a queued transaction.')).toBeInTheDocument()
   })
 
   it('should list the rules being applied, when the transaction applies a configuration', () => {

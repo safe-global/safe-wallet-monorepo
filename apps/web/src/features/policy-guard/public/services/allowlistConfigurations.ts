@@ -73,6 +73,7 @@ export const clearGuardExitConfigurations = (safeAddress: string): PolicyConfigu
  * The first root of a removal: deletes every rule of the allowlist and allows the Safe's guard and fallback handler
  * setters, which the first setup's MultiSend bindings let through in one batch. ERC-20 recipients are revoked before
  * their rule is unbound, since the policy keeps them and a later rule on the token would let them through again.
+ * The reject rule stays, so the signers can still reject while the guard blocks the rest.
  */
 export const buildAllowlistRemovalConfigurations = ({
   chainId,

@@ -10,8 +10,7 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelec
 import { useRecipientAllowlistSafeAccounts } from '../../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
-import { useSpendingLimitImpacts } from '../../hooks/useSpendingLimitImpacts'
-import type { SpendingLimitImpact } from '../../utils/spendingLimitImpacts'
+import { useSpendingLimitTokens } from '../../hooks/useSpendingLimitTokens'
 import type { RecipientAllowlistFlowData } from '../../types'
 import EditRecipientAllowlistFlow from '..'
 
@@ -82,7 +81,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
 jest.mock('../../hooks/useHeldTokenAddresses')
-jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
+jest.mock('../../hooks/useSpendingLimitTokens', () => ({ useSpendingLimitTokens: jest.fn() }))
 jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
@@ -90,13 +89,9 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   useMergedAddressBooks: () => ({ has: () => false, get: () => undefined, list: [] }),
   useSafeNameResolver: () => () => '',
 }))
-jest.mock('../../ExistingPoliciesStep', () => ({
-  __esModule: true,
-  default: () => <div data-testid="existing-policies-step" />,
-}))
 
 const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
-const mockSpendingLimits = useSpendingLimitImpacts as jest.MockedFunction<typeof useSpendingLimitImpacts>
+const mockSpendingLimits = useSpendingLimitTokens as jest.MockedFunction<typeof useSpendingLimitTokens>
 
 const policy = mockActiveAllowlist()
 const { chainId, address: safeAddress } = policy.safe
@@ -147,7 +142,7 @@ describe('EditRecipientAllowlistFlow', () => {
     mockScope.safeLoaded = true
     mockScope.safeError = undefined
     holdTokens()
-    mockSpendingLimits.mockReturnValue({ impacts: [], isLoading: false, isError: false, refetch: jest.fn() })
+    mockSpendingLimits.mockReturnValue({ tokens: [], isLoading: false, isError: false, refetch: jest.fn() })
     jest.mocked(useGuardStatus).mockReturnValue({
       guard: {
         status: 'known',
@@ -275,18 +270,18 @@ describe('EditRecipientAllowlistFlow', () => {
     ).not.toContain(MOCK_ADDRESSES.unresolved.toLowerCase())
   })
 
-  it('should go through Existing policies, when the change affects a spending limit', () => {
+  it('should, when the Safe has a spending limit on a token left out, go straight to the review', () => {
     mockSpendingLimits.mockReturnValue({
-      impacts: [{ impact: 'blocked' } as SpendingLimitImpact],
+      tokens: [{ address: DAI, symbol: 'DAI', decimals: 18, logoUri: null }],
       isLoading: false,
       isError: false,
       refetch: jest.fn(),
     })
     renderFlow()
 
-    pickToken('DAI')
+    fireEvent.click(recipientChips()[2])
     fireEvent.click(next())
 
-    expect(screen.getByTestId('existing-policies-step')).toBeInTheDocument()
+    expect(screen.getByTestId('review-data')).toBeInTheDocument()
   })
 })

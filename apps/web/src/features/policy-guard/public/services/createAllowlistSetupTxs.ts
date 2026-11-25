@@ -34,7 +34,8 @@ export const createAllowlistSetupTxs = ({
     throw new Error(GUARD_NOT_SUPPORTED_ERROR)
   }
 
-  const installed = guardState.status === 'none' ? withFirstSetupDefaults(chainId, configurations) : configurations
+  const installed =
+    guardState.status === 'none' ? withFirstSetupDefaults(chainId, safeAddress, configurations) : configurations
   const limitError = getConfigurationLimitError(installed)
   if (limitError) throw new Error(limitError)
   if (estimateConfigurationGas(installed) > MAX_TRANSACTION_GAS) {

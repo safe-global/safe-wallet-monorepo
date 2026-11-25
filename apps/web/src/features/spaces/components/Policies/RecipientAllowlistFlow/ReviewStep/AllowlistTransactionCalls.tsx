@@ -34,7 +34,9 @@ const AllowlistTransactionCalls = ({
 }: AllowlistTransactionCallsProps): ReactElement | null => {
   const isAllowlistEnabled = useHasFeature(FEATURES.POLICY_RECIPIENT_ALLOWLIST) === true
   const getAddressInfo = useAllowlistAddressInfo()
-  const chainId = useSafeScope()?.chainId
+  const scope = useSafeScope()
+  const chainId = scope?.chainId
+  const safeAddress = scope?.safeAddress
 
   const calls = useMemo(() => (safeTx ? toCalls(safeTx.data) : undefined), [safeTx])
   const getConfigurations = useCallback(
@@ -44,11 +46,12 @@ const AllowlistTransactionCalls = ({
     [requestedConfigurations],
   )
 
-  if (!chainId || !calls || !isAllowlistEnabled) return null
+  if (!chainId || !safeAddress || !calls || !isAllowlistEnabled) return null
 
   return (
     <AllowlistSetupActions
       chainId={chainId}
+      safeAddress={safeAddress}
       calls={calls}
       getConfigurations={getConfigurations}
       describeCall={describeSetupCall}

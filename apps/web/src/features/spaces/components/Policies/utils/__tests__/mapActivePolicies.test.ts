@@ -357,6 +357,15 @@ describe('mapActivePolicies', () => {
       expect(toAllowlists([withAccess(mockGuardExitDto(), { selector: '0xe068df37' })])).toEqual([])
     })
 
+    it('should, when the Safe lets its signers reject, not read the reject rule as an ETH recipient', () => {
+      const rejectRule = withAccess(mockGuardExitDto(), { selector: '0x00000000' })
+
+      const [policy, ...rest] = toAllowlists([mockErc20TransferDto(), rejectRule])
+
+      expect(rest).toEqual([])
+      expect(policy.data.entries.map(({ token }) => token.address)).toEqual([MOCK_TOKENS.usdc.address])
+    })
+
     it('should not mark an allowlist as waiting for guard removal, when no setGuard rule is bound', () => {
       const [policy] = toAllowlists([mockErc20TransferDto()])
 

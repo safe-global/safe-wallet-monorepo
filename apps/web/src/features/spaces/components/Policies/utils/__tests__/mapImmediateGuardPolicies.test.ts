@@ -62,6 +62,24 @@ describe('mapImmediateGuardPolicies', () => {
     ])
   })
 
+  it('should, when the setup lets the signers reject, not list the Safe as an ETH recipient', () => {
+    const setup = makeSetup()
+    const rejectRule = {
+      target: setup.safe.address,
+      selector: '0x00000000',
+      operation: 0 as const,
+      policy: faker.finance.ethereumAddress(),
+      data: '0x',
+    }
+
+    const mapped = mapImmediateGuardPolicies(
+      { ...setup, configurations: [...setup.configurations, rejectRule] },
+      resolveToken,
+    )
+
+    expect(mapped?.data.entries.map(({ token }) => token.address)).toEqual([token])
+  })
+
   it('skips a setup that binds no transfer policy, which is not an allowlist', () => {
     const setup = makeSetup({
       configurations: [

@@ -166,9 +166,10 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
       {children}
 
-      {chainId && txs && configurations && (
+      {chainId && scope?.safeAddress && txs && configurations && (
         <AllowlistSetupActions
           chainId={chainId}
+          safeAddress={scope.safeAddress}
           calls={txs}
           getConfigurations={() => configurations}
           describeCall={describeSetupCall}

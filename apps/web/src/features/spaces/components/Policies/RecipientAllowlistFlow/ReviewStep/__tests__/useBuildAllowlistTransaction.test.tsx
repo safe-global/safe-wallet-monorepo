@@ -91,7 +91,7 @@ describe('useBuildAllowlistTransaction', () => {
     expect(sentBatch()).toHaveLength(4)
     expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
     expect(result.current.guardState).toEqual({ status: 'none' })
-    const installed = withFirstSetupDefaults(CHAIN_ID, [
+    const installed = withFirstSetupDefaults(CHAIN_ID, SAFE, [
       ...mockServices.clearGuardExitConfigurations(SAFE),
       ...mockServices.buildAllowlistConfigurations(CHAIN_ID, erc20Rules),
     ])

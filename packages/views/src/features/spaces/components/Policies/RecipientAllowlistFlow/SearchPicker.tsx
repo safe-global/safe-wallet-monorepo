@@ -17,6 +17,8 @@ import {
 export type SearchPickerItem = {
   id: string
   label: string
+  /** Right after the label, e.g. an info mark. */
+  labelSuffix?: ReactNode
   detail?: string
   /** The detail is an address, so it's set in the code font. */
   isDetailAddress?: boolean
@@ -147,7 +149,10 @@ const SearchPicker = ({
         <Checkbox checked={isPicked} tabIndex={-1} className="pointer-events-none" />
         <span className="flex size-6 shrink-0 overflow-hidden rounded-full">{item.icon}</span>
         <span className="flex min-w-0 flex-col">
-          <span className="truncate">{item.label}</span>
+          <span className="flex min-w-0 items-center gap-1">
+            <span className="truncate">{item.label}</span>
+            {item.labelSuffix}
+          </span>
           {item.detail && (
             <span className={cn('truncate text-xs text-muted-foreground', item.isDetailAddress && 'font-mono')}>
               {item.detail}

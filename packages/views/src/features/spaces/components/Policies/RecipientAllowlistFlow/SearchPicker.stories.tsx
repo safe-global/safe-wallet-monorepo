@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { expect, fn, userEvent, within } from 'storybook/test'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import ContactsHeader from './ContactsHeader'
+import PickerGroupHeader from './PickerGroupHeader'
+import SpendingLimitTokenMark from './SpendingLimitTokenMark'
 import SearchPicker, { type SearchPickerGroup, type SearchPickerItem, type SearchPickerProps } from './SearchPicker'
 
 const tokenIcon = (symbol: string) => (
@@ -29,6 +31,18 @@ const TOKENS: SearchPickerGroup[] = [
       token('DAI', 'Dai Stablecoin', '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357'),
     ],
   },
+]
+
+const [eth, usdc, usdt, dai] = TOKENS[0].items
+
+/** USDC and DAI have a spending limit on the Safe: listed first and marked. */
+const TOKENS_WITH_SPENDING_LIMITS: SearchPickerGroup[] = [
+  {
+    id: 'spending-limits',
+    header: <PickerGroupHeader label="In spending limits" count={2} />,
+    items: [usdc, dai].map((item) => ({ ...item, labelSuffix: <SpendingLimitTokenMark /> })),
+  },
+  { id: 'tokens', header: <PickerGroupHeader label="Other tokens" count={2} />, items: [eth, usdt] },
 ]
 
 const contact = (name: string, address: string): SearchPickerItem => ({
@@ -114,6 +128,11 @@ export const TokensOpen: Story = {
     await userEvent.click(within(canvasElement).getByRole('combobox'))
     await expect(within(document.body).getByRole('listbox')).toBeVisible()
   },
+}
+
+export const TokensInSpendingLimitsOpen: Story = {
+  args: { groups: TOKENS_WITH_SPENDING_LIMITS },
+  play: TokensOpen.play,
 }
 
 export const ContactsOpen: Story = {

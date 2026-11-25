@@ -413,8 +413,10 @@ describe('ReviewRecipientAllowlist', () => {
     expect(within(native).queryByText('Allowed recipients')).not.toBeInTheDocument()
     expect(within(token).getByText('Token withdraw allowlist')).toBeInTheDocument()
     expect(within(token).getByText('Allowed recipients')).toBeInTheDocument()
-    const fallbacks = defaults.slice(-2)
-    defaults.slice(0, -2).forEach((rule) => expect(within(rule).getByText('Batched transactions')).toBeInTheDocument())
+    const [reject, ...fallbacks] = defaults.slice(-3)
+    defaults.slice(0, -3).forEach((rule) => expect(within(rule).getByText('Batched transactions')).toBeInTheDocument())
+    expect(within(reject).getByText('Reject transactions')).toBeInTheDocument()
+    expect(within(reject).getByText('This Safe account')).toBeInTheDocument()
     fallbacks.forEach((rule) => {
       expect(within(rule).getByText('Block everything else')).toBeInTheDocument()
       expect(within(rule).getByText('Any address')).toBeInTheDocument()

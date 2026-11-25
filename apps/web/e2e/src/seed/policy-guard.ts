@@ -32,6 +32,7 @@ const addressOf = (name: ContractName): string => {
 /** The 3-minute delay guard that the wallet sets up on Sepolia */
 export const POLICY_GUARD = addressOf('SafePolicyGuard')
 export const ERC20_TRANSFER_POLICY = addressOf('ERC20TransferPolicy')
+const ALLOW_POLICY = addressOf('AllowPolicy')
 /** The guard's `EXPIRY`: how long a requested root stays applicable after its delay */
 export const ROOT_EXPIRY_SECONDS = 604_800
 
@@ -39,6 +40,7 @@ const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
 const SET_GUARD_SELECTOR = '0xe19a9dd9'
 const SET_MODULE_GUARD_SELECTOR = '0xe068df37'
 const SET_FALLBACK_HANDLER_SELECTOR = '0xf08a0323'
+const REJECT_SELECTOR = '0x00000000'
 const CALL = 0
 const PERMISSION_ALWAYS = 2
 const CONFIGURATION = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
@@ -64,6 +66,11 @@ function configurationOf({ token, recipients }: TokenAllowlist): Configuration {
       [recipients.map((recipient) => [getAddress(recipient), PERMISSION_ALWAYS])],
     ),
   }
+}
+
+/** The rule of the wallet's first setup that lets the signers reject a transaction: the Safe calls itself with no data */
+function rejectAccessOf(safe: string): Configuration {
+  return { target: getAddress(safe), selector: REJECT_SELECTOR, operation: CALL, policy: ALLOW_POLICY, data: '0x' }
 }
 
 /** The unbinding of the Safe setters a removal allows, which the wallet puts before every allowlist */
@@ -98,9 +105,9 @@ export async function installPolicyEngine(env: JourneyEnvironment): Promise<void
 }
 
 /**
- * Sets up the allowlist as the wallet's first setup does, in one Safe transaction: `configureImmediately`, then both
- * guard slots. `cosigners` sign first, as a Safe with a threshold above 1 needs; the Safe's context signer signs last
- * and executes. Registers the binding in the indexer.
+ * Sets up the allowlist as the wallet's first setup does, in one Safe transaction: `configureImmediately` with the
+ * token rule and the reject rule, then both guard slots. `cosigners` sign first, as a Safe with a threshold above 1
+ * needs; the Safe's context signer signs last and executes. Registers the bindings in the indexer.
  */
 export async function seedAllowlist(
   journey: Journey,
@@ -114,7 +121,9 @@ export async function seedAllowlist(
       {
         to: POLICY_GUARD,
         value: '0',
-        data: guardInterface.encodeFunctionData('configureImmediately', [[configurationOf(allowlist)]]),
+        data: guardInterface.encodeFunctionData('configureImmediately', [
+          [configurationOf(allowlist), rejectAccessOf(safe.address)],
+        ]),
       },
       { to: safe.address, value: '0', data: safeInterface.encodeFunctionData('setGuard', [POLICY_GUARD]) },
       { to: safe.address, value: '0', data: safeInterface.encodeFunctionData('setModuleGuard', [POLICY_GUARD]) },
@@ -132,8 +141,8 @@ export async function seedAllowlist(
 type RootRegistration = { root: string; readyAt: number; status: 'PENDING' | 'APPLIED' | 'INVALIDATED' }
 
 /**
- * Makes the indexer report `allowlist` as the Safe's bound ERC-20 allowlist and `roots` as its configuration roots,
- * in place of what it reported before.
+ * Makes the indexer report `allowlist` as the Safe's bound ERC-20 allowlist, next to the reject rule of the first
+ * setup, and `roots` as its configuration roots, in place of what it reported before.
  */
 export async function registerAllowlist(
   safe: SeededSafe,
@@ -161,6 +170,17 @@ export async function registerAllowlist(
               permission: 'ALWAYS',
             })),
           },
+        },
+        {
+          chainId,
+          safe: safeAddress,
+          guard: POLICY_GUARD,
+          target: safeAddress,
+          selector: REJECT_SELECTOR,
+          operation: 'CALL',
+          kind: 'ALLOW',
+          policy: ALLOW_POLICY,
+          state: null,
         },
       ],
       ConfigurationRoot: roots.map(({ root, readyAt, status }) => ({

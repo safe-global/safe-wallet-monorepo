@@ -18,6 +18,7 @@ import {
   getRuleTitle,
   POLICY_GUARD_NAME,
   POLICY_LABELS,
+  REJECT_RULE_DESCRIPTION,
   RULE_DELEGATE_CALL_LABEL,
   RULE_POLICY_LABEL,
   RULE_RECIPIENTS_LABEL,
@@ -38,6 +39,7 @@ import { getRuleKind, type RuleKind } from './ruleKind'
 
 type AllowlistSetupActionsProps = {
   chainId: string
+  safeAddress: string
   calls: MetaTransactionData[]
   /** The rules a configuring call sets. */
   getConfigurations: (call: MetaTransactionData) => PolicyConfiguration[] | undefined
@@ -130,6 +132,12 @@ const PolicyRuleRows = ({
       {getRuleTitle(index, count)}
     </Typography>
 
+    {kind === 'reject' && (
+      <Typography variant="paragraph-small" color="muted" as="div">
+        {REJECT_RULE_DESCRIPTION}
+      </Typography>
+    )}
+
     <TxDataRow title={RULE_POLICY_LABEL}>
       <Typography variant="paragraph-small" as="div" className="flex flex-wrap items-center gap-2">
         {POLICY_LABELS[kind]}
@@ -166,6 +174,7 @@ const PolicyRuleRows = ({
 /** The app's Multisend rebuilt so the configuring call lists "Rule N of M", which the generic decoder can't. */
 const AllowlistSetupActions = ({
   chainId,
+  safeAddress,
   calls,
   getConfigurations,
   describeCall,
@@ -208,7 +217,7 @@ const AllowlistSetupActions = ({
                             configuration={configuration}
                             index={ruleIndex}
                             count={configurations.length}
-                            kind={getRuleKind(chainId, configuration)}
+                            kind={getRuleKind(chainId, configuration, safeAddress)}
                             decodeRecipients={decodeRecipients}
                             getAddressInfo={getAddressInfo}
                           />
