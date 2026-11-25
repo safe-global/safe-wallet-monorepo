@@ -136,10 +136,13 @@ describe('ReviewSpendingLimit', () => {
     expect(screen.queryByTestId('old-token-amount')).not.toBeInTheDocument()
   })
 
-  it('builds the spending limit transaction', async () => {
+  it('builds the spending limit transaction with the decimals of the picked token', async () => {
     const context = renderReview()
 
     await waitFor(() => expect(context.setSafeTx).toHaveBeenCalledWith(builtTx))
+    const [data, , , , , , decimals] = mockCreateNewSpendingLimitTx.mock.lastCall ?? []
+    expect(data).toEqual(newLimit)
+    expect(decimals).toBe(usdc.decimals)
   })
 
   it('waits for the token decimals before it builds the transaction', () => {

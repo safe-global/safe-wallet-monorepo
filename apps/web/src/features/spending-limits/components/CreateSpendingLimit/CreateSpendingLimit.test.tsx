@@ -94,7 +94,7 @@ describe('CreateSpendingLimit', () => {
   it('shows the selected token and its balance in the token picker', () => {
     mockOptions([nativeOption])
 
-    renderForm()
+    renderForm({ [SpendingLimitFields.tokenAddress]: nativeOption.address })
 
     expect(screen.getByTestId('spending-limit-token-selector')).toHaveValue('ETH')
     expect(screen.getByText('1 ETH')).toBeInTheDocument()
