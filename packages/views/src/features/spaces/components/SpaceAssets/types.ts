@@ -10,17 +10,12 @@ export type AssetTokenRow = {
 export type AssetPositionRow = {
   id: string
   name: string
+  protocol: string
+  protocolLogoUri?: string | null
+  /** Deposited, staked, reward… */
   type: string
   amount: string
   value: string
-}
-
-export type AssetProtocolRow = {
-  id: string
-  name: string
-  logoUri?: string | null
-  value: string
-  positions: AssetPositionRow[]
 }
 
 export type ChainAssetsState = 'loading' | 'error' | 'ready' | 'inactive' | 'unsupported'

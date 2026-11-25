@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState, type ReactElement } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useState, type ReactElement } from 'react'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
+import SpaceAssetsTable from '@safe-global/views/features/spaces/components/SpaceAssets/SpaceAssetsTable'
 import SpaceAssetsToolbar from '@safe-global/views/features/spaces/components/SpaceAssets/SpaceAssetsToolbar'
 import SpaceAssetsTotals from '@safe-global/views/features/spaces/components/SpaceAssets/SpaceAssetsTotals'
 import {
@@ -41,6 +42,21 @@ const SpaceAssets = (): ReactElement => {
   const [filters, setFilters] = useState<AssetsFilters>(NO_ASSETS_FILTERS)
   const [reports, setReports] = useState<Record<string, ChainAssetsReport>>({})
   const [retryKey, setRetryKey] = useState(0)
+  const [collapsedSafes, setCollapsedSafes] = useState<ReadonlySet<string>>(new Set())
+  const [panel, setPanel] = useState<HTMLDivElement | null>(null)
+  const [scrollsX, setScrollsX] = useState(false)
+
+  // Pins the first column only while the table is wider than its panel, as in the queue
+  useLayoutEffect(() => {
+    const table = panel?.querySelector('table')
+    if (!panel || !table) return
+    const update = () => setScrollsX(panel.scrollWidth > panel.clientWidth)
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(panel)
+    observer.observe(table)
+    return () => observer.disconnect()
+  }, [panel])
 
   const safes = useMemo(() => toAssetsSafes(flattenSafeItems(allSafes)), [allSafes])
   const shownSafes = useMemo(() => filterAssetsSafes(safes, filters), [safes, filters])
@@ -65,6 +81,24 @@ const SpaceAssets = (): ReactElement => {
     const report = reports[toAssetsKey(chainId, safeAddress)]
     return report?.state === 'error' || !!report?.isPartial
   })
+
+  const isCollapsed = (address: string) => collapsedSafes.has(address.toLowerCase())
+  const allCollapsed = shownSafes.length > 0 && shownSafes.every((safe) => isCollapsed(safe.address))
+  const toggleSafe = (address: string) =>
+    setCollapsedSafes((current) => {
+      const next = new Set(current)
+      if (!next.delete(address.toLowerCase())) next.add(address.toLowerCase())
+      return next
+    })
+  const toggleAll = () =>
+    setCollapsedSafes((current) => {
+      const next = new Set(current)
+      for (const { address } of shownSafes) {
+        if (allCollapsed) next.delete(address.toLowerCase())
+        else next.add(address.toLowerCase())
+      }
+      return next
+    })
 
   if (isError) return <SpaceAssetsLoadError onRetry={refetch} />
   if (isLoading) return <SkeletonTxList />
@@ -97,11 +131,17 @@ const SpaceAssets = (): ReactElement => {
             </div>
           )}
 
-          <div className="flex flex-col gap-3">
+          <SpaceAssetsTable
+            panelRef={setPanel}
+            scrollsX={scrollsX}
+            collapseAll={{ allCollapsed, count: shownSafes.length, onToggle: toggleAll }}
+          >
             {shownSafes.map((safe, index) => (
               <SafeAssets
                 key={safe.address}
                 safe={safe}
+                collapsed={isCollapsed(safe.address)}
+                onToggle={() => toggleSafe(safe.address)}
                 firstIndex={firstIndexes[index]}
                 loadLimit={loadLimit}
                 retryKey={retryKey}
@@ -109,7 +149,7 @@ const SpaceAssets = (): ReactElement => {
                 onReport={onReport}
               />
             ))}
-          </div>
+          </SpaceAssetsTable>
         </>
       )}
     </div>

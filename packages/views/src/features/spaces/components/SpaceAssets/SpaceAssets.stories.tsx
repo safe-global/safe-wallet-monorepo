@@ -1,13 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import ChainAssetsSection from './ChainAssetsSection'
-import SafeAssetsBand from './SafeAssetsBand'
+import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
+import SafeBandTitle, { SafeBandCard } from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandTitle'
+import ChainAssetsRows from './ChainAssetsRows'
+import { ASSETS_COLUMNS } from './columns'
+import SpaceAssetsTable from './SpaceAssetsTable'
 import SpaceAssetsToolbar from './SpaceAssetsToolbar'
 import SpaceAssetsTotals from './SpaceAssetsTotals'
 import { SpaceAssetsEmpty, SpaceAssetsLoadError, SpaceAssetsNoMatches } from './SpaceAssetsStates'
-import type { AssetProtocolRow, AssetTokenRow } from './types'
+import type { AssetPositionRow, AssetTokenRow } from './types'
 
 const SAFE_ADDRESS = '0x8675B754342754A30A2AeF474D114d8460bca19b'
+const OTHER_SAFE_ADDRESS = '0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01'
 const ETHEREUM = { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }
 const GNOSIS = { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null, shortName: 'gno' }
 
@@ -17,23 +21,53 @@ const TOKENS: AssetTokenRow[] = [
   { id: 'safe', name: 'Safe Token', symbol: 'SAFE', amount: '50,000', value: '$ 9,500' },
 ]
 
-const PROTOCOLS: AssetProtocolRow[] = [
+const POSITIONS: AssetPositionRow[] = [
   {
-    id: 'lending',
-    name: 'Lending protocol',
+    id: 'supplied',
+    name: 'USD Coin',
+    protocol: 'Lending protocol',
+    type: 'Deposited',
+    amount: '25,000 USDC',
     value: '$ 25,000',
-    positions: [{ id: 'supplied', name: 'USD Coin', type: 'Deposited', amount: '25,000 USDC', value: '$ 25,000' }],
   },
-  {
-    id: 'staking',
-    name: 'Staking protocol',
-    value: '$ 6,600',
-    positions: [
-      { id: 'staked', name: 'Ether', type: 'Staked', amount: '2 ETH', value: '$ 6,600' },
-      { id: 'reward', name: 'Ether', type: 'Reward', amount: '0.01 ETH', value: '$ 33' },
-    ],
-  },
+  { id: 'staked', name: 'Ether', protocol: 'Staking protocol', type: 'Staked', amount: '2 ETH', value: '$ 6,600' },
+  { id: 'reward', name: 'Ether', protocol: 'Staking protocol', type: 'Reward', amount: '0.01 ETH', value: '$ 33' },
 ]
+
+const Band = ({
+  address,
+  name,
+  total,
+  collapsed = false,
+}: {
+  address: string
+  name: string
+  total: string
+  collapsed?: boolean
+}) => (
+  <SafeBandRow
+    safeAddress={address}
+    title={
+      <SafeBandTitle
+        safeAddress={address}
+        name={name}
+        card={
+          <SafeBandCard
+            name={name}
+            address={address}
+            details={[{ label: 'Networks', value: 'Ethereum, Gnosis Chain' }]}
+          />
+        }
+        chains={[ETHEREUM, GNOSIS].map((chain) => ({ chain, collapsed, label: `Collapse ${name}`, onClick: fn() }))}
+      />
+    }
+    collapsed={collapsed}
+    summary={total}
+    showSummary="always"
+    onToggle={fn()}
+    columnCount={ASSETS_COLUMNS.length}
+  />
+)
 
 const meta = {
   title: 'Features/Spaces/Assets/Views',
@@ -43,76 +77,100 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** A Safe on two networks: tokens and positions on Ethereum, tokens only on Gnosis Chain */
-export const SafeWithAssets: Story = {
+/** Two Safes: Treasury with tokens and positions on Ethereum and tokens on Gnosis Chain, Operations collapsed */
+export const Table: Story = {
   render: () => (
-    <SafeAssetsBand
-      address={SAFE_ADDRESS}
-      name="Treasury"
-      chains={[ETHEREUM, GNOSIS]}
-      total="$ 109,150"
-      collapsed={false}
-      onToggle={fn()}
-    >
-      <ChainAssetsSection
+    <SpaceAssetsTable collapseAll={{ allCollapsed: false, count: 2, onToggle: fn() }}>
+      <Band address={SAFE_ADDRESS} name="Treasury" total="$ 109,183" />
+      <ChainAssetsRows
         chain={ETHEREUM}
         state="ready"
-        total="$ 100,750"
+        total="$ 100,783"
         tokens={TOKENS}
-        protocols={PROTOCOLS}
+        positions={POSITIONS}
+        collapsed={false}
+        onToggle={fn()}
         onRetry={fn()}
       />
-      <ChainAssetsSection
+      <ChainAssetsRows
         chain={GNOSIS}
         state="ready"
         total="$ 8,400"
         tokens={[{ id: 'xdai', name: 'xDAI', symbol: 'XDAI', amount: '8,400', value: '$ 8,400' }]}
+        positions={[]}
+        collapsed={false}
+        onToggle={fn()}
         onRetry={fn()}
       />
-    </SafeAssetsBand>
+      <Band address={OTHER_SAFE_ADDRESS} name="Operations" total="$ 12,000" collapsed />
+    </SpaceAssetsTable>
   ),
 }
 
-export const SafeCollapsed: Story = {
-  render: () => (
-    <SafeAssetsBand
-      address={SAFE_ADDRESS}
-      name="Treasury"
-      chains={[ETHEREUM, GNOSIS]}
-      total="$ 109,150"
-      collapsed
-      onToggle={fn()}
-    >
-      {null}
-    </SafeAssetsBand>
-  ),
-}
-
-/** One network per state: loading, failed, not activated, empty, unsupported and positions failed */
+/** One network per state: loading, failed, not activated, unsupported, empty and positions failed */
 export const NetworkStates: Story = {
   tags: ['skip-visual-test'],
   render: () => (
-    <SafeAssetsBand
-      address={SAFE_ADDRESS}
-      name="Operations"
-      chains={[ETHEREUM, GNOSIS]}
-      collapsed={false}
-      onToggle={fn()}
-    >
-      <ChainAssetsSection chain={ETHEREUM} state="loading" tokens={[]} onRetry={fn()} />
-      <ChainAssetsSection chain={GNOSIS} state="error" tokens={[]} onRetry={fn()} />
-      <ChainAssetsSection chain={ETHEREUM} state="inactive" tokens={[]} onRetry={fn()} />
-      <ChainAssetsSection chain={GNOSIS} state="ready" total="$ 0" tokens={[]} protocols={[]} onRetry={fn()} />
-      <ChainAssetsSection chain={ETHEREUM} state="unsupported" tokens={[]} onRetry={fn()} />
-      <ChainAssetsSection
-        chain={GNOSIS}
-        state="ready"
-        total="$ 8,400"
-        tokens={TOKENS.slice(0, 1)}
-        positionsFailed
+    <SpaceAssetsTable>
+      <Band address={SAFE_ADDRESS} name="Operations" total="" />
+      <ChainAssetsRows
+        chain={ETHEREUM}
+        state="loading"
+        tokens={[]}
+        positions={[]}
+        collapsed={false}
+        onToggle={fn()}
         onRetry={fn()}
       />
-    </SafeAssetsBand>
+      <ChainAssetsRows
+        chain={GNOSIS}
+        state="error"
+        tokens={[]}
+        positions={[]}
+        collapsed={false}
+        onToggle={fn()}
+        onRetry={fn()}
+      />
+      <ChainAssetsRows
+        chain={ETHEREUM}
+        state="inactive"
+        tokens={[]}
+        positions={[]}
+        collapsed={false}
+        onToggle={fn()}
+        onRetry={fn()}
+      />
+      <ChainAssetsRows
+        chain={GNOSIS}
+        state="unsupported"
+        tokens={[]}
+        positions={[]}
+        collapsed={false}
+        onToggle={fn()}
+        onRetry={fn()}
+      />
+      <ChainAssetsRows
+        chain={ETHEREUM}
+        state="ready"
+        total="$ 0"
+        tokens={[]}
+        positions={[]}
+        collapsed={false}
+        onToggle={fn()}
+        onRetry={fn()}
+      />
+      <ChainAssetsRows
+        chain={GNOSIS}
+        state="ready"
+        total="$ 41,250"
+        tokens={TOKENS.slice(0, 1)}
+        positions={[]}
+        positionsFailed
+        collapsed={false}
+        onToggle={fn()}
+        onRetry={fn()}
+      />
+    </SpaceAssetsTable>
   ),
 }
 

@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { balanceBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { SafeAssets as SafeAssetsResult } from '../../hooks/useSafeAssets'
 import SpaceAssets from './SpaceAssets'
@@ -165,5 +166,57 @@ describe('SpaceAssets', () => {
     render(<SpaceAssets />)
 
     expect(screen.getByText(/assets on this network can.t be shown/i)).toBeInTheDocument()
+  })
+
+  describe('collapsing', () => {
+    const first = faker.finance.ethereumAddress()
+    const second = faker.finance.ethereumAddress()
+
+    beforeEach(() => {
+      givenSpaceSafes(
+        { address: first, chainId: '1' },
+        { address: first, chainId: '100' },
+        { address: second, chainId: '1' },
+      )
+      givenAssets({ [`1:${first}`]: loaded('10'), [`100:${first}`]: loaded('20'), [`1:${second}`]: loaded('5') })
+    })
+
+    it('hides the networks of a collapsed Safe but keeps its value in the totals', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(first)}` }))
+
+      expect(screen.getAllByTestId('space-assets-chain')).toHaveLength(1)
+      expect(within(screen.getByTestId('space-assets-totals')).getAllByText('$ 35')).toHaveLength(2)
+    })
+
+    it('collapses every shown Safe, then expands them again', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.click(screen.getByRole('button', { name: 'Collapse all' }))
+      const afterCollapse = screen.queryAllByTestId('space-assets-chain').length
+      await user.click(screen.getByRole('button', { name: 'Expand all' }))
+
+      expect(afterCollapse).toBe(0)
+      expect(screen.getAllByTestId('space-assets-chain')).toHaveLength(3)
+    })
+
+    it('hides the assets of a collapsed network but keeps its header', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.click(screen.getAllByRole('button', { name: 'Collapse Gnosis Chain' })[0])
+
+      expect(screen.getAllByTestId('space-assets-chain')).toHaveLength(3)
+      expect(screen.getAllByTestId('space-assets-row')).toHaveLength(2)
+    })
+
+    it('shows only the network whose logo is clicked in the Safe band', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.click(screen.getByRole('button', { name: 'Show Gnosis Chain' }))
+
+      expect(screen.getByRole('button', { name: 'Show all 2 networks' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Expand Ethereum' })).toBeInTheDocument()
+    })
   })
 })

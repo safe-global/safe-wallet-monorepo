@@ -8,7 +8,7 @@ import {
   NO_ASSETS_FILTERS,
   toAssetsSafes,
   toAssetsSummary,
-  toProtocolRows,
+  toPositionRows,
   toTokenRows,
 } from './utils'
 
@@ -136,37 +136,31 @@ describe('toTokenRows', () => {
   })
 })
 
-describe('toProtocolRows', () => {
-  it('sorts the protocols by value and names each position type', () => {
-    const lending = protocol('Lending', '10')
-    lending.items = [
-      {
-        name: 'Supplied',
-        items: [
-          {
-            balance: '1000000',
-            fiatBalance: '10',
-            fiatConversion: '1',
-            fiatBalance24hChange: null,
-            position_type: 'deposit',
-            tokenInfo: {
-              address: address(),
-              decimals: 6,
-              logoUri: '',
-              name: 'USD Coin',
-              symbol: 'USDC',
-              type: 'ERC20',
-            },
-          },
-        ],
-      },
-    ]
+const position = (name: string, fiatBalance: string, positionType: 'deposit' | 'staked') => ({
+  balance: '1000000',
+  fiatBalance,
+  fiatConversion: '1',
+  fiatBalance24hChange: null,
+  position_type: positionType,
+  tokenInfo: { address: address(), decimals: 6, logoUri: '', name, symbol: 'USDC', type: 'ERC20' as const },
+})
 
-    const rows = toProtocolRows([lending, protocol('Staking', '50')], 'USD')
+describe('toPositionRows', () => {
+  it('lists the positions of every protocol, highest value first, with their protocol and type', () => {
+    const lending = {
+      ...protocol('Lending', '10'),
+      items: [{ name: 'Supplied', items: [position('USD Coin', '10', 'deposit')] }],
+    }
+    const staking = {
+      ...protocol('Staking', '50'),
+      items: [{ name: 'Staked', items: [position('Staked USDC', '50', 'staked')] }],
+    }
 
-    expect(rows.map((row) => row.name)).toEqual(['Staking', 'Lending'])
-    expect(rows[1].positions).toEqual([
-      expect.objectContaining({ name: 'USD Coin', type: 'Deposited', amount: '1 USDC' }),
+    const rows = toPositionRows([lending, staking], 'USD')
+
+    expect(rows).toEqual([
+      expect.objectContaining({ name: 'Staked USDC', protocol: 'Staking', type: 'Staking' }),
+      expect.objectContaining({ name: 'USD Coin', protocol: 'Lending', type: 'Deposited', amount: '1 USDC' }),
     ])
   })
 })

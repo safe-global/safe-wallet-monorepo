@@ -6,7 +6,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import type {
-  AssetProtocolRow,
+  AssetPositionRow,
   AssetTokenRow,
   ChainAssetsState,
 } from '@safe-global/views/features/spaces/components/SpaceAssets/types'
@@ -98,21 +98,21 @@ export const toTokenRows = (items: Balances['items'], currency: string): AssetTo
       value: formatCurrency(item.fiatBalance, currency),
     }))
 
-export const toProtocolRows = (protocols: Protocol[], currency: string): AssetProtocolRow[] =>
-  [...protocols]
-    .sort((a, b) => toNumber(b.fiatTotal) - toNumber(a.fiatTotal))
-    .map((protocol) => ({
-      id: protocol.protocol,
-      name: protocol.protocol_metadata.name,
-      logoUri: protocol.protocol_metadata.icon.url,
-      value: formatCurrency(protocol.fiatTotal, currency),
-      positions: protocol.items.flatMap((group, groupIndex) =>
+export const toPositionRows = (protocols: Protocol[], currency: string): AssetPositionRow[] =>
+  protocols
+    .flatMap((protocol) =>
+      protocol.items.flatMap((group, groupIndex) =>
         group.items.map((position, index) => ({
-          id: `${groupIndex}:${index}:${position.tokenInfo.address}`,
+          id: `${protocol.protocol}:${groupIndex}:${index}:${position.tokenInfo.address}`,
           name: position.tokenInfo.name,
+          protocol: protocol.protocol_metadata.name,
+          protocolLogoUri: protocol.protocol_metadata.icon.url,
           type: getReadablePositionType(position.position_type),
           amount: `${formatVisualAmount(position.balance, position.tokenInfo.decimals)} ${position.tokenInfo.symbol}`,
+          fiat: toNumber(position.fiatBalance),
           value: formatCurrency(position.fiatBalance, currency),
         })),
       ),
-    }))
+    )
+    .sort((a, b) => b.fiat - a.fiat)
+    .map(({ fiat: _fiat, ...row }) => row)
