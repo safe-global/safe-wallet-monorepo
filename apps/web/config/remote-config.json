@@ -495,8 +495,8 @@
     {
       "key": "WORKSPACE_ONBOARDING_V2",
       "description": "New workspace setup wizard in the onboarding.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
+      "scope": "GLOBAL",
+      "enabled": true,
       "defaultChains": []
     }
   ]
