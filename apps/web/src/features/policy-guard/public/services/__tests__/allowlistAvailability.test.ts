@@ -1,7 +1,6 @@
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { chainBuilder } from '@/tests/builders/chains'
-import { isAllowlistEnabled, isAllowlistOptedIn, isSafeEligibleForAllowlist } from '../allowlistAvailability'
+import { isAllowlistEnabled, isSafeEligibleForAllowlist } from '../allowlistAvailability'
 
 const sepolia = chainBuilder()
   .with({ chainId: '11155111', features: [FEATURES.POLICY_RECIPIENT_ALLOWLIST] })
@@ -76,20 +75,5 @@ describe('isSafeEligibleForAllowlist', () => {
 
   it('treats a Safe without deployment info as deployed', () => {
     expect(isSafeEligibleForAllowlist({ version: '1.5.0' }, sepolia)).toEqual({ eligible: true })
-  })
-})
-
-describe('isAllowlistOptedIn', () => {
-  it('is opted in only when POLICY_RECIPIENT_ALLOWLIST is listed', () => {
-    expect(isAllowlistOptedIn({ experimentalFeatures: ['POLICY_RECIPIENT_ALLOWLIST'] })).toBe(true)
-    expect(isAllowlistOptedIn({ experimentalFeatures: [] })).toBe(false)
-  })
-
-  it('is not opted in for an undefined space', () => {
-    expect(isAllowlistOptedIn(undefined)).toBe(false)
-  })
-
-  it('is not opted in when the gateway omits experimentalFeatures', () => {
-    expect(isAllowlistOptedIn({} as GetSpaceResponse)).toBe(false)
   })
 })

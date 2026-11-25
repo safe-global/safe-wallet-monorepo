@@ -402,13 +402,6 @@
       "defaultChains": []
     },
     {
-      "key": "WORKSPACES_EXPERIMENTAL_FEATURES",
-      "description": "Experimental settings page for Workspaces.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
-      "defaultChains": []
-    },
-    {
       "key": "WORKSPACES_ADDRESS_BOOK_V2",
       "description": "Version 2 of the Workspace address book.",
       "scope": "PER_CHAIN",
