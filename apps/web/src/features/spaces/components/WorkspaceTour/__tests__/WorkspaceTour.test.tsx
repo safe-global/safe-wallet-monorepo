@@ -11,6 +11,7 @@ const mockIsBelowMd = jest.fn()
 const mockIsSpaceRoute = jest.fn()
 const mockIsActiveMember = jest.fn()
 const mockWorkspaceLock = jest.fn()
+const mockIsTrialReminderPending = jest.fn()
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -36,6 +37,8 @@ jest.mock('../../../public/hooks/useSpaceMembers', () => ({
 jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockSpaceId }))
 
 jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockWorkspaceLock() }))
+
+jest.mock('../../../hooks/useTrialReminder', () => ({ useIsTrialReminderPending: () => mockIsTrialReminderPending() }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/users'),
@@ -70,12 +73,26 @@ describe('WorkspaceTour', () => {
     mockIsSpaceRoute.mockReturnValue(true)
     mockIsActiveMember.mockReturnValue(true)
     mockWorkspaceLock.mockReturnValue(UNLOCKED)
+    mockIsTrialReminderPending.mockReturnValue(false)
     const { result } = renderHook(() => useWorkspaceTourOpen())
     act(() => result.current.close())
   })
 
   it('welcomes a member on their first visit to the workspace', () => {
     renderTour()
+
+    expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
+  })
+
+  it('waits for the free access reminder to be closed before welcoming the member', () => {
+    mockIsTrialReminderPending.mockReturnValue(true)
+    const { rerender } = renderTour()
+
+    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+
+    mockIsTrialReminderPending.mockReturnValue(false)
+    rerender(tourWithSettingsSection)
 
     expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
   })

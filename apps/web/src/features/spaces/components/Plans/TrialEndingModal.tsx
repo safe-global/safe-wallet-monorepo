@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -12,9 +12,10 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import { useCurrentMembership, useIsAdmin } from '../../public/hooks/useSpaceMembers'
+import { useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
-import { markTrialReminderSeen, wasTrialReminderSeen } from '../../public/store/trialReminder'
+import { markTrialReminderSeen } from '../../public/store/trialReminder'
+import { setTrialReminderShowing, useIsTrialReminderDue } from '../../hooks/useTrialReminder'
 import { useWorkspaceTourOpen } from '../WorkspaceTour/hooks/useWorkspaceTourOpen'
 import ChangePlanFlow from './ChangePlanFlow'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
@@ -143,25 +144,21 @@ const TrialEndingChooser = ({
 
 /** Mounted on every Workspace page; shows once per login when the trial enters its last week. */
 export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
-  const { plan, seats, subscription, isTrialing, isTrialEndingSoon, hasPaymentMethod } = useSpacePlan(spaceId)
-  const membership = useCurrentMembership(spaceId)
+  const { plan, seats, subscription, isTrialing, isTrialEndingSoon } = useSpacePlan(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
+  const isDue = useIsTrialReminderDue(spaceId)
   const { isOpen: isTourOpen } = useWorkspaceTourOpen()
   const [isOpen, setIsOpen] = useState(false)
 
-  const close = useCallback(() => {
-    markTrialReminderSeen(spaceId)
-    setIsOpen(false)
-  }, [spaceId])
+  useEffect(() => {
+    if (isDue) setIsOpen(true)
+  }, [isDue])
 
   useEffect(() => {
-    if (isTrialEndingSoon && !hasPaymentMethod && membership && !wasTrialReminderSeen(spaceId)) setIsOpen(true)
-  }, [isTrialEndingSoon, hasPaymentMethod, membership, spaceId])
-
-  useEffect(() => {
-    if (isTourOpen && isOpen) close()
-  }, [isTourOpen, isOpen, close])
+    setTrialReminderShowing(isOpen)
+    return () => setTrialReminderShowing(false)
+  }, [isOpen])
 
   if (!isOpen || isTourOpen || !plan || !subscription) return null
 
@@ -174,7 +171,10 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
       currentPlan={currentPlan}
       seatsQuota={seats?.quota}
       isAdmin={isAdmin}
-      onClose={close}
+      onClose={() => {
+        markTrialReminderSeen(spaceId)
+        setIsOpen(false)
+      }}
     />
   )
 }

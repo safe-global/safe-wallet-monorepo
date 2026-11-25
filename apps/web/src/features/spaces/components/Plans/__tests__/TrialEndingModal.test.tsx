@@ -246,23 +246,16 @@ describe('TrialEndingModal', () => {
     expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
   })
 
-  it('closes the reminder for good when the workspace tour starts over it', () => {
-    const { rerender } = render(<TrialEndingModal spaceId={SPACE_ID} />)
-    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
-
+  it('waits under a running workspace tour and shows once the tour is closed', () => {
     mockIsTourOpen.mockReturnValue(true)
+    const { rerender } = render(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(storage.safeProTrialReminderSeen).toBeUndefined()
+
+    mockIsTourOpen.mockReturnValue(false)
     rerender(<TrialEndingModal spaceId={SPACE_ID} />)
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
-  })
-
-  it('does not show the reminder over a workspace tour that is already running', () => {
-    mockIsTourOpen.mockReturnValue(true)
-
-    render(<TrialEndingModal spaceId={SPACE_ID} />)
-
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
   })
 })
