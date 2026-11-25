@@ -10,6 +10,7 @@ import AllowlistDrawer from '../AllowlistDrawer/AllowlistDrawer'
 import ConfirmAllowlistFlow from '../ConfirmAllowlistFlow'
 import { usePendingTransactionLinks } from '../SpendingLimitDetails/hooks/usePendingSpendingLimitActions'
 import { usePolicyDetailsBase } from '../hooks/usePolicyDetailsBase'
+import { useIsBehindLowerNonce } from './hooks/useIsBehindLowerNonce'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 
 const ENFORCED_BY = 'Safe policy contract'
@@ -41,6 +42,11 @@ const PendingAllowlistDetails = ({
     base.viewer,
     isUnlisted,
   )
+  const signed = confirmationsSubmitted ?? policy.confirmationsSubmitted
+  const isBehindLowerNonce = useIsBehindLowerNonce(
+    policy,
+    policy.status === 'pending' && !outcome && signed >= policy.confirmationsRequired,
+  )
   const { txFlow, setTxFlow } = useContext(TxModalContext)
   const onReviewTransaction =
     txSummary && !isUnlisted
@@ -58,11 +64,7 @@ const PendingAllowlistDetails = ({
   const drawerPolicy: QueuedAllowlistPolicy | FailedAllowlistPolicy =
     policy.status === 'failed'
       ? { ...policy, status: 'failed' }
-      : {
-          ...policy,
-          status: 'pending',
-          confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
-        }
+      : { ...policy, status: 'pending', confirmationsSubmitted: signed }
 
   return (
     <AllowlistDrawer
@@ -77,6 +79,7 @@ const PendingAllowlistDetails = ({
       transactionLink={transactionLink}
       onReviewTransaction={onReviewTransaction}
       outcome={outcome}
+      isBehindLowerNonce={isBehindLowerNonce}
     />
   )
 }

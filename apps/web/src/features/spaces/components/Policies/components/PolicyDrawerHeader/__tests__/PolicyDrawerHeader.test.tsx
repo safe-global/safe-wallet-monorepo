@@ -1,4 +1,4 @@
-import { Wallet } from 'lucide-react'
+import { Users, Wallet } from 'lucide-react'
 import { render, screen } from '@/tests/test-utils'
 import PolicyDrawerHeader from '../PolicyDrawerHeader'
 
@@ -20,5 +20,31 @@ describe('PolicyDrawerHeader', () => {
 
     expect(screen.getByTestId('policy-status-skeleton')).toBeInTheDocument()
     expect(screen.queryByText('Active')).not.toBeInTheDocument()
+  })
+
+  it('should, when an allowlist is in a change, show the change beside the status of the change', () => {
+    render(
+      <PolicyDrawerHeader
+        icon={Users}
+        title="Allowlist"
+        status={{ state: 'removal-in-delay', change: 'removal', label: 'In delay', variant: 'warning' }}
+      />,
+    )
+
+    expect(screen.getByTestId('policy-change-removal')).toHaveTextContent('Removal')
+    expect(screen.getByTestId('policy-status-removal-in-delay')).toHaveTextContent('In delay')
+  })
+
+  it('should, when an allowlist is in no change, show its status alone', () => {
+    render(
+      <PolicyDrawerHeader
+        icon={Users}
+        title="Allowlist"
+        status={{ state: 'active', label: 'Active', variant: 'success' }}
+      />,
+    )
+
+    expect(screen.getByTestId('allowlist-status-tags')).toHaveTextContent(/^Active$/)
+    expect(screen.queryByTestId(/^policy-change-/)).not.toBeInTheDocument()
   })
 })

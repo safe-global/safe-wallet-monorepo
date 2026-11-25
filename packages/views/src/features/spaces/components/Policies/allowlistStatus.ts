@@ -26,34 +26,53 @@ export type AllowlistState =
   | 'unenforced'
   | 'failed'
 
+/** The change the allowlist is in: the first of the two tags of its status. */
+export type AllowlistChange = 'setup' | 'edit' | 'removal' | 'guard-removal'
+
+export const ALLOWLIST_CHANGE_LABEL: Record<AllowlistChange, string> = {
+  setup: 'Setup',
+  edit: 'Edit',
+  removal: 'Removal',
+  'guard-removal': 'Guard removal',
+}
+
 type AllowlistStatusCopy = {
+  /** The status of the change, the second tag; the only tag of an allowlist that is in no change. */
   label: string
   variant: PolicyStatusVariant
   /** The label ends in `n/m` once the number of signatures is known. */
   countsSignatures?: true
 }
 
+const PENDING: AllowlistStatusCopy = { label: 'Pending', variant: 'warning', countsSignatures: true }
+const READY_TO_EXECUTE: AllowlistStatusCopy = { label: 'Ready to execute', variant: 'info' }
+const IN_DELAY: AllowlistStatusCopy = { label: 'In delay', variant: 'warning' }
+const READY_TO_APPLY: AllowlistStatusCopy = { label: 'Ready to apply', variant: 'info' }
+const APPLY_PENDING: AllowlistStatusCopy = { label: 'Apply pending', variant: 'warning', countsSignatures: true }
+const APPLY_READY_TO_EXECUTE: AllowlistStatusCopy = { label: 'Apply ready to execute', variant: 'info' }
+const EXPIRED: AllowlistStatusCopy = { label: 'Expired', variant: 'secondary' }
+
 export const ALLOWLIST_STATUS: Record<AllowlistState, AllowlistStatusCopy> = {
-  'setup-pending': { label: 'Setup pending', variant: 'warning', countsSignatures: true },
-  'setup-ready-to-execute': { label: 'Setup ready to execute', variant: 'info' },
+  'setup-pending': PENDING,
+  'setup-ready-to-execute': READY_TO_EXECUTE,
   processing: { label: 'Processing', variant: 'warning' },
   active: { label: 'Active', variant: 'success' },
-  'edit-pending': { label: 'Edit pending', variant: 'warning', countsSignatures: true },
-  'edit-ready-to-execute': { label: 'Edit ready to execute', variant: 'info' },
-  'edit-in-delay': { label: 'Edit in delay', variant: 'warning' },
-  'edit-ready-to-apply': { label: 'Edit ready to apply', variant: 'info' },
-  'edit-apply-pending': { label: 'Edit apply pending', variant: 'warning', countsSignatures: true },
-  'edit-apply-ready-to-execute': { label: 'Edit apply ready to execute', variant: 'info' },
-  'edit-expired': { label: 'Edit expired', variant: 'secondary' },
-  'removal-pending': { label: 'Removal pending', variant: 'warning', countsSignatures: true },
-  'removal-ready-to-execute': { label: 'Removal ready to execute', variant: 'info' },
-  'removal-in-delay': { label: 'Removal in delay', variant: 'warning' },
-  'removal-ready-to-apply': { label: 'Removal ready to apply', variant: 'info' },
-  'removal-apply-pending': { label: 'Removal apply pending', variant: 'warning', countsSignatures: true },
-  'removal-apply-ready-to-execute': { label: 'Removal apply ready to execute', variant: 'info' },
-  'removal-expired': { label: 'Removal expired', variant: 'secondary' },
-  'guard-removal-pending': { label: 'Guard removal pending', variant: 'warning', countsSignatures: true },
-  'guard-removal-ready-to-execute': { label: 'Guard removal ready to execute', variant: 'info' },
+  'edit-pending': PENDING,
+  'edit-ready-to-execute': READY_TO_EXECUTE,
+  'edit-in-delay': IN_DELAY,
+  'edit-ready-to-apply': READY_TO_APPLY,
+  'edit-apply-pending': APPLY_PENDING,
+  'edit-apply-ready-to-execute': APPLY_READY_TO_EXECUTE,
+  'edit-expired': EXPIRED,
+  'removal-pending': PENDING,
+  'removal-ready-to-execute': READY_TO_EXECUTE,
+  'removal-in-delay': IN_DELAY,
+  'removal-ready-to-apply': READY_TO_APPLY,
+  'removal-apply-pending': APPLY_PENDING,
+  'removal-apply-ready-to-execute': APPLY_READY_TO_EXECUTE,
+  'removal-expired': EXPIRED,
+  'guard-removal-pending': PENDING,
+  'guard-removal-ready-to-execute': READY_TO_EXECUTE,
   unenforced: { label: 'Not enforced', variant: 'secondary' },
   failed: { label: 'Failed', variant: 'destructive' },
 }
@@ -62,13 +81,15 @@ export type AllowlistSignatures = { signed: number; required: number }
 
 export type AllowlistStatusBadge = {
   state: AllowlistState
+  /** Unset while the allowlist is in no change, which shows the status alone. */
+  change?: AllowlistChange
   label: string
   variant: PolicyStatusVariant
   /** What the allowlist waits for; unset when it waits for nothing. */
   tooltip?: string
 }
 
-/** `Edit pending · 1/2`. */
+/** `Pending · 1/2`. */
 export const formatAllowlistStatus = (state: AllowlistState, signatures?: AllowlistSignatures): string => {
   const { label, countsSignatures } = ALLOWLIST_STATUS[state]
 

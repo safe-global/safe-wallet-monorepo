@@ -46,10 +46,13 @@ const openOnlyRow = async ({ user }: ReturnType<typeof renderPage>) => {
   return screen.findByRole('dialog')
 }
 
-const openRowWithStatus = async ({ user }: ReturnType<typeof renderPage>, status: string) => {
-  const statusCell = (await screen.findAllByTestId('policy-cell-status')).find((cell) => cell.textContent === status)
-  const row = statusCell?.closest('tr')
-  if (!row) throw new Error(`No row with status ${status}`)
+const openRowWithStatus = async ({ user }: ReturnType<typeof renderPage>, change: string, status: string) => {
+  const row = (await screen.findAllByTestId('table-row')).find(
+    (candidate) =>
+      within(candidate).getByTestId('policy-cell-change').textContent === change &&
+      within(candidate).getByTestId('policy-cell-status').textContent === status,
+  )
+  if (!row) throw new Error(`No row with change ${change} and status ${status}`)
   await user.click(within(row).getByTestId('policy-open-button'))
   return screen.findByRole('dialog')
 }
@@ -122,7 +125,7 @@ describe('Policies page with delayed allowlist requests', () => {
     expect(within(drawer).queryByRole('button', { name: /Apply|Review transaction/ })).not.toBeInTheDocument()
   })
 
-  it('shows an apply in signing as apply pending with its signatures, and its panel counts them', async () => {
+  it('should, when the apply of an edit waits for signatures, show edit and apply pending with its signatures, and its panel counts them', async () => {
     serveAllowlistWorkspace(workspace, {
       pending: [
         delayedGuardRequest(workspace, {
@@ -142,11 +145,47 @@ describe('Policies page with delayed allowlist requests', () => {
     })
     const view = renderPage(workspace)
 
-    expect(await screen.findByTestId('policy-cell-status')).toHaveTextContent('Edit apply pending · 1/2')
+    expect(await screen.findByTestId('policy-cell-status')).toHaveTextContent('Apply pending · 1/2')
+    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
     const drawer = await openOnlyRow(view)
 
     expect(within(drawer).getByText('Pending signatures')).toBeInTheDocument()
     expect(within(drawer).getByText('1 of 2 signatures')).toBeInTheDocument()
+  })
+
+  it('should, when the fully signed apply waits for a lower nonce, keep it ready to execute and send the user to the queue first', async () => {
+    serveAllowlistWorkspace(workspace, {
+      pending: [
+        delayedGuardRequest(workspace, {
+          status: 'application-ready',
+          readyAt: nowSeconds() - HOUR,
+          expiresAt: nowSeconds() + 6 * DAY,
+          transaction: {
+            safeTxHash: faker.string.hexadecimal({ length: 64, casing: 'lower' }),
+            nonce: workspace.safe.nonce + faker.number.int({ min: 1, max: 5 }),
+            confirmations: 2,
+            confirmationsRequired: 2,
+            proposedAt: nowSeconds() - HOUR,
+            proposer: workspace.wallet.address,
+          },
+        }),
+      ],
+    })
+    const view = renderPage(workspace)
+
+    expect(await screen.findByTestId('policy-cell-status')).toHaveTextContent('Apply ready to execute')
+    const drawer = await openOnlyRow(view)
+
+    expect(
+      await within(drawer).findByText(
+        'First execute the transactions with a lower nonce in the queue of this Safe account.',
+      ),
+    ).toBeInTheDocument()
+    expect(within(drawer).getByRole('link', { name: 'Open queue' })).toHaveAttribute(
+      'href',
+      expect.stringMatching(/^\/transactions\/queue\?safe=sep(%3A|:)0x/),
+    )
+    expect(within(drawer).getByRole('button', { name: 'Review transaction' })).toBeDisabled()
   })
 
   it("should show the request on the Safe's one allowlist row as an edit in delay, when the Safe already has an allowlist", async () => {
@@ -160,7 +199,8 @@ describe('Policies page with delayed allowlist requests', () => {
 
     const drawer = await openOnlyRow(view)
 
-    expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Edit in delay')
+    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('In delay')
     expect(within(drawer).getByText(/^Your changes can be applied in (9|10) minutes$/)).toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: /^Apply in (9|10) minutes$/ })).toBeDisabled()
   })
@@ -187,7 +227,7 @@ describe('Policies page with delayed allowlist requests', () => {
     })
     const view = renderPage(workspace)
 
-    const drawer = await openRowWithStatus(view, 'Removal in delay')
+    const drawer = await openRowWithStatus(view, 'Removal', 'In delay')
     await view.user.click(within(drawer).getByRole('button', { name: 'Show recipient details' }))
     const [listed, ...others] = within(drawer).getAllByTestId('allowlist-recipient')
 
@@ -223,7 +263,7 @@ describe('Policies page with delayed allowlist requests', () => {
     )
     const view = renderPage(workspace)
 
-    const drawer = await openRowWithStatus(view, 'Edit expired')
+    const drawer = await openRowWithStatus(view, 'Edit', 'Expired')
     await view.user.click(within(drawer).getByRole('button', { name: 'Discard' }))
 
     await waitFor(() => expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Active'))

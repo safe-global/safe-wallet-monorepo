@@ -21,6 +21,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import {
   APPLIED_ON_EXECUTION_LINE,
+  LOWER_NONCE_HELPER,
   NOT_A_SIGNER_EDIT_HELPER,
   OUTCOME_TITLE,
   PENDING_BANNER_TITLE,
@@ -37,6 +38,7 @@ import {
   REMOVE_GUARD_NOT_A_SIGNER_HELPER,
   UNENFORCED_BANNER_LINE,
   UNENFORCED_BANNER_TITLE,
+  lowerNonceLine,
   outcomeLine,
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
@@ -86,9 +88,12 @@ export type UnenforcedAllowlistDrawerState = {
   bannerLine2: string
 }
 
+/** Every signature is in, but a transaction with a lower nonce in the Safe's queue has to execute first. */
+export type AllowlistPendingDrawerState = PendingDrawerState & { waitsForLowerNonce?: true }
+
 export type AllowlistDrawerState =
   | ActiveDrawerState
-  | PendingDrawerState
+  | AllowlistPendingDrawerState
   | ClosedDrawerState
   | ScheduledDrawerState
   | ReadyToApplyDrawerState
@@ -164,7 +169,14 @@ const resolveScheduled = (
   return { kind: 'scheduled', operation, action: 'apply-later', disabled: true }
 }
 
-const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName: string): PendingDrawerState => {
+const resolvePending = (
+  policy: QueuedAllowlistPolicy,
+  viewer: Viewer,
+  safeName: string,
+  isBehindLowerNonce: boolean,
+): AllowlistPendingDrawerState => {
+  const isFullySigned = policy.confirmationsSubmitted >= policy.confirmationsRequired
+  const waitsForLowerNonce = isFullySigned && isBehindLowerNonce
   const base = {
     kind: 'pending',
     operation: policy.operation,
@@ -172,15 +184,23 @@ const resolvePending = (policy: QueuedAllowlistPolicy, viewer: Viewer, safeName:
       policy.step === 'remove-guard' ? GUARD_REMOVAL_PENDING_BANNER_TITLE : PENDING_BANNER_TITLE[policy.operation],
     signed: policy.confirmationsSubmitted,
     required: policy.confirmationsRequired,
+    ...(waitsForLowerNonce ? { waitsForLowerNonce } : {}),
   } as const
 
   if (!viewer.address) {
-    return { ...base, action: 'connect', bannerLine2: CONNECT_TO_SIGN_LINE, helper: connectHelper(safeName) }
+    return {
+      ...base,
+      action: 'connect',
+      bannerLine2: waitsForLowerNonce ? lowerNonceLine(safeName) : CONNECT_TO_SIGN_LINE,
+      helper: connectHelper(safeName),
+    }
   }
 
   // Anyone can execute a fully signed Safe transaction, so this outranks the signer checks below.
-  if (policy.confirmationsSubmitted >= policy.confirmationsRequired) {
-    return { ...base, action: 'review', bannerLine2: executeLine(policy.operation) }
+  if (isFullySigned) {
+    return waitsForLowerNonce
+      ? { ...base, action: 'review', bannerLine2: lowerNonceLine(safeName), helper: LOWER_NONCE_HELPER }
+      : { ...base, action: 'review', bannerLine2: executeLine(policy.operation) }
   }
 
   if (!viewer.isSigner) return { ...base, action: 'copy-link' }
@@ -224,10 +244,13 @@ export const resolveAllowlistDrawerState = (
   outcome: AllowlistTxOutcome | undefined = inferAllowlistOutcome(policy, Date.now()),
   nowMs: number = Date.now(),
   changeDelay: string = POLICY_CHANGE_DELAY,
+  isBehindLowerNonce = false,
 ): AllowlistDrawerState => {
   if (policy.status === 'failed') return resolveClosed(policy, outcome ?? 'failed', changeDelay)
   if (policy.status === 'pending') {
-    return outcome ? resolveClosed(policy, outcome, changeDelay) : resolvePending(policy, viewer, safeName)
+    return outcome
+      ? resolveClosed(policy, outcome, changeDelay)
+      : resolvePending(policy, viewer, safeName, isBehindLowerNonce)
   }
 
   if (policy.awaitingGuardRemoval) return resolveRemoveGuard(viewer)

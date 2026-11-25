@@ -4,6 +4,7 @@ import { DrawerHeader } from '@safe-global/views/components/common/Drawer/compon
 import { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
+import AllowlistStatusTags from '@safe-global/views/features/spaces/components/Policies/components/AllowlistStatusTags'
 import type { PolicyStatus } from '@safe-global/views/features/spaces/components/Policies/types'
 import type { AllowlistStatusBadge } from '@safe-global/views/features/spaces/components/Policies/allowlistStatus'
 
@@ -14,19 +15,21 @@ export type PolicyDrawerHeaderProps = {
   status?: PolicyStatus | AllowlistStatusBadge | null
 }
 
+const renderStatus = (status: PolicyDrawerHeaderProps['status']): ReactElement | null => {
+  if (status === null) return null
+  if (status === undefined) return <Skeleton className="h-6 w-24 rounded-lg" data-testid="policy-status-skeleton" />
+
+  return typeof status === 'string' ? <PolicyStatusChip status={status} /> : <AllowlistStatusTags badge={status} />
+}
+
 const PolicyDrawerHeader = ({ icon: Icon, title, status }: PolicyDrawerHeaderProps): ReactElement => (
   <DrawerHeader>
-    <div className="flex size-10 items-center justify-center rounded-lg bg-success-subtle">
+    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-success-subtle">
       <Icon className="size-4 text-success-strong" />
     </div>
     <DrawerTitle size="lg">{title}</DrawerTitle>
-    <div className="ml-auto">
-      {status === null ? null : status ? (
-        <PolicyStatusChip {...(typeof status === 'string' ? { status } : { badge: status })} />
-      ) : (
-        <Skeleton className="h-6 w-24 rounded-lg" data-testid="policy-status-skeleton" />
-      )}
-    </div>
+    {/* Takes only the room the title leaves, so two status tags wrap instead of cutting the title */}
+    <div className="flex flex-1 justify-end">{renderStatus(status)}</div>
   </DrawerHeader>
 )
 

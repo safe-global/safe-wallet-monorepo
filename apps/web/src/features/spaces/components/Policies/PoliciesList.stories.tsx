@@ -100,7 +100,7 @@ export const AllowlistChangePending: Story = {
   args: { policies: [mockAllowlistChangePending()] },
 }
 
-/** One allowlist in each state that has a status, sorted with the ones that need the user first. */
+/** One allowlist in each change and status, sorted with the ones that need the user first. */
 export const AllowlistStatuses: Story = {
   args: {
     policies: [
@@ -111,7 +111,9 @@ export const AllowlistStatuses: Story = {
       mockAllowlistChangePending(),
       mockReadyToApplyAllowlist('update'),
       mockPendingAllowlist({ id: 'edit-apply-pending', operation: 'update', step: 'apply' }),
+      mockPendingAllowlist({ id: 'edit-apply-ready', operation: 'update', step: 'apply', confirmationsSubmitted: 2 }),
       mockExpiredRequestAllowlist('update'),
+      mockPendingAllowlist({ id: 'removal-pending', operation: 'remove', step: 'request' }),
       mockAllowlistRemovalScheduled(),
       mockAllowlistAwaitingGuardRemoval(),
       mockPendingAllowlist({

@@ -131,6 +131,81 @@ describe('resolveAllowlistDrawerState', () => {
     ).toMatchObject({ action: 'review', bannerLine2: 'Execute the transaction to activate.' })
   })
 
+  it('should, when a fully signed transaction waits for a lower nonce, tell to execute those first and hold the review', () => {
+    const state = resolveAllowlistDrawerState(
+      mockFullySignedPendingAllowlist(),
+      MOCK_VIEWERS.signer,
+      'Payroll',
+      undefined,
+      Date.now(),
+      '1 minute',
+      true,
+    )
+
+    expect(state).toMatchObject({
+      kind: 'pending',
+      action: 'review',
+      waitsForLowerNonce: true,
+      bannerLine2: 'First execute the transactions with a lower nonce in the queue of Payroll.',
+      helper: 'Transactions with a lower nonce must be executed first.',
+    })
+  })
+
+  it('should, when a fully signed transaction is next in the queue, let the viewer execute it', () => {
+    const state = resolveAllowlistDrawerState(
+      mockFullySignedPendingAllowlist(),
+      MOCK_VIEWERS.signer,
+      'Payroll',
+      undefined,
+      Date.now(),
+      '1 minute',
+      false,
+    )
+
+    expect(state).toEqual({
+      kind: 'pending',
+      operation: 'create',
+      action: 'review',
+      bannerTitle: 'The allowlist is not active as the transaction is not yet executed.',
+      bannerLine2: 'Execute the transaction to activate.',
+      signed: 2,
+      required: 2,
+    })
+  })
+
+  it('should, when a fully signed transaction waits for a lower nonce and no wallet is connected, tell to execute those first', () => {
+    const state = resolveAllowlistDrawerState(
+      mockFullySignedPendingAllowlist(),
+      MOCK_VIEWERS.disconnected,
+      'Payroll',
+      undefined,
+      Date.now(),
+      '1 minute',
+      true,
+    )
+
+    expect(state).toMatchObject({
+      action: 'connect',
+      waitsForLowerNonce: true,
+      bannerLine2: 'First execute the transactions with a lower nonce in the queue of Payroll.',
+    })
+  })
+
+  it('should, when a transaction still waits for signatures, not wait for a lower nonce yet', () => {
+    const state = resolveAllowlistDrawerState(
+      mockPendingAllowlist(),
+      MOCK_VIEWERS.signer,
+      'Payroll',
+      undefined,
+      Date.now(),
+      '1 minute',
+      true,
+    )
+
+    expect(state).toMatchObject({ action: 'review', bannerLine2: 'Sign and execute the transaction to activate.' })
+    expect(state).not.toHaveProperty('waitsForLowerNonce')
+  })
+
   it('should say the allowlist is active, when an executed first setup applied its rules at once', () => {
     expect(
       resolveAllowlistDrawerState(

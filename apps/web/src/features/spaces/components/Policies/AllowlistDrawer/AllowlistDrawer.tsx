@@ -25,6 +25,7 @@ import {
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import {
   ACTIVATED_BANNER_TITLE,
+  QUEUE_LINK_LABEL,
   activatedBannerLine,
   applyInLabel,
   timeToSignLine,
@@ -36,11 +37,12 @@ import { formatPolicyChangeDelay } from '@safe-global/views/features/spaces/comp
 import PolicyDrawerHeader from '../components/PolicyDrawerHeader/PolicyDrawerHeader'
 import PendingSignatures from '../SpendingLimitDrawer/components/PendingSignatures/PendingSignatures'
 import PolicyOverview from '../SpendingLimitDrawer/components/PolicyOverview/PolicyOverview'
-import { getAllowlistStatus } from '../utils/allowlistStatus'
+import { getAllowlistStatus, resolveAllowlistChange } from '../utils/allowlistStatus'
 import {
   inferAllowlistOutcome,
   resolveAllowlistDrawerState,
   type ActiveAllowlistPolicy,
+  type AllowlistDrawerPolicy,
   type AllowlistDrawerState,
 } from './resolveState'
 import AllowlistActions from './components/AllowlistActions'
@@ -91,6 +93,8 @@ type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   onReviewTransaction?: () => void
   /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
   outcome?: AllowlistTxOutcome
+  /** A transaction with a lower nonce is still in the Safe's queue, so this one cannot execute yet. */
+  isBehindLowerNonce?: boolean
 }
 
 export type AllowlistDrawerProps = ActiveAllowlistDrawerProps | PendingAllowlistDrawerProps
@@ -113,8 +117,9 @@ const OUTCOME_STATE: Record<AllowlistTxOutcome, AllowlistState | null> = {
   expired: null,
 }
 
-const toBadge = (state: AllowlistState): AllowlistStatusBadge => ({
+const toBadge = (policy: AllowlistDrawerPolicy, state: AllowlistState): AllowlistStatusBadge => ({
   state,
+  change: resolveAllowlistChange(policy),
   label: formatAllowlistStatus(state),
   variant: ALLOWLIST_STATUS[state].variant,
 })
@@ -129,16 +134,27 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
 
   const now = Date.now()
   const outcome = isPendingDrawer(props) ? (props.outcome ?? inferAllowlistOutcome(props.policy, now)) : undefined
-  const state = resolveAllowlistDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome, now, changeDelay)
+  const state = resolveAllowlistDrawerState(
+    policy,
+    viewer,
+    safe.name ?? 'this Safe account',
+    outcome,
+    now,
+    changeDelay,
+    isPendingDrawer(props) && props.isBehindLowerNonce,
+  )
   const Icon = getPolicyIcon(policy.type)
   const outcomeState = outcome ? OUTCOME_STATE[outcome] : undefined
   const threshold = isPendingDrawer(props) ? undefined : props.signatures?.threshold
   const status =
-    outcomeState === undefined ? getAllowlistStatus(policy, now, threshold) : outcomeState && toBadge(outcomeState)
+    outcomeState === undefined
+      ? getAllowlistStatus(policy, now, threshold)
+      : outcomeState && toBadge(policy, outcomeState)
   const scheduledChange = policy.status === 'active' ? policy.scheduledChange : undefined
   const applyStage = scheduledChange ? APPLY_STAGE[state.kind] : undefined
   const isRemoved = 'operation' in state && state.operation === 'remove'
   const recipients = getAllowlistRecipients(policy.data)
+  const queueHref = buildSafeHref(AppRoutes.transactions.queue, chain?.shortName, policy.safe.address, spaceId)
   const actions = isPendingDrawer(props)
     ? { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction }
     : {
@@ -158,7 +174,11 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
         <div className="flex flex-col gap-6">
           {state.kind === 'pending' && (
             <>
-              <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
+              <PendingBanner
+                title={state.bannerTitle}
+                line2={state.bannerLine2}
+                link={state.waitsForLowerNonce && queueHref ? { label: QUEUE_LINK_LABEL, href: queueHref } : undefined}
+              />
               <PendingSignatures
                 safe={safe}
                 signed={state.signed}

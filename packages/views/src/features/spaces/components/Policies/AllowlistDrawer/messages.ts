@@ -15,6 +15,13 @@ export const PENDING_BANNER_TITLE: Record<PendingPolicyOperation, string> = {
 
 export const GUARD_REMOVAL_PENDING_BANNER_TITLE = "This Safe account can't send anything until the guard is removed."
 
+export const lowerNonceLine = (safeName: string): string =>
+  `First execute the transactions with a lower nonce in the queue of ${safeName}.`
+
+export const LOWER_NONCE_HELPER = 'Transactions with a lower nonce must be executed first.'
+
+export const QUEUE_LINK_LABEL = 'Open queue'
+
 export const NOT_A_SIGNER_EDIT_HELPER = 'Only signers of this Safe account can edit this allowlist.'
 
 // Every change to the allowlist waits out the guard's delay after execution.

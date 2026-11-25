@@ -95,6 +95,16 @@ export const PendingFullySigned: Story = {
   args: { ...PENDING_ARGS, policy: mockFullySignedPendingAllowlist(), viewer: MOCK_VIEWERS.nonSigner },
 }
 
+/** Every signature is in, but a transaction with a lower nonce has to execute first, from the Safe's queue. */
+export const PendingBehindLowerNonce: Story = {
+  args: {
+    ...PENDING_ARGS,
+    policy: mockPendingAllowlist({ appliesOnExecution: true, confirmationsSubmitted: 2 }),
+    viewer: MOCK_VIEWERS.signer,
+    isBehindLowerNonce: true,
+  },
+}
+
 export const PendingUpdate: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingAllowlistUpdate(), viewer: MOCK_VIEWERS.signer },
 }

@@ -15,6 +15,7 @@ import {
   formatAllowlistStatus,
   inDelayTooltip,
   readyToApplyTooltip,
+  type AllowlistChange,
   type AllowlistSignatures,
   type AllowlistState,
   type AllowlistStatusBadge,
@@ -49,8 +50,11 @@ const CHANGE_STATES: Record<'edit' | 'removal', ChangeStates> = {
   },
 }
 
+const delayedChangeOf = (operation: PendingAllowlistPolicy['operation']): 'edit' | 'removal' =>
+  operation === 'remove' ? 'removal' : 'edit'
+
 const changeStatesOf = (operation: PendingAllowlistPolicy['operation']): ChangeStates =>
-  CHANGE_STATES[operation === 'remove' ? 'removal' : 'edit']
+  CHANGE_STATES[delayedChangeOf(operation)]
 
 const isFullySigned = (policy: PendingAllowlistPolicy): boolean =>
   policy.confirmationsSubmitted >= policy.confirmationsRequired
@@ -82,6 +86,18 @@ export const resolveAllowlistState = (policy: AllowlistRow, nowMs: number): Allo
   if (policy.scheduledChange) return resolveScheduled(policy.scheduledChange, nowMs)
 
   return policy.enabled ? 'active' : 'unenforced'
+}
+
+/** The change a queued, executing or requested transaction makes; unset while the allowlist is in none. */
+export const resolveAllowlistChange = (policy: AllowlistRow): AllowlistChange | undefined => {
+  if (policy.status === 'active') {
+    if (policy.awaitingGuardRemoval) return 'guard-removal'
+    return policy.scheduledChange && delayedChangeOf(policy.scheduledChange.operation)
+  }
+  if (policy.appliesOnExecution) return 'setup'
+  if (policy.step === 'remove-guard') return 'guard-removal'
+
+  return delayedChangeOf(policy.operation)
 }
 
 const getTooltip = (policy: AllowlistRow, state: AllowlistState, nowMs: number): string | undefined => {
@@ -127,6 +143,7 @@ export const getAllowlistStatus = (policy: AllowlistRow, nowMs: number, threshol
 
   return {
     state,
+    change: resolveAllowlistChange(policy),
     label: formatAllowlistStatus(state, signatures),
     variant: ALLOWLIST_STATUS[state].variant,
     tooltip: getTooltip(policy, state, nowMs),

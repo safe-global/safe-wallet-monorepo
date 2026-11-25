@@ -1,11 +1,18 @@
 import { faker } from '@faker-js/faker'
 import type { ReactElement } from 'react'
+import { http, HttpResponse } from 'msw'
+import { GATEWAY_URL } from '@/config/gateway'
+import { server } from '@/tests/server'
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
 import type { PolicyConfiguration } from '@/features/policy-guard/public/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../../../public/utils/policies'
-import { mockPendingAllowlist, mockPendingAllowlistEdit } from '../../../../public/utils/allowlistPolicies'
+import {
+  mockFullySignedPendingAllowlist,
+  mockPendingAllowlist,
+  mockPendingAllowlistEdit,
+} from '../../../../public/utils/allowlistPolicies'
 import type { QueuedAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { usePendingTransactionLinks } from '../../SpendingLimitDetails/hooks/usePendingSpendingLimitActions'
 import ConfirmAllowlistFlow from '../../ConfirmAllowlistFlow'
@@ -39,6 +46,13 @@ const requestedConfigurations: PolicyConfiguration[] = [
     data: '0x',
   },
 ]
+
+const serveSafeNonce = (currentNonce: number) =>
+  server.use(
+    http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/nonces`, () =>
+      HttpResponse.json({ currentNonce, recommendedNonce: currentNonce + 1 }),
+    ),
+  )
 
 const renderDetails = (isUnlisted = false, policy: QueuedAllowlistPolicy = mockPendingAllowlist()) => {
   const setTxFlow = jest.fn()
@@ -90,6 +104,18 @@ describe('PendingAllowlistDetails', () => {
     mockLinks.mockReturnValue({ viewer: MOCK_VIEWERS.signer, transactionLink: 'https://app.safe.global/tx' })
     renderDetails()
 
+    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+  })
+
+  it('should, when a fully signed transaction waits for a lower nonce, tell to execute those first and disable Review transaction', async () => {
+    const policy = mockFullySignedPendingAllowlist()
+    serveSafeNonce(policy.nonce - faker.number.int({ min: 1, max: 5 }))
+
+    renderDetails(false, policy)
+
+    expect(
+      await screen.findByText('First execute the transactions with a lower nonce in the queue of Payroll.'),
+    ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
   })
 })

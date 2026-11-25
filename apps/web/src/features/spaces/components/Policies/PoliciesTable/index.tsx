@@ -10,6 +10,7 @@ import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/com
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import PolicyRule from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
+import AllowlistChangeCell from './components/AllowlistChangeCell'
 import AllowlistStatusCell from './components/AllowlistStatusCell'
 import PolicyStatusCell from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyStatusCell'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
@@ -130,7 +131,7 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       id: 'network',
       header: 'NETWORK',
       width: 'fit',
-      minWidth: 96,
+      minWidth: 80,
       align: 'center',
       priority: 'secondary',
       cellTestId: 'policy-cell-network',
@@ -150,10 +151,19 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       ),
     },
     {
+      id: 'change',
+      header: 'CHANGE',
+      width: 'fit',
+      minWidth: 136,
+      cellTestId: 'policy-cell-change',
+      cell: (policy) => (isAllowlistPolicy(policy) ? <AllowlistChangeCell policy={policy} /> : null),
+    },
+    {
       id: 'status',
       header: 'STATUS',
       width: 'fit',
-      minWidth: 140,
+      // Fits "Apply ready to execute", the longest status, clear of the open button
+      minWidth: 184,
       cellTestId: 'policy-cell-status',
       cell: (policy) =>
         isAllowlistPolicy(policy) ? (

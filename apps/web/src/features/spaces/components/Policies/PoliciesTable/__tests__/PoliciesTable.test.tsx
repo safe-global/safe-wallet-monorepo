@@ -18,6 +18,7 @@ import {
   mockActiveAllowlist,
   mockAllowlistChangePending,
   mockFailedAllowlist,
+  mockPendingAllowlist,
   mockPendingAllowlistUpdate,
 } from '../../../../public/utils/allowlistPolicies'
 import PoliciesTable from '../index'
@@ -64,6 +65,7 @@ describe('PoliciesTable', () => {
       'SAFE ACCOUNT',
       'PROPOSER / TOKENS',
       'NETWORK',
+      'CHANGE',
       'STATUS',
       '',
     ])
@@ -154,7 +156,7 @@ describe('PoliciesTable', () => {
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signatures')
   })
 
-  it('should, when an allowlist edit waits out the delay, show it as in delay and say from when it can be applied', async () => {
+  it('should, when an allowlist edit waits out the delay, show edit and in delay and say from when it can be applied', async () => {
     jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockAllowlistChangePending()]} />)
@@ -162,13 +164,14 @@ describe('PoliciesTable', () => {
     await user.hover(screen.getByTestId('policy-status-edit-in-delay'))
     act(() => jest.runOnlyPendingTimers())
 
-    expect(screen.getByTestId('policy-status-edit-in-delay')).toHaveTextContent('Edit in delay')
+    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(screen.getByTestId('policy-status-edit-in-delay')).toHaveTextContent('In delay')
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent(
       /^Can be applied in (1 day|23 hours 5[89] minutes), from .+ UTC\. Expires on .+ UTC\.$/,
     )
   })
 
-  it('should, when an allowlist edit waits for signatures, show it as edit pending with the signatures it has', async () => {
+  it('should, when an allowlist edit waits for signatures, show edit and pending with the signatures it has', async () => {
     jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockPendingAllowlistUpdate()]} />)
@@ -176,7 +179,8 @@ describe('PoliciesTable', () => {
     await user.hover(screen.getByTestId('policy-status-edit-pending'))
     act(() => jest.runOnlyPendingTimers())
 
-    expect(screen.getByTestId('policy-status-edit-pending')).toHaveTextContent('Edit pending · 1/2')
+    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(screen.getByTestId('policy-status-edit-pending')).toHaveTextContent('Pending · 1/2')
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('Waiting for signatures: 1 of 2.')
   })
 
@@ -194,6 +198,31 @@ describe('PoliciesTable', () => {
     expect(within(rule).getByText('3 recipients')).toBeInTheDocument()
     expect(screen.getByTestId('policy-tokens')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-active')).toBeInTheDocument()
+  })
+
+  it('should, when an allowlist is in no change, leave its change column empty', () => {
+    render(<PoliciesTable policies={[mockActiveAllowlist()]} />)
+
+    expect(screen.getByTestId('policy-cell-change')).toBeEmptyDOMElement()
+    expect(screen.getByTestId('policy-status-active')).toHaveTextContent('Active')
+  })
+
+  it('should, when the policy is not an allowlist, leave its change column empty', () => {
+    render(<PoliciesTable policies={[mockPendingPolicy()]} />)
+
+    expect(screen.getByTestId('policy-cell-change')).toBeEmptyDOMElement()
+    expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when the apply of an allowlist removal has every signature, show removal and apply ready to execute in their own columns', () => {
+    render(
+      <PoliciesTable
+        policies={[mockPendingAllowlist({ operation: 'remove', step: 'apply', confirmationsSubmitted: 2 })]}
+      />,
+    )
+
+    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Removal')
+    expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Apply ready to execute')
   })
 
   it('should, when an executed change is not yet indexed, show it as activating', () => {

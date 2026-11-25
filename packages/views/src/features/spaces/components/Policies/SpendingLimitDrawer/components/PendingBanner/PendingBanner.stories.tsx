@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { PENDING_BANNER_TITLE, executeLine, signAndExecuteLine } from '../../messages'
+import { QUEUE_LINK_LABEL, lowerNonceLine } from '../../../AllowlistDrawer/messages'
 import PendingBanner from './PendingBanner'
 
 const meta = {
@@ -28,4 +29,13 @@ export const Update: Story = {
 /** A non-signer has nothing to do, so the banner states the fact and stops. */
 export const TitleOnly: Story = {
   args: { title: PENDING_BANNER_TITLE.create },
+}
+
+/** The second line names a page the user must go to first, and links to it. */
+export const WithLink: Story = {
+  args: {
+    title: PENDING_BANNER_TITLE.update,
+    line2: lowerNonceLine('Treasury'),
+    link: { label: QUEUE_LINK_LABEL, href: '/transactions/queue' },
+  },
 }

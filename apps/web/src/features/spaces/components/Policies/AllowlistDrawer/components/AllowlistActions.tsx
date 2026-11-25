@@ -101,7 +101,8 @@ const AllowlistActions = ({
         <PolicyDrawerActions
           actionLabel="Review transaction"
           onClick={onReviewTransaction}
-          disabled={!onReviewTransaction}
+          hint={state.helper}
+          disabled={state.waitsForLowerNonce || !onReviewTransaction}
         />
       )
 
