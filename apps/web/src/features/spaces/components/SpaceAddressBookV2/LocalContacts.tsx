@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
-import { searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
+import { searchContacts } from './search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'

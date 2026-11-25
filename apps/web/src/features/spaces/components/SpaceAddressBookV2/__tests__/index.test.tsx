@@ -959,6 +959,29 @@ describe('SpaceAddressBookV2', () => {
       expect(rowOf(second.name)).toBeInTheDocument()
     })
 
+    it('searches the pending requests by requester and keeps the tab count', async () => {
+      const [first, second] = [spaceAddressBookRequestBuilder().build(), spaceAddressBookRequestBuilder().build()]
+      mockRequests({ items: [first, second] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (2)' }))
+      await userEvent.type(screen.getByLabelText('Search contacts by name, address or member'), first.requestedBy)
+
+      expect(rowOf(first.name)).toBeInTheDocument()
+      expect(screen.queryByText(second.name)).not.toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: 'Pending (2)' })).toBeInTheDocument()
+    })
+
+    it('shows no results for a pending search that matches nothing', async () => {
+      mockRequests({ items: [spaceAddressBookRequestBuilder().build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+      await userEvent.type(screen.getByLabelText('Search contacts by name, address or member'), 'no such request')
+
+      expect(screen.getByTestId('address-book-no-results')).toBeInTheDocument()
+    })
+
     it('lets an admin accept and decline a request', async () => {
       const [first, second] = [spaceAddressBookRequestBuilder().build(), spaceAddressBookRequestBuilder().build()]
       mockRequests({ items: [first, second] })
