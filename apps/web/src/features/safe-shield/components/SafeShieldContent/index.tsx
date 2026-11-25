@@ -191,7 +191,9 @@ export const SafeShieldContent = ({
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
-              {showGuardInPro && guardCheck && <PolicyGuardCheck {...guardCheck} />}
+              {showGuardInPro && guardCheck && (
+                <PolicyGuardCheck {...guardCheck} highlightedSeverity={highlightedSeverity} />
+              )}
 
               {hasProFeatures ? (
                 <AnalysisGroupCard

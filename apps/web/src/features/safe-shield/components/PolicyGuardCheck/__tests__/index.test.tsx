@@ -1,5 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import type { GuardCheckResult } from '@safe-global/utils/services/policy-guard'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import PolicyGuardCheck from '../index'
 
 describe('PolicyGuardCheck', () => {
@@ -35,6 +36,20 @@ describe('PolicyGuardCheck', () => {
     render(<PolicyGuardCheck blocked={{ status: 'unsupported', reason }} isAllowed={false} />)
 
     expect(screen.getByTestId('policy-guard-check')).toHaveTextContent(message)
+  })
+
+  it('should, when the overall analysis found something else, mute the pass icon like the other passed checks', () => {
+    const { container } = render(<PolicyGuardCheck isAllowed highlightedSeverity={Severity.WARN} />)
+
+    expect(container.querySelector('mock-icon')).toHaveStyle({ color: 'var(--color-border-main)' })
+  })
+
+  it('should, when the policies refuse the transaction, keep the refusal icon in colour whatever the overall severity', () => {
+    const { container } = render(
+      <PolicyGuardCheck blocked={{ status: 'no-policy' }} isAllowed={false} highlightedSeverity={Severity.WARN} />,
+    )
+
+    expect(container.querySelector('mock-icon')).not.toHaveStyle({ color: 'var(--color-border-main)' })
   })
 
   it('falls back to the general refusal for an unsupported shape it has no copy for', () => {

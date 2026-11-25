@@ -1,7 +1,9 @@
 import type { ReactElement } from 'react'
 import type { GuardCheckResult } from '@safe-global/utils/services/policy-guard'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { GuardPolicyCheck } from '../../hooks/useGuardPolicyChecks'
+import { SeverityIcon } from '../../public/components/SeverityIcon'
 
 const REFUSED = "This account's policies will refuse this transaction."
 
@@ -16,17 +18,27 @@ const UNSUPPORTED_MESSAGES: Record<string, string> = {
 const refusalMessage = (blocked: GuardCheckResult): string =>
   (blocked.status === 'unsupported' && UNSUPPORTED_MESSAGES[blocked.reason]) || REFUSED
 
-/** Renders nothing until the policy guard has given a verdict on the current transaction. */
-const PolicyGuardCheck = ({ blocked, isAllowed }: GuardPolicyCheck): ReactElement | null => {
+type PolicyGuardCheckProps = GuardPolicyCheck & {
+  /** The overall severity of the analysis: a pass is muted, like the other checks, unless it is the overall one */
+  highlightedSeverity?: Severity
+}
+
+/** One Safe Shield check row; renders nothing until the policy guard has given a verdict on the current transaction. */
+const PolicyGuardCheck = ({ blocked, isAllowed, highlightedSeverity }: PolicyGuardCheckProps): ReactElement | null => {
   if (!blocked && !isAllowed) return null
 
-  const variant = blocked ? 'destructive' : 'success'
+  const severity = blocked ? Severity.CRITICAL : Severity.OK
+  const isMuted = !blocked && !!highlightedSeverity && highlightedSeverity !== severity
 
   return (
-    <Alert variant={variant} data-testid="policy-guard-check">
-      <AlertSeverityIcon variant={variant} />
-      <AlertDescription>{blocked ? refusalMessage(blocked) : 'Policy checks passed'}</AlertDescription>
-    </Alert>
+    <div className="flex flex-row items-start gap-2 p-3" data-testid="policy-guard-check">
+      <span className="mt-0.5 flex shrink-0">
+        <SeverityIcon severity={severity} muted={isMuted} />
+      </span>
+      <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
+        {blocked ? refusalMessage(blocked) : 'Policy checks passed'}
+      </Typography>
+    </div>
   )
 }
 
