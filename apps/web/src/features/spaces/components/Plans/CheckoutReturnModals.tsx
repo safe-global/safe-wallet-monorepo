@@ -8,6 +8,7 @@ import {
   SafeProTrialActivatedModal,
 } from '@safe-global/views/features/spaces/components/SafeProModals'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
+import { useDialogOnScreen } from '../../hooks/useDialogOnScreen'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'
 import { seatsLabel } from './planTiers'
@@ -35,7 +36,10 @@ export default function CheckoutReturnModals({
   const { plan, seats, refetch } = useSpacePlan(spaceId)
   const checkout = useCheckoutReturn(spaceId)
   const router = useRouter()
-  const isComplete = checkout.status === 'complete'
+  const { status } = checkout
+  const isPending = PENDING_STATUSES.includes(status)
+  const hasFailed = status === 'timeout' || status === 'error'
+  const isComplete = status === 'complete'
   // A failed return leaves the Workspace as it was, so closing steps out to the Workspaces list.
   const leave = () => void router.push(AppRoutes.welcome.spaces)
 
@@ -43,12 +47,14 @@ export default function CheckoutReturnModals({
     if (isComplete) refetch()
   }, [isComplete]) // eslint-disable-line react-hooks/exhaustive-deps -- refetch is a new function every render
 
-  if (PENDING_STATUSES.includes(checkout.status)) {
+  useDialogOnScreen(isPending || hasFailed || (isComplete && Boolean(checkout.subscription)))
+
+  if (isPending) {
     return <SafeProPendingModal title="Confirming your subscription" body="This usually takes a few seconds." />
   }
 
-  if (checkout.status === 'timeout' || checkout.status === 'error') {
-    const { title, body } = FAILURE_COPY[checkout.status]
+  if (hasFailed) {
+    const { title, body } = FAILURE_COPY[status]
     return (
       <SafeProNoticeModal
         open
@@ -56,8 +62,8 @@ export default function CheckoutReturnModals({
         body={body}
         actionLabel="Close"
         onAction={leave}
-        secondaryActionLabel={checkout.status === 'timeout' ? 'Try again' : undefined}
-        onSecondaryAction={checkout.status === 'timeout' ? checkout.retry : undefined}
+        secondaryActionLabel={status === 'timeout' ? 'Try again' : undefined}
+        onSecondaryAction={status === 'timeout' ? checkout.retry : undefined}
         onOpenChange={(open) => !open && leave()}
       />
     )

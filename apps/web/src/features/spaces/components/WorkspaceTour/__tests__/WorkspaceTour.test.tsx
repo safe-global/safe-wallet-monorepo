@@ -5,6 +5,7 @@ import WorkspaceTour from '../index'
 import WorkspaceTourSection from '../WorkspaceTourSection'
 import { useWorkspaceTourOpen } from '../hooks/useWorkspaceTourOpen'
 import { getWorkspaceTourSeenKey } from '../hooks/useWorkspaceTourVisit'
+import { useDialogOnScreen } from '../../../hooks/useDialogOnScreen'
 
 const mockIsTourFlagOn = jest.fn()
 const mockIsBelowMd = jest.fn()
@@ -51,8 +52,20 @@ const tourWithSettingsSection = (
   </>
 )
 
-const renderTour = () =>
-  render(tourWithSettingsSection, { routerProps: { pathname: '/spaces', query: { spaceId: mockSpaceId } } })
+const DialogOnScreen = () => {
+  useDialogOnScreen(true)
+  return null
+}
+
+const tourUnderDialog = (isDialogOnScreen: boolean) => (
+  <>
+    {tourWithSettingsSection}
+    {isDialogOnScreen && <DialogOnScreen />}
+  </>
+)
+
+const renderTour = (ui = tourWithSettingsSection) =>
+  render(ui, { routerProps: { pathname: '/spaces', query: { spaceId: mockSpaceId } } })
 
 const markTourSeen = () => local.setItem(getWorkspaceTourSeenKey(mockUserId), true)
 
@@ -201,6 +214,31 @@ describe('WorkspaceTour', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Take the tour' }))
 
+    expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
+  })
+
+  it('waits under a workspace dialog and welcomes the member once it closes', () => {
+    const { rerender } = renderTour(tourUnderDialog(true))
+
+    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+
+    rerender(tourUnderDialog(false))
+
+    expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBe(true)
+  })
+
+  it('steps aside for a dialog that opens mid-tour and starts again from the welcome after it', async () => {
+    addSpaceSelector()
+    const { rerender } = renderTour(tourUnderDialog(false))
+    fireEvent.click(screen.getByRole('button', { name: 'Show me around' }))
+    expect(await screen.findByText('1 of 7')).toBeInTheDocument()
+
+    rerender(tourUnderDialog(true))
+    expect(screen.queryByText('1 of 7')).not.toBeInTheDocument()
+
+    rerender(tourUnderDialog(false))
     expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
   })
 })

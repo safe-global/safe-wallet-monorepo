@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, renderHook, screen } from '@/tests/test-utils'
+import { useIsDialogOnScreen } from '../../../hooks/useDialogOnScreen'
 import CheckoutReturnModals from '../CheckoutReturnModals'
 
 const mockPush = jest.fn()
@@ -170,5 +171,29 @@ describe('CheckoutReturnModals', () => {
 
     expect(container).toBeEmptyDOMElement()
     expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['processing', undefined],
+    ['activating', undefined],
+    ['timeout', undefined],
+    ['error', undefined],
+    ['complete', subscription('trialing')],
+  ])('holds the screen for overlays such as the tour while the return is %s', (status, sub) => {
+    mockUseCheckoutReturn.mockReturnValue({ status, subscription: sub, dismiss, retry })
+    const dialogs = renderHook(() => useIsDialogOnScreen())
+
+    render(<CheckoutReturnModals />)
+
+    expect(dialogs.result.current).toBe(true)
+  })
+
+  it.each(['idle', 'canceled'])('leaves the screen free while the return is %s', (status) => {
+    mockUseCheckoutReturn.mockReturnValue({ status, subscription: undefined, dismiss, retry })
+    const dialogs = renderHook(() => useIsDialogOnScreen())
+
+    render(<CheckoutReturnModals />)
+
+    expect(dialogs.result.current).toBe(false)
   })
 })

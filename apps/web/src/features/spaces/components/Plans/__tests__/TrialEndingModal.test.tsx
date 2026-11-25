@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, renderHook, screen } from '@/tests/test-utils'
 import { CONTACT_SALES_URL } from '../../../constants'
+import { useIsDialogOnScreen } from '../../../hooks/useDialogOnScreen'
 import TrialEndingModal, { _endsIn } from '../TrialEndingModal'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
@@ -151,6 +152,25 @@ describe('TrialEndingModal', () => {
       expect(container).toBeEmptyDOMElement()
       unmountAgain()
     }
+  })
+
+  it('holds the screen for overlays such as the tour from the moment it is due until it is closed', () => {
+    const dialogs = renderHook(() => useIsDialogOnScreen())
+    render(<TrialEndingModal spaceId={SPACE_ID} />)
+    expect(dialogs.result.current).toBe(true)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+
+    expect(dialogs.result.current).toBe(false)
+  })
+
+  it('leaves the screen free for overlays while the trial has more than a week left', () => {
+    mockUseSpacePlan.mockReturnValue(trial(14))
+    const dialogs = renderHook(() => useIsDialogOnScreen())
+
+    render(<TrialEndingModal spaceId={SPACE_ID} />)
+
+    expect(dialogs.result.current).toBe(false)
   })
 
   it('stays quiet when a payment method is already on file', () => {

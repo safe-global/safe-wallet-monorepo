@@ -10,9 +10,11 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: () => ({ currentData: mockCurrentUser() }),
 }))
 
-const renderVisit = ({ spaceId, canShowTour = true }: { spaceId: string; canShowTour?: boolean }) => {
+type VisitProps = { spaceId: string; canShowTour?: boolean; isShown?: boolean }
+
+const renderVisit = ({ spaceId, canShowTour = true, isShown = true }: VisitProps) => {
   const onFirstVisit = jest.fn()
-  renderHook(() => useWorkspaceTourVisit(canShowTour, onFirstVisit), {
+  renderHook(() => useWorkspaceTourVisit({ canShowTour, isShown, onFirstVisit }), {
     routerProps: { query: { spaceId } },
   })
   return onFirstVisit
@@ -32,6 +34,13 @@ describe('useWorkspaceTourVisit', () => {
 
     expect(onFirstVisit).toHaveBeenCalledTimes(1)
     expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBe(true)
+  })
+
+  it('opens the tour but leaves the visit unrecorded while something holds the tour off screen', () => {
+    const onFirstVisit = renderVisit({ spaceId, isShown: false })
+
+    expect(onFirstVisit).toHaveBeenCalledTimes(1)
+    expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBeNull()
   })
 
   it('does not open the tour again for the same member', () => {
@@ -68,7 +77,7 @@ describe('useWorkspaceTourVisit', () => {
   })
 
   it('leaves the visit unrecorded while the tour cannot be shown', () => {
-    const onFirstVisit = renderVisit({ spaceId, canShowTour: false })
+    const onFirstVisit = renderVisit({ spaceId, canShowTour: false, isShown: false })
 
     expect(onFirstVisit).not.toHaveBeenCalled()
     expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBeNull()

@@ -14,6 +14,7 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useCurrentMembership, useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
+import { useDialogOnScreen } from '../../hooks/useDialogOnScreen'
 import { markTrialReminderSeen, wasTrialReminderSeen } from '../../public/store/trialReminder'
 import ChangePlanFlow from './ChangePlanFlow'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
@@ -147,10 +148,14 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
   const [isOpen, setIsOpen] = useState(false)
+  const isDue = isTrialEndingSoon && !hasPaymentMethod && Boolean(membership) && !wasTrialReminderSeen(spaceId)
 
   useEffect(() => {
-    if (isTrialEndingSoon && !hasPaymentMethod && membership && !wasTrialReminderSeen(spaceId)) setIsOpen(true)
-  }, [isTrialEndingSoon, hasPaymentMethod, membership, spaceId])
+    if (isDue) setIsOpen(true)
+  }, [isDue])
+
+  // isDue covers the render before the effect above opens it, so no overlay starts in between.
+  useDialogOnScreen(isDue || isOpen)
 
   if (!isOpen || !plan || !subscription) return null
 
