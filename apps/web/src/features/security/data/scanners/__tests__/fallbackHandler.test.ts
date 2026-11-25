@@ -40,6 +40,17 @@ describe('fallbackHandlerScanner', () => {
     expect(result.score).toBe(100)
   })
 
+  it('should return clear, when the fallback handler is the TokenCallbackHandler that a recipient allowlist sets', async () => {
+    const result = await fallbackHandlerScanner.scan(
+      createMockContext({
+        chainId: '1',
+        fallbackHandler: { value: '0x54e86d004d71a8D2112ec75FaCE57D730b0433F3' },
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.evidence).toContainEqual({ label: 'Status', value: 'Official Safe token callback handler' })
+  })
+
   it('returns issue for an unrecognized fallback handler', async () => {
     const result = await fallbackHandlerScanner.scan(
       createMockContext({
