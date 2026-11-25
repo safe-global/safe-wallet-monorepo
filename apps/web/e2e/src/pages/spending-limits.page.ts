@@ -1,5 +1,5 @@
 /**
- * Spending limits section of Settings → Setup and its New spending limit form.
+ * Spending limits section of Settings → Setup, its New spending limit form and the review step.
  *
  * Rule: Page Objects hold locators and actions only. Assertions belong in the test.
  */
@@ -16,6 +16,8 @@ export class SpendingLimitsPage {
   readonly tokenSelector: TokenSelectorField
   readonly amountInput: Locator
   readonly nextButton: Locator
+  /** Under the token field once an untrusted token is picked, and again on the review step */
+  readonly untrustedTokenWarning: Locator
 
   constructor(private readonly page: Page) {
     this.section = page.getByTestId('spending-limit-section')
@@ -25,6 +27,7 @@ export class SpendingLimitsPage {
     this.tokenSelector = new TokenSelectorField(page)
     this.amountInput = page.getByLabel('Limit amount')
     this.nextButton = page.getByRole('button', { name: 'Next' })
+    this.untrustedTokenWarning = page.getByText('Token not trusted, we maintain a list. At your own risk.')
   }
 
   /** Opens the settings inside the Workspace, whose plan decides whether spending limits can be added */
@@ -33,18 +36,14 @@ export class SpendingLimitsPage {
     await this.section.waitFor()
   }
 
-  /** Fills the open form with a beneficiary and a limit of a pasted token, and goes on to the review */
-  async addLimitOnPastedToken({
-    beneficiary,
-    token,
-    amount,
-  }: {
-    beneficiary: string
-    token: { address: string; symbol: string }
-    amount: string
-  }): Promise<void> {
+  /** Opens the form and fills the beneficiary; the token is picked by the test */
+  async startLimit(beneficiary: string): Promise<void> {
+    await this.addButton.click()
     await this.beneficiaryInput.fill(beneficiary)
-    await this.tokenSelector.pickPastedToken(token)
+  }
+
+  /** Fills the amount of the picked token and goes on to the review */
+  async finishLimit(amount: string): Promise<void> {
     await this.amountInput.fill(amount)
     await this.nextButton.click()
   }

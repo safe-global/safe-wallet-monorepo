@@ -1,7 +1,7 @@
 import { Wallet, getAddress } from 'ethers'
 import { fundWithToken } from '../../environment/scenarios/chain.mjs'
 import { waitUntil } from '../../environment/scenarios/indexing.mjs'
-import { trustToken } from '../../environment/scenarios/tokens.mjs'
+import { registerTokens, trustToken } from '../../environment/scenarios/tokens.mjs'
 import { readChain } from '../chain/local-provider'
 import type { JourneyEnvironment } from '../fixtures/journey.fixture'
 import type { SeededSafe } from './safe'
@@ -22,9 +22,22 @@ export const SEPOLIA_COW: SeedToken = {
   decimals: 18,
 }
 
+/** Aave's GHO on Sepolia: an ERC-20 with 18 decimals that no other spec trusts, so it stays untrusted. */
+export const SEPOLIA_GHO: SeedToken & { name: string } = {
+  address: getAddress('0xc4bf5cbdabe595361438f8c6a187bdc330539c60'),
+  symbol: 'GHO',
+  decimals: 18,
+  name: 'Gho Token',
+}
+
 /** Lists `token` as trusted in the Transaction Service, which CGW asks for its metadata, without a balance for any Safe. */
 export async function seedKnownToken(env: JourneyEnvironment, token: SeedToken): Promise<void> {
   await trustToken(env, token.address)
+}
+
+/** Lists `token` in the Transaction Service without trusting it, without a balance for any Safe. */
+export async function seedUntrustedToken(env: JourneyEnvironment, token: SeedToken & { name: string }): Promise<void> {
+  await registerTokens(env, [token])
 }
 
 type TxsBalance = { tokenAddress: string | null; balance: string }
