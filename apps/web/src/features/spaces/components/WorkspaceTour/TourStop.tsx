@@ -9,7 +9,7 @@ import { useSelectTabOnEnter } from './hooks/useSelectTabOnEnter'
 import { useStepRoute } from './hooks/useStepRoute'
 import { useStopLayout } from './hooks/useStopLayout'
 import type { TourStep } from './types'
-import { toVirtualAnchor } from './utils'
+import { scrollBelowHeaders, toVirtualAnchor } from './utils'
 
 type TourStopProps = {
   step: TourStep
@@ -27,9 +27,13 @@ const TourStop = ({ step, progress, onBack, onNext, onClose, onMissingAnchor }: 
 
   useSelectTabOnEnter(tabToClick)
 
+  const side = step.placement.side
+
   useEffect(() => {
-    target?.scrollIntoView({ block: 'nearest' })
-  }, [target])
+    if (!target) return
+    if (side === 'bottom') scrollBelowHeaders(target)
+    else target.scrollIntoView({ block: 'nearest' })
+  }, [target, side])
 
   if (!target || !layout.popoverTarget) return null
 

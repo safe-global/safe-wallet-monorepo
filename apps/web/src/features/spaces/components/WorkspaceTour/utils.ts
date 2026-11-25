@@ -50,3 +50,17 @@ export const toVirtualAnchor = ({ top, left, width, height }: SpotlightRect) => 
     bottom: top + height,
   }),
 })
+
+const HEADER_HEIGHT_VARS = ['--topbar-height', '--page-header-height']
+const GAP_BELOW_HEADER = 16
+
+/** Scrolls the page so the element sits just under the fixed headers, leaving the room below it for the card. */
+export const scrollBelowHeaders = (element: Element) => {
+  const rootStyle = getComputedStyle(document.documentElement)
+  const headersHeight = HEADER_HEIGHT_VARS.reduce(
+    (sum, cssVar) => sum + (parseFloat(rootStyle.getPropertyValue(cssVar)) || 0),
+    0,
+  )
+  const distance = element.getBoundingClientRect().top - headersHeight - GAP_BELOW_HEADER
+  if (distance > 0) window.scrollBy({ top: distance })
+}

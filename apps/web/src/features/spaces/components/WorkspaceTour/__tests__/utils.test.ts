@@ -1,5 +1,5 @@
 import { TOUR_PLACEHOLDER_ROW_HEIGHT } from '@safe-global/views/features/spaces/components/WorkspaceTour/TourPlaceholderRow'
-import { toStopLayout, toVirtualAnchor } from '../utils'
+import { scrollBelowHeaders, toStopLayout, toVirtualAnchor } from '../utils'
 
 const TABS_AREA = { top: 100, left: 280, width: 900, height: 600, radius: 16 }
 const EMPTY_STATE = { top: 220, left: 280, width: 900, height: 300, radius: 12 }
@@ -52,5 +52,32 @@ describe('toVirtualAnchor', () => {
     const rect = toVirtualAnchor(EMPTY_STATE).getBoundingClientRect()
 
     expect(rect).toMatchObject({ x: 280, y: 220, right: 1180, bottom: 520 })
+  })
+})
+
+describe('scrollBelowHeaders', () => {
+  const elementAt = (top: number) => ({ getBoundingClientRect: () => ({ top }) }) as Element
+
+  beforeEach(() => {
+    window.scrollBy = jest.fn()
+    document.documentElement.style.setProperty('--topbar-height', '56px')
+    document.documentElement.style.setProperty('--page-header-height', '40px')
+  })
+
+  afterEach(() => {
+    document.documentElement.style.removeProperty('--topbar-height')
+    document.documentElement.style.removeProperty('--page-header-height')
+  })
+
+  it('scrolls an element low on the page up to just under the headers', () => {
+    scrollBelowHeaders(elementAt(500))
+
+    expect(window.scrollBy).toHaveBeenCalledWith({ top: 500 - 56 - 40 - 16 })
+  })
+
+  it('leaves the page alone when the element already sits at the top', () => {
+    scrollBelowHeaders(elementAt(20))
+
+    expect(window.scrollBy).not.toHaveBeenCalled()
   })
 })

@@ -27,6 +27,9 @@ const TourInsideList = ({ items }: { items: TourInsideItem[] }) => (
   </ul>
 )
 
+// Flipping would cover the spotlighted element, so a short window shrinks the card instead.
+const KEEP_SIDE = { side: 'none', align: 'shift', fallbackAxisSide: 'none' } as const
+
 export type TourStepPopoverProps = {
   anchor: ComponentProps<typeof PopoverContent>['anchor']
   placement: TourPlacement
@@ -44,26 +47,32 @@ const TourStepPopover = ({ anchor, placement, content, progress, onBack, onNext,
       side={placement.side}
       align={placement.align}
       sideOffset={12}
-      className="w-80"
+      collisionAvoidance={KEEP_SIDE}
+      className="max-h-(--available-height) w-80"
       data-testid="workspace-tour-step"
       aria-label={content.title}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex shrink-0 items-start justify-between gap-2">
         <Typography variant="paragraph-bold">{content.title}</Typography>
         <Button variant="ghost" size="icon-xs" aria-label="Close tour" onClick={onClose}>
           <X />
         </Button>
       </div>
-      <Typography variant="paragraph-small" color="muted">
-        {content.body}
-      </Typography>
-      {content.inside && <TourInsideList items={content.inside} />}
-      {content.tip && (
-        <Typography variant="paragraph-mini" color="muted">
-          {content.tip}
+      <div
+        className="flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain"
+        data-testid="workspace-tour-step-body"
+      >
+        <Typography variant="paragraph-small" color="muted">
+          {content.body}
         </Typography>
-      )}
-      <div className="flex items-center justify-between gap-2">
+        {content.inside && <TourInsideList items={content.inside} />}
+        {content.tip && (
+          <Typography variant="paragraph-mini" color="muted">
+            {content.tip}
+          </Typography>
+        )}
+      </div>
+      <div className="flex shrink-0 items-center justify-between gap-2">
         <Typography variant="paragraph-mini" color="muted">
           {progress.current} of {progress.total}
         </Typography>

@@ -59,3 +59,24 @@ export const WithInsideList: Story = {
     },
   },
 }
+
+const lowAnchor = {
+  getBoundingClientRect: () => {
+    const top = window.innerHeight - 240
+    return { x: 40, y: top, top, left: 40, width: 320, height: 56, right: 360, bottom: top + 56 }
+  },
+}
+
+/** The card stays below a row near the bottom of the window and scrolls its middle instead of flipping over it. */
+export const WithInsideListNearWindowBottom: Story = {
+  args: { ...WithInsideList.args, anchor: lowAnchor },
+  render: (args) => (
+    <div className="h-screen">
+      <div
+        className="fixed rounded-md ring-2 ring-primary"
+        style={{ left: 40, top: 'calc(100vh - 240px)', width: 320, height: 56 }}
+      />
+      <TourStepPopover {...args} />
+    </div>
+  ),
+}
