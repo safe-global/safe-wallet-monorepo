@@ -1,5 +1,11 @@
 import { filterByTags, searchContacts, searchPendingRequests, searchSuggestions } from '../search'
-import { ADDRESSES, MEMBERS, PENDING_REQUESTS, SUGGESTED_SIGNERS, WORKSPACE_CONTACTS } from '../mocks/fixtures'
+import {
+  ADDRESSES,
+  MEMBERS,
+  PENDING_REQUESTS,
+  SUGGESTED_SIGNERS,
+  WORKSPACE_CONTACTS,
+} from '@safe-global/views/features/spaces/components/AddressBookV2/mocks/fixtures'
 
 const names = (query: string) => searchContacts(WORKSPACE_CONTACTS, query).map((contact) => contact.name)
 

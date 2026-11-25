@@ -6,7 +6,7 @@ import AddSuggestionsDialog, {
 } from '@safe-global/views/features/spaces/components/AddressBookV2/AddSuggestionsDialog'
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
-import { searchSuggestions } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
+import { searchSuggestions } from './search'
 import SuggestedContacts, {
   type SuggestionAddLocation,
 } from '@safe-global/views/features/spaces/components/AddressBookV2/SuggestedContacts'

@@ -8,7 +8,7 @@ import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
 import PendingRequests from '@safe-global/views/features/spaces/components/AddressBookV2/PendingRequests'
-import { searchPendingRequests } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
+import { searchPendingRequests } from './search'
 import useChains from '@/hooks/useChains'
 import { useAddressBookRequestActions } from '../../hooks/useAddressBookRequestActions'
 import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
