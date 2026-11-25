@@ -4,7 +4,6 @@ import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-glo
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/hooks/useSafeShield'
-import { usePolicyGuardDelay } from '@/features/policy-guard/public/hooks/usePolicyGuardDelay'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
 import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
@@ -16,9 +15,9 @@ import SafeIdentity from '../../../../public/components/SafeIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
-import { getAllowlistSafeLabel, isAllowlistGuardEnabled } from '../utils/allowlistDisplay'
+import { getAllowlistSafeLabel } from '../utils/allowlistDisplay'
 import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
-import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
+import RecipientAllowlistForm from './RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
   type RecipientAllowlistFlowData,
@@ -37,7 +36,6 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
-  formatPolicyChangeDelay,
   NO_ELIGIBLE_SAFES_DESCRIPTION,
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -48,15 +46,11 @@ const renderGuardAddress = (address: string, name: string) => <SafeIdentity addr
 const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
 
 export type CreateRecipientAllowlistPolicyProps = {
-  dismissedCallouts: Record<CalloutSection, boolean>
-  onDismissCallout: (section: CalloutSection) => void
   /** Called on Next with whether the allowlist affects a spending limit, which adds the Existing policies step. */
   onSpendingLimitImpact?: (affectsSpendingLimits: boolean) => void
 }
 
 const CreateRecipientAllowlistPolicy = ({
-  dismissedCallouts,
-  onDismissCallout,
   onSpendingLimitImpact,
 }: CreateRecipientAllowlistPolicyProps): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
@@ -78,8 +72,7 @@ const CreateRecipientAllowlistPolicy = ({
     selectedSafe && !selectedSafe.ineligibleReason
       ? { chainId: selectedSafe.chainId, safeAddress: selectedSafe.address }
       : undefined
-  const { guard, guardAddress, retry } = useGuardStatus(target)
-  const guardDelay = formatPolicyChangeDelay(usePolicyGuardDelay(target?.chainId ?? '', guardAddress))
+  const { guard, retry } = useGuardStatus(target)
 
   const heldTokens = useHeldTokenAddresses()
 
@@ -134,9 +127,6 @@ const CreateRecipientAllowlistPolicy = ({
               : undefined
           }
           showSections={!selectedSafe || canContinue}
-          installedGuardDelay={isAllowlistGuardEnabled(guard) ? guardDelay : undefined}
-          dismissedCallouts={dismissedCallouts}
-          onDismissCallout={onDismissCallout}
         >
           <SafeAccountSelector
             accounts={accounts}

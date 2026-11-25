@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement, type ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import {
@@ -7,15 +7,9 @@ import {
   getEditSummaryTitle,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { RecipientAllowlistFormValues } from '../types'
-import { getAllowedTokenAddresses } from '../utils/allowlistForm'
-import { toAllowlistRecipients, toAllowlistTokens } from '../utils/allowlistDisplay'
-import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
-import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokensSection from './TokensSection'
 import RecipientsSection from './RecipientsSection'
-
-export type CalloutSection = 'tokens' | 'recipients'
 
 export type RecipientAllowlistFormProps = {
   values: RecipientAllowlistFormValues
@@ -24,11 +18,7 @@ export type RecipientAllowlistFormProps = {
   account?: { chainId: string; address: string; label: string }
   /** False when the picked Safe cannot take an allowlist: only `children` show. */
   showSections: boolean
-  /** The delay of the policy guard the Safe already has, which changes wait out before they apply. */
-  installedGuardDelay?: string
-  dismissedCallouts: Record<CalloutSection, boolean>
-  onDismissCallout: (section: CalloutSection) => void
-  /** Between the summary and the sections: the account field and its banners. */
+  /** Between the edit summary and the sections: the account field and its banners. */
   children?: ReactNode
 }
 
@@ -38,39 +28,17 @@ const RecipientAllowlistForm = ({
   heldTokens,
   account,
   showSections,
-  installedGuardDelay,
-  dismissedCallouts,
-  onDismissCallout,
   children,
 }: RecipientAllowlistFormProps): ReactElement => {
-  const { addresses, options } = heldTokens
-  const chainId = account?.chainId
-  const resolveName = useSafeNameResolver()
   const isEditMode = useIsEditMode()
-
-  const tokenSymbols = useMemo(
-    () => toAllowlistTokens(getAllowedTokenAddresses(addresses, values), options).map(({ symbol }) => symbol),
-    [addresses, options, values],
-  )
-  const recipientNames = useMemo(
-    () => toAllowlistRecipients(values, (address) => resolveName(address, chainId)).map(spenderDisplayName),
-    [values, resolveName, chainId],
-  )
 
   return (
     <>
-      {showSections && (
+      {showSections && isEditMode && account && (
         <AllowlistSummary
-          accountLabel={account?.label}
-          tokenSymbols={tokenSymbols}
-          recipientNames={recipientNames}
-          installedGuardDelay={installedGuardDelay}
-          {...(isEditMode &&
-            account && {
-              title: getEditSummaryTitle(account.label),
-              description: EDIT_SUMMARY_DESCRIPTION,
-              details: EDIT_SUMMARY_DETAILS,
-            })}
+          title={getEditSummaryTitle(account.label)}
+          description={EDIT_SUMMARY_DESCRIPTION}
+          details={EDIT_SUMMARY_DETAILS}
         />
       )}
 
@@ -78,22 +46,13 @@ const RecipientAllowlistForm = ({
 
       {showSections && (
         <div className="mt-1 flex flex-col gap-4">
-          <TokensSection
-            values={values}
-            onChange={onChange}
-            heldTokens={heldTokens}
-            hasAccount={Boolean(account)}
-            isCalloutDismissed={dismissedCallouts.tokens}
-            onDismissCallout={() => onDismissCallout('tokens')}
-          />
+          <TokensSection values={values} onChange={onChange} heldTokens={heldTokens} hasAccount={Boolean(account)} />
           <RecipientsSection
             key={account ? `${account.chainId}:${account.address}` : 'none'}
             values={values}
             onChange={onChange}
             safeAddress={account?.address}
             chainId={account?.chainId}
-            isCalloutDismissed={dismissedCallouts.recipients}
-            onDismissCallout={() => onDismissCallout('recipients')}
           />
         </div>
       )}

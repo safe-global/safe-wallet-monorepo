@@ -80,18 +80,10 @@ const StatefulForm = ({
   guard,
 }: StoryProps) => {
   const [values, setValues] = useState(initialValues)
-  const [dismissedCallouts, setDismissedCallouts] = useState({ tokens: false, recipients: false })
 
   return (
     <SafeScopeProvider initial={hasAccount ? efSafeTarget : undefined}>
-      <ScopedForm
-        values={values}
-        onChange={setValues}
-        hasAccount={hasAccount}
-        showSections={showSections}
-        dismissedCallouts={dismissedCallouts}
-        onDismissCallout={(section) => setDismissedCallouts((prev) => ({ ...prev, [section]: true }))}
-      >
+      <ScopedForm values={values} onChange={setValues} hasAccount={hasAccount} showSections={showSections}>
         {guard && <GuardStatusBanner guard={guard} safeName={account.label} />}
       </ScopedForm>
     </SafeScopeProvider>

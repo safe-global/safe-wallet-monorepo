@@ -9,7 +9,6 @@ import {
   AllowlistEmptyItem,
   AllowlistSection,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
-import DismissibleCallout from '@safe-global/views/components/common/DismissibleCallout'
 import StatusAlert from '@safe-global/views/components/common/StatusAlert'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
 import {
@@ -23,8 +22,6 @@ import {
   DESELECT_ALL_LABEL,
   EDIT_TOKENS_DESCRIPTION,
   SELECT_ALL_LABEL,
-  TOKENS_CALLOUT_DESCRIPTION,
-  TOKENS_CALLOUT_TITLE,
   TOKENS_EMPTY_TEXT,
   TOKENS_LOAD_ERROR_TEXT,
   TOKENS_NO_ACCOUNT_DESCRIPTION,
@@ -43,8 +40,6 @@ type TokensSectionProps = {
   onChange: (next: RecipientAllowlistFormValues) => void
   heldTokens: HeldTokenAddresses
   hasAccount: boolean
-  isCalloutDismissed: boolean
-  onDismissCallout: () => void
 }
 
 const LoadErrorAlert = ({
@@ -68,14 +63,7 @@ const LoadErrorAlert = ({
   />
 )
 
-const TokensSection = ({
-  values,
-  onChange,
-  heldTokens,
-  hasAccount,
-  isCalloutDismissed,
-  onDismissCallout,
-}: TokensSectionProps): ReactElement => {
+const TokensSection = ({ values, onChange, heldTokens, hasAccount }: TokensSectionProps): ReactElement => {
   const {
     addresses,
     options,
@@ -172,16 +160,6 @@ const TokensSection = ({
       description={!hasAccount ? TOKENS_NO_ACCOUNT_DESCRIPTION : isEditMode ? EDIT_TOKENS_DESCRIPTION : undefined}
       data-testid="allowlist-tokens-section"
     >
-      {hasAccount && !isEditMode && !isCalloutDismissed && (
-        <DismissibleCallout
-          className="mb-1"
-          title={TOKENS_CALLOUT_TITLE}
-          description={TOKENS_CALLOUT_DESCRIPTION}
-          onDismiss={onDismissCallout}
-          data-testid="allowlist-tokens-callout"
-        />
-      )}
-
       {renderBody()}
 
       {hasAccount && isPopularError && (

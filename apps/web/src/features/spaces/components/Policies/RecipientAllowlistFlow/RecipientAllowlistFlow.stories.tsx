@@ -307,14 +307,17 @@ const pickRecipients = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement)
   await userEvent.click(await canvas.findByRole('button', { name: RECIPIENT_REMOVE_LABEL }, { timeout: 30000 }))
   // Two passes, since one pass lists Workspace contacts before local ones
-  for (const names of [['Payroll — Deel', 'Contractor — M. Ito', 'Ops wallet'], ['Coinbase Prime']]) {
+  const passes = [['Payroll — Deel', 'Contractor — M. Ito', 'Ops wallet'], ['Coinbase Prime']]
+  for (const names of passes) {
     await userEvent.click(await canvas.findByRole('button', { name: ADDRESS_BOOK_TRIGGER_LABEL }))
     for (const name of names) {
       await userEvent.click(await screen.findByRole('checkbox', { name: `Add ${name}` }))
     }
     await userEvent.click(await screen.findByRole('button', { name: /^Add$/ }))
   }
-  await expect(await canvas.findByText(/to 4 recipients/)).toBeVisible()
+  for (const name of passes.flat()) {
+    await expect(await canvas.findByRole('button', { name: `Allow ${name}` })).toHaveAttribute('aria-pressed', 'true')
+  }
 }
 
 const excludeUsdc = async (canvasElement: HTMLElement) =>

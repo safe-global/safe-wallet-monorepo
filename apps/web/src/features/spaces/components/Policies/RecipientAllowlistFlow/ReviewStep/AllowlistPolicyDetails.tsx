@@ -118,7 +118,7 @@ const AllowlistPolicyDetails = ({
             <Separator className="my-3" />
 
             <SummaryRow label={REVIEW_FALLBACK_LABEL}>
-              <SummaryLine className={fallback === 'deny' ? 'justify-end' : undefined}>
+              <SummaryLine>
                 {fallback === 'allow' ? (
                   <Typography variant="paragraph-small" data-testid="allowlist-fallback">
                     {REVIEW_FALLBACK_ALLOW}

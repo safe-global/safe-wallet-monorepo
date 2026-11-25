@@ -60,7 +60,6 @@ const setup = (
   recipients: AllowlistFormRecipient[] = [],
   props: {
     hasAccount?: boolean
-    isCalloutDismissed?: boolean
     known?: string[]
     contactNames?: Record<string, string>
   } = {},
@@ -75,7 +74,6 @@ const setup = (
   } as unknown as ReturnType<typeof useMergedAddressBooks>)
   const values: RecipientAllowlistFormValues = { ...createDefaultAllowlistValues(), recipients }
   const onChange = jest.fn()
-  const onDismissCallout = jest.fn()
   const hasAccount = props.hasAccount ?? true
   const rendered = renderWithUserEvent(
     <RecipientsSection
@@ -83,11 +81,9 @@ const setup = (
       onChange={onChange}
       safeAddress={hasAccount ? SAFE_ADDRESS : undefined}
       chainId={hasAccount ? CHAIN_ID : undefined}
-      isCalloutDismissed={props.isCalloutDismissed ?? false}
-      onDismissCallout={onDismissCallout}
     />,
   )
-  return { ...rendered, values, onChange, onDismissCallout }
+  return { ...rendered, values, onChange }
 }
 
 describe('RecipientsSection', () => {
@@ -226,23 +222,5 @@ describe('RecipientsSection', () => {
       ...values,
       recipients: [{ address: DRAFT_ADDRESS, name: 'Dave', selected: true }],
     })
-  })
-
-  it('shows the callout and dismisses it', async () => {
-    const { user, onDismissCallout } = setup([recipient({ name: 'Alice' })])
-
-    expect(
-      screen.getByText('Only the recipients selected below can receive the tokens on this allowlist.'),
-    ).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Dismiss' }))
-    expect(onDismissCallout).toHaveBeenCalled()
-  })
-
-  it('hides the callout once dismissed', () => {
-    setup([recipient({ name: 'Alice' })], { isCalloutDismissed: true })
-
-    expect(
-      screen.queryByText('Only the recipients selected below can receive the tokens on this allowlist.'),
-    ).toBeNull()
   })
 })

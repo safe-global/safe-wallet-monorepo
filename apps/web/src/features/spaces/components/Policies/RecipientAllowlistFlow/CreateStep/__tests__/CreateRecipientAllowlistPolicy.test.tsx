@@ -36,10 +36,6 @@ jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
   ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShieldForAddressPoisoning: jest.fn(),
 }))
-jest.mock('@/features/policy-guard/store/guardDelayApi', () => ({
-  ...jest.requireActual('@/features/policy-guard/store/guardDelayApi'),
-  useGetGuardDelayQuery: () => ({ currentData: undefined }),
-}))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
@@ -172,11 +168,7 @@ const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
             clearScope: jest.fn(),
           }}
         >
-          <CreateRecipientAllowlistPolicy
-            dismissedCallouts={{ tokens: false, recipients: false }}
-            onDismissCallout={jest.fn()}
-            onSpendingLimitImpact={onSpendingLimitImpact}
-          />
+          <CreateRecipientAllowlistPolicy onSpendingLimitImpact={onSpendingLimitImpact} />
         </SafeScopeContext.Provider>
       </TxFlowContext.Provider>
     </TxModalContext.Provider>
@@ -402,12 +394,14 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it('names the picked Safe and its chain in the summary', () => {
+  it('should show no summary and no callouts, when a token and a recipient are selected', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
-    expect(screen.getByText(/Treasury on Sepolia/)).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-tokens-section')).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
   it.each<GuardStatus>([{ status: 'none' }, { status: 'known' }])(
@@ -438,11 +432,11 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('guard-status-destructive')).toHaveTextContent('This Safe account needs an update')
   })
 
-  it('shows the summary and both sections before a Safe is picked', () => {
+  it('shows both sections before a Safe is picked', () => {
     accounts([option(SAFE_A)])
     renderStep()
 
-    expect(screen.getByText('Pick a Safe account to start.')).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-tokens-section')).toBeInTheDocument()
     expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
@@ -459,34 +453,6 @@ describe('CreateRecipientAllowlistPolicy', () => {
 
     expect(mockSetTxFlow).toHaveBeenCalledWith(undefined)
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining(`/settings/modules?safe=sep:${SAFE_A}`))
-  })
-
-  it.each<[GuardStatus, string]>([
-    [{ status: 'none' }, 'take effect as soon as this transaction is executed'],
-    [{ status: 'known' }, 'policy guard is already enabled'],
-    [{ status: 'partial', missingSlot: 'module' }, 'policy guard is already enabled'],
-  ])('explains when the changes apply for guard status %o', async (status, copy) => {
-    accounts([option(SAFE_A)])
-    guard(status)
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
-
-    await userEvent.hover(screen.getByRole('button', { name: 'When this takes effect' }))
-
-    expect(await screen.findByText(new RegExp(copy))).toBeInTheDocument()
-  })
-
-  it('should say the changes wait the installed guard delay, when the Safe runs a guard with another delay than the configured one', async () => {
-    accounts([option(SAFE_A)])
-    mockUseGuardStatus.mockReturnValue({
-      guard: { status: 'known' },
-      guardAddress: '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57',
-      retry: jest.fn(),
-    })
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
-
-    await userEvent.hover(screen.getByRole('button', { name: 'When this takes effect' }))
-
-    expect(await screen.findByText(/these changes wait 10 minutes after execution/)).toBeInTheDocument()
   })
 
   it('retries a failed guard check', () => {
@@ -508,12 +474,12 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it('shows no summary for a selected Safe that cannot take an allowlist', () => {
+  it('hides the form for a selected Safe that cannot take an allowlist', () => {
     accounts([option(SAFE_A, { ineligibleReason: 'unsupported-safe-version' }), option(SAFE_B)])
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.queryByText('Pick a Safe account to start.')).not.toBeInTheDocument()
-    expect(screen.queryByText(/Treasury on Sepolia/)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-tokens-section')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-recipients-section')).not.toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 

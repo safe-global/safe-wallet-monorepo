@@ -7,14 +7,11 @@ import {
   AllowlistEmptyItem,
   AllowlistSection,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
-import DismissibleCallout from '@safe-global/views/components/common/DismissibleCallout'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
 import {
   ADD_RECIPIENT_LABEL,
   ADDRESS_BOOK_TRIGGER_LABEL,
   EDIT_RECIPIENTS_DESCRIPTION,
-  RECIPIENTS_CALLOUT_DESCRIPTION,
-  RECIPIENTS_CALLOUT_TITLE,
   RECIPIENTS_EMPTY_TEXT,
   RECIPIENTS_SECTION_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -31,18 +28,9 @@ type RecipientsSectionProps = {
   onChange: (next: RecipientAllowlistFormValues) => void
   safeAddress?: string
   chainId?: string
-  isCalloutDismissed: boolean
-  onDismissCallout: () => void
 }
 
-const RecipientsSection = ({
-  values,
-  onChange,
-  safeAddress,
-  chainId,
-  isCalloutDismissed,
-  onDismissCallout,
-}: RecipientsSectionProps): ReactElement => {
+const RecipientsSection = ({ values, onChange, safeAddress, chainId }: RecipientsSectionProps): ReactElement => {
   const { recipients } = values
   const account = safeAddress && chainId ? { safeAddress, chainId } : undefined
   const hasAccount = Boolean(account)
@@ -78,16 +66,6 @@ const RecipientsSection = ({
       description={hasAccount && isEditMode ? EDIT_RECIPIENTS_DESCRIPTION : undefined}
       data-testid="allowlist-recipients-section"
     >
-      {hasAccount && !isEditMode && !isCalloutDismissed && (
-        <DismissibleCallout
-          className="mb-1"
-          title={RECIPIENTS_CALLOUT_TITLE}
-          description={RECIPIENTS_CALLOUT_DESCRIPTION}
-          onDismiss={onDismissCallout}
-          data-testid="allowlist-recipients-callout"
-        />
-      )}
-
       {!hasAccount && <AllowlistEmptyItem>{RECIPIENTS_EMPTY_TEXT}</AllowlistEmptyItem>}
 
       {account && (recipients.length > 0 || isDraftOpen) && (

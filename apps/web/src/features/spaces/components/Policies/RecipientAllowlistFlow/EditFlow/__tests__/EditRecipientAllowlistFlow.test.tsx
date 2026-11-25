@@ -84,10 +84,6 @@ jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
 jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
 jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
-jest.mock('@/features/policy-guard/store/guardDelayApi', () => ({
-  ...jest.requireActual('@/features/policy-guard/store/guardDelayApi'),
-  useGetGuardDelayQuery: () => ({ currentData: undefined }),
-}))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useAddressBookItem: () => undefined,
@@ -212,11 +208,13 @@ describe('EditRecipientAllowlistFlow', () => {
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 
-  it('should show the edit copy in the summary and as the section descriptions, without the create callouts', () => {
+  it('should show the edit copy in the summary and as the section descriptions', () => {
     renderFlow()
 
-    expect(screen.getByText("You're editing the allowlist on Treasury on Ethereum.")).toBeInTheDocument()
-    expect(screen.getByText('Anything you deselect will be blocked once the change applies.')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent("You're editing the allowlist on Treasury on Ethereum.")
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Anything you deselect will be blocked once the change applies.',
+    )
     expect(
       screen.getByText('These are the tokens the allowlist allows today. Add a token or deselect one to change it.'),
     ).toBeInTheDocument()
@@ -225,8 +223,6 @@ describe('EditRecipientAllowlistFlow', () => {
         'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.',
       ),
     ).toBeInTheDocument()
-    expect(screen.queryByTestId('allowlist-tokens-callout')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('allowlist-recipients-callout')).not.toBeInTheDocument()
   })
 
   it('should say the Safe could not be loaded and retry loading it, when the Safe read fails', () => {

@@ -24,18 +24,10 @@ export const RECIPIENT_DUPLICATE_ERROR = 'Already in the list'
 export const RECIPIENT_IS_SAFE_ERROR = 'Cannot add the Safe account itself as recipient'
 export const RECIPIENT_RESERVED_ERROR = 'This recipient address is not valid'
 
-export const SUMMARY_NO_ACCOUNT_TITLE = 'Pick a Safe account to start.'
-export const SUMMARY_NO_ACCOUNT_DESCRIPTION = 'Then choose which tokens it can send and who can receive them.'
-export const SUMMARY_DESCRIPTION = 'Transfers of these tokens to anyone else will be blocked.'
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
-export const getSummaryDetailsGuardEnabled = (changeDelay: string): string =>
-  `The Safe policy guard is already enabled, so these changes wait ${changeDelay} after execution, then need an activation step before they apply.`
-export const SUMMARY_DETAILS = `These changes take effect as soon as this transaction is executed. Further changes will take ${POLICY_CHANGE_DELAY} to apply.`
 
 export const TOKENS_SECTION_TITLE = 'Which tokens can be sent'
 export const TOKENS_NO_ACCOUNT_DESCRIPTION = 'Pick a Safe account to choose from its tokens.'
-export const TOKENS_CALLOUT_TITLE = 'The tokens selected below can only be sent to the recipients on this allowlist.'
-export const TOKENS_CALLOUT_DESCRIPTION = 'Sending them to anyone else will be blocked.'
 export const TOKENS_EMPTY_TEXT = 'Tokens in this account will show here.'
 export const TOKENS_LOAD_ERROR_TEXT = 'Could not load the tokens in this account.'
 export const SELECT_ALL_LABEL = 'Select all'
@@ -46,8 +38,6 @@ export const CONFIRM_TOKEN_LABEL = 'Add matching token'
 export const ADD_TOKEN_PLACEHOLDER = 'Search by name or address'
 
 export const RECIPIENTS_SECTION_TITLE = 'Who can receive funds'
-export const RECIPIENTS_CALLOUT_TITLE = 'Only the recipients selected below can receive the tokens on this allowlist.'
-export const RECIPIENTS_CALLOUT_DESCRIPTION = 'Sending those tokens to anyone else will be blocked.'
 export const RECIPIENTS_EMPTY_TEXT = 'Recipients will show here.'
 export const ADD_RECIPIENT_LABEL = 'Add a recipient'
 export const IN_ADDRESS_BOOK_LABEL = 'In your address book'
@@ -85,7 +75,6 @@ export const GUARD_READ_ERROR = "Couldn't check the Safe's policy guard. Try aga
 export const GUARD_UNAVAILABLE_ERROR = 'Allowlists are not available on this chain.'
 export const GUARD_NOT_SUPPORTED_ERROR = "This Safe account's guard setup doesn't support allowlists."
 
-export const REVIEW_SUMMARY_DESCRIPTION = 'Check the details below before you sign.'
 export const REVIEW_ACCOUNT_LABEL = 'Applies to'
 export const REVIEW_TOKENS_LABEL = 'Allowed tokens'
 export const getReviewRecipientsLabel = (count: number): string => `Allowed recipients (${count})`
@@ -116,9 +105,6 @@ export const REVIEW_FALLBACK_LABEL = 'Every other action'
 export const REVIEW_FALLBACK_ALLOW =
   'Stays allowed. Only transfers of the selected tokens to recipients not on the list are blocked.'
 export const BLOCKED_LABEL = 'Blocked'
-export const reviewConsentLabel = (safeName: string, changeDelay: string): string =>
-  `I understand that ${safeName} will only be able to do what this allowlist allows, and that every later change takes ${changeDelay} to apply.`
-export const REVIEW_CONSENT_ERROR = 'Tick the box to continue.'
 
 export const ALLOWLIST_GAPS_TITLE = "What this allowlist doesn't cover"
 export const ALLOWLIST_GAP_APPROVALS =

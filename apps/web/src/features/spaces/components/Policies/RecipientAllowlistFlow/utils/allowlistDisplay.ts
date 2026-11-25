@@ -36,7 +36,3 @@ export const toAllowlistRecipients = (
     const bookName = resolveName(address)
     return { address, name: name || bookName || undefined, isInAddressBook: Boolean(fromAddressBook || bookName) }
   })
-
-/** Once the policy guard sits in either slot, a new configuration waits out its delay. */
-export const isAllowlistGuardEnabled = (guard?: { status: string }): boolean =>
-  guard?.status === 'known' || guard?.status === 'partial'

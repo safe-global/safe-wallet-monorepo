@@ -211,9 +211,6 @@ const renderReview = (
     </SafeScopeContext.Provider>,
   )
 
-const confirmBlockedActions = () =>
-  fireEvent.click(screen.getByRole('checkbox', { name: /^I understand that Treasury will only be able to do/ }))
-
 const configurations = buildAllowlistConfigurations(SEPOLIA, rules)
 const guardAddress = getPolicyGuardAddress(SEPOLIA)!
 
@@ -308,16 +305,14 @@ describe('ReviewRecipientAllowlist', () => {
     expect(review).toHaveAttribute('data-with-multisend', 'false')
   })
 
-  it('shows the banner with the review description', () => {
+  it('should show the details under Confirm policy without a summary banner, when creating an allowlist', () => {
     built({ status: 'none' })
     renderReview()
 
     expect(screen.getByTestId('review-transaction')).toHaveAttribute('data-title', 'Confirm policy')
-    expect(
-      screen.getByText('Treasury on Sepolia will be able to send ETH and USDC only to 2 recipients.'),
-    ).toBeInTheDocument()
-    expect(screen.getByText('Check the details below before you sign.')).toBeInTheDocument()
-    expect(screen.queryByText('Transfers of these tokens to anyone else will be blocked.')).not.toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-review-summary')).toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('shows the account, the tokens and the recipients', () => {
@@ -400,29 +395,6 @@ describe('ReviewRecipientAllowlist', () => {
     renderReview()
 
     expect(actionLabels()).toEqual(labels.map((label, index) => `${index + 1}${label}`))
-  })
-
-  it('should say the changes wait 3 minutes, when the guard is already enabled', () => {
-    mockGuardDelay(180)
-    built({ status: 'known', guardAddress })
-    renderReview()
-
-    expect(screen.getByText(/wait 3 minutes after execution/)).toBeInTheDocument()
-  })
-
-  it('should say the changes wait the installed guard delay, when the guard has another delay than the configured one', () => {
-    mockGuardDelay(600)
-    built({ status: 'known', guardAddress })
-    renderReview()
-
-    expect(screen.getByText(/wait 10 minutes after execution/)).toBeInTheDocument()
-  })
-
-  it('says the changes apply on execution when no guard is set yet', () => {
-    built({ status: 'none' })
-    renderReview()
-
-    expect(screen.getByText(/take effect as soon as this transaction is executed/)).toBeInTheDocument()
   })
 
   it('lists every rule with its policy when the configuring action is expanded', () => {
@@ -546,7 +518,6 @@ describe('ReviewRecipientAllowlist', () => {
       built(guardState)
       renderReview()
 
-      confirmBlockedActions()
       fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
       await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
@@ -556,76 +527,11 @@ describe('ReviewRecipientAllowlist', () => {
     },
   )
 
-  it('should neither save nor continue, when the owner has not confirmed what the allowlist blocks', async () => {
-    built({ status: 'none' })
-    renderReview()
-
-    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
-
-    expect(await screen.findByText('Tick the box to continue.')).toBeInTheDocument()
-    expect(mockSave).not.toHaveBeenCalled()
-    expect(onSubmit).not.toHaveBeenCalled()
-  })
-
-  it('should neither save nor continue, when the Safe account is not loaded yet, so nobody could confirm what the allowlist blocks', async () => {
-    built({ status: 'none' })
-    mockUseAccounts.mockReturnValue({
-      accounts: [],
-      isLoading: true,
-      isError: false,
-      hasWallet: true,
-      signersOnly: false,
-      refetch: jest.fn(),
-      hasSelectableAccount: false,
-    })
-    renderReview()
-
-    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
-
-    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
-    await waitFor(() => expect(mockSave).not.toHaveBeenCalled())
-    expect(onSubmit).not.toHaveBeenCalled()
-  })
-
-  it('should ask the owner to confirm what the Safe can still do and the delay of later changes, when the review opens', () => {
-    mockGuardDelay(180)
-    built({ status: 'none' })
-    renderReview()
-
-    expect(
-      screen.getByRole('checkbox', {
-        name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 3 minutes to apply.',
-      }),
-    ).not.toBeChecked()
-  })
-
-  it('should name the delay of the installed guard, when the Safe is on a guard of another delay', () => {
-    const installed = '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57'
-    mockGuardDelay(600)
-    built({ status: 'known', guardAddress: installed })
-    renderReview()
-
-    expect(mockPolicyGuardDelay).toHaveBeenCalledWith(SEPOLIA, installed)
-    expect(
-      screen.getByRole('checkbox', {
-        name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 10 minutes to apply.',
-      }),
-    ).toBeInTheDocument()
-  })
-
-  it('should show the summary in red, when the review opens', () => {
-    built({ status: 'none' })
-    renderReview()
-
-    expect(screen.getByRole('alert')).toHaveTextContent(/will be able to send/)
-  })
-
   it('stays on the review and does not sign when the save fails', async () => {
     built({ status: 'none' })
     mockSave.mockResolvedValue(false)
     renderReview()
 
-    confirmBlockedActions()
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
     await waitFor(() => expect(mockSave).toHaveBeenCalledTimes(1))
@@ -649,7 +555,6 @@ describe('ReviewRecipientAllowlist', () => {
     mockSave.mockReturnValue(new Promise<boolean>((resolve) => (finishSave = resolve)))
     renderReview()
 
-    confirmBlockedActions()
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
     finishSave(true)
@@ -776,18 +681,23 @@ describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
     expect(within(tokenItem(USDC)).queryByText(/Added|Removed/)).not.toBeInTheDocument()
   })
 
+  it('should show the edit summary as info, naming the Safe, when editing an allowlist', () => {
+    renderEdit()
+
+    expect(screen.getByRole('status')).toHaveTextContent("You're editing the allowlist on Treasury on Sepolia.")
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
   it('describes the wait with the delay of the installed guard', () => {
     mockGuardDelay(600)
     renderEdit()
 
     expect(mockPolicyGuardDelay).toHaveBeenCalledWith(SEPOLIA, INSTALLED_GUARD)
-    expect(screen.getByText(/This starts a 10-minute wait/)).toBeInTheDocument()
-    expect(screen.getByText('Any signer can cancel the change before it applies.')).toBeInTheDocument()
-    expect(
-      screen.getByRole('checkbox', {
-        name: 'I understand that Treasury will only be able to do what this allowlist allows, and that every later change takes 10 minutes to apply.',
-      }),
-    ).toBeInTheDocument()
+    const summary = screen.getByRole('status')
+    expect(summary).toHaveTextContent(/This starts a 10-minute wait/)
+    expect(within(summary).getByTestId('tooltip-content')).toHaveTextContent(
+      'Any signer can cancel the change before it applies.',
+    )
   })
 
   it('lists the revoked recipients and the deleted rule in the request', () => {
@@ -805,7 +715,6 @@ describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
   it('saves only the change set before continuing to sign', async () => {
     renderEdit()
 
-    confirmBlockedActions()
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))

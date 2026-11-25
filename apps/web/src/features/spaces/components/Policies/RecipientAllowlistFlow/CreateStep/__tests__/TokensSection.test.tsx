@@ -64,22 +64,14 @@ const hold = (options: TokenOption[], overrides: Partial<HeldTokenAddresses> = {
 
 const setup = (
   values: RecipientAllowlistFormValues = createDefaultAllowlistValues(),
-  props: { hasAccount?: boolean; isCalloutDismissed?: boolean } = {},
+  props: { hasAccount?: boolean } = {},
 ) => {
   const onChange = jest.fn()
-  const onDismissCallout = jest.fn()
   const ui = () => (
-    <TokensSection
-      values={values}
-      onChange={onChange}
-      heldTokens={heldTokens}
-      hasAccount={props.hasAccount ?? true}
-      isCalloutDismissed={props.isCalloutDismissed ?? false}
-      onDismissCallout={onDismissCallout}
-    />
+    <TokensSection values={values} onChange={onChange} heldTokens={heldTokens} hasAccount={props.hasAccount ?? true} />
   )
   const { rerender } = render(ui())
-  return { onChange, onDismissCallout, rerender: () => rerender(ui()) }
+  return { onChange, rerender: () => rerender(ui()) }
 }
 
 describe('TokensSection', () => {
@@ -170,7 +162,6 @@ describe('TokensSection', () => {
 
     expect(screen.getByRole('button', { name: 'Add a token' })).toBeDisabled()
     expect(screen.getByText('Pick a Safe account to choose from its tokens.')).toBeInTheDocument()
-    expect(screen.queryByTestId('allowlist-tokens-callout')).not.toBeInTheDocument()
   })
 
   it('shows the empty text when the account holds no tokens', () => {
@@ -257,22 +248,5 @@ describe('TokensSection', () => {
     rerender()
 
     expect(screen.queryByRole('button', { name: 'pick DAI' })).not.toBeInTheDocument()
-  })
-
-  it('shows the callout and dismisses it', async () => {
-    const { onDismissCallout } = setup()
-
-    expect(
-      screen.getByText('The tokens selected below can only be sent to the recipients on this allowlist.'),
-    ).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
-
-    expect(onDismissCallout).toHaveBeenCalled()
-  })
-
-  it('hides the callout once dismissed', () => {
-    setup(createDefaultAllowlistValues(), { isCalloutDismissed: true })
-
-    expect(screen.queryByTestId('allowlist-tokens-callout')).not.toBeInTheDocument()
   })
 })

@@ -4,12 +4,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { createDefaultAllowlistValues, type AllowlistFormRecipient } from '../../types'
-import {
-  getAllowlistSafeLabel,
-  isAllowlistGuardEnabled,
-  toAllowlistRecipients,
-  toAllowlistTokens,
-} from '../allowlistDisplay'
+import { getAllowlistSafeLabel, toAllowlistRecipients, toAllowlistTokens } from '../allowlistDisplay'
 
 const CHAIN_ID = '11155111'
 const address = () => getAddress(faker.finance.ethereumAddress())
@@ -81,13 +76,5 @@ describe('allowlistDisplay', () => {
 
     expect(getAllowlistSafeLabel({ ...safe, name: 'Treasury' })).toBe(`Treasury on ${CHAIN_ID}`)
     expect(getAllowlistSafeLabel(safe)).toBe(`${shortenAddress(safe.address)} on ${CHAIN_ID}`)
-  })
-
-  it.each([
-    ['none', false],
-    ['known', true],
-    ['partial', true],
-  ])('treats the guard as enabled for %s: %s', (status, expected) => {
-    expect(isAllowlistGuardEnabled({ status })).toBe(expected)
   })
 })

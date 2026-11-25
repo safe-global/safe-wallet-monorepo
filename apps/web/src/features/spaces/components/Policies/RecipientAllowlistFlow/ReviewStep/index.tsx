@@ -1,27 +1,18 @@
-import { useContext, useMemo, useRef, useState, type ReactElement } from 'react'
+import { useContext, useMemo, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import AllowlistConsent from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistConsent'
 import AllowlistSummary from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSummary'
 import {
   EDIT_SUMMARY_DETAILS,
-  getEditReviewDescription,
-  getNextSignersText,
-  formatPolicyChangeDelay,
   formatPolicyChangeDelayAdjective,
-  REVIEW_SUMMARY_DESCRIPTION,
-  reviewConsentLabel,
+  getEditReviewDescription,
+  getEditSummaryTitle,
+  getNextSignersText,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
-import {
-  getAllowlistSafeLabel,
-  isAllowlistGuardEnabled,
-  toAllowlistRecipients,
-  toAllowlistTokens,
-} from '../utils/allowlistDisplay'
+import { getAllowlistSafeLabel, toAllowlistRecipients, toAllowlistTokens } from '../utils/allowlistDisplay'
 import { getLiveRecipients, markAllowlistChanges, toAllowlistRules } from '../utils/allowlistEdit'
 import type { RecipientAllowlistFlowData } from '../types'
 import { REVIEW_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
@@ -70,16 +61,12 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
   const installedGuard =
     guardState?.status === 'known' || guardState?.status === 'partial' ? guardState.guardAddress : undefined
   const delaySeconds = usePolicyGuardDelay(chainId ?? '', installedGuard)
-  const changeDelay = formatPolicyChangeDelay(delaySeconds)
 
   const requests = useMemo(
     () => (configurations && root ? [{ configurations, root }] : undefined),
     [configurations, root],
   )
   const handleSubmit = useSaveBeforeSubmit(requests, onSubmit)
-  const [isConsentGiven, setIsConsentGiven] = useState(false)
-  const [showConsentError, setShowConsentError] = useState(false)
-  const consentRef = useRef<HTMLDivElement>(null)
 
   const selected = findSafeAccount(accounts, scope?.scopeKey)
 
@@ -143,37 +130,19 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
   const hasSummary = Boolean(guardState && selected && chainId)
 
-  // Signing locks the Safe to the allowlist, so the owner confirms that before continuing
-  const submitWithConsent: SubmitCallback = (args) => {
-    if (!isConsentGiven) {
-      setShowConsentError(true)
-      consentRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
-      return
-    }
-    return handleSubmit(args)
-  }
-
   return (
     <ReviewTransaction
       {...props}
       title={REVIEW_STEP_TITLE}
       withDecodedData={false}
       withMultisend={false}
-      onSubmit={submitWithConsent}
+      onSubmit={handleSubmit}
     >
-      {hasSummary && selected && (
+      {hasSummary && selected && baseline && (
         <AllowlistSummary
-          accountLabel={getAllowlistSafeLabel(selected)}
-          tokenSymbols={tokens.map(({ symbol }) => symbol)}
-          recipientNames={recipients.map(spenderDisplayName)}
-          installedGuardDelay={isAllowlistGuardEnabled(guardState) ? changeDelay : undefined}
-          description={
-            baseline
-              ? getEditReviewDescription(formatPolicyChangeDelayAdjective(delaySeconds))
-              : REVIEW_SUMMARY_DESCRIPTION
-          }
-          details={baseline ? EDIT_SUMMARY_DETAILS : undefined}
-          tone="error"
+          title={getEditSummaryTitle(getAllowlistSafeLabel(selected))}
+          description={getEditReviewDescription(formatPolicyChangeDelayAdjective(delaySeconds))}
+          details={EDIT_SUMMARY_DETAILS}
         />
       )}
 
@@ -185,16 +154,6 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
           fallback={chainId && configurations ? getInstalledFallback(chainId, configurations) : undefined}
           hasNativeRule={Boolean(rules?.some(({ tokenAddress }) => sameAddress(tokenAddress, ZERO_ADDRESS)))}
           isEdit={Boolean(baseline)}
-        />
-      )}
-
-      {hasSummary && selected && (
-        <AllowlistConsent
-          ref={consentRef}
-          label={reviewConsentLabel(spenderDisplayName(selected), changeDelay)}
-          checked={isConsentGiven}
-          showError={showConsentError}
-          onCheckedChange={setIsConsentGiven}
         />
       )}
 

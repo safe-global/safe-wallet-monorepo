@@ -17,17 +17,8 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
 }))
 jest.mock('../CreateStep', () => ({
   __esModule: true,
-  default: ({
-    dismissedCallouts,
-    onDismissCallout,
-    onSpendingLimitImpact,
-  }: {
-    dismissedCallouts: { tokens: boolean; recipients: boolean }
-    onDismissCallout: (section: 'tokens' | 'recipients') => void
-    onSpendingLimitImpact: (affectsSpendingLimits: boolean) => void
-  }) => (
-    <div data-testid="create-step" data-dismissed={JSON.stringify(dismissedCallouts)}>
-      <button onClick={() => onDismissCallout('recipients')}>dismiss recipients</button>
+  default: ({ onSpendingLimitImpact }: { onSpendingLimitImpact: (affectsSpendingLimits: boolean) => void }) => (
+    <div data-testid="create-step">
       <button onClick={() => onSpendingLimitImpact(true)}>affect spending limits</button>
     </div>
   ),
@@ -79,21 +70,6 @@ describe('RecipientAllowlistFlow', () => {
     render(<RecipientAllowlistFlow />)
 
     expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ initialData: createDefaultAllowlistValues() })
-  })
-
-  it('remembers dismissed callouts per section', () => {
-    render(<RecipientAllowlistFlow />)
-    expect(screen.getByTestId('create-step')).toHaveAttribute(
-      'data-dismissed',
-      JSON.stringify({ tokens: false, recipients: false }),
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: 'dismiss recipients' }))
-
-    expect(screen.getByTestId('create-step')).toHaveAttribute(
-      'data-dismissed',
-      JSON.stringify({ tokens: false, recipients: true }),
-    )
   })
 
   it('names the policy in the subtitle', () => {
