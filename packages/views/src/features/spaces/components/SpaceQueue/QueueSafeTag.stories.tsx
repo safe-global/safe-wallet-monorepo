@@ -37,6 +37,11 @@ type Story = StoryObj<typeof meta>
 
 export const Named: Story = {}
 
+/** Links to the Safe's home: a click opens the Safe, hovering still shows the card */
+export const Link: Story = {
+  args: { href: `/home?safe=eth:${ADDRESS}`, onNavigate: (event) => event.preventDefault() },
+}
+
 /** A long name truncates so the tag keeps its width */
 export const LongName: Story = { args: { name: 'Operations multisig for the European payroll' } }
 

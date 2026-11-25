@@ -67,6 +67,27 @@ describe('QueueSafeTag', () => {
     expect(onNavigate).toHaveBeenCalledTimes(1)
   })
 
+  it.each([{}, { metaKey: true }])(
+    'does not open the party card on a click that follows the link (%o)',
+    async (modifier) => {
+      render(
+        <QueueSafeTag
+          address={address}
+          name="Treasury"
+          chain={chain}
+          card={card}
+          href="/home?safe=eth:0x1"
+          onNavigate={(event) => event.preventDefault()}
+        />,
+      )
+
+      fireEvent.click(screen.getByRole('link', { name: /Treasury/ }), modifier)
+      await new Promise((resolve) => setTimeout(resolve, 50))
+
+      expect(screen.queryByTestId('party-card')).not.toBeInTheDocument()
+    },
+  )
+
   it('still shows the party card on hover when it links to the Safe', async () => {
     jest.useFakeTimers()
     const { user } = renderOnFakeClock(

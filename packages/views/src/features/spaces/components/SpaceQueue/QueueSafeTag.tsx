@@ -18,6 +18,9 @@ type QueueSafeTagProps = {
   onNavigate?: (event: MouseEvent<HTMLAnchorElement>) => void
 }
 
+/** Base UI adds this to events of a trigger's own handlers; its type isn't exported */
+type TriggerClickEvent = MouseEvent<HTMLAnchorElement> & { preventBaseUIHandler?: () => void }
+
 const TAG_CLASS =
   'flex max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted py-1 pr-2 pl-1 text-sm outline-hidden group-hover/transaction:bg-card focus-visible:ring-[3px] focus-visible:ring-ring/50'
 
@@ -43,7 +46,11 @@ const QueueSafeTag = ({
           href={href}
           // The popover trigger makes it a button; it navigates, so it is a link
           role="link"
-          onClick={onNavigate}
+          onClick={(event: TriggerClickEvent) => {
+            // A click follows the link, so the trigger must not also open the card; hover still does
+            event.preventBaseUIHandler?.()
+            onNavigate?.(event)
+          }}
           className={`${TAG_CLASS} cursor-pointer`}
         />
       ) : (
