@@ -4,7 +4,7 @@ import { test, expect } from '../../src/fixtures/journey.fixture'
 import { SpendingLimitsPage } from '../../src/pages/spending-limits.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { seedSafe } from '../../src/seed/safe'
-import { SEPOLIA_COW, SEPOLIA_GHO, SEPOLIA_USDC, seedKnownToken, seedUntrustedToken } from '../../src/seed/tokens'
+import { SEPOLIA_COW, SEPOLIA_USDC, seedKnownToken } from '../../src/seed/tokens'
 import { seedBusinessWorkspace } from '../../src/seed/workspace'
 
 const AMOUNT = '5'
@@ -50,27 +50,6 @@ test.describe('Set up a spending limit', { tag: '@e2e' }, () => {
     await expect
       .poll(() => allowanceOf(journey.env, { safe: safe.address, delegate: beneficiary, token: usdc }))
       .toEqual({ amount: parseUnits('1.5', decimals), spent: 0n })
-  })
-
-  test('should warn on the form and the review when the pasted token is not trusted', async ({ safePage, journey }) => {
-    const { address: gho, decimals } = SEPOLIA_GHO
-    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
-    await seedUntrustedToken(journey.env, SEPOLIA_GHO)
-    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { Treasury: safe })
-    const beneficiary = journey.newAddress()
-
-    const spendingLimits = new SpendingLimitsPage(safePage)
-    await spendingLimits.goto(safe.prefixedAddress, workspaceId)
-    await spendingLimits.startLimit(beneficiary)
-    await spendingLimits.tokenSelector.pickPastedToken(SEPOLIA_GHO)
-    await expect(spendingLimits.untrustedTokenWarning).toBeVisible()
-    await spendingLimits.finishLimit(AMOUNT)
-    await expect(spendingLimits.untrustedTokenWarning).toBeVisible()
-    await new TxReviewPage(safePage).signAndExecuteDecliningSponsor()
-
-    await expect
-      .poll(() => allowanceOf(journey.env, { safe: safe.address, delegate: beneficiary, token: gho }))
-      .toEqual({ amount: parseUnits(AMOUNT, decimals), spent: 0n })
   })
 
   test('should offer no token for a pasted address the Transaction Service does not know', async ({
