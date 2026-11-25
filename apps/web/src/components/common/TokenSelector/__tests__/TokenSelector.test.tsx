@@ -136,6 +136,14 @@ describe('TokenSelector — rendering', () => {
     expect(onChange).toHaveBeenCalledWith(heldUsdc.address)
   })
 
+  it('passes its extra tokens to the options hook, so they stay selectable', () => {
+    const existingLimitToken = option({ group: 'held' })
+
+    renderSelector({ extraTokens: [existingLimitToken] })
+
+    expect(mockUseOptions).toHaveBeenCalledWith([existingLimitToken])
+  })
+
   it('renders a token without a logo', async () => {
     const { user } = renderSelector()
     await openSelector(user)

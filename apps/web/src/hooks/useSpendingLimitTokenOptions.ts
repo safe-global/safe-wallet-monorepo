@@ -34,8 +34,8 @@ export const buildIdentityKey = (chainId: string, safeAddress: string): string =
 const noop = (): void => {}
 
 /**
- * @param extraTokens - Tokens to keep selectable whichever lists the queries return. See
- *   {@link useExistingLimitTokens}; pass nothing outside the edit flow.
+ * @param extraTokens - Tokens to keep selectable whichever lists the queries return, such as an
+ *   existing limit's token in the edit flow. Pass nothing elsewhere.
  *
  * @remarks
  * Held tokens come from the Transaction Service balances endpoint, not the portfolio one: only it

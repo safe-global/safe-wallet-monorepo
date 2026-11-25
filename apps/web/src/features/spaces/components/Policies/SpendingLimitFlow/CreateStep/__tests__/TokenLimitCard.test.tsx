@@ -65,6 +65,7 @@ jest.mock('@/components/common/TokenSelector', () => ({
     onChange,
     excludeAddresses = [],
     disabledAddresses = [],
+    extraTokens = [],
     helperText,
     'data-testid': testId = 'limit-token-selector',
   }: {
@@ -72,11 +73,17 @@ jest.mock('@/components/common/TokenSelector', () => ({
     onChange: (next: string | undefined) => void
     excludeAddresses?: string[]
     disabledAddresses?: string[]
+    extraTokens?: readonly { address: string }[]
     helperText?: React.ReactNode
     'data-testid'?: string
   }) => (
     <div>
-      <select data-testid={testId} value={value ?? ''} onChange={(event) => onChange(event.target.value || undefined)}>
+      <select
+        data-testid={testId}
+        data-extra-tokens={extraTokens.map((token) => token.address).join(',')}
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value || undefined)}
+      >
         <option value="">none</option>
         {mockTokens
           .filter((token) => !excludeAddresses.includes(token.address))
@@ -386,6 +393,14 @@ describe('TokenLimitCard', () => {
       renderRows([{ ...createEmptyLimit(), tokenAddress: unlisted.address }], undefined, SPENDER, true)
 
       expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
+    })
+
+    it('hands the tokens the Safe already limits to the picker', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, SPENDER, true)
+
+      expect(screen.getByTestId('limit-token-selector')).toHaveAttribute('data-extra-tokens', USDC)
     })
 
     it('keeps a token the spender already has in the selector so it can be edited', () => {
