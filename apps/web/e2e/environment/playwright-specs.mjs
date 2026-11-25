@@ -16,7 +16,7 @@ export const playwrightSpecs = {
     devices: ['trezor'],
   },
   'e2e/batch.spec.ts': { flags: ['BATCHING'] },
-  'e2e/billing.spec.ts': {},
+  'e2e/billing.spec.ts': { scenarios: ['prepareBasicScenario'] },
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},
@@ -91,9 +91,7 @@ export const playwrightSpecs = {
   'regression/wallet-reconnect.spec.ts': {
     scenarios: ['prepareBasicScenario'],
   },
-  'regression/auth0/step-up-billing.spec.ts': {
-    scenarios: ['prepareBasicScenario'],
-  },
+  'regression/auth0/step-up-billing.spec.ts': {},
   'regression/auth0/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
   },

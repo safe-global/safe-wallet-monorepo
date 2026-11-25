@@ -1,8 +1,10 @@
 // The local billing service opens a local page in place of Stripe's checkout; its button completes the checkout.
 import { test, expect } from '../../src/fixtures/test.fixture'
+import { TEST_ADDRESSES, safeAddress } from '../../src/data/constants'
 import { expectLocalCheckout } from '../../src/fixtures/billing'
 import {
   acceptInvite,
+  addWorkspaceSafes,
   clearSubscription,
   createEmailSession,
   createWorkspace,
@@ -11,6 +13,7 @@ import {
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
+  workspaceResource,
   type EmailSession,
 } from '../../src/fixtures/email-session'
 import { WorkspacePage } from '../../src/pages/workspace.page'
@@ -89,15 +92,29 @@ test.describe('Safe Pro billing of a Workspace', { tag: '@e2e' }, () => {
     await expect.poll(() => planName(user, workspaceId)).toBe('Business')
   })
 
-  test('should move the Workspace to Starter when the admin downgrades from Business', async () => {
+  test('should remove the deselected Safe when the admin downgrades to a plan with fewer Safes', async ({
+    safePage,
+    safes,
+  }) => {
     await storeSubscription(user, workspaceId)
+    await addWorkspaceSafes(user, workspaceId, [
+      safeAddress(safes.basic),
+      TEST_ADDRESSES.PLACEHOLDER_A,
+      TEST_ADDRESSES.PLACEHOLDER_B,
+    ])
     await workspace.gotoPlans(workspaceId)
 
     await workspace.switchPlanButton('Starter').click()
+    const selection = safePage.getByRole('dialog', { name: 'Select Safe accounts for your Safe Pro plan' })
+    await selection.getByRole('checkbox', { name: /^Select 0xb000/ }).uncheck()
+    await selection.getByRole('button', { name: 'Continue to downgrade' }).click()
     await workspace.confirmPlanChangeButton.click()
 
     await workspace.planSwitchedDialog('Starter').getByRole('button', { name: 'Get started' }).click()
     await expect(workspace.currentPlanName).toHaveText('Starter')
     await expect.poll(() => planName(user, workspaceId)).toBe('Starter')
+    const workspaceSafes = (await workspaceResource(user, workspaceId, 'safes')).toLowerCase()
+    expect(workspaceSafes).not.toContain(TEST_ADDRESSES.PLACEHOLDER_B)
+    expect(workspaceSafes).toContain(TEST_ADDRESSES.PLACEHOLDER_A)
   })
 })
