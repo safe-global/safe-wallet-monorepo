@@ -660,6 +660,28 @@ describe('useFeesPreview', () => {
       ])
     })
 
+    it('locks the fee params of a proposal the Safe pays for, even without signatures', () => {
+      const previewSpy = jest
+        .spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery')
+        .mockReturnValue(mockSuccessfulPreview)
+      const proposedWethGasSafeTx = buildSafeTx({
+        to: mockSafe.address.value,
+        value: '100000000000000',
+        data: '0x',
+        gasToken: WETH_ADDRESS,
+        ...SAFE_PAYS,
+      })
+
+      const { result } = renderHook(() => useFeesPreview({ isPayFromSafe: true }), {
+        wrapper: withSafeTx(proposedWethGasSafeTx),
+      })
+
+      expect(result.current.isConfirmation).toBe(true)
+      expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+      expect(result.current.gasFee.currency).toBe('WETH')
+      expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
+    })
+
     it('skips the CGW preview query — confirmers derive fees from the signed payload', () => {
       const previewSpy = jest
         .spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery')

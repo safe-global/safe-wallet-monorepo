@@ -96,10 +96,10 @@ export const useFeesPreview = ({
       }
     : undefined
 
-  // Once the first signer has signed, gas params are baked into the payload — later signers
-  // render what's locked in. The isPaidFromSafe guard excludes Signer-pays / pre-Pay-from-Safe queued txs.
-  const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
-  const isConfirmation = lockedGasToken !== undefined && !!safeTx && isPaidFromSafe(safeTx.data)
+  // A payload that already carries Safe-pays fee params (signed, or proposed without signatures)
+  // renders what's locked in: re-quoting would show a fee the signature doesn't commit to.
+  const lockedGasToken = safeTx && isPaidFromSafe(safeTx.data) ? safeTx.data.gasToken : undefined
+  const isConfirmation = lockedGasToken !== undefined
 
   // Signed payload that never went through Safe-pays setup — pre-M2 queue items, or post-M2
   // Signer-pays multi-sig after the first signature. The hook can't tell these apart from the
