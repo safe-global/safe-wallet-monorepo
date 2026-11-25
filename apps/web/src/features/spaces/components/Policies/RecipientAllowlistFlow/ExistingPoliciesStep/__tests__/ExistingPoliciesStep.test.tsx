@@ -47,7 +47,7 @@ const makeImpact = (symbol: string, impact: SpendingLimitImpactKind, isPending =
 const spendingLimits = (overrides: Partial<SpendingLimitImpactsResult> = {}) =>
   mockImpacts.mockReturnValue({ impacts: [], isLoading: false, isError: false, refetch: jest.fn(), ...overrides })
 
-const data: RecipientAllowlistFlowData = { excludedTokens: [], addedTokens: [], recipients: [], rules: [] }
+const data: RecipientAllowlistFlowData = { tokens: [], recipients: [], rules: [] }
 
 const renderStep = (isEditMode = false) => {
   const onNext = jest.fn()

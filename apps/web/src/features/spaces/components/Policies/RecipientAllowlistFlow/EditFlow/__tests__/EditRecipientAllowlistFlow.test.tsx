@@ -90,8 +90,6 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   useMergedAddressBooks: () => ({ has: () => false, get: () => undefined, list: [] }),
   useSafeNameResolver: () => () => '',
 }))
-jest.mock('../../CreateStep/AddFromAddressBook', () => ({ __esModule: true, default: () => null }))
-jest.mock('../../CreateStep/TokenDraftRow', () => ({ __esModule: true, default: () => null }))
 jest.mock('../../ExistingPoliciesStep', () => ({
   __esModule: true,
   default: () => <div data-testid="existing-policies-step" />,
@@ -131,7 +129,15 @@ const treasury: SafeAccountOption = {
 }
 
 const chip = (name: string) => screen.getByRole('button', { name: `Allow ${name}` })
+const recipientChips = () => screen.getAllByRole('button', { name: /^Allow 0x/ })
 const next = () => screen.getByTestId('next-btn')
+
+const pick = (search: string, value: string, option: RegExp) => {
+  fireEvent.change(screen.getByRole('combobox', { name: search }), { target: { value } })
+  fireEvent.click(screen.getByRole('option', { name: option }))
+}
+const pickToken = (symbol: string) => pick('Search tokens by name or address', symbol, new RegExp(symbol))
+const pasteRecipient = (address: string) => pick('Search contacts or paste an address', address, /New recipient/)
 
 const renderFlow = () => render(<EditRecipientAllowlistFlow policy={policy} />)
 
@@ -192,37 +198,29 @@ describe('EditRecipientAllowlistFlow', () => {
     expect(screen.getByTestId('recipient-allowlist-create-step')).toBeInTheDocument()
   })
 
-  it('should open titled Edit policy, prefilled with the live allowlist on its fixed Safe', () => {
+  it('should open titled Edit policy, with the live tokens and recipients as chips on its fixed Safe', () => {
     renderFlow()
 
     expect(screen.getByTestId('modal-title')).toHaveTextContent('Edit policy')
     expect(mockFlowProps.mock.calls[0][0].eventCategory).toBe(TxFlowType.EDIT_SPACE_RECIPIENT_ALLOWLIST)
     expect(chip('USDC')).toHaveAttribute('aria-pressed', 'true')
     expect(chip('USDT')).toHaveAttribute('aria-pressed', 'true')
-    expect(chip('DAI')).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getAllByRole('button', { name: /^Allow 0x/ })).toHaveLength(3)
-    screen
-      .getAllByRole('button', { name: /^Allow 0x/ })
-      .forEach((recipient) => expect(recipient).toHaveAttribute('aria-pressed', 'true'))
+    expect(screen.queryByRole('button', { name: 'Allow DAI' })).not.toBeInTheDocument()
+    expect(recipientChips()).toHaveLength(3)
+    recipientChips().forEach((recipient) => expect(recipient).toHaveAttribute('aria-pressed', 'true'))
     expect(screen.getByTestId('safe-account-readonly')).toBeInTheDocument()
-    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('safe-account-selector')).not.toBeInTheDocument()
   })
 
-  it('should show the edit copy in the summary and as the section descriptions', () => {
+  it('should show the edit copy in the summary and the section descriptions', () => {
     renderFlow()
 
     expect(screen.getByRole('status')).toHaveTextContent("You're editing the allowlist on Treasury on Ethereum.")
     expect(screen.getByRole('status')).toHaveTextContent(
       'Anything you deselect will be blocked once the change applies.',
     )
-    expect(
-      screen.getByText('These are the tokens the allowlist allows today. Add a token or deselect one to change it.'),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.',
-      ),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Only transfers of the tokens selected below will be allowed.')).toBeInTheDocument()
+    expect(screen.getByText('Only transfers to the recipients selected below will be allowed.')).toBeInTheDocument()
   })
 
   it('should say the Safe could not be loaded and retry loading it, when the Safe read fails', () => {
@@ -241,29 +239,29 @@ describe('EditRecipientAllowlistFlow', () => {
     renderFlow()
     expect(next()).toBeDisabled()
 
-    const bob = screen.getAllByRole('button', { name: /^Allow 0x/ })[1]
-    fireEvent.click(bob)
+    fireEvent.click(recipientChips()[1])
     expect(next()).toBeEnabled()
 
-    fireEvent.click(bob)
+    pasteRecipient(MOCK_ADDRESSES.bob)
     expect(next()).toBeDisabled()
 
-    fireEvent.click(chip('DAI'))
+    pickToken('DAI')
     expect(next()).toBeEnabled()
   })
 
-  it('should keep Next disabled, when every recipient is deselected', () => {
+  it('should keep Next disabled, when every recipient is removed', () => {
     renderFlow()
 
-    screen.getAllByRole('button', { name: /^Allow 0x/ }).forEach((recipient) => fireEvent.click(recipient))
+    recipientChips().forEach((recipient) => fireEvent.click(recipient))
 
+    expect(screen.queryByRole('button', { name: /^Allow 0x/ })).not.toBeInTheDocument()
     expect(next()).toBeDisabled()
   })
 
   it('should carry the live allowlist to the review with the changed rules', () => {
     renderFlow()
 
-    fireEvent.click(screen.getAllByRole('button', { name: /^Allow 0x/ })[2])
+    fireEvent.click(recipientChips()[2])
     fireEvent.click(next())
 
     const data = JSON.parse(screen.getByTestId('review-data').textContent ?? '') as RecipientAllowlistFlowData
@@ -286,7 +284,7 @@ describe('EditRecipientAllowlistFlow', () => {
     })
     renderFlow()
 
-    fireEvent.click(chip('DAI'))
+    pickToken('DAI')
     fireEvent.click(next())
 
     expect(screen.getByTestId('existing-policies-step')).toBeInTheDocument()

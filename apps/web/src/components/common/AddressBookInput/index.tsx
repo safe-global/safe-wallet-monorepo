@@ -19,7 +19,7 @@ import { useMemberNameResolver } from '@/features/spaces/public/hooks/useMemberN
 import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
-import { useAnchoredList } from './useAnchoredList'
+import { useAnchoredList } from '@safe-global/views/hooks/use-anchored-list'
 import { usePortalContainerElement } from '@safe-global/views/components/ui/ShadcnProvider'
 
 type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }

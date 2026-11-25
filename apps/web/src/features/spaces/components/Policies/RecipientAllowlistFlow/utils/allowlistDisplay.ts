@@ -5,10 +5,9 @@ import type { SafeAccountOption } from '@safe-global/views/features/spaces/compo
 import { chainLabel } from '../../SafeAccountSelector/utils'
 import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
-import type { RecipientAllowlistFormValues } from '../types'
-import { getUniqueSelectedRecipients } from './allowlistForm'
+import type { AllowlistToken, RecipientAllowlistFormValues } from '../types'
+import { getUniqueRecipients } from './allowlistForm'
 
-export type AllowlistTokenDisplay = { address: string; symbol: string; logoUri?: string }
 export type AllowlistRecipientDisplay = { address: string; name?: string; isInAddressBook: boolean }
 
 export const getAllowlistSafeLabel = (safe: SafeAccountOption): string =>
@@ -18,8 +17,8 @@ export const getAllowlistSafeLabel = (safe: SafeAccountOption): string =>
 export const toAllowlistTokens = (
   addresses: readonly string[],
   options: readonly TokenOption[],
-  known: readonly AllowlistTokenDisplay[] = [],
-): AllowlistTokenDisplay[] =>
+  known: readonly AllowlistToken[] = [],
+): AllowlistToken[] =>
   addresses.map((address) => {
     const option = findTokenOption(options, address)
     if (option) return { address, symbol: tokenOptionLabel(option), logoUri: option.logoUri }
@@ -32,7 +31,7 @@ export const toAllowlistRecipients = (
   values: RecipientAllowlistFormValues,
   resolveName: (address: string) => string,
 ): AllowlistRecipientDisplay[] =>
-  getUniqueSelectedRecipients(values).map(({ address, name, fromAddressBook }) => {
+  getUniqueRecipients(values).map(({ address, name, fromAddressBook }) => {
     const bookName = resolveName(address)
     return { address, name: name || bookName || undefined, isInAddressBook: Boolean(fromAddressBook || bookName) }
   })

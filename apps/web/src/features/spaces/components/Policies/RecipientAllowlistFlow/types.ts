@@ -1,23 +1,21 @@
 import type { AllowlistEntry } from '@safe-global/views/features/spaces/components/Policies/types'
 
+/** A token as its chip and the review show it, so one no token list names keeps its symbol and logo. */
+export type AllowlistToken = { address: string; symbol: string; logoUri?: string }
+
 export type AllowlistFormRecipient = {
   address: string
   name?: string
   fromAddressBook?: boolean
-  selected: boolean
 }
 
 export type RecipientAllowlistFormValues = {
-  /** Token addresses deselected; every shown token is allowed until deselected. */
-  excludedTokens: string[]
-  /** Token addresses added via "Add a token". */
-  addedTokens: string[]
+  tokens: AllowlistToken[]
   recipients: AllowlistFormRecipient[]
 }
 
 export const createDefaultAllowlistValues = (): RecipientAllowlistFormValues => ({
-  excludedTokens: [],
-  addedTokens: [],
+  tokens: [],
   recipients: [],
 })
 

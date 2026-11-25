@@ -26,7 +26,8 @@ import { cn } from '@safe-global/views/utils/cn'
 import TokenIcon from '@/components/common/TokenIcon'
 import { SafeAccountSummary } from '../../SafeAccountSelector/components/SafeAccountRow'
 import RecipientIdentity from '../components/RecipientIdentity'
-import type { AllowlistRecipientDisplay, AllowlistTokenDisplay } from '../utils/allowlistDisplay'
+import type { AllowlistRecipientDisplay } from '../utils/allowlistDisplay'
+import type { AllowlistToken } from '../types'
 import type { ListChange } from '../utils/allowlistEdit'
 import type { InstalledFallback } from './ruleKind'
 
@@ -36,7 +37,7 @@ type Changed<T> = T & { change?: ListChange }
 
 type AllowlistPolicyDetailsProps = {
   safe: SafeAccountOption
-  tokens: Changed<AllowlistTokenDisplay>[]
+  tokens: Changed<AllowlistToken>[]
   recipients: Changed<AllowlistRecipientDisplay>[]
   fallback?: InstalledFallback
   hasNativeRule: boolean

@@ -1,9 +1,10 @@
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { AllowlistEntry } from '@safe-global/views/features/spaces/components/Policies/types'
 import { mockAllowlistPolicy } from '../../../../../public/utils/allowlistPolicies'
 import { MOCK_ADDRESSES, MOCK_TOKENS } from '../../../../../public/utils/policies'
-import { buildAllowlistRules, getAllowedTokenAddresses, getFormTokenAddresses } from '../allowlistForm'
+import { buildAllowlistRules, getAllowedTokenAddresses } from '../allowlistForm'
 import {
   hasAllowlistChanges,
   markAllowlistChanges,
@@ -36,39 +37,37 @@ describe('allowlistEdit', () => {
   })
 
   describe('toAllowlistEditValues', () => {
-    it('marks every live token as added, held or not, and held tokens that are not live as excluded', () => {
-      const entries = [entry(usdc, [alice]), entry(usdt, [alice])]
+    it('should, when editing, pick every live token with its symbol and logo', () => {
+      const entries = [entry(usdc, [alice]), entry({ ...usdt, logoUri: null }, [alice])]
 
-      const values = toAllowlistEditValues(entries, [usdc.address.toLowerCase(), unknown])
-
-      expect(values.addedTokens).toEqual([usdc.address, usdt.address])
-      expect(values.excludedTokens).toEqual([unknown])
+      expect(toAllowlistEditValues(entries).tokens).toEqual([
+        { address: usdc.address, symbol: usdc.symbol, logoUri: usdc.logoUri },
+        { address: usdt.address, symbol: usdt.symbol, logoUri: undefined },
+      ])
     })
 
-    it('should keep a live token selected, when it is no longer held after the prefill', () => {
-      const entries = [entry(usdc, [alice]), entry(usdt, [alice])]
-      const values = toAllowlistEditValues(entries, [usdc.address, usdt.address])
+    it('should, when a live token has no symbol, label it by its short address', () => {
+      const nameless = { ...usdc, symbol: '' }
 
-      expect(getAllowedTokenAddresses([usdt.address], values)).toEqual([usdt.address, usdc.address])
+      expect(toAllowlistEditValues([entry(nameless, [alice])]).tokens[0].symbol).toBe(shortenAddress(usdc.address))
     })
 
-    it('should list a live token once, when it is both held and added', () => {
-      const entries = [entry(usdc, [alice])]
-      const values = toAllowlistEditValues(entries, [usdc.address.toLowerCase()])
-
-      expect(getFormTokenAddresses([usdc.address.toLowerCase()], values)).toEqual([usdc.address.toLowerCase()])
-    })
-
-    it('lists the union of recipients once, selected, ignoring case', () => {
+    it('should, when the live tokens share recipients, pick each recipient once, ignoring case', () => {
       const entries = [entry(usdc, [alice, bob]), entry(usdt, [alice.toLowerCase(), unresolved])]
 
-      const { recipients } = toAllowlistEditValues(entries, [usdc.address, usdt.address])
+      const { recipients } = toAllowlistEditValues(entries)
 
       expect(recipients).toEqual([
-        { address: checksumAddress(alice), selected: true },
-        { address: checksumAddress(bob), selected: true },
-        { address: checksumAddress(unresolved), selected: true },
+        { address: checksumAddress(alice) },
+        { address: checksumAddress(bob) },
+        { address: checksumAddress(unresolved) },
       ])
+    })
+
+    it('should, when a live token is no longer held, keep it allowed', () => {
+      const values = toAllowlistEditValues([entry(usdc, [alice]), entry(usdt, [alice])])
+
+      expect(getAllowedTokenAddresses([usdt.address], values)).toEqual([usdt.address, usdc.address])
     })
   })
 
@@ -91,42 +90,38 @@ describe('allowlistEdit', () => {
       ['held is a subset of live', [usdc.address]],
       ['live is a subset of held', [usdc.address, usdt.address, unknown]],
       ['held equals live', [usdc.address, usdt.address]],
-    ])('is false for an untouched form when %s', (_, held) => {
-      const desired = buildAllowlistRules(held, toAllowlistEditValues(entries, held))
+    ])('should, when the form is untouched and %s, find no change', (_, held) => {
+      const desired = buildAllowlistRules(held, toAllowlistEditValues(entries))
 
       expect(hasAllowlistChanges(baseline, desired)).toBe(false)
     })
 
-    it('is false for an untouched form with the native token', () => {
+    it('should, when the form is untouched with the native token, find no change', () => {
       const nativeEntries = [entry(native, [alice]), entry(usdc, [alice])]
-      const held = [ZERO_ADDRESS, usdc.address]
-      const desired = buildAllowlistRules(held, toAllowlistEditValues(nativeEntries, held))
+      const desired = buildAllowlistRules([ZERO_ADDRESS, usdc.address], toAllowlistEditValues(nativeEntries))
 
       expect(hasAllowlistChanges(toAllowlistRules(nativeEntries), desired)).toBe(false)
     })
 
-    it('is false for an untouched form when the live recipients differ per token', () => {
+    it('should, when the form is untouched and the live recipients differ per token, find no change', () => {
       const uneven = [entry(usdc, [alice, bob]), entry(usdt, [alice])]
-      const held = [usdc.address, usdt.address]
-      const desired = buildAllowlistRules(held, toAllowlistEditValues(uneven, held))
+      const desired = buildAllowlistRules([usdc.address, usdt.address], toAllowlistEditValues(uneven))
 
       expect(hasAllowlistChanges(toAllowlistRules(uneven), desired)).toBe(false)
     })
 
-    it('is true when a recipient is deselected', () => {
-      const held = [usdc.address, usdt.address]
-      const values = toAllowlistEditValues(entries, held)
-      values.recipients = values.recipients.map((r) => (r.address === bob ? { ...r, selected: false } : r))
+    it('should, when a recipient is removed, find a change', () => {
+      const values = toAllowlistEditValues(entries)
+      values.recipients = values.recipients.filter((r) => r.address !== bob)
 
-      expect(hasAllowlistChanges(baseline, buildAllowlistRules(held, values))).toBe(true)
+      expect(hasAllowlistChanges(baseline, buildAllowlistRules([], values))).toBe(true)
     })
 
-    it('is true when a token is excluded', () => {
-      const held = [usdc.address, usdt.address]
-      const values = toAllowlistEditValues(entries, held)
-      values.excludedTokens = [usdt.address]
+    it('should, when a token is removed, find a change', () => {
+      const values = toAllowlistEditValues(entries)
+      values.tokens = values.tokens.filter((t) => t.address !== usdt.address)
 
-      expect(hasAllowlistChanges(baseline, buildAllowlistRules(held, values))).toBe(true)
+      expect(hasAllowlistChanges(baseline, buildAllowlistRules([], values))).toBe(true)
     })
 
     it('is false when only the address case differs', () => {

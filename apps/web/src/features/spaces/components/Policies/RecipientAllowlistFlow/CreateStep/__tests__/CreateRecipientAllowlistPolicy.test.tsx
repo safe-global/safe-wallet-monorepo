@@ -6,11 +6,7 @@ import userEvent from '@testing-library/user-event'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/hooks/useSafeShield'
-import {
-  createDefaultAllowlistValues,
-  type AllowlistFormRecipient,
-  type RecipientAllowlistFormValues,
-} from '../../types'
+import type { RecipientAllowlistFormValues } from '../../types'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { GuardStatus } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -41,18 +37,8 @@ jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('../../hooks/useSpendingLimitImpacts', () => ({ useSpendingLimitImpacts: jest.fn() }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
-  useMergedAddressBooks: () => ({ has: () => false }),
+  useMergedAddressBooks: () => ({ list: [], has: () => false, get: () => undefined }),
   useSafeNameResolver: () => () => '',
-}))
-jest.mock('../AddFromAddressBook', () => ({ __esModule: true, default: () => null }))
-jest.mock('../TokenDraftRow', () => ({ __esModule: true, default: () => null }))
-jest.mock('../RecipientDraftRow', () => ({
-  __esModule: true,
-  default: ({ onAdd }: { onAdd: (recipient: AllowlistFormRecipient) => void }) => (
-    <button type="button" onClick={() => onAdd({ address: RECIPIENT, name: 'Dave', selected: true })}>
-      confirm draft
-    </button>
-  ),
 }))
 
 // The selector has its own suite; here only what the step does with a pick is under test.
@@ -115,9 +101,23 @@ const holdNative = (overrides: Partial<ReturnType<typeof useHeldTokenAddresses>>
   })
 
 const completeValues = (): RecipientAllowlistFormValues => ({
-  ...createDefaultAllowlistValues(),
-  recipients: [{ address: RECIPIENT, name: 'Dave', selected: true }],
+  tokens: [{ address: ZERO_ADDRESS, symbol: 'ETH' }],
+  recipients: [{ address: RECIPIENT, name: 'Dave' }],
 })
+
+const pickToken = (symbol: string) => {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search tokens by name or address' }), {
+    target: { value: symbol },
+  })
+  fireEvent.click(screen.getByRole('option', { name: new RegExp(symbol) }))
+}
+
+const pasteRecipient = (address: string) => {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search contacts or paste an address' }), {
+    target: { value: address },
+  })
+  fireEvent.click(screen.getByRole('option', { name: /New recipient/ }))
+}
 
 const option = (address: string, extra: Partial<SafeAccountOption> = {}): SafeAccountOption => ({
   id: buildSafeAccountId(SEPOLIA, address),
@@ -244,12 +244,16 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
 
-    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
+    pickToken('ETH')
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+
+    pasteRecipient(RECIPIENT)
     expect(screen.getByTestId('next-btn')).toBeEnabled()
 
     fireEvent.click(screen.getByTestId('next-btn'))
     expect(onNext).toHaveBeenCalledWith({
-      ...completeValues(),
+      tokens: [{ address: ZERO_ADDRESS, symbol: 'ETH' }],
+      recipients: [{ address: RECIPIENT }],
       rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }],
     })
   })
@@ -326,7 +330,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
 
     expect(mockPoisoning).toHaveBeenLastCalledWith([])
 
-    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
+    pasteRecipient(RECIPIENT)
 
     expect(mockPoisoning).toHaveBeenLastCalledWith([RECIPIENT])
   })
@@ -349,11 +353,20 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it('keeps Next disabled when every token is deselected', () => {
+  it('should, when no token is picked, keep Next disabled', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), { ...completeValues(), excludedTokens: [ZERO_ADDRESS] })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), { ...completeValues(), tokens: [] })
 
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it("should, when creating, start with none of the Safe's tokens and no recipient picked", () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    expect(screen.queryByRole('button', { name: /^Allow / })).not.toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
@@ -374,23 +387,23 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'none' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
+    expect(screen.getByRole('button', { name: 'Allow ETH' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Allow Dave' })).toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeEnabled()
   })
 
-  it('resets the recipients and reopens the draft row when the Safe changes', () => {
+  it('should, when the Safe changes, drop the picked tokens and recipients', () => {
     accounts([option(SAFE_A), option(SAFE_B)])
     guard({ status: 'none' })
     const { switchTo } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
-    expect(screen.getByRole('button', { name: 'Allow Dave' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'confirm draft' })).not.toBeInTheDocument()
+    pickToken('ETH')
+    pasteRecipient(RECIPIENT)
+    expect(screen.getAllByRole('button', { name: /^Allow / })).toHaveLength(2)
 
     switchTo(buildSafeAccountId(SEPOLIA, SAFE_B))
 
-    expect(screen.queryByRole('button', { name: 'Allow Dave' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'confirm draft' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Allow / })).not.toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 

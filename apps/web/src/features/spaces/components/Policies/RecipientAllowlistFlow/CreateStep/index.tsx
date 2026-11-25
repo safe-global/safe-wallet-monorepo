@@ -59,8 +59,8 @@ const CreateRecipientAllowlistPolicy = ({
   const isEditMode = useIsEditMode()
   const baseline = data?.baseline
   const [values, setValues] = useState<RecipientAllowlistFormValues>(() => {
-    const { excludedTokens, addedTokens, recipients } = data ?? createDefaultAllowlistValues()
-    return { excludedTokens, addedTokens, recipients }
+    const { tokens, recipients } = data ?? createDefaultAllowlistValues()
+    return { tokens, recipients }
   })
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
   const { setScope } = useSafeScopeControls()
@@ -98,7 +98,7 @@ const CreateRecipientAllowlistPolicy = ({
     !heldTokens.isLoading &&
     !heldTokens.isError &&
     !spendingLimits.isLoading &&
-    isAllowlistComplete(heldTokens.addresses, values) &&
+    isAllowlistComplete(values) &&
     !isUnchangedEdit
 
   const isSettled = !isLoading && !isError

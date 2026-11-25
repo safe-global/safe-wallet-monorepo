@@ -31,6 +31,7 @@ const RecipientAllowlistForm = ({
   children,
 }: RecipientAllowlistFormProps): ReactElement => {
   const isEditMode = useIsEditMode()
+  const accountKey = account ? `${account.chainId}:${account.address}` : 'none'
 
   return (
     <>
@@ -46,9 +47,15 @@ const RecipientAllowlistForm = ({
 
       {showSections && (
         <div className="mt-1 flex flex-col gap-4">
-          <TokensSection values={values} onChange={onChange} heldTokens={heldTokens} hasAccount={Boolean(account)} />
+          <TokensSection
+            key={`tokens-${accountKey}`}
+            values={values}
+            onChange={onChange}
+            heldTokens={heldTokens}
+            hasAccount={Boolean(account)}
+          />
           <RecipientsSection
-            key={account ? `${account.chainId}:${account.address}` : 'none'}
+            key={`recipients-${accountKey}`}
             values={values}
             onChange={onChange}
             safeAddress={account?.address}

@@ -1,4 +1,5 @@
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { AllowlistEntry, AllowlistItemChange } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getAllowlistPairKeys } from '@/features/policy-guard/public/services/allowlistPairs'
 import type { AllowlistRule, RecipientAllowlistFormValues } from '../types'
@@ -14,22 +15,16 @@ export const toAllowlistRules = (entries: AllowlistEntry[]): AllowlistRule[] =>
 const uniqueByAddress = (addresses: string[]): string[] =>
   addresses.filter((address, index) => addresses.findIndex((other) => sameAddress(other, address)) === index)
 
-export const toAllowlistEditValues = (
-  entries: AllowlistEntry[],
-  heldTokens: readonly string[],
-): RecipientAllowlistFormValues => {
-  const liveTokens = entries.map(({ token }) => token.address)
-  const isLive = (token: string) => liveTokens.some((live) => sameAddress(live, token))
-
-  return {
-    // Every live token, held or not, so a later change to the held list never drops one
-    addedTokens: liveTokens,
-    excludedTokens: heldTokens.filter((token) => !isLive(token)),
-    recipients: uniqueByAddress(entries.flatMap(({ recipients }) => recipients.map(({ account }) => account))).map(
-      (address) => ({ address: checksumAddress(address), selected: true }),
-    ),
-  }
-}
+export const toAllowlistEditValues = (entries: AllowlistEntry[]): RecipientAllowlistFormValues => ({
+  tokens: entries.map(({ token }) => ({
+    address: token.address,
+    symbol: token.symbol || shortenAddress(token.address),
+    logoUri: token.logoUri ?? undefined,
+  })),
+  recipients: uniqueByAddress(entries.flatMap(({ recipients }) => recipients.map(({ account }) => account))).map(
+    (address) => ({ address: checksumAddress(address) }),
+  ),
+})
 
 export const getLiveRecipients = (baseline: AllowlistRule[]): string[] =>
   uniqueByAddress(baseline.flatMap((rule) => rule.recipients))

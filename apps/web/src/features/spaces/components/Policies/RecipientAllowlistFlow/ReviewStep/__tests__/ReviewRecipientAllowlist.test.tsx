@@ -97,16 +97,6 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
     <SafeScopeContext.Provider value={scopeValue}>{children}</SafeScopeContext.Provider>
   ),
 }))
-jest.mock('../../CreateStep/AddFromAddressBook', () => ({ __esModule: true, default: () => null }))
-jest.mock('../../CreateStep/TokenDraftRow', () => ({ __esModule: true, default: () => null }))
-jest.mock('../../CreateStep/RecipientDraftRow', () => ({
-  __esModule: true,
-  default: ({ onAdd }: { onAdd: (recipient: { address: string; name: string; selected: boolean }) => void }) => (
-    <button type="button" onClick={() => onAdd({ address: RECIPIENT, name: 'Alice', selected: true })}>
-      confirm draft
-    </button>
-  ),
-}))
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({
   TxFlowStep: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
@@ -175,7 +165,7 @@ const rules = [
   { tokenAddress: USDC, recipients: [RECIPIENT, OTHER] },
 ]
 
-const recipients: AllowlistFormRecipient[] = [RECIPIENT, OTHER].map((address) => ({ address, selected: true }))
+const recipients: AllowlistFormRecipient[] = [RECIPIENT, OTHER].map((address) => ({ address }))
 
 const safeTxContext = (overrides: Partial<SafeTxContextParams> = {}): SafeTxContextParams =>
   ({ setSafeTx: jest.fn(), setSafeTxError: jest.fn(), ...overrides }) as unknown as SafeTxContextParams
@@ -364,12 +354,22 @@ describe('ReviewRecipientAllowlist', () => {
     expect(screen.queryByTestId('allowlist-next-signers')).not.toBeInTheDocument()
   })
 
+  it('should, when a picked token is on no token list, show it by the symbol and logo picked in step 1', () => {
+    const custom = checksumAddress(faker.finance.ethereumAddress())
+    built({ status: 'none' })
+    renderReview({}, recipients, {
+      rules: [{ tokenAddress: custom, recipients: [RECIPIENT] }],
+      tokens: [{ address: custom, symbol: 'SAFE', logoUri: 'https://safe.png' }],
+    })
+
+    const token = within(screen.getByTestId('allowlist-review-summary')).getByTestId(`allowlist-review-token-${custom}`)
+    expect(within(token).getByText('SAFE')).toBeInTheDocument()
+    expect(within(token).getByTitle('SAFE').getAttribute('srcdoc')).toContain('https://safe.png')
+  })
+
   it('shows a recipient name typed in step 1 in the summary and the rule rows', () => {
     built({ status: 'none' })
-    renderReview({}, [
-      { address: RECIPIENT, selected: true },
-      { address: OTHER, name: 'Payroll', selected: true },
-    ])
+    renderReview({}, [{ address: RECIPIENT }, { address: OTHER, name: 'Payroll' }])
 
     expect(within(screen.getByTestId('allowlist-review-summary')).getByText('Payroll')).toBeInTheDocument()
 
@@ -614,11 +614,7 @@ describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
     entry(token(DAI, 'DAI', 'https://dai.png'), [RECIPIENT]),
   ]
   const editedRules = [{ tokenAddress: USDC, recipients: [RECIPIENT, NEWBIE] }]
-  const editedRecipients: AllowlistFormRecipient[] = [
-    { address: RECIPIENT, selected: true },
-    { address: OTHER, selected: false },
-    { address: NEWBIE, selected: true },
-  ]
+  const editedRecipients: AllowlistFormRecipient[] = [{ address: RECIPIENT }, { address: NEWBIE }]
   const changeSet = buildAllowlistChangeConfigurations(SEPOLIA, toFormBaseline(toAllowlistRules(baseline)), editedRules)
   const guardState: PolicyGuardState = { status: 'known', guardAddress: INSTALLED_GUARD }
 
@@ -734,7 +730,14 @@ describe('RecipientAllowlistFlow review round trip', () => {
 
     render(<RecipientAllowlistFlow />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
+    fireEvent.change(screen.getByRole('combobox', { name: 'Search tokens by name or address' }), {
+      target: { value: 'ETH' },
+    })
+    fireEvent.click(screen.getByRole('option', { name: /ETH/ }))
+    fireEvent.change(screen.getByRole('combobox', { name: 'Search contacts or paste an address' }), {
+      target: { value: RECIPIENT },
+    })
+    fireEvent.click(screen.getByRole('option', { name: /New recipient/ }))
     fireEvent.click(screen.getByTestId('next-btn'))
 
     expect(await screen.findByTestId('allowlist-review-summary')).toHaveTextContent('Alice')

@@ -75,14 +75,15 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
     [baseline],
   )
 
+  const pickedTokens = data?.tokens
   const tokens = useMemo(
     () =>
       toAllowlistTokens(
         (rules ?? []).map(({ tokenAddress }) => tokenAddress),
         tokenOptions,
-        liveTokens,
+        [...(pickedTokens ?? []), ...liveTokens],
       ),
-    [rules, tokenOptions, liveTokens],
+    [rules, tokenOptions, pickedTokens, liveTokens],
   )
 
   const recipients = useMemo(

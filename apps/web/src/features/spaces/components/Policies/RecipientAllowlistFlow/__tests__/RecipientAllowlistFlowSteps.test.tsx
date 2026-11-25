@@ -68,15 +68,24 @@ const renderFlow = (workspace: AllowlistWorkspace) => {
 
 const stepTitle = () => screen.getByTestId('modal-title')
 
+const enabledField = (name: string) =>
+  waitFor(
+    () => {
+      const field = screen.getByRole('combobox', { name })
+      expect(field).toBeEnabled()
+      return field
+    },
+    { timeout: 10_000 },
+  )
+
 const fillCreateStep = async ({ user }: ReturnType<typeof renderFlow>) => {
-  await user.click(await screen.findByRole('combobox'))
+  await user.click(await screen.findByTestId('safe-account-selector'))
   await user.click(await screen.findByRole('option'))
-  const name = await screen.findByRole('textbox', { name: 'Name (optional)' }, { timeout: 10_000 })
-  await user.type(name, `${faker.person.firstName()}{Enter}`)
-  await user.type(await screen.findByRole('textbox', { name: 'Address or ENS' }), fakerChecksummedAddress())
-  const addRecipient = screen.getByRole('button', { name: 'Add recipient' })
-  await waitFor(() => expect(addRecipient).toBeEnabled())
-  await user.click(addRecipient)
+  await user.click(await enabledField('Search tokens by name or address'))
+  await user.click(await screen.findByRole('option', { name: /USDC/ }, { timeout: 10_000 }))
+  await user.click(await enabledField('Search contacts or paste an address'))
+  await user.paste(fakerChecksummedAddress())
+  await user.click(await screen.findByRole('option', { name: /New recipient/ }))
 
   const next = screen.getByTestId('next-btn')
   await waitFor(() => expect(next).toBeEnabled())

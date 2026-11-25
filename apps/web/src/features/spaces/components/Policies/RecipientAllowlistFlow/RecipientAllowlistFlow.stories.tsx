@@ -17,9 +17,8 @@ import { createChainsPageDataV2 } from '@/stories/mocks/chains'
 import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/public/constants'
 import { getPolicyGuardAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import {
-  ADDRESS_BOOK_TRIGGER_LABEL,
-  RECIPIENT_NAME_LABEL,
-  RECIPIENT_REMOVE_LABEL,
+  RECIPIENTS_SEARCH_PLACEHOLDER,
+  TOKENS_SEARCH_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { mockAllowlistPolicy } from '../../../public/utils/allowlistPolicies'
 import { asActivePolicy } from '../../../public/utils/policies'
@@ -65,6 +64,8 @@ const chainHandlers = [
 const spaceSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
   HttpResponse.json({ safes: { [CHAIN_ID]: [EF_SAFE] } }),
 )
+
+const spacePoliciesHandler = http.get(/\/v1\/spaces\/[^/]+\/policies\/(active|pending)$/, () => HttpResponse.json([]))
 
 const owner = (value: string) => ({ value, name: null, logoUri: null })
 const OWNERS = [WALLET, '0x1De7F5cc55653C581d1c842AD155f88cE389E0B2', '0x24BBC568dC89E4e57bAF23b759989F3D6113BBaA']
@@ -247,6 +248,7 @@ const setup = createMockStory({
 const handlers = ({ version = '1.5.0', moduleGuard = ZERO_ADDRESS, txGuard }: HandlerOptions = {}) => [
   ...chainHandlers,
   spaceSafesHandler,
+  spacePoliciesHandler,
   safeOverviewHandler,
   safeInfoHandler(version, txGuard),
   balancesHandler,
@@ -259,7 +261,7 @@ const handlers = ({ version = '1.5.0', moduleGuard = ZERO_ADDRESS, txGuard }: Ha
 
 const pickSafe = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement)
-  const trigger = await canvas.findByRole('combobox', {}, { timeout: 30000 })
+  const trigger = await canvas.findByTestId('safe-account-selector', {}, { timeout: 30000 })
   await waitFor(() => expectEnabled(trigger), { timeout: 30000 })
   await userEvent.click(trigger)
   await userEvent.click(await screen.findByRole('option', { name: /Payments/ }, { timeout: 30000 }))
@@ -288,40 +290,61 @@ type Story = StoryObj<typeof meta>
 /** The real TxFlow chrome at Space level with no Safe picked yet. */
 export const CreateNoAccount: Story = {
   play: async ({ canvasElement }) => {
-    const trigger = await within(canvasElement).findByRole('combobox', {}, { timeout: 30000 })
+    const trigger = await within(canvasElement).findByTestId('safe-account-selector', {}, { timeout: 30000 })
     await expect(trigger).toBeVisible()
   },
 }
 
-/** A Safe picked, its held tokens listed and no recipients yet: the entry row starts open. */
+/** Waits for a search field the picked Safe enables, as the sections show once its guard is read. */
+const enabledSearch = async (canvasElement: HTMLElement, name: string) => {
+  const canvas = within(canvasElement)
+  return waitFor(
+    () => {
+      const field = canvas.getByRole('combobox', { name })
+      expectEnabled(field)
+      return field
+    },
+    { timeout: 30000 },
+  )
+}
+
+/** A Safe picked and nothing chosen yet: the focused token search lists its tokens and the popular ones. */
 export const CreateNoRecipients: Story = {
   play: async ({ canvasElement }) => {
     await pickSafe(canvasElement)
-    await expect(
-      await within(canvasElement).findByRole('textbox', { name: RECIPIENT_NAME_LABEL }, { timeout: 30000 }),
-    ).toBeVisible()
+    await userEvent.click(await enabledSearch(canvasElement, TOKENS_SEARCH_PLACEHOLDER))
+    await expect(await screen.findByRole('option', { name: /USDT/ }, { timeout: 30000 })).toBeVisible()
   },
 }
 
-const pickRecipients = async (canvasElement: HTMLElement) => {
-  const canvas = within(canvasElement)
-  await userEvent.click(await canvas.findByRole('button', { name: RECIPIENT_REMOVE_LABEL }, { timeout: 30000 }))
-  // Two passes, since one pass lists Workspace contacts before local ones
-  const passes = [['Payroll — Deel', 'Contractor — M. Ito', 'Ops wallet'], ['Coinbase Prime']]
-  for (const names of passes) {
-    await userEvent.click(await canvas.findByRole('button', { name: ADDRESS_BOOK_TRIGGER_LABEL }))
-    for (const name of names) {
-      await userEvent.click(await screen.findByRole('checkbox', { name: `Add ${name}` }))
-    }
-    await userEvent.click(await screen.findByRole('button', { name: /^Add$/ }))
+const pickFromSearch = async (canvasElement: HTMLElement, search: string, options: RegExp[]) => {
+  await userEvent.click(await enabledSearch(canvasElement, search))
+  for (const option of options) {
+    await userEvent.click(await screen.findByRole('option', { name: option }, { timeout: 30000 }))
   }
-  for (const name of passes.flat()) {
+  await userEvent.keyboard('{Escape}')
+}
+
+const RECIPIENT_NAMES = ['Payroll — Deel', 'Contractor — M. Ito', 'Ops wallet', 'Coinbase Prime']
+
+const pickRecipients = async (canvasElement: HTMLElement) => {
+  await pickFromSearch(
+    canvasElement,
+    RECIPIENTS_SEARCH_PLACEHOLDER,
+    RECIPIENT_NAMES.map((name) => new RegExp(name)),
+  )
+  const canvas = within(canvasElement)
+  for (const name of RECIPIENT_NAMES) {
     await expect(await canvas.findByRole('button', { name: `Allow ${name}` })).toHaveAttribute('aria-pressed', 'true')
   }
 }
 
-const excludeUsdc = async (canvasElement: HTMLElement) =>
-  userEvent.click(await within(canvasElement).findByRole('button', { name: 'Allow USDC' }, { timeout: 30000 }))
+const pickTokens = (canvasElement: HTMLElement, symbols: string[]) =>
+  pickFromSearch(
+    canvasElement,
+    TOKENS_SEARCH_PLACEHOLDER,
+    symbols.map((symbol) => new RegExp(`\\b${symbol}\\b`)),
+  )
 
 const goToReview = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement)
@@ -333,11 +356,11 @@ const goToReview = async (canvasElement: HTMLElement) => {
 
 const createAllowlist = async (canvasElement: HTMLElement) => {
   await pickSafe(canvasElement)
-  await excludeUsdc(canvasElement)
+  await pickTokens(canvasElement, ['USDT', 'ETH'])
   await pickRecipients(canvasElement)
 }
 
-/** USDC left out and four recipients picked from the address book. */
+/** USDT and ETH picked, and four recipients picked from the address book. */
 export const Create: Story = {
   play: ({ canvasElement }) => createAllowlist(canvasElement),
 }
@@ -368,10 +391,11 @@ export const ReviewMissingModuleGuard: Story = {
   play: Review.play,
 }
 
-/** USDC, USDT and ETH kept: two ERC-20 rules and one native rule per recipient. */
+/** USDC, USDT and ETH picked: two ERC-20 rules and one native rule per recipient. */
 export const ReviewMixedTokens: Story = {
   play: async ({ canvasElement }) => {
     await pickSafe(canvasElement)
+    await pickTokens(canvasElement, ['USDC', 'USDT', 'ETH'])
     await pickRecipients(canvasElement)
     await goToReview(canvasElement)
   },
@@ -392,7 +416,7 @@ export const CreateAnotherGuard: Story = {
 export const CreateOldVersion: Story = {
   parameters: { msw: { handlers: handlers({ version: '1.3.0' }) } },
   play: async ({ canvasElement }) => {
-    const trigger = await within(canvasElement).findByRole('combobox', {}, { timeout: 30000 })
+    const trigger = await within(canvasElement).findByTestId('safe-account-selector', {}, { timeout: 30000 })
     await waitFor(() => expectEnabled(trigger), { timeout: 30000 })
     await userEvent.click(trigger)
     await expect(await screen.findByRole('option', { name: /Payments/ })).toHaveAttribute('aria-disabled', 'true')
@@ -429,7 +453,7 @@ const editPolicy = asActivePolicy(
 
 const renderEdit = () => <EditRecipientAllowlistFlow policy={editPolicy} />
 
-/** The live Payments allowlist, opened from its side panel: every live token and recipient selected. */
+/** The live Payments allowlist, opened from its side panel: every live token and recipient as a chip. */
 export const EditCreate: Story = {
   name: 'Edit · Create',
   render: renderEdit,
@@ -439,15 +463,18 @@ export const EditCreate: Story = {
   },
 }
 
-/** Coinbase Prime and USDT unchecked: the review lists them as removed beside the unchanged rest. */
+/** Coinbase Prime and USDT removed: the review lists them as removed beside the unchanged rest. */
 export const EditReviewTwoChanges: Story = {
   name: 'Edit · Review (2 changes)',
   render: renderEdit,
+  parameters: { msw: { handlers: handlers({ txGuard: POLICY_GUARD, moduleGuard: POLICY_GUARD }) } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     await userEvent.click(await canvas.findByRole('button', { name: 'Allow USDT' }, { timeout: 30000 }))
     await userEvent.click(
-      await canvas.findByRole('button', { name: `Allow ${shortenAddress(checksumAddress(COINBASE))}` }),
+      await canvas.findByRole('button', {
+        name: new RegExp(`^Allow (Coinbase Prime|${shortenAddress(checksumAddress(COINBASE))})$`),
+      }),
     )
     await goToReview(canvasElement)
     await expect(canvas.getAllByText('Removed').length).toBeGreaterThan(0)

@@ -15,6 +15,7 @@ export class RecipientAllowlistPage {
   /** The policies list's button, shown once the Workspace has policies */
   readonly addPolicyButton: Locator
   readonly safeAccountSelector: Locator
+  readonly tokensSection: Locator
   readonly recipientsSection: Locator
   readonly nextButton: Locator
   /** One row per call of the reviewed transaction, in execution order: "<n> <target>: <method>" */
@@ -32,6 +33,7 @@ export class RecipientAllowlistPage {
     this.setPolicyButton = page.getByRole('button', { name: 'Set policy: Recipient allowlist' })
     this.addPolicyButton = page.getByRole('button', { name: 'Add policy', exact: true })
     this.safeAccountSelector = page.getByTestId('safe-account-selector')
+    this.tokensSection = page.getByTestId('allowlist-tokens-section')
     this.recipientsSection = page.getByTestId('allowlist-recipients-section')
     this.nextButton = page.getByTestId('recipient-allowlist-create-step').getByTestId('next-btn')
     this.setupCalls = page.getByTestId('allowlist-setup-actions').getByTestId('action-item')
@@ -69,26 +71,31 @@ export class RecipientAllowlistPage {
     await this.page.getByRole('option').filter({ hasText: safeName }).click()
   }
 
-  /** The chip that allows `label`, a token symbol or a recipient's name; `aria-pressed` says whether it is allowed */
+  /** The chip that allows `label`, a token symbol or a recipient's name; only picked items have one */
   allowChip(label: string): Locator {
     return this.page.getByRole('button', { name: `Allow ${label}`, exact: true })
   }
 
-  /** Waits until the form lists the Safe's tokens, then leaves `symbol` out of the allowlist */
-  async excludeToken(symbol: string): Promise<void> {
-    await this.allowChip(symbol).click({ timeout: FORM_LOAD_TIMEOUT_MS })
+  /** Waits until the form lists the Safe's tokens, then allows `symbol` from the token search */
+  async pickToken(symbol: string): Promise<void> {
+    const search = this.tokensSection.getByRole('combobox', { name: 'Search tokens by name or address' })
+    await search.click({ timeout: FORM_LOAD_TIMEOUT_MS })
+    await search.fill(symbol)
+    await this.page
+      .getByRole('option')
+      .filter({ has: this.page.getByText(symbol, { exact: true }) })
+      .click({ timeout: FORM_LOAD_TIMEOUT_MS })
+    // The open list would cover the recipients below it
+    await search.press('Escape')
   }
 
-  /** Adds a named recipient with the inline row; the row is already open while the list is empty */
-  async addRecipient({ name, address }: { name: string; address: string }): Promise<void> {
-    const nameInput = this.recipientsSection.getByRole('textbox', { name: 'Name (optional)' })
-    const addButton = this.recipientsSection.getByRole('button', { name: 'Add a recipient' })
-    await nameInput.or(addButton).first().waitFor({ timeout: FORM_LOAD_TIMEOUT_MS })
-    if (await addButton.isVisible()) await addButton.click()
-    await nameInput.fill(name)
-    await this.recipientsSection.getByRole('button', { name: 'Next', exact: true }).click()
-    await this.recipientsSection.getByRole('textbox', { name: 'Address or ENS' }).fill(address)
-    await this.recipientsSection.getByRole('button', { name: 'Add recipient' }).click()
+  /** Allows `address` by pasting it in the recipient search and choosing it as a new recipient */
+  async addRecipient(address: string): Promise<void> {
+    const search = this.recipientsSection.getByRole('combobox', { name: 'Search contacts or paste an address' })
+    await search.click({ timeout: FORM_LOAD_TIMEOUT_MS })
+    await search.fill(address)
+    await this.page.getByRole('option', { name: /New recipient/ }).click()
+    await search.press('Escape')
   }
 
   /** The table row of the Safe's allowlist, found by the Safe's short address that it shows */

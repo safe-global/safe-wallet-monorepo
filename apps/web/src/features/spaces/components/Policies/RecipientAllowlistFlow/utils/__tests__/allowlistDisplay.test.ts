@@ -18,7 +18,6 @@ const token = (overrides: Partial<TokenOption> = {}): TokenOption => ({
 })
 const recipient = (overrides: Partial<AllowlistFormRecipient> = {}): AllowlistFormRecipient => ({
   address: address(),
-  selected: true,
   ...overrides,
 })
 const resolverWith =
@@ -42,17 +41,12 @@ describe('allowlistDisplay', () => {
   })
 
   describe('toAllowlistRecipients', () => {
-    it('lists each selected recipient once, named from the form or else the resolved address book name', () => {
+    it('lists each recipient once, named from the form or else the resolved address book name', () => {
       const named = recipient({ name: 'Alice' })
       const contact = recipient()
       const values = {
         ...createDefaultAllowlistValues(),
-        recipients: [
-          named,
-          contact,
-          recipient({ selected: false }),
-          { ...named, address: named.address.toLowerCase() },
-        ],
+        recipients: [named, contact, { ...named, address: named.address.toLowerCase() }],
       }
 
       expect(toAllowlistRecipients(values, resolverWith({ [contact.address]: 'Bob' }))).toEqual([

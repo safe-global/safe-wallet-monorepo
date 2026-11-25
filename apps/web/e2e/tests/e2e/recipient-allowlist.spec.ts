@@ -37,12 +37,12 @@ const REQUEST_CALLS = [/requestConfiguration/]
 const APPLY_CALLS = [/applyConfiguration/]
 
 type OwnerSetup = { owners: OwnerName[]; threshold: number }
-type Recipient = { name: string; address: string }
+type Recipient = { address: string }
 
 // Every run keeps its video, the evidence of the whole setup and apply flow for reviewers.
 test.use({ video: 'on' })
 
-const newRecipient = (name: string): Recipient => ({ name, address: Wallet.createRandom().address })
+const newRecipient = (): Recipient => ({ address: Wallet.createRandom().address })
 
 /**
  * A Safe 1.5.0 with 10 USDC and 1 ETH in a Business Workspace; with `allowlisted`, it already enforces an allowlist
@@ -70,9 +70,9 @@ async function seedAllowlistSafe(
 async function fillAllowlist(allowlist: RecipientAllowlistPage, recipients: Recipient[]): Promise<void> {
   await allowlist.selectSafe(SAFE_NAME)
   // The native transfer policy the wallet names is not one the indexer serves, so the allowlist covers USDC only.
-  await allowlist.excludeToken('ETH')
+  await allowlist.pickToken(SEPOLIA_USDC.symbol)
   await expect(allowlist.allowChip(SEPOLIA_USDC.symbol)).toHaveAttribute('aria-pressed', 'true')
-  for (const recipient of recipients) await allowlist.addRecipient(recipient)
+  for (const { address } of recipients) await allowlist.addRecipient(address)
   await allowlist.nextButton.click()
 }
 
@@ -157,7 +157,7 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
     },
   ]) {
     test(title, async ({ safePage, safeApiClient, journey }) => {
-      const recipient = newRecipient('Payroll')
+      const recipient = newRecipient()
       const { safe, workspaceId } = await seedAllowlistSafe(safePage, journey, setup)
 
       const policies = new PoliciesPage(safePage)
@@ -195,8 +195,8 @@ test.describe('Recipient allowlist policy', { tag: '@e2e' }, () => {
   ]) {
     test(title, async ({ safePage, safeApiClient, journey }) => {
       const { env } = journey
-      const current = newRecipient('Payroll')
-      const added = newRecipient('Exchange')
+      const current = newRecipient()
+      const added = newRecipient()
       const changed = { token: SEPOLIA_USDC.address, recipients: [current.address, added.address] }
       const { safe, workspaceId } = await seedAllowlistSafe(safePage, journey, setup, { allowlisted: [current] })
       const signing = { journey, safeApiClient, safe, setup, workspaceId }

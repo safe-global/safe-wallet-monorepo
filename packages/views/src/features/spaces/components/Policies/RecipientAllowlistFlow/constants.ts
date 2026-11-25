@@ -27,32 +27,19 @@ export const RECIPIENT_RESERVED_ERROR = 'This recipient address is not valid'
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
 
 export const TOKENS_SECTION_TITLE = 'Which tokens can be sent'
-export const TOKENS_NO_ACCOUNT_DESCRIPTION = 'Pick a Safe account to choose from its tokens.'
-export const TOKENS_EMPTY_TEXT = 'Tokens in this account will show here.'
+export const TOKENS_SECTION_DESCRIPTION = 'Only transfers of the tokens selected below will be allowed.'
+export const TOKENS_SEARCH_PLACEHOLDER = 'Search tokens by name or address'
 export const TOKENS_LOAD_ERROR_TEXT = 'Could not load the tokens in this account.'
 export const SELECT_ALL_LABEL = 'Select all'
-export const DESELECT_ALL_LABEL = 'Deselect all'
-export const ADD_TOKEN_LABEL = 'Add a token'
-export const CANCEL_ADD_TOKEN_LABEL = 'Cancel adding a token'
-export const CONFIRM_TOKEN_LABEL = 'Add matching token'
-export const ADD_TOKEN_PLACEHOLDER = 'Search by name or address'
 
 export const RECIPIENTS_SECTION_TITLE = 'Who can receive funds'
-export const RECIPIENTS_EMPTY_TEXT = 'Recipients will show here.'
-export const ADD_RECIPIENT_LABEL = 'Add a recipient'
+export const RECIPIENTS_SECTION_DESCRIPTION = 'Only transfers to the recipients selected below will be allowed.'
+export const RECIPIENTS_SEARCH_PLACEHOLDER = 'Search contacts or paste an address'
+export const RECIPIENTS_NOT_FOUND_TEXT = 'No contacts found. Paste an address to add it.'
 export const IN_ADDRESS_BOOK_LABEL = 'In your address book'
-
-export const RECIPIENT_NAME_LABEL = 'Name (optional)'
-export const RECIPIENT_ADDRESS_LABEL = 'Address or ENS'
 export const RECIPIENT_FALLBACK_NAME = 'New recipient'
-export const RECIPIENT_NEXT_LABEL = 'Next'
-export const RECIPIENT_ADD_CONFIRM_LABEL = 'Add recipient'
-export const RECIPIENT_REMOVE_LABEL = 'Remove'
 
-export const ADDRESS_BOOK_TRIGGER_LABEL = 'Add from address book'
-export const ADDRESS_BOOK_SEARCH_LABEL = 'Search contacts'
-export const ADDRESS_BOOK_EMPTY_TEXT = 'No contacts found.'
-export const ADDRESS_BOOK_CONFIRM_LABEL = 'Add'
+export const SPACE_CONTACTS_LABEL = 'Contacts of'
 export const LOCAL_CONTACTS_LABEL = 'Local contacts'
 export const LOCAL_CONTACTS_TOOLTIP = "Saved in this browser only. Other members of the Workspace can't see them."
 export const getSpaceContactsTooltip = (spaceName: string): string =>
@@ -180,10 +167,6 @@ export const EDIT_LABEL = 'Edit'
 export const getEditSummaryTitle = (account: string): string => `You're editing the allowlist on ${account}.`
 export const EDIT_SUMMARY_DESCRIPTION = 'Anything you deselect will be blocked once the change applies.'
 export const EDIT_SUMMARY_DETAILS = 'Any signer can cancel the change before it applies.'
-export const EDIT_TOKENS_DESCRIPTION =
-  'These are the tokens the allowlist allows today. Add a token or deselect one to change it.'
-export const EDIT_RECIPIENTS_DESCRIPTION =
-  'These are the recipients the allowlist allows today. Add a recipient or deselect one to change it.'
 export const EDIT_SAFE_LOAD_ERROR_TEXT = 'Could not load this Safe account.'
 export const getEditReviewDescription = (delay: string): string =>
   `Check the details below before you sign. This starts a ${delay} wait, and a second transaction will be needed to apply the changes to the policy.`

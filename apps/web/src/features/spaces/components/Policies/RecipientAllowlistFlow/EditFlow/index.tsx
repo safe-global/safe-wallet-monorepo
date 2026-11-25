@@ -65,7 +65,7 @@ const EditTxFlow = ({ initialData }: { initialData: RecipientAllowlistFlowData }
   )
 }
 
-/** The form is seeded once from the held tokens, since `TxFlow` reads `initialData` only at mount. */
+/** The form is seeded once, since `TxFlow` reads `initialData` only at mount; it waits for the tokens the form lists. */
 const EditFlowBody = ({ policy }: { policy: ActiveAllowlistPolicy }): ReactElement => {
   const scope = useSafeScope()
   const heldTokens = useHeldTokenAddresses()
@@ -82,7 +82,7 @@ const EditFlowBody = ({ policy }: { policy: ActiveAllowlistPolicy }): ReactEleme
     const { entries } = policy.data
     const baselineGuard = policy.enforcement.via === 'guard' ? policy.enforcement.guardAddress : undefined
     setInitialData({
-      ...toAllowlistEditValues(entries, heldTokens.addresses),
+      ...toAllowlistEditValues(entries),
       rules: [],
       baseline: entries,
       baselineGuard,
