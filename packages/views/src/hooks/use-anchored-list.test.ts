@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { act } from 'react'
-import { useAnchoredList } from './useAnchoredList'
+import { useAnchoredList } from './use-anchored-list'
 
 const VIEWPORT_HEIGHT = 900
 

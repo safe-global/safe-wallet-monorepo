@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import SelectableChip from './SelectableChip'
+import ShortAddress from './ShortAddress'
 
 const meta = {
   title: 'Features/Spaces/Policies/RecipientAllowlistFlow/SelectableChip',
@@ -10,8 +11,9 @@ const meta = {
   args: {
     selected: true,
     onToggle: fn(),
-    'aria-label': 'USDC',
-    children: <span>USDC</span>,
+    'aria-label': 'Allow USDC',
+    icon: <span className="size-6 rounded-full bg-muted" aria-hidden />,
+    label: 'USDC',
   },
 } satisfies Meta<typeof SelectableChip>
 
@@ -22,30 +24,25 @@ export const Selected: Story = {}
 
 export const Unselected: Story = { args: { selected: false } }
 
-export const Token: Story = {
+export const Recipient: Story = {
   args: {
-    'aria-label': 'Ether',
-    children: (
-      <>
-        <span className="size-6 rounded-full bg-muted" aria-hidden />
-        <span>ETH</span>
-        <span className="font-normal text-muted-foreground">1.25</span>
-      </>
-    ),
+    'aria-label': 'Allow Alice',
+    label: 'Alice',
+    subline: <ShortAddress address="0x8675B754342754A30A2AeF474D114d8460bca19b" />,
   },
 }
 
-export const Recipient: Story = {
-  args: {
-    'aria-label': 'Alice',
-    children: (
-      <>
-        <span className="size-6 rounded-full bg-muted" aria-hidden />
-        <span className="flex flex-col items-start gap-1 text-left">
-          <span>Alice</span>
-          <span className="font-mono text-xs font-normal text-muted-foreground">0x1234…abcd</span>
-        </span>
-      </>
+export const LongLabel: Story = {
+  decorators: [
+    (Story) => (
+      <div className="w-48">
+        <Story />
+      </div>
     ),
+  ],
+  args: {
+    'aria-label': 'Allow Payroll provider for the contractors in Europe',
+    label: 'Payroll provider for the contractors in Europe',
+    subline: <ShortAddress address="0x8675B754342754A30A2AeF474D114d8460bca19b" />,
   },
 }
