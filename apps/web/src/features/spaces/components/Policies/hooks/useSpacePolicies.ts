@@ -51,11 +51,15 @@ export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types']
   'allow',
 ]
 
-/** Proposer grants take effect off chain at once, so only spending limits and allowlists can be pending. */
+/**
+ * Proposer grants take effect off chain at once, so only spending limits and allowlists can be pending. `allow` keeps a
+ * removal's clean-up listed once its rules are deleted, so the guard removal applies it.
+ */
 export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = [
   'spending-limit',
   'erc20-transfer',
   'native-transfer',
+  'allow',
 ]
 
 const PENDING_REFETCH_EVENTS = [

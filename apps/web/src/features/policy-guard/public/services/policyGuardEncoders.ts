@@ -10,6 +10,7 @@ const CONFIGURATION_TUPLE = 'tuple(address target, bytes4 selector, uint8 operat
 const policyGuardInterface = new Interface([
   `function configureImmediately(${CONFIGURATION_TUPLE}[] configurations)`,
   'function requestConfiguration(bytes32 configureRoot)',
+  'function invalidateRoot(bytes32 configureRoot)',
   `function applyConfiguration(${CONFIGURATION_TUPLE}[] configurations)`,
 ])
 
@@ -98,6 +99,25 @@ export const createRequestConfigurationTx = (guardAddress: string, configureRoot
   data: policyGuardInterface.encodeFunctionData('requestConfiguration', [configureRoot]),
 })
 
+/** Withdraws a request that is still on chain, so the same configurations can be requested again. */
+export const createInvalidateRootTx = (guardAddress: string, configureRoot: string): MetaTransactionData => ({
+  to: guardAddress,
+  value: '0',
+  data: policyGuardInterface.encodeFunctionData('invalidateRoot', [configureRoot]),
+})
+
+/** Requests each root, after withdrawing those the guard already holds: it rejects a root it holds already. */
+export const createRequestConfigurationTxs = (
+  guardAddress: string,
+  roots: string[],
+  heldRoots: string[] = [],
+): MetaTransactionData[] => [
+  ...roots
+    .filter((root) => heldRoots.some((held) => held.toLowerCase() === root.toLowerCase()))
+    .map((root) => createInvalidateRootTx(guardAddress, root)),
+  ...roots.map((root) => createRequestConfigurationTx(guardAddress, root)),
+]
+
 export const createApplyConfigurationTx = (
   guardAddress: string,
   configurations: PolicyConfiguration[],
@@ -134,6 +154,7 @@ export const getCallConfigurations = (
   }
 
   const [arg] = decoded
+  if (fragment.name === 'invalidateRoot') return undefined
   if (fragment.name !== 'requestConfiguration') return Array.from(arg, toPolicyConfiguration)
   return requested && getConfigurationRoot(requested) === String(arg).toLowerCase() ? requested : undefined
 }

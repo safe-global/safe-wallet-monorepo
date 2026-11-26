@@ -13,6 +13,8 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePolicyGuard } from '@/features/policy-guard/public/hooks/usePolicyGuard'
+import { useHeldRootsReader } from '@/features/policy-guard/public/hooks/useHeldRootsReader'
+import { createInvalidateRootTx } from '@/features/policy-guard/public/services/policyGuardEncoders'
 import type { AllowlistSetup, PolicyGuardState, PolicyGuardTarget } from '@/features/policy-guard/public/types'
 import {
   buildAllowlistChangeConfigurations,
@@ -46,6 +48,7 @@ export const useBuildAllowlistTransaction = (
   const safeAddress = scope?.safeAddress
   const target = useMemo(() => (chainId && safeAddress ? { chainId, safeAddress } : undefined), [chainId, safeAddress])
   const { state: readState, error } = usePolicyGuard(target)
+  const readHeldRoots = useHeldRootsReader(chainId)
 
   // Each new Safe transaction re-reads the guard and clears `state` meanwhile, so the last settled one is kept per Safe.
   const readKey = readState ? JSON.stringify(readState) : undefined
@@ -114,11 +117,17 @@ export const useBuildAllowlistTransaction = (
 
     // A build that finishes after the inputs changed must not overwrite the newer one.
     let isStale = false
-    createMultiSendCallOnlyTx(setup.txs, scope)
-      .then((tx) => {
+    const isRequest = state.status === 'known' || state.status === 'partial'
+    ;(isRequest ? readHeldRoots(guardAddress, safeAddress, [setup.root]) : Promise.resolve([]))
+      .then((heldRoots) => {
+        // The guard rejects a root it holds already, such as an identical change that expired
+        const txs = heldRoots.length > 0 ? [createInvalidateRootTx(guardAddress, setup.root), ...setup.txs] : setup.txs
+        return createMultiSendCallOnlyTx(txs, scope).then((tx) => ({ tx, txs }))
+      })
+      .then(({ tx, txs }) => {
         if (isStale) return
         setSafeTx(tx)
-        setBuilt({ ...setup, guardState: state })
+        setBuilt({ ...setup, txs, guardState: state })
       })
       .catch((e) => {
         if (!isStale) setSafeTxError(asError(e))
@@ -138,6 +147,7 @@ export const useBuildAllowlistTransaction = (
     safeAddress,
     currentFallbackHandler,
     isAllowlistEnabled,
+    readHeldRoots,
     setSafeTx,
     setSafeTxError,
   ])

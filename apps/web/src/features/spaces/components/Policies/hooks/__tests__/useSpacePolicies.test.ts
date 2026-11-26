@@ -111,6 +111,12 @@ const mockQueuedGuardSetup = (
 
 const idle = { currentData: undefined, isLoading: false, isFetching: false, isError: false, refetch: jest.fn() }
 
+describe('PENDING_POLICY_TYPES', () => {
+  it("should, when asking for pending changes, include allow so a removal's clean-up stays listed after its rules are deleted", () => {
+    expect(PENDING_POLICY_TYPES).toContain('allow')
+  })
+})
+
 describe('useSpacePolicies', () => {
   beforeEach(() => {
     jest.clearAllMocks()

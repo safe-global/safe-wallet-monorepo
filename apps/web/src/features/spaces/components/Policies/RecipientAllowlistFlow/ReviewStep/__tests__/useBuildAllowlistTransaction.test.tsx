@@ -16,6 +16,11 @@ import type { AllowlistRule } from '../../types'
 import { usePolicyGuard, type UsePolicyGuardResult } from '@/features/policy-guard/public/hooks/usePolicyGuard'
 import * as useChainsModule from '@/hooks/useChains'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
+import { useHeldRootsReader } from '@/features/policy-guard/public/hooks/useHeldRootsReader'
+import {
+  createInvalidateRootTx,
+  createRequestConfigurationTx,
+} from '@/features/policy-guard/public/services/policyGuardEncoders'
 import { useBuildAllowlistTransaction } from '../useBuildAllowlistTransaction'
 
 const mockServices = jest.requireActual('@/features/policy-guard/public/services/allowlistConfigurations')
@@ -41,6 +46,7 @@ jest.mock('@/features/policy-guard/public/services/policyEngineDeployments', () 
   return { ...actual, getPolicyGuardAddress: (chainId: string) => mockConfiguredGuard(chainId) }
 })
 jest.mock('@/services/tx/tx-sender/create', () => ({ createMultiSendCallOnlyTx: jest.fn() }))
+jest.mock('@/features/policy-guard/public/hooks/useHeldRootsReader', () => ({ useHeldRootsReader: jest.fn() }))
 
 const CHAIN_ID = '11155111'
 const GUARD_180 = '0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f'
@@ -53,6 +59,7 @@ const erc20Rules: AllowlistRule[] = [{ tokenAddress: TOKEN, recipients: [RECIPIE
 const nativeRules: AllowlistRule[] = [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }]
 const builtTx = { data: { to: SAFE } }
 
+const heldRoots = jest.fn()
 const setSafeTx = jest.fn()
 const setSafeTxError = jest.fn()
 const wrapper = ({ children }: { children: ReactNode }) => (
@@ -80,7 +87,32 @@ describe('useBuildAllowlistTransaction', () => {
     mockBuildConfigurations.mockImplementation(mockServices.buildAllowlistConfigurations)
     ;(useSafeScope as jest.Mock).mockReturnValue(scope)
     ;(createMultiSendCallOnlyTx as jest.Mock).mockResolvedValue(builtTx)
+    jest.mocked(useHeldRootsReader).mockReturnValue(heldRoots)
+    heldRoots.mockResolvedValue([])
     mockFeature()
+  })
+
+  it('should, when the guard still holds the root of an identical request, withdraw it before requesting it again', async () => {
+    mockGuard({ state: { status: 'known', guardAddress: GUARD_180 } })
+    heldRoots.mockImplementation((_guard: string, _safe: string, roots: string[]) => Promise.resolve(roots))
+    const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+    await waitFor(() => expect(result.current.root).toBeDefined())
+    const root = result.current.root as string
+    expect(heldRoots).toHaveBeenCalledWith(GUARD_180, SAFE, [root])
+    expect(sentBatch()).toEqual([
+      createInvalidateRootTx(GUARD_180, root),
+      createRequestConfigurationTx(GUARD_180, root),
+    ])
+    expect(result.current.txs).toEqual(sentBatch())
+  })
+
+  it('should, when no guard is set up yet, not read the held roots', async () => {
+    mockGuard({ state: { status: 'none' } })
+    renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+    await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+    expect(heldRoots).not.toHaveBeenCalled()
   })
 
   it('sets a multisend of 4 calls when no guard is set up', async () => {

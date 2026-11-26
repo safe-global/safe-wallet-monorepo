@@ -11,9 +11,11 @@ import {
 import { buildAllowlistRemovalConfigurations } from '@/features/policy-guard/public/services/allowlistConfigurations'
 import { buildGuardRemovalCleanupConfigurations } from '@/features/policy-guard/public/services/guardRemoval'
 import {
+  createInvalidateRootTx,
   createRequestConfigurationTx,
   getConfigurationRoot,
 } from '@/features/policy-guard/public/services/policyGuardEncoders'
+import { useHeldRootsReader } from '@/features/policy-guard/public/hooks/useHeldRootsReader'
 import * as useChainsModule from '@/hooks/useChains'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 import { useBuildRemoveAllowlistTransaction } from '../useBuildRemoveAllowlistTransaction'
@@ -23,6 +25,7 @@ jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   useSafeScope: jest.fn(),
 }))
 jest.mock('@/services/tx/tx-sender/create', () => ({ createMultiSendCallOnlyTx: jest.fn() }))
+jest.mock('@/features/policy-guard/public/hooks/useHeldRootsReader', () => ({ useHeldRootsReader: jest.fn() }))
 
 const CHAIN_ID = '11155111'
 const SAFE = faker.finance.ethereumAddress()
@@ -34,6 +37,7 @@ const rules = [
 const scope = { chainId: CHAIN_ID, safeAddress: SAFE, sdk: {} }
 const builtTx = { data: { to: GUARD } }
 
+const heldRoots = jest.fn()
 const setSafeTx = jest.fn()
 const setSafeTxError = jest.fn()
 const wrapper = ({ children }: { children: ReactNode }) => (
@@ -48,6 +52,26 @@ describe('useBuildRemoveAllowlistTransaction', () => {
     ;(useSafeScope as jest.Mock).mockReturnValue(scope)
     jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
     ;(createMultiSendCallOnlyTx as jest.Mock).mockResolvedValue(builtTx)
+    jest.mocked(useHeldRootsReader).mockReturnValue(heldRoots)
+    heldRoots.mockResolvedValue([])
+  })
+
+  it('should, when the guard still holds the clean-up of an earlier removal, withdraw it before requesting both roots', async () => {
+    const deletion = buildAllowlistRemovalConfigurations({ chainId: CHAIN_ID, safeAddress: SAFE, rules })
+    const cleanupRoot = getConfigurationRoot(buildGuardRemovalCleanupConfigurations(CHAIN_ID, SAFE))
+    heldRoots.mockResolvedValue([cleanupRoot])
+    renderHook(() => useBuildRemoveAllowlistTransaction(GUARD, rules), { wrapper })
+
+    await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+    expect(heldRoots).toHaveBeenCalledWith(GUARD, SAFE, [getConfigurationRoot(deletion), cleanupRoot])
+    expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(
+      [
+        createInvalidateRootTx(GUARD, cleanupRoot),
+        createRequestConfigurationTx(GUARD, getConfigurationRoot(deletion)),
+        createRequestConfigurationTx(GUARD, cleanupRoot),
+      ],
+      scope,
+    )
   })
 
   it('should request the deletion and the clean-up in one batch and return both for CGW, when the Safe SDK is ready', async () => {

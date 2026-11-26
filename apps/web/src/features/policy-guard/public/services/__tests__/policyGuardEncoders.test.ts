@@ -8,7 +8,9 @@ import {
   createApplyConfigurationTx,
   createFirstSetupTxs,
   createRemoveGuardTxs,
+  createInvalidateRootTx,
   createRequestConfigurationTx,
+  createRequestConfigurationTxs,
   createSetFallbackHandlerTx,
   createSetGuardTx,
   createSetModuleGuardTx,
@@ -22,6 +24,7 @@ const guardIface = new Interface([
   `function configureImmediately(${TUPLE}[] configurations)`,
   'function requestConfiguration(bytes32 configureRoot)',
   `function applyConfiguration(${TUPLE}[] configurations)`,
+  'function invalidateRoot(bytes32 configureRoot)',
 ])
 const safeIface = new Interface([
   'function setGuard(address)',
@@ -137,6 +140,36 @@ describe('createRequestConfigurationTx', () => {
     const tx = createRequestConfigurationTx(guardAddress, root)
     expect(tx.to).toBe(guardAddress)
     expect(guardIface.decodeFunctionData('requestConfiguration', tx.data)[0]).toBe(root)
+  })
+})
+
+describe('createRequestConfigurationTxs', () => {
+  const guard = getAddress(faker.finance.ethereumAddress())
+  const roots = [id(faker.string.uuid()), id(faker.string.uuid())]
+
+  it('should, when the guard holds none of the roots, only request them', () => {
+    expect(createRequestConfigurationTxs(guard, roots)).toEqual(
+      roots.map((root) => createRequestConfigurationTx(guard, root)),
+    )
+  })
+
+  it('should, when the guard still holds a root, withdraw it before the requests', () => {
+    expect(createRequestConfigurationTxs(guard, roots, [roots[1].toUpperCase().replace('0X', '0x')])).toEqual([
+      createInvalidateRootTx(guard, roots[1]),
+      ...roots.map((root) => createRequestConfigurationTx(guard, root)),
+    ])
+  })
+})
+
+describe('createInvalidateRootTx', () => {
+  it('should, when a root is withdrawn, call invalidateRoot on the guard with it', () => {
+    const guard = getAddress(faker.finance.ethereumAddress())
+    const root = id(faker.string.uuid())
+    const tx = createInvalidateRootTx(guard, root)
+
+    expect(tx).toEqual({ to: guard, value: '0', data: guardIface.encodeFunctionData('invalidateRoot', [root]) })
+    expect(describeSetupCall(tx)).toEqual({ method: 'invalidateRoot', target: 'guard' })
+    expect(getCallConfigurations(tx)).toBeUndefined()
   })
 })
 
