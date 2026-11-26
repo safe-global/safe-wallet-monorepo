@@ -5,6 +5,7 @@
  */
 import { type Locator, type Page } from '@playwright/test'
 import { ROUTES } from '../data/constants'
+import { TokenSelectorField } from './token-selector.page'
 
 export class PoliciesPage {
   readonly setProposerPolicyButton: Locator
@@ -14,7 +15,7 @@ export class PoliciesPage {
   readonly proposerNameInput: Locator
   readonly submitButton: Locator
   readonly spenderInput: Locator
-  readonly tokenInput: Locator
+  readonly tokenSelector: TokenSelectorField
   readonly limitAmountInput: Locator
   readonly nextButton: Locator
 
@@ -26,7 +27,7 @@ export class PoliciesPage {
     this.proposerNameInput = page.getByRole('textbox', { name: 'Proposer name' })
     this.submitButton = page.getByRole('button', { name: 'Submit' })
     this.spenderInput = page.getByRole('combobox', { name: 'Spender', exact: true })
-    this.tokenInput = page.getByRole('combobox', { name: 'Token', exact: true })
+    this.tokenSelector = new TokenSelectorField(page)
     this.limitAmountInput = page.getByLabel('Limit amount')
     this.nextButton = page.getByRole('button', { name: 'Next', exact: true })
   }
@@ -66,12 +67,6 @@ export class PoliciesPage {
     await this.submitButton.click()
   }
 
-  /** Pastes a token address that the lists do not offer and picks the token that the lookup finds for it */
-  private async pickCustomToken({ address, symbol }: { address: string; symbol: string }): Promise<void> {
-    await this.tokenInput.fill(address)
-    await this.page.getByRole('group', { name: 'Custom token' }).getByRole('option', { name: symbol }).click()
-  }
-
   /** Fills the open form with one spender and one limit of a pasted token, and goes on to the review */
   async addSpendingLimitOnPastedToken({
     safeName,
@@ -86,7 +81,7 @@ export class PoliciesPage {
   }): Promise<void> {
     await this.chooseSafeAccount(safeName)
     await this.spenderInput.fill(spender)
-    await this.pickCustomToken(token)
+    await this.tokenSelector.pickPastedToken(token)
     await this.limitAmountInput.fill(amount)
     await this.nextButton.click()
   }
