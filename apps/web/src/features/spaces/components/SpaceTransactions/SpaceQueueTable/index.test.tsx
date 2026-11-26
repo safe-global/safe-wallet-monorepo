@@ -214,19 +214,14 @@ describe('SpaceQueueTable', () => {
   })
 
   it("opens the tooltips of the shared components it renders after the queue's delay", async () => {
-    jest.useFakeTimers()
-    try {
-      const { user } = renderOnFakeClock(<SpaceQueueTable sections={[sections[0]]} groupBy="safe" />)
+    const { user } = renderOnFakeClock(<SpaceQueueTable sections={[sections[0]]} groupBy="safe" />)
 
-      await user.hover(screen.getByRole('button', { name: `Show ${chainName}` }))
-      await advanceClock(QUEUE_TOOLTIP_DELAY - 50)
-      expect(screen.queryByText(chainName, { selector: '[data-slot="tooltip-content"]' })).not.toBeInTheDocument()
+    await user.hover(screen.getByRole('button', { name: `Show ${chainName}` }))
+    await advanceClock(QUEUE_TOOLTIP_DELAY - 50)
+    expect(screen.queryByText(chainName, { selector: '[data-slot="tooltip-content"]' })).not.toBeInTheDocument()
 
-      await advanceClock(100)
-      expect(screen.getByText(chainName, { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
-    } finally {
-      jest.useRealTimers()
-    }
+    await advanceClock(100)
+    expect(screen.getByText(chainName, { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
   })
 
   it("gives each network of a Safe's band its own logo button and tooltip", async () => {
@@ -747,7 +742,6 @@ describe('SpaceQueueTable', () => {
       fireEvent.click(screen.getByRole('button', { name: `Go from ${blocked.transaction.id}` }))
 
     beforeEach(() => mockScrollToIndex.mockClear())
-    afterEach(() => jest.useRealTimers())
 
     it('scrolls to the transaction of that Safe and chain, not just that nonce, and highlights it', () => {
       render(<SpaceQueueTable sections={sameNonceElsewhere} groupBy="safe" />)
@@ -773,7 +767,6 @@ describe('SpaceQueueTable', () => {
     })
 
     it('fades the highlight out after two seconds', () => {
-      jest.useFakeTimers()
       render(<SpaceQueueTable sections={sameNonceElsewhere} groupBy="safe" />)
 
       goFromBlocked()
@@ -1053,7 +1046,7 @@ describe('SpaceQueueTable', () => {
     const cellsOf = (index: number) => screen.getAllByTestId('space-queue-row')[index].querySelectorAll('td')
 
     it('shows the executing state in the action column, not in Status, and disables the other option at its nonce', () => {
-      jest.useFakeTimers({ now: 1_800_000_000_000 })
+      jest.setSystemTime(1_800_000_000_000)
       renderPendingRows({
         [next.transaction.id]: {
           chainId,
@@ -1078,7 +1071,6 @@ describe('SpaceQueueTable', () => {
       expect(within(other[5]).getByRole('button', { name: 'Execute' })).toBeDisabled()
       expect(within(other[5]).getByTestId('queue-row-nonce-taken')).toBeInTheDocument()
       expect(screen.queryByText(/Locked/)).not.toBeInTheDocument()
-      jest.useRealTimers()
     })
 
     it('shows a signature being saved in the action column and leaves the other option at its nonce alone', () => {
