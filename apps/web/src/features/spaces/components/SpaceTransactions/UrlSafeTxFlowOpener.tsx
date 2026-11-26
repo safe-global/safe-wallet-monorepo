@@ -16,10 +16,10 @@ type PendingFlow = { target: SafeScopeTarget; args: Parameters<TxModalContextTyp
 export const LOAD_TIMEOUT_MS = 15_000
 
 /**
- * Opens the queue rows' flows on the URL Safe, like the Space dashboard does, so the header shows the Safe
- * being transacted on. Each flow waits until the URL Safe's info and SDK belong to its row's Safe.
+ * Opens a Workspace flow on the URL Safe, like the Space dashboard does, so the header shows the Safe
+ * being transacted on. Each flow waits until the URL Safe's info and SDK belong to its target Safe.
  */
-const UrlSafeTxFlowOpener = ({ children }: { children: ReactNode }): ReactElement => {
+export const useUrlSafeTxFlow = (): ScopedTxFlowOpener => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { txFlow: openTxFlow, setTxFlow } = useContext(TxModalContext)
@@ -109,6 +109,12 @@ const UrlSafeTxFlowOpener = ({ children }: { children: ReactNode }): ReactElemen
     void setUrlSafe(undefined)
   }, [openTxFlow, pending, setUrlSafe])
 
+  return openFlow
+}
+
+/** Opens the queue rows' scoped flows on the URL Safe instead of in a SafeScope */
+const UrlSafeTxFlowOpener = ({ children }: { children: ReactNode }): ReactElement => {
+  const openFlow = useUrlSafeTxFlow()
   return <ScopedTxFlowOpenerContext.Provider value={openFlow}>{children}</ScopedTxFlowOpenerContext.Provider>
 }
 
