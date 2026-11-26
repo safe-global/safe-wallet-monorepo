@@ -1,4 +1,6 @@
 import { AbiCoder } from 'ethers'
+// eslint-disable-next-line no-restricted-imports -- asserts the review step classifies every output
+import { getRuleKind } from '@/features/spaces/components/Policies/RecipientAllowlistFlow/ReviewStep/ruleKind'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
@@ -6,7 +8,7 @@ import {
   EMPTY_ALLOWLIST_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
   ZERO_ADDRESS_RECIPIENT_ERROR,
-} from '../allowlistErrors'
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { getPolicyEngineAddress } from '../policyEngineDeployments'
 import { isRejectAccess } from '../rejectAccess'
 import {
@@ -352,6 +354,23 @@ describe('buildAllowlistChangeConfigurations', () => {
     expect(() => buildAllowlistChangeConfigurations(CHAIN_ID, [], [rule(ZERO_ADDRESS, ...recipients)])).toThrow(
       TOO_MANY_CONFIGURATIONS_ERROR,
     )
+  })
+
+  it('should give every configuration a known rule kind', () => {
+    const configurations = buildAllowlistChangeConfigurations(
+      CHAIN_ID,
+      [rule(USDC, ALICE, BOB), rule(DAI, ALICE), rule(ZERO_ADDRESS, ALICE)],
+      [rule(USDC, ALICE, CAROL), rule(ZERO_ADDRESS, CAROL)],
+    )
+
+    expect(configurations.map((configuration) => getRuleKind(CHAIN_ID, configuration, SAFE))).toEqual([
+      'erc20',
+      'erc20Revoke',
+      'erc20Revoke',
+      'removal',
+      'native',
+      'removal',
+    ])
   })
 })
 

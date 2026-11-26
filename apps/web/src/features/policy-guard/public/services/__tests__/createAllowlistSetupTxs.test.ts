@@ -5,7 +5,7 @@ import {
   GUARD_NOT_SUPPORTED_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
   TRANSACTION_TOO_LARGE_ERROR,
-} from '../allowlistErrors'
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration, PolicyGuardState } from '../../types'
 import { encodeErc20TransferPolicyData, MAX_POLICY_CONFIGURATIONS } from '../allowlistConfigurations'
 import { createAllowlistSetupTxs } from '../createAllowlistSetupTxs'

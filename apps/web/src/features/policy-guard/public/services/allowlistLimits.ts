@@ -1,6 +1,9 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { TOO_MANY_CONFIGURATIONS_ERROR, TOO_MANY_RECIPIENTS_ERROR } from './allowlistErrors'
+import {
+  TOO_MANY_CONFIGURATIONS_ERROR,
+  TOO_MANY_RECIPIENTS_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistRule } from '@/features/spaces/public/types'
 import type { PolicyConfiguration } from '../types'
 import {

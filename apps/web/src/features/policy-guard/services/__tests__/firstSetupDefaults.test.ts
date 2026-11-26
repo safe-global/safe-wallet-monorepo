@@ -2,7 +2,7 @@ import { getAddress } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { ALLOWLIST_UNAVAILABLE_ERROR } from '../../public/services/allowlistErrors'
+import { ALLOWLIST_UNAVAILABLE_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration } from '../../public/types'
 import {
   getOfficialMultiSendCallOnlyAddresses,

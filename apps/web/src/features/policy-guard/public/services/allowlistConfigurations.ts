@@ -10,7 +10,7 @@ import {
   EMPTY_ALLOWLIST_ERROR,
   TOO_MANY_CONFIGURATIONS_ERROR,
   ZERO_ADDRESS_RECIPIENT_ERROR,
-} from './allowlistErrors'
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { PolicyConfiguration } from '../types'
 import { SET_FALLBACK_HANDLER_SELECTOR, SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR } from './guardExit'
 import { getAllowlistPairKeys, pairKey } from './allowlistPairs'

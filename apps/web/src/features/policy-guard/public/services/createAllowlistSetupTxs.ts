@@ -1,4 +1,8 @@
-import { ALLOWLIST_UNAVAILABLE_ERROR, GUARD_NOT_SUPPORTED_ERROR, TRANSACTION_TOO_LARGE_ERROR } from './allowlistErrors'
+import {
+  ALLOWLIST_UNAVAILABLE_ERROR,
+  GUARD_NOT_SUPPORTED_ERROR,
+  TRANSACTION_TOO_LARGE_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState } from '../types'
 import { estimateConfigurationGas, getConfigurationLimitError, MAX_TRANSACTION_GAS } from './allowlistLimits'
 import { withFirstSetupDefaults } from '../../services/firstSetupDefaults'
