@@ -26,7 +26,7 @@ export const TENDERLY_ORG_NAME =
   process.env.NEXT_PUBLIC_TENDERLY_ORG_NAME || process.env.EXPO_PUBLIC_TENDERLY_ORG_NAME || ''
 
 // Captcha — set to empty string to disable CAPTCHA entirely
-const IS_PRODUCTION =
+export const IS_PRODUCTION =
   process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true' || process.env.EXPO_PUBLIC_IS_PRODUCTION === 'true'
 
 const TURNSTILE_SITE_KEY_PRODUCTION =
