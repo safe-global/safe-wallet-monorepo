@@ -27,6 +27,9 @@ import type { GasPayerSelection } from './useGasPayerSelection'
 
 type DraftField = keyof GasParamsDraft
 
+/** An open editor holds only what the user typed; every other field shows the live values it follows. */
+type GasParamsEditor = { follows: 'params' | 'estimate'; edits: Partial<GasParamsDraft> }
+
 const EIP1559_FIELDS: DraftField[] = ['userNonce', 'gasLimit', 'maxPriorityFeePerGas', 'maxFeePerGas']
 const LEGACY_FIELDS: DraftField[] = ['userNonce', 'gasLimit', 'maxFeePerGas']
 
@@ -83,7 +86,7 @@ export const useGasFeeDetails = ({
 }): { selection: GasPayerSelection; gasFeeDetails?: GasFeeDetails } => {
   const chain = useCurrentChain()
   const isEIP1559 = !!useHasFeature(FEATURES.EIP1559)
-  const [draft, setDraft] = useState<GasParamsDraft | null>(null)
+  const [editor, setEditor] = useState<GasParamsEditor | null>(null)
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [wasAutoOpened, setWasAutoOpened] = useState(false)
 
@@ -92,26 +95,28 @@ export const useGasFeeDetails = ({
   const isEditable = !!view && !isPayFromSafe && !view.sponsored
   const cannotEstimate = !!gasLimitError && !params.gasLimit
 
-  // Switching to a payer that can't edit drops the draft.
+  const draft = useMemo<GasParamsDraft | null>(
+    () => editor && { ...toGasParamsDraft(editor.follows === 'estimate' ? estimate : params), ...editor.edits },
+    [editor, estimate, params],
+  )
+
+  // Switching to a payer that can't edit closes the editor.
   useEffect(() => {
-    if (!isEditable) setDraft(null)
+    if (!isEditable) setEditor(null)
   }, [isEditable])
 
   // When the gas can't be estimated, the editor opens once by itself to ask for a gas limit.
   useEffect(() => {
     if (!isEditable || !cannotEstimate || wasAutoOpened) return
     setWasAutoOpened(true)
-    setDraft(toGasParamsDraft(params))
-  }, [isEditable, cannotEstimate, wasAutoOpened, params])
+    setEditor({ follows: 'params', edits: {} })
+  }, [isEditable, cannotEstimate, wasAutoOpened])
 
-  const onEditOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) return setDraft(null)
-      setDraft(toGasParamsDraft(params))
-      trackEvent(MODALS_EVENTS.EDIT_ADVANCED_PARAMS)
-    },
-    [params],
-  )
+  const onEditOpenChange = useCallback((open: boolean) => {
+    if (!open) return setEditor(null)
+    setEditor({ follows: 'params', edits: {} })
+    trackEvent(MODALS_EVENTS.EDIT_ADVANCED_PARAMS)
+  }, [])
 
   const onViewOpenChange = useCallback((open: boolean) => {
     setIsViewOpen(open)
@@ -176,19 +181,19 @@ export const useGasFeeDetails = ({
       fields,
       onFieldChange: (name, value) => {
         const field = draftField(name)
-        setDraft((current) => (current ? { ...current, [field]: value } : current))
+        setEditor((current) => current && { ...current, edits: { ...current.edits, [field]: value } })
       },
       canSave: Object.keys(errors).length === 0,
       onSave: () => {
         if (!draft || Object.keys(errors).length > 0) return
         // Saving the estimate unchanged goes back to following it.
         onParamsChange(isSameGasParamsDraft(draft, estimateDraft) ? undefined : fromGasParamsDraft(draft))
-        setDraft(null)
+        setEditor(null)
       },
-      onCancel: () => setDraft(null),
+      onCancel: () => setEditor(null),
       onReset:
         draft && estimate.gasLimit && !isSameGasParamsDraft(draft, estimateDraft)
-          ? () => setDraft(estimateDraft)
+          ? () => setEditor({ follows: 'estimate', edits: {} })
           : undefined,
     }
   }, [

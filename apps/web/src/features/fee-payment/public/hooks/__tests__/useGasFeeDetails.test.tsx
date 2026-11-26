@@ -51,16 +51,20 @@ const buildSelection = (overrides: Partial<GasPayerSelection> = {}): GasPayerSel
     ...overrides,
   }) as GasPayerSelection
 
-const renderDetails = (props: Partial<Parameters<typeof useGasFeeDetails>[0]> = {}) => {
+type DetailsProps = Partial<Parameters<typeof useGasFeeDetails>[0]>
+
+const renderDetails = (props: DetailsProps = {}) => {
   const onParamsChange = jest.fn()
-  const hook = renderHook(() =>
-    useGasFeeDetails({
-      selection: buildSelection(),
-      params: estimate,
-      estimate,
-      onParamsChange,
-      ...props,
-    }),
+  const hook = renderHook(
+    (overrides: DetailsProps) =>
+      useGasFeeDetails({
+        selection: buildSelection(),
+        params: estimate,
+        estimate,
+        onParamsChange,
+        ...overrides,
+      }),
+    { initialProps: props },
   )
   return { ...hook, onParamsChange }
 }
@@ -112,6 +116,31 @@ describe('useGasFeeDetails', () => {
     act(() => asEdit(result.current.gasFeeDetails).onSave())
 
     expect(onParamsChange).toHaveBeenCalledWith(undefined)
+  })
+
+  it('fills in a gas limit that the estimate gives after the editor opened', () => {
+    const pending = { ...estimate, gasLimit: undefined }
+    const { result, rerender } = renderDetails({ params: pending, estimate: pending })
+
+    act(() => result.current.gasFeeDetails?.onOpenChange(true))
+    rerender({ params: estimate, estimate })
+
+    const editor = asEdit(result.current.gasFeeDetails)
+    expect(editor.fields.find((f) => f.name === 'gasLimit')?.value).toBe('100000')
+    expect(editor.canSave).toBe(true)
+  })
+
+  it('keeps the edited values and follows the estimate in the others while the editor is open', () => {
+    const { result, rerender } = renderDetails()
+
+    act(() => result.current.gasFeeDetails?.onOpenChange(true))
+    act(() => asEdit(result.current.gasFeeDetails).onFieldChange('maxFeePerGas', '3'))
+    const newEstimate = { ...estimate, maxPriorityFeePerGas: 2n * GWEI, maxFeePerGas: 4n * GWEI }
+    rerender({ params: newEstimate, estimate: newEstimate })
+
+    const fields = asEdit(result.current.gasFeeDetails).fields
+    expect(fields.find((f) => f.name === 'maxPriorityFeePerGas')?.value).toBe('2')
+    expect(fields.find((f) => f.name === 'maxFeePerGas')?.value).toBe('3')
   })
 
   it('blocks saving invalid values', () => {
