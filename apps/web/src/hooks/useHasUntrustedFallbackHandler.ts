@@ -6,7 +6,7 @@ import { identifyOfficialFallbackHandler } from '@safe-global/utils/services/con
 
 /**
  * Hook to check if the Safe's fallback handler (or optionally provided addresses) contain a non-official one.
- * Official handlers are the CompatibilityFallbackHandler and ExtensibleFallbackHandler deployments,
+ * Official handlers are the Compatibility-, Extensible- and TokenCallbackHandler deployments,
  * plus CoW's TWAP handler on its supported chains.
  * @param fallbackHandler Optional fallback handler address(es) (if not provided, it will be taken from the Safe info)
  * @returns Boolean indicating if an untrusted fallback handler is set or if the provided address(es) contain an untrusted one

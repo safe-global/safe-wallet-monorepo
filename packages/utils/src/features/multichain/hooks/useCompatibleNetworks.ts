@@ -54,7 +54,7 @@ export const useCompatibleNetworks = (
       config.chainId,
       TRUSTED_DEPLOYMENT_VERSIONS,
     )
-    // Any official Compatibility- or ExtensibleFallbackHandler deployment across the trusted versions counts
+    // Any official Compatibility-, Extensible- or TokenCallbackHandler deployment across the trusted versions counts
     const fallbackHandlerExists = Boolean(identifyOfficialFallbackHandler(fallbackHandler, config.chainId))
 
     // We only need to check that it is nonzero as useSafeCreationData already validates that it is the setupToL2 call otherwise
