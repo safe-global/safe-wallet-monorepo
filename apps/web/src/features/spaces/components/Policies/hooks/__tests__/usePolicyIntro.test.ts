@@ -42,6 +42,17 @@ describe('usePolicyIntro', () => {
     expect(startFlow).toHaveBeenCalledTimes(1)
   })
 
+  it('should open the intro again, when it must be shown every time and has been seen', () => {
+    mockUseLocalStorage.mockReturnValue([true, jest.fn()])
+    const startFlow = jest.fn()
+    const { result } = renderHook(() => usePolicyIntro(SEEN_KEY, startFlow, { everyTime: true }))
+
+    act(() => result.current.request())
+
+    expect(result.current.isOpen).toBe(true)
+    expect(startFlow).not.toHaveBeenCalled()
+  })
+
   it('closes the intro, records it as seen and starts the flow on proceed', () => {
     const { result, startFlow, setHasSeen } = renderIntro(false)
     act(() => result.current.request())

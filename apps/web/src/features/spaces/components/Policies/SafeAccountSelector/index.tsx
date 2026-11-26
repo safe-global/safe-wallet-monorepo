@@ -54,6 +54,8 @@ export type SafeAccountSelectorProps = {
   notice?: { title: ReactNode; description: ReactNode }
   name?: string
   id?: string
+  /** The dialog it opens in focuses it first. */
+  autoFocus?: boolean
 }
 
 /** Height of the picked state's two-line identity. Every state reserves it so the field never jumps. */
@@ -81,6 +83,7 @@ const SafeAccountSelector = ({
   notice,
   name,
   id,
+  autoFocus = false,
 }: SafeAccountSelectorProps) => {
   const generatedId = useId()
   const fieldId = id ?? generatedId
@@ -179,6 +182,7 @@ const SafeAccountSelector = ({
           aria-label={label}
           aria-invalid={shownError ? true : undefined}
           data-testid="safe-account-selector"
+          data-autofocus={autoFocus || undefined}
           className="w-full"
         >
           {isLoading ? (
