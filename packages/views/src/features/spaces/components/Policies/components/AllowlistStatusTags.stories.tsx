@@ -38,8 +38,8 @@ export const Expired: Story = {
   },
 }
 
-/** Too wide for the panel header beside the title, so the status wraps under the change. */
-export const Narrow: Story = {
+/** The widest pair, which still stays on one line. */
+export const Widest: Story = {
   args: {
     badge: {
       state: 'guard-removal-ready-to-execute',
@@ -48,5 +48,4 @@ export const Narrow: Story = {
       variant: ALLOWLIST_STATUS['guard-removal-ready-to-execute'].variant,
     },
   },
-  decorators: [(Story) => <div className="w-48">{Story()}</div>],
 }

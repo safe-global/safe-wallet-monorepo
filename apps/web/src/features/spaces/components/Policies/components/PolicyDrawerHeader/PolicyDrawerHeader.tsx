@@ -15,11 +15,11 @@ export type PolicyDrawerHeaderProps = {
   status?: PolicyStatus | AllowlistStatusBadge | null
 }
 
-const renderStatus = (status: PolicyDrawerHeaderProps['status']): ReactElement | null => {
+const renderStatus = (status: PolicyStatus | null | undefined): ReactElement | null => {
   if (status === null) return null
   if (status === undefined) return <Skeleton className="h-6 w-24 rounded-lg" data-testid="policy-status-skeleton" />
 
-  return typeof status === 'string' ? <PolicyStatusChip status={status} /> : <AllowlistStatusTags badge={status} />
+  return <PolicyStatusChip status={status} />
 }
 
 const PolicyDrawerHeader = ({ icon: Icon, title, status }: PolicyDrawerHeaderProps): ReactElement => (
@@ -27,9 +27,18 @@ const PolicyDrawerHeader = ({ icon: Icon, title, status }: PolicyDrawerHeaderPro
     <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-success-subtle">
       <Icon className="size-4 text-success-strong" />
     </div>
-    <DrawerTitle size="lg">{title}</DrawerTitle>
-    {/* Takes only the room the title leaves, so two status tags wrap instead of cutting the title */}
-    <div className="flex flex-1 justify-end">{renderStatus(status)}</div>
+    {typeof status === 'object' && status !== null ? (
+      // Beside the title an allowlist's two tags would break onto a second line, so they get a row of their own
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <DrawerTitle size="lg">{title}</DrawerTitle>
+        <AllowlistStatusTags badge={status} />
+      </div>
+    ) : (
+      <>
+        <DrawerTitle size="lg">{title}</DrawerTitle>
+        <div className="flex flex-1 justify-end">{renderStatus(status)}</div>
+      </>
+    )}
   </DrawerHeader>
 )
 

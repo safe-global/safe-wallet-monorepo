@@ -28,7 +28,7 @@ export const NotActivated: Story = { args: { icon: UserRoundPen, title: 'Propose
 /** The status is still being read, so the slot holds its place. */
 export const StatusLoading: Story = { args: { icon: UserRoundPen, title: 'Proposer role', status: undefined } }
 
-/** An allowlist shows the change it is in beside the status of that change. */
+/** An allowlist shows the change it is in and the status of that change on one line below the title. */
 export const AllowlistChange: Story = {
   args: {
     icon: Users,
@@ -39,5 +39,14 @@ export const AllowlistChange: Story = {
       label: formatAllowlistStatus('guard-removal-ready-to-execute'),
       variant: ALLOWLIST_STATUS['guard-removal-ready-to-execute'].variant,
     },
+  },
+}
+
+/** An allowlist in no change shows its status alone below the title. */
+export const AllowlistActive: Story = {
+  args: {
+    icon: Users,
+    title: 'Allowlist',
+    status: { state: 'active', label: 'Active', variant: ALLOWLIST_STATUS.active.variant },
   },
 }

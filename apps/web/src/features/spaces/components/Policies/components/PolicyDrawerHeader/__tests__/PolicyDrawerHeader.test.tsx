@@ -47,4 +47,26 @@ describe('PolicyDrawerHeader', () => {
     expect(screen.getByTestId('allowlist-status-tags')).toHaveTextContent(/^Active$/)
     expect(screen.queryByTestId(/^policy-change-/)).not.toBeInTheDocument()
   })
+
+  it('should, when an allowlist is in a change, put both of its tags on one row below the title', () => {
+    render(
+      <PolicyDrawerHeader
+        icon={Users}
+        title="Allowlist"
+        status={{ state: 'guard-removal-pending', change: 'guard-removal', label: 'Pending · 0/1', variant: 'warning' }}
+      />,
+    )
+
+    const tags = screen.getByTestId('allowlist-status-tags')
+    expect(screen.getByText('Allowlist').nextElementSibling).toBe(tags)
+    expect(tags).toHaveTextContent('Guard removalPending · 0/1')
+  })
+
+  it('should, for a policy with a single status, keep the status beside the title', () => {
+    render(<PolicyDrawerHeader icon={Wallet} title="Spending limit" status="active" />)
+
+    expect(screen.getByText('Spending limit').nextElementSibling).toContainElement(
+      screen.getByTestId('policy-status-active'),
+    )
+  })
 })
