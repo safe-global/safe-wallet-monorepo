@@ -10,7 +10,6 @@ import {
   SpaceAssetsLoadError,
   SpaceAssetsNoMatches,
 } from '@safe-global/views/features/spaces/components/SpaceAssets/SpaceAssetsStates'
-import type { AssetsGroupBy } from '@safe-global/views/features/spaces/components/SpaceAssets/types'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import useChains from '@/hooks/useChains'
@@ -40,20 +39,8 @@ import {
 
 const LOAD_BATCH_SIZE = 3
 const LOAD_BATCH_DELAY_MS = 300
-const DEFAULT_GROUP_BY: AssetsGroupBy = 'type'
-
-const COLLAPSE_UNITS: Record<AssetsGroupBy, [string, string]> = {
-  asset: ['asset', 'assets'],
-  type: ['type', 'types'],
-  safe: ['Safe', 'Safes'],
-  network: ['network', 'networks'],
-}
-
 const isSameReport = (a: ChainAssetsReport | undefined, b: ChainAssetsReport) =>
   a?.state === b.state && a.isPartial === b.isPartial && a.holdings === b.holdings
-
-/** Grouped by asset, the bands start collapsed: each line is the asset's total, as in a portfolio */
-const isCollapsedByDefault = (groupBy: AssetsGroupBy) => groupBy === 'asset'
 
 const SpaceAssets = (): ReactElement => {
   const { allSafes, isLoading, isError, refetch } = useSpaceSafes()
@@ -63,8 +50,7 @@ const SpaceAssets = (): ReactElement => {
   const [filters, setFilters] = useState<AssetsFilters>(NO_ASSETS_FILTERS)
   const [search, setSearch] = useState('')
   const [searchKey, setSearchKey] = useState(0)
-  const [groupBy, setGroupBy] = useState<AssetsGroupBy>(DEFAULT_GROUP_BY)
-  const [collapsedByDefault, setCollapsedByDefault] = useState(isCollapsedByDefault(DEFAULT_GROUP_BY))
+  const [collapsedByDefault, setCollapsedByDefault] = useState(false)
   const [toggled, setToggled] = useState<ReadonlySet<string>>(new Set())
   const [reports, setReports] = useState<Record<string, ChainAssetsReport>>({})
   const [retryKey, setRetryKey] = useState(0)
@@ -116,7 +102,7 @@ const SpaceAssets = (): ReactElement => {
     [getName, configs],
   )
   const searched = useMemo(() => searchHoldings(holdings, search, describe), [holdings, search, describe])
-  const groups = useMemo(() => groupHoldings(searched, groupBy), [searched, groupBy])
+  const groups = useMemo(() => groupHoldings(searched), [searched])
   const summary = summarizeHoldings(searched)
 
   const isCollapsed = (id: string) => collapsedByDefault !== toggled.has(id)
@@ -129,11 +115,6 @@ const SpaceAssets = (): ReactElement => {
     })
   const toggleAll = () => {
     setCollapsedByDefault(!allCollapsed)
-    setToggled(new Set())
-  }
-  const changeGroupBy = (next: AssetsGroupBy) => {
-    setGroupBy(next)
-    setCollapsedByDefault(isCollapsedByDefault(next))
     setToggled(new Set())
   }
   const clearAll = () => {
@@ -163,9 +144,16 @@ const SpaceAssets = (): ReactElement => {
         />
       ))}
 
+      <SpaceAssetsTotals
+        total={formatCurrency(summary.tokens + summary.positions, currency)}
+        tokens={formatCurrency(summary.tokens, currency)}
+        positions={formatCurrency(summary.positions, currency)}
+        isLoading={isLoadingAssets && holdings.length === 0}
+        isPartial={isPartial}
+      />
+
       <SpaceAssetsToolbar
         {...toolbar}
-        groupBy={{ value: groupBy, onChange: changeGroupBy }}
         search={
           <SearchTransactions
             key={searchKey}
@@ -180,14 +168,6 @@ const SpaceAssets = (): ReactElement => {
         <SpaceAssetsNoMatches onClear={clearAll} />
       ) : (
         <>
-          <SpaceAssetsTotals
-            total={formatCurrency(summary.tokens + summary.positions, currency)}
-            tokens={formatCurrency(summary.tokens, currency)}
-            positions={formatCurrency(summary.positions, currency)}
-            isLoading={isLoadingAssets && holdings.length === 0}
-            isPartial={isPartial}
-          />
-
           {failedPairs.length > 0 && (
             <div className="flex justify-end">
               <UnavailableAssetsAlert safes={failedPairs} onRetry={() => setRetryKey((key) => key + 1)} />
@@ -197,18 +177,17 @@ const SpaceAssets = (): ReactElement => {
           <SpaceAssetsTable
             panelRef={setPanel}
             scrollsX={scrollsX}
-            firstColumn={groupBy === 'asset' ? 'Network' : 'Asset'}
             collapseAll={
               groups.length > 0
-                ? { allCollapsed, count: groups.length, unit: COLLAPSE_UNITS[groupBy], onToggle: toggleAll }
+                ? { allCollapsed, count: groups.length, unit: ['group', 'groups'], onToggle: toggleAll }
                 : undefined
             }
           >
-            <AssetsGroups groups={groups} groupBy={groupBy} isCollapsed={isCollapsed} onToggle={toggleGroup} />
+            <AssetsGroups groups={groups} isCollapsed={isCollapsed} onToggle={toggleGroup} />
             {isLoadingAssets && (
-              <AssetsNoteRow
-                isLoading
-              >{`Loading the assets of ${loadingCount} more Safe ${loadingCount === 1 ? 'network' : 'networks'}…`}</AssetsNoteRow>
+              <AssetsNoteRow isLoading>
+                {`Loading the assets of ${loadingCount} more Safe ${loadingCount === 1 ? 'network' : 'networks'}…`}
+              </AssetsNoteRow>
             )}
             {!isLoadingAssets && groups.length === 0 && <AssetsNoteRow>No assets</AssetsNoteRow>}
           </SpaceAssetsTable>

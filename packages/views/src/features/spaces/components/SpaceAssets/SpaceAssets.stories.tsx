@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { Coins, Layers } from 'lucide-react'
 import { fn } from 'storybook/test'
-import Identicon from '@safe-global/views/components/common/Identicon'
-import { ChainLogo } from '@safe-global/views/features/spaces/components/AddressBookV2/ChainLogos'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import SignersList from '@safe-global/views/features/spaces/components/SpaceQueue/SignersList'
 import AssetLogo from './AssetLogo'
 import { AssetHoldingRow, AssetsGroupRow, AssetsNoteRow } from './AssetsRows'
 import SpaceAssetsTable from './SpaceAssetsTable'
@@ -16,6 +16,24 @@ const ETHEREUM = { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shor
 const GNOSIS = { chainId: '100', chainName: 'Gnosis Chain', chainLogoUri: null, shortName: 'gno' }
 const BASE = { chainId: '8453', chainName: 'Base', chainLogoUri: null, shortName: 'base' }
 
+const GroupIcon = ({ positions = false }: { positions?: boolean }) => (
+  <span className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+    {positions ? <Layers className="size-4" /> : <Coins className="size-4" />}
+  </span>
+)
+
+const ETH_OWNERS = (
+  <SignersList
+    header="Held by 2 Safe accounts"
+    isLoading={false}
+    hideStatus
+    signers={[
+      { address: TREASURY, name: 'Treasury · 3 ETH · $ 3,272', signed: true },
+      { address: OPERATIONS, name: 'Operations · 0.5 ETH · $ 546', signed: true },
+    ]}
+  />
+)
+
 const meta = {
   title: 'Features/Spaces/Assets/Views',
   parameters: { layout: 'padded' },
@@ -24,44 +42,46 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** The default view, grouped by type: tokens, then positions, each asset summed across Safes and networks */
-export const GroupedByType: Story = {
+/** Tokens, then positions: each asset once, summed across Safes and networks, with the networks holding it */
+export const Table: Story = {
   render: () => (
-    <SpaceAssetsTable firstColumn="Asset" collapseAll={{ allCollapsed: false, count: 2, onToggle: fn() }}>
+    <SpaceAssetsTable collapseAll={{ allCollapsed: false, count: 2, onToggle: fn() }}>
       <AssetsGroupRow
-        logo={<AssetLogo label="T" />}
+        logo={<GroupIcon />}
         title="Tokens"
         chains={[ETHEREUM, GNOSIS, BASE]}
-        value="$ 19,000"
+        value="$ 17,818"
         collapsed={false}
         onToggle={fn()}
       />
       <AssetHoldingRow
         logo={<AssetLogo label="SAFE" />}
         title="Safe Token"
-        subtitle="SAFE · Ethereum"
-        type="Token"
+        subtitle="SAFE"
+        chains={[ETHEREUM]}
         balance="50,000 SAFE"
         value="$ 9,500"
       />
       <AssetHoldingRow
         logo={<AssetLogo label="USDC" />}
         title="USD Coin"
-        subtitle="USDC · 2 networks"
-        type="Token"
+        subtitle="USDC"
+        chains={[ETHEREUM, GNOSIS]}
         balance="4,500 USDC"
         value="$ 4,500"
       />
       <AssetHoldingRow
         logo={<AssetLogo label="ETH" />}
         title="Ether"
-        subtitle="ETH · 3 networks"
-        type="Token"
+        subtitle="ETH"
+        chains={[ETHEREUM, BASE]}
         balance="3.5 ETH"
         value="$ 3,818"
+        owners={ETH_OWNERS}
+        ownersLabel="Ether: held by 2 Safe accounts"
       />
       <AssetsGroupRow
-        logo={<AssetLogo label="P" />}
+        logo={<GroupIcon positions />}
         title="Positions"
         chains={[ETHEREUM]}
         value="$ 2,182"
@@ -71,100 +91,19 @@ export const GroupedByType: Story = {
       <AssetHoldingRow
         logo={<AssetLogo label="ETH" />}
         title="Ether"
-        subtitle="ETH · Staking protocol · Ethereum"
-        type="Staked"
+        subtitle="ETH · Staking protocol · Staked"
+        chains={[ETHEREUM]}
         balance="2 ETH"
         value="$ 2,182"
-      />
-    </SpaceAssetsTable>
-  ),
-}
-
-/** Grouped by asset: ETH expanded to a row per network summed across its Safes, USDC collapsed to its total */
-export const GroupedByAsset: Story = {
-  render: () => (
-    <SpaceAssetsTable firstColumn="Network" collapseAll={{ allCollapsed: false, count: 3, onToggle: fn() }}>
-      <AssetsGroupRow
-        logo={<AssetLogo label="ETH" />}
-        title="ETH"
-        subtitle="Ether"
-        chains={[ETHEREUM, GNOSIS, BASE]}
-        balance="5.5 ETH"
-        value="$ 6,000"
-        collapsed={false}
-        onToggle={fn()}
-      />
-      <AssetHoldingRow
-        logo={<ChainLogo chain={ETHEREUM} size="md" />}
-        title="Ethereum"
-        subtitle="5 Safe accounts"
-        type="Token"
-        balance="3 ETH"
-        value="$ 3,272"
-      />
-      <AssetHoldingRow
-        logo={<ChainLogo chain={ETHEREUM} size="md" />}
-        title="Ethereum"
-        subtitle="Treasury · Staking protocol"
-        type="Staked"
-        balance="2 ETH"
-        value="$ 2,182"
-      />
-      <AssetHoldingRow
-        logo={<ChainLogo chain={BASE} size="md" />}
-        title="Base"
-        subtitle="Operations"
-        type="Token"
-        balance="0.5 ETH"
-        value="$ 546"
-      />
-      <AssetsGroupRow
-        logo={<AssetLogo label="USDC" />}
-        title="USDC"
-        subtitle="USD Coin"
-        chains={[ETHEREUM, GNOSIS]}
-        balance="4,500 USDC"
-        value="$ 4,500"
-        collapsed
-        onToggle={fn()}
-      />
-    </SpaceAssetsTable>
-  ),
-}
-
-/** Grouped by Safe, while three more networks load */
-export const GroupedBySafeLoading: Story = {
-  tags: ['skip-visual-test'],
-  render: () => (
-    <SpaceAssetsTable firstColumn="Asset">
-      <AssetsGroupRow
-        logo={<Identicon address={TREASURY} size={32} />}
-        title="Treasury"
-        subtitle="0x8675…a19b"
-        chains={[ETHEREUM, GNOSIS]}
-        value="$ 13,772"
-        collapsed={false}
-        onToggle={fn()}
-      />
-      <AssetHoldingRow
-        logo={<AssetLogo label="SAFE" />}
-        title="Safe Token"
-        subtitle="SAFE · Ethereum"
-        type="Token"
-        balance="50,000 SAFE"
-        value="$ 9,500"
-      />
-      <AssetHoldingRow
-        logo={<AssetLogo label="USDC" />}
-        title="USD Coin"
-        subtitle="USDC · Gnosis Chain"
-        type="Token"
-        balance="4,272 USDC"
-        value="$ 4,272"
       />
       <AssetsNoteRow isLoading>Loading the assets of 3 more Safe networks…</AssetsNoteRow>
     </SpaceAssetsTable>
   ),
+}
+
+/** The Safe accounts holding an asset, opened on hovering it: the queue's signers list, without the signed marks */
+export const Owners: Story = {
+  render: () => <div className="w-72 rounded-md bg-foreground p-3 text-xs text-background">{ETH_OWNERS}</div>,
 }
 
 export const Totals: Story = {
@@ -204,7 +143,6 @@ export const ToolbarWithFilters: Story = {
       chips={{ safes: [{ safeAddress: TREASURY, name: 'Treasury' }], networkNames: ['Gnosis Chain'] }}
       onRemove={fn()}
       onClear={fn()}
-      groupBy={{ value: 'type', onChange: fn() }}
       search={
         <SearchInput
           aria-label="Search assets"

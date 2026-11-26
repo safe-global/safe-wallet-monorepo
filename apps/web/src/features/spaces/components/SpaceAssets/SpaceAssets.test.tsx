@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
@@ -63,13 +64,6 @@ const givenAssets = (byChainAndAddress: Record<string, SafeAssetsResult>) =>
 
 const totals = () => within(screen.getByTestId('space-assets-totals'))
 
-const renderGroupedBy = async (label: string) => {
-  const rendered = renderWithUserEvent(<SpaceAssets />)
-  await rendered.user.click(screen.getByRole('button', { name: /^Group by/ }))
-  await rendered.user.click(await screen.findByRole('menuitemradio', { name: new RegExp(`^${label}`) }))
-  return rendered
-}
-
 describe('SpaceAssets', () => {
   const treasury = faker.finance.ethereumAddress()
   const ops = faker.finance.ethereumAddress()
@@ -97,7 +91,7 @@ describe('SpaceAssets', () => {
     expect(refetch).toHaveBeenCalled()
   })
 
-  describe('grouped by asset', () => {
+  describe('with tokens on several Safes and networks', () => {
     beforeEach(() => {
       givenSpaceSafes(
         { address: treasury, chainId: '1' },
@@ -111,67 +105,76 @@ describe('SpaceAssets', () => {
       })
     })
 
-    it('shows one collapsed band per asset with its amount and value summed across Safes and networks', async () => {
-      await renderGroupedBy('Asset')
-
-      const bands = screen.getAllByTestId('space-assets-group')
-      expect(bands).toHaveLength(2)
-      expect(within(bands[0]).getByText('ETH')).toBeInTheDocument()
-      expect(within(bands[0]).getByText('3 ETH')).toBeInTheDocument()
-      expect(within(bands[0]).getByText('$ 6,000')).toBeInTheDocument()
-      expect(screen.queryAllByTestId('space-assets-row')).toHaveLength(0)
-    })
-
-    it('lists one row per network when an asset is expanded, summed across its Safes', async () => {
-      const { user } = await renderGroupedBy('Asset')
-
-      await user.click(screen.getByRole('button', { name: 'Expand ETH' }))
+    it('shows each token once, summed across Safes and networks, with the networks holding it', () => {
+      render(<SpaceAssets />)
 
       const rows = screen.getAllByTestId('space-assets-row')
       expect(rows).toHaveLength(2)
-      expect(within(rows[0]).getByText('Ethereum')).toBeInTheDocument()
-      expect(within(rows[0]).getByText('2 Safe accounts')).toBeInTheDocument()
-      expect(within(rows[0]).getByText('$ 4,000')).toBeInTheDocument()
+      expect(within(rows[0]).getByText('3 ETH')).toBeInTheDocument()
+      expect(within(rows[0]).getByText('$ 6,000')).toBeInTheDocument()
+      expect(within(rows[0]).getByText('2 networks')).toBeInTheDocument()
+      expect(within(rows[1]).getByText('Ethereum')).toBeInTheDocument()
     })
 
-    it('expands and collapses every asset at once', async () => {
-      const { user } = await renderGroupedBy('Asset')
+    it('lists the Safes holding a token, with their share, when the token is hovered', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
 
-      await user.click(screen.getByRole('button', { name: 'Expand all' }))
-      const expandedRows = screen.getAllByTestId('space-assets-row').length
-      await user.click(screen.getByRole('button', { name: 'Collapse all' }))
+      await user.hover(screen.getByRole('button', { name: 'ETH token: held by 2 Safe accounts' }))
 
-      expect(expandedRows).toBe(3)
-      expect(screen.queryAllByTestId('space-assets-row')).toHaveLength(0)
+      expect(await screen.findByText('Held by 2 Safe accounts')).toBeInTheDocument()
+      expect(screen.getAllByTestId('signer-row').map((row) => row.textContent?.replace(/\s/g, ' '))).toEqual([
+        `${shortenAddress(treasury)} · 2 ETH · $ 5,000`,
+        `${shortenAddress(ops)} · 1 ETH · $ 1,000`,
+      ])
     })
 
-    it('sums every holding in the totals', async () => {
-      await renderGroupedBy('Asset')
+    it('shows the totals above the search and filters, and no Group by', () => {
+      render(<SpaceAssets />)
+
+      const totalsCard = screen.getByTestId('space-assets-totals')
+      const search = screen.getByRole('searchbox', { name: 'Search assets' })
+      expect(totalsCard.compareDocumentPosition(search) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(screen.queryByRole('button', { name: /^Group by/ })).not.toBeInTheDocument()
+    })
+
+    it('sums every holding in the totals', () => {
+      render(<SpaceAssets />)
 
       expect(totals().getAllByText('$ 6,001')).toHaveLength(2)
     })
 
+    it('collapses and expands the tokens at once', async () => {
+      const { user } = renderWithUserEvent(<SpaceAssets />)
+
+      await user.click(screen.getByRole('button', { name: 'Collapse all' }))
+      const collapsedRows = screen.queryAllByTestId('space-assets-row').length
+      await user.click(screen.getByRole('button', { name: 'Expand all' }))
+
+      expect(collapsedRows).toBe(0)
+      expect(screen.getAllByTestId('space-assets-row')).toHaveLength(2)
+    })
+
     it('narrows the assets and the totals to the search', async () => {
-      const { user } = await renderGroupedBy('Asset')
+      const { user } = renderWithUserEvent(<SpaceAssets />)
 
       await user.type(screen.getByRole('searchbox', { name: 'Search assets' }), 'usdc')
 
       expect(await totals().findAllByText('$ 1')).toHaveLength(2)
-      expect(screen.getAllByTestId('space-assets-group')).toHaveLength(1)
+      expect(screen.getAllByTestId('space-assets-row')).toHaveLength(1)
     })
 
     it('offers to clear a search that matches nothing', async () => {
-      const { user } = await renderGroupedBy('Asset')
+      const { user } = renderWithUserEvent(<SpaceAssets />)
 
       await user.type(screen.getByRole('searchbox', { name: 'Search assets' }), 'dai')
       await user.click(await screen.findByRole('button', { name: 'Clear search and filters' }))
 
-      expect(screen.getAllByTestId('space-assets-group')).toHaveLength(2)
+      expect(screen.getAllByTestId('space-assets-row')).toHaveLength(2)
     })
   })
 
-  it('groups by type by default: tokens, then positions, each expanded', () => {
-    givenSpaceSafes({ address: treasury, chainId: '1' }, { address: ops, chainId: '1' })
+  it('shows tokens, then positions, each in its own band', () => {
+    givenSpaceSafes({ address: treasury, chainId: '1' })
     givenAssets({
       [`1:${treasury}`]: {
         ...loaded(token('ETH', '10')),
@@ -205,7 +208,6 @@ describe('SpaceAssets', () => {
           },
         ],
       },
-      [`1:${ops}`]: loaded(token('ETH', '5')),
     })
 
     render(<SpaceAssets />)
@@ -215,18 +217,7 @@ describe('SpaceAssets', () => {
       'Collapse Tokens',
       'Collapse Positions',
     ])
-    expect(within(bands[0]).getByText('$ 15')).toBeInTheDocument()
-    expect(screen.getAllByTestId('space-assets-row')).toHaveLength(2)
-  })
-
-  it('groups by Safe when picked in Group by', async () => {
-    givenSpaceSafes({ address: treasury, chainId: '1' }, { address: ops, chainId: '1' })
-    givenAssets({ [`1:${treasury}`]: loaded(token('ETH', '10')), [`1:${ops}`]: loaded(token('ETH', '5')) })
-
-    await renderGroupedBy('Safe')
-
-    expect(screen.getAllByTestId('space-assets-group')).toHaveLength(2)
-    expect(screen.getAllByTestId('space-assets-row')).toHaveLength(2)
+    expect(screen.getByText('ETH · Staking · Staking')).toBeInTheDocument()
   })
 
   it('leaves a failed network out of the totals and reloads it from the alert', async () => {

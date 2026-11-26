@@ -213,89 +213,60 @@ describe('searchHoldings', () => {
 describe('groupHoldings', () => {
   const treasury = address()
   const ops = address()
-  const holdings = [
-    holding({ safeAddress: treasury, chainId: '1', amount: 1.5, fiat: 4500 }),
-    holding({ safeAddress: ops, chainId: '10', amount: 0.5, fiat: 1500 }),
-    holding({ safeAddress: treasury, chainId: '1', assetKey: 'USDC', symbol: 'USDC', amount: 4500, fiat: 4500.5 }),
-  ]
 
-  it('sums each asset across Safes and networks, highest value first', () => {
-    const groups = groupHoldings(holdings, 'asset')
-
-    expect(groups.map(({ key, amount, fiat, chainIds }) => ({ key, amount, fiat, chainIds }))).toEqual([
-      { key: 'ETH', amount: 2, fiat: 6000, chainIds: ['1', '10'] },
-      { key: 'USDC', amount: 4500, fiat: 4500.5, chainIds: ['1'] },
+  it('puts tokens before positions, whatever their values', () => {
+    const groups = groupHoldings([
+      holding({ fiat: 1 }),
+      holding({ isPosition: true, type: 'Staked', protocol: 'Staking', fiat: 100 }),
     ])
-  })
 
-  it('groups by Safe, ignoring the address case', () => {
-    const groups = groupHoldings(holdings, 'safe')
-
-    expect(groups.map(({ key, rows }) => [key, rows.length])).toEqual([
-      [treasury.toLowerCase(), 2],
-      [ops.toLowerCase(), 1],
-    ])
-  })
-
-  it('groups by network', () => {
-    const groups = groupHoldings(holdings, 'network')
-
-    expect(groups.map(({ key }) => key)).toEqual(['1', '10'])
-  })
-
-  it('sums the same token of several Safes on a network into one row of the asset', () => {
-    const safes = Array.from({ length: 5 }, () => address())
-    const sameToken = safes.map((safeAddress) => holding({ safeAddress, chainId: '1', amount: 1, fiat: 3000 }))
-
-    const [eth] = groupHoldings([...sameToken, holding({ chainId: '10', amount: 0.5, fiat: 1500 })], 'asset')
-
-    expect(
-      eth.rows.map(({ chainIds, safeAddresses, amount, fiat }) => ({
-        chainIds,
-        safes: safeAddresses.length,
-        amount,
-        fiat,
-      })),
-    ).toEqual([
-      { chainIds: ['1'], safes: 5, amount: 5, fiat: 15000 },
-      { chainIds: ['10'], safes: 1, amount: 0.5, fiat: 1500 },
-    ])
-  })
-
-  it('keeps a position apart from the token it holds', () => {
-    const safeAddress = address()
-
-    const [eth] = groupHoldings(
-      [holding({ safeAddress }), holding({ safeAddress, isPosition: true, type: 'Staked', protocol: 'Staking' })],
-      'asset',
-    )
-
-    expect(eth.rows.map(({ type }) => type)).toEqual(['Token', 'Staked'])
-  })
-
-  it('sums an asset across the networks of a Safe when grouped by Safe', () => {
-    const safeAddress = address()
-
-    const [safe] = groupHoldings(
-      [
-        holding({ safeAddress, chainId: '1', amount: 1, fiat: 10 }),
-        holding({ safeAddress, chainId: '10', amount: 2, fiat: 20 }),
-      ],
-      'safe',
-    )
-
-    expect(safe.rows).toEqual([expect.objectContaining({ chainIds: ['1', '10'], amount: 3, fiat: 30 })])
-  })
-
-  it('puts tokens before positions when grouped by type, whatever their values', () => {
-    const groups = groupHoldings(
-      [holding({ fiat: 1 }), holding({ isPosition: true, type: 'Staked', protocol: 'Staking', fiat: 100 })],
-      'type',
-    )
-
-    expect(groups.map(({ key, fiat }) => [key, fiat])).toEqual([
+    expect(groups.map(({ id, fiat }) => [id, fiat])).toEqual([
       ['tokens', 1],
       ['positions', 100],
     ])
+  })
+
+  it('sums an asset into one row across Safes and networks, highest value first', () => {
+    const [tokens] = groupHoldings([
+      holding({ safeAddress: treasury, chainId: '1', amount: 1, fiat: 3000 }),
+      holding({ safeAddress: ops, chainId: '1', amount: 1, fiat: 3000 }),
+      holding({ safeAddress: ops, chainId: '10', amount: 0.5, fiat: 1500 }),
+      holding({ safeAddress: treasury, assetKey: 'USDC', symbol: 'USDC', amount: 10000, fiat: 10000 }),
+    ])
+
+    expect(tokens.rows.map(({ assetKey, amount, fiat, chainIds }) => ({ assetKey, amount, fiat, chainIds }))).toEqual([
+      { assetKey: 'USDC', amount: 10000, fiat: 10000, chainIds: ['1'] },
+      { assetKey: 'ETH', amount: 2.5, fiat: 7500, chainIds: ['1', '10'] },
+    ])
+  })
+
+  it('lists the Safes holding an asset with their share, highest value first', () => {
+    const [tokens] = groupHoldings([
+      holding({ safeAddress: treasury, chainId: '1', amount: 1, fiat: 3000 }),
+      holding({ safeAddress: ops, chainId: '1', amount: 1, fiat: 3000 }),
+      holding({ safeAddress: ops, chainId: '10', amount: 0.5, fiat: 1500 }),
+    ])
+
+    expect(tokens.rows[0].safes).toEqual([
+      { safeAddress: ops, chainIds: ['1', '10'], amount: 1.5, fiat: 4500 },
+      { safeAddress: treasury, chainIds: ['1'], amount: 1, fiat: 3000 },
+    ])
+  })
+
+  it('keeps each kind of position apart from the token it holds', () => {
+    const groups = groupHoldings([
+      holding({ safeAddress: treasury }),
+      holding({ safeAddress: treasury, isPosition: true, type: 'Staked', protocol: 'Staking' }),
+      holding({ safeAddress: ops, isPosition: true, type: 'Deposited', protocol: 'Lending' }),
+    ])
+
+    expect(groups.map(({ id, rows }) => [id, rows.map(({ type }) => type)])).toEqual([
+      ['tokens', ['Token']],
+      ['positions', ['Staked', 'Deposited']],
+    ])
+  })
+
+  it('leaves out a group with nothing in it', () => {
+    expect(groupHoldings([holding({})]).map(({ id }) => id)).toEqual(['tokens'])
   })
 })

@@ -9,7 +9,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import GroupByMenu, { type GroupByOption } from '@safe-global/views/features/spaces/components/SpaceQueue/GroupByMenu'
 import FilterChips from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterChips'
 import NetworkOptions, {
   type NetworkOptionsProps,
@@ -17,14 +16,6 @@ import NetworkOptions, {
 import SafeOptions, {
   type SafeOptionsProps,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SafeOptions'
-import type { AssetsGroupBy } from './types'
-
-const GROUP_BY_OPTIONS: GroupByOption<AssetsGroupBy>[] = [
-  { value: 'type', label: 'Type', hint: 'Tokens apart from positions, each asset summed' },
-  { value: 'asset', label: 'Asset', hint: 'Each asset summed across Safes and networks' },
-  { value: 'safe', label: 'Safe', hint: 'Grouped by Safe account' },
-  { value: 'network', label: 'Network', hint: 'Grouped by network' },
-]
 
 export type SpaceAssetsToolbarProps = {
   safe: SafeOptionsProps
@@ -35,25 +26,22 @@ export type SpaceAssetsToolbarProps = {
   }
   onRemove: (filter: 'safes' | 'chainIds') => void
   onClear: () => void
-  groupBy: { value: AssetsGroupBy; onChange: (value: AssetsGroupBy) => void }
   /** Rendered first, as in the queue's toolbar */
   search?: ReactNode
 }
 
-/** The queue's toolbar for the assets: search, Group by and the Safe account and Network filters, then the chips */
+/** The queue's toolbar for the assets: search and the Safe account and Network filters, then the chips */
 const SpaceAssetsToolbar = ({
   safe,
   network,
   chips,
   onRemove,
   onClear,
-  groupBy,
   search,
 }: SpaceAssetsToolbarProps): ReactElement => (
   <div className="flex flex-col gap-3">
     <div className="flex flex-wrap items-center gap-2">
       {search}
-      <GroupByMenu options={GROUP_BY_OPTIONS} {...groupBy} />
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="outline" />}>
           <ListFilter />

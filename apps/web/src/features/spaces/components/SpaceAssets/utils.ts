@@ -3,7 +3,6 @@ import { getReadablePositionType } from '@safe-global/utils/features/positions'
 import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
-import type { AssetsGroupBy } from '@safe-global/views/features/spaces/components/SpaceAssets/types'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 /** A Space Safe address and the networks it is on, in the Space's sort order */
@@ -159,7 +158,10 @@ export const searchHoldings = (
   })
 }
 
-/** Holdings summed across the Safes, and across the networks when grouped by Safe, so an asset shows once per band */
+/** What one Safe holds of a row's asset, across its networks */
+type SafeShare = { safeAddress: string; chainIds: string[]; amount: number; fiat: number }
+
+/** An asset summed across the Safes and networks that hold it */
 export type HoldingsRow = {
   id: string
   assetKey: string
@@ -169,37 +171,17 @@ export type HoldingsRow = {
   type: string
   protocol?: string
   chainIds: string[]
-  safeAddresses: string[]
+  /** Highest value first */
+  safes: SafeShare[]
   amount: number
   fiat: number
 }
 
 export type HoldingsGroup = {
-  id: string
-  /** The asset key, the Safe address or the chain id */
-  key: string
+  id: 'tokens' | 'positions'
   rows: HoldingsRow[]
   chainIds: string[]
-  amount: number
   fiat: number
-}
-
-const GROUP_KEYS: Record<AssetsGroupBy, (holding: AssetHolding) => string> = {
-  asset: (holding) => holding.assetKey,
-  type: (holding) => (holding.isPosition ? 'positions' : 'tokens'),
-  safe: (holding) => holding.safeAddress.toLowerCase(),
-  network: (holding) => holding.chainId,
-}
-
-// Tokens before positions, as in the totals, whatever their values
-const GROUP_ORDER: Partial<Record<AssetsGroupBy, string[]>> = { type: ['tokens', 'positions'] }
-
-// Tokens and each kind of position stay apart, so staked ETH isn't summed into the wallet's ETH
-const ROW_KEYS: Record<AssetsGroupBy, (holding: AssetHolding) => string> = {
-  asset: (holding) => [holding.chainId, holding.type, holding.protocol ?? ''].join('|'),
-  type: (holding) => [holding.assetKey, holding.type, holding.protocol ?? ''].join('|'),
-  safe: (holding) => [holding.assetKey, holding.type, holding.protocol ?? ''].join('|'),
-  network: (holding) => [holding.assetKey, holding.type, holding.protocol ?? ''].join('|'),
 }
 
 const byKey = <T>(items: T[], keyOf: (item: T) => string): Map<string, T[]> => {
@@ -215,40 +197,48 @@ const sum = (items: AssetHolding[], field: 'amount' | 'fiat') => items.reduce((t
 
 const unique = (values: string[]) => [...new Set(values)]
 
+const toSafeShares = (items: AssetHolding[]): SafeShare[] =>
+  [...byKey(items, (item) => item.safeAddress.toLowerCase()).values()]
+    .map((safeItems) => ({
+      safeAddress: safeItems[0].safeAddress,
+      chainIds: unique(safeItems.map((item) => item.chainId)),
+      amount: sum(safeItems, 'amount'),
+      fiat: sum(safeItems, 'fiat'),
+    }))
+    .sort((a, b) => b.fiat - a.fiat)
+
 const toRow = (id: string, items: AssetHolding[]): HoldingsRow => {
-  const [first] = items
+  const [first] = [...items].sort((a, b) => b.fiat - a.fiat)
   return {
     id,
     assetKey: first.assetKey,
     name: first.name,
     symbol: first.symbol,
-    logoUri: items.find((item) => item.logoUri)?.logoUri,
+    logoUri: first.logoUri ?? items.find((item) => item.logoUri)?.logoUri,
     type: first.type,
     protocol: first.protocol,
     chainIds: unique(items.map((item) => item.chainId)),
-    safeAddresses: unique(items.map((item) => item.safeAddress.toLowerCase())),
+    safes: toSafeShares(items),
     amount: sum(items, 'amount'),
     fiat: sum(items, 'fiat'),
   }
 }
 
-/** Groups the holdings and sums each group's rows, each group and its rows highest value first */
-export const groupHoldings = (holdings: AssetHolding[], groupBy: AssetsGroupBy): HoldingsGroup[] =>
-  [...byKey(holdings, GROUP_KEYS[groupBy]).entries()]
-    .map(([key, items]) => {
-      const id = `${groupBy}:${key}`
+// Tokens and each kind of position stay apart, so staked ETH isn't summed into the wallet's ETH
+const rowKey = (holding: AssetHolding) => [holding.assetKey, holding.type, holding.protocol ?? ''].join('|')
+
+/** Tokens, then positions, each asset summed across Safes and networks, highest value first */
+export const groupHoldings = (holdings: AssetHolding[]): HoldingsGroup[] =>
+  (['tokens', 'positions'] as const)
+    .map((id) => {
+      const items = holdings.filter((holding) => holding.isPosition === (id === 'positions'))
       return {
         id,
-        key,
-        rows: [...byKey(items, ROW_KEYS[groupBy]).entries()]
-          .map(([rowKey, rowItems]) => toRow(`${id}:${rowKey}`, rowItems))
+        rows: [...byKey(items, rowKey).entries()]
+          .map(([key, rowItems]) => toRow(`${id}:${key}`, rowItems))
           .sort((a, b) => b.fiat - a.fiat),
         chainIds: unique(items.map((item) => item.chainId)),
-        amount: sum(items, 'amount'),
         fiat: sum(items, 'fiat'),
       }
     })
-    .sort((a, b) => {
-      const order = GROUP_ORDER[groupBy]
-      return order ? order.indexOf(a.key) - order.indexOf(b.key) : b.fiat - a.fiat
-    })
+    .filter((group) => group.rows.length > 0)

@@ -20,15 +20,17 @@ export type SignersListProps = {
   signers: SignerRow[]
   /** A line under the list, such as why the user can't sign */
   note?: string
+  /** Lists the rows without the signed mark, for a list that isn't about signing */
+  hideStatus?: boolean
 }
 
-const SignerItem = ({ address, name, signed }: SignerRow): ReactElement => (
+const SignerItem = ({ address, name, signed, hideStatus }: SignerRow & { hideStatus?: boolean }): ReactElement => (
   <li
     data-testid="signer-row"
     data-signed={signed}
     className={cn('flex items-center gap-2', !signed && 'text-background/60')}
   >
-    {signed ? (
+    {hideStatus ? null : signed ? (
       <CircleCheck aria-label="Signed" className="size-4 shrink-0 fill-success-strong text-foreground" />
     ) : (
       <Circle aria-label="Not signed" className="size-4 shrink-0 text-background/40" />
@@ -38,7 +40,7 @@ const SignerItem = ({ address, name, signed }: SignerRow): ReactElement => (
   </li>
 )
 
-const SignersList = ({ header, isLoading, signers, note }: SignersListProps): ReactElement => (
+const SignersList = ({ header, isLoading, signers, note, hideStatus }: SignersListProps): ReactElement => (
   <div className="flex flex-col gap-2 py-1">
     <p className="whitespace-nowrap font-medium">{header}</p>
     {isLoading && (
@@ -54,7 +56,7 @@ const SignersList = ({ header, isLoading, signers, note }: SignersListProps): Re
     {signers.length > 0 && (
       <ul className="flex flex-col gap-1.5">
         {signers.slice(0, MAX_SIGNER_ROWS).map((signer) => (
-          <SignerItem key={signer.address} {...signer} />
+          <SignerItem key={signer.address} {...signer} hideStatus={hideStatus} />
         ))}
       </ul>
     )}
