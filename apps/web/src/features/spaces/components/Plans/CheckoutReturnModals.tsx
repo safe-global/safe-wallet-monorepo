@@ -7,6 +7,7 @@ import {
   SafeProSubscriptionActivatedModal,
   SafeProTrialActivatedModal,
 } from '@safe-global/views/features/spaces/components/SafeProModals'
+import { useOverlay } from '@/services/overlay-queue/useOverlay'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'
@@ -35,7 +36,13 @@ export default function CheckoutReturnModals({
   const { plan, seats, refetch } = useSpacePlan(spaceId)
   const checkout = useCheckoutReturn(spaceId)
   const router = useRouter()
+  const isPending = PENDING_STATUSES.includes(checkout.status)
+  const hasFailed = checkout.status === 'timeout' || checkout.status === 'error'
   const isComplete = checkout.status === 'complete'
+  const isShown = useOverlay({
+    kind: 'confirmation',
+    isDue: isPending || hasFailed || (isComplete && Boolean(checkout.subscription)),
+  })
   // A failed return leaves the Workspace as it was, so closing steps out to the Workspaces list.
   const leave = () => void router.push(AppRoutes.welcome.spaces)
 
@@ -43,7 +50,9 @@ export default function CheckoutReturnModals({
     if (isComplete) refetch()
   }, [isComplete]) // eslint-disable-line react-hooks/exhaustive-deps -- refetch is a new function every render
 
-  if (PENDING_STATUSES.includes(checkout.status)) {
+  if (!isShown) return null
+
+  if (isPending) {
     return <SafeProPendingModal title="Confirming your subscription" body="This usually takes a few seconds." />
   }
 

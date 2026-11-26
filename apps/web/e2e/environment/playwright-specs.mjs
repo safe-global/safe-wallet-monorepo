@@ -103,6 +103,7 @@ export const playwrightSpecs = {
   'regression/workspace-address-book.spec.ts': {
     scenarios: ['prepareBasicScenario'],
   },
+  'regression/workspace-tour-after-checkout.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
