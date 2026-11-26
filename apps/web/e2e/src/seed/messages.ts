@@ -1,6 +1,7 @@
 import { hashSafeMessage } from '@safe-global/protocol-kit'
 import type { MessageItem, MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { BaseWallet } from 'ethers'
+import { setTimeout as sleep } from 'node:timers/promises'
 import { addMessageToQueue, confirmMessageInQueue } from '../../environment/scenarios/gateway.mjs'
 import { waitUntil } from '../../environment/scenarios/indexing.mjs'
 import { safeService } from '../../environment/scenarios/safe.mjs'
@@ -32,11 +33,16 @@ export async function confirmPendingMessage(
 ): Promise<string> {
   const context = safeService(env, safeAddress)
   let messageHash = ''
+  let modifiedTimestamp = 0
   await waitUntil(env, `${context.path}/messages`, (page: MessagePage) => {
     const pending = page.results.filter(isMessage).find((item) => item.status === 'NEEDS_CONFIRMATION')
     messageHash = pending?.messageHash ?? ''
+    modifiedTimestamp = pending?.modifiedTimestamp ?? 0
     return !!pending
   })
+  // messagesTag has whole seconds: a signature in the same second as the last change never refreshes an open dialog
+  const nextSecond = (Math.floor(modifiedTimestamp / 1000) + 1) * 1000
+  await sleep(Math.max(0, nextSecond - Date.now()))
   await confirmMessageInQueue(context, messageHash, owner.signingKey.sign(messageHash).serialized)
   return messageHash
 }
