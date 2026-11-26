@@ -15,11 +15,10 @@ const postMessage = (origin: string, data: string) =>
 
 describe('useWhatsNewUpdateListener', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     jest.restoreAllMocks()
   })
 

@@ -352,26 +352,16 @@ describe('TxSigners (Audit Log)', () => {
     expect(await screen.findByText('Copied')).toBeInTheDocument()
   })
 
-  describe('on a fake clock', () => {
-    beforeEach(() => {
-      jest.useFakeTimers({ advanceTimers: false })
-    })
+  it('shows "Copied" when the pointer comes back to the hash button right after copying', async () => {
+    const { user } = renderTxSigners(executedTx(2, 2), {}, renderOnFakeClock)
+    spyOnClipboard()
+    const hashButton = screen.getByTestId('copy-tx-hash-btn')
 
-    afterEach(() => {
-      jest.useRealTimers()
-    })
+    await user.click(hashButton)
+    await user.unhover(hashButton)
+    await user.hover(hashButton)
 
-    it('shows "Copied" when the pointer comes back to the hash button right after copying', async () => {
-      const { user } = renderTxSigners(executedTx(2, 2), {}, renderOnFakeClock)
-      spyOnClipboard()
-      const hashButton = screen.getByTestId('copy-tx-hash-btn')
-
-      await user.click(hashButton)
-      await user.unhover(hashButton)
-      await user.hover(hashButton)
-
-      expect(await screen.findByText('Copied')).toBeInTheDocument()
-    })
+    expect(await screen.findByText('Copied')).toBeInTheDocument()
   })
 
   it('does not render the copy hash button until the transaction has a hash', () => {

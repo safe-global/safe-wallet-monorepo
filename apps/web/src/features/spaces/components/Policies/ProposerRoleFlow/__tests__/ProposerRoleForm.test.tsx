@@ -122,8 +122,6 @@ describe('ProposerRoleForm', () => {
   })
 
   describe('submit gating', () => {
-    afterEach(() => jest.useRealTimers())
-
     it('disables submit until a Safe account is picked', () => {
       renderForm({ defaultValues: { proposer: PROPOSER, name: 'Nicole' } })
 
@@ -234,7 +232,6 @@ describe('ProposerRoleForm', () => {
     })
 
     it('runs the proposer rule on the typed address and blocks submit on its message', async () => {
-      jest.useFakeTimers()
       const validateProposer = jest.fn().mockResolvedValue('Cannot add a signer of this Safe account as proposer')
       const { user } = renderFormOnFakeClock({ safeAccount: treasury.id, validateProposer })
 
@@ -242,7 +239,7 @@ describe('ProposerRoleForm', () => {
       await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
 
       expect(validateProposer).toHaveBeenCalledWith(PROPOSER)
-      expect(screen.getByText('Cannot add a signer of this Safe account as proposer')).toBeInTheDocument()
+      expect(await screen.findByText('Cannot add a signer of this Safe account as proposer')).toBeInTheDocument()
       expect(submitButton()).toBeDisabled()
     })
 
@@ -268,14 +265,13 @@ describe('ProposerRoleForm', () => {
     })
 
     it('re-validates the proposer when the rule itself changes, e.g. once the Safe has loaded', async () => {
-      jest.useFakeTimers()
       const loading = jest.fn().mockResolvedValue('Loading the Safe account details, please wait')
       const loaded = jest.fn().mockResolvedValue(undefined)
       const { user, rerender } = renderFormOnFakeClock({ safeAccount: treasury.id, validateProposer: loading })
 
       await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
       await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
-      expect(screen.getByText('Loading the Safe account details, please wait')).toBeInTheDocument()
+      expect(await screen.findByText('Loading the Safe account details, please wait')).toBeInTheDocument()
       expect(submitButton()).toBeDisabled()
 
       rerender(
@@ -478,7 +474,7 @@ describe('ProposerRoleForm', () => {
       renderForm({ defaultValues: { proposer: PROPOSER } }, { [CHAIN_ID]: { [PROPOSER]: 'Al' } })
 
       await waitFor(() => expect(nameField()).toHaveValue('Al'))
-      expect(screen.getByText('Names must be at least 3 character(s) long')).toBeInTheDocument()
+      expect(await screen.findByText('Names must be at least 3 character(s) long')).toBeInTheDocument()
     })
   })
 
@@ -508,24 +504,19 @@ describe('ProposerRoleForm', () => {
     })
 
     it('is not marked invalid when focus leaves it while still empty', async () => {
-      jest.useFakeTimers()
-      try {
-        renderForm({ safeAccount: treasury.id })
-        const field = proposerField()
+      renderForm({ safeAccount: treasury.id })
+      const field = proposerField()
 
-        fireEvent.focus(field)
-        fireEvent.blur(field)
-        await act(async () => {
-          jest.advanceTimersByTime(200)
-        })
-        await act(async () => {
-          jest.advanceTimersByTime(1000)
-        })
+      fireEvent.focus(field)
+      fireEvent.blur(field)
+      await act(async () => {
+        jest.advanceTimersByTime(200)
+      })
+      await act(async () => {
+        jest.advanceTimersByTime(1000)
+      })
 
-        expect(field).not.toHaveAttribute('aria-invalid')
-      } finally {
-        jest.useRealTimers()
-      }
+      expect(field).not.toHaveAttribute('aria-invalid')
     })
   })
 

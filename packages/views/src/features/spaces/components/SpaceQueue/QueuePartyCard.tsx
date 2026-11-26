@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
-import { ArrowUpRight, BookUser, Check, Copy } from 'lucide-react'
+import NextLink from 'next/link'
+import { ArrowRight, ArrowUpRight, BookUser, Check, Copy } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import QueueHintPopover from './QueueHintPopover'
@@ -18,6 +19,8 @@ export type QueuePartyActions = {
   explorer?: { href: string; label: string }
   /** Set when the user can add the address to the Workspace address book */
   onAddToAddressBook?: () => void
+  /** A Safe's home page, so a keyboard or touch user, whose Enter or tap opens the card, can still open the Safe */
+  safeHref?: string
 }
 
 export type QueuePartyCardProps = QueuePartyActions & {
@@ -37,6 +40,7 @@ export const QueuePartyCard = ({
   onCopy,
   explorer,
   onAddToAddressBook,
+  safeHref,
 }: QueuePartyCardProps): ReactElement => (
   // The card is portalled, but React still bubbles its clicks to the row
   <span className="flex flex-col gap-2.5 py-1" onClick={(event) => event.stopPropagation()}>
@@ -56,6 +60,12 @@ export const QueuePartyCard = ({
         <Button variant="ghost" size="2xs" className={ACTION_CLASS} onClick={onAddToAddressBook}>
           <BookUser strokeWidth={ICON_STROKE} />
           Add to address book
+        </Button>
+      )}
+      {safeHref && (
+        <Button variant="ghost" size="2xs" className={ACTION_CLASS} render={<NextLink href={safeHref} />}>
+          Open Safe
+          <ArrowRight strokeWidth={ICON_STROKE} />
         </Button>
       )}
       {explorer && (

@@ -32,6 +32,7 @@
         "src/**/*.{ts,tsx,js,jsx,json,snap}",
         "jest.config.{js,cjs,mjs,ts}",
         "jest.setup.{js,cjs,mjs,ts}",
+        "jest.clock.{js,cjs,mjs,ts}",
         "package.json",
         "**/*.d.ts"
       ],
