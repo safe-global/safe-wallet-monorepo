@@ -52,11 +52,10 @@ const hover = async (user: ReturnType<typeof renderOnFakeClock>['user'], element
 
 describe('PendingRowAction', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ now: NOW })
+    jest.setSystemTime(NOW)
     mockSpeedUp.mockReturnValue(false)
     mockMonitor.loaded = true
   })
-  afterEach(() => jest.useRealTimers())
 
   it.each<[string, PendingTx, string]>([
     ['Signing', { ...common, status: PendingStatus.SIGNING, signerAddress }, 'Saving your signature.'],
@@ -197,13 +196,11 @@ describe('PendingRowAction', () => {
 })
 
 describe('NonceTakenAction', () => {
-  afterEach(() => jest.useRealTimers())
-
   it.each([
     [TransactionStatus.AWAITING_EXECUTION, 'Execute'],
     [TransactionStatus.AWAITING_CONFIRMATIONS, 'Sign'],
   ])('disables the %s row action, with "Available if #n fails." in a focusable tooltip', async (txStatus, label) => {
-    jest.useFakeTimers({ now: NOW })
+    jest.setSystemTime(NOW)
     const tx = safeTxSummaryBuilder().with({ txStatus }).build()
 
     const { user } = renderOnFakeClock(<NonceTakenAction tx={tx} nonce={42} />)
