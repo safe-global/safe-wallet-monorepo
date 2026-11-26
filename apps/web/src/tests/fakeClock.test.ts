@@ -21,6 +21,20 @@ describe('the global fake clock', () => {
     expect(Date.now() - FAKE_CLOCK_START).toBeLessThan(1_000)
   })
 
+  it('keeps a cookie until its expiry on the fake clock', () => {
+    const inAnHour = new Date(Date.now() + 3_600_000).toUTCString()
+    const anHourAgo = new Date(Date.now() - 3_600_000).toUTCString()
+
+    document.cookie = `kept=1; expires=${inAnHour}; path=/`
+    document.cookie = `expired=1; expires=${anHourAgo}; path=/`
+
+    expect(document.cookie).toContain('kept=1')
+    expect(document.cookie).not.toContain('expired=1')
+
+    document.cookie = `kept=; expires=${anHourAgo}; path=/`
+    expect(document.cookie).not.toContain('kept=1')
+  })
+
   it('runs a queued microtask before a promise that settles after it', async () => {
     const order: string[] = []
 

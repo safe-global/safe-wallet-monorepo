@@ -69,6 +69,21 @@ globalThis.BroadcastChannel = class BroadcastChannel {
   close() {}
 }
 
+// jsdom checks a cookie's expires date against the real date, so a cookie that expires on the fake clock is dropped at once
+if (typeof Document !== 'undefined') {
+  const cookieProperty = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
+  Object.defineProperty(Document.prototype, 'cookie', {
+    ...cookieProperty,
+    set(value) {
+      const withMaxAge = value.replace(
+        /;\s*expires=([^;]*)/i,
+        (_, date) => `; max-age=${Math.round((Date.parse(date) - Date.now()) / 1000)}`,
+      )
+      cookieProperty.set.call(this, withMaxAge)
+    },
+  })
+}
+
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())
