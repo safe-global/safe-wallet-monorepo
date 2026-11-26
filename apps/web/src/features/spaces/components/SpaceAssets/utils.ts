@@ -159,11 +159,26 @@ export const searchHoldings = (
   })
 }
 
+/** Holdings summed across the Safes, and across the networks when grouped by Safe, so an asset shows once per band */
+export type HoldingsRow = {
+  id: string
+  assetKey: string
+  name: string
+  symbol: string
+  logoUri?: string
+  type: string
+  protocol?: string
+  chainIds: string[]
+  safeAddresses: string[]
+  amount: number
+  fiat: number
+}
+
 export type HoldingsGroup = {
   id: string
   /** The asset key, the Safe address or the chain id */
   key: string
-  holdings: AssetHolding[]
+  rows: HoldingsRow[]
   chainIds: string[]
   amount: number
   fiat: number
@@ -171,25 +186,69 @@ export type HoldingsGroup = {
 
 const GROUP_KEYS: Record<AssetsGroupBy, (holding: AssetHolding) => string> = {
   asset: (holding) => holding.assetKey,
+  type: (holding) => (holding.isPosition ? 'positions' : 'tokens'),
   safe: (holding) => holding.safeAddress.toLowerCase(),
   network: (holding) => holding.chainId,
 }
 
-/** Groups the holdings, each group and its holdings highest value first */
-export const groupHoldings = (holdings: AssetHolding[], groupBy: AssetsGroupBy): HoldingsGroup[] => {
-  const groups = new Map<string, AssetHolding[]>()
-  for (const holding of holdings) {
-    const key = GROUP_KEYS[groupBy](holding)
-    groups.set(key, [...(groups.get(key) ?? []), holding])
-  }
-  return [...groups.entries()]
-    .map(([key, items]) => ({
-      id: `${groupBy}:${key}`,
-      key,
-      holdings: [...items].sort((a, b) => b.fiat - a.fiat),
-      chainIds: [...new Set(items.map((item) => item.chainId))],
-      amount: items.reduce((sum, item) => sum + item.amount, 0),
-      fiat: items.reduce((sum, item) => sum + item.fiat, 0),
-    }))
-    .sort((a, b) => b.fiat - a.fiat)
+// Tokens before positions, as in the totals, whatever their values
+const GROUP_ORDER: Partial<Record<AssetsGroupBy, string[]>> = { type: ['tokens', 'positions'] }
+
+// Tokens and each kind of position stay apart, so staked ETH isn't summed into the wallet's ETH
+const ROW_KEYS: Record<AssetsGroupBy, (holding: AssetHolding) => string> = {
+  asset: (holding) => [holding.chainId, holding.type, holding.protocol ?? ''].join('|'),
+  type: (holding) => [holding.assetKey, holding.type, holding.protocol ?? ''].join('|'),
+  safe: (holding) => [holding.assetKey, holding.type, holding.protocol ?? ''].join('|'),
+  network: (holding) => [holding.assetKey, holding.type, holding.protocol ?? ''].join('|'),
 }
+
+const byKey = <T>(items: T[], keyOf: (item: T) => string): Map<string, T[]> => {
+  const map = new Map<string, T[]>()
+  for (const item of items) {
+    const key = keyOf(item)
+    map.set(key, [...(map.get(key) ?? []), item])
+  }
+  return map
+}
+
+const sum = (items: AssetHolding[], field: 'amount' | 'fiat') => items.reduce((total, item) => total + item[field], 0)
+
+const unique = (values: string[]) => [...new Set(values)]
+
+const toRow = (id: string, items: AssetHolding[]): HoldingsRow => {
+  const [first] = items
+  return {
+    id,
+    assetKey: first.assetKey,
+    name: first.name,
+    symbol: first.symbol,
+    logoUri: items.find((item) => item.logoUri)?.logoUri,
+    type: first.type,
+    protocol: first.protocol,
+    chainIds: unique(items.map((item) => item.chainId)),
+    safeAddresses: unique(items.map((item) => item.safeAddress.toLowerCase())),
+    amount: sum(items, 'amount'),
+    fiat: sum(items, 'fiat'),
+  }
+}
+
+/** Groups the holdings and sums each group's rows, each group and its rows highest value first */
+export const groupHoldings = (holdings: AssetHolding[], groupBy: AssetsGroupBy): HoldingsGroup[] =>
+  [...byKey(holdings, GROUP_KEYS[groupBy]).entries()]
+    .map(([key, items]) => {
+      const id = `${groupBy}:${key}`
+      return {
+        id,
+        key,
+        rows: [...byKey(items, ROW_KEYS[groupBy]).entries()]
+          .map(([rowKey, rowItems]) => toRow(`${id}:${rowKey}`, rowItems))
+          .sort((a, b) => b.fiat - a.fiat),
+        chainIds: unique(items.map((item) => item.chainId)),
+        amount: sum(items, 'amount'),
+        fiat: sum(items, 'fiat'),
+      }
+    })
+    .sort((a, b) => {
+      const order = GROUP_ORDER[groupBy]
+      return order ? order.indexOf(a.key) - order.indexOf(b.key) : b.fiat - a.fiat
+    })

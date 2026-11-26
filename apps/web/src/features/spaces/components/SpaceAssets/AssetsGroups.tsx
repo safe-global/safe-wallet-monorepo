@@ -1,4 +1,5 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react'
+import { Coins, Layers } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { formatAmount, formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import Identicon from '@safe-global/views/components/common/Identicon'
@@ -12,7 +13,7 @@ import useChains from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { toChainInfos } from '../../utils'
-import type { AssetHolding, HoldingsGroup } from './utils'
+import type { HoldingsGroup, HoldingsRow } from './utils'
 
 type Band = { logo: ReactNode; title: string; subtitle?: string; chains: ChainInfo[]; balance?: string }
 type Row = { logo: ReactNode; title: string; subtitle: string }
@@ -32,11 +33,17 @@ const AssetsGroups = ({ groups, groupBy, isCollapsed, onToggle }: AssetsGroupsPr
   const chainOf = (chainId: string) => toChainInfos([chainId], configs)[0]
   const safeName = (address: string, chainId: string) => getName(address, chainId) || shortenAddress(address)
   const safeLogo = (address: string) => <Identicon address={address} size={32} />
-  const assetLogo = (holding: AssetHolding) => <AssetLogo src={holding.logoUri} label={holding.symbol} />
+  const assetLogo = (item: { logoUri?: string; symbol: string }) => <AssetLogo src={item.logoUri} label={item.symbol} />
   const details = (...parts: Array<string | undefined>) => parts.filter(Boolean).join(' · ')
+  const safesLabel = (row: HoldingsRow) =>
+    row.safeAddresses.length === 1
+      ? safeName(row.safeAddresses[0], row.chainIds[0])
+      : `${row.safeAddresses.length} Safe accounts`
+  const networksLabel = (row: HoldingsRow) =>
+    row.chainIds.length === 1 ? chainOf(row.chainIds[0]).chainName : `${row.chainIds.length} networks`
 
   const toBand = (group: HoldingsGroup): Band => {
-    const first = group.holdings[0]
+    const [first] = group.rows
     const chains = group.chainIds.map(chainOf)
     if (groupBy === 'asset') {
       return {
@@ -47,42 +54,41 @@ const AssetsGroups = ({ groups, groupBy, isCollapsed, onToggle }: AssetsGroupsPr
         balance: `${formatAmount(group.amount)} ${first.symbol}`,
       }
     }
-    if (groupBy === 'safe') {
+    if (groupBy === 'type') {
+      const isPositions = group.key === 'positions'
       return {
-        logo: safeLogo(first.safeAddress),
-        title: safeName(first.safeAddress, first.chainId),
-        subtitle: shortenAddress(first.safeAddress),
+        logo: (
+          <span className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            {isPositions ? <Layers className="size-4" /> : <Coins className="size-4" />}
+          </span>
+        ),
+        title: isPositions ? 'Positions' : 'Tokens',
         chains,
       }
     }
-    return {
-      logo: <ChainLogo chain={chainOf(first.chainId)} size="md" />,
-      title: chainOf(first.chainId).chainName,
-      chains: [],
-    }
-  }
-
-  const toRow = (holding: AssetHolding): Row => {
-    const chainName = chainOf(holding.chainId).chainName
-    if (groupBy === 'asset') {
-      return {
-        logo: safeLogo(holding.safeAddress),
-        title: safeName(holding.safeAddress, holding.chainId),
-        subtitle: details(chainName, holding.protocol),
-      }
-    }
     if (groupBy === 'safe') {
       return {
-        logo: assetLogo(holding),
-        title: holding.name,
-        subtitle: details(holding.symbol, holding.protocol, chainName),
+        logo: safeLogo(group.key),
+        title: safeName(group.key, group.chainIds[0]),
+        subtitle: shortenAddress(group.key),
+        chains,
       }
     }
-    return {
-      logo: assetLogo(holding),
-      title: holding.name,
-      subtitle: details(holding.symbol, holding.protocol, safeName(holding.safeAddress, holding.chainId)),
+    const chain = chainOf(group.key)
+    return { logo: <ChainLogo chain={chain} size="md" />, title: chain.chainName, chains: [] }
+  }
+
+  const toRow = (row: HoldingsRow): Row => {
+    if (groupBy === 'asset') {
+      const chain = chainOf(row.chainIds[0])
+      return {
+        logo: <ChainLogo chain={chain} size="md" />,
+        title: chain.chainName,
+        subtitle: details(safesLabel(row), row.protocol),
+      }
     }
+    const spread = groupBy === 'network' ? safesLabel(row) : networksLabel(row)
+    return { logo: assetLogo(row), title: row.name, subtitle: details(row.symbol, row.protocol, spread) }
   }
 
   return (
@@ -98,13 +104,13 @@ const AssetsGroups = ({ groups, groupBy, isCollapsed, onToggle }: AssetsGroupsPr
               onToggle={() => onToggle(group.id)}
             />
             {!collapsed &&
-              group.holdings.map((holding) => (
+              group.rows.map((row) => (
                 <AssetHoldingRow
-                  key={holding.id}
-                  {...toRow(holding)}
-                  type={holding.type}
-                  balance={`${formatAmount(holding.amount)} ${holding.symbol}`}
-                  value={formatCurrency(holding.fiat, currency)}
+                  key={row.id}
+                  {...toRow(row)}
+                  type={row.type}
+                  balance={`${formatAmount(row.amount)} ${row.symbol}`}
+                  value={formatCurrency(row.fiat, currency)}
                 />
               ))}
           </Fragment>

@@ -40,10 +40,11 @@ import {
 
 const LOAD_BATCH_SIZE = 3
 const LOAD_BATCH_DELAY_MS = 300
-const DEFAULT_GROUP_BY: AssetsGroupBy = 'asset'
+const DEFAULT_GROUP_BY: AssetsGroupBy = 'type'
 
 const COLLAPSE_UNITS: Record<AssetsGroupBy, [string, string]> = {
   asset: ['asset', 'assets'],
+  type: ['type', 'types'],
   safe: ['Safe', 'Safes'],
   network: ['network', 'networks'],
 }
@@ -196,7 +197,7 @@ const SpaceAssets = (): ReactElement => {
           <SpaceAssetsTable
             panelRef={setPanel}
             scrollsX={scrollsX}
-            firstColumn={groupBy === 'asset' ? 'Safe account' : 'Asset'}
+            firstColumn={groupBy === 'asset' ? 'Network' : 'Asset'}
             collapseAll={
               groups.length > 0
                 ? { allCollapsed, count: groups.length, unit: COLLAPSE_UNITS[groupBy], onToggle: toggleAll }

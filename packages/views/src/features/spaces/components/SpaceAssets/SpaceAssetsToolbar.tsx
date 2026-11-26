@@ -20,6 +20,7 @@ import SafeOptions, {
 import type { AssetsGroupBy } from './types'
 
 const GROUP_BY_OPTIONS: GroupByOption<AssetsGroupBy>[] = [
+  { value: 'type', label: 'Type', hint: 'Tokens apart from positions, each asset summed' },
   { value: 'asset', label: 'Asset', hint: 'Each asset summed across Safes and networks' },
   { value: 'safe', label: 'Safe', hint: 'Grouped by Safe account' },
   { value: 'network', label: 'Network', hint: 'Grouped by network' },
