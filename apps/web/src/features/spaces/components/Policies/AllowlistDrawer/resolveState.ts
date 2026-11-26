@@ -1,9 +1,7 @@
 import type {
   AllowlistPolicy,
   AllowlistScheduledChange,
-  FailedAllowlistPolicy,
   PendingAllowlistPolicy,
-  QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import type {
   ActiveDrawerState,
@@ -43,6 +41,7 @@ import {
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 import { POLICY_CHANGE_DELAY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { getAllowlistOutcome } from '../utils/allowlistStatus'
 
 /** The request executed and waits out the guard's delay: the apply button stays disabled until then. */
 export type ScheduledDrawerState = {
@@ -103,17 +102,7 @@ export type AllowlistDrawerState =
 
 export type ActiveAllowlistPolicy = AllowlistPolicy & { status: 'active' }
 
-export type AllowlistDrawerPolicy = ActiveAllowlistPolicy | QueuedAllowlistPolicy | FailedAllowlistPolicy
-
-/** The outcome a row carries on its own: a failed status, or a pending one whose signing window has closed. */
-export const inferAllowlistOutcome = (policy: AllowlistDrawerPolicy, nowMs: number): AllowlistTxOutcome | undefined => {
-  if (policy.status === 'failed') return 'failed'
-  if (policy.status === 'pending' && policy.expiresAt !== undefined && policy.expiresAt * 1_000 <= nowMs) {
-    return 'expired'
-  }
-
-  return undefined
-}
+export type AllowlistDrawerPolicy = ActiveAllowlistPolicy | PendingAllowlistPolicy
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
   if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
@@ -170,7 +159,7 @@ const resolveScheduled = (
 }
 
 const resolvePending = (
-  policy: QueuedAllowlistPolicy,
+  policy: PendingAllowlistPolicy,
   viewer: Viewer,
   safeName: string,
   isBehindLowerNonce: boolean,
@@ -241,13 +230,12 @@ export const resolveAllowlistDrawerState = (
   policy: AllowlistDrawerPolicy,
   viewer: Viewer,
   safeName: string,
-  outcome: AllowlistTxOutcome | undefined = inferAllowlistOutcome(policy, Date.now()),
+  outcome: AllowlistTxOutcome | undefined = getAllowlistOutcome(policy, Date.now()),
   nowMs: number = Date.now(),
   changeDelay: string = POLICY_CHANGE_DELAY,
   isBehindLowerNonce = false,
 ): AllowlistDrawerState => {
-  if (policy.status === 'failed') return resolveClosed(policy, outcome ?? 'failed', changeDelay)
-  if (policy.status === 'pending') {
+  if (policy.status !== 'active') {
     return outcome
       ? resolveClosed(policy, outcome, changeDelay)
       : resolvePending(policy, viewer, safeName, isBehindLowerNonce)

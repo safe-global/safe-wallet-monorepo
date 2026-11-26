@@ -1,9 +1,10 @@
+import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { POLICY_GUARD_DELAY_SECONDS } from '@safe-global/utils/features/policy-guard/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { chainBuilder } from '@/tests/builders/chains'
-import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { MOCK_ADDRESSES, MOCK_TOKENS, MOCK_VIEWERS } from '../../../../public/utils/policies'
 import {
   mockActiveAllowlist,
@@ -19,6 +20,7 @@ import {
   mockPendingAllowlistEdit,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
+  mockProcessingAllowlist,
   mockUnenforcedAllowlist,
 } from '../../../../public/utils/allowlistPolicies'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
@@ -401,9 +403,7 @@ describe('AllowlistDrawer', () => {
   it('should say the delay of the installed guard, when it differs from the configured one', () => {
     mockGuardDelay.mockReturnValue(600)
 
-    render(
-      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="executed" />,
-    )
+    render(<AllowlistDrawer {...SHARED} policy={mockProcessingAllowlist()} viewer={MOCK_VIEWERS.signer} />)
 
     expect(
       screen.getByText('After 10 minutes, a second transaction needs to be executed to activate the allowlist.'),
@@ -411,9 +411,7 @@ describe('AllowlistDrawer', () => {
   })
 
   it('says an executed transaction applies after the delay, shows its change as processing and offers no action', () => {
-    render(
-      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="executed" />,
-    )
+    render(<AllowlistDrawer {...SHARED} policy={mockProcessingAllowlist()} viewer={MOCK_VIEWERS.signer} />)
 
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
     expect(
@@ -434,22 +432,26 @@ describe('AllowlistDrawer', () => {
   })
 
   it('reports a failed transaction in red and marks the policy as failed', () => {
-    render(
-      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome="failed" />,
-    )
+    render(<AllowlistDrawer {...SHARED} policy={mockFailedAllowlist()} viewer={MOCK_VIEWERS.signer} />)
 
     expect(screen.getByRole('alert')).toHaveTextContent('The transaction failed and can no longer be executed.')
     expect(screen.getByText('Close this panel to see the current policies.')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it.each([
     ['replaced', 'Another transaction used this nonce, so this one can no longer be executed.'],
     ['deleted', 'The transaction was deleted.'],
-  ] as const)('reports a %s transaction in red and marks the policy as failed', (outcome, title) => {
+  ] as const)('reports a %s transaction in red and marks the policy as failed', (reason, title) => {
     render(
-      <AllowlistDrawer {...SHARED} policy={mockPendingAllowlist()} viewer={MOCK_VIEWERS.signer} outcome={outcome} />,
+      <AllowlistDrawer
+        {...SHARED}
+        policy={mockFailedAllowlist()}
+        viewer={MOCK_VIEWERS.signer}
+        failureReason={reason}
+      />,
     )
 
     expect(screen.getByRole('alert')).toHaveTextContent(title)
@@ -458,13 +460,13 @@ describe('AllowlistDrawer', () => {
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
-  it('closes an expired transaction with no chip and no action', () => {
+  it('should, when the signing window closed, close the transaction with the expired tags and no action', () => {
     setup(mockExpiredPendingAllowlist())
 
     expect(screen.getByText('Transaction expired')).toBeInTheDocument()
     expect(screen.getByText('It can no longer be signed. Set up the allowlist again to retry.')).toBeInTheDocument()
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
-    expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-edit-expired')).toHaveTextContent('Expired')
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
@@ -472,9 +474,8 @@ describe('AllowlistDrawer', () => {
     render(
       <AllowlistDrawer
         {...SHARED}
-        policy={mockPendingAllowlistRemoval()}
+        policy={mockProcessingAllowlist({ operation: 'remove' })}
         viewer={MOCK_VIEWERS.signer}
-        outcome="executed"
       />,
     )
 
@@ -667,15 +668,6 @@ describe('AllowlistDrawer', () => {
     expect(screen.queryByText('Time to sign')).not.toBeInTheDocument()
   })
 
-  it('shows a failed row from the table as failed without an outcome passed in', () => {
-    render(<AllowlistDrawer {...SHARED} policy={mockFailedAllowlist()} viewer={MOCK_VIEWERS.signer} />)
-
-    expect(screen.getByRole('alert')).toHaveTextContent('The transaction failed and can no longer be executed.')
-    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
-    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
-  })
-
   it('should disable Remove, when no removal flow is passed in', () => {
     render(<AllowlistDrawer {...SHARED} policy={mockActiveAllowlist()} viewer={MOCK_VIEWERS.signer} />)
 
@@ -707,17 +699,28 @@ describe('AllowlistDrawer', () => {
     expect(onRemoveGuard).toHaveBeenCalledTimes(1)
   })
 
-  it("should, when an applied removal waits for the guard to come off, count none of the Safe's signatures in the status", () => {
-    render(
-      <AllowlistDrawer
-        {...SHARED}
-        policy={mockAllowlistAwaitingGuardRemoval()}
-        viewer={MOCK_VIEWERS.signer}
-        signatures={{ threshold: 2, owners: 3 }}
-      />,
+  it("should, when an applied removal waits for the guard to come off, count none of the Safe's signatures in the status", async () => {
+    const policy = mockAllowlistAwaitingGuardRemoval()
+    server.use(
+      http.get(`${GATEWAY_URL}/v2/safes`, () =>
+        HttpResponse.json([
+          {
+            address: { value: policy.safe.address },
+            chainId: policy.safe.chainId,
+            threshold: 2,
+            owners: [{ value: faker.finance.ethereumAddress() }, { value: faker.finance.ethereumAddress() }],
+            fiatTotal: '0',
+            queued: 0,
+          },
+        ]),
+      ),
     )
 
-    expect(screen.getByTestId('policy-status-guard-removal-pending')).toHaveTextContent('Pending · 0/2')
+    render(<AllowlistDrawer {...SHARED} policy={policy} viewer={MOCK_VIEWERS.signer} />)
+
+    await waitFor(() =>
+      expect(screen.getByTestId('policy-status-guard-removal-pending')).toHaveTextContent('Pending · 0/2'),
+    )
   })
 
   it('should disable Remove guard and say why, when the wallet is not a signer', () => {

@@ -10,6 +10,7 @@ import {
   FAILED_TOOLTIP,
   GUARD_REMOVAL_TOOLTIP,
   PROCESSING_TOOLTIP,
+  SIGNING_EXPIRED_TOOLTIP,
   awaitingSignaturesTooltip,
   executeByTooltip,
   formatAllowlistStatus,
@@ -20,6 +21,7 @@ import {
   type AllowlistState,
   type AllowlistStatusBadge,
 } from '@safe-global/views/features/spaces/components/Policies/allowlistStatus'
+import type { AllowlistTxOutcome } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
 
 export type AllowlistRow = Extract<Policy, { type: 'allowlist' }>
 
@@ -59,12 +61,21 @@ const changeStatesOf = (operation: PendingAllowlistPolicy['operation']): ChangeS
 const isFullySigned = (policy: PendingAllowlistPolicy): boolean =>
   policy.confirmationsSubmitted >= policy.confirmationsRequired
 
-const resolveQueued = (policy: PendingAllowlistPolicy): AllowlistState => {
+/** A queued request or apply whose window has closed: it can no longer be signed or executed. */
+export const isQueuedTxExpired = (policy: AllowlistRow, nowMs: number): boolean =>
+  policy.status === 'pending' &&
+  !policy.appliesOnExecution &&
+  policy.step !== 'remove-guard' &&
+  policy.expiresAt !== undefined &&
+  policy.expiresAt * 1_000 <= nowMs
+
+const resolveQueued = (policy: PendingAllowlistPolicy, nowMs: number): AllowlistState => {
   const isSigned = isFullySigned(policy)
   if (policy.appliesOnExecution) return isSigned ? 'setup-ready-to-execute' : 'setup-pending'
   if (policy.step === 'remove-guard') return isSigned ? 'guard-removal-ready-to-execute' : 'guard-removal-pending'
 
   const states = changeStatesOf(policy.operation)
+  if (isQueuedTxExpired(policy, nowMs)) return states.expired
   if (policy.step === 'apply') return isSigned ? states.applyReadyToExecute : states.applyPending
 
   return isSigned ? states.readyToExecute : states.pending
@@ -81,7 +92,7 @@ const resolveScheduled = ({ operation, appliesAt, expiresAt }: AllowlistSchedule
 export const resolveAllowlistState = (policy: AllowlistRow, nowMs: number): AllowlistState => {
   if (policy.status === 'activating') return 'processing'
   if (policy.status === 'failed') return 'failed'
-  if (policy.status !== 'active') return resolveQueued(policy)
+  if (policy.status !== 'active') return resolveQueued(policy, nowMs)
   if (policy.awaitingGuardRemoval) return 'guard-removal-pending'
   if (policy.scheduledChange) return resolveScheduled(policy.scheduledChange, nowMs)
 
@@ -100,21 +111,55 @@ export const resolveAllowlistChange = (policy: AllowlistRow): AllowlistChange | 
   return delayedChangeOf(policy.operation)
 }
 
+// Executed reads Processing until CGW serves it; replaced and deleted can never execute, so they read Failed.
+const OUTCOME_STATUS: Record<AllowlistTxOutcome, 'activating' | 'failed' | undefined> = {
+  executed: 'activating',
+  failed: 'failed',
+  replaced: 'failed',
+  deleted: 'failed',
+  // The row's own expiresAt tells it.
+  expired: undefined,
+}
+
+/** The row as its transaction's outcome leaves it. */
+export const applyTxOutcome = (
+  policy: PendingAllowlistPolicy,
+  outcome: AllowlistTxOutcome | undefined,
+): PendingAllowlistPolicy => {
+  const status = outcome && OUTCOME_STATUS[outcome]
+
+  return status && status !== policy.status ? { ...policy, status } : policy
+}
+
+/** How the row's transaction closed. `failureReason`, read from the transaction, only says why a failed one failed. */
+export const getAllowlistOutcome = (
+  policy: AllowlistRow,
+  nowMs: number,
+  failureReason?: Extract<AllowlistTxOutcome, 'replaced' | 'deleted'>,
+): AllowlistTxOutcome | undefined => {
+  if (policy.status === 'activating') return 'executed'
+  if (policy.status === 'failed') return failureReason ?? 'failed'
+
+  return isQueuedTxExpired(policy, nowMs) ? 'expired' : undefined
+}
+
+const getQueuedTooltip = (policy: PendingAllowlistPolicy, state: AllowlistState): string => {
+  if (state === 'edit-expired' || state === 'removal-expired') return SIGNING_EXPIRED_TOOLTIP
+
+  const waitingFor = isFullySigned(policy)
+    ? AWAITING_EXECUTION_TOOLTIP
+    : awaitingSignaturesTooltip({ signed: policy.confirmationsSubmitted, required: policy.confirmationsRequired })
+  if (policy.step === 'apply' && policy.expiresAt !== undefined) {
+    return `${waitingFor} ${executeByTooltip(policy.expiresAt)}`
+  }
+
+  return waitingFor
+}
+
 const getTooltip = (policy: AllowlistRow, state: AllowlistState, nowMs: number): string | undefined => {
   if (state === 'processing') return PROCESSING_TOOLTIP
   if (state === 'failed') return FAILED_TOOLTIP
-
-  if (policy.status === 'pending') {
-    const waitingFor = isFullySigned(policy)
-      ? AWAITING_EXECUTION_TOOLTIP
-      : awaitingSignaturesTooltip({ signed: policy.confirmationsSubmitted, required: policy.confirmationsRequired })
-    if (policy.step === 'apply' && policy.expiresAt !== undefined) {
-      return `${waitingFor} ${executeByTooltip(policy.expiresAt)}`
-    }
-
-    return waitingFor
-  }
-
+  if (policy.status === 'pending') return getQueuedTooltip(policy, state)
   if (policy.status !== 'active') return undefined
   if (state === 'guard-removal-pending') return GUARD_REMOVAL_TOOLTIP
 
@@ -129,8 +174,9 @@ const getTooltip = (policy: AllowlistRow, state: AllowlistState, nowMs: number):
 }
 
 /**
- * The allowlist's status as the table and the panel show it. `threshold` gives the guard removal that no transaction
- * holds yet the number of signatures it will need.
+ * The allowlist's status: the one source for the table and the panel, which both read it through
+ * `useAllowlistStatus`. `threshold` gives the guard removal that no transaction holds yet the number of signatures it
+ * will need.
  */
 export const getAllowlistStatus = (policy: AllowlistRow, nowMs: number, threshold?: number): AllowlistStatusBadge => {
   const state = resolveAllowlistState(policy, nowMs)

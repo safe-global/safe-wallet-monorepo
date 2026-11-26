@@ -10,9 +10,10 @@ import {
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
+  mockProcessingAllowlist,
   mockUnenforcedAllowlist,
 } from '../../../../public/utils/allowlistPolicies'
-import { inferAllowlistOutcome, resolveAllowlistDrawerState } from '../resolveState'
+import { resolveAllowlistDrawerState } from '../resolveState'
 
 describe('resolveAllowlistDrawerState', () => {
   it('should let a signer manage an active allowlist', () => {
@@ -371,29 +372,19 @@ describe('resolveAllowlistDrawerState', () => {
     })
   })
 
+  it('should, when the row is processing, report its transaction as executed without an outcome passed in', () => {
+    expect(resolveAllowlistDrawerState(mockProcessingAllowlist(), MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
+      kind: 'closed',
+      action: 'none',
+      bannerTitle: 'The transaction was executed.',
+    })
+  })
+
   it('should close an expired pending transaction without an outcome passed in', () => {
     expect(resolveAllowlistDrawerState(mockExpiredPendingAllowlist(), MOCK_VIEWERS.signer, 'Payroll')).toMatchObject({
       kind: 'closed',
       action: 'none',
       bannerTitle: 'Transaction expired',
     })
-  })
-})
-
-describe('inferAllowlistOutcome', () => {
-  const NOW_MS = 1_792_584_000_000
-
-  it('should read a failed status as failed', () => {
-    expect(inferAllowlistOutcome(mockFailedAllowlist(), NOW_MS)).toBe('failed')
-  })
-
-  it('should read a pending transaction as expired once its signing window has closed', () => {
-    expect(inferAllowlistOutcome(mockPendingAllowlist({ expiresAt: NOW_MS / 1_000 }), NOW_MS)).toBe('expired')
-  })
-
-  it('should infer nothing while the signing window is open or unknown', () => {
-    expect(inferAllowlistOutcome(mockPendingAllowlist({ expiresAt: NOW_MS / 1_000 + 1 }), NOW_MS)).toBeUndefined()
-    expect(inferAllowlistOutcome(mockPendingAllowlist({ expiresAt: undefined }), NOW_MS)).toBeUndefined()
-    expect(inferAllowlistOutcome(mockActiveAllowlist(), NOW_MS)).toBeUndefined()
   })
 })

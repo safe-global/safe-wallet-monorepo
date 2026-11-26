@@ -20,6 +20,8 @@ import {
 } from '../../mocks/activePolicies'
 import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_SAFES, MOCK_TOKENS, mockActivatingPolicy } from '../../../../public/utils/policies'
+import { getPendingTxId } from '../../utils/mapPendingPolicies'
+import type { QueuedTxSignals } from '../useQueuedTxSignals'
 import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
@@ -28,6 +30,7 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockPoliciesQuery = jest.fn()
 const mockPendingQuery = jest.fn()
 const mockUseActivatingPolicies = jest.fn()
+const mockUseQueuedTxSignals = jest.fn()
 let mockIsAuthenticated = true
 
 const sepolia = chainBuilder()
@@ -65,6 +68,17 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('../useActivatingPolicies', () => ({
   useActivatingPolicies: (...args: unknown[]) => mockUseActivatingPolicies(...args),
 }))
+
+jest.mock('../useQueuedTxSignals', () => ({
+  useQueuedTxSignals: (...args: unknown[]) => mockUseQueuedTxSignals(...args),
+}))
+
+const NO_SIGNALS: QueuedTxSignals = {
+  executed: new Set(),
+  failed: new Set(),
+  leftQueue: new Set(),
+  confirmations: new Map(),
+}
 
 const mockQueuedGuardSetup = (
   status: PendingImmediateGuardPoliciesDto['status'],
@@ -105,6 +119,7 @@ describe('useSpacePolicies', () => {
     mockPoliciesQuery.mockReturnValue(idle)
     mockPendingQuery.mockReturnValue(idle)
     mockUseActivatingPolicies.mockReturnValue([])
+    mockUseQueuedTxSignals.mockReturnValue(NO_SIGNALS)
   })
 
   it('should, when signed in with a space, ask for the types the table renders', () => {
@@ -289,7 +304,57 @@ describe('useSpacePolicies', () => {
       refetch: expect.any(Function),
       resetKey: SPACE_ID,
       enabled: false,
+      signals: NO_SIGNALS,
     })
+  })
+
+  it('should read the transaction signals of the queued rows of the space', () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto()] })
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockUseQueuedTxSignals).toHaveBeenLastCalledWith([expect.objectContaining({ status: 'pending' })], SPACE_ID)
+  })
+
+  it('should, while an executed change waits for CGW to serve it, poll both queries', () => {
+    mockUseActivatingPolicies.mockReturnValue([mockActivatingPolicy()])
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPoliciesQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true }),
+    )
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true }),
+    )
+  })
+
+  it('should, once no executed change waits any more, stop polling the active policies', () => {
+    mockUseActivatingPolicies.mockReturnValue([mockActivatingPolicy()])
+    const { rerender } = renderHook(() => useSpacePolicies())
+
+    mockUseActivatingPolicies.mockReturnValue([])
+    rerender()
+    rerender()
+
+    expect(mockPoliciesQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: 0 }),
+    )
+  })
+
+  it("should, when CGW's details of a queued transaction count more signatures than the pending policies, show that count", () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto({ confirmations: 1 })] })
+    const { result: before } = renderHook(() => useSpacePolicies())
+    const [queued] = before.current.policies
+    if (queued.status !== 'pending') throw new Error('expected a queued row')
+    mockUseQueuedTxSignals.mockReturnValue({ ...NO_SIGNALS, confirmations: new Map([[getPendingTxId(queued), 2]]) })
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.policies).toEqual([expect.objectContaining({ confirmationsSubmitted: 2 })])
   })
 
   it('should, while rows are held, refetch both the active and the pending policies', () => {
@@ -444,6 +509,19 @@ describe('useSpacePolicies', () => {
       const { result } = renderHook(() => useSpacePolicies())
 
       expect(result.current.policies).toEqual([held])
+    })
+
+    it("should, when CGW's details say a queued setup failed, show its row as failed", () => {
+      const setup = mockQueuedGuardSetup('ready')
+      mockPendingQuery.mockReturnValue({ ...idle, currentData: [setup] })
+      const { result: before } = renderHook(() => useSpacePolicies())
+      const [queued] = before.current.policies
+      if (queued.status !== 'pending') throw new Error('expected a queued row')
+      mockUseQueuedTxSignals.mockReturnValue({ ...NO_SIGNALS, failed: new Set([getPendingTxId(queued)]) })
+
+      const { result } = renderHook(() => useSpacePolicies())
+
+      expect(result.current.policies).toEqual([{ ...queued, status: 'failed' }])
     })
 
     it("should, when a queued transaction takes the guard off both slots, show it on the allowlist's row", () => {

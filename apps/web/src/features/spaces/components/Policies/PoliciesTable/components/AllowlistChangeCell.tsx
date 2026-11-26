@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react'
 import AllowlistChangeChip from '@safe-global/views/features/spaces/components/Policies/components/AllowlistChangeChip'
-import { getAllowlistStatus, type AllowlistRow } from '../../utils/allowlistStatus'
+import type { AllowlistRow } from '../../utils/allowlistStatus'
+import { useAllowlistStatus } from '../../hooks/useAllowlistStatus'
 
 const AllowlistChangeCell = ({ policy }: { policy: AllowlistRow }): ReactElement | null => {
-  const { change, variant } = getAllowlistStatus(policy, Date.now())
+  const { change, variant } = useAllowlistStatus(policy)
 
   return change ? <AllowlistChangeChip change={change} variant={variant} /> : null
 }

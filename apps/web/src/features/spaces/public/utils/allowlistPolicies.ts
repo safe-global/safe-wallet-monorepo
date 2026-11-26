@@ -5,6 +5,7 @@ import {
   type AllowlistPolicy,
   type AllowlistRecipient,
   type FailedAllowlistPolicy,
+  type PendingAllowlistPolicy,
   type PolicyTokenInfo,
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -217,6 +218,14 @@ export const mockAllowlistAwaitingGuardRemoval = (): AllowlistPolicy & { status:
       awaitingGuardRemoval: true,
     }),
   )
+
+/** Executed, and CGW does not serve the change yet. */
+export const mockProcessingAllowlist = (overrides: Partial<PendingAllowlistPolicy> = {}): PendingAllowlistPolicy => ({
+  ...mockFullySignedPendingAllowlist(),
+  id: '0xallowlist-processing',
+  status: 'activating',
+  ...overrides,
+})
 
 /** Executed but reverted: nothing changed on the Safe. */
 export const mockFailedAllowlist = (): FailedAllowlistPolicy => ({

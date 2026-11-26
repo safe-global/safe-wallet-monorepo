@@ -17,9 +17,11 @@ import {
 import {
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockExpiredPendingAllowlist,
   mockFailedAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistUpdate,
+  mockProcessingAllowlist,
 } from '../../../../public/utils/allowlistPolicies'
 import PoliciesTable from '../index'
 
@@ -167,7 +169,7 @@ describe('PoliciesTable', () => {
     expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
     expect(screen.getByTestId('policy-status-edit-in-delay')).toHaveTextContent('In delay')
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent(
-      /^Can be applied in (1 day|23 hours 5[89] minutes), from .+ UTC\. Expires on .+ UTC\.$/,
+      /^Can be applied in (1 day|23 hours 5[7-9] minutes), from .+ UTC\. Expires on .+ UTC\.$/,
     )
   })
 
@@ -188,6 +190,20 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[mockFailedAllowlist()]} />)
 
     expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
+  })
+
+  it('should, when an allowlist setup executed and CGW does not serve it yet, show setup and processing', () => {
+    render(<PoliciesTable policies={[mockProcessingAllowlist({ appliesOnExecution: true })]} />)
+
+    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Setup')
+    expect(screen.getByTestId('policy-status-processing')).toHaveTextContent('Processing')
+  })
+
+  it('should, when the signing window of a queued allowlist edit closed, show edit and expired', () => {
+    render(<PoliciesTable policies={[mockExpiredPendingAllowlist()]} />)
+
+    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(screen.getByTestId('policy-status-edit-expired')).toHaveTextContent('Expired')
   })
 
   it('should, when the policy is an allowlist, show its label, recipient count and tokens', () => {

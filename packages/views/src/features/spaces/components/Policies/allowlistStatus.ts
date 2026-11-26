@@ -119,6 +119,8 @@ export const readyToApplyTooltip = (expiresAt: number | undefined): string =>
 
 export const EXPIRED_TOOLTIP = 'It was not applied in time. The current rules stay in force.'
 
+export const SIGNING_EXPIRED_TOOLTIP = 'It can no longer be signed. The current rules stay in force.'
+
 export const GUARD_REMOVAL_TOOLTIP =
   "Waiting for a signer to remove the guard. Until then, this Safe account can't send anything."
 

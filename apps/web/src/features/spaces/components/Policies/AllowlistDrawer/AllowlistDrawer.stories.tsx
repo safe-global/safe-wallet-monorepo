@@ -18,6 +18,7 @@ import {
   mockPendingAllowlistEdit,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
+  mockProcessingAllowlist,
 } from '../../../public/utils/allowlistPolicies'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import AllowlistDrawer from './AllowlistDrawer'
@@ -118,19 +119,19 @@ export const PendingRemoval: Story = {
 }
 
 export const PendingExecuted: Story = {
-  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'executed' },
+  args: { ...PENDING_ARGS, policy: mockProcessingAllowlist(), viewer: MOCK_VIEWERS.signer },
 }
 
 export const PendingFailed: Story = {
-  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'failed' },
+  args: { ...PENDING_ARGS, policy: mockFailedAllowlist(), viewer: MOCK_VIEWERS.signer },
 }
 
 export const PendingReplaced: Story = {
-  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'replaced' },
+  args: { ...PENDING_ARGS, policy: mockFailedAllowlist(), viewer: MOCK_VIEWERS.signer, failureReason: 'replaced' },
 }
 
 export const PendingDeleted: Story = {
-  args: { ...PENDING_ARGS, policy: mockPendingAllowlist(), viewer: MOCK_VIEWERS.signer, outcome: 'deleted' },
+  args: { ...PENDING_ARGS, policy: mockFailedAllowlist(), viewer: MOCK_VIEWERS.signer, failureReason: 'deleted' },
 }
 
 export const PendingExpired: Story = {

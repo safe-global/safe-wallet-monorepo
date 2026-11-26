@@ -1,10 +1,12 @@
 import {
   mockActiveAllowlist,
   mockAllowlistAwaitingGuardRemoval,
+  mockFailedAllowlist,
   mockPendingAllowlist,
+  mockProcessingAllowlist,
   mockUnenforcedAllowlist,
 } from '../../../../public/utils/allowlistPolicies'
-import { getAllowlistStatus } from '../allowlistStatus'
+import { applyTxOutcome, getAllowlistOutcome, getAllowlistStatus } from '../allowlistStatus'
 
 const NOW_SECONDS = 1_800_000_000
 const NOW_MS = NOW_SECONDS * 1_000
@@ -73,6 +75,7 @@ describe('getAllowlistStatus', () => {
       step: 'request',
       confirmationsSubmitted: 1,
       confirmationsRequired: 2,
+      expiresAt: NOW_SECONDS + DAY,
     })
 
     const status = getAllowlistStatus(edit, NOW_MS)
@@ -86,6 +89,7 @@ describe('getAllowlistStatus', () => {
       step: 'request',
       confirmationsSubmitted: 2,
       confirmationsRequired: 2,
+      expiresAt: NOW_SECONDS + DAY,
     })
 
     const status = getAllowlistStatus(edit, NOW_MS)
@@ -158,6 +162,7 @@ describe('getAllowlistStatus', () => {
       step: 'apply',
       confirmationsSubmitted: 2,
       confirmationsRequired: 2,
+      expiresAt: NOW_SECONDS + DAY,
     })
 
     const status = getAllowlistStatus(edit, NOW_MS)
@@ -193,6 +198,7 @@ describe('getAllowlistStatus', () => {
       step: 'request',
       confirmationsSubmitted: 1,
       confirmationsRequired: 3,
+      expiresAt: NOW_SECONDS + DAY,
     })
 
     const status = getAllowlistStatus(removal, NOW_MS)
@@ -211,6 +217,7 @@ describe('getAllowlistStatus', () => {
       step: 'request',
       confirmationsSubmitted: 2,
       confirmationsRequired: 2,
+      expiresAt: NOW_SECONDS + DAY,
     })
 
     const status = getAllowlistStatus(removal, NOW_MS)
@@ -256,6 +263,7 @@ describe('getAllowlistStatus', () => {
       step: 'apply',
       confirmationsSubmitted: 0,
       confirmationsRequired: 2,
+      expiresAt: NOW_SECONDS + DAY,
     })
 
     const status = getAllowlistStatus(removal, NOW_MS)
@@ -269,6 +277,7 @@ describe('getAllowlistStatus', () => {
       step: 'apply',
       confirmationsSubmitted: 2,
       confirmationsRequired: 2,
+      expiresAt: NOW_SECONDS + DAY,
     })
 
     const status = getAllowlistStatus(removal, NOW_MS)
@@ -373,5 +382,77 @@ describe('getAllowlistStatus', () => {
     const status = getAllowlistStatus(failed, NOW_MS)
 
     expect(status).toMatchObject({ state: 'failed', change: 'setup', label: 'Failed', variant: 'destructive' })
+  })
+
+  it('should, when the signing window of an edit request closed, read edit and expired and say it can no longer be signed', () => {
+    const edit = mockPendingAllowlist({ operation: 'update', step: 'request', expiresAt: NOW_SECONDS - HOUR })
+
+    const status = getAllowlistStatus(edit, NOW_MS)
+
+    expect(status).toEqual({
+      state: 'edit-expired',
+      change: 'edit',
+      label: 'Expired',
+      variant: 'secondary',
+      tooltip: 'It can no longer be signed. The current rules stay in force.',
+    })
+  })
+
+  it('should, when the apply window of a queued removal closed, read removal and expired', () => {
+    const removal = mockPendingAllowlist({ operation: 'remove', step: 'apply', expiresAt: NOW_SECONDS - HOUR })
+
+    const status = getAllowlistStatus(removal, NOW_MS)
+
+    expect(status).toMatchObject({ state: 'removal-expired', change: 'removal', label: 'Expired' })
+  })
+})
+
+describe('getAllowlistOutcome', () => {
+  it('should, when the row is processing, read its transaction as executed', () => {
+    expect(getAllowlistOutcome(mockProcessingAllowlist(), NOW_MS)).toBe('executed')
+  })
+
+  it('should, when the row failed, read its transaction as failed', () => {
+    expect(getAllowlistOutcome(mockFailedAllowlist(), NOW_MS)).toBe('failed')
+  })
+
+  it.each(['replaced', 'deleted'] as const)('should, when a failed row was %s, name that reason', (reason) => {
+    expect(getAllowlistOutcome(mockFailedAllowlist(), NOW_MS, reason)).toBe(reason)
+  })
+
+  it('should, when a reason is given for a row that has not failed, ignore it', () => {
+    const queued = mockPendingAllowlist({ step: 'request', expiresAt: NOW_SECONDS + DAY })
+
+    expect(getAllowlistOutcome(queued, NOW_MS, 'deleted')).toBeUndefined()
+  })
+
+  it('should, when the signing window of a queued request has closed, read it as expired', () => {
+    expect(getAllowlistOutcome(mockPendingAllowlist({ step: 'request', expiresAt: NOW_SECONDS }), NOW_MS)).toBe(
+      'expired',
+    )
+  })
+
+  it('should, while the signing window is open or unknown, read no outcome', () => {
+    expect(getAllowlistOutcome(mockPendingAllowlist({ expiresAt: NOW_SECONDS + 1 }), NOW_MS)).toBeUndefined()
+    expect(getAllowlistOutcome(mockPendingAllowlist({ expiresAt: undefined }), NOW_MS)).toBeUndefined()
+    expect(getAllowlistOutcome(mockActiveAllowlist(), NOW_MS)).toBeUndefined()
+  })
+})
+
+describe('applyTxOutcome', () => {
+  it.each([
+    ['executed', 'activating'],
+    ['failed', 'failed'],
+    ['replaced', 'failed'],
+    ['deleted', 'failed'],
+  ] as const)('should, when the transaction was %s, give the row the %s status', (outcome, status) => {
+    expect(applyTxOutcome(mockPendingAllowlist(), outcome).status).toBe(status)
+  })
+
+  it('should, when the outcome is unknown or read from the row itself, keep the row as it is', () => {
+    const queued = mockPendingAllowlist()
+
+    expect(applyTxOutcome(queued, undefined)).toBe(queued)
+    expect(applyTxOutcome(queued, 'expired')).toBe(queued)
   })
 })

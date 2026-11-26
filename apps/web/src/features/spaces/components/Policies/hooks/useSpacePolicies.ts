@@ -24,17 +24,20 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies, type NativeTokenResolver } from '../utils/mapActivePolicies'
-import { mapPendingPolicies } from '../utils/mapPendingPolicies'
+import { getPendingTxId, mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { toPolicyToken } from '../utils/toPolicyToken'
 import { mergeDelayedGuardRequests, type GuardRemovalCleanup } from '../utils/mapDelayedGuardRequests'
 import { mapImmediateGuardPolicies } from '../utils/mapImmediateGuardPolicies'
 import { mergeGuardRemovals } from '../utils/mapGuardRemovals'
+import { applyTxOutcome } from '../utils/allowlistStatus'
 import type { ApplyAllowlistFlowData } from '../ApplyAllowlistFlow/types'
 import { useActivatingPolicies, type QueuedPolicy } from './useActivatingPolicies'
+import { useQueuedTxSignals, type QueuedTxSignals } from './useQueuedTxSignals'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import { usePollAfterTx } from './usePollAfterTx'
 import {
   isAllowlistPolicy,
+  isPendingPolicy,
   type Policy,
   type QueuedAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -87,6 +90,20 @@ const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
   }
 }
 
+/** A queued row as CGW's details of its transaction tell it, which the table and the panel then both read. */
+const withCachedTx = (policy: Policy, { failed, confirmations }: QueuedTxSignals): Policy => {
+  if (!isPendingPolicy(policy) || policy.status !== 'pending') return policy
+
+  const txId = getPendingTxId(policy)
+  const signed = confirmations.get(txId)
+  const counted =
+    signed === undefined || signed === policy.confirmationsSubmitted
+      ? policy
+      : { ...policy, confirmationsSubmitted: signed }
+
+  return isAllowlistPolicy(counted) && failed.has(txId) ? applyTxOutcome(counted, 'failed') : counted
+}
+
 /** The active rows the table shows: an allowlist only on a chain that supports it. */
 export const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[]): Policy[] => {
   const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
@@ -115,12 +132,14 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const { configs: chains } = useChains()
 
   const isPollingAfterTx = usePollAfterTx(POLL_EVENTS, !skip)
+  // An executed change is polled for until CGW serves it, which useActivatingPolicies bounds.
+  const [isAwaitingServe, setIsAwaitingServe] = useState(false)
   const active = useSpacePoliciesGetActivePoliciesV1Query(
     { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
     {
       skip,
       ...SPACE_REFRESH_OPTIONS,
-      pollingInterval: isPollingAfterTx ? POLLING_INTERVAL : 0,
+      pollingInterval: isAwaitingServe || isPollingAfterTx ? POLLING_INTERVAL : 0,
       skipPollingIfUnfocused: true,
     },
   )
@@ -131,7 +150,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     {
       skip,
       ...SPACE_REFRESH_OPTIONS,
-      pollingInterval: hasExecutable || isPollingAfterTx ? POLLING_INTERVAL : 0,
+      pollingInterval: hasExecutable || isAwaitingServe || isPollingAfterTx ? POLLING_INTERVAL : 0,
       skipPollingIfUnfocused: true,
     },
   )
@@ -240,21 +259,27 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     refetchActive()
     refetchPending()
   }, [refetchActive, refetchPending])
+  const signals = useQueuedTxSignals(queuedRows, spaceId)
   const activatingRows = useActivatingPolicies(queuedRows, listed, {
     refetch: refetchHeld,
     resetKey: spaceId,
     enabled: !skip,
+    signals,
   })
+
+  useEffect(() => {
+    setIsAwaitingServe(activatingRows.length > 0)
+  }, [activatingRows])
 
   // An allowlist keeps one row: while its executed transaction is processed, the held row stands in for it.
   const policies = useMemo(() => {
     const held = new Map<string, Policy>(activatingRows.map((policy) => [policy.id, policy]))
     const listedIds = new Set(listed.map((policy) => policy.id))
     return [
-      ...listed.map((policy) => held.get(policy.id) ?? policy),
+      ...listed.map((policy) => held.get(policy.id) ?? withCachedTx(policy, signals)),
       ...activatingRows.filter((policy) => !listedIds.has(policy.id)),
     ]
-  }, [listed, activatingRows])
+  }, [listed, activatingRows, signals])
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
   const isLoadingActive = active.isFetching && !active.currentData

@@ -1,9 +1,5 @@
 import { useContext, useMemo, type ReactElement } from 'react'
-import type {
-  FailedAllowlistPolicy,
-  PendingAllowlistPolicy,
-  QueuedAllowlistPolicy,
-} from '@safe-global/views/features/spaces/components/Policies/types'
+import type { PendingAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { TxModalContext } from '@/components/tx-flow'
 import type { PolicyConfiguration } from '@/features/policy-guard/public/types'
 import AllowlistDrawer from '../AllowlistDrawer/AllowlistDrawer'
@@ -11,6 +7,7 @@ import ConfirmAllowlistFlow from '../ConfirmAllowlistFlow'
 import { usePendingTransactionLinks } from '../SpendingLimitDetails/hooks/usePendingSpendingLimitActions'
 import { usePolicyDetailsBase } from '../hooks/usePolicyDetailsBase'
 import { useIsBehindLowerNonce } from './hooks/useIsBehindLowerNonce'
+import { applyTxOutcome } from '../utils/allowlistStatus'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
 
 const ENFORCED_BY = 'Safe policy contract'
@@ -42,10 +39,16 @@ const PendingAllowlistDetails = ({
     base.viewer,
     isUnlisted,
   )
-  const signed = confirmationsSubmitted ?? policy.confirmationsSubmitted
+  // A listed row already carries what its transaction says; one that left the list has no table row to agree with.
+  const drawerPolicy = isUnlisted
+    ? applyTxOutcome(
+        { ...policy, confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted },
+        outcome,
+      )
+    : policy
   const isBehindLowerNonce = useIsBehindLowerNonce(
-    policy,
-    policy.status === 'pending' && !outcome && signed >= policy.confirmationsRequired,
+    drawerPolicy,
+    drawerPolicy.status === 'pending' && drawerPolicy.confirmationsSubmitted >= drawerPolicy.confirmationsRequired,
   )
   const { txFlow, setTxFlow } = useContext(TxModalContext)
   const onReviewTransaction =
@@ -61,11 +64,6 @@ const PendingAllowlistDetails = ({
           )
       : undefined
 
-  const drawerPolicy: QueuedAllowlistPolicy | FailedAllowlistPolicy =
-    policy.status === 'failed'
-      ? { ...policy, status: 'failed' }
-      : { ...policy, status: 'pending', confirmationsSubmitted: signed }
-
   return (
     <AllowlistDrawer
       open={!txFlow}
@@ -78,7 +76,7 @@ const PendingAllowlistDetails = ({
       onConnectWallet={base.onConnectWallet}
       transactionLink={transactionLink}
       onReviewTransaction={onReviewTransaction}
-      outcome={outcome}
+      failureReason={outcome === 'replaced' || outcome === 'deleted' ? outcome : undefined}
       isBehindLowerNonce={isBehindLowerNonce}
     />
   )

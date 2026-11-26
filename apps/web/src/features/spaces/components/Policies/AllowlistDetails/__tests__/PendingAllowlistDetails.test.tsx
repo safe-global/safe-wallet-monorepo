@@ -9,11 +9,12 @@ import type { PolicyConfiguration } from '@/features/policy-guard/public/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../../../public/utils/policies'
 import {
+  mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
   mockPendingAllowlistEdit,
 } from '../../../../public/utils/allowlistPolicies'
-import type { QueuedAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
+import type { PendingAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { usePendingTransactionLinks } from '../../SpendingLimitDetails/hooks/usePendingSpendingLimitActions'
 import ConfirmAllowlistFlow from '../../ConfirmAllowlistFlow'
 import PendingAllowlistDetails from '../PendingAllowlistDetails'
@@ -54,7 +55,7 @@ const serveSafeNonce = (currentNonce: number) =>
     ),
   )
 
-const renderDetails = (isUnlisted = false, policy: QueuedAllowlistPolicy = mockPendingAllowlist()) => {
+const renderDetails = (isUnlisted = false, policy: PendingAllowlistPolicy = mockPendingAllowlist()) => {
   const setTxFlow = jest.fn()
   const view = renderWithUserEvent(
     <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
@@ -117,5 +118,46 @@ describe('PendingAllowlistDetails', () => {
       await screen.findByText('First execute the transactions with a lower nonce in the queue of Payroll.'),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+  })
+
+  it("should, while the row is listed, show the row's status rather than one read from its transaction", () => {
+    mockLinks.mockReturnValue({
+      viewer: MOCK_VIEWERS.signer,
+      txSummary,
+      confirmationsSubmitted: 2,
+      outcome: 'executed',
+    })
+
+    renderDetails(false, mockPendingAllowlist({ confirmationsSubmitted: 1, confirmationsRequired: 2 }))
+
+    expect(screen.getByTestId('allowlist-status-tags')).toHaveTextContent('Pending · 1/2')
+  })
+
+  it('should, when the row has left the list and its transaction executed, show it as processing', () => {
+    mockLinks.mockReturnValue({ viewer: MOCK_VIEWERS.signer, txSummary, outcome: 'executed' })
+
+    renderDetails(true)
+
+    expect(screen.getByTestId('policy-status-processing')).toHaveTextContent('Processing')
+    expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+  })
+
+  it('should, when the row has left the list because its transaction was deleted, show it as failed and say why', () => {
+    mockLinks.mockReturnValue({ viewer: MOCK_VIEWERS.signer, outcome: 'deleted' })
+
+    renderDetails(true)
+
+    expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
+    expect(screen.getByRole('alert')).toHaveTextContent('The transaction was deleted.')
+  })
+
+  it('should, when a failed row was replaced by another transaction, say so', () => {
+    mockLinks.mockReturnValue({ viewer: MOCK_VIEWERS.signer, outcome: 'replaced' })
+
+    renderDetails(false, mockFailedAllowlist())
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Another transaction used this nonce, so this one can no longer be executed.',
+    )
   })
 })

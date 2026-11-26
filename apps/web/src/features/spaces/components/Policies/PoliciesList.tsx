@@ -11,6 +11,7 @@ import PoliciesTable from './PoliciesTable'
 import { PoliciesNoSearchResults } from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates'
 import usePolicySearch from './hooks/usePolicySearch'
 import { resolveAllowlistState } from './utils/allowlistStatus'
+import { usePoliciesClock } from './hooks/usePoliciesClock'
 import {
   DEFAULT_POLICY_SORT,
   POLICY_SORT_OPTIONS,
@@ -44,15 +45,16 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
 
   const resolveSafeName = useSafeNameResolver()
   const { configs } = useChains()
+  const now = usePoliciesClock()
   const sortContext = useMemo<PolicySortContext>(() => {
     const chainNames = new Map(configs.map((chain) => [chain.chainId, chain.chainName]))
 
     return {
       getSafeName: (safe) => resolveSafeName(safe.address, safe.chainId),
       getChainName: (chainId) => chainNames.get(chainId) ?? chainId,
-      getAllowlistState: (policy) => resolveAllowlistState(policy, Date.now()),
+      getAllowlistState: (policy) => resolveAllowlistState(policy, now),
     }
-  }, [configs, resolveSafeName])
+  }, [configs, resolveSafeName, now])
 
   const { policies: matches, matchedSpenderNames } = usePolicySearch(policies, query)
   const rows = useMemo(() => {
