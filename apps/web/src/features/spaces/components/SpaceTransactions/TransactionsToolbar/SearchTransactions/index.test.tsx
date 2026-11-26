@@ -3,11 +3,7 @@ import SearchTransactions from '.'
 
 describe('SearchTransactions', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   const searchbox = () => screen.getByRole('searchbox', { name: 'Search transactions' })

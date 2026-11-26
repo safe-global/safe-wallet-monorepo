@@ -65,6 +65,8 @@ const requestOverviews = async (
 }
 
 describe('safeOverviews trusted param', () => {
+  beforeAll(() => jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] }))
+
   it('sends trusted=false on a chain without PORTFOLIO_SUMMARIES', async () => {
     const requests = recordSafesRequests()
     const chain = chainBuilder().with({ features: TRUSTED_TOKENLIST }).build()
@@ -195,14 +197,6 @@ describe('safeOverviews trusted param', () => {
     })
 
     describe('with slow chain configs', () => {
-      beforeEach(() => {
-        jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
-      })
-
-      afterEach(() => {
-        jest.useRealTimers()
-      })
-
       const requestAfter = async (chain: Chain, ms: number) => {
         const elapsed = requestWhileChainsLoad(chain)
         await jest.advanceTimersByTimeAsync(ms)

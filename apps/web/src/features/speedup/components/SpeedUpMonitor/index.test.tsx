@@ -32,14 +32,13 @@ const settle = () => act(() => jest.advanceTimersByTimeAsync(0))
 
 describe('SpeedUpMonitor', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ now: NOW })
+    jest.setSystemTime(NOW)
     jest.clearAllMocks()
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(wallets, 'isSmartContract').mockResolvedValue(false)
     ;(useWallet as jest.Mock).mockReturnValue(connectedWalletBuilder().with({ address: signerAddress }).build())
   })
   afterEach(() => {
-    jest.useRealTimers()
     jest.restoreAllMocks()
   })
 

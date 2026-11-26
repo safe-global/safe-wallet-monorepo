@@ -20,12 +20,8 @@ const addAnchor = () => {
 
 describe('useStopLayout', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     document.body.innerHTML = ''
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('finds an anchor that is already on the page', () => {
