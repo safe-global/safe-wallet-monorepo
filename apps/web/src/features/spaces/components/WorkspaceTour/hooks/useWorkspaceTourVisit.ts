@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { localItem } from '@/services/local-storage/local'
 import { useAppSelector } from '@/store'
@@ -8,6 +8,7 @@ export const WORKSPACE_TOUR_SEEN_KEY = 'workspaceTourSeen'
 
 export const getWorkspaceTourSeenKey = (userId: number) => `${WORKSPACE_TOUR_SEEN_KEY}_${userId}`
 
+/** Opens the tour on a member's first visit; `markSeen` records the visit once the tour is on screen. */
 export const useWorkspaceTourVisit = (canShowTour: boolean, onFirstVisit: () => void) => {
   const isSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
@@ -15,12 +16,13 @@ export const useWorkspaceTourVisit = (canShowTour: boolean, onFirstVisit: () => 
 
   useEffect(() => {
     if (!canShowTour || userId === undefined) return
-
-    const seen = localItem<boolean>(getWorkspaceTourSeenKey(userId))
-    if (seen.get()) return
-
-    // Marked on open, not on finish: leaving mid-tour counts as having seen it.
-    seen.set(true)
-    onFirstVisit()
+    if (!localItem<boolean>(getWorkspaceTourSeenKey(userId)).get()) onFirstVisit()
   }, [canShowTour, userId, onFirstVisit])
+
+  // Marked once shown, not on finish: leaving mid-tour counts as having seen it.
+  const markSeen = useCallback(() => {
+    if (userId !== undefined) localItem<boolean>(getWorkspaceTourSeenKey(userId)).set(true)
+  }, [userId])
+
+  return { markSeen }
 }
