@@ -130,17 +130,20 @@ describe('useGasFeeDetails', () => {
     expect(editor.canSave).toBe(true)
   })
 
-  it('keeps the edited values and follows the estimate in the others while the editor is open', () => {
+  it('keeps the fees from when the editor opened and the edits when a new estimate arrives', () => {
     const { result, rerender } = renderDetails()
 
     act(() => result.current.gasFeeDetails?.onOpenChange(true))
-    act(() => asEdit(result.current.gasFeeDetails).onFieldChange('maxFeePerGas', '3'))
-    const newEstimate = { ...estimate, maxPriorityFeePerGas: 2n * GWEI, maxFeePerGas: 4n * GWEI }
+    act(() => asEdit(result.current.gasFeeDetails).onFieldChange('gasLimit', '150000'))
+    const newEstimate = { ...estimate, gasLimit: 200_000n, maxPriorityFeePerGas: 2n * GWEI, maxFeePerGas: 4n * GWEI }
     rerender({ params: newEstimate, estimate: newEstimate })
 
-    const fields = asEdit(result.current.gasFeeDetails).fields
-    expect(fields.find((f) => f.name === 'maxPriorityFeePerGas')?.value).toBe('2')
-    expect(fields.find((f) => f.name === 'maxFeePerGas')?.value).toBe('3')
+    expect(asEdit(result.current.gasFeeDetails).fields.map(({ name, value }) => [name, value])).toEqual([
+      ['userNonce', '12'],
+      ['gasLimit', '150000'],
+      ['maxPriorityFeePerGas', '1'],
+      ['maxFeePerGas', '2'],
+    ])
   })
 
   it('blocks saving invalid values', () => {
