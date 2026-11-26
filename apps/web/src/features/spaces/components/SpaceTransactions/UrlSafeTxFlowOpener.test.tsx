@@ -159,7 +159,6 @@ describe('UrlSafeTxFlowOpener', () => {
   })
 
   it('shows an error when the Safe never loads', () => {
-    jest.useFakeTimers()
     const notify = jest.spyOn(notifications, 'showNotification')
     const { result, setTxFlow } = renderOpener()
 
@@ -168,6 +167,5 @@ describe('UrlSafeTxFlowOpener', () => {
 
     expect(notify).toHaveBeenCalledWith(expect.objectContaining({ variant: 'error' }))
     expect(setTxFlow).not.toHaveBeenCalled()
-    jest.useRealTimers()
   })
 })

@@ -11,6 +11,10 @@ import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-sc
 import { createScopeStore, ScopePool, type ScopeTarget } from './scopePool'
 
 describe('ScopePool', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
+  })
+
   it('does not arm the URL-Safe SDK guard, so flows opened on the URL Safe still work', () => {
     const chainId = faker.string.numeric(5)
     const safeAddress = faker.finance.ethereumAddress()
@@ -63,12 +67,7 @@ describe('ScopePool', () => {
     }
 
     beforeEach(() => {
-      jest.useFakeTimers()
       servedNonce = faker.number.int({ min: 1, max: 1000 })
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
     })
 
     it('refetches the Safe info when the queue is ahead of it', async () => {
