@@ -52,6 +52,23 @@ describe('QueuePartyCard', () => {
     expect(link).toHaveAttribute('target', '_blank')
   })
 
+  it('offers to open the Safe only when given its page', () => {
+    const { rerender } = renderCard()
+    expect(screen.queryByRole('link', { name: 'Open Safe' })).not.toBeInTheDocument()
+
+    rerender(
+      <QueuePartyCard
+        avatar={<span />}
+        title="T"
+        address={address}
+        copied={false}
+        onCopy={jest.fn()}
+        safeHref="/home?safe=eth:0x1"
+      />,
+    )
+    expect(screen.getByRole('link', { name: 'Open Safe' })).toHaveAttribute('href', '/home?safe=eth:0x1')
+  })
+
   it('offers to add the address to the address book only when it can', () => {
     const onAddToAddressBook = jest.fn()
     const { rerender } = renderCard()

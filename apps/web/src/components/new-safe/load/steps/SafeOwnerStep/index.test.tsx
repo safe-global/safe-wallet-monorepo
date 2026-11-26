@@ -59,6 +59,7 @@ const renderStep = (initialReduxState?: Parameters<typeof render>[1]) => {
 }
 
 const signerNameInputs = () => screen.findAllByLabelText('Signer name', { exact: false }) as Promise<HTMLInputElement[]>
+const getSignerNameInputs = () => screen.getAllByLabelText('Signer name', { exact: false }) as HTMLInputElement[]
 
 describe('SafeOwnerStep', () => {
   beforeEach(() => {
@@ -98,8 +99,8 @@ describe('SafeOwnerStep', () => {
       },
     })
 
-    await waitFor(async () => expect((await signerNameInputs())[0]).toHaveValue('Sepolia signer'))
-    expect((await signerNameInputs())[1]).toHaveValue('')
+    await waitFor(() => expect(getSignerNameInputs()[0]).toHaveValue('Sepolia signer'))
+    expect(getSignerNameInputs()[1]).toHaveValue('')
   })
 
   it('suggests the ENS name of a signer and passes it on', async () => {
@@ -108,7 +109,7 @@ describe('SafeOwnerStep', () => {
     serveSafe([owner], 1)
     const { onSubmit } = renderStep()
 
-    await waitFor(async () => expect((await signerNameInputs())[0]).toHaveAttribute('placeholder', ENS_NAME))
+    await waitFor(() => expect(getSignerNameInputs()[0]).toHaveAttribute('placeholder', ENS_NAME))
     fireEvent.click(screen.getByRole('button', { name: 'Next' }))
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalled())

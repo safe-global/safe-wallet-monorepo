@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import local from '@/services/local-storage/local'
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook } from '@/tests/test-utils'
 import { getWorkspaceTourSeenKey, useWorkspaceTourVisit } from '../useWorkspaceTourVisit'
 
 const mockCurrentUser = jest.fn()
@@ -12,10 +12,10 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
 
 const renderVisit = ({ spaceId, canShowTour = true }: { spaceId: string; canShowTour?: boolean }) => {
   const onFirstVisit = jest.fn()
-  renderHook(() => useWorkspaceTourVisit(canShowTour, onFirstVisit), {
+  const { result } = renderHook(() => useWorkspaceTourVisit(canShowTour, onFirstVisit), {
     routerProps: { query: { spaceId } },
   })
-  return onFirstVisit
+  return { onFirstVisit, markSeen: () => act(() => result.current.markSeen()) }
 }
 
 describe('useWorkspaceTourVisit', () => {
@@ -27,17 +27,21 @@ describe('useWorkspaceTourVisit', () => {
     mockCurrentUser.mockReturnValue({ id: userId })
   })
 
-  it('opens the tour the first time a member opens a workspace and remembers it', () => {
-    const onFirstVisit = renderVisit({ spaceId })
+  it('opens the tour the first time a member opens a workspace, and records the visit only once it is shown', () => {
+    const { onFirstVisit, markSeen } = renderVisit({ spaceId })
 
     expect(onFirstVisit).toHaveBeenCalledTimes(1)
+    expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBeNull()
+
+    markSeen()
+
     expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBe(true)
   })
 
   it('does not open the tour again for the same member', () => {
     local.setItem(getWorkspaceTourSeenKey(userId), true)
 
-    const onFirstVisit = renderVisit({ spaceId })
+    const { onFirstVisit } = renderVisit({ spaceId })
 
     expect(onFirstVisit).not.toHaveBeenCalled()
   })
@@ -45,7 +49,7 @@ describe('useWorkspaceTourVisit', () => {
   it('does not open the tour again when the member opens another workspace', () => {
     local.setItem(getWorkspaceTourSeenKey(userId), true)
 
-    const onFirstVisit = renderVisit({ spaceId: `${spaceId}1` })
+    const { onFirstVisit } = renderVisit({ spaceId: `${spaceId}1` })
 
     expect(onFirstVisit).not.toHaveBeenCalled()
   })
@@ -54,7 +58,7 @@ describe('useWorkspaceTourVisit', () => {
     local.setItem(getWorkspaceTourSeenKey(userId), true)
     mockCurrentUser.mockReturnValue({ id: userId + 1 })
 
-    const onFirstVisit = renderVisit({ spaceId })
+    const { onFirstVisit } = renderVisit({ spaceId })
 
     expect(onFirstVisit).toHaveBeenCalledTimes(1)
   })
@@ -62,13 +66,13 @@ describe('useWorkspaceTourVisit', () => {
   it('waits until the signed-in member is known', () => {
     mockCurrentUser.mockReturnValue(undefined)
 
-    const onFirstVisit = renderVisit({ spaceId })
+    const { onFirstVisit } = renderVisit({ spaceId })
 
     expect(onFirstVisit).not.toHaveBeenCalled()
   })
 
   it('leaves the visit unrecorded while the tour cannot be shown', () => {
-    const onFirstVisit = renderVisit({ spaceId, canShowTour: false })
+    const { onFirstVisit } = renderVisit({ spaceId, canShowTour: false })
 
     expect(onFirstVisit).not.toHaveBeenCalled()
     expect(local.getItem(getWorkspaceTourSeenKey(userId))).toBeNull()
