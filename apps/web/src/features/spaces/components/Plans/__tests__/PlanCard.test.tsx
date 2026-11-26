@@ -141,6 +141,31 @@ describe('PlanCard', () => {
       expect(screen.getByTestId('plan-card')).not.toHaveAttribute('data-hover-plan')
     })
 
+    it.each([
+      ['the trial size is not sold on that cycle', '20 Safe accounts'],
+      ['the trial size is not known yet', undefined],
+    ])('keeps the trial plan on the other billing cycle unpicked when %s', (_, seatsLabel) => {
+      const yearly: PlanTier = {
+        ...BUSINESS,
+        id: 'Business-year',
+        billingCycle: 'year',
+        options: [option(5, 719_000), option(10, 1_199_000)],
+      }
+      render(
+        <PlanCard
+          location={PlanLocation.PLANS_PAGE}
+          tier={yearly}
+          currentPlan={businessPlan({ isTrialing: true, seatsLabel })}
+        />,
+      )
+
+      expect(screen.queryByRole('tab', { selected: true })).not.toBeInTheDocument()
+      expect(screen.getByText('Custom')).toBeInTheDocument()
+      expect(screen.queryByText('€7,190')).not.toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Talk to sales' })).toBeInTheDocument()
+      expect(screen.getByTestId('plan-card')).not.toHaveAttribute('data-hover-plan')
+    })
+
     it('shows another plan with a custom price and only sales until a size is picked, then the price and a switch', async () => {
       const onCta = jest.fn()
       const starterTrial = businessPlan({

@@ -268,9 +268,14 @@ export const buildPlanTiers = (
 export const isOnPlan = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
   currentPlan !== undefined && (Boolean(tier.isCurrent) || currentPlan.name === tier.name)
 
-/** Only another plan sold in several sizes, without a paid plan in force, waits for the user to pick a size. */
+const hasCurrentSize = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
+  tier.options.some((option) => option.priceId === tier.currentPriceId || option.label === currentPlan?.seatsLabel)
+
+/** Without a paid plan in force, a plan sold in several sizes waits for a pick unless it offers the size in force. */
 export const opensOnSize = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
-  !isUnpaid(currentPlan) || tier.options.length < 2 || isOnPlan(tier, currentPlan)
+  !isUnpaid(currentPlan) ||
+  tier.options.length < 2 ||
+  (isOnPlan(tier, currentPlan) && hasCurrentSize(tier, currentPlan))
 
 export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
   const isCurrentPlan = isOnPlan(tier, currentPlan)
