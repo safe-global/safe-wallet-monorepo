@@ -33,4 +33,14 @@ describe('usePoliciesClock', () => {
 
     expect(second.result.current).toBe(first.result.current)
   })
+
+  it('should, when a reader joins after the time moved between ticks, move every reader to the current time', () => {
+    const first = renderHook(() => usePoliciesClock())
+    jest.setSystemTime(Date.now() + 2 * POLICIES_CLOCK_TICK_MS)
+
+    const second = renderHook(() => usePoliciesClock())
+
+    expect(second.result.current).toBe(Date.now())
+    expect(first.result.current).toBe(Date.now())
+  })
 })

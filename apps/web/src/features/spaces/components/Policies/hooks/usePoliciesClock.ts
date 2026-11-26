@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
 export const POLICIES_CLOCK_TICK_MS = 30_000
+const JOIN_REFRESH_MS = 1_000
 
 let now = Date.now()
 let timer: ReturnType<typeof setInterval> | undefined
@@ -16,6 +17,9 @@ const subscribe = (listener: () => void): (() => void) => {
   if (!timer) {
     now = Date.now()
     timer = setInterval(tick, POLICIES_CLOCK_TICK_MS)
+  } else if (Math.abs(Date.now() - now) >= JOIN_REFRESH_MS) {
+    // A reader that joins between ticks, such as a panel being opened, moves every reader to the current time
+    tick()
   }
   return () => {
     listeners.delete(listener)
