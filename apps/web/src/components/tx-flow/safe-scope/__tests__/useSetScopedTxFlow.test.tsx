@@ -4,14 +4,15 @@ import { renderHook } from '@/tests/test-utils'
 import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
 import type { SafeScopeContextValue } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import useSetScopedTxFlow from '../useSetScopedTxFlow'
+import { ScopedTxFlowOpenerContext, type ScopedTxFlowOpener } from '../ScopedTxFlowOpener'
 
 const Flow = () => null
 
-const renderWith = (scope?: SafeScopeContextValue) => {
+const renderWith = (scope?: SafeScopeContextValue, opener?: ScopedTxFlowOpener) => {
   const setTxFlow = mockSetTxFlow()
   const wrapper = ({ children }: { children: ReactNode }) => (
     <TxModalWithScope setTxFlow={setTxFlow} scope={scope}>
-      {children}
+      <ScopedTxFlowOpenerContext.Provider value={opener}>{children}</ScopedTxFlowOpenerContext.Provider>
     </TxModalWithScope>
   )
 
@@ -69,5 +70,28 @@ describe('useSetScopedTxFlow', () => {
     setScopedTxFlow(undefined)
 
     expect(setTxFlow.mock.calls).toEqual([[undefined]])
+  })
+
+  it('hands a scoped flow to the page opener instead of wrapping it', () => {
+    const opener = jest.fn<void, Parameters<ScopedTxFlowOpener>>()
+    const { setScopedTxFlow, setTxFlow } = renderWith(safeScopeContextFor(target), opener)
+    const flow = <Flow />
+    const onClose = jest.fn()
+
+    setScopedTxFlow(flow, onClose, false)
+
+    expect(opener.mock.calls).toEqual([[target, flow, onClose, false]])
+    expect(setTxFlow).not.toHaveBeenCalled()
+  })
+
+  it('ignores the page opener outside a SafeScope', () => {
+    const opener = jest.fn<void, Parameters<ScopedTxFlowOpener>>()
+    const { setScopedTxFlow, setTxFlow } = renderWith(undefined, opener)
+    const flow = <Flow />
+
+    setScopedTxFlow(flow)
+
+    expect(setTxFlow.mock.calls).toEqual([[flow]])
+    expect(opener).not.toHaveBeenCalled()
   })
 })
