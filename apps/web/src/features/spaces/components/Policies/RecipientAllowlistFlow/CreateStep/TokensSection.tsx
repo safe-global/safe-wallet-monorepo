@@ -17,10 +17,10 @@ import {
   POPULAR_LOAD_ERROR_TEXT,
   TOKEN_ICON_SIZE,
   TOKEN_LOOKUP_ERROR_TEXT,
-  TOKEN_NOT_FOUND_TEXT,
   UNTRUSTED_TOKEN_WARNING,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import {
+  NOT_ERC20_TOKEN_TEXT,
   OTHER_TOKENS_GROUP_LABEL,
   RETRY_LABEL,
   SPENDING_LIMIT_TOKENS_GROUP_LABEL,
@@ -29,6 +29,7 @@ import {
   TOKENS_SEARCH_PLACEHOLDER,
   TOKENS_SECTION_DESCRIPTION,
   TOKENS_SECTION_TITLE,
+  UNKNOWN_TOKEN_DETAIL,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import useCustomTokenLookup from '../../SpendingLimitFlow/hooks/useCustomTokenLookup'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
@@ -60,8 +61,17 @@ const tokenIcon = ({ symbol, logoUri }: AllowlistToken): ReactElement => (
 const tokenDetail = (option: TokenOption): string | undefined => {
   if (option.untrusted) return UNTRUSTED_TOKEN_WARNING
   if (option.symbol && option.name) return option.name
-  return option.symbol || option.name ? shortenAddress(option.address) : undefined
+  return option.symbol || option.name ? shortenAddress(option.address) : UNKNOWN_TOKEN_DETAIL
 }
+
+/** A pasted address CGW knows as no token; the allowlist only needs its address. */
+const toUnknownTokenOption = (address: string): TokenOption => ({
+  address,
+  symbol: '',
+  name: '',
+  decimals: 0,
+  group: 'custom',
+})
 
 const isListed = (tokens: readonly { address: string }[], address: string): boolean =>
   tokens.some((token) => sameAddress(token.address, address))
@@ -110,6 +120,8 @@ const TokensSection = ({
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular } = heldTokens
   const [query, setQuery] = useState('')
   const lookup = useCustomTokenLookup(query, options)
+  const pastedOption =
+    lookup.option ?? (lookup.address && lookup.isNotFound ? toUnknownTokenOption(lookup.address) : undefined)
 
   const isInSpendingLimit = (address: string) => isListed(spendingLimits.tokens, address)
 
@@ -147,7 +159,7 @@ const TokensSection = ({
   const toggle = (token: AllowlistToken) => setTokens(toggleByAddress(values.tokens, token))
 
   const pick = ({ id }: SearchPickerItem) => {
-    const option = findTokenOption(lookup.option ? [...options, lookup.option] : options, id)
+    const option = findTokenOption(pastedOption ? [...options, pastedOption] : options, id)
     if (option) toggle(toAllowlistToken(option))
   }
 
@@ -174,8 +186,8 @@ const TokensSection = ({
         onSelectAll={selectAll}
         query={query}
         onQueryChange={setQuery}
-        emptyLabel={lookup.address ? TOKEN_NOT_FOUND_TEXT : NO_TOKENS_FOUND_TEXT}
-        extraItem={lookup.option && toPickerItem(lookup.option, isInSpendingLimit(lookup.option.address))}
+        emptyLabel={lookup.address ? NOT_ERC20_TOKEN_TEXT : NO_TOKENS_FOUND_TEXT}
+        extraItem={pastedOption && toPickerItem(pastedOption, isInSpendingLimit(pastedOption.address))}
         notice={lookup.isError ? { text: TOKEN_LOOKUP_ERROR_TEXT, onRetry: lookup.refetch } : undefined}
         isLoading={isLoading || isPopularLoading || lookup.isLoading}
         disabled={!hasAccount}

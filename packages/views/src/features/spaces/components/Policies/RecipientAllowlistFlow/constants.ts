@@ -38,6 +38,9 @@ export const SPENDING_LIMIT_TOKEN_HINT =
   "This Safe account has a spending limit for this token. Add the token, so the allowlist doesn't block the spending limit."
 export const SELECT_ALL_LABEL = 'Select all'
 
+export const UNKNOWN_TOKEN_DETAIL = 'Unknown token'
+export const NOT_ERC20_TOKEN_TEXT = 'Only ERC-20 tokens can be added.'
+
 export const RECIPIENTS_SECTION_TITLE = 'Who can receive funds'
 export const RECIPIENTS_SECTION_DESCRIPTION = 'Only transfers to the recipients selected below will be allowed.'
 export const RECIPIENTS_SEARCH_PLACEHOLDER = 'Search contacts or paste an address'

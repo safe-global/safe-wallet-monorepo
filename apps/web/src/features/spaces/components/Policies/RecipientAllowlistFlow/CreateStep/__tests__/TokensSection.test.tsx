@@ -5,8 +5,12 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
-import { erc20TokenMetadataBuilder } from '@/tests/builders/tokens'
-import { TOKEN_NOT_FOUND_TEXT } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+import { erc20TokenMetadataBuilder, erc721TokenMetadataBuilder } from '@/tests/builders/tokens'
+import {
+  NOT_ERC20_TOKEN_TEXT,
+  UNKNOWN_TOKEN_DETAIL,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { tokenOptionBuilder } from '../../../SpendingLimitFlow/utils/tokenOptions.testData'
 import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
 import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
@@ -217,14 +221,34 @@ describe('TokensSection', () => {
     expect(search()).toHaveValue('')
   })
 
-  it('should, when the pasted address is no known token, say the token is unknown', async () => {
+  it('should, when the pasted address is no known token, offer it as an unknown token and add it by its address', async () => {
+    const pasted = checksumAddress(faker.finance.ethereumAddress())
     server.use(http.get(TOKEN_URL, () => new HttpResponse(null, { status: 404 })))
+    const { user, onChange, values } = renderSection()
+
+    await user.click(search())
+    await user.paste(pasted)
+    const option = await screen.findByRole('option', { name: new RegExp(UNKNOWN_TOKEN_DETAIL) })
+    expect(option).toHaveTextContent(`${shortenAddress(pasted)}${UNKNOWN_TOKEN_DETAIL}`)
+
+    await user.click(option)
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...values,
+      tokens: [{ address: pasted, symbol: shortenAddress(pasted), logoUri: undefined }],
+    })
+  })
+
+  it('should, when the pasted address is an NFT, say only ERC-20 tokens can be added', async () => {
+    const pasted = checksumAddress(faker.finance.ethereumAddress())
+    const nft = erc721TokenMetadataBuilder().with({ address: pasted }).build()
+    server.use(http.get(TOKEN_URL, () => HttpResponse.json(nft)))
     const { user } = renderSection()
 
     await user.click(search())
-    await user.paste(checksumAddress(faker.finance.ethereumAddress()))
+    await user.paste(pasted)
 
-    expect(await screen.findByText(TOKEN_NOT_FOUND_TEXT)).toBeInTheDocument()
+    expect(await screen.findByText(NOT_ERC20_TOKEN_TEXT)).toBeInTheDocument()
     expect(screen.queryByRole('option')).not.toBeInTheDocument()
   })
 
