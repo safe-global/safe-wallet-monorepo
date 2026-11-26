@@ -5,7 +5,7 @@ import useOffersTrial from '../useOffersTrial'
 let mockQuery: Record<string, string> = {}
 let mockLock = { isLocked: false, reason: 'lapsed' }
 
-jest.mock('next/router', () => ({
+jest.mock('next/compat/router', () => ({
   useRouter: () => ({ query: mockQuery }),
 }))
 

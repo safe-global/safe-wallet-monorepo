@@ -13,6 +13,9 @@ type OverlayOptions = {
 /**
  * Queues an overlay that opens without a click, so that only one shows at a time. Render the overlay only while
  * this returns true; make `isDue` false to close it and let the next one show.
+ *
+ * The kind orders overlays that are due together. One that is already shown keeps the screen, so an overlay that
+ * must come before another that mounts earlier says so in that overlay's own condition.
  */
 export const useOverlay = ({ kind, isDue, onShown }: OverlayOptions): boolean => {
   const key = useId()
