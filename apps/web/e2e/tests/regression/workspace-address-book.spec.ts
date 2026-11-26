@@ -68,10 +68,10 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
       const page = new WorkspaceAddressBookPage(safePage)
       await page.goto(workspaceId)
 
-      await page.tab('Suggested').click()
+      await page.openTab('Suggested')
       await page.addSuggestion(ALICE_SUGGESTION)
 
-      await page.tab('Workspace contacts').click()
+      await page.openTab('Workspace contacts')
       await expect(page.row(ALICE_SUGGESTION)).toBeVisible()
       await expect.poll(async () => (await findContact(owners.alice.address))?.name).toBe(ALICE_SUGGESTION)
     })
@@ -97,10 +97,10 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
       const page = new WorkspaceAddressBookPage(safePage)
       await page.goto(workspaceId)
 
-      await page.tab('Local contacts').click()
+      await page.openTab('Local contacts')
       await page.addLocalContactToWorkspace(contact.name)
 
-      await page.tab('Workspace contacts').click()
+      await page.openTab('Workspace contacts')
       await expect(page.row(contact.name)).toBeVisible()
       expect((await findContact(contact.address))?.name).toBe(contact.name)
     })
@@ -121,7 +121,7 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
       const page = new WorkspaceAddressBookPage(safePage)
       await page.goto(workspaceId)
 
-      await page.tab('Suggested').click()
+      await page.openTab('Suggested')
       await page.requestToAdd(ALICE_SUGGESTION)
 
       await expect
