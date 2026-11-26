@@ -13,7 +13,7 @@ Read this before committing, pushing, opening a PR, or reviewing one. Nothing in
 ## Commits
 
 - **Pre-commit hooks (Husky):** **pre-commit** runs `lint-staged` (**prettier only — no type-check at commit time**).
-- **Commit messages** use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/) as described in [CONTRIBUTING.md](../../CONTRIBUTING.md).
+- **Commit messages** use [semantic commit messages](https://www.conventionalcommits.org/en/v1.0.0/).
 - **CI/CD changes always use `chore:`** — CI, workflows, build configs (not `feat:` or `fix:`).
 - **Test changes always use `tests:`** — changes in unit or e2e tests (not `feat:` or `fix:`).
 

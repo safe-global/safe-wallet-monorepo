@@ -174,6 +174,12 @@ yarn workspace @safe-global/web e2e:env playwright  # Playwright on the isolated
 
 ## Contributing
 
+Contributions are welcome. Please read the organization-wide [contribution guide](https://github.com/safe-global/.github/blob/main/CONTRIBUTING.md), [support guide](https://github.com/safe-global/.github/blob/main/SUPPORT.md) and [Code of Conduct](https://github.com/safe-global/.github/blob/main/CODE_OF_CONDUCT.md) first. To report a vulnerability, follow the [security policy](https://github.com/safe-global/.github/blob/main/SECURITY.md).
+
+- Look at the [good first issues](https://github.com/safe-global/safe-wallet-monorepo/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) if you want to contribute but do not know where to start.
+- Follow the code style of the package you work on: [web](apps/web/docs/code-style.md), [mobile](apps/mobile/docs/code-style.md).
+- Fill in the pull request template and cover your changes with unit tests.
+
 ### Adding a new workspace
 
 1. Create a new directory under `apps/` or `packages/`.
