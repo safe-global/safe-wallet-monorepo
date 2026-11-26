@@ -1,0 +1,160 @@
+import { AbiCoder, Interface, keccak256, type Result } from 'ethers'
+import type { MetaTransactionData } from '@safe-global/types-kit'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.5.0/Safe__factory'
+import type { PolicyConfiguration, SetupCallDescription } from '../types'
+
+// Hand-written from SafePolicyGuard.sol until the WA-3034 artifact package is published
+const CONFIGURATION_TUPLE = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
+
+const policyGuardInterface = new Interface([
+  `function configureImmediately(${CONFIGURATION_TUPLE}[] configurations)`,
+  'function requestConfiguration(bytes32 configureRoot)',
+  'function invalidateRoot(bytes32 configureRoot)',
+  `function applyConfiguration(${CONFIGURATION_TUPLE}[] configurations)`,
+])
+
+const safeInterface = Safe__factory.createInterface()
+const SAFE_SETUP_METHODS = ['setGuard', 'setModuleGuard', 'setFallbackHandler']
+
+export const describeSetupCall = ({ data }: Pick<MetaTransactionData, 'data'>): SetupCallDescription | undefined => {
+  const selector = data.slice(0, 10)
+  const guardFunction = policyGuardInterface.getFunction(selector)
+  if (guardFunction) return { method: guardFunction.name, target: 'guard' }
+
+  const safeCall = safeInterface.parseTransaction({ data })
+  if (!safeCall || !SAFE_SETUP_METHODS.includes(safeCall.name)) return undefined
+  return {
+    method: safeCall.name,
+    target: 'safe',
+    param: { name: safeCall.fragment.inputs[0].name, value: String(safeCall.args[0]) },
+  }
+}
+
+export const createSetGuardTx = (safeAddress: string, guardAddress: string): MetaTransactionData => ({
+  to: safeAddress,
+  value: '0',
+  data: safeInterface.encodeFunctionData('setGuard', [guardAddress]),
+})
+
+export const createSetModuleGuardTx = (safeAddress: string, guardAddress: string): MetaTransactionData => ({
+  to: safeAddress,
+  value: '0',
+  data: safeInterface.encodeFunctionData('setModuleGuard', [guardAddress]),
+})
+
+export const createSetFallbackHandlerTx = (safeAddress: string, handler: string): MetaTransactionData => ({
+  to: safeAddress,
+  value: '0',
+  data: safeInterface.encodeFunctionData('setFallbackHandler', [handler]),
+})
+
+/**
+ * Takes the guard off both slots and sets the fallback handler back, once an applied removal lets the three setters and
+ * their batch through. Applies the removal's second root last, while the guard still checks the batch.
+ */
+export const createRemoveGuardTxs = ({
+  safeAddress,
+  guardAddress,
+  fallbackHandler,
+  cleanupConfigurations,
+}: {
+  safeAddress: string
+  guardAddress: string
+  fallbackHandler: string
+  cleanupConfigurations?: PolicyConfiguration[]
+}): MetaTransactionData[] => [
+  createSetGuardTx(safeAddress, ZERO_ADDRESS),
+  createSetModuleGuardTx(safeAddress, ZERO_ADDRESS),
+  createSetFallbackHandlerTx(safeAddress, fallbackHandler),
+  ...(cleanupConfigurations ? [createApplyConfigurationTx(guardAddress, cleanupConfigurations)] : []),
+]
+
+// configureImmediately reverts once our guard is in either slot, so it must run before both setters
+export const createFirstSetupTxs = ({
+  safeAddress,
+  guardAddress,
+  configurations,
+  fallbackHandler,
+}: {
+  safeAddress: string
+  guardAddress: string
+  configurations: PolicyConfiguration[]
+  /** Set last, when the Safe does not use it yet. */
+  fallbackHandler?: string
+}): MetaTransactionData[] => [
+  {
+    to: guardAddress,
+    value: '0',
+    data: policyGuardInterface.encodeFunctionData('configureImmediately', [configurations]),
+  },
+  createSetGuardTx(safeAddress, guardAddress),
+  createSetModuleGuardTx(safeAddress, guardAddress),
+  ...(fallbackHandler ? [createSetFallbackHandlerTx(safeAddress, fallbackHandler)] : []),
+]
+
+export const createRequestConfigurationTx = (guardAddress: string, configureRoot: string): MetaTransactionData => ({
+  to: guardAddress,
+  value: '0',
+  data: policyGuardInterface.encodeFunctionData('requestConfiguration', [configureRoot]),
+})
+
+/** Withdraws a request that is still on chain, so the same configurations can be requested again. */
+export const createInvalidateRootTx = (guardAddress: string, configureRoot: string): MetaTransactionData => ({
+  to: guardAddress,
+  value: '0',
+  data: policyGuardInterface.encodeFunctionData('invalidateRoot', [configureRoot]),
+})
+
+/** Requests each root, after withdrawing those the guard already holds: it rejects a root it holds already. */
+export const createRequestConfigurationTxs = (
+  guardAddress: string,
+  roots: string[],
+  heldRoots: string[] = [],
+): MetaTransactionData[] => [
+  ...roots
+    .filter((root) => heldRoots.some((held) => held.toLowerCase() === root.toLowerCase()))
+    .map((root) => createInvalidateRootTx(guardAddress, root)),
+  ...roots.map((root) => createRequestConfigurationTx(guardAddress, root)),
+]
+
+export const createApplyConfigurationTx = (
+  guardAddress: string,
+  configurations: PolicyConfiguration[],
+): MetaTransactionData => ({
+  to: guardAddress,
+  value: '0',
+  data: policyGuardInterface.encodeFunctionData('applyConfiguration', [configurations]),
+})
+
+export const getConfigurationRoot = (configurations: PolicyConfiguration[]): string =>
+  keccak256(AbiCoder.defaultAbiCoder().encode([`${CONFIGURATION_TUPLE}[]`], [configurations]))
+
+const toPolicyConfiguration = (configuration: Result): PolicyConfiguration => {
+  const { target, selector, operation, policy, data } = configuration.toObject()
+  return { target, selector, operation: Number(operation) === 1 ? 1 : 0, policy, data }
+}
+
+/**
+ * The configurations a guard call sets, read from its calldata. A request carries only their root, so it returns
+ * `requested` only when that hashes to the root.
+ */
+export const getCallConfigurations = (
+  { data }: Pick<MetaTransactionData, 'data'>,
+  requested?: PolicyConfiguration[],
+): PolicyConfiguration[] | undefined => {
+  const fragment = policyGuardInterface.getFunction(data.slice(0, 10))
+  if (!fragment) return undefined
+
+  let decoded: Result
+  try {
+    decoded = policyGuardInterface.decodeFunctionData(fragment, data)
+  } catch {
+    return undefined
+  }
+
+  const [arg] = decoded
+  if (fragment.name === 'invalidateRoot') return undefined
+  if (fragment.name !== 'requestConfiguration') return Array.from(arg, toPolicyConfiguration)
+  return requested && getConfigurationRoot(requested) === String(arg).toLowerCase() ? requested : undefined
+}

@@ -1,0 +1,298 @@
+import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.5.0/Safe__factory'
+import { getAddress, id, Interface, keccak256 } from 'ethers'
+import { faker } from '@faker-js/faker'
+import { OperationType } from '@safe-global/types-kit'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import type { PolicyConfiguration } from '../../types'
+import {
+  createApplyConfigurationTx,
+  createFirstSetupTxs,
+  createRemoveGuardTxs,
+  createInvalidateRootTx,
+  createRequestConfigurationTx,
+  createRequestConfigurationTxs,
+  createSetFallbackHandlerTx,
+  createSetGuardTx,
+  createSetModuleGuardTx,
+  describeSetupCall,
+  getCallConfigurations,
+  getConfigurationRoot,
+} from '../policyGuardEncoders'
+
+const TUPLE = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
+const guardIface = new Interface([
+  `function configureImmediately(${TUPLE}[] configurations)`,
+  'function requestConfiguration(bytes32 configureRoot)',
+  `function applyConfiguration(${TUPLE}[] configurations)`,
+  'function invalidateRoot(bytes32 configureRoot)',
+])
+const safeIface = new Interface([
+  'function setGuard(address)',
+  'function setModuleGuard(address)',
+  'function setFallbackHandler(address)',
+])
+
+const safeAddress = getAddress(faker.finance.ethereumAddress())
+const guardAddress = getAddress(faker.finance.ethereumAddress())
+const configurations: PolicyConfiguration[] = [
+  {
+    target: faker.finance.ethereumAddress(),
+    selector: '0xa9059cbb',
+    operation: OperationType.Call,
+    policy: faker.finance.ethereumAddress(),
+    data: '0x1234',
+  },
+]
+
+describe('createFirstSetupTxs', () => {
+  it('configures before setting either guard slot', () => {
+    const txs = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+
+    expect(txs.map((tx) => tx.to)).toEqual([guardAddress, safeAddress, safeAddress])
+    expect(guardIface.parseTransaction({ data: txs[0].data })?.name).toBe('configureImmediately')
+    expect(safeIface.parseTransaction({ data: txs[1].data })?.name).toBe('setGuard')
+    expect(safeIface.parseTransaction({ data: txs[1].data })?.args[0]).toBe(guardAddress)
+    expect(safeIface.parseTransaction({ data: txs[2].data })?.name).toBe('setModuleGuard')
+    expect(safeIface.parseTransaction({ data: txs[2].data })?.args[0]).toBe(guardAddress)
+    expect(txs.every((tx) => tx.value === '0')).toBe(true)
+  })
+
+  it('should set the fallback handler last, when one is given', () => {
+    const handler = getAddress(faker.finance.ethereumAddress())
+
+    const txs = createFirstSetupTxs({ safeAddress, guardAddress, configurations, fallbackHandler: handler })
+
+    expect(txs.map((tx) => tx.to)).toEqual([guardAddress, safeAddress, safeAddress, safeAddress])
+    expect(safeIface.parseTransaction({ data: txs[3].data })?.name).toBe('setFallbackHandler')
+    expect(safeIface.parseTransaction({ data: txs[3].data })?.args[0]).toBe(handler)
+  })
+
+  it('round-trips the configurations', () => {
+    const [configure] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+    const [decoded] = guardIface.decodeFunctionData('configureImmediately', configure.data)
+    expect(decoded[0].selector).toBe('0xa9059cbb')
+    expect(Number(decoded[0].operation)).toBe(OperationType.Call)
+    expect(decoded[0].data).toBe('0x1234')
+  })
+})
+
+describe('createSetGuardTx / createSetModuleGuardTx', () => {
+  it('target the Safe with the guard address', () => {
+    const guardTx = createSetGuardTx(safeAddress, guardAddress)
+    const moduleTx = createSetModuleGuardTx(safeAddress, guardAddress)
+    expect([guardTx.to, moduleTx.to]).toEqual([safeAddress, safeAddress])
+    expect(safeIface.parseTransaction({ data: guardTx.data })?.name).toBe('setGuard')
+    expect(safeIface.parseTransaction({ data: moduleTx.data })?.name).toBe('setModuleGuard')
+    expect(safeIface.parseTransaction({ data: moduleTx.data })?.args[0]).toBe(guardAddress)
+  })
+})
+
+describe('createSetFallbackHandlerTx', () => {
+  it('should call setFallbackHandler on the Safe with the handler, when the handler is changed', () => {
+    const handler = getAddress(faker.finance.ethereumAddress())
+
+    const tx = createSetFallbackHandlerTx(safeAddress, handler)
+
+    expect(tx.to).toBe(safeAddress)
+    expect(tx.value).toBe('0')
+    expect(tx.data.slice(0, 10)).toBe(id('setFallbackHandler(address)').slice(0, 10))
+    expect(safeIface.parseTransaction({ data: tx.data })?.args[0]).toBe(handler)
+  })
+})
+
+describe('createRemoveGuardTxs', () => {
+  it('should set both guard slots of the Safe to the zero address and the fallback handler back, when the guard comes off', () => {
+    const fallbackHandler = getAddress(faker.finance.ethereumAddress())
+
+    const txs = createRemoveGuardTxs({ safeAddress, guardAddress, fallbackHandler })
+
+    expect(txs.map((tx) => tx.to)).toEqual([safeAddress, safeAddress, safeAddress])
+    expect(txs.map((tx) => safeIface.parseTransaction({ data: tx.data })?.name)).toEqual([
+      'setGuard',
+      'setModuleGuard',
+      'setFallbackHandler',
+    ])
+    expect(txs.map((tx) => safeIface.parseTransaction({ data: tx.data })?.args[0])).toEqual([
+      ZERO_ADDRESS,
+      ZERO_ADDRESS,
+      fallbackHandler,
+    ])
+  })
+
+  it('should apply the clean-up configurations last, when they are given', () => {
+    const fallbackHandler = getAddress(faker.finance.ethereumAddress())
+
+    const txs = createRemoveGuardTxs({
+      safeAddress,
+      guardAddress,
+      fallbackHandler,
+      cleanupConfigurations: configurations,
+    })
+
+    expect(txs).toHaveLength(4)
+    expect(txs[3]).toEqual(createApplyConfigurationTx(guardAddress, configurations))
+  })
+})
+
+describe('createRequestConfigurationTx', () => {
+  it('passes the root through to the guard', () => {
+    const root = `0x${'ab'.repeat(32)}`
+    const tx = createRequestConfigurationTx(guardAddress, root)
+    expect(tx.to).toBe(guardAddress)
+    expect(guardIface.decodeFunctionData('requestConfiguration', tx.data)[0]).toBe(root)
+  })
+})
+
+describe('createRequestConfigurationTxs', () => {
+  const guard = getAddress(faker.finance.ethereumAddress())
+  const roots = [id(faker.string.uuid()), id(faker.string.uuid())]
+
+  it('should, when the guard holds none of the roots, only request them', () => {
+    expect(createRequestConfigurationTxs(guard, roots)).toEqual(
+      roots.map((root) => createRequestConfigurationTx(guard, root)),
+    )
+  })
+
+  it('should, when the guard still holds a root, withdraw it before the requests', () => {
+    expect(createRequestConfigurationTxs(guard, roots, [roots[1].toUpperCase().replace('0X', '0x')])).toEqual([
+      createInvalidateRootTx(guard, roots[1]),
+      ...roots.map((root) => createRequestConfigurationTx(guard, root)),
+    ])
+  })
+})
+
+describe('createInvalidateRootTx', () => {
+  it('should, when a root is withdrawn, call invalidateRoot on the guard with it', () => {
+    const guard = getAddress(faker.finance.ethereumAddress())
+    const root = id(faker.string.uuid())
+    const tx = createInvalidateRootTx(guard, root)
+
+    expect(tx).toEqual({ to: guard, value: '0', data: guardIface.encodeFunctionData('invalidateRoot', [root]) })
+    expect(describeSetupCall(tx)).toEqual({ method: 'invalidateRoot', target: 'guard' })
+    expect(getCallConfigurations(tx)).toBeUndefined()
+  })
+})
+
+describe('createApplyConfigurationTx', () => {
+  it('sends the full configuration array, not the root', () => {
+    const tx = createApplyConfigurationTx(guardAddress, configurations)
+    expect(tx.to).toBe(guardAddress)
+    expect(guardIface.parseTransaction({ data: tx.data })?.name).toBe('applyConfiguration')
+  })
+})
+
+describe('getConfigurationRoot', () => {
+  it('is stable for equal input and changes with the input', () => {
+    const root = getConfigurationRoot(configurations)
+    expect(root).toMatch(/^0x[0-9a-f]{64}$/)
+    expect(getConfigurationRoot([...configurations])).toBe(root)
+    expect(getConfigurationRoot([{ ...configurations[0], data: '0x' }])).not.toBe(root)
+  })
+})
+
+describe('selectors', () => {
+  const CONFIGURATION = '(address,bytes4,uint8,address,bytes)'
+  const selectorOf = (signature: string) => id(signature).slice(0, 10)
+
+  it('match the canonical SafePolicyGuard and Safe signatures', () => {
+    const [configure, setGuard, setModuleGuard] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+
+    expect(configure.data.slice(0, 10)).toBe(selectorOf(`configureImmediately(${CONFIGURATION}[])`))
+    expect(setGuard.data.slice(0, 10)).toBe(selectorOf('setGuard(address)'))
+    expect(setModuleGuard.data.slice(0, 10)).toBe(selectorOf('setModuleGuard(address)'))
+    expect(createRequestConfigurationTx(guardAddress, `0x${'00'.repeat(32)}`).data.slice(0, 10)).toBe(
+      selectorOf('requestConfiguration(bytes32)'),
+    )
+    expect(createApplyConfigurationTx(guardAddress, configurations).data.slice(0, 10)).toBe(
+      selectorOf(`applyConfiguration(${CONFIGURATION}[])`),
+    )
+  })
+})
+
+describe('getConfigurationRoot vs applyConfiguration', () => {
+  it('hashes exactly the arguments applyConfiguration sends, as the contract recomputes them', () => {
+    const { data } = createApplyConfigurationTx(guardAddress, configurations)
+    expect(getConfigurationRoot(configurations)).toBe(keccak256(`0x${data.slice(10)}`))
+  })
+})
+
+describe('describeSetupCall', () => {
+  it('names the guard calls without params', () => {
+    const [configure] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+    const request = createRequestConfigurationTx(guardAddress, getConfigurationRoot(configurations))
+
+    expect(describeSetupCall(configure)).toEqual({ method: 'configureImmediately', target: 'guard' })
+    expect(describeSetupCall(request)).toEqual({ method: 'requestConfiguration', target: 'guard' })
+  })
+
+  it.each([
+    ['setGuard', 'guard', createSetGuardTx],
+    ['setModuleGuard', 'moduleGuard', createSetModuleGuardTx],
+  ] as const)('names %s with the guard it sets', (method, name, create) => {
+    expect(describeSetupCall(create(safeAddress, guardAddress))).toEqual({
+      method,
+      target: 'safe',
+      param: { name, value: guardAddress },
+    })
+  })
+
+  it('should name setFallbackHandler with the handler it sets, when the call changes the fallback handler', () => {
+    const handler = getAddress(faker.finance.ethereumAddress())
+
+    expect(describeSetupCall(createSetFallbackHandlerTx(safeAddress, handler))).toEqual({
+      method: 'setFallbackHandler',
+      target: 'safe',
+      param: { name: 'handler', value: handler },
+    })
+  })
+
+  it('returns undefined for a call it does not know', () => {
+    expect(describeSetupCall({ data: '0xa9059cbb' })).toBeUndefined()
+    expect(describeSetupCall({ data: '0x' })).toBeUndefined()
+    expect(
+      describeSetupCall({ data: Safe__factory.createInterface().encodeFunctionData('changeThreshold', [1]) }),
+    ).toBeUndefined()
+  })
+})
+
+describe('getCallConfigurations', () => {
+  const decoded = configurations.map((configuration) => ({
+    ...configuration,
+    target: getAddress(configuration.target),
+    policy: getAddress(configuration.policy),
+  }))
+
+  it('should read the configurations from the calldata, when the call configures immediately', () => {
+    const [configure] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+
+    expect(getCallConfigurations(configure)).toEqual(decoded)
+  })
+
+  it('should read the configurations from the calldata, when the call applies them', () => {
+    expect(getCallConfigurations(createApplyConfigurationTx(guardAddress, configurations))).toEqual(decoded)
+  })
+
+  it('should return the requested configurations, when they hash to the root of the request', () => {
+    const request = createRequestConfigurationTx(guardAddress, getConfigurationRoot(configurations))
+
+    expect(getCallConfigurations(request, configurations)).toBe(configurations)
+  })
+
+  it('should return nothing, when the requested configurations do not hash to the root of the request', () => {
+    const request = createRequestConfigurationTx(guardAddress, getConfigurationRoot(configurations))
+
+    expect(getCallConfigurations(request, [{ ...configurations[0], data: '0x' }])).toBeUndefined()
+    expect(getCallConfigurations(request)).toBeUndefined()
+  })
+
+  it('should return nothing, when the call is not a configuring call', () => {
+    expect(getCallConfigurations(createSetGuardTx(safeAddress, guardAddress))).toBeUndefined()
+    expect(getCallConfigurations({ data: '0x' })).toBeUndefined()
+  })
+
+  it('should return nothing, when the calldata of a configuring call is malformed', () => {
+    const { data } = createApplyConfigurationTx(guardAddress, configurations)
+
+    expect(getCallConfigurations({ data: data.slice(0, 20) })).toBeUndefined()
+  })
+})
