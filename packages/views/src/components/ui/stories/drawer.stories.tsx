@@ -32,12 +32,10 @@ type Story = StoryObj<typeof meta>
 export const Open: Story = {
   render: () => (
     <Drawer defaultOpen>
-      <DrawerTrigger asChild>
-        <Button>Open Drawer</Button>
-      </DrawerTrigger>
+      <DrawerTrigger render={<Button />}>Open drawer</DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Drawer Title</DrawerTitle>
+          <DrawerTitle>Drawer title</DrawerTitle>
           <DrawerDescription>Drawer description goes here.</DrawerDescription>
         </DrawerHeader>
         <div style={{ padding: '1rem' }}>
@@ -45,10 +43,25 @@ export const Open: Story = {
         </div>
         <DrawerFooter>
           <Button>Save</Button>
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
+          <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>
         </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  ),
+}
+
+export const Right: Story = {
+  render: () => (
+    <Drawer direction="right" defaultOpen>
+      <DrawerTrigger render={<Button />}>Open drawer</DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Drawer title</DrawerTitle>
+          <DrawerDescription>Drawer description goes here.</DrawerDescription>
+        </DrawerHeader>
+        <div style={{ padding: '1rem' }}>
+          <p className="text-sm">Drawer content area.</p>
+        </div>
       </DrawerContent>
     </Drawer>
   ),
@@ -69,12 +82,10 @@ export const AllVariants: Story = {
           }}
         >
           <Drawer>
-            <DrawerTrigger asChild>
-              <Button>Open Drawer</Button>
-            </DrawerTrigger>
+            <DrawerTrigger render={<Button />}>Open drawer</DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle>Drawer Title</DrawerTitle>
+                <DrawerTitle>Drawer title</DrawerTitle>
                 <DrawerDescription>Drawer description goes here.</DrawerDescription>
               </DrawerHeader>
               <div style={{ padding: '1rem' }}>
@@ -82,9 +93,7 @@ export const AllVariants: Story = {
               </div>
               <DrawerFooter>
                 <Button>Save</Button>
-                <DrawerClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DrawerClose>
+                <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>
               </DrawerFooter>
             </DrawerContent>
           </Drawer>
@@ -102,12 +111,10 @@ export const AllVariants: Story = {
           }}
         >
           <Drawer>
-            <DrawerTrigger asChild>
-              <Button>Open with Footer</Button>
-            </DrawerTrigger>
+            <DrawerTrigger render={<Button />}>Open with footer</DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle>Drawer with Footer</DrawerTitle>
+                <DrawerTitle>Drawer with footer</DrawerTitle>
                 <DrawerDescription>This drawer includes a footer with actions.</DrawerDescription>
               </DrawerHeader>
               <div style={{ padding: '1rem' }}>
@@ -115,9 +122,7 @@ export const AllVariants: Story = {
               </div>
               <DrawerFooter>
                 <Button>Submit</Button>
-                <DrawerClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DrawerClose>
+                <DrawerClose render={<Button variant="outline" />}>Cancel</DrawerClose>
               </DrawerFooter>
             </DrawerContent>
           </Drawer>

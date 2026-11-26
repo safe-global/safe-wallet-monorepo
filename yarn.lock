@@ -14125,7 +14125,6 @@ __metadata:
     tailwind-merge: "npm:^3.4.0"
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.72.1"
-    vaul: "npm:^1.1.2"
   peerDependencies:
     next: "*"
     next-themes: ^0.4.6
@@ -14338,7 +14337,6 @@ __metadata:
     typechain: "npm:^8.3.2"
     typescript: "npm:~5.9.2"
     typescript-plugin-css-modules: "npm:^4.2.2"
-    vaul: "npm:^1.1.2"
     viem: "npm:^2.21.55"
     vite: "npm:8.3.6"
     vite-plugin-svgr: "npm:^5.2.0"
