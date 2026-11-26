@@ -10,12 +10,22 @@ type PartyCardProps = {
   /** Said after the name, for a Safe */
   network?: string
   avatar: ReactNode
+  /** A Safe's home page, for the card's Open Safe action */
+  safeHref?: string
 }
 
 /** The party card's content, with its actions. Rendered only while the card is open. */
-const PartyCard = ({ address, chainId, name, network, avatar }: PartyCardProps): ReactElement => {
+const PartyCard = ({ address, chainId, name, network, avatar, safeHref }: PartyCardProps): ReactElement => {
   const actions = useQueuePartyActions(address, chainId, !!name)
-  return <QueuePartyCard {...actions} avatar={avatar} title={getPartyTitle(name, network)} address={address} />
+  return (
+    <QueuePartyCard
+      {...actions}
+      safeHref={safeHref}
+      avatar={avatar}
+      title={getPartyTitle(name, network)}
+      address={address}
+    />
+  )
 }
 
 export default PartyCard
