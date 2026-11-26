@@ -33,7 +33,7 @@ yarn install
 ## Contributing
 
 Contributions, be it a bug report or a pull request, are very welcome. Please check
-our [contribution guidelines](../../CONTRIBUTING.md) beforehand.
+our [contribution guidelines](https://github.com/safe-global/.github/blob/main/CONTRIBUTING.md) beforehand.
 
 ## Getting started with local development
 
