@@ -64,6 +64,30 @@ describe('useDefaultGasPrice', () => {
       expect(result.current[0]?.maxPriorityFeePerGas).toBeUndefined()
     })
 
+    it('should keep the network priority fee below a fixed gas price on an EIP-1559 chain', async () => {
+      const chain = makeChain([{ type: 'fixed', weiValue: '30000000000' }], ['EIP1559'])
+
+      const { result } = renderHook(() => useDefaultGasPrice(chain, makeProvider()))
+
+      await waitFor(() => {
+        expect(result.current[2]).toBe(false)
+      })
+
+      expect(result.current[0]).toEqual({ maxFeePerGas: 30000000000n, maxPriorityFeePerGas: 2000000000n })
+    })
+
+    it('should cap the network priority fee at a lower fixed gas price on an EIP-1559 chain', async () => {
+      const chain = makeChain([{ type: 'fixed', weiValue: '1000000000' }], ['EIP1559'])
+
+      const { result } = renderHook(() => useDefaultGasPrice(chain, makeProvider()))
+
+      await waitFor(() => {
+        expect(result.current[2]).toBe(false)
+      })
+
+      expect(result.current[0]).toEqual({ maxFeePerGas: 1000000000n, maxPriorityFeePerGas: 1000000000n })
+    })
+
     it('should return a fixed EIP-1559 gas price', async () => {
       const chain = makeChain(
         [{ type: 'fixed1559', maxFeePerGas: '100000000', maxPriorityFeePerGas: '100000' }],
