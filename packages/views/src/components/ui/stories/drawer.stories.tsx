@@ -50,23 +50,6 @@ export const Open: Story = {
   ),
 }
 
-export const Right: Story = {
-  render: () => (
-    <Drawer direction="right" defaultOpen>
-      <DrawerTrigger render={<Button />}>Open drawer</DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Drawer title</DrawerTitle>
-          <DrawerDescription>Drawer description goes here.</DrawerDescription>
-        </DrawerHeader>
-        <div style={{ padding: '1rem' }}>
-          <p className="text-sm">Drawer content area.</p>
-        </div>
-      </DrawerContent>
-    </Drawer>
-  ),
-}
-
 export const AllVariants: Story = {
   tags: ['skip-visual-test'],
   render: () => (
