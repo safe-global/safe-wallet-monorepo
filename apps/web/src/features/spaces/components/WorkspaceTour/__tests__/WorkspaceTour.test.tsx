@@ -59,8 +59,8 @@ const tourWithSettingsSection = (
   </>
 )
 
-const renderTour = (ui = tourWithSettingsSection) =>
-  render(ui, { routerProps: { pathname: '/spaces', query: { spaceId: mockSpaceId } } })
+const renderTour = (ui = tourWithSettingsSection, query: Record<string, string> = {}) =>
+  render(ui, { routerProps: { pathname: '/spaces', query: { spaceId: mockSpaceId, ...query } } })
 
 const NO_CHECKOUT = { status: 'idle', subscription: undefined, dismiss: jest.fn(), retry: jest.fn() }
 const TRIAL_CHECKOUT = {
@@ -244,5 +244,12 @@ describe('WorkspaceTour', () => {
 
     expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
     expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBe(true)
+  })
+
+  it('waits while the URL still carries a checkout session, before the checkout confirmation has mounted', () => {
+    renderTour(<WorkspaceTour />, { sessionId: faker.string.alphanumeric(16) })
+
+    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
   })
 })
