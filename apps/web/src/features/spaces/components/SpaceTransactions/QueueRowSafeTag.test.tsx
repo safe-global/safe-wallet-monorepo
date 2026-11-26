@@ -6,7 +6,14 @@ import QueueRowSafeTag from './QueueRowSafeTag'
 const mockConfigs = jest.fn(() => [{ chainId: '1', chainName: 'Ethereum', shortName: 'eth', chainLogoUri: null }])
 jest.mock('@/hooks/useChains', () => ({ __esModule: true, default: () => ({ configs: mockConfigs() }) }))
 jest.mock('@/hooks/useSafeDisplayName', () => ({ useSafeDisplayName: () => 'Treasury' }))
-jest.mock('./QueueParty/PartyCard', () => ({ __esModule: true, default: () => <span data-testid="party-card" /> }))
+const mockPartyCard = jest.fn()
+jest.mock('./QueueParty/PartyCard', () => ({
+  __esModule: true,
+  default: (props: { safeHref?: string }) => {
+    mockPartyCard(props)
+    return <span data-testid="party-card" />
+  },
+}))
 
 const safeAddress = checksumAddress(faker.finance.ethereumAddress())
 const spaceId = faker.string.uuid()
@@ -29,9 +36,13 @@ describe('QueueRowSafeTag', () => {
   it('opens the Safe in place on a click', () => {
     const { push, link } = renderTag()
 
-    fireEvent.click(link!)
+    fireEvent.click(link!, { detail: 1 })
 
-    expect(push).toHaveBeenCalledWith(`/home?safe=eth:${safeAddress}&spaceId=${spaceId}`)
+    expect(push).toHaveBeenCalledWith(
+      `/home?safe=eth:${safeAddress}&spaceId=${spaceId}`,
+      expect.anything(),
+      expect.anything(),
+    )
   })
 
   it.each([{ metaKey: true }, { ctrlKey: true }, { shiftKey: true }])(
@@ -39,11 +50,22 @@ describe('QueueRowSafeTag', () => {
     (modifier) => {
       const { push, link } = renderTag()
 
-      fireEvent.click(link!, modifier)
+      fireEvent.click(link!, { detail: 1, ...modifier })
 
       expect(push).not.toHaveBeenCalled()
     },
   )
+
+  it('gives the party card the Safe link, for keyboard and touch users', async () => {
+    const { link } = renderTag()
+
+    fireEvent.click(link!, { detail: 0 })
+
+    await screen.findByTestId('party-card')
+    expect(mockPartyCard).toHaveBeenCalledWith(
+      expect.objectContaining({ safeHref: `/home?safe=eth:${safeAddress}&spaceId=${spaceId}` }),
+    )
+  })
 
   it('shows no link for a network the app has no config for', () => {
     const { link } = renderTag('424242')

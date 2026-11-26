@@ -25,6 +25,20 @@ const card = (name?: string) => (
   />
 )
 
+function QueuePartyCardWithOpen() {
+  return (
+    <QueuePartyCard
+      avatar={<Identicon address={ADDRESS} size={32} />}
+      title={getPartyTitle('Treasury', ETHEREUM.chainName)}
+      address={ADDRESS}
+      copied={false}
+      onCopy={() => undefined}
+      explorer={{ href: `https://etherscan.io/address/${ADDRESS}`, label: 'Etherscan' }}
+      safeHref={`/home?safe=eth:${ADDRESS}`}
+    />
+  )
+}
+
 const meta = {
   title: 'Features/Spaces/Transactions/QueueSafeTag',
   component: QueueSafeTag,
@@ -37,9 +51,17 @@ type Story = StoryObj<typeof meta>
 
 export const Named: Story = {}
 
-/** Links to the Safe's home: a click opens the Safe, hovering still shows the card */
-export const Link: Story = {
-  args: { href: `/home?safe=eth:${ADDRESS}`, onNavigate: (event) => event.preventDefault() },
+/** Links to the Safe's home: a mouse click opens the Safe; hovering, a tap or Enter shows the card */
+export const Link: Story = { args: { href: `/home?safe=eth:${ADDRESS}` } }
+
+/** The card of a linked tag, for a tap or Enter: Open Safe takes keyboard and touch users to the Safe */
+export const LinkPartyCard: Story = {
+  args: {
+    href: `/home?safe=eth:${ADDRESS}`,
+    card: <QueuePartyCardWithOpen />,
+    defaultOpen: true,
+  },
+  parameters: { layout: 'centered' },
 }
 
 /** A long name truncates so the tag keeps its width */
