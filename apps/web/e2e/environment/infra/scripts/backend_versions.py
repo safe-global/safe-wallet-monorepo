@@ -26,8 +26,11 @@ class Service:
     name: str
     repository: str
     about: Mapping[str, str]
-    # Set when `main` builds overwrite the `staging` tag; /about then reports the last release, not the build.
+    # The /about field with the build commit, for services whose `version` is the last release, not the build.
     commit_field: Optional[str] = None
+    # True when `main` builds are tagged main-<sha7>: staging then pins the build that /about reports. Otherwise
+    # each `main` build overwrites the `staging` tag, and staging pins that tag.
+    main_sha_tags: bool = False
 
 
 @dataclass(frozen=True)
@@ -59,7 +62,7 @@ SERVICES = {
     "DECODER_IMAGE": Service("Decoder", "ghcr.io/safe-global/safe-decoder-service", {
         "staging": "https://api.5afe.dev/decoder/api/v1/about",
         "production": "https://api.safe.global/decoder/api/v1/about",
-    }, commit_field="buildCommit"),
+    }, commit_field="buildCommit", main_sha_tags=True),
     "EVENTS_IMAGE": DeployedService("Events Service", "ghcr.io/safe-global/safe-events-service",
         "safe-global/safe-events-service", {"staging": "devstaging", "production": "production"}),
 }
@@ -152,12 +155,14 @@ def resolve_service(service, backend, read=read_json, inspect=inspect_image):
         tag = version
     elif backend == "production":
         tag = f"v{version}"
+    elif service.main_sha_tags:
+        tag = f"main-{about_field(about, service.commit_field, service, url)[:7]}"
     else:
         tag = "staging"
     reference = f"{service.repository}:{tag}"
     image = inspect(reference)
     warning = None
-    if service.commit_field and backend == "staging":
+    if tag == "staging":
         deployed = about_field(about, service.commit_field, service, url)
         if image.build_commit != deployed:
             warning = (
