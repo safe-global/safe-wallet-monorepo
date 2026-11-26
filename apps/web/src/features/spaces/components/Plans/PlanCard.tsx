@@ -218,9 +218,9 @@ export const PlanCard = ({
   const { subtitle, supportLevel, supportDetail } = tier.copy ?? {}
   const isPrimary = isOnlyCard || tier.name === RECOMMENDED_PLAN
   const isOnThisPlan = isOnPlan(tier, actions.currentPlan)
-  const isCurrentPlan = isOnThisPlan && Boolean(tier.isCurrent)
   const isFeatured = isOnlyCard || isOnThisPlan || (isPrimary && !actions.currentPlan)
   const option = pickSeatOption(tier, actions.currentPlan, seatsLabel)
+  const isCurrentPlan = isOnThisPlan && Boolean(tier.isCurrent) && option?.priceId === tier.currentPriceId
   const hasPicked = seatsLabel !== undefined || opensOnSize(tier, actions.currentPlan)
   const price = !option ? undefined : hasPicked ? getPlanPrice(tier, option) : UNPICKED_PRICE
   const isYearly = tier.billingCycle === 'year'

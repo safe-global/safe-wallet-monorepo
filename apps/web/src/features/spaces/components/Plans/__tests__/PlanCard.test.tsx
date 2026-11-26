@@ -89,6 +89,30 @@ describe('PlanCard', () => {
     expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
   })
 
+  it.each([
+    ['a paid plan', businessPlan()],
+    ['a trial', businessPlan({ isTrialing: true, seatsLabel: '10 Safe accounts' })],
+  ])('marks only the size in force as current on %s', async (_, currentPlan) => {
+    const Picker = () => {
+      const [seatsLabel, setSeatsLabel] = useState<string>()
+      return (
+        <PlanCard
+          location={PlanLocation.PLANS_PAGE}
+          tier={currentTier('price_b10m')}
+          currentPlan={currentPlan}
+          seatsLabel={seatsLabel}
+          onSeatsChange={setSeatsLabel}
+        />
+      )
+    }
+    const { user } = renderWithUserEvent(<Picker />)
+    expect(screen.getByTestId('plan-current-badge')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: '5 Safe accounts' }))
+
+    expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
+  })
+
   it('opens the other billing cycle on the Safe count of the plan in force', () => {
     const yearly: PlanTier = {
       ...BUSINESS,
