@@ -209,6 +209,23 @@ describe('useGasPrice', () => {
     expect(result.current[0]?.maxPriorityFeePerGas?.toString()).toEqual('4975')
   })
 
+  it('should cap the priority fee at a fixed gas price that is lower than the suggested priority fee', async () => {
+    ;(useCurrentChain as jest.Mock).mockReturnValue({
+      chainId: '11155111',
+      gasPrice: [{ type: 'fixed', weiValue: '4000' }],
+      features: ['EIP1559'],
+    })
+
+    const { result } = renderHook(() => useGasPrice())
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(result.current[0]?.maxFeePerGas?.toString()).toBe('4000')
+    expect(result.current[0]?.maxPriorityFeePerGas?.toString()).toBe('4000')
+  })
+
   it('should be able to set a fixed EIP 1559 gas price', async () => {
     ;(useCurrentChain as jest.Mock).mockReturnValue({
       chainId: '10',

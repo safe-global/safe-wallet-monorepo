@@ -164,9 +164,11 @@ const getGasParameters = (
   }
 
   if ('gasPrice' in estimation) {
+    const tip = isEIP1559 ? feeData?.maxPriorityFeePerGas : undefined
     return {
       maxFeePerGas: estimation.gasPrice,
-      maxPriorityFeePerGas: isEIP1559 ? feeData?.maxPriorityFeePerGas : undefined,
+      // The node's suggested tip can exceed the configured price, and a tip above the fee cap is rejected
+      maxPriorityFeePerGas: tip != null && tip > estimation.gasPrice ? estimation.gasPrice : tip,
     }
   }
 
