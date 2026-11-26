@@ -3,11 +3,7 @@ import { POLICIES_CLOCK_TICK_MS, usePoliciesClock } from '../usePoliciesClock'
 
 describe('usePoliciesClock', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   it('should, when it mounts, read the current time', () => {
