@@ -47,12 +47,13 @@ describe('overlay queue', () => {
     expect(getShown()).toBe('checkout')
   })
 
-  it('ignores an acknowledgement from an overlay that does not have the screen', () => {
+  it('refuses an acknowledgement from an overlay that does not have the screen', () => {
     setDue('tour', 'guide')
     setDue('checkout', 'confirmation')
-    acknowledge('tour')
 
+    expect(acknowledge('tour')).toBe(false)
     expect(getShown()).toBe('checkout')
+    expect(acknowledge('checkout')).toBe(true)
   })
 
   it('keeps the first arrival when an overlay reports that it is due again', () => {

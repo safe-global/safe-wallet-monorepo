@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import type { OverlayKind } from '../kinds'
-import { _resetOverlayQueue } from '../store'
+import { _resetOverlayQueue, getShown, subscribe } from '../store'
 import { useOverlay } from '../useOverlay'
 
 const Overlay = ({ name, kind, onShown }: { name: string; kind: OverlayKind; onShown?: () => void }) => {
@@ -13,6 +13,22 @@ const Overlay = ({ name, kind, onShown }: { name: string; kind: OverlayKind; onS
   return (
     <div role="dialog" aria-label={name}>
       <button onClick={() => setIsDue(false)}>Close {name}</button>
+    </div>
+  )
+}
+
+// Becomes due once, in the very render in which another overlay first shows
+const ReminderDueOnceAnotherShows = () => {
+  const [state, setState] = useState<'waiting' | 'due' | 'closed'>('waiting')
+  const isAnotherShown = useSyncExternalStore(subscribe, getShown, () => null) !== null
+  if (isAnotherShown && state === 'waiting') setState('due')
+  const isShown = useOverlay({ kind: 'reminder', isDue: state === 'due' })
+
+  if (!isShown) return null
+
+  return (
+    <div role="dialog" aria-label="Reminder">
+      <button onClick={() => setState('closed')}>Close Reminder</button>
     </div>
   )
 }
@@ -89,5 +105,23 @@ describe('useOverlay', () => {
     expect(screen.getAllByRole('dialog')).toHaveLength(1)
     fireEvent.click(screen.getByRole('button', { name: 'Close First' }))
     expect(screen.getByRole('dialog', { name: 'Second' })).toBeInTheDocument()
+  })
+
+  it('reports an overlay as shown only once it keeps the screen, not when a more important one takes it in the same commit', () => {
+    const onTourShown = jest.fn()
+    render(
+      <>
+        <ReminderDueOnceAnotherShows />
+        <Overlay name="Tour" kind="guide" onShown={onTourShown} />
+      </>,
+    )
+
+    expect(screen.getByRole('dialog', { name: 'Reminder' })).toBeInTheDocument()
+    expect(onTourShown).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Reminder' }))
+
+    expect(screen.getByRole('dialog', { name: 'Tour' })).toBeInTheDocument()
+    expect(onTourShown).toHaveBeenCalledTimes(1)
   })
 })

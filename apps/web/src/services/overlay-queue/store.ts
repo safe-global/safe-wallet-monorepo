@@ -49,9 +49,14 @@ export const clearDue = (key: string) => {
   notify()
 }
 
-/** Called once the overlay rendered as shown, so that it keeps the screen until it closes. */
-export const acknowledge = (key: string) => {
-  if (getShown() === key) acknowledged = key
+/**
+ * Called once the overlay rendered as shown, so that it keeps the screen until it closes. False when a more important
+ * overlay became due in the same commit and took the screen first.
+ */
+export const acknowledge = (key: string): boolean => {
+  if (getShown() !== key) return false
+  acknowledged = key
+  return true
 }
 
 export const _resetOverlayQueue = () => {

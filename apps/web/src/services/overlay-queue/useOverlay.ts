@@ -30,9 +30,7 @@ export const useOverlay = ({ kind, isDue, onShown }: OverlayOptions): boolean =>
   }, [key, kind, isDue])
 
   useEffect(() => {
-    if (!isShown) return
-    acknowledge(key)
-    reportShown()
+    if (isShown && acknowledge(key)) reportShown()
   }, [key, isShown])
 
   return isShown
