@@ -5,6 +5,8 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import UnavailableSafesAlertView from '@safe-global/views/features/spaces/components/SpaceQueue/UnavailableSafesAlertView'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
+import { useAppSelector } from '@/store'
 
 /** The gateway reads the queue of this many distinct Safe addresses at most */
 export const SPACE_QUEUE_MAX_SAFES = 100
@@ -26,14 +28,30 @@ type UnavailableSafesAlertProps = {
   isRetrying?: boolean
 }
 
-const UnavailableSafesAlert = ({ spaceId, safes, onRetry, isRetrying }: UnavailableSafesAlertProps): ReactElement => {
+const UnavailableSafesAlert = ({
+  spaceId,
+  safes,
+  onRetry,
+  isRetrying,
+}: UnavailableSafesAlertProps): ReactElement | null => {
   const getName = useSafeNameResolver()
   const { configs } = useChains()
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId })
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
+
+  // A counterfactual Safe has no queue to load, so it isn't a failure. Only this device knows its own
+  const failedSafes = useMemo(() => {
+    const undeployed = new Set(
+      Object.entries(undeployedSafes ?? {}).flatMap(([chainId, safesOnChain]) =>
+        Object.keys(safesOnChain ?? {}).map((address) => `${chainId}:${address.toLowerCase()}`),
+      ),
+    )
+    return safes.filter(({ chainId, safeAddress }) => !undeployed.has(`${chainId}:${safeAddress.toLowerCase()}`))
+  }, [safes, undeployedSafes])
 
   const rows = useMemo(
     () =>
-      safes.map(({ chainId, safeAddress }) => {
+      failedSafes.map(({ chainId, safeAddress }) => {
         const chain = configs.find((config) => config.chainId === chainId)
         return {
           id: `${chainId}:${safeAddress}`,
@@ -42,12 +60,14 @@ const UnavailableSafesAlert = ({ spaceId, safes, onRetry, isRetrying }: Unavaila
           networkName: chain?.chainName ?? `Chain ${chainId}`,
         }
       }),
-    [safes, getName, configs],
+    [failedSafes, getName, configs],
   )
+
+  if (rows.length === 0) return null
 
   return (
     <UnavailableSafesAlertView
-      title={getUnavailableTitle(safes.length)}
+      title={getUnavailableTitle(rows.length)}
       maxSafes={SPACE_QUEUE_MAX_SAFES}
       isOverLimit={countSafeAddresses(spaceSafes?.safes) > SPACE_QUEUE_MAX_SAFES}
       rows={rows}

@@ -333,7 +333,7 @@ describe('getNestedWallet send', () => {
         SIGNER,
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ declared: declared }),
+        expect.objectContaining({ declared }),
       )
     })
 
@@ -351,7 +351,7 @@ describe('getNestedWallet send', () => {
         SIGNER,
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ declared: declared }),
+        expect.objectContaining({ declared }),
       )
     })
 
@@ -370,7 +370,7 @@ describe('getNestedWallet send', () => {
         SIGNER,
         expect.anything(),
         expect.anything(),
-        expect.objectContaining({ declared: declared }),
+        expect.objectContaining({ declared }),
       )
     })
 

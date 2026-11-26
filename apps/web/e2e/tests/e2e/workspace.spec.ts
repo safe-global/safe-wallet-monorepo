@@ -24,7 +24,7 @@ test.describe('Workspace', { tag: '@e2e' }, () => {
     await workspace.createButton.click()
     await workspace.startTrialViaWizard(name, BUSINESS_SEATS)
     await expect(safePage.getByText('Plan: Business')).toBeVisible()
-    await workspace.checkoutStartTrialButton.click()
+    await workspace.completeCheckoutButton.click()
 
     await expect(workspace.trialActivatedDialog).toBeVisible()
     await workspace.trialActivatedDialog.getByRole('button', { name: 'Get started' }).click()

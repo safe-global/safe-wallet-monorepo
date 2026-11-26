@@ -20,8 +20,8 @@ import {
 import { getStoreInstance } from '@/store'
 import type * as Store from '@/store'
 import type * as AddressBookSlice from '@/store/addressBookSlice'
-import { render, screen, waitFor, within } from '@/tests/test-utils'
-import type { AddressBookState } from '@/store/addressBookSlice'
+import { act, render, screen, waitFor, within } from '@/tests/test-utils'
+import { removeAddressBookEntry, type AddressBookState } from '@/store/addressBookSlice'
 import { useWorkspaceSigners, type WorkspaceSigner } from '../../../hooks/useWorkspaceSigners'
 import { useAddressBookRequestActions } from '../../../hooks/useAddressBookRequestActions'
 import SpaceAddressBookV2 from '../index'
@@ -888,6 +888,42 @@ describe('SpaceAddressBookV2', () => {
       expect(screen.getByRole('tab', { name: 'Suggested (1)' })).toBeInTheDocument()
     })
 
+    it.each(['admin', 'member'] as const)('hides suggestions saved in Local contacts from the %s', async (role) => {
+      const [saved, open] = [signerBuilder().build(), signerBuilder().build()]
+      mockRole(role)
+      mockSigners({ signers: [saved, open] })
+
+      renderAddressBook({ '137': { [saved.address]: faker.person.fullName() } })
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByText(`${open.safes[0].name} signer 1`)).toBeInTheDocument()
+      expect(screen.queryByText(`${saved.safes[0].name} signer 1`)).not.toBeInTheDocument()
+    })
+
+    it('suggests a Local contact again once it is deleted from the local book', async () => {
+      const signer = signerBuilder().build()
+      mockSigners({ signers: [signer] })
+
+      renderAddressBook({ '1': { [signer.address]: faker.person.fullName() } })
+      expect(screen.getByRole('tab', { name: 'Suggested (0)' })).toBeInTheDocument()
+
+      act(() => {
+        getStoreInstance().dispatch(removeAddressBookEntry({ chainId: '1', address: signer.address }))
+      })
+
+      expect(screen.getByRole('tab', { name: 'Suggested (1)' })).toBeInTheDocument()
+    })
+
+    it('keeps suggestions saved in Local contacts without the private address book', () => {
+      const signer = signerBuilder().build()
+      mockPrivateAddressBook(false)
+      mockSigners({ signers: [signer] })
+
+      renderAddressBook({ '1': { [signer.address]: faker.person.fullName() } })
+
+      expect(screen.getByRole('tab', { name: 'Suggested (1)' })).toBeInTheDocument()
+    })
+
     it('waits for the pending requests before showing suggestions', async () => {
       mockSigners({ signers: [signerBuilder().build()] })
       mockRequests({ isLoading: true })
@@ -921,6 +957,29 @@ describe('SpaceAddressBookV2', () => {
 
       expect(rowOf(first.name)).toBeInTheDocument()
       expect(rowOf(second.name)).toBeInTheDocument()
+    })
+
+    it('searches the pending requests by requester and keeps the tab count', async () => {
+      const [first, second] = [spaceAddressBookRequestBuilder().build(), spaceAddressBookRequestBuilder().build()]
+      mockRequests({ items: [first, second] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (2)' }))
+      await userEvent.type(screen.getByLabelText('Search contacts by name, address or member'), first.requestedBy)
+
+      expect(rowOf(first.name)).toBeInTheDocument()
+      expect(screen.queryByText(second.name)).not.toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: 'Pending (2)' })).toBeInTheDocument()
+    })
+
+    it('shows no results for a pending search that matches nothing', async () => {
+      mockRequests({ items: [spaceAddressBookRequestBuilder().build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+      await userEvent.type(screen.getByLabelText('Search contacts by name, address or member'), 'no such request')
+
+      expect(screen.getByTestId('address-book-no-results')).toBeInTheDocument()
     })
 
     it('lets an admin accept and decline a request', async () => {

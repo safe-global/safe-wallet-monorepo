@@ -18,6 +18,17 @@ const nameInput = () => screen.getByRole('textbox')
 const saveButton = () => screen.getByRole('button', { name: 'Save' })
 
 describe('EditOwnerDialog', () => {
+  it('blocks editing a name that comes from the Workspace address book', async () => {
+    const { user } = renderWithUserEvent(
+      <EditOwnerDialog chainId={CHAIN_ID} address={fakerChecksummedAddress()} name={CURRENT_NAME} isWorkspaceName />,
+    )
+    const button = screen.getByRole('button', { name: 'Edit signer' })
+
+    expect(button).toBeDisabled()
+    await user.hover(button.parentElement as HTMLElement)
+    expect(await screen.findByText('Rename this signer in the Workspace address book')).toBeInTheDocument()
+  })
+
   it('disables Save while the name is unchanged', async () => {
     await openEditOwnerDialog()
 

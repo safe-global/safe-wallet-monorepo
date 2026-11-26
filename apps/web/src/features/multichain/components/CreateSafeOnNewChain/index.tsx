@@ -323,21 +323,26 @@ export const CreateSafeOnNewChain = ({
   defaultChainId?: string
 }) => {
   const { configs } = useChains()
+  // Callers pass a new array on each render; depending on it would reload the creation data and reset the dialog
+  const sourceChainId = deployedChainIds[0]
+  const deployedChainKey = deployedChainIds.join()
   const deployedChains = useMemo(
-    () => configs.filter((config) => config.chainId === deployedChainIds[0]),
-    [configs, deployedChainIds],
+    () => configs.filter((config) => config.chainId === sourceChainId),
+    [configs, sourceChainId],
   )
 
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChains)
-  const allCompatibleChains = useCompatibleNetworks(safeCreationResult[0], configs)
-  const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
-  const replayableChains = useMemo(
-    () =>
+  const [safeCreationData] = safeCreationResult
+  const allCompatibleChains = useCompatibleNetworks(safeCreationData, configs)
+  const isUnsupportedSafeCreationVersion = Boolean(safeCreationData && !allCompatibleChains?.length)
+  const replayableChains = useMemo(() => {
+    const deployedIds = deployedChainKey.split(',')
+    return (
       allCompatibleChains?.filter(
-        (config) => !deployedChainIds.includes(config.chainId) && hasMultiChainAddNetworkFeature(config),
-      ) || [],
-    [allCompatibleChains, deployedChainIds],
-  )
+        (config) => !deployedIds.includes(config.chainId) && hasMultiChainAddNetworkFeature(config),
+      ) || []
+    )
+  }, [allCompatibleChains, deployedChainKey])
 
   const preselectedChain = useMemo(
     () => (defaultChainId ? replayableChains?.find((c) => c.chainId === defaultChainId) : undefined),

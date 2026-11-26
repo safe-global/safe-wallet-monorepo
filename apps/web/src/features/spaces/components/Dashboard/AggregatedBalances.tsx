@@ -1,4 +1,3 @@
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useRouter } from 'next/router'
 import { useContext, useCallback, useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
@@ -15,15 +14,17 @@ import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { DashboardHeader } from '../../public/components/DashboardHeader'
+import { DashboardHeader, DashboardHeaderSkeleton } from '../../public/components/DashboardHeader'
 import QrModal from '@/components/common/QrCodeButton/QrModal'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const AggregatedBalance = ({
   safeItems,
+  safesLoading = false,
   accountsLoading = false,
 }: {
   safeItems: SafeItem[]
+  safesLoading?: boolean
   accountsLoading?: boolean
 }) => {
   const currency = useAppSelector(selectCurrency)
@@ -36,7 +37,8 @@ const AggregatedBalance = ({
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false)
 
   const { configs } = useChains()
-  const { data: safeOverviews, isLoading: overviewsLoading } = useGetMultipleSafeOverviewsQuery({
+  // currentData, not data: data keeps the previous Safes' result while the new list loads, which summed to $0
+  const { currentData: safeOverviews, isFetching: overviewsFetching } = useGetMultipleSafeOverviewsQuery({
     safes: safeItems,
     currency,
   })
@@ -46,7 +48,7 @@ const AggregatedBalance = ({
     [configs],
   )
   const aggregatedBalance = aggregateBalance(safeItems, safeOverviews, summaries, testnetChainIds)
-  const isLoading = overviewsLoading || summaries.isLoading
+  const isLoading = safesLoading || (overviewsFetching && !safeOverviews) || summaries.isLoading
 
   const safeQueryParam = chain && firstSafe ? `${chain.shortName}:${firstSafe.address}` : undefined
 
@@ -65,7 +67,7 @@ const AggregatedBalance = ({
     })
   }, [router])
 
-  if (isLoading) return <AggregatedBalanceSkeleton />
+  if (isLoading) return <DashboardHeaderSkeleton />
 
   const isDimmed = safeItems.length === 0 || accountsLoading
   const formattedValue = formatCurrencyPrecise(aggregatedBalance, currency)
@@ -117,18 +119,6 @@ const AggregatedBalance = ({
       </div>
       {isReceiveModalOpen && <QrModal onClose={handleReceiveClose} />}
     </>
-  )
-}
-
-const AggregatedBalanceSkeleton = () => {
-  return (
-    <div className="mb-4 flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-[30px] w-[200px]" />
-      </div>
-      <Skeleton className="h-9 w-[400px]" />
-    </div>
   )
 }
 

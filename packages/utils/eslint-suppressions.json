@@ -14,19 +14,9 @@
       "count": 8
     }
   },
-  "src/features/safe-shield/hooks/__tests__/useThreatAnalysisHypernative.test.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 2
-    }
-  },
   "src/features/safe-shield/hooks/__tests__/useThreatAnalysisHypernativeBatch.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 6
-    }
-  },
-  "src/features/safe-shield/hooks/__tests__/useThreatAnalysisHypernativeMessage.test.ts": {
-    "@typescript-eslint/no-explicit-any": {
-      "count": 7
     }
   },
   "src/features/safe-shield/utils/__tests__/analysisUtils.test.ts": {

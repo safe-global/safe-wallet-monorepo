@@ -144,7 +144,7 @@ const SpaceDashboard = () => {
 
       <>
         <div>
-          <AggregatedBalance safeItems={safeItems} accountsLoading={isOverviewLoading} />
+          <AggregatedBalance safeItems={safeItems} safesLoading={isSafesLoading} accountsLoading={isOverviewLoading} />
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
