@@ -22,6 +22,7 @@ import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvi
  * @remarks
  * Key Props:
  * - TooltipProvider: `delay`
+ * - TooltipDelay: `delay` for every tooltip inside it that doesn't set its own
  * - TooltipContent: `side`, `sideOffset`, `align`, `alignOffset`, `anchor` (position against an element other than the trigger)
  * - Root / Trigger: see Base UI
  */

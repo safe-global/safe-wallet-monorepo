@@ -43,7 +43,6 @@ const Dashboard = (): ReactElement => {
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
 
-  const noAssets = balancesLoaded && items.length === 0
   const defiV1 = useDefiV1()
 
   return (
