@@ -5,14 +5,14 @@
     {
       "key": "DEFAULT_TOKENLIST",
       "description": "Curated default token list for the chain.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "NATIVE_WALLETCONNECT",
       "description": "Native WalletConnect integration (connect a Safe as a wallet).",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -21,28 +21,110 @@
       "description": "Use the Zerion-backed CGW portfolio endpoint for Safe balances.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "324",
+        "480",
+        "999",
+        "4326",
+        "4663",
+        "5000",
+        "8453",
+        "9745",
+        "42161",
+        "42220",
+        "42431",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "534352",
+        "747474",
+        "5042002",
+        "1313161554"
+      ]
     },
     {
       "key": "POSITIONS",
       "description": "DeFi positions display.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "324",
+        "480",
+        "999",
+        "4217",
+        "4326",
+        "4663",
+        "5000",
+        "8217",
+        "8453",
+        "9745",
+        "16661",
+        "42161",
+        "42220",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "534352",
+        "747474",
+        "1313161554"
+      ]
     },
     {
       "key": "RELAYING",
       "description": "Gasless transaction relaying.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["10", "100", "130", "137", "8453", "42161"]
     },
     {
       "key": "RISK_MITIGATION",
       "description": "Blockaid transaction risk scanning.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "324",
+        "480",
+        "999",
+        "4217",
+        "4326",
+        "8453",
+        "10143",
+        "42161",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "84532",
+        "747474",
+        "11155111"
+      ]
     },
     {
       "key": "SEND_FLOW",
@@ -56,7 +138,7 @@
       "description": "GTF relayer strategy support.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "56", "8453", "42161", "11155111"]
     }
   ]
 }
