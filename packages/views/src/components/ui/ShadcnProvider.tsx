@@ -52,7 +52,7 @@ export function usePortalContainer(): RefObject<HTMLDivElement | null> | undefin
 
 /**
  * Like usePortalContainer but resolves the ref to an element.
- * Use this for libraries (e.g. Vaul) that don't accept RefObject as a container.
+ * Use this for APIs (e.g. createPortal) that don't accept RefObject as a container.
  * The element is stored via state so consumers re-render once the DOM node mounts.
  */
 export function usePortalContainerElement(): HTMLDivElement | null {

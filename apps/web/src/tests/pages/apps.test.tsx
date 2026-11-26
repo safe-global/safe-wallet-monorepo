@@ -101,8 +101,7 @@ describe('AppsPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Close Transaction Builder preview' }))
 
-      // vaul keeps the drawer mounted for an exit animation that jsdom never finishes
-      await waitFor(() => expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'closed'))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     })
   })
 

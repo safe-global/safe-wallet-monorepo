@@ -29,6 +29,7 @@ const DEPS_TO_CHECK = [
   '@safe-global/safe-deployments',
   '@safe-global/safe-modules-deployments',
   '@cowprotocol/app-data',
+  '@base-ui/react',
 ]
 
 /**
@@ -66,7 +67,7 @@ function detectInconsistentVersions({ Yarn }, depsToCheck = DEPS_TO_CHECK) {
       if (!depVersions.has(version)) {
         depVersions.set(version, [])
       }
-      depVersions.get(version).push(workspaceName)
+      depVersions.get(version).push({ workspaceName, dependency })
     }
 
     // Only report if there are inconsistencies
@@ -78,16 +79,18 @@ function detectInconsistentVersions({ Yarn }, depsToCheck = DEPS_TO_CHECK) {
     }
   }
 
-  // Report inconsistencies
+  // Report inconsistencies as constraint errors, so `yarn install` and `yarn constraints` fail
   if (inconsistentDeps.size > 0) {
-    console.log('\n🔍 Version inconsistencies detected:')
     for (const [depName, versions] of inconsistentDeps.entries()) {
-      console.log(`\n📦 ${depName}:`)
-      for (const [version, workspaces] of versions.entries()) {
-        console.log(`  - ${version}: ${workspaces.join(', ')}`)
+      const found = [...versions.entries()]
+        .map(([version, entries]) => `${version} (${entries.map((entry) => entry.workspaceName).join(', ')})`)
+        .join('; ')
+      for (const entries of versions.values()) {
+        for (const { dependency } of entries) {
+          dependency.error(`${depName} must use one version range in every workspace; found ${found}`)
+        }
       }
     }
-    console.log('\n⚠️  Consider standardizing these dependency versions across all workspaces.\n')
   } else {
     console.log('\n✅ All specified dependencies have consistent versions across workspaces.\n')
   }
