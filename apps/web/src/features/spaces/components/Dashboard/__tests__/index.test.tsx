@@ -238,7 +238,7 @@ const restoreDefaultMocks = () => {
   })
   useSpaceAccountsDataMock.mockReturnValue({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })
   mockUseHasFeature.mockReturnValue(false)
-  mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
+  mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: false, close: jest.fn() })
   mockUseSpacePlan.mockReturnValue({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() })
   mockUseSpacePlanState.mockReturnValue(PLAN_STATE)
   mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
@@ -474,7 +474,7 @@ describe('SpaceDashboard – Safe Pro announcement', () => {
   })
 
   it('shows the announcement when the hook opens it', () => {
-    mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: true, setIsOpen: jest.fn() })
+    mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: true, close: jest.fn() })
 
     render(<SpaceDashboard />)
 

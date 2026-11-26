@@ -1,5 +1,8 @@
-import { renderHook } from '@/tests/test-utils'
+import { createElement, useState } from 'react'
+import { act, render, renderHook, screen } from '@/tests/test-utils'
 import local from '@/services/local-storage/local'
+import { _resetOverlayQueue } from '@/services/overlay-queue/store'
+import { useOverlay } from '@/services/overlay-queue/useOverlay'
 import { useSafeProAnnouncementModal, SAFE_PRO_ANNOUNCEMENT_SEEN_KEY } from '../useSafeProAnnouncementModal'
 
 jest.mock('@/hooks/useIsSafeProEnabled')
@@ -13,6 +16,7 @@ describe('useSafeProAnnouncementModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     window.localStorage.clear()
+    _resetOverlayQueue()
     mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
     mockUseIsSafeProEnabled.mockReturnValue(false)
   })
@@ -83,5 +87,36 @@ describe('useSafeProAnnouncementModal', () => {
     rerender()
 
     expect(result.current.isOpen).toBe(true)
+  })
+
+  it('stays open after it records that it was seen, until it is closed', () => {
+    const { result } = renderHook(() => useSafeProAnnouncementModal(true))
+
+    expect(result.current.isOpen).toBe(true)
+
+    act(() => result.current.close())
+
+    expect(result.current.isOpen).toBe(false)
+  })
+
+  it('waits while a tour is on screen, and records that it was seen only once it shows', () => {
+    let closeTour = () => {}
+    const Tour = () => {
+      const [isDue, setIsDue] = useState(true)
+      closeTour = () => setIsDue(false)
+      return useOverlay({ kind: 'guide', isDue }) ? createElement('p', null, 'Tour') : null
+    }
+    render(createElement(Tour))
+    expect(screen.getByText('Tour')).toBeInTheDocument()
+
+    const { result } = renderHook(() => useSafeProAnnouncementModal(true))
+
+    expect(result.current.isOpen).toBe(false)
+    expect(local.getItem<boolean>(SAFE_PRO_ANNOUNCEMENT_SEEN_KEY)).toBeNull()
+
+    act(() => closeTour())
+
+    expect(result.current.isOpen).toBe(true)
+    expect(local.getItem<boolean>(SAFE_PRO_ANNOUNCEMENT_SEEN_KEY)).toBe(true)
   })
 })

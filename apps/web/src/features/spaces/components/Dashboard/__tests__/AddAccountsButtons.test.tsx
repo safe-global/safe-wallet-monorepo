@@ -111,7 +111,7 @@ jest.mock('@/features/safe-pro-announcement/public/components/SafeProAnnouncemen
 }))
 jest.mock('@/features/safe-pro-announcement/public/hooks/useSafeProAnnouncementModal', () => ({
   ...jest.requireActual('@/features/safe-pro-announcement/public/hooks/useSafeProAnnouncementModal'),
-  useSafeProAnnouncementModal: () => ({ isOpen: false, setIsOpen: jest.fn() }),
+  useSafeProAnnouncementModal: () => ({ isOpen: false, close: jest.fn() }),
 }))
 
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
