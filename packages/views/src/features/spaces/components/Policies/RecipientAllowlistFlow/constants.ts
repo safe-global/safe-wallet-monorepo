@@ -41,7 +41,7 @@ export const SELECT_ALL_LABEL = 'Select all'
 export const RECIPIENTS_SECTION_TITLE = 'Who can receive funds'
 export const RECIPIENTS_SECTION_DESCRIPTION = 'Only transfers to the recipients selected below will be allowed.'
 export const RECIPIENTS_SEARCH_PLACEHOLDER = 'Search contacts or paste an address'
-export const RECIPIENTS_NOT_FOUND_TEXT = 'No contacts found. Paste an address to add it.'
+export const RECIPIENTS_NOT_FOUND_TEXT = 'No contacts found. Paste an address or ENS name to add it.'
 export const IN_ADDRESS_BOOK_LABEL = 'In your address book'
 export const RECIPIENT_FALLBACK_NAME = 'New recipient'
 

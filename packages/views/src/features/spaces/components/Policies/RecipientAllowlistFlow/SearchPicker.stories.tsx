@@ -139,7 +139,7 @@ export const ContactsOpen: Story = {
   args: {
     placeholder: 'Search contacts or paste an address',
     groups: CONTACTS,
-    emptyLabel: 'No contacts found. Paste an address to add it.',
+    emptyLabel: 'No contacts found. Paste an address or ENS name to add it.',
     onSelectAll: undefined,
   },
   play: TokensOpen.play,

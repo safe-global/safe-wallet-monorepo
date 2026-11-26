@@ -21,11 +21,13 @@ import {
   RECIPIENTS_SECTION_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import useWorkspaceName from '@/components/common/AddressBookInput/useWorkspaceName'
+import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'
+import { isDomain } from '@/services/ens'
 import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import type { AllowlistFormRecipient, RecipientAllowlistFormValues } from '../types'
-import { parsePastedRecipient, toggleByAddress } from '../utils/allowlistForm'
+import { parsePastedRecipient, toggleByAddress, validateAllowlistRecipient } from '../utils/allowlistForm'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
@@ -59,8 +61,11 @@ const RecipientsSection = ({ values, onChange, safeAddress, chainId }: Recipient
   const isEditMode = useIsEditMode()
   const addressBook = useMergedAddressBooks(chainId)
   const workspaceName = useWorkspaceName()
-  const chainShortName = useChain(chainId ?? '')?.shortName
+  const chain = useChain(chainId ?? '')
+  const chainShortName = chain?.shortName
   const [query, setQuery] = useState('')
+  const ensName = safeAddress && chain && isDomain(query.trim()) ? query.trim() : ''
+  const { address: ensAddress, resolverError, resolving } = useNameResolver(ensName, chain)
 
   const contacts = useMemo(
     () =>
@@ -89,14 +94,24 @@ const RecipientsSection = ({ values, onChange, safeAddress, chainId }: Recipient
   const findContact = (address: string): ExtendedContact | undefined =>
     contacts.find((contact) => sameAddress(contact.address, address))
 
-  const pasted = safeAddress
-    ? parsePastedRecipient(query, { safeAddress, chainShortName, existing: recipients })
+  const resolved =
+    safeAddress && ensAddress
+      ? {
+          address: checksumAddress(ensAddress),
+          name: ensName,
+          error: validateAllowlistRecipient(ensAddress, { safeAddress, existing: recipients }),
+        }
+      : undefined
+  const pasted: { address: string; name?: string; error?: string } | undefined = safeAddress
+    ? (parsePastedRecipient(query, { safeAddress, chainShortName, existing: recipients }) ?? resolved)
     : undefined
   const pastedContact = pasted && findContact(pasted.address)
   const pastedItem =
     pasted && (pastedContact || !pasted.error)
-      ? toPickerItem(pastedContact?.name ?? RECIPIENT_FALLBACK_NAME, pasted.address)
+      ? toPickerItem(pastedContact?.name ?? pasted.name ?? RECIPIENT_FALLBACK_NAME, pasted.address)
       : undefined
+  const pastedError = pasted?.error && !pastedContact ? pasted.error : undefined
+  const noticeText = pastedError ?? (ensName ? resolverError?.message : undefined)
 
   const contactName = (address: string) => (chainId ? addressBook.get(address, chainId)?.name : undefined)
 
@@ -105,10 +120,11 @@ const RecipientsSection = ({ values, onChange, safeAddress, chainId }: Recipient
 
   const pick = ({ id }: SearchPickerItem) => {
     const contact = findContact(id)
+    const typedName = pasted && sameAddress(pasted.address, id) ? pasted.name : undefined
     toggle(
       contact
         ? { address: contact.address, name: contact.name, fromAddressBook: true }
-        : { address: checksumAddress(id), name: contactName(id) },
+        : { address: checksumAddress(id), name: contactName(id) ?? typedName },
     )
   }
 
@@ -127,7 +143,8 @@ const RecipientsSection = ({ values, onChange, safeAddress, chainId }: Recipient
         onQueryChange={setQuery}
         emptyLabel={RECIPIENTS_NOT_FOUND_TEXT}
         extraItem={pastedItem}
-        notice={pasted?.error && !pastedContact ? { text: pasted.error } : undefined}
+        notice={noticeText ? { text: noticeText } : undefined}
+        isLoading={!!ensName && resolving && !ensAddress}
         disabled={!safeAddress || !chainId}
         data-testid="allowlist-recipients-search"
       />
