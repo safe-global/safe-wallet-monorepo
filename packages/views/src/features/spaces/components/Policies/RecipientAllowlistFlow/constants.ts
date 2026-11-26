@@ -37,6 +37,13 @@ export const SELECT_ALL_LABEL = 'Select all'
 export const UNKNOWN_TOKEN_DETAIL = 'Unknown token'
 export const NOT_ERC20_TOKEN_TEXT = 'Only ERC-20 tokens can be added.'
 
+export const RECIPIENTS_SECTION_TITLE = 'Who can receive funds'
+export const RECIPIENTS_SECTION_DESCRIPTION = 'Only transfers to the recipients selected below will be allowed.'
+export const RECIPIENTS_SEARCH_PLACEHOLDER = 'Search contacts or paste an address'
+export const RECIPIENTS_NOT_FOUND_TEXT = 'No contacts found. Paste an address or ENS name to add it.'
+export const IN_ADDRESS_BOOK_LABEL = 'In your address book'
+export const RECIPIENT_FALLBACK_NAME = 'New recipient'
+
 export const SPACE_CONTACTS_LABEL = 'Contacts of'
 export const LOCAL_CONTACTS_LABEL = 'Local contacts'
 export const LOCAL_CONTACTS_TOOLTIP = "Saved in this browser only. Other members of the Workspace can't see them."
@@ -44,6 +51,7 @@ export const getSpaceContactsTooltip = (spaceName: string): string =>
   `Shared with everyone in ${spaceName}. Only Workspace admins can add or change these contacts.`
 export const FALLBACK_SPACE_NAME = 'your Workspace'
 
+export const IDENTICON_SIZE = 24
 export const getAllowlistAccountLabel = (name: string, chainName: string): string => `${name} on ${chainName}`
 
 export const BLOCKED_LABEL = 'Blocked'

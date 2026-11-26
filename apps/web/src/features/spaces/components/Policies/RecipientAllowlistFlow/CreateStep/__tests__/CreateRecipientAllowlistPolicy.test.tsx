@@ -5,6 +5,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/hooks/useSafeShield'
 import type { RecipientAllowlistFormValues } from '../../types'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
@@ -64,6 +65,7 @@ const mockUseAccounts = useRecipientAllowlistSafeAccounts as jest.MockedFunction
 >
 const mockUseGuardStatus = useGuardStatus as jest.MockedFunction<typeof useGuardStatus>
 const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
+const mockPoisoning = useSafeShieldForAddressPoisoning as jest.MockedFunction<typeof useSafeShieldForAddressPoisoning>
 const mockSpendingLimits = useSpendingLimitTokens as jest.MockedFunction<typeof useSpendingLimitTokens>
 
 const ETH_LIMIT = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
@@ -95,6 +97,20 @@ const completeValues = (): RecipientAllowlistFormValues => ({
   tokens: [{ address: ZERO_ADDRESS, symbol: 'ETH' }],
   recipients: [{ address: RECIPIENT, name: 'Dave' }],
 })
+
+const pickToken = (symbol: string) => {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search tokens by name or address' }), {
+    target: { value: symbol },
+  })
+  fireEvent.click(screen.getByRole('option', { name: new RegExp(symbol) }))
+}
+
+const pasteRecipient = (address: string) => {
+  fireEvent.change(screen.getByRole('combobox', { name: 'Search contacts or paste an address' }), {
+    target: { value: address },
+  })
+  fireEvent.click(screen.getByRole('option', { name: /New recipient/ }))
+}
 
 const option = (address: string, extra: Partial<SafeAccountOption> = {}): SafeAccountOption => ({
   id: buildSafeAccountId(SEPOLIA, address),
@@ -206,6 +222,33 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.queryByTestId('allowlist-recipients-section')).not.toBeInTheDocument()
   })
 
+  it.each<GuardStatus>([
+    { status: 'none' },
+    { status: 'known' },
+    { status: 'partial', missingSlot: 'module' },
+    { status: 'partial', missingSlot: 'transaction' },
+  ])('enables Next once a token and a recipient are selected, with guard state %o', (status) => {
+    accounts([option(SAFE_A)])
+    guard(status)
+    const { onNext } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+
+    pickToken('ETH')
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+
+    pasteRecipient(RECIPIENT)
+    expect(screen.getByTestId('next-btn')).toBeEnabled()
+
+    fireEvent.click(screen.getByTestId('next-btn'))
+    expect(onNext).toHaveBeenCalledWith({
+      tokens: [{ address: ZERO_ADDRESS, symbol: 'ETH' }],
+      recipients: [{ address: RECIPIENT }],
+      rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }],
+    })
+  })
+
   it('should, when the Safe has a spending limit, go on to the review on Next', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
@@ -239,6 +282,18 @@ describe('CreateRecipientAllowlistPolicy', () => {
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
     expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it('runs the address-poisoning check on every recipient', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    expect(mockPoisoning).toHaveBeenLastCalledWith([])
+
+    pasteRecipient(RECIPIENT)
+
+    expect(mockPoisoning).toHaveBeenLastCalledWith([RECIPIENT])
   })
 
   it('keeps Next disabled while the held tokens load', () => {
@@ -294,7 +349,23 @@ describe('CreateRecipientAllowlistPolicy', () => {
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
     expect(screen.getByRole('button', { name: 'Allow ETH' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Allow Dave' })).toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeEnabled()
+  })
+
+  it('should, when the Safe changes, drop the picked tokens and recipients', () => {
+    accounts([option(SAFE_A), option(SAFE_B)])
+    guard({ status: 'none' })
+    const { switchTo } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    pickToken('ETH')
+    pasteRecipient(RECIPIENT)
+    expect(screen.getAllByRole('button', { name: /^Allow / })).toHaveLength(2)
+
+    switchTo(buildSafeAccountId(SEPOLIA, SAFE_B))
+
+    expect(screen.queryByRole('button', { name: /^Allow / })).not.toBeInTheDocument()
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
   it('should show no summary and no callouts, when a token and a recipient are selected', () => {
@@ -303,6 +374,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
     expect(screen.getByTestId('allowlist-tokens-section')).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
@@ -323,6 +395,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
     expect(screen.getByTestId('guard-status-warning')).toHaveTextContent('The Safe policy guard is only partly enabled')
+    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
   })
 
   it('shows the guard banner when the guard blocks an allowlist', () => {
@@ -333,11 +406,21 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('guard-status-destructive')).toHaveTextContent('This Safe account needs an update')
   })
 
-  it('should, before a Safe is picked, mark the Safe selector for focus', () => {
+  it('shows both sections before a Safe is picked', () => {
+    accounts([option(SAFE_A)])
+    renderStep()
+
+    expect(screen.getByTestId('allowlist-tokens-section')).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it('should, before a Safe is picked, disable the token and recipient fields and mark the Safe selector for focus', () => {
     accounts([option(SAFE_A)])
     renderStep()
 
     expect(screen.getByRole('combobox', { name: 'Search tokens by name or address' })).toBeDisabled()
+    expect(screen.getByRole('combobox', { name: 'Search contacts or paste an address' })).toBeDisabled()
     expect(screen.getByTestId('selector')).toHaveAttribute('data-autofocus', 'true')
   })
 
