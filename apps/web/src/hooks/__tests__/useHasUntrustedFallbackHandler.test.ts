@@ -6,6 +6,7 @@ import { faker } from '@faker-js/faker'
 import {
   getCompatibilityFallbackHandlerDeployment,
   getExtensibleFallbackHandlerDeployment,
+  getTokenCallbackHandlerDeployment,
 } from '@safe-global/safe-deployments'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 // Imported directly from helpers to avoid circular deps in tests
@@ -68,6 +69,17 @@ describe('useHasUntrustedFallbackHandler', () => {
       })?.defaultAddress!
 
       const { result } = renderHook(() => useHasUntrustedFallbackHandler(extensibleFallbackHandlerAddress))
+
+      expect(result.current).toBe(false)
+    })
+
+    it('if the provided fallback handler is the TokenCallbackHandler, which a recipient allowlist sets', () => {
+      const tokenCallbackHandlerAddress = getTokenCallbackHandlerDeployment({
+        network: '1',
+        version: '1.5.0',
+      })?.defaultAddress!
+
+      const { result } = renderHook(() => useHasUntrustedFallbackHandler(tokenCallbackHandlerAddress))
 
       expect(result.current).toBe(false)
     })
