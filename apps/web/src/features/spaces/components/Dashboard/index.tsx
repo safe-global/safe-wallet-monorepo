@@ -59,9 +59,7 @@ const SpaceDashboard = () => {
   const router = useRouter()
   // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
   const { isLocked, isResolving: isResolvingPlan } = useWorkspaceLock()
-  const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncementModal(
-    !isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited,
-  )
+  const announcement = useSafeProAnnouncementModal(!isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited)
 
   const planState = useSpacePlanState(spaceId)
 
@@ -137,7 +135,7 @@ const SpaceDashboard = () => {
 
   return (
     <>
-      <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />
+      <SafeProAnnouncementModal open={announcement.isOpen} onOpenChange={(open) => !open && announcement.close()} />
       {checkoutModal}
 
       {isInvited && <PreviewInvite />}
