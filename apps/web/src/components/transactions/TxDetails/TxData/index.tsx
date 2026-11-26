@@ -116,6 +116,7 @@ const TxData = ({
       <SettingsChangeTxInfo
         settingsInfo={txInfo.settingsInfo}
         isTxExecuted={!!txDetails?.executedAt}
+        txStatus={txDetails?.txStatus}
         safeAddress={executingSafeAddress ?? txDetails?.safeAddress}
       />
     )

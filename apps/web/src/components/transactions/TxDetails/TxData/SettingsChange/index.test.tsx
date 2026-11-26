@@ -30,25 +30,31 @@ describe('SettingsChangeTxInfo', () => {
     expect(getByText('Delete module guard')).toBeInTheDocument()
   })
 
-  it('shows the guard that a pending transaction of this Safe deletes', () => {
-    const { getByText } = render(
-      <SettingsChangeTxInfo settingsInfo={deleteGuard} safeAddress={safe.address.value} />,
-      withGuard,
-    )
+  it.each([undefined, 'AWAITING_CONFIRMATIONS', 'AWAITING_EXECUTION'] as const)(
+    'shows the guard that a queued transaction of this Safe deletes (status %s)',
+    (txStatus) => {
+      const { getByText } = render(
+        <SettingsChangeTxInfo settingsInfo={deleteGuard} txStatus={txStatus} safeAddress={safe.address.value} />,
+        withGuard,
+      )
 
-    expect(getByText('Delete guard:')).toBeInTheDocument()
-    expect(getByText(guard)).toBeInTheDocument()
-  })
+      expect(getByText('Delete guard:')).toBeInTheDocument()
+      expect(getByText(guard)).toBeInTheDocument()
+    },
+  )
 
-  it('shows no guard address once the transaction is executed, because a later guard may be set', () => {
-    const { getByText, queryByText } = render(
-      <SettingsChangeTxInfo settingsInfo={deleteGuard} isTxExecuted />,
-      withGuard,
-    )
+  it.each(['SUCCESS', 'FAILED', 'CANCELLED'] as const)(
+    'shows no guard address for a %s transaction, whose removed guard is unknown',
+    (txStatus) => {
+      const { getByText, queryByText } = render(
+        <SettingsChangeTxInfo settingsInfo={deleteGuard} txStatus={txStatus} />,
+        withGuard,
+      )
 
-    expect(getByText('Delete guard')).toBeInTheDocument()
-    expect(queryByText(guard)).not.toBeInTheDocument()
-  })
+      expect(getByText('Delete guard')).toBeInTheDocument()
+      expect(queryByText(guard)).not.toBeInTheDocument()
+    },
+  )
 
   it("shows no guard address for another Safe's transaction, such as a nested Safe's", () => {
     const { getByText, queryByText } = render(
@@ -60,7 +66,7 @@ describe('SettingsChangeTxInfo', () => {
     expect(queryByText(guard)).not.toBeInTheDocument()
   })
 
-  it('renders nothing for a settings type it does not know, instead of an empty card', () => {
+  it('renders nothing for a settings type it does not know', () => {
     const unknown = { type: 'SET_SOMETHING_NEW' } as unknown as SettingsChangeTransaction['settingsInfo']
 
     const { container } = render(<SettingsChangeTxInfo settingsInfo={unknown} />)
