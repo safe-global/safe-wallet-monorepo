@@ -21,35 +21,33 @@ jest.mock('@/services/analytics', () =>
 )
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
+const EMPTY_QUEUE = {
+  count: 0,
+  next: null,
+  previous: null,
+  results: {},
+  unavailableSafes: [],
+  counts: {
+    total: 0,
+    execute: 0,
+    sign: 0,
+    blocked: 0,
+    waiting: 0,
+    conflicting: 0,
+    stale: 0,
+    safes: [],
+    chains: [],
+    signers: [],
+  },
+}
+
 const HISTORY_TITLE = 'Workspace history is coming'
 
 describe('SpaceTransactionsPage', () => {
   beforeEach(() => {
     mockTrackEvent.mockClear()
     setBaseUrl(GATEWAY_URL)
-    server.use(
-      http.get(`${GATEWAY_URL}/v1/spaces/:spaceId/transactions/queued`, () =>
-        HttpResponse.json({
-          count: 0,
-          next: null,
-          previous: null,
-          results: {},
-          unavailableSafes: [],
-          counts: {
-            total: 0,
-            execute: 0,
-            sign: 0,
-            blocked: 0,
-            waiting: 0,
-            conflicting: 0,
-            stale: 0,
-            safes: [],
-            chains: [],
-            signers: [],
-          },
-        }),
-      ),
-    )
+    server.use(http.get(`${GATEWAY_URL}/v1/spaces/:spaceId/transactions/queued`, () => HttpResponse.json(EMPTY_QUEUE)))
   })
 
   it('resets the queue filters when switching to another Workspace', () => {
@@ -71,6 +69,29 @@ describe('SpaceTransactionsPage', () => {
     rerender(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
 
     expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toHaveValue('')
+  })
+
+  it('shows the Safes that could not be loaded beside the title, and not on History', async () => {
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/spaces/:spaceId/transactions/queued`, () =>
+        HttpResponse.json({
+          ...EMPTY_QUEUE,
+          unavailableSafes: [{ chainId: '1', safeAddress: faker.finance.ethereumAddress() }],
+        }),
+      ),
+    )
+    render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+
+    const chip = await screen.findByTestId('unavailable-safes-alert')
+    expect(chip).toHaveTextContent('1 Safe account not loaded')
+    expect(screen.getByText('Transactions').parentElement).toContainElement(chip)
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('tab', { name: 'History' }))
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+    })
+
+    expect(screen.queryByTestId('unavailable-safes-alert')).not.toBeInTheDocument()
   })
 
   describe('History tab', () => {
