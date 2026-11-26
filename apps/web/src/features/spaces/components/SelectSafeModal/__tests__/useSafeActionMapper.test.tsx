@@ -5,7 +5,6 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
 import { ESafeAction } from '../../../public/store/safeActionsModalSlice'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { unwrapScopedFlow } from '@/tests/mocks/safeScope'
 
 const mockReplace = jest.fn()
 const mockPush = jest.fn()
@@ -44,6 +43,11 @@ jest.mock('@/components/tx-flow/flows/TokenTransferFlow', () => ({
 }))
 jest.mock('@/components/tx-flow/flows/NewTxFlow', () => ({
   NewTxFlow: () => null,
+}))
+
+const mockOpenUrlSafeTxFlow = jest.fn()
+jest.mock('../../SpaceTransactions/UrlSafeTxFlowOpener', () => ({
+  useUrlSafeTxFlow: () => mockOpenUrlSafeTxFlow,
 }))
 
 const mockSafe: SafeItem = {
@@ -212,19 +216,18 @@ describe('useSafeActionMapper', () => {
   })
 
   describe(ESafeAction.NewTransaction, () => {
-    it('opens the new transaction flow scoped to the picked Safe without touching the URL', async () => {
+    it('opens the new transaction flow on the picked Safe through the URL', async () => {
       const { result, setTxFlow } = renderMapper()
 
       await act(async () => {
         await result.current.actionMapper[ESafeAction.NewTransaction]({ ...mockSafe, chainId: '137' })
       })
 
-      expect(mockReplace).not.toHaveBeenCalled()
-      expect(setTxFlow).toHaveBeenCalledTimes(1)
-      const [txFlow, onClose, shouldWarn] = setTxFlow.mock.calls[0] as [React.ReactElement, unknown, boolean]
-      const { flow, target } = unwrapScopedFlow(txFlow)
-      expect(flow?.type).toBe(jest.requireMock('@/components/tx-flow/flows/NewTxFlow').NewTxFlow)
+      expect(setTxFlow).not.toHaveBeenCalled()
+      expect(mockOpenUrlSafeTxFlow).toHaveBeenCalledTimes(1)
+      const [target, txFlow, onClose, shouldWarn] = mockOpenUrlSafeTxFlow.mock.calls[0]
       expect(target).toEqual({ chainId: '137', safeAddress: mockSafe.address })
+      expect(txFlow.type).toBe(jest.requireMock('@/components/tx-flow/flows/NewTxFlow').NewTxFlow)
       expect(onClose).toBeUndefined()
       expect(shouldWarn).toBe(false)
     })
