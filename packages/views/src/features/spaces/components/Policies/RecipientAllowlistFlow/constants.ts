@@ -22,9 +22,20 @@ export const RECIPIENT_RESERVED_ERROR = 'This recipient address is not valid'
 
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
 
+export const TOKENS_SECTION_TITLE = 'Which tokens can be sent'
+export const TOKENS_SECTION_DESCRIPTION = 'Only transfers of the tokens selected below will be allowed.'
+export const TOKENS_SEARCH_PLACEHOLDER = 'Search tokens by name or address'
+export const TOKENS_LOAD_ERROR_TEXT = 'Could not load the tokens in this account.'
+export const SPENDING_LIMITS_LOAD_ERROR_TEXT =
+  'Could not load the spending limits of this account. You can continue once they load.'
+export const SPENDING_LIMIT_TOKENS_GROUP_LABEL = 'In spending limits'
+export const OTHER_TOKENS_GROUP_LABEL = 'Other tokens'
 export const SPENDING_LIMIT_TOKEN_HINT =
   "This Safe account has a spending limit for this token. Add the token, so the allowlist doesn't block the spending limit."
 export const SELECT_ALL_LABEL = 'Select all'
+
+export const UNKNOWN_TOKEN_DETAIL = 'Unknown token'
+export const NOT_ERC20_TOKEN_TEXT = 'Only ERC-20 tokens can be added.'
 
 export const SPACE_CONTACTS_LABEL = 'Contacts of'
 export const LOCAL_CONTACTS_LABEL = 'Local contacts'

@@ -9,6 +9,7 @@ import {
 import type { RecipientAllowlistFormValues } from '../types'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import type { SpendingLimitTokensResult } from '../hooks/useSpendingLimitTokens'
+import TokensSection from './TokensSection'
 
 export type RecipientAllowlistFormProps = {
   values: RecipientAllowlistFormValues
@@ -22,8 +23,17 @@ export type RecipientAllowlistFormProps = {
   children?: ReactNode
 }
 
-const RecipientAllowlistForm = ({ account, showSections, children }: RecipientAllowlistFormProps): ReactElement => {
+const RecipientAllowlistForm = ({
+  values,
+  onChange,
+  heldTokens,
+  spendingLimits,
+  account,
+  showSections,
+  children,
+}: RecipientAllowlistFormProps): ReactElement => {
   const isEditMode = useIsEditMode()
+  const accountKey = account ? `${account.chainId}:${account.address}` : 'none'
 
   return (
     <>
@@ -36,6 +46,19 @@ const RecipientAllowlistForm = ({ account, showSections, children }: RecipientAl
       )}
 
       {children}
+
+      {showSections && (
+        <div className="mt-1 flex flex-col gap-4">
+          <TokensSection
+            key={`tokens-${accountKey}`}
+            values={values}
+            onChange={onChange}
+            heldTokens={heldTokens}
+            spendingLimits={spendingLimits}
+            hasAccount={Boolean(account)}
+          />
+        </div>
+      )}
     </>
   )
 }
