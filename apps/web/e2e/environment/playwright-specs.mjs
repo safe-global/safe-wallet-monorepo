@@ -102,6 +102,7 @@ export const playwrightSpecs = {
     scenarios: ['prepareBasicScenario'],
     flags: ['WORKSPACES_ADDRESS_BOOK_V2'],
   },
+  'regression/workspace-tour-after-checkout.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],

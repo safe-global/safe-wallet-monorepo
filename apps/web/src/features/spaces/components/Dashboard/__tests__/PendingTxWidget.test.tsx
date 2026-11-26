@@ -194,10 +194,8 @@ describe('PendingTxWidget – View all', () => {
 })
 
 describe('PendingTxWidget – proposed time', () => {
-  afterEach(() => jest.useRealTimers())
-
   it('shows the same short time as the queue table', () => {
-    jest.useFakeTimers({ now: 1705852800000 + 5 * 60 * 60 * 1000 })
+    jest.setSystemTime(1705852800000 + 5 * 60 * 60 * 1000)
 
     render(<PendingTxWidget transactions={[createMockTx('tx-1', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID)]} />)
 

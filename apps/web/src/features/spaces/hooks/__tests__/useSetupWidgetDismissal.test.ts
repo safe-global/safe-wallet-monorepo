@@ -9,12 +9,8 @@ let spaceId: string
 describe('useSetupWidgetDismissal', () => {
   beforeEach(() => {
     window.localStorage.clear()
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     spaceId = faker.string.uuid()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('is not dismissed initially', () => {

@@ -61,11 +61,7 @@ const AppOnWorkspaceContactsStop = ({ startOn, goTo, afterMs, onClose, onMissing
 
 describe('TourStop across a page change', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   it('shows the stop once its page loads, even when loading takes longer than the anchor wait', async () => {
