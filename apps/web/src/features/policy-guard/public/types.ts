@@ -14,8 +14,8 @@ export type ForeignGuard = { slot: GuardSlot; address: string }
 
 export type PolicyGuardState =
   | { status: 'none' }
-  | { status: 'known' }
-  | { status: 'partial'; missingSlot: GuardSlot }
+  | { status: 'known'; guardAddress: string }
+  | { status: 'partial'; missingSlot: GuardSlot; guardAddress: string }
   | { status: 'unknown'; foreignGuards: ForeignGuard[] }
   | { status: 'unsupported' }
 
