@@ -1,6 +1,7 @@
 import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
@@ -209,6 +210,23 @@ describe('SpendingLimitPolicyForm', () => {
     expect(screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)).toBeInTheDocument()
     expect(screen.getAllByTestId('spender-card')).toHaveLength(1)
     expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+  })
+
+  it('should, when the chosen Safe has a recipient allowlist, say that its spending limits follow it and link to the help article', () => {
+    renderForm({ isCoveredByAllowlist: true })
+
+    const notice = screen.getByTestId('spending-limit-allowlist-notice')
+    expect(notice).toHaveTextContent('This Safe account has a recipient allowlist')
+    expect(notice).toHaveTextContent(
+      'Spending limits go through the allowlist too. A spender can only send the allowed tokens to the allowed recipients.',
+    )
+    expect(within(notice).getByRole('link', { name: /Learn more/ })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
+  })
+
+  it('should, when the chosen Safe has no recipient allowlist, show no allowlist notice', () => {
+    renderForm()
+
+    expect(screen.queryByTestId('spending-limit-allowlist-notice')).not.toBeInTheDocument()
   })
 
   it('enables Next once a Safe, a spender and one complete limit row are valid, and submits the policy', async () => {

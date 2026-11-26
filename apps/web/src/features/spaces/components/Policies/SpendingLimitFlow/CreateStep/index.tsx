@@ -6,6 +6,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
+import { useIsCoveredByAllowlist } from '../hooks/useIsCoveredByAllowlist'
 import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
 import {
   createDefaultFormValues,
@@ -25,7 +26,9 @@ const CreateSpendingLimitPolicy = ({
   const { data: formValues, onNext } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const { accounts, isLoading, isError, refetch, hasWallet } = useSpendingLimitSafeAccounts()
   const { setScope } = useSafeScopeControls()
-  const scopeKey = useSafeScope()?.scopeKey
+  const scope = useSafeScope()
+  const scopeKey = scope?.scopeKey
+  const isCoveredByAllowlist = useIsCoveredByAllowlist(scope?.chainId, scope?.safeAddress)
 
   // Address-poisoning check for every spender, as the Safe-level form does for its beneficiary.
   const [spenderAddresses, setSpenderAddresses] = useState<string[]>([])
@@ -54,6 +57,7 @@ const CreateSpendingLimitPolicy = ({
       onSpendersChange={setSpenderAddresses}
       isCalloutDismissed={isCalloutDismissed}
       onDismissCallout={onDismissCallout}
+      isCoveredByAllowlist={isCoveredByAllowlist}
     />
   )
 }
