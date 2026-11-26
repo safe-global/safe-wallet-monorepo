@@ -1,60 +1,25 @@
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { render, screen } from '@/tests/test-utils'
-import userEvent from '@testing-library/user-event'
-import { createDefaultAllowlistValues, type RecipientAllowlistFormValues } from '../../types'
+import { createDefaultAllowlistValues } from '../../types'
 import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
 import RecipientAllowlistForm from '../RecipientAllowlistForm'
 
 jest.mock('../TokensSection', () => ({
   __esModule: true,
-  default: ({
-    isCalloutDismissed,
-    onDismissCallout,
-  }: {
-    isCalloutDismissed: boolean
-    onDismissCallout: () => void
-  }) => (
-    <div data-testid="tokens-section">
-      <span>{`tokens callout dismissed: ${isCalloutDismissed}`}</span>
-      <button onClick={onDismissCallout}>dismiss tokens</button>
-    </div>
-  ),
+  default: () => <div data-testid="tokens-section" />,
 }))
 jest.mock('../RecipientsSection', () => ({
   __esModule: true,
-  default: ({
-    values,
-    onChange,
-    isCalloutDismissed,
-    onDismissCallout,
-  }: {
-    values: RecipientAllowlistFormValues
-    onChange: (next: RecipientAllowlistFormValues) => void
-    isCalloutDismissed: boolean
-    onDismissCallout: () => void
-  }) => (
-    <div data-testid="recipients-section">
-      <span>{`recipients callout dismissed: ${isCalloutDismissed}`}</span>
-      <button onClick={onDismissCallout}>dismiss recipients</button>
-      <button
-        onClick={() => onChange({ ...values, recipients: [{ address: RECIPIENT, name: 'Carol', selected: true }] })}
-      >
-        select recipient
-      </button>
-    </div>
-  ),
+  default: () => <div data-testid="recipients-section" />,
 }))
 
-const RECIPIENT = checksumAddress(faker.finance.ethereumAddress())
-const SAFE = checksumAddress(faker.finance.ethereumAddress())
-const UNKNOWN_TOKEN = checksumAddress(faker.finance.ethereumAddress())
-const ACCOUNT = { chainId: '1', address: SAFE, label: 'Treasury' }
+const ACCOUNT = { chainId: '1', address: checksumAddress(faker.finance.ethereumAddress()), label: 'Treasury' }
 const HELD_TOKENS: HeldTokenAddresses = {
-  addresses: [ZERO_ADDRESS, UNKNOWN_TOKEN],
+  addresses: [ZERO_ADDRESS],
   options: [{ address: ZERO_ADDRESS, symbol: 'ETH', name: 'Ether', decimals: 18, group: 'held' }],
   isLoading: false,
   isError: false,
@@ -65,95 +30,82 @@ const HELD_TOKENS: HeldTokenAddresses = {
   identityKey: '1:0x1',
 }
 
-const Harness = ({
-  initial = createDefaultAllowlistValues(),
+const Form = ({
   showSections = true,
   hasAccount = true,
-  onDismissCallout = jest.fn(),
   children,
 }: {
-  initial?: RecipientAllowlistFormValues
   showSections?: boolean
   hasAccount?: boolean
-  onDismissCallout?: (section: 'tokens' | 'recipients') => void
   children?: ReactNode
-}) => {
-  const [values, setValues] = useState(initial)
-  return (
-    <RecipientAllowlistForm
-      values={values}
-      onChange={setValues}
-      heldTokens={HELD_TOKENS}
-      account={hasAccount ? ACCOUNT : undefined}
-      showSections={showSections}
-      dismissedCallouts={{ tokens: true, recipients: false }}
-      onDismissCallout={onDismissCallout}
-    >
-      {children}
-    </RecipientAllowlistForm>
-  )
-}
+}) => (
+  <RecipientAllowlistForm
+    values={createDefaultAllowlistValues()}
+    onChange={jest.fn()}
+    heldTokens={HELD_TOKENS}
+    spendingLimits={{ tokens: [], isLoading: false, isError: false, refetch: jest.fn() }}
+    account={hasAccount ? ACCOUNT : undefined}
+    showSections={showSections}
+  >
+    {children}
+  </RecipientAllowlistForm>
+)
 
 describe('RecipientAllowlistForm', () => {
-  it('asks for a selection until a recipient is picked, then names tokens and recipient', async () => {
-    render(<Harness />)
-
-    expect(screen.getByText(/select at least one token and one recipient/)).toBeInTheDocument()
-
-    await userEvent.click(screen.getByText('select recipient'))
-
-    expect(
-      screen.getByText(`Treasury will only be able to send ETH and ${shortenAddress(UNKNOWN_TOKEN)} to Carol.`),
-    ).toBeInTheDocument()
-  })
-
-  it('renders both sections when showSections is true', () => {
-    render(<Harness />)
+  it('renders both sections and no summary when creating an allowlist', () => {
+    render(<Form />)
 
     expect(screen.getByTestId('tokens-section')).toBeInTheDocument()
     expect(screen.getByTestId('recipients-section')).toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
-  it('hides the summary and sections when blocked with an account', () => {
-    render(<Harness showSections={false} />)
+  it('renders both sections and no summary before a Safe is picked', () => {
+    render(<Form hasAccount={false} />)
 
-    expect(screen.queryByTestId('tokens-section')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('recipients-section')).not.toBeInTheDocument()
-    expect(screen.queryByText(/select at least one token/)).not.toBeInTheDocument()
-  })
-
-  it('shows the no-account summary with both sections before a Safe is picked', () => {
-    render(<Harness hasAccount={false} />)
-
-    expect(screen.getByText('Pick a Safe account to start.')).toBeInTheDocument()
     expect(screen.getByTestId('tokens-section')).toBeInTheDocument()
     expect(screen.getByTestId('recipients-section')).toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
-  it('renders its children between the summary and the sections', () => {
+  it('shows the edit summary when editing an allowlist', () => {
     render(
-      <Harness>
-        <div data-testid="account-field" />
-      </Harness>,
+      <EditModeProvider>
+        <Form />
+      </EditModeProvider>,
     )
 
-    const summary = screen.getByText(/select at least one token/)
+    expect(screen.getByRole('status')).toHaveTextContent("You're editing the allowlist on Treasury.")
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Anything you deselect will be blocked once the change applies.',
+    )
+  })
+
+  it('hides the edit summary and the sections when blocked with an account', () => {
+    render(
+      <EditModeProvider>
+        <Form showSections={false} />
+      </EditModeProvider>,
+    )
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('tokens-section')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('recipients-section')).not.toBeInTheDocument()
+  })
+
+  it('renders its children between the edit summary and the sections', () => {
+    render(
+      <EditModeProvider>
+        <Form>
+          <div data-testid="account-field" />
+        </Form>
+      </EditModeProvider>,
+    )
+
+    const summary = screen.getByRole('status')
     const field = screen.getByTestId('account-field')
     const sections = screen.getByTestId('tokens-section')
     expect(summary.compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(field.compareDocumentPosition(sections) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  })
-
-  it('passes each callout its own dismissed state and reports which one was dismissed', async () => {
-    const onDismissCallout = jest.fn()
-    render(<Harness onDismissCallout={onDismissCallout} />)
-
-    expect(screen.getByText('tokens callout dismissed: true')).toBeInTheDocument()
-    expect(screen.getByText('recipients callout dismissed: false')).toBeInTheDocument()
-
-    await userEvent.click(screen.getByText('dismiss recipients'))
-    await userEvent.click(screen.getByText('dismiss tokens'))
-
-    expect(onDismissCallout.mock.calls).toEqual([['recipients'], ['tokens']])
   })
 })

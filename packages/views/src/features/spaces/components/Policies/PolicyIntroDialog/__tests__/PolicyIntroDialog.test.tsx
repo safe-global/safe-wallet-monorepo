@@ -22,6 +22,8 @@ const defaultProps: PolicyIntroDialogProps = {
   testId: 'a-policy-intro-dialog',
 }
 
+const ACKNOWLEDGEMENT = { summary: <span>Something is blocked</span>, label: 'I understand.' }
+
 const StatefulIntro = (props: Partial<PolicyIntroDialogProps>) => {
   const [open, setOpen] = useState(true)
 
@@ -76,6 +78,34 @@ describe('PolicyIntroDialog', () => {
 
     await waitFor(() => expect(screen.queryByTestId('a-policy-intro-dialog')).not.toBeInTheDocument())
     expect(onProceed).not.toHaveBeenCalled()
+  })
+
+  it('should show no subtitle or help link, when the policy gives none', () => {
+    render(
+      <PolicyIntroDialog {...defaultProps} description={undefined} helpArticle={undefined} helpLabel={undefined} />,
+    )
+
+    expect(screen.queryByText('What the policy does.')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Learn more about a policy' })).not.toBeInTheDocument()
+  })
+
+  it('should keep the primary action disabled, when the acknowledgement is not ticked', () => {
+    render(<PolicyIntroDialog {...defaultProps} acknowledgement={ACKNOWLEDGEMENT} />)
+
+    expect(screen.getByText('Something is blocked')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set up a policy' })).toBeDisabled()
+  })
+
+  it('should proceed, when the acknowledgement is ticked', async () => {
+    const onProceed = jest.fn()
+    const { user } = renderWithUserEvent(
+      <PolicyIntroDialog {...defaultProps} acknowledgement={ACKNOWLEDGEMENT} onProceed={onProceed} />,
+    )
+
+    await user.click(screen.getByRole('checkbox', { name: 'I understand.' }))
+    await user.click(screen.getByRole('button', { name: 'Set up a policy' }))
+
+    expect(onProceed).toHaveBeenCalledTimes(1)
   })
 
   it('renders nothing while closed', () => {

@@ -1,7 +1,9 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { Children } from 'react'
+import { render, screen } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowType } from '@/services/analytics/types'
 import { createDefaultAllowlistValues } from '../types'
+import ReviewRecipientAllowlist from '../ReviewStep'
 import RecipientAllowlistFlow from '..'
 
 jest.mock('@/components/tx-flow/TxFlow', () => ({
@@ -16,17 +18,7 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
 }))
 jest.mock('../CreateStep', () => ({
   __esModule: true,
-  default: ({
-    dismissedCallouts,
-    onDismissCallout,
-  }: {
-    dismissedCallouts: { tokens: boolean; recipients: boolean }
-    onDismissCallout: (section: 'tokens' | 'recipients') => void
-  }) => (
-    <div data-testid="create-step" data-dismissed={JSON.stringify(dismissedCallouts)}>
-      <button onClick={() => onDismissCallout('recipients')}>dismiss recipients</button>
-    </div>
-  ),
+  default: () => <div data-testid="create-step" />,
 }))
 
 const mockTxFlow = TxFlow as jest.MockedFunction<typeof TxFlow>
@@ -47,25 +39,22 @@ describe('RecipientAllowlistFlow', () => {
     expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ eventCategory: TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST })
   })
 
+  it('reviews through the allowlist review step', () => {
+    render(<RecipientAllowlistFlow />)
+
+    expect(mockTxFlow.mock.calls[0][0].ReviewTransactionComponent).toBe(ReviewRecipientAllowlist)
+  })
+
+  it('should, before the review, pass TxFlow the Create step alone', () => {
+    render(<RecipientAllowlistFlow />)
+
+    expect(Children.toArray(mockTxFlow.mock.calls[0][0].children)).toHaveLength(1)
+  })
+
   it('seeds the flow with an empty allowlist form', () => {
     render(<RecipientAllowlistFlow />)
 
     expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ initialData: createDefaultAllowlistValues() })
-  })
-
-  it('remembers dismissed callouts per section', () => {
-    render(<RecipientAllowlistFlow />)
-    expect(screen.getByTestId('create-step')).toHaveAttribute(
-      'data-dismissed',
-      JSON.stringify({ tokens: false, recipients: false }),
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: 'dismiss recipients' }))
-
-    expect(screen.getByTestId('create-step')).toHaveAttribute(
-      'data-dismissed',
-      JSON.stringify({ tokens: false, recipients: true }),
-    )
   })
 
   it('names the policy in the subtitle', () => {

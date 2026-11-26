@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { useEffectDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks/useEffectDeepCompare'
+import type { GuardPolicyCheck } from '../../hooks/useGuardPolicyChecks'
 import type {
   ContractAnalysisResults,
   ThreatAnalysisResults,
@@ -13,6 +15,8 @@ type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setPoisoningAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
+  setDraftTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
+  guardCheck: GuardPolicyCheck
   safeTx?: SafeTransaction
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -76,6 +80,13 @@ export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undef
   }, [key, setPoisoningAddresses])
 
   return recipient
+}
+
+/** Register a transaction a flow is still composing, so the policy guard check runs before it is built. */
+export const useSafeShieldForDraftTx = (draftTx: SafeTransaction | undefined) => {
+  const { setDraftTx } = useSafeShield()
+
+  useEffectDeepCompare(() => setDraftTx(draftTx), [draftTx?.data, setDraftTx])
 }
 
 /**

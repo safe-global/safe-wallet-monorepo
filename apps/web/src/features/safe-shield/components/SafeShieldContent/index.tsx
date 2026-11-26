@@ -30,6 +30,8 @@ import { ThreatAnalysis } from '../ThreatAnalysis/ThreatAnalysis'
 import SafenetChecksSection from '@/features/safenet-checks/public/components/SafenetChecksSection'
 import HnInfoCard from '@/features/hypernative/public/components/HnInfoCard'
 import HnCustomChecksCard from '@/features/hypernative/public/components/HnCustomChecksCard'
+import PolicyGuardCheck from '../PolicyGuardCheck'
+import type { GuardPolicyCheck } from '../../hooks/useGuardPolicyChecks'
 
 export const SafeShieldContent = ({
   recipient,
@@ -37,6 +39,7 @@ export const SafeShieldContent = ({
   threat,
   deadlock,
   safeTx,
+  guardCheck,
   overallStatus,
   hypernativeAuth,
   showHypernativeInfo = true,
@@ -52,6 +55,7 @@ export const SafeShieldContent = ({
   threat: AsyncResult<ThreatAnalysisResults>
   deadlock: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
+  guardCheck?: GuardPolicyCheck
   overallStatus?: { severity: Severity; title: string }
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean
@@ -80,7 +84,11 @@ export const SafeShieldContent = ({
   const threatEmpty = !hasThreatCardResults(threatResults)
   const deadlockEmpty = isEmpty(deadlockResults)
   const analysesEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty
-  const allEmpty = recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx
+  const showGuardInPro = isSafePro && hasProFeatures
+  const guardRefusal = !showGuardInPro && guardCheck?.blocked
+  const hasGuardVerdict = showGuardInPro && (!!guardCheck?.blocked || !!guardCheck?.isAllowed)
+  const allEmpty =
+    recipientEmpty && contractEmpty && threatEmpty && deadlockEmpty && !safeTx && !guardRefusal && !hasGuardVerdict
 
   const revealDelays = getRevealDelays(isSafePro ? PRO_CARD_ORDER : CARD_ORDER, {
     recipient: !recipientEmpty,
@@ -91,7 +99,7 @@ export const SafeShieldContent = ({
     simulation: !!safeTx,
   })
 
-  const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
+  const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx || hasGuardVerdict
 
   const showProSection = isSafePro && shouldShowContent && !isOffchainMessage && (!hasProFeatures || hasProContent)
 
@@ -123,6 +131,8 @@ export const SafeShieldContent = ({
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
+        {guardRefusal && <PolicyGuardCheck blocked={guardRefusal} isAllowed={false} />}
+
         {showHypernativeInfo && (
           <HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
@@ -181,6 +191,10 @@ export const SafeShieldContent = ({
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
+              {showGuardInPro && guardCheck && (
+                <PolicyGuardCheck {...guardCheck} highlightedSeverity={highlightedSeverity} />
+              )}
+
               {hasProFeatures ? (
                 <AnalysisGroupCard
                   data-testid="recipient-analysis-group-card"

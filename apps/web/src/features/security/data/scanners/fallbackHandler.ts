@@ -5,7 +5,7 @@ import type { SecurityScanner } from './types'
 import { getSeverityFromScore } from '../../public/constants'
 import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/public/utils'
 
-type HandlerMatch = 'compatibility' | 'extensible' | 'twap' | null
+type HandlerMatch = 'compatibility' | 'extensible' | 'token-callback' | 'twap' | null
 
 const identifyFallbackHandler = (address: string, chainId: string): HandlerMatch => {
   const officialHandler = identifyOfficialFallbackHandler(address, chainId)
@@ -17,6 +17,7 @@ const identifyFallbackHandler = (address: string, chainId: string): HandlerMatch
 const HANDLER_LABELS: Record<Exclude<HandlerMatch, null>, string> = {
   compatibility: 'Official Safe fallback handler',
   extensible: 'Official Safe extensible fallback handler',
+  'token-callback': 'Official Safe token callback handler',
   twap: 'CoW Protocol TWAP handler',
 }
 

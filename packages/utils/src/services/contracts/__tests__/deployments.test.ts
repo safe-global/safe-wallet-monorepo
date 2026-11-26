@@ -2,6 +2,7 @@ import type { DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-
 import {
   getCanonicalOrFirstAddress,
   getChainAgnosticAddress,
+  getDeploymentAddresses,
   getDeploymentTypeForMasterCopy,
   getSafeToL2SetupVersion,
   getSafeToL2SetupVersionByAddress,
@@ -195,11 +196,40 @@ describe('deployments utils', () => {
     })
   })
 
+  describe('getDeploymentAddresses', () => {
+    it('lists every network address of each version, skipping versions without a deployment', () => {
+      const getDeployments = jest.fn((filter?: DeploymentFilter) => {
+        if (filter?.version === '1.3.0') {
+          return makeDeployment({ canonical: { address: '0x1', codeHash: '0xhash' } }, { [chainId]: ['0x1', '0x2'] })
+        }
+        if (filter?.version === '1.4.1') {
+          return makeDeployment({ canonical: { address: '0x3', codeHash: '0xhash' } }, { [chainId]: '0x3' })
+        }
+        return undefined
+      })
+
+      expect(getDeploymentAddresses(getDeployments, chainId, ['1.3.0', '1.4.1', '1.5.0'])).toEqual([
+        '0x1',
+        '0x2',
+        '0x3',
+      ])
+    })
+
+    it('is empty when no version is deployed on the network', () => {
+      const getDeployments = jest.fn(() =>
+        makeDeployment({ canonical: { address: '0x1', codeHash: '0xhash' } }, { other: ['0x1'] }),
+      )
+
+      expect(getDeploymentAddresses(getDeployments, chainId, ['1.4.1'])).toEqual([])
+    })
+  })
+
   describe('identifyOfficialFallbackHandler', () => {
     // Canonical deployment addresses (identical across all chains)
     const COMPATIBILITY_FALLBACK_HANDLER_1_4_1 = '0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99'
     const COMPATIBILITY_FALLBACK_HANDLER_1_5_0 = '0x3EfCBb83A4A7AfcB4F68D501E2c2203a38be77f4'
     const EXTENSIBLE_FALLBACK_HANDLER_1_5_0 = '0x85a8ca358D388530ad0fB95D0cb89Dd44Fc242c3'
+    const TOKEN_CALLBACK_HANDLER_1_5_0 = '0x54e86d004d71a8D2112ec75FaCE57D730b0433F3'
     // CoW's own ExtensibleFallbackHandler instance — deliberately NOT an official deployment
     const COW_TWAP_FALLBACK_HANDLER = '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
 
@@ -210,6 +240,11 @@ describe('deployments utils', () => {
 
     it('identifies the ExtensibleFallbackHandler deployment', () => {
       expect(identifyOfficialFallbackHandler(EXTENSIBLE_FALLBACK_HANDLER_1_5_0, '1')).toBe('extensible')
+    })
+
+    it('should identify the TokenCallbackHandler deployment, which a recipient allowlist sets', () => {
+      expect(identifyOfficialFallbackHandler(TOKEN_CALLBACK_HANDLER_1_5_0, '1')).toBe('token-callback')
+      expect(identifyOfficialFallbackHandler(TOKEN_CALLBACK_HANDLER_1_5_0, '11155111')).toBe('token-callback')
     })
 
     it('is case-insensitive on the address', () => {

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSelector, useStore } from 'react-redux'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import {
+  cgwApi as spacesApi,
   useSpaceTransactionsGetTransactionQueueV1Query,
   type SpaceQueueCounts,
   type SpaceQueuedItemPage,
@@ -101,6 +102,13 @@ const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search
     signers: joinOrOmit(filters.signers),
     search: search || undefined,
   } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
+}
+
+/** The unfiltered Space queue as last loaded, which useSpaceQueuePolling keeps fresh; reading it sends no request */
+export const selectSpaceQueuePage = (state: RootState, spaceId: string): SpaceQueuedItemPage | undefined => {
+  const select = spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.select(toQueryArgs(spaceId, {}))
+  // RootState types the shared gateway reducer without the spaces tags; the cache entries are the same
+  return select(state as unknown as Parameters<typeof select>[0]).data
 }
 
 /** The Space queue grouped by Safe and chain, refetched after a tx event and, with `poll`, polled with backoff */

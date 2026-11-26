@@ -1,16 +1,30 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
-import { createDefaultAllowlistValues, type AllowlistFormRecipient, type RecipientAllowlistFormValues } from '../types'
+import {
+  createDefaultAllowlistValues,
+  type AllowlistFormRecipient,
+  type AllowlistToken,
+  type RecipientAllowlistFormValues,
+} from '../types'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import {
+  RECIPIENTS_SEARCH_PLACEHOLDER,
+  SPENDING_LIMIT_TOKENS_GROUP_LABEL,
+  TOKENS_SEARCH_PLACEHOLDER,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
+import { toSpendingLimitTokenOption } from '../utils/spendingLimitTokens'
 import RecipientAllowlistForm, { type RecipientAllowlistFormProps } from './RecipientAllowlistForm'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
@@ -49,12 +63,14 @@ const spaceAddressBookHandler = http.get(/\/v1\/spaces\/[^/]+\/address-book$/, (
 )
 
 const filledValues: RecipientAllowlistFormValues = {
-  excludedTokens: [USDC],
-  addedTokens: [USDT],
+  tokens: [
+    { address: USDC, symbol: 'USDC' },
+    { address: USDT, symbol: 'USDT' },
+  ],
   recipients: [
-    { address: NICOLE, name: 'Nicole', fromAddressBook: true, selected: true },
-    { address: DEV, name: 'Dev', fromAddressBook: true, selected: true },
-    { address: LOCAL_CONTACT, name: 'Cold storage', fromAddressBook: true, selected: false },
+    { address: NICOLE, name: 'Nicole', fromAddressBook: true },
+    { address: DEV, name: 'Dev', fromAddressBook: true },
+    { address: LOCAL_CONTACT, name: 'Cold storage', fromAddressBook: true },
   ],
 }
 
@@ -62,15 +78,22 @@ faker.seed(3079)
 const manyRecipients: AllowlistFormRecipient[] = Array.from({ length: 20 }, (_, index) => ({
   address: faker.finance.ethereumAddress(),
   name: index % 2 === 0 ? faker.person.firstName() : undefined,
-  selected: index % 3 !== 0,
 }))
-const manyTokens = Array.from({ length: 20 }, () => faker.finance.ethereumAddress())
+const manyTokens: AllowlistToken[] = Array.from({ length: 20 }, () => ({
+  address: faker.finance.ethereumAddress(),
+  symbol: faker.finance.currencyCode(),
+}))
+
+const NO_SPENDING_LIMIT_TOKENS: PolicyTokenInfo[] = []
+const usdcLimit: PolicyTokenInfo = { address: USDC, symbol: 'USDC', decimals: 6, logoUri: null }
 
 type StoryProps = {
   initialValues?: RecipientAllowlistFormValues
   hasAccount?: boolean
   showSections?: boolean
   guard?: GuardStatus
+  /** The tokens of the Safe's spending limits. */
+  spendingLimitTokens?: PolicyTokenInfo[]
 }
 
 const StatefulForm = ({
@@ -78,9 +101,9 @@ const StatefulForm = ({
   hasAccount = true,
   showSections = true,
   guard,
+  spendingLimitTokens = NO_SPENDING_LIMIT_TOKENS,
 }: StoryProps) => {
   const [values, setValues] = useState(initialValues)
-  const [dismissedCallouts, setDismissedCallouts] = useState({ tokens: false, recipients: false })
 
   return (
     <SafeScopeProvider initial={hasAccount ? efSafeTarget : undefined}>
@@ -89,8 +112,7 @@ const StatefulForm = ({
         onChange={setValues}
         hasAccount={hasAccount}
         showSections={showSections}
-        dismissedCallouts={dismissedCallouts}
-        onDismissCallout={(section) => setDismissedCallouts((prev) => ({ ...prev, [section]: true }))}
+        spendingLimitTokens={spendingLimitTokens}
       >
         {guard && <GuardStatusBanner guard={guard} safeName={account.label} />}
       </ScopedForm>
@@ -101,10 +123,23 @@ const StatefulForm = ({
 /** Reads the held tokens inside the scope, as CreateStep does. */
 const ScopedForm = ({
   hasAccount,
+  spendingLimitTokens,
   ...props
-}: Omit<RecipientAllowlistFormProps, 'heldTokens' | 'account'> & { hasAccount: boolean }) => {
-  const heldTokens = useHeldTokenAddresses()
-  return <RecipientAllowlistForm {...props} heldTokens={heldTokens} account={hasAccount ? account : undefined} />
+}: Omit<RecipientAllowlistFormProps, 'heldTokens' | 'spendingLimits' | 'account'> & {
+  hasAccount: boolean
+  spendingLimitTokens: PolicyTokenInfo[]
+}) => {
+  const extraTokens = useMemo(() => spendingLimitTokens.map(toSpendingLimitTokenOption), [spendingLimitTokens])
+  const heldTokens = useHeldTokenAddresses(extraTokens)
+  const spendingLimits = { tokens: spendingLimitTokens, isLoading: false, isError: false, refetch: () => {} }
+  return (
+    <RecipientAllowlistForm
+      {...props}
+      heldTokens={heldTokens}
+      spendingLimits={spendingLimits}
+      account={hasAccount ? account : undefined}
+    />
+  )
 }
 
 const setup = createMockStory({
@@ -138,7 +173,61 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+/** Nothing picked yet: both search fields and no chips. */
 export const CreateEmpty: Story = {}
+
+const openSearch = async (canvasElement: HTMLElement, name: string) => {
+  const field = await within(canvasElement).findByRole('combobox', { name }, { timeout: 30000 })
+  await waitFor(() => expect(field).toBeEnabled(), { timeout: 30000 })
+  await userEvent.click(field)
+  return field
+}
+
+/** The token search focused: the Safe's tokens listed under it, with Select all. */
+export const CreatePickingTokens: Story = {
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, TOKENS_SEARCH_PLACEHOLDER)
+    await expect(await screen.findByRole('button', { name: 'Select all' }, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** The Safe has a spending limit on USDC: the token search lists it first, marked, and its chip keeps the mark. */
+export const CreateWithSpendingLimits: Story = {
+  args: {
+    spendingLimitTokens: [usdcLimit],
+    initialValues: { tokens: [{ address: USDC, symbol: 'USDC' }], recipients: [] },
+  },
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, TOKENS_SEARCH_PLACEHOLDER)
+    await expect(await screen.findByText(SPENDING_LIMIT_TOKENS_GROUP_LABEL, {}, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** The recipient search focused: the Workspace's contacts, then the local ones, each under its header. */
+export const CreatePickingRecipients: Story = {
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, RECIPIENTS_SEARCH_PLACEHOLDER)
+    await expect(await screen.findByRole('option', { name: /Nicole/ }, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** An address no contact has, pasted: offered as a new recipient. */
+export const CreatePastedRecipient: Story = {
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, RECIPIENTS_SEARCH_PLACEHOLDER)
+    await userEvent.paste(faker.finance.ethereumAddress())
+    await expect(await screen.findByRole('option', { name: /New recipient/ })).toBeVisible()
+  },
+}
+
+/** The Safe's own address, pasted: its error instead of an option. */
+export const CreatePastedInvalidRecipient: Story = {
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, RECIPIENTS_SEARCH_PLACEHOLDER)
+    await userEvent.paste(EF_SAFE)
+    await expect(await screen.findByRole('alert')).toBeVisible()
+  },
+}
 
 export const CreateFilled: Story = {
   args: { initialValues: filledValues },
@@ -146,8 +235,20 @@ export const CreateFilled: Story = {
 
 export const CreateTwentyTokensTwentyRecipients: Story = {
   args: {
-    initialValues: { excludedTokens: [], addedTokens: manyTokens, recipients: manyRecipients },
+    initialValues: { tokens: manyTokens, recipients: manyRecipients },
   },
+}
+
+/** Editing: the live allowlist's tokens and recipients start as chips, under the edit summary. */
+export const Edit: Story = {
+  args: { initialValues: filledValues },
+  decorators: [
+    (Story) => (
+      <EditModeProvider>
+        <Story />
+      </EditModeProvider>
+    ),
+  ],
 }
 
 /** The guard is not in a state that allows an allowlist: the sections are hidden and the banner explains why. */

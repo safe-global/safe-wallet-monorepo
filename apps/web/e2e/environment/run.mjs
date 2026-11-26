@@ -54,6 +54,8 @@ export function walletEnvironment(manifest, env = process.env) {
     // The local gateway accepts loopback returns; a developer's staging origin would send checkouts away.
     NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN: '',
     NEXT_PUBLIC_POLLING_INTERVAL: '2000',
+    // The fork holds the code of the 3-minute policy guard only, see e2e/src/seed/policy-guard.ts
+    NEXT_PUBLIC_POLICY_GUARD_DELAY_SECONDS: '180',
     NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',
     NEXT_PUBLIC_GATEWAY_URL_STAGING: gatewayUrl,
     NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: gatewayUrl,

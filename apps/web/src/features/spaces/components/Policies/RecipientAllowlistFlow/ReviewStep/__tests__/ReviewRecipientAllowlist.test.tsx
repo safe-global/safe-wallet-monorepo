@@ -1,0 +1,751 @@
+import { cloneElement, type ReactElement, type ReactNode } from 'react'
+import { faker } from '@faker-js/faker'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
+import { fireEvent, render, screen, waitFor, within } from '@/tests/test-utils'
+import { chainBuilder } from '@/tests/builders/chains'
+import * as useChainsModule from '@/hooks/useChains'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { AllowlistEntry } from '@safe-global/views/features/spaces/components/Policies/types'
+import {
+  POLICY_LABELS,
+  RULE_REVOKED_RECIPIENTS_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import type { AllowlistFormRecipient, RecipientAllowlistFlowData } from '../../types'
+import type { PolicyGuardState } from '@/features/policy-guard/public/types'
+import {
+  buildAllowlistChangeConfigurations,
+  buildAllowlistConfigurations,
+  encodeErc20TransferPolicyData,
+} from '@/features/policy-guard/public/services/allowlistConfigurations'
+import { createAllowlistSetupTxs } from '@/features/policy-guard/public/services/createAllowlistSetupTxs'
+import { getPolicyGuardAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
+import { POLICY_GUARD_DELAY_SECONDS } from '@safe-global/utils/features/policy-guard/constants'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import useWallet from '@/hooks/wallets/useWallet'
+import { groupSafeAccounts } from '../../../SafeAccountSelector/utils'
+import { useRecipientAllowlistSafeAccounts } from '../../hooks/useRecipientAllowlistSafeAccounts'
+import { useGuardStatus } from '../../hooks/useGuardStatus'
+import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
+import useSpendingLimitTokenOptions from '../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
+import { useBuildAllowlistTransaction } from '../useBuildAllowlistTransaction'
+import { useSaveAllowlistConfiguration } from '../../hooks/useSaveAllowlistConfiguration'
+import { toAllowlistRules, toFormBaseline } from '../../utils/allowlistEdit'
+import ReviewRecipientAllowlist from '..'
+import RecipientAllowlistFlow from '../..'
+
+const SEPOLIA = '11155111'
+const SAFE = checksumAddress(faker.finance.ethereumAddress())
+const RECIPIENT = checksumAddress(faker.finance.ethereumAddress())
+const OTHER = checksumAddress(faker.finance.ethereumAddress())
+const USDC = checksumAddress(faker.finance.ethereumAddress())
+const SCOPE_KEY: `${string}:${string}` = `${SEPOLIA}:${SAFE}`
+const WALLET = checksumAddress(faker.finance.ethereumAddress())
+const TOM = checksumAddress(faker.finance.ethereumAddress())
+const mockResolveName = (address: string): string => ({ [RECIPIENT]: 'Alice', [TOM]: 'Tom' })[address] ?? ''
+const PRIYA = checksumAddress(faker.finance.ethereumAddress())
+
+jest.mock('../useBuildAllowlistTransaction', () => ({ useBuildAllowlistTransaction: jest.fn() }))
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+  ...jest.requireActual('@safe-global/views/components/ui/tooltip'),
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children, render }: { children: ReactNode; render?: ReactElement }) =>
+    render ? cloneElement(render, {}, children) : <>{children}</>,
+  TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
+}))
+jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: jest.fn(),
+  useSigner: () => null,
+  useWalletContext: () => null,
+}))
+const mockPolicyGuardDelay = jest.fn()
+jest.mock('@/features/policy-guard/public/hooks/usePolicyGuardDelay', () => ({
+  ...jest.requireActual('@/features/policy-guard/public/hooks/usePolicyGuardDelay'),
+  usePolicyGuardDelay: (...args: unknown[]) => mockPolicyGuardDelay(...args),
+}))
+jest.mock('../../hooks/useSaveAllowlistConfiguration', () => ({ useSaveAllowlistConfiguration: jest.fn() }))
+jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
+jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
+jest.mock('../../hooks/useHeldTokenAddresses')
+jest.mock('../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
+  useSafeShieldForAddressPoisoning: jest.fn(),
+}))
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  ContactSource: { space: 'space', local: 'local' },
+  useAddressBookItem: () => undefined,
+  useMergedAddressBooks: () => ({
+    list: [],
+    has: (address: string) => address === RECIPIENT,
+    get: (address: string) => ({ [RECIPIENT]: { name: 'Alice', address }, [TOM]: { name: 'Tom', address } })[address],
+  }),
+  useSafeNameResolver: () => mockResolveName,
+}))
+jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
+  SafeScopeProvider: ({ children }: { children: ReactNode }) => (
+    <SafeScopeContext.Provider value={scopeValue}>{children}</SafeScopeContext.Provider>
+  ),
+}))
+jest.mock('@/components/tx-flow/TxFlowStep', () => ({
+  TxFlowStep: ({ children }: { children: ReactNode }) => <>{children}</>,
+}))
+jest.mock('@/components/tx/ReviewTransactionV2', () => ({
+  __esModule: true,
+  default: ({
+    title,
+    children,
+    onSubmit,
+    withDecodedData,
+    withMultisend,
+  }: {
+    title?: string
+    children?: ReactNode
+    onSubmit: () => void
+    withDecodedData?: boolean
+    withMultisend?: boolean
+  }) => (
+    <div
+      data-testid="review-transaction"
+      data-title={title}
+      data-with-decoded-data={String(withDecodedData)}
+      data-with-multisend={String(withMultisend)}
+    >
+      {children}
+      <button onClick={() => onSubmit()}>continue</button>
+    </div>
+  ),
+}))
+jest.mock('@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton', () => ({
+  __esModule: true,
+  default: () => <div data-testid="review-skeleton" />,
+}))
+
+const mockBuild = useBuildAllowlistTransaction as jest.MockedFunction<typeof useBuildAllowlistTransaction>
+const mockSave = jest.fn()
+const mockUseSave = useSaveAllowlistConfiguration as jest.MockedFunction<typeof useSaveAllowlistConfiguration>
+const mockUseAccounts = useRecipientAllowlistSafeAccounts as jest.MockedFunction<
+  typeof useRecipientAllowlistSafeAccounts
+>
+const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
+
+const option: SafeAccountOption = {
+  id: SCOPE_KEY,
+  chainId: SEPOLIA,
+  address: SAFE,
+  name: 'Treasury',
+  eligibility: 'signer',
+  chain: { chainId: SEPOLIA, chainName: 'Sepolia', chainLogoUri: null, shortName: 'sep' },
+}
+
+const scopeValue = {
+  scope: {
+    chainId: SEPOLIA,
+    safeAddress: SAFE,
+    scopeKey: SCOPE_KEY,
+    safeLoaded: true,
+    safeLoading: false,
+  },
+  setScope: jest.fn(),
+  clearScope: jest.fn(),
+}
+
+const rules = [
+  { tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] },
+  { tokenAddress: USDC, recipients: [RECIPIENT, OTHER] },
+]
+
+const recipients: AllowlistFormRecipient[] = [RECIPIENT, OTHER].map((address) => ({ address }))
+
+const safeTxContext = (overrides: Partial<SafeTxContextParams> = {}): SafeTxContextParams =>
+  ({ setSafeTx: jest.fn(), setSafeTxError: jest.fn(), ...overrides }) as unknown as SafeTxContextParams
+
+const onSubmit = jest.fn()
+
+const setIsSubmitLoading = jest.fn()
+const setIsSubmitDisabled = jest.fn()
+
+const renderReview = (
+  safeTxOverrides: Partial<SafeTxContextParams> = {},
+  flowRecipients = recipients,
+  flowData: Partial<RecipientAllowlistFlowData> = { rules },
+) =>
+  render(
+    <SafeScopeContext.Provider value={scopeValue}>
+      <TxFlowContext.Provider
+        value={
+          {
+            ...initialContext,
+            data: { ...flowData, recipients: flowRecipients },
+            setIsSubmitLoading,
+            setIsSubmitDisabled,
+          } as unknown as TxFlowContextType
+        }
+      >
+        <SafeTxContext.Provider value={safeTxContext(safeTxOverrides)}>
+          <ReviewRecipientAllowlist onSubmit={onSubmit}>
+            <div data-testid="flow-children" />
+          </ReviewRecipientAllowlist>
+        </SafeTxContext.Provider>
+      </TxFlowContext.Provider>
+    </SafeScopeContext.Provider>,
+  )
+
+const configurations = buildAllowlistConfigurations(SEPOLIA, rules)
+const guardAddress = getPolicyGuardAddress(SEPOLIA)!
+
+const setupFor = (guardState: PolicyGuardState, input = configurations) =>
+  createAllowlistSetupTxs({ chainId: SEPOLIA, safeAddress: SAFE, guardAddress, guardState, configurations: input })
+
+const built = (guardState?: PolicyGuardState) => {
+  if (!guardState) return mockBuild.mockReturnValue({})
+  const setup = setupFor(guardState)
+  return mockBuild.mockReturnValue({
+    guardState,
+    configurations: setup.configurations,
+    root: setup.root,
+    txs: setup.txs,
+  })
+}
+
+const mockOwners = (owners: string[], threshold = 2) =>
+  (useSafeInfo as jest.Mock).mockReturnValue({
+    safe: {
+      ...defaultSafeInfo,
+      address: { value: SAFE },
+      chainId: SEPOLIA,
+      owners: owners.map((value) => ({ value })),
+      threshold,
+    },
+    safeAddress: SAFE,
+    safeLoaded: true,
+    safeLoading: false,
+  })
+
+const mockGuardDelay = (delay = POLICY_GUARD_DELAY_SECONDS) => mockPolicyGuardDelay.mockReturnValue(delay)
+
+const actionLabels = () => screen.getAllByTestId('action-item').map((item) => item.textContent)
+
+beforeEach(() => {
+  jest.clearAllMocks()
+  mockGuardDelay()
+  mockSave.mockResolvedValue(true)
+  mockOwners([WALLET, TOM, PRIYA])
+  ;(useWallet as jest.Mock).mockReturnValue({ address: WALLET })
+  mockUseSave.mockReturnValue({ save: mockSave, isSaving: false })
+  jest.spyOn(useChainsModule, 'useChain').mockReturnValue(chainBuilder().with({ chainId: SEPOLIA }).build())
+  mockUseAccounts.mockReturnValue({
+    accounts: groupSafeAccounts([option]),
+    isLoading: false,
+    isError: false,
+    hasWallet: true,
+    signersOnly: false,
+    refetch: jest.fn(),
+    hasSelectableAccount: true,
+  })
+  mockUseOptions.mockReturnValue({
+    options: [
+      { address: ZERO_ADDRESS, symbol: 'ETH', name: 'Ether', decimals: 18, group: 'held' },
+      { address: USDC, symbol: 'USDC', name: 'USD Coin', decimals: 6, group: 'held' },
+    ],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    isPopularLoading: false,
+    isPopularError: false,
+    refetchPopular: jest.fn(),
+    identityKey: SCOPE_KEY,
+  })
+})
+
+describe('ReviewRecipientAllowlist', () => {
+  it('shows the skeleton until the guard state is known', () => {
+    built()
+    renderReview()
+
+    expect(screen.getByTestId('review-skeleton')).toBeInTheDocument()
+    expect(screen.queryByTestId('review-transaction')).not.toBeInTheDocument()
+  })
+
+  it('still renders the review so the build error shows', () => {
+    built()
+    renderReview({ safeTxError: new Error('boom') })
+
+    expect(screen.getByTestId('review-transaction')).toBeInTheDocument()
+    expect(screen.queryByTestId('review-skeleton')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-review-summary')).not.toBeInTheDocument()
+  })
+
+  it('hides the generic decoded data and action list, since it lists the setup calls itself', () => {
+    built({ status: 'partial', missingSlot: 'module', guardAddress })
+    renderReview()
+
+    const review = screen.getByTestId('review-transaction')
+    expect(review).toHaveAttribute('data-with-decoded-data', 'false')
+    expect(review).toHaveAttribute('data-with-multisend', 'false')
+  })
+
+  it('should show the details under Confirm policy without a summary banner, when creating an allowlist', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    expect(screen.getByTestId('review-transaction')).toHaveAttribute('data-title', 'Confirm policy')
+    expect(screen.getByTestId('allowlist-review-summary')).toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('shows the account, the tokens and the recipients', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    const summary = within(screen.getByTestId('allowlist-review-summary'))
+    expect(summary.getByText('Applies to')).toBeInTheDocument()
+    expect(summary.getByText('Treasury')).toBeInTheDocument()
+    expect(summary.getByText('Allowed tokens')).toBeInTheDocument()
+    expect(summary.getByText('ETH')).toBeInTheDocument()
+    expect(summary.getByText('USDC')).toBeInTheDocument()
+    expect(summary.getByText('Allowed recipients (2)')).toBeInTheDocument()
+    expect(summary.getByText('Alice')).toBeInTheDocument()
+    expect(summary.getByLabelText('In your address book')).toBeInTheDocument()
+    expect(summary.getByText(shortenAddress(OTHER))).toBeInTheDocument()
+    expect(screen.getByTestId('flow-children')).toBeInTheDocument()
+  })
+
+  it('keeps the two equal recipient columns of a first setup', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    expect(screen.getByTestId('allowlist-review-recipients')).toHaveClass('grid-cols-2', 'gap-x-4')
+  })
+
+  it('names the other owners who sign next', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    expect(screen.getByTestId('allowlist-next-signers')).toHaveTextContent(
+      `Tom and ${shortenAddress(PRIYA)} will be asked to sign next. Nothing changes until it's executed.`,
+    )
+  })
+
+  it('hides the signer line on a threshold-1 Safe', () => {
+    built({ status: 'none' })
+    mockOwners([WALLET, TOM, PRIYA], 1)
+    renderReview()
+
+    expect(screen.queryByTestId('allowlist-next-signers')).not.toBeInTheDocument()
+  })
+
+  it('hides the signer line when there are no other owners', () => {
+    built({ status: 'none' })
+    mockOwners([WALLET])
+    renderReview()
+
+    expect(screen.queryByTestId('allowlist-next-signers')).not.toBeInTheDocument()
+  })
+
+  it('should, when a picked token is on no token list, show it by the symbol and logo picked in step 1', () => {
+    const custom = checksumAddress(faker.finance.ethereumAddress())
+    built({ status: 'none' })
+    renderReview({}, recipients, {
+      rules: [{ tokenAddress: custom, recipients: [RECIPIENT] }],
+      tokens: [{ address: custom, symbol: 'SAFE', logoUri: 'https://safe.png' }],
+    })
+
+    const token = within(screen.getByTestId('allowlist-review-summary')).getByTestId(`allowlist-review-token-${custom}`)
+    expect(within(token).getByText('SAFE')).toBeInTheDocument()
+    expect(within(token).getByTitle('SAFE').getAttribute('srcdoc')).toContain('https://safe.png')
+  })
+
+  it('shows a recipient name typed in step 1 in the summary and the rule rows', () => {
+    built({ status: 'none' })
+    renderReview({}, [{ address: RECIPIENT }, { address: OTHER, name: 'Payroll' }])
+
+    expect(within(screen.getByTestId('allowlist-review-summary')).getByText('Payroll')).toBeInTheDocument()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const [, tokenRule] = screen.getAllByTestId('allowlist-rule')
+    expect(within(tokenRule).getByText('Payroll')).toBeInTheDocument()
+  })
+
+  it.each([
+    [{ status: 'none' }, ['SafePolicyGuard: configureImmediately', 'setGuard', 'setModuleGuard', 'setFallbackHandler']],
+    [{ status: 'known', guardAddress }, ['SafePolicyGuard: requestConfiguration']],
+    [
+      { status: 'partial', missingSlot: 'transaction', guardAddress },
+      ['SafePolicyGuard: requestConfiguration', 'setGuard'],
+    ],
+    [
+      { status: 'partial', missingSlot: 'module', guardAddress },
+      ['SafePolicyGuard: requestConfiguration', 'setModuleGuard'],
+    ],
+  ] as const)('lists the actions the transaction contains for %j', (guardState, labels) => {
+    built(guardState)
+    renderReview()
+
+    expect(actionLabels()).toEqual(labels.map((label, index) => `${index + 1}${label}`))
+  })
+
+  it('lists every rule with its policy when the configuring action is expanded', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const rules = screen.getAllByTestId('allowlist-rule')
+    const count = setupFor({ status: 'none' }).configurations.length
+    expect(rules.map((rule) => within(rule).getByText(/^Rule \d+ of \d+$/).textContent)).toEqual(
+      Array.from({ length: count }, (_, index) => `Rule ${index + 1} of ${count}`),
+    )
+    const [native, token, ...defaults] = rules
+    expect(within(native).getByText('Native transfers')).toBeInTheDocument()
+    expect(within(native).queryByText('Allowed recipients')).not.toBeInTheDocument()
+    expect(within(token).getByText('Token withdraw allowlist')).toBeInTheDocument()
+    expect(within(token).getByText('Allowed recipients')).toBeInTheDocument()
+    const [reject, ...fallbacks] = defaults.slice(-3)
+    defaults.slice(0, -3).forEach((rule) => expect(within(rule).getByText('Batched transactions')).toBeInTheDocument())
+    expect(within(reject).getByText('Reject transactions')).toBeInTheDocument()
+    expect(within(reject).getByText('This Safe account')).toBeInTheDocument()
+    fallbacks.forEach((rule) => {
+      expect(within(rule).getByText('Block everything else')).toBeInTheDocument()
+      expect(within(rule).getByText('Any address')).toBeInTheDocument()
+      expect(within(rule).queryByText('ETH')).not.toBeInTheDocument()
+    })
+    expect(fallbacks[0]).not.toHaveTextContent('Delegate call')
+    expect(fallbacks[1]).toHaveTextContent('Delegate call')
+  })
+
+  it('names only the catch-all access "Any address", whatever policy a rule binds', () => {
+    const installed = setupFor({ status: 'none' }).configurations
+    const fallback = installed[installed.length - 1]
+    const [, erc20] = configurations
+    const allowOnToken = { ...erc20, policy: fallback.policy, data: '0x' }
+    mockBuild.mockReturnValue({
+      guardState: { status: 'none' },
+      configurations: [allowOnToken, fallback],
+      txs: setupFor({ status: 'none' }, [allowOnToken, fallback]).txs,
+    })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const [tokenRule, fallbackRule] = screen.getAllByTestId('allowlist-rule')
+    expect(within(tokenRule).queryByText('Any address')).not.toBeInTheDocument()
+    expect(within(tokenRule).getByText('USDC')).toBeInTheDocument()
+    expect(within(fallbackRule).getByText('Any address')).toBeInTheDocument()
+  })
+
+  it('should say every other action is blocked and list no gaps, when the first setup installs the guard', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    expect(within(screen.getByTestId('allowlist-review-summary')).getByText('Every other action')).toBeInTheDocument()
+    expect(screen.getByTestId('allowlist-fallback')).toHaveTextContent('Blocked')
+    expect(screen.queryByTestId('allowlist-gaps')).not.toBeInTheDocument()
+  })
+
+  it('shows no fallback row or gaps when the guard is already set, since nothing new is installed', () => {
+    built({ status: 'known', guardAddress })
+    renderReview()
+
+    expect(screen.queryByText('Every other action')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-gaps')).not.toBeInTheDocument()
+  })
+
+  it('lists the recipients encoded in the configuration, not the form rules', () => {
+    const [native, erc20] = configurations
+    const encodedOnlyOther = { ...erc20, data: encodeErc20TransferPolicyData([OTHER]) }
+    mockBuild.mockReturnValue({
+      guardState: { status: 'none' },
+      configurations: [native, encodedOnlyOther],
+      txs: setupFor({ status: 'none' }, [native, encodedOnlyOther]).txs,
+    })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const erc20Rule = screen.getAllByTestId('allowlist-rule')[1]
+    expect(erc20Rule).toHaveTextContent(OTHER)
+    expect(erc20Rule).not.toHaveTextContent(RECIPIENT)
+  })
+
+  it('never shows the configuration root or the raw calldata', () => {
+    built({ status: 'known', guardAddress })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const {
+      root,
+      txs: [request],
+    } = setupFor({ status: 'known', guardAddress })
+    expect(screen.getAllByTestId('allowlist-rule')).toHaveLength(configurations.length)
+    expect(document.body.textContent).not.toContain(root)
+    expect(document.body.textContent).not.toContain(request.data)
+  })
+
+  it('should name the TokenCallbackHandler the first setup sets as fallback handler, when the setter is expanded', () => {
+    built({ status: 'none' })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[3])
+
+    expect(screen.getByText('handler')).toBeInTheDocument()
+    expect(screen.getByText('TokenCallbackHandler')).toBeInTheDocument()
+  })
+
+  it('shows the guard a setter action sets', () => {
+    built({ status: 'partial', missingSlot: 'module', guardAddress })
+    renderReview()
+
+    fireEvent.click(screen.getAllByTestId('action-item')[1])
+
+    expect(screen.getByText('moduleGuard')).toBeInTheDocument()
+  })
+
+  it.each<[PolicyGuardState]>([[{ status: 'none' }], [{ status: 'known', guardAddress }]])(
+    'review submit saves before continuing to sign (%o)',
+    async (guardState) => {
+      built(guardState)
+      renderReview()
+
+      fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+      const { configurations: installed, root } = setupFor(guardState)
+      expect(mockSave).toHaveBeenCalledWith({ configurations: installed, root })
+      expect(mockSave.mock.invocationCallOrder[0]).toBeLessThan(onSubmit.mock.invocationCallOrder[0])
+    },
+  )
+
+  it('stays on the review and does not sign when the save fails', async () => {
+    built({ status: 'none' })
+    mockSave.mockResolvedValue(false)
+    renderReview()
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+    await waitFor(() => expect(mockSave).toHaveBeenCalledTimes(1))
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('marks the submit as loading only while the save runs', () => {
+    built({ status: 'none' })
+    mockUseSave.mockReturnValue({ save: mockSave, isSaving: true })
+    renderReview()
+    expect(setIsSubmitLoading).toHaveBeenLastCalledWith(true)
+
+    mockUseSave.mockReturnValue({ save: mockSave, isSaving: false })
+    renderReview()
+    expect(setIsSubmitLoading).toHaveBeenLastCalledWith(false)
+  })
+
+  it('saves once when Continue is clicked again while the save runs', async () => {
+    built({ status: 'none' })
+    let finishSave: (saved: boolean) => void = () => {}
+    mockSave.mockReturnValue(new Promise<boolean>((resolve) => (finishSave = resolve)))
+    renderReview()
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+    finishSave(true)
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    expect(mockSave).toHaveBeenCalledTimes(1)
+  })
+
+  it('disables the submit while the save runs', () => {
+    built({ status: 'none' })
+    mockUseSave.mockReturnValue({ save: mockSave, isSaving: true })
+    renderReview()
+
+    expect(setIsSubmitDisabled).toHaveBeenLastCalledWith(true)
+  })
+
+  it('disables the submit without configurations and enables it with them', () => {
+    built()
+    renderReview()
+    expect(setIsSubmitDisabled).toHaveBeenLastCalledWith(true)
+
+    built({ status: 'none' })
+    renderReview()
+    expect(setIsSubmitDisabled).toHaveBeenLastCalledWith(false)
+  })
+
+  it('resets the submit loading and disabled state on unmount', () => {
+    built({ status: 'none' })
+    mockUseSave.mockReturnValue({ save: mockSave, isSaving: true })
+    const { unmount } = renderReview()
+    setIsSubmitLoading.mockClear()
+    setIsSubmitDisabled.mockClear()
+
+    unmount()
+
+    expect(setIsSubmitLoading).toHaveBeenCalledWith(false)
+    expect(setIsSubmitDisabled).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('ReviewRecipientAllowlist when editing a live allowlist', () => {
+  const NEWBIE = checksumAddress(faker.finance.ethereumAddress())
+  const DAI = checksumAddress(faker.finance.ethereumAddress())
+  const INSTALLED_GUARD = '0x46d22E0B3DC367b48bc2d64B789ae154b3177a57'
+  const token = (address: string, symbol: string, logoUri: string | null = null) => ({
+    address,
+    symbol,
+    decimals: 18,
+    logoUri,
+  })
+  const entry = (entryToken: AllowlistEntry['token'], accounts: string[]): AllowlistEntry => ({
+    token: entryToken,
+    recipients: accounts.map((account) => ({ account, permission: 'ALWAYS' as const })),
+  })
+  const baseline = [
+    entry(token(USDC, 'USDC'), [RECIPIENT, OTHER]),
+    entry(token(DAI, 'DAI', 'https://dai.png'), [RECIPIENT]),
+  ]
+  const editedRules = [{ tokenAddress: USDC, recipients: [RECIPIENT, NEWBIE] }]
+  const editedRecipients: AllowlistFormRecipient[] = [{ address: RECIPIENT }, { address: NEWBIE }]
+  const changeSet = buildAllowlistChangeConfigurations(SEPOLIA, toFormBaseline(toAllowlistRules(baseline)), editedRules)
+  const guardState: PolicyGuardState = { status: 'known', guardAddress: INSTALLED_GUARD }
+
+  const renderEdit = () => {
+    const setup = createAllowlistSetupTxs({
+      chainId: SEPOLIA,
+      safeAddress: SAFE,
+      guardAddress: INSTALLED_GUARD,
+      guardState,
+      configurations: changeSet,
+    })
+    mockBuild.mockReturnValue({ guardState, ...setup })
+    return renderReview({}, editedRecipients, {
+      rules: editedRules,
+      baseline,
+      baselineGuard: INSTALLED_GUARD,
+    })
+  }
+
+  const recipientRow = (address: string) =>
+    within(screen.getByTestId('allowlist-review-summary')).getByTestId(`allowlist-review-recipient-${address}`)
+  const tokenItem = (address: string) =>
+    within(screen.getByTestId('allowlist-review-summary')).getByTestId(`allowlist-review-token-${address}`)
+
+  it('builds the edit from the live rules on the guard holding them', () => {
+    renderEdit()
+
+    expect(mockBuild).toHaveBeenCalledWith(editedRules, toAllowlistRules(baseline), INSTALLED_GUARD)
+  })
+
+  it('marks an added recipient Added and a removed one Removed and faded, counting only the kept ones', () => {
+    renderEdit()
+
+    expect(within(recipientRow(NEWBIE)).getByText('Added')).toBeInTheDocument()
+    expect(within(recipientRow(RECIPIENT)).queryByText(/Added|Removed/)).not.toBeInTheDocument()
+    const removed = recipientRow(OTHER)
+    expect(within(removed).getByText('Removed')).toBeInTheDocument()
+    expect(within(removed).getByText(shortenAddress(OTHER)).closest('.opacity-50')).not.toBeNull()
+    expect(
+      within(screen.getByTestId('allowlist-review-summary')).getByText('Allowed recipients (2)'),
+    ).toBeInTheDocument()
+  })
+
+  it('lays the recipients out in content-sized columns, so a badge never overlaps the next address', () => {
+    renderEdit()
+
+    expect(screen.getByTestId('allowlist-review-recipients')).toHaveClass(
+      'grid-cols-[max-content_minmax(0,1fr)]',
+      'gap-x-8',
+    )
+  })
+
+  it('shows a removed token the Safe no longer holds by its live symbol and logo', () => {
+    renderEdit()
+
+    const removed = tokenItem(DAI)
+    expect(within(removed).getByText('Removed')).toBeInTheDocument()
+    expect(within(removed).getByText('DAI')).toHaveClass('text-muted-foreground', 'opacity-50')
+    expect(within(removed).getByTitle('DAI').getAttribute('srcdoc')).toContain('https://dai.png')
+    expect(within(tokenItem(USDC)).queryByText(/Added|Removed/)).not.toBeInTheDocument()
+  })
+
+  it('should show the edit summary as info, naming the Safe, when editing an allowlist', () => {
+    renderEdit()
+
+    expect(screen.getByRole('status')).toHaveTextContent("You're editing the allowlist on Treasury on Sepolia.")
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('describes the wait with the delay of the installed guard', () => {
+    mockGuardDelay(600)
+    renderEdit()
+
+    expect(mockPolicyGuardDelay).toHaveBeenCalledWith(SEPOLIA, INSTALLED_GUARD)
+    const summary = screen.getByRole('status')
+    expect(summary).toHaveTextContent(/This starts a 10-minute wait/)
+    expect(within(summary).getByTestId('tooltip-content')).toHaveTextContent(
+      'Any signer can cancel the change before it applies.',
+    )
+  })
+
+  it('lists the revoked recipients and the deleted rule in the request', () => {
+    renderEdit()
+
+    expect(actionLabels()).toEqual(['1SafePolicyGuard: requestConfiguration'])
+    fireEvent.click(screen.getAllByTestId('action-item')[0])
+
+    const rows = screen.getAllByTestId('allowlist-rule')
+    expect(rows).toHaveLength(changeSet.length)
+    expect(rows.filter((row) => within(row).queryByText(RULE_REVOKED_RECIPIENTS_LABEL))).toHaveLength(2)
+    expect(rows.filter((row) => within(row).queryByText(POLICY_LABELS.removal))).toHaveLength(1)
+  })
+
+  it('saves only the change set before continuing to sign', async () => {
+    renderEdit()
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
+    const { getConfigurationRoot } = jest.requireActual('@/features/policy-guard/public/services/policyGuardEncoders')
+    expect(mockSave).toHaveBeenCalledWith({ configurations: changeSet, root: getConfigurationRoot(changeSet) })
+  })
+})
+
+describe('RecipientAllowlistFlow review round trip', () => {
+  it('Back returns to the form with entries kept', async () => {
+    built({ status: 'none' })
+    ;(useGuardStatus as jest.Mock).mockReturnValue({ guard: { status: 'none' }, retry: jest.fn() })
+    ;(useHeldTokenAddresses as jest.Mock).mockReturnValue({
+      ...mockUseOptions(),
+      addresses: [ZERO_ADDRESS],
+    })
+
+    render(<RecipientAllowlistFlow />)
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Search tokens by name or address' }), {
+      target: { value: 'ETH' },
+    })
+    fireEvent.click(screen.getByRole('option', { name: /ETH/ }))
+    fireEvent.change(screen.getByRole('combobox', { name: 'Search contacts or paste an address' }), {
+      target: { value: RECIPIENT },
+    })
+    fireEvent.click(screen.getByRole('option', { name: /New recipient/ }))
+    fireEvent.click(screen.getByTestId('next-btn'))
+
+    expect(await screen.findByTestId('allowlist-review-summary')).toHaveTextContent('Alice')
+
+    fireEvent.click(screen.getByRole('button', { name: /^back$/i }))
+
+    expect(await screen.findByTestId('allowlist-recipients-section')).toHaveTextContent('Alice')
+  })
+})

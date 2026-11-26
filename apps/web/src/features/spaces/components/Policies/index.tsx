@@ -19,10 +19,15 @@ import type { PolicyLock } from '@safe-global/views/features/spaces/components/P
 import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
 import RecipientAllowlistFlow from './RecipientAllowlistFlow'
+import { useRecipientAllowlistSafeAccounts } from './RecipientAllowlistFlow/hooks/useRecipientAllowlistSafeAccounts'
+import { hasAllowlistCandidate } from './RecipientAllowlistFlow/utils/safeAccounts'
 import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
 import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
 import AllowlistDetails from './AllowlistDetails'
+import PendingAllowlistDetails from './AllowlistDetails/PendingAllowlistDetails'
+import ApplyAllowlistFlow, { type ApplyAllowlistFlowData } from './ApplyAllowlistFlow'
+import type { GuardRemovalCleanup } from './utils/mapDelayedGuardRequests'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
@@ -38,6 +43,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
   isActiveAllowlistPolicy,
+  isAllowlistPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
@@ -49,6 +55,10 @@ import {
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
   policies?: Policy[]
+  /** What the apply flow replays for an allowlist whose guard delay has passed, keyed by row id. */
+  allowlistApplyRequests?: ReadonlyMap<string, ApplyAllowlistFlowData>
+  /** A removal's second root, which the guard removal applies with it, keyed by row id. */
+  guardRemovalCleanups?: ReadonlyMap<string, GuardRemovalCleanup>
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
@@ -79,6 +89,8 @@ const openRequestPolicyForm = () => {
  */
 const Policies = ({
   policies = [],
+  allowlistApplyRequests,
+  guardRemovalCleanups,
   isLoading = false,
   isError = false,
   onRetry,
@@ -87,8 +99,14 @@ const Policies = ({
   locked,
 }: PoliciesProps): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
+  const allowlistSafes = useRecipientAllowlistSafeAccounts()
+  const hasNoAllowlistSafe =
+    allowlistSafes.hasWallet &&
+    !allowlistSafes.isLoading &&
+    !allowlistSafes.isError &&
+    !hasAllowlistCandidate(allowlistSafes.accounts)
   // Existing allowlists stay listed either way; only creating one needs a chain that enables it.
-  const canCreateAllowlist = useIsAllowlistAvailableInSpace()
+  const canCreateAllowlist = useIsAllowlistAvailableInSpace() && !hasNoAllowlistSafe
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
@@ -96,8 +114,7 @@ const Policies = ({
   const { newIds: newAllowlistIds, dismiss: dismissNewAllowlist } = useNewAllowlistIds(policies, isSettled)
 
   const selectPolicy = useCallback((policy: Policy) => {
-    // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
-    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isActiveAllowlistPolicy(policy)) {
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isAllowlistPolicy(policy)) {
       setOpenPolicy(policy)
     }
   }, [])
@@ -144,9 +161,15 @@ const Policies = ({
 
   const startAllowlistFlow = useCallback(() => setTxFlow(<RecipientAllowlistFlow />), [setTxFlow])
 
+  const applyAllowlist = (policyId: string): (() => void) | undefined => {
+    const request = allowlistApplyRequests?.get(policyId)
+    return request ? () => setTxFlow(<ApplyAllowlistFlow {...request} />) : undefined
+  }
+
   const spendingLimitIntro = usePolicyIntro(SPENDING_LIMIT_INTRO_SEEN_KEY, startSpendingLimitFlow)
   const proposerIntro = usePolicyIntro(PROPOSER_INTRO_SEEN_KEY, startProposerFlow)
-  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow)
+  // The owner confirms there that every other action will be blocked, so it opens before every setup
+  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow, { everyTime: true })
 
   const handleSelect = useCallback(
     (id: AddPolicyId) => {
@@ -277,6 +300,17 @@ const Policies = ({
           policies={policies}
           onClose={closeDetails}
           justActivated={newAllowlistIds.has(openedPolicy.id)}
+          onApply={applyAllowlist(openedPolicy.id)}
+          guardRemovalCleanup={guardRemovalCleanups?.get(openedPolicy.id)}
+        />
+      )}
+
+      {openedPolicy && isAllowlistPolicy(openedPolicy) && isPendingPolicy(openedPolicy) && (
+        <PendingAllowlistDetails
+          policy={openedPolicy}
+          isUnlisted={!listedPolicy}
+          requestedConfigurations={allowlistApplyRequests?.get(openedPolicy.id)?.configurations}
+          onClose={closeDetails}
         />
       )}
 

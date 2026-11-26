@@ -1,4 +1,4 @@
-import { Wallet } from 'lucide-react'
+import { Users, Wallet } from 'lucide-react'
 import { render, screen } from '@/tests/test-utils'
 import PolicyDrawerHeader from '../PolicyDrawerHeader'
 
@@ -20,5 +20,53 @@ describe('PolicyDrawerHeader', () => {
 
     expect(screen.getByTestId('policy-status-skeleton')).toBeInTheDocument()
     expect(screen.queryByText('Active')).not.toBeInTheDocument()
+  })
+
+  it('should, when an allowlist is in a change, show the change beside the status of the change', () => {
+    render(
+      <PolicyDrawerHeader
+        icon={Users}
+        title="Allowlist"
+        status={{ state: 'removal-in-delay', change: 'removal', label: 'In delay', variant: 'warning' }}
+      />,
+    )
+
+    expect(screen.getByTestId('policy-change-removal')).toHaveTextContent('Removal')
+    expect(screen.getByTestId('policy-status-removal-in-delay')).toHaveTextContent('In delay')
+  })
+
+  it('should, when an allowlist is in no change, show its status alone', () => {
+    render(
+      <PolicyDrawerHeader
+        icon={Users}
+        title="Allowlist"
+        status={{ state: 'active', label: 'Active', variant: 'success' }}
+      />,
+    )
+
+    expect(screen.getByTestId('allowlist-status-tags')).toHaveTextContent(/^Active$/)
+    expect(screen.queryByTestId(/^policy-change-/)).not.toBeInTheDocument()
+  })
+
+  it('should, when an allowlist is in a change, put both of its tags on one row below the title', () => {
+    render(
+      <PolicyDrawerHeader
+        icon={Users}
+        title="Allowlist"
+        status={{ state: 'guard-removal-pending', change: 'guard-removal', label: 'Pending · 0/1', variant: 'warning' }}
+      />,
+    )
+
+    const tags = screen.getByTestId('allowlist-status-tags')
+    expect(screen.getByText('Allowlist').nextElementSibling).toBe(tags)
+    expect(tags).toHaveTextContent('Guard removalPending · 0/1')
+  })
+
+  it('should, for a policy with a single status, keep the status beside the title', () => {
+    render(<PolicyDrawerHeader icon={Wallet} title="Spending limit" status="active" />)
+
+    expect(screen.getByText('Spending limit').nextElementSibling).toContainElement(
+      screen.getByTestId('policy-status-active'),
+    )
   })
 })

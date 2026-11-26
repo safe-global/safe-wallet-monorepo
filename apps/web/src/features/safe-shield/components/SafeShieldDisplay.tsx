@@ -16,6 +16,7 @@ import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import type { GuardPolicyCheck } from '../hooks/useGuardPolicyChecks'
 import { getOverallStatus, getPrimaryResult } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
@@ -41,6 +42,7 @@ export const SafeShieldDisplay = ({
   threat,
   deadlock,
   safeTx,
+  guardCheck,
   hypernativeAuth,
   showHypernativeInfo = true,
   showHypernativeActiveStatus = true,
@@ -55,6 +57,7 @@ export const SafeShieldDisplay = ({
   threat: AsyncResult<ThreatAnalysisResults>
   deadlock: AsyncResult<DeadlockAnalysisResults>
   safeTx?: SafeTransaction
+  guardCheck?: GuardPolicyCheck
   hypernativeAuth?: HypernativeAuthStatus
   showHypernativeInfo?: boolean
   showHypernativeActiveStatus?: boolean
@@ -151,6 +154,7 @@ export const SafeShieldDisplay = ({
           contract={contract}
           deadlock={deadlock}
           safeTx={safeTx}
+          guardCheck={guardCheck}
           overallStatus={overallStatus}
           hypernativeAuth={hypernativeAuth}
           showHypernativeInfo={showHypernativeInfo}

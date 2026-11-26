@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   useTransactionsGetTransactionByIdV1Query,
   type Transaction,
-  type TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent } from '@/services/tx/txEvents'
@@ -12,6 +11,7 @@ import type { PendingTxOutcome } from '@safe-global/views/features/spaces/compon
 import { useRefetchOnTxEvents } from '../../hooks/useRefetchOnTxEvents'
 import type { PendingSpendingLimitPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
+import { PENDING_TX_OUTCOME_BY_STATUS } from '../../utils/pendingTxOutcome'
 
 const REFETCH_EVENTS = [
   TxEvent.SIGNATURE_PROPOSED,
@@ -20,13 +20,6 @@ const REFETCH_EVENTS = [
   TxEvent.SUCCESS,
   TxEvent.DELETED,
 ]
-
-const OUTCOME_BY_STATUS: Partial<Record<TransactionDetails['txStatus'], PendingTxOutcome>> = {
-  SUCCESS: 'executed',
-  FAILED: 'failed',
-  // CGW marks a queued transaction cancelled once another one has taken its nonce.
-  CANCELLED: 'replaced',
-}
 
 export type PendingPolicyTransaction = {
   /** Undefined until loaded. */
@@ -41,7 +34,7 @@ export type PendingPolicyTransaction = {
 }
 
 export const usePendingPolicyTransaction = (
-  policy: PendingSpendingLimitPolicy,
+  policy: Pick<PendingSpendingLimitPolicy, 'safe' | 'safeTxHash'>,
   isUnlisted = false,
 ): PendingPolicyTransaction => {
   // A transaction that has left the queue can no longer change.
@@ -75,7 +68,7 @@ export const usePendingPolicyTransaction = (
       txSummary: makeTxFromDetails(currentData).transaction,
       confirmedBy: execution?.confirmations.map(({ signer }) => signer.value) ?? [],
       confirmationsSubmitted: execution?.confirmations.length,
-      outcome: OUTCOME_BY_STATUS[currentData.txStatus],
+      outcome: PENDING_TX_OUTCOME_BY_STATUS[currentData.txStatus],
     }
   }, [currentData, error, isUnlisted, refetch])
 

@@ -3,7 +3,13 @@ import type { Policy } from '@safe-global/views/features/spaces/components/Polic
 import { TxModalContext } from '@/components/tx-flow'
 import type { ActiveAllowlistPolicy } from '../AllowlistDrawer/resolveState'
 import AllowlistDrawer from '../AllowlistDrawer/AllowlistDrawer'
+import RemoveAllowlistFlow from '../RemoveAllowlistFlow'
+import RemoveGuardFlow from '../RemoveGuardFlow'
+import EditRecipientAllowlistFlow from '../RecipientAllowlistFlow/EditFlow'
+import { toAllowlistRules } from '../RecipientAllowlistFlow/utils/allowlistEdit'
+import { getApplicableCleanup, type GuardRemovalCleanup } from '../utils/mapDelayedGuardRequests'
 import { useAllowlistDetails } from './hooks/useAllowlistDetails'
+import { useDiscardAllowlistRequest } from './hooks/useDiscardAllowlistRequest'
 
 export type AllowlistDetailsProps = {
   policy: ActiveAllowlistPolicy
@@ -11,12 +17,39 @@ export type AllowlistDetailsProps = {
   policies: Policy[]
   onClose: () => void
   justActivated?: boolean
+  /** Set once the guard's delay is over: opens the apply flow. */
+  onApply?: () => void
+  /** The removal's second root, which the guard removal applies with it while its window is open. */
+  guardRemovalCleanup?: GuardRemovalCleanup
 }
 
 /** Active allowlists only: pending ones are not wired to CGW yet. */
-const AllowlistDetails = ({ policy, policies, onClose, justActivated }: AllowlistDetailsProps): ReactElement => {
+const AllowlistDetails = ({
+  policy,
+  policies,
+  onClose,
+  justActivated,
+  onApply,
+  guardRemovalCleanup,
+}: AllowlistDetailsProps): ReactElement => {
   const content = useAllowlistDetails(policy, policies)
-  const { txFlow } = useContext(TxModalContext)
+  const onDiscard = useDiscardAllowlistRequest(policy)
+  const { txFlow, setTxFlow } = useContext(TxModalContext)
+  const { chainId, address: safeAddress } = policy.safe
+  const { enforcement } = policy
+
+  const onRemove =
+    enforcement.via === 'guard'
+      ? () =>
+          setTxFlow(
+            <RemoveAllowlistFlow
+              chainId={chainId}
+              safeAddress={safeAddress}
+              guardAddress={enforcement.guardAddress}
+              rules={toAllowlistRules(policy.data.entries)}
+            />,
+          )
+      : undefined
 
   return (
     <AllowlistDrawer
@@ -25,9 +58,23 @@ const AllowlistDetails = ({ policy, policies, onClose, justActivated }: Allowlis
       policy={policy}
       {...content}
       justActivated={justActivated}
-      // TODO: placeholder handlers so the buttons look live; replace with the edit and remove flows
-      onEdit={() => console.log('Edit allowlist', policy)}
-      onRemove={() => console.log('Remove allowlist', policy)}
+      onApply={onApply}
+      onEdit={() => setTxFlow(<EditRecipientAllowlistFlow policy={policy} />)}
+      onRemove={onRemove}
+      onDiscard={onDiscard}
+      onRemoveGuard={
+        enforcement.via === 'guard'
+          ? () =>
+              setTxFlow(
+                <RemoveGuardFlow
+                  chainId={chainId}
+                  safeAddress={safeAddress}
+                  guardAddress={enforcement.guardAddress}
+                  cleanupConfigurations={getApplicableCleanup(guardRemovalCleanup, Date.now())}
+                />,
+              )
+          : undefined
+      }
     />
   )
 }

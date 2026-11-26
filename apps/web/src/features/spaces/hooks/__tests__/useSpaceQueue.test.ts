@@ -4,11 +4,22 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
-import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  cgwApi as spacesApi,
+  type SpaceQueuedItemPage,
+  type TransactionQueuedItem,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { makeStore } from '@/store'
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { getPollingInterval, toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
+import {
+  getPollingInterval,
+  selectSpaceQueuePage,
+  toSpaceQueue,
+  useSpaceQueue,
+  type SpaceQueueFilters,
+} from '../useSpaceQueue'
 
 const spaceId = faker.string.uuid()
 const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
@@ -332,5 +343,30 @@ describe('useSpaceQueue', () => {
     const { queue } = await fetchQueue(undefined, 'treasury')
 
     expect(queue?.isComplete).toBe(true)
+  })
+})
+
+describe('selectSpaceQueuePage', () => {
+  beforeEach(() => setBaseUrl(GATEWAY_URL))
+
+  it('should, once the unfiltered queue of the Space has loaded, read it from the cache', async () => {
+    const loaded = page({ [faker.finance.ethereumAddress()]: { '1': transactions(1) } }, { count: 1 })
+    server.use(http.get(queueUrl, () => HttpResponse.json(loaded)))
+    const store = makeStore()
+
+    await store.dispatch(spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.initiate({ spaceId }))
+
+    expect(selectSpaceQueuePage(store.getState(), spaceId)).toEqual(loaded)
+  })
+
+  it('should, while only a searched queue of the Space has loaded, read nothing', async () => {
+    server.use(http.get(queueUrl, () => HttpResponse.json(page({}, { count: 0 }))))
+    const store = makeStore()
+
+    await store.dispatch(
+      spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.initiate({ spaceId, search: faker.lorem.word() }),
+    )
+
+    expect(selectSpaceQueuePage(store.getState(), spaceId)).toBeUndefined()
   })
 })

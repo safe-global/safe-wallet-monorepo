@@ -10,6 +10,7 @@ import PendingRemovalsCard from '@safe-global/views/features/spaces/components/P
 import { useEditState } from '../EditFlow/useEditState'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCallout'
+import AllowlistNotice from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/AllowlistNotice'
 import SpenderCard from './SpenderCard'
 import {
   createDefaultFormValues,
@@ -36,6 +37,8 @@ export type SpendingLimitPolicyFormProps = {
   onSpendersChange?: (addresses: string[]) => void
   isCalloutDismissed: boolean
   onDismissCallout: () => void
+  /** The chosen Safe has a recipient allowlist that its spending limits go through. */
+  isCoveredByAllowlist?: boolean
 }
 
 /**
@@ -55,6 +58,7 @@ const SpendingLimitPolicyForm = ({
   onSpendersChange,
   isCalloutDismissed,
   onDismissCallout,
+  isCoveredByAllowlist = false,
 }: SpendingLimitPolicyFormProps): ReactElement => {
   const formMethods = useForm<SpendingLimitPolicyFormValues>({ defaultValues, mode: 'onChange' })
   const { control, handleSubmit, formState, watch, getValues, reset } = formMethods
@@ -104,6 +108,8 @@ const SpendingLimitPolicyForm = ({
             onSafeChange={onSafeChange}
             readOnly={isEditMode}
           />
+
+          {isCoveredByAllowlist && <AllowlistNotice />}
 
           {removalCopy && <PendingRemovalsCard copy={removalCopy} onDiscard={discardChanges} />}
 

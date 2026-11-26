@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { AbiCoder, id } from 'ethers'
 import { http, HttpResponse } from 'msw'
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -7,18 +8,22 @@ import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERAT
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
 import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 import { createChainData, createChainsPageData } from '@/stories/mocks/chains'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { createChainsPageDataV2 } from '@/stories/mocks/chains'
 import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/public/constants'
+import { getPolicyGuardAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import {
-  ADDRESS_BOOK_TRIGGER_LABEL,
-  RECIPIENT_NAME_LABEL,
-  RECIPIENT_REMOVE_LABEL,
+  RECIPIENTS_SEARCH_PLACEHOLDER,
+  TOKENS_SEARCH_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import { mockAllowlistPolicy } from '../../../public/utils/allowlistPolicies'
+import { asActivePolicy } from '../../../public/utils/policies'
 import RecipientAllowlistFlow from '.'
+import EditRecipientAllowlistFlow from './EditFlow'
 
 /** The policy guard is only deployed on Sepolia. */
 const CHAIN_ID = '11155111'
@@ -28,6 +33,7 @@ const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
 const WALLET = '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F'
 const RPC_URL = 'https://rpc.recipient-allowlist.story'
 const FOREIGN_GUARD = '0x1a4F7b8C9d0E1f2a3B4c5D6e7F8091A2b3C4c802'
+const POLICY_GUARD = getPolicyGuardAddress(CHAIN_ID)!
 
 const SEPOLIA_USDC = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238'
 const SEPOLIA_USDT = '0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0'
@@ -59,6 +65,8 @@ const spaceSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
   HttpResponse.json({ safes: { [CHAIN_ID]: [EF_SAFE] } }),
 )
 
+const spacePoliciesHandler = http.get(/\/v1\/spaces\/[^/]+\/policies\/(active|pending)$/, () => HttpResponse.json([]))
+
 const owner = (value: string) => ({ value, name: null, logoUri: null })
 const OWNERS = [WALLET, '0x1De7F5cc55653C581d1c842AD155f88cE389E0B2', '0x24BBC568dC89E4e57bAF23b759989F3D6113BBaA']
 
@@ -76,13 +84,13 @@ const safeOverviewHandler = http.get(/\/v2\/safes$/, () =>
   ]),
 )
 
-const safeInfoHandler = (version: string) =>
+const safeInfoHandler = (version: string, txGuard?: string) =>
   http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+$/, () =>
     HttpResponse.json({
       ...safeFixtures.efSafe,
       chainId: CHAIN_ID,
       version,
-      guard: null,
+      guard: txGuard ? { value: txGuard, name: null, logoUri: null } : null,
       threshold: 2,
       owners: OWNERS.map(owner),
     }),
@@ -170,7 +178,32 @@ const LOCAL_CONTACTS = Object.fromEntries(
   ].map(([address, name]) => [checksumAddress(address), name]),
 )
 
+type PreviewRequest = { to: string; data: string; value: string; operation: number }
+
+/** CGW's preview of the setup multisend; without decoded actions, as the review lists them itself. */
+const txPreviewHandler = http.post(/\/v1\/chains\/\d+\/transactions\/0x[a-fA-F0-9]+\/preview$/, async ({ request }) => {
+  const { to, data, value, operation } = (await request.json()) as PreviewRequest
+  const target = { value: to, name: 'Safe: MultiSendCallOnly 1.4.1', logoUri: null }
+  return HttpResponse.json({
+    txInfo: {
+      type: 'Custom',
+      to: target,
+      dataSize: String((data.length - 2) / 2),
+      value,
+      isCancellation: false,
+      methodName: 'multiSend',
+    },
+    txData: { hexData: data, dataDecoded: null, to: target, value, operation, trustedDelegateCallTarget: true },
+  })
+})
+
 type RpcRequest = { id: number; method: string; params?: unknown[] }
+
+const abiCoder = AbiCoder.defaultAbiCoder()
+const SAFE_CALL_RESULTS: Record<string, string> = {
+  [id('nonce()').slice(0, 10)]: abiCoder.encode(['uint256'], [12]),
+  [id('VERSION()').slice(0, 10)]: abiCoder.encode(['string'], ['1.5.0']),
+}
 
 /** The module guard slot: empty, or a guard the app does not know. */
 const rpcHandler = (moduleGuard: string) =>
@@ -187,10 +220,19 @@ const rpcHandler = (moduleGuard: string) =>
         }
       }
       if (method === 'eth_blockNumber') return { jsonrpc: '2.0', id, result: '0x1' }
+      // Enough of the Safe for the SDK to build the setup transaction: deployed code, its nonce and version
+      if (method === 'eth_getCode') return { jsonrpc: '2.0', id, result: '0x6080' }
+      if (method === 'eth_call') {
+        const selector = String((params?.[0] as { data?: string })?.data).slice(0, 10)
+        const result = SAFE_CALL_RESULTS[selector]
+        if (result) return { jsonrpc: '2.0', id, result }
+      }
       return { jsonrpc: '2.0', id, result: null }
     }
     return HttpResponse.json(Array.isArray(body) ? body.map(respond) : respond(body))
   })
+
+type HandlerOptions = { version?: string; moduleGuard?: string; txGuard?: string }
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -203,21 +245,23 @@ const setup = createMockStory({
   store: { addressBook: { [CHAIN_ID]: LOCAL_CONTACTS } },
 })
 
-const handlers = ({ version = '1.5.0', moduleGuard = ZERO_ADDRESS } = {}) => [
+const handlers = ({ version = '1.5.0', moduleGuard = ZERO_ADDRESS, txGuard }: HandlerOptions = {}) => [
   ...chainHandlers,
   spaceSafesHandler,
+  spacePoliciesHandler,
   safeOverviewHandler,
-  safeInfoHandler(version),
+  safeInfoHandler(version, txGuard),
   balancesHandler,
   popularTokensHandler,
   spaceAddressBookHandler,
   rpcHandler(moduleGuard),
+  txPreviewHandler,
   ...setup.handlers,
 ]
 
 const pickSafe = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement)
-  const trigger = await canvas.findByRole('combobox', {}, { timeout: 30000 })
+  const trigger = await canvas.findByTestId('safe-account-selector', {}, { timeout: 30000 })
   await waitFor(() => expectEnabled(trigger), { timeout: 30000 })
   await userEvent.click(trigger)
   await userEvent.click(await screen.findByRole('option', { name: /Payments/ }, { timeout: 30000 }))
@@ -246,37 +290,114 @@ type Story = StoryObj<typeof meta>
 /** The real TxFlow chrome at Space level with no Safe picked yet. */
 export const CreateNoAccount: Story = {
   play: async ({ canvasElement }) => {
-    const trigger = await within(canvasElement).findByRole('combobox', {}, { timeout: 30000 })
+    const trigger = await within(canvasElement).findByTestId('safe-account-selector', {}, { timeout: 30000 })
     await expect(trigger).toBeVisible()
   },
 }
 
-/** A Safe picked, its held tokens listed and no recipients yet: the entry row starts open. */
+/** Waits for a search field the picked Safe enables, as the sections show once its guard is read. */
+const enabledSearch = async (canvasElement: HTMLElement, name: string) => {
+  const canvas = within(canvasElement)
+  return waitFor(
+    () => {
+      const field = canvas.getByRole('combobox', { name })
+      expectEnabled(field)
+      return field
+    },
+    { timeout: 30000 },
+  )
+}
+
+/** A Safe picked and nothing chosen yet: the focused token search lists its tokens and the popular ones. */
 export const CreateNoRecipients: Story = {
   play: async ({ canvasElement }) => {
     await pickSafe(canvasElement)
-    await expect(
-      await within(canvasElement).findByRole('textbox', { name: RECIPIENT_NAME_LABEL }, { timeout: 30000 }),
-    ).toBeVisible()
+    await userEvent.click(await enabledSearch(canvasElement, TOKENS_SEARCH_PLACEHOLDER))
+    await expect(await screen.findByRole('option', { name: /USDT/ }, { timeout: 30000 })).toBeVisible()
   },
 }
 
-/** USDC left out and four recipients picked from the address book. */
+const pickFromSearch = async (canvasElement: HTMLElement, search: string, options: RegExp[]) => {
+  await userEvent.click(await enabledSearch(canvasElement, search))
+  for (const option of options) {
+    await userEvent.click(await screen.findByRole('option', { name: option }, { timeout: 30000 }))
+  }
+  await userEvent.keyboard('{Escape}')
+}
+
+const RECIPIENT_NAMES = ['Payroll — Deel', 'Contractor — M. Ito', 'Ops wallet', 'Coinbase Prime']
+
+const pickRecipients = async (canvasElement: HTMLElement) => {
+  await pickFromSearch(
+    canvasElement,
+    RECIPIENTS_SEARCH_PLACEHOLDER,
+    RECIPIENT_NAMES.map((name) => new RegExp(name)),
+  )
+  const canvas = within(canvasElement)
+  for (const name of RECIPIENT_NAMES) {
+    await expect(await canvas.findByRole('button', { name: `Allow ${name}` })).toHaveAttribute('aria-pressed', 'true')
+  }
+}
+
+const pickTokens = (canvasElement: HTMLElement, symbols: string[]) =>
+  pickFromSearch(
+    canvasElement,
+    TOKENS_SEARCH_PLACEHOLDER,
+    symbols.map((symbol) => new RegExp(`\\b${symbol}\\b`)),
+  )
+
+const goToReview = async (canvasElement: HTMLElement) => {
+  const canvas = within(canvasElement)
+  const next = await canvas.findByTestId('next-btn')
+  await waitFor(() => expectEnabled(next), { timeout: 30000 })
+  await userEvent.click(next)
+  await expect(await canvas.findByTestId('allowlist-setup-actions', {}, { timeout: 30000 })).toBeVisible()
+}
+
+const createAllowlist = async (canvasElement: HTMLElement) => {
+  await pickSafe(canvasElement)
+  await pickTokens(canvasElement, ['USDT', 'ETH'])
+  await pickRecipients(canvasElement)
+}
+
+/** USDT and ETH picked, and four recipients picked from the address book. */
 export const Create: Story = {
+  play: ({ canvasElement }) => createAllowlist(canvasElement),
+}
+
+/** No guard yet: the review lists configureImmediately, with the MultiSend bindings and fallbacks, then both setters. */
+export const Review: Story = {
+  play: async ({ canvasElement }) => {
+    await createAllowlist(canvasElement)
+    await goToReview(canvasElement)
+  },
+}
+
+/** The policy guard is already in both slots: one requestConfiguration call. */
+export const ReviewGuardEnabled: Story = {
+  parameters: { msw: { handlers: handlers({ txGuard: POLICY_GUARD, moduleGuard: POLICY_GUARD }) } },
+  play: Review.play,
+}
+
+/** Only the module guard is set: a request plus setGuard. */
+export const ReviewMissingTransactionGuard: Story = {
+  parameters: { msw: { handlers: handlers({ moduleGuard: POLICY_GUARD }) } },
+  play: Review.play,
+}
+
+/** Only the transaction guard is set: a request plus setModuleGuard. */
+export const ReviewMissingModuleGuard: Story = {
+  parameters: { msw: { handlers: handlers({ txGuard: POLICY_GUARD }) } },
+  play: Review.play,
+}
+
+/** USDC, USDT and ETH picked: two ERC-20 rules and one native rule per recipient. */
+export const ReviewMixedTokens: Story = {
   play: async ({ canvasElement }) => {
     await pickSafe(canvasElement)
-    const canvas = within(canvasElement)
-    await userEvent.click(await canvas.findByRole('button', { name: 'Allow USDC' }, { timeout: 30000 }))
-    await userEvent.click(await canvas.findByRole('button', { name: RECIPIENT_REMOVE_LABEL }))
-    // Two passes, since one pass lists Workspace contacts before local ones
-    for (const names of [['Payroll — Deel', 'Contractor — M. Ito', 'Ops wallet'], ['Coinbase Prime']]) {
-      await userEvent.click(await canvas.findByRole('button', { name: ADDRESS_BOOK_TRIGGER_LABEL }))
-      for (const name of names) {
-        await userEvent.click(await screen.findByRole('checkbox', { name: `Add ${name}` }))
-      }
-      await userEvent.click(await screen.findByRole('button', { name: /^Add$/ }))
-    }
-    await expect(await canvas.findByText(/to 4 recipients/)).toBeVisible()
+    await pickTokens(canvasElement, ['USDC', 'USDT', 'ETH'])
+    await pickRecipients(canvasElement)
+    await goToReview(canvasElement)
   },
 }
 
@@ -295,9 +416,67 @@ export const CreateAnotherGuard: Story = {
 export const CreateOldVersion: Story = {
   parameters: { msw: { handlers: handlers({ version: '1.3.0' }) } },
   play: async ({ canvasElement }) => {
-    const trigger = await within(canvasElement).findByRole('combobox', {}, { timeout: 30000 })
+    const trigger = await within(canvasElement).findByTestId('safe-account-selector', {}, { timeout: 30000 })
     await waitFor(() => expectEnabled(trigger), { timeout: 30000 })
     await userEvent.click(trigger)
     await expect(await screen.findByRole('option', { name: /Payments/ })).toHaveAttribute('aria-disabled', 'true')
+  },
+}
+
+const liveRecipients = [PAYROLL, CONTRACTOR, OPS_WALLET, COINBASE].map((account) => ({
+  account,
+  permission: 'ALWAYS' as const,
+}))
+
+const editPolicy = asActivePolicy(
+  mockAllowlistPolicy({
+    safe: { address: EF_SAFE, chainId: CHAIN_ID },
+    enforcement: { via: 'guard', guardAddress: POLICY_GUARD },
+    data: {
+      entries: [
+        {
+          token: { address: SEPOLIA_USDC, symbol: 'USDC', decimals: 6, logoUri: USDC_LOGO },
+          recipients: liveRecipients,
+        },
+        {
+          token: { address: SEPOLIA_USDT, symbol: 'USDT', decimals: 6, logoUri: USDT_LOGO },
+          recipients: liveRecipients,
+        },
+        {
+          token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: chain.nativeCurrency.logoUri },
+          recipients: liveRecipients,
+        },
+      ],
+    },
+  }),
+)
+
+const renderEdit = () => <EditRecipientAllowlistFlow policy={editPolicy} />
+
+/** The live Payments allowlist, opened from its side panel: every live token and recipient as a chip. */
+export const EditCreate: Story = {
+  name: 'Edit · Create',
+  render: renderEdit,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(await canvas.findByRole('button', { name: 'Allow USDT' }, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** Coinbase Prime and USDT removed: the review lists them as removed beside the unchanged rest. */
+export const EditReviewTwoChanges: Story = {
+  name: 'Edit · Review (2 changes)',
+  render: renderEdit,
+  parameters: { msw: { handlers: handlers({ txGuard: POLICY_GUARD, moduleGuard: POLICY_GUARD }) } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await userEvent.click(await canvas.findByRole('button', { name: 'Allow USDT' }, { timeout: 30000 }))
+    await userEvent.click(
+      await canvas.findByRole('button', {
+        name: new RegExp(`^Allow (Coinbase Prime|${shortenAddress(checksumAddress(COINBASE))})$`),
+      }),
+    )
+    await goToReview(canvasElement)
+    await expect(canvas.getAllByText('Removed').length).toBeGreaterThan(0)
   },
 }

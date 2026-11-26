@@ -15,12 +15,19 @@ import {
 } from '../../public/utils/policies'
 import {
   mockActivatingAllowlist,
+  mockActiveAllowlist,
+  mockAllowlistAwaitingGuardRemoval,
   mockAllowlistChangePending,
+  mockAllowlistRemovalScheduled,
   mockCgwAllowlist,
   mockCgwUnenforcedAllowlist,
+  mockExpiredPendingAllowlist,
+  mockExpiredRequestAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
+  mockProcessingAllowlist,
+  mockReadyToApplyAllowlist,
 } from '../../public/utils/allowlistPolicies'
 import PoliciesList from './PoliciesList'
 
@@ -90,8 +97,38 @@ export const AllowlistActivating: Story = {
   args: { policies: [mockActivatingAllowlist()] },
 }
 
+/** The executed edit waits out the delay on the allowlist's own row. */
 export const AllowlistChangePending: Story = {
   args: { policies: [mockAllowlistChangePending()] },
+}
+
+/** One allowlist in each change and status, sorted with the ones that need the user first; the change is tagged beside the name. */
+export const AllowlistStatuses: Story = {
+  args: {
+    policies: [
+      mockActiveAllowlist(),
+      mockPendingAllowlist({ id: 'setup-pending', appliesOnExecution: true }),
+      mockPendingAllowlist({ id: 'setup-ready', appliesOnExecution: true, confirmationsSubmitted: 2 }),
+      mockPendingAllowlist({ id: 'edit-pending', operation: 'update', step: 'request' }),
+      mockAllowlistChangePending(),
+      mockReadyToApplyAllowlist('update'),
+      mockPendingAllowlist({ id: 'edit-apply-pending', operation: 'update', step: 'apply' }),
+      mockPendingAllowlist({ id: 'edit-apply-ready', operation: 'update', step: 'apply', confirmationsSubmitted: 2 }),
+      mockExpiredRequestAllowlist('update'),
+      mockPendingAllowlist({ id: 'removal-pending', operation: 'remove', step: 'request' }),
+      mockAllowlistRemovalScheduled(),
+      mockAllowlistAwaitingGuardRemoval(),
+      mockPendingAllowlist({
+        id: 'guard-removal-ready',
+        operation: 'remove',
+        step: 'remove-guard',
+        confirmationsSubmitted: 2,
+      }),
+      mockProcessingAllowlist({ id: 'processing', operation: 'update', step: 'apply' }),
+      mockExpiredPendingAllowlist(),
+      mockFailedAllowlist(),
+    ],
+  },
 }
 
 export const AllowlistFailed: Story = {

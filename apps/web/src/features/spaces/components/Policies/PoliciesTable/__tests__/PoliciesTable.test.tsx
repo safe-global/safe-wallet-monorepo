@@ -17,7 +17,11 @@ import {
 import {
   mockActiveAllowlist,
   mockAllowlistChangePending,
+  mockExpiredPendingAllowlist,
   mockFailedAllowlist,
+  mockPendingAllowlist,
+  mockPendingAllowlistUpdate,
+  mockProcessingAllowlist,
 } from '../../../../public/utils/allowlistPolicies'
 import PoliciesTable from '../index'
 
@@ -153,16 +157,52 @@ describe('PoliciesTable', () => {
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('1 of 2 signatures')
   })
 
-  it('should, when an allowlist change waits out the delay, show it as pending', () => {
+  it('should, when an allowlist edit waits out the delay, show edit and in delay and say from when it can be applied', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockAllowlistChangePending()]} />)
 
-    expect(screen.getByTestId('policy-status-change-pending')).toHaveTextContent('Pending')
+    await user.hover(screen.getByTestId('policy-status-edit-in-delay'))
+    act(() => jest.runOnlyPendingTimers())
+
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
+    expect(screen.getByTestId('policy-status-edit-in-delay')).toHaveTextContent('In delay')
+    expect(screen.getByTestId('policy-status-detail')).toHaveTextContent(
+      /^Can be applied in (1 day|23 hours 5[7-9] minutes), from .+ UTC\. Expires on .+ UTC\.$/,
+    )
+  })
+
+  it('should, when an allowlist edit waits for signatures, show edit and pending with the signatures it has', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+    render(<PoliciesTable policies={[mockPendingAllowlistUpdate()]} />)
+
+    await user.hover(screen.getByTestId('policy-status-edit-pending'))
+    act(() => jest.runOnlyPendingTimers())
+
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
+    expect(screen.getByTestId('policy-status-edit-pending')).toHaveTextContent('Pending · 1/2')
+    expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('Waiting for signatures: 1 of 2.')
   })
 
   it('should, when an allowlist setup failed, show it as failed', () => {
     render(<PoliciesTable policies={[mockFailedAllowlist()]} />)
 
     expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
+  })
+
+  it('should, when an allowlist setup executed and CGW does not serve it yet, show setup and processing', () => {
+    render(<PoliciesTable policies={[mockProcessingAllowlist({ appliesOnExecution: true })]} />)
+
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Setup')
+    expect(screen.getByTestId('policy-status-processing')).toHaveTextContent('Processing')
+  })
+
+  it('should, when the signing window of a queued allowlist edit closed, show edit and expired', () => {
+    render(<PoliciesTable policies={[mockExpiredPendingAllowlist()]} />)
+
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
+    expect(screen.getByTestId('policy-status-edit-expired')).toHaveTextContent('Expired')
   })
 
   it('should, when the policy is an allowlist, show its label, recipient count and tokens', () => {
@@ -173,6 +213,40 @@ describe('PoliciesTable', () => {
     expect(within(rule).getByText('3 recipients')).toBeInTheDocument()
     expect(screen.getByTestId('policy-tokens')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-active')).toBeInTheDocument()
+  })
+
+  it('should, when an allowlist is in no change, show no change tag beside its name', () => {
+    render(<PoliciesTable policies={[mockActiveAllowlist()]} />)
+
+    expect(within(screen.getByTestId('policy-cell-rule')).queryByTestId(/^policy-change-/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-active')).toHaveTextContent('Active')
+  })
+
+  it('should, when the policy is not an allowlist, show no change tag beside its name', () => {
+    render(<PoliciesTable policies={[mockPendingPolicy()]} />)
+
+    expect(within(screen.getByTestId('policy-cell-rule')).queryByTestId(/^policy-change-/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when an allowlist is in a change, tag the change beside its name and recipient count', () => {
+    render(<PoliciesTable policies={[mockPendingAllowlistUpdate()]} />)
+
+    const rule = screen.getByTestId('policy-cell-rule')
+    expect(within(rule).getByText('Allowlist')).toBeInTheDocument()
+    expect(within(rule).getByText('3 recipients')).toBeInTheDocument()
+    expect(within(rule).getByTestId('policy-change-edit')).toHaveTextContent('Edit')
+  })
+
+  it('should, when the apply of an allowlist removal has every signature, tag removal beside its name and show apply ready to execute as its status', () => {
+    render(
+      <PoliciesTable
+        policies={[mockPendingAllowlist({ operation: 'remove', step: 'apply', confirmationsSubmitted: 2 })]}
+      />,
+    )
+
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Removal')
+    expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Apply ready to execute')
   })
 
   it('should, when an executed change is not yet indexed, show it as activating', () => {

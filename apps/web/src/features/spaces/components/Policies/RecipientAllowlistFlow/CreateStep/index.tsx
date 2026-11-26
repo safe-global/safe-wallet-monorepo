@@ -1,4 +1,4 @@
-import { useContext, useState, type ReactElement } from 'react'
+import { useContext, useMemo, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxModalContext } from '@/components/tx-flow'
@@ -6,22 +6,27 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/hooks/useSafeShield'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { Button } from '@safe-global/views/components/ui/button'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { AppRoutes } from '@/config/routes'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import SafeAccountSelector from '../../SafeAccountSelector'
-import { chainLabel, findSafeAccount } from '../../SafeAccountSelector/utils'
+import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import SafeIdentity from '../../../../public/components/SafeIdentity'
 import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
-import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
+import { getAllowlistSafeLabel } from '../utils/allowlistDisplay'
+import { useSpendingLimitTokens } from '../hooks/useSpendingLimitTokens'
+import { toSpendingLimitTokenOption } from '../utils/spendingLimitTokens'
+import RecipientAllowlistForm from './RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
   type RecipientAllowlistFlowData,
   type RecipientAllowlistFormValues,
 } from '../types'
 import { buildAllowlistRules, isAllowlistComplete } from '../utils/allowlistForm'
+import { hasAllowlistChanges, toAllowlistRules } from '../utils/allowlistEdit'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import GuardStatusBanner, {
   type GuardStatus,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -32,7 +37,6 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
-  getAllowlistAccountLabel,
   NO_ELIGIBLE_SAFES_DESCRIPTION,
   NO_ELIGIBLE_SAFES_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -42,21 +46,15 @@ const renderGuardAddress = (address: string, name: string) => <SafeIdentity addr
 /** The guard states an allowlist can be set up on. */
 const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
 
-export type CreateRecipientAllowlistPolicyProps = {
-  dismissedCallouts: Record<CalloutSection, boolean>
-  onDismissCallout: (section: CalloutSection) => void
-}
-
-const CreateRecipientAllowlistPolicy = ({
-  dismissedCallouts,
-  onDismissCallout,
-}: CreateRecipientAllowlistPolicyProps): ReactElement => {
+const CreateRecipientAllowlistPolicy = (): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
+  const isEditMode = useIsEditMode()
+  const baseline = data?.baseline
   const [values, setValues] = useState<RecipientAllowlistFormValues>(() => {
-    const { excludedTokens, addedTokens, recipients } = data ?? createDefaultAllowlistValues()
-    return { excludedTokens, addedTokens, recipients }
+    const { tokens, recipients } = data ?? createDefaultAllowlistValues()
+    return { tokens, recipients }
   })
   const { accounts, isLoading, isError, refetch, hasWallet, hasSelectableAccount } = useRecipientAllowlistSafeAccounts()
   const { setScope } = useSafeScopeControls()
@@ -70,20 +68,37 @@ const CreateRecipientAllowlistPolicy = ({
       : undefined
   const { guard, retry } = useGuardStatus(target)
 
-  const heldTokens = useHeldTokenAddresses()
+  const spendingLimits = useSpendingLimitTokens()
+  const spendingLimitOptions = useMemo(
+    () => spendingLimits.tokens.map(toSpendingLimitTokenOption),
+    [spendingLimits.tokens],
+  )
+  const heldTokens = useHeldTokenAddresses(spendingLimitOptions)
 
   useSafeShieldForAddressPoisoning(values.recipients.map((recipient) => recipient.address))
 
   // Reset during render, not in an effect, so the remounted recipients section never sees the old Safe's values.
   const [trackedScopeKey, setTrackedScopeKey] = useState(scopeKey)
-  if (trackedScopeKey !== scopeKey) {
+  if (!isEditMode && trackedScopeKey !== scopeKey) {
     setTrackedScopeKey(scopeKey)
     setValues(createDefaultAllowlistValues())
   }
 
+  const rules = useMemo(() => buildAllowlistRules(heldTokens.addresses, values), [heldTokens.addresses, values])
+  const isUnchangedEdit = useMemo(
+    () => baseline !== undefined && !hasAllowlistChanges(toAllowlistRules(baseline), rules),
+    [baseline, rules],
+  )
+
   const canContinue = guard !== undefined && READY_GUARD_STATES.includes(guard.status)
   const canGoNext =
-    canContinue && !heldTokens.isLoading && !heldTokens.isError && isAllowlistComplete(heldTokens.addresses, values)
+    canContinue &&
+    !heldTokens.isLoading &&
+    !heldTokens.isError &&
+    !spendingLimits.isLoading &&
+    !spendingLimits.isError &&
+    isAllowlistComplete(values) &&
+    !isUnchangedEdit
 
   const isSettled = !isLoading && !isError
   const settingsHref = selectedSafe?.chain
@@ -92,7 +107,7 @@ const CreateRecipientAllowlistPolicy = ({
         spaceId,
       )
     : undefined
-  const safeName = selectedSafe && (selectedSafe.name || shortenAddress(selectedSafe.address))
+  const safeName = selectedSafe && spenderDisplayName(selectedSafe)
 
   return (
     <TxCard>
@@ -101,19 +116,17 @@ const CreateRecipientAllowlistPolicy = ({
           values={values}
           onChange={setValues}
           heldTokens={heldTokens}
+          spendingLimits={spendingLimits}
           account={
-            selectedSafe && safeName && target
+            selectedSafe && target
               ? {
                   chainId: selectedSafe.chainId,
                   address: selectedSafe.address,
-                  label: getAllowlistAccountLabel(safeName, chainLabel(selectedSafe)),
+                  label: getAllowlistSafeLabel(selectedSafe),
                 }
               : undefined
           }
           showSections={!selectedSafe || canContinue}
-          isGuardEnabled={guard?.status === 'known' || guard?.status === 'partial'}
-          dismissedCallouts={dismissedCallouts}
-          onDismissCallout={onDismissCallout}
         >
           <SafeAccountSelector
             accounts={accounts}
@@ -130,6 +143,8 @@ const CreateRecipientAllowlistPolicy = ({
               title: NESTED_SAFES_NOTICE_TITLE,
               description: getNestedSafesNoticeText('recipient allowlists'),
             }}
+            readOnly={isEditMode}
+            autoFocus={!isEditMode}
             id="recipient-allowlist-safe-account"
           />
 
@@ -170,7 +185,7 @@ const CreateRecipientAllowlistPolicy = ({
             type="button"
             size="submit"
             disabled={!canGoNext}
-            onClick={() => onNext({ ...values, rules: buildAllowlistRules(heldTokens.addresses, values) })}
+            onClick={() => onNext({ ...values, rules, baseline, baselineGuard: data?.baselineGuard })}
             data-testid="next-btn"
           >
             {NEXT_LABEL}

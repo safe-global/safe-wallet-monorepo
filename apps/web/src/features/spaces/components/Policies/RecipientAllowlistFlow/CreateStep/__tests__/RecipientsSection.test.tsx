@@ -1,8 +1,16 @@
 import { faker } from '@faker-js/faker'
-import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { renderWithUserEvent, screen } from '@/tests/test-utils'
-import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
+import useNameResolver from '@/components/common/AddressInput/useNameResolver'
+import { useChain } from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
+import {
+  RECIPIENT_DUPLICATE_ERROR,
+  RECIPIENT_IS_SAFE_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import {
   createDefaultAllowlistValues,
   type AllowlistFormRecipient,
@@ -14,229 +22,257 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useMergedAddressBooks: jest.fn(),
 }))
-jest.mock('../AddFromAddressBook', () => ({
+
+jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
   __esModule: true,
-  default: ({ onAdd }: { onAdd: (recipients: AllowlistFormRecipient[]) => void }) => (
-    <button onClick={() => onAdd([{ address: BOOK_ADDRESS, name: 'Carol', fromAddressBook: true, selected: true }])}>
-      Add from address book
-    </button>
-  ),
-}))
-let mockDraftName: string | undefined = 'Dave'
-jest.mock('../RecipientDraftRow', () => ({
-  __esModule: true,
-  default: ({
-    onAdd,
-    onCancel,
-    autoFocus,
-  }: {
-    onAdd: (recipient: AllowlistFormRecipient) => void
-    onCancel: () => void
-    autoFocus?: boolean
-  }) => (
-    <div data-testid="draft-row" data-autofocus={Boolean(autoFocus)}>
-      <button onClick={() => onAdd({ address: DRAFT_ADDRESS, name: mockDraftName, selected: true })}>
-        confirm draft
-      </button>
-      <button onClick={onCancel}>cancel draft</button>
-    </div>
-  ),
+  default: jest.fn(),
 }))
 
-const mockBooks = useMergedAddressBooks as jest.MockedFunction<typeof useMergedAddressBooks>
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ configs: [], loading: false, loaded: true, error: undefined })),
+  useChain: jest.fn(),
+  useCurrentChain: jest.fn(),
+  useHasFeature: jest.fn(() => false),
+}))
 
-const BOOK_ADDRESS = checksumAddress(faker.finance.ethereumAddress())
-const DRAFT_ADDRESS = checksumAddress(faker.finance.ethereumAddress())
+const CHAIN_ID = '11155111'
+const OTHER_CHAIN_ID = '1'
+const PLACEHOLDER = 'Search contacts or paste an address'
 const SAFE_ADDRESS = checksumAddress(faker.finance.ethereumAddress())
-const CHAIN_ID = '1'
 
-const recipient = (overrides: Partial<AllowlistFormRecipient> = {}): AllowlistFormRecipient => ({
-  address: checksumAddress(faker.finance.ethereumAddress()),
-  selected: true,
-  ...overrides,
+const address = () => checksumAddress(faker.finance.ethereumAddress())
+
+const contact = (name: string, source: ContactSource, chainIds = [CHAIN_ID]): ExtendedContact => ({
+  name,
+  address: address(),
+  chainIds,
+  tagIds: [],
+  createdBy: '',
+  createdByUserId: 0,
+  lastUpdatedBy: '',
+  lastUpdatedByUserId: 0,
+  createdAt: '',
+  updatedAt: '',
+  source,
 })
 
-const setup = (
-  recipients: AllowlistFormRecipient[] = [],
-  props: {
-    hasAccount?: boolean
-    isCalloutDismissed?: boolean
-    known?: string[]
-    contactNames?: Record<string, string>
-  } = {},
-) => {
-  mockBooks.mockReturnValue({
-    list: [],
-    has: (address: string) => (props.known ?? []).includes(address),
-    get: (address: string) => {
-      const name = props.contactNames?.[address]
-      return name ? { name, address } : undefined
-    },
-  } as unknown as ReturnType<typeof useMergedAddressBooks>)
+const ALICE = contact('Alice', ContactSource.space)
+const BOB = contact('Bob', ContactSource.local)
+const OTHER_CHAIN = contact('Carol', ContactSource.space, [OTHER_CHAIN_ID])
+const SAFE_CONTACT = { ...contact('Treasury', ContactSource.local), address: SAFE_ADDRESS }
+const DUPLICATE = address()
+const ENS_NAME = `${faker.internet.domainWord()}.eth`
+const CHAIN = chainBuilder().with({ chainId: CHAIN_ID, shortName: 'sep', chainName: 'Sepolia' }).build()
+
+type NameResolution = ReturnType<typeof useNameResolver>
+
+const resolveEnsName = (resolution: Partial<NameResolution>) =>
+  jest
+    .mocked(useNameResolver)
+    .mockImplementation((value) =>
+      value === ENS_NAME
+        ? { address: undefined, name: undefined, resolving: false, ...resolution }
+        : { address: undefined, name: undefined, resolving: false },
+    )
+
+const mockBooks = (list: ExtendedContact[]) =>
+  jest.mocked(useMergedAddressBooks).mockReturnValue({
+    list,
+    get: (target: string) => list.find((entry) => sameAddress(entry.address, target)),
+    has: (target: string) => list.some((entry) => sameAddress(entry.address, target)),
+    getFromSpace: () => undefined,
+    getFromLocal: () => undefined,
+  })
+
+const renderSection = ({
+  recipients = [],
+  hasAccount = true,
+  isEditMode = false,
+}: { recipients?: AllowlistFormRecipient[]; hasAccount?: boolean; isEditMode?: boolean } = {}) => {
   const values: RecipientAllowlistFormValues = { ...createDefaultAllowlistValues(), recipients }
   const onChange = jest.fn()
-  const onDismissCallout = jest.fn()
-  const hasAccount = props.hasAccount ?? true
-  const rendered = renderWithUserEvent(
+  const section = (
     <RecipientsSection
       values={values}
       onChange={onChange}
       safeAddress={hasAccount ? SAFE_ADDRESS : undefined}
       chainId={hasAccount ? CHAIN_ID : undefined}
-      isCalloutDismissed={props.isCalloutDismissed ?? false}
-      onDismissCallout={onDismissCallout}
-    />,
+    />
   )
-  return { ...rendered, values, onChange, onDismissCallout }
+  const rendered = renderWithUserEvent(isEditMode ? <EditModeProvider>{section}</EditModeProvider> : section)
+  return { ...rendered, values, onChange }
 }
+
+const search = () => screen.getByRole('combobox', { name: PLACEHOLDER })
 
 describe('RecipientsSection', () => {
   beforeEach(() => {
-    mockDraftName = 'Dave'
+    mockBooks([ALICE, BOB, OTHER_CHAIN, SAFE_CONTACT])
+    jest.mocked(useChain).mockReturnValue(CHAIN)
+    resolveEnsName({})
   })
 
-  it('shows the placeholder and disables both actions without an account', () => {
-    setup([], { hasAccount: false })
+  it('should, when creating, show the copy and no recipient chips', () => {
+    renderSection()
 
-    expect(screen.getByText('Recipients will show here.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Add a recipient' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Add from address book' })).toBeDisabled()
-    expect(screen.queryByText('Only transactions to the recipients selected below will be allowed.')).toBeNull()
-    expect(screen.queryByText('confirm draft')).not.toBeInTheDocument()
+    expect(screen.getByText('Who can receive funds')).toBeInTheDocument()
+    expect(screen.getByText('Only transfers to the recipients selected below will be allowed.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^Allow / })).not.toBeInTheDocument()
   })
 
-  it('opens the draft row when the account has no recipients, and appends the added one', async () => {
-    const { user, onChange, values } = setup([])
+  it("should, when the search field is focused, list the contacts on the Safe's chain under their address book", async () => {
+    const { user } = renderSection()
 
-    await user.click(screen.getByText('confirm draft'))
+    await user.click(search())
+
+    expect(within(screen.getByRole('group', { name: /Contacts of/ })).getByRole('option')).toHaveTextContent(
+      `Alice${ALICE.address}`,
+    )
+    expect(within(screen.getByRole('group', { name: /Local contacts/ })).getByRole('option')).toHaveTextContent(
+      `Bob${BOB.address}`,
+    )
+    expect(screen.getAllByRole('option')).toHaveLength(2)
+  })
+
+  it('should, when a contact is picked, add it with its address book name', async () => {
+    const { user, onChange, values } = renderSection()
+
+    await user.click(search())
+    await user.click(screen.getByRole('option', { name: /Bob/ }))
 
     expect(onChange).toHaveBeenCalledWith({
       ...values,
-      recipients: [{ address: DRAFT_ADDRESS, name: 'Dave', selected: true }],
+      recipients: [{ address: BOB.address, name: 'Bob', fromAddressBook: true }],
     })
-    expect(screen.queryByText('confirm draft')).not.toBeInTheDocument()
   })
 
-  it('does not open the draft row when recipients exist, until asked', async () => {
-    const { user } = setup([recipient({ name: 'Alice' })])
+  it('should, when an unknown address is pasted, offer it as a new recipient and add it checksummed', async () => {
+    const pasted = address()
+    const { user, onChange, values } = renderSection()
 
-    expect(screen.queryByText('confirm draft')).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Add a recipient' }))
-    expect(screen.getByText('confirm draft')).toBeInTheDocument()
-    await user.click(screen.getByText('cancel draft'))
-    expect(screen.queryByText('confirm draft')).not.toBeInTheDocument()
+    await user.click(search())
+    await user.paste(pasted.toLowerCase())
+    await user.click(screen.getByRole('option', { name: /New recipient/ }))
+
+    expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [{ address: pasted }] })
+    expect(search()).toHaveValue('')
   })
 
-  it('focuses only a draft row the user opened', async () => {
-    const { user } = setup([])
+  it("should, when a contact's address is pasted, offer the contact", async () => {
+    const { user, onChange, values } = renderSection()
 
-    expect(screen.getByTestId('draft-row')).toHaveAttribute('data-autofocus', 'false')
-    await user.click(screen.getByText('cancel draft'))
-    await user.click(screen.getByRole('button', { name: 'Add a recipient' }))
-    expect(screen.getByTestId('draft-row')).toHaveAttribute('data-autofocus', 'true')
+    await user.click(search())
+    await user.paste(ALICE.address)
+
+    expect(screen.getAllByRole('option')).toHaveLength(1)
+
+    await user.click(screen.getByRole('option', { name: /Alice/ }))
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...values,
+      recipients: [{ address: ALICE.address, name: 'Alice', fromAddressBook: true }],
+    })
   })
 
-  it('hides Add a recipient while the draft row is open', async () => {
-    const { user } = setup([recipient({ name: 'Alice' })])
+  it.each([
+    ["the Safe's own address", () => SAFE_ADDRESS, [], RECIPIENT_IS_SAFE_ERROR],
+    [
+      'an address already listed',
+      () => DUPLICATE,
+      [{ address: DUPLICATE }] as AllowlistFormRecipient[],
+      RECIPIENT_DUPLICATE_ERROR,
+    ],
+  ])('should, when %s is pasted, show its error instead of an option', async (_, pasted, recipients, error) => {
+    const { user } = renderSection({ recipients })
 
-    await user.click(screen.getByRole('button', { name: 'Add a recipient' }))
-    expect(screen.queryByRole('button', { name: 'Add a recipient' })).not.toBeInTheDocument()
+    await user.click(search())
+    await user.paste(pasted())
 
-    await user.click(screen.getByText('cancel draft'))
-    expect(screen.getByRole('button', { name: 'Add a recipient' })).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent(error)
+    expect(screen.queryByRole('option')).not.toBeInTheDocument()
   })
 
-  it('toggles a recipient between selected and deselected', async () => {
-    const alice = recipient({ name: 'Alice' })
-    const bob = recipient({ name: 'Bob' })
-    const { user, onChange, values } = setup([alice, bob])
+  it("should, when an ENS name resolves on the Safe's chain, offer its address and add it under the name", async () => {
+    const resolved = address()
+    resolveEnsName({ address: resolved.toLowerCase(), name: ENS_NAME })
+    const { user, onChange, values } = renderSection()
+
+    await user.click(search())
+    await user.type(search(), ENS_NAME)
+
+    expect(useNameResolver).toHaveBeenLastCalledWith(ENS_NAME, CHAIN)
+    expect(screen.getByRole('option')).toHaveTextContent(`${ENS_NAME}${resolved}`)
+
+    await user.click(screen.getByRole('option', { name: new RegExp(ENS_NAME) }))
+
+    expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [{ address: resolved, name: ENS_NAME }] })
+  })
+
+  it("should, when an ENS name doesn't resolve, show why instead of an option", async () => {
+    resolveEnsName({ resolverError: new Error('ENS name not available on Sepolia') })
+    const { user } = renderSection()
+
+    await user.click(search())
+    await user.type(search(), ENS_NAME)
+
+    expect(screen.getByRole('alert')).toHaveTextContent('ENS name not available on Sepolia')
+    expect(screen.queryByRole('option')).not.toBeInTheDocument()
+  })
+
+  it('should, while an ENS name is looked up, show the loading rows', async () => {
+    resolveEnsName({ resolving: true })
+    const { user } = renderSection()
+
+    await user.click(search())
+    await user.type(search(), ENS_NAME)
+
+    expect(screen.getByTestId('search-picker-loading')).toBeInTheDocument()
+  })
+
+  it('should, when an ENS name resolves to the Safe itself, show its error instead of an option', async () => {
+    resolveEnsName({ address: SAFE_ADDRESS, name: ENS_NAME })
+    mockBooks([ALICE, BOB])
+    const { user } = renderSection()
+
+    await user.click(search())
+    await user.type(search(), ENS_NAME)
+
+    expect(screen.getByRole('alert')).toHaveTextContent(RECIPIENT_IS_SAFE_ERROR)
+    expect(screen.queryByRole('option')).not.toBeInTheDocument()
+  })
+
+  it('should, when creating, show a recipient chip named from the address book, or as new, with its short address', () => {
+    const unknown = address()
+    renderSection({ recipients: [{ address: ALICE.address }, { address: unknown }] })
+
+    expect(screen.getByRole('button', { name: 'Allow Alice' })).toHaveTextContent(
+      `Alice${ALICE.address.slice(0, 6)}...${ALICE.address.slice(-4)}`,
+    )
+    expect(screen.getByRole('button', { name: `Allow ${shortenAddress(unknown)}` })).toHaveTextContent('New recipient')
+  })
+
+  it('should, when editing, name a live recipient without a name by its short address instead of as new', () => {
+    const unknown = address()
+    renderSection({ recipients: [{ address: unknown }], isEditMode: true })
+
+    const chip = screen.getByRole('button', { name: `Allow ${shortenAddress(unknown)}` })
+    expect(chip).toHaveTextContent(shortenAddress(unknown))
+    expect(chip).not.toHaveTextContent('New recipient')
+  })
+
+  it('should, when a recipient chip is clicked, remove the recipient', async () => {
+    const kept = { address: address(), name: 'Dave' }
+    const { user, onChange, values } = renderSection({ recipients: [{ address: ALICE.address }, kept] })
 
     await user.click(screen.getByRole('button', { name: 'Allow Alice' }))
 
-    expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [{ ...alice, selected: false }, bob] })
+    expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [kept] })
   })
 
-  it('names unnamed recipients by their shortened address', () => {
-    const unnamed = recipient()
-    setup([unnamed])
+  it('should, when no Safe is picked, disable the search field', () => {
+    renderSection({ hasAccount: false })
 
-    expect(screen.getByRole('button', { name: `Allow ${shortenAddress(unnamed.address)}` })).toBeInTheDocument()
-  })
-
-  it('marks recipients that are in the address book', () => {
-    const fromBook = recipient({ name: 'Alice', fromAddressBook: true })
-    const known = recipient({ name: 'Bob' })
-    const stranger = recipient({ name: 'Carol' })
-    setup([fromBook, known, stranger], { known: [known.address] })
-
-    expect(screen.getAllByLabelText('In your address book')).toHaveLength(2)
-  })
-
-  it('appends contacts picked from the address book', async () => {
-    const alice = recipient({ name: 'Alice' })
-    const { user, onChange, values } = setup([alice])
-
-    await user.click(screen.getByRole('button', { name: 'Add from address book' }))
-
-    expect(onChange).toHaveBeenCalledWith({
-      ...values,
-      recipients: [alice, { address: BOOK_ADDRESS, name: 'Carol', fromAddressBook: true, selected: true }],
-    })
-  })
-
-  it('ignores recipients that are already listed, whatever their case', async () => {
-    const listed = recipient({ name: 'Carol', address: BOOK_ADDRESS.toLowerCase() })
-    const { user, onChange, values } = setup([listed])
-
-    await user.click(screen.getByRole('button', { name: 'Add from address book' }))
-
-    expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [listed] })
-  })
-
-  it('selects a deselected recipient again when it is added again', async () => {
-    const listed = recipient({ address: DRAFT_ADDRESS, selected: false })
-    const { user, onChange, values } = setup([listed])
-
-    await user.click(screen.getByRole('button', { name: 'Add a recipient' }))
-    await user.click(screen.getByRole('button', { name: 'confirm draft' }))
-
-    expect(onChange).toHaveBeenCalledWith({ ...values, recipients: [{ ...listed, name: 'Dave', selected: true }] })
-  })
-
-  it('names an unnamed draft after its address book contact', async () => {
-    mockDraftName = undefined
-    const { user, onChange, values } = setup([], { contactNames: { [DRAFT_ADDRESS]: 'Treasury' } })
-
-    await user.click(screen.getByText('confirm draft'))
-
-    expect(onChange).toHaveBeenCalledWith({
-      ...values,
-      recipients: [{ address: DRAFT_ADDRESS, name: 'Treasury', selected: true }],
-    })
-  })
-
-  it('keeps the typed name over the address book name', async () => {
-    const { user, onChange, values } = setup([], { contactNames: { [DRAFT_ADDRESS]: 'Treasury' } })
-
-    await user.click(screen.getByText('confirm draft'))
-
-    expect(onChange).toHaveBeenCalledWith({
-      ...values,
-      recipients: [{ address: DRAFT_ADDRESS, name: 'Dave', selected: true }],
-    })
-  })
-
-  it('shows the callout and dismisses it', async () => {
-    const { user, onDismissCallout } = setup([recipient({ name: 'Alice' })])
-
-    expect(screen.getByText('Only transactions to the recipients selected below will be allowed.')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Dismiss' }))
-    expect(onDismissCallout).toHaveBeenCalled()
-  })
-
-  it('hides the callout once dismissed', () => {
-    setup([recipient({ name: 'Alice' })], { isCalloutDismissed: true })
-
-    expect(screen.queryByText('Only transactions to the recipients selected below will be allowed.')).toBeNull()
+    expect(search()).toBeDisabled()
   })
 })

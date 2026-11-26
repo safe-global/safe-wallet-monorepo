@@ -68,6 +68,18 @@ const openSelector = async (user: ReturnType<typeof renderSelector>['user']) => 
 }
 
 describe('SafeAccountSelector', () => {
+  it('should, when asked to autofocus, mark its trigger for the dialog to focus first', () => {
+    renderSelector({ autoFocus: true })
+
+    expect(screen.getByTestId('safe-account-selector')).toHaveAttribute('data-autofocus', 'true')
+  })
+
+  it('should, by default, leave its trigger unmarked', () => {
+    renderSelector()
+
+    expect(screen.getByTestId('safe-account-selector')).not.toHaveAttribute('data-autofocus')
+  })
+
   it('renders the default label and the eligibility helper text', () => {
     render(<SafeAccountSelector accounts={[singleChainAccount]} onChange={jest.fn()} />)
 
@@ -556,6 +568,33 @@ describe('SafeAccountSelector', () => {
       await user.hover(rows[1])
 
       expect(await screen.findByText(INELIGIBILITY_TEXT['no-spending-limits'])).toBeInTheDocument()
+    })
+  })
+
+  describe('accounts on an older Safe version', () => {
+    const outdated = option('11155111', SAFE_B, { name: 'Grants', ineligibleReason: 'unsupported-safe-version' })
+
+    it('should, when a listed Safe is older than 1.5.0, say on hover that it has to be updated to 1.5.0', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, outdated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+      const rows = await screen.findAllByRole('option')
+      await user.hover(rows[1])
+
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      expect(
+        await screen.findByText('Update this Safe account to version 1.5.0 in its settings first'),
+      ).toBeInTheDocument()
+    })
+
+    it('should, when the preselected Safe is older than 1.5.0, say that it has to be updated to 1.5.0', () => {
+      render(<SafeAccountSelector accounts={[singleChainAccount, outdated]} value={outdated.id} onChange={jest.fn()} />)
+
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Update this Safe account to version 1.5.0 in its settings first',
+      )
     })
   })
 

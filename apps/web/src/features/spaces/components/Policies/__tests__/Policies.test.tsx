@@ -123,6 +123,7 @@ describe('Policies', () => {
     mockHasSeenAllowlistIntro = false
     mockIsAllowlistAvailable = false
     jest.clearAllMocks()
+    mockUseWallet.mockReturnValue(null)
     mockUseSpaceSafes.mockReturnValue({
       allSafes: [],
       isLoading: false,
@@ -328,6 +329,16 @@ describe('Policies', () => {
       expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
     })
 
+    it('should, when the connected wallet has no Safe account that can take an allowlist, not offer it', async () => {
+      mockIsAllowlistAvailable = true
+      mockWallet()
+
+      await openAddPolicyDialog()
+
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
+    })
+
     it('should, when no chain enables the allowlist, leave it out of the catalogue', () => {
       render(<Policies policies={[]} />)
 
@@ -359,7 +370,8 @@ describe('Policies', () => {
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
-      await user.click(await screen.findByRole('button', { name: 'Set up recipient allowlist' }))
+      await user.click(await screen.findByRole('checkbox', { name: /I understand that anything not allowed/ }))
+      await user.click(screen.getByRole('button', { name: 'Set up allowlist' }))
 
       expect(setTxFlow).toHaveBeenCalledTimes(1)
       expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: RecipientAllowlistFlow })
@@ -388,16 +400,15 @@ describe('Policies', () => {
       expect(await screen.findByTestId('recipient-allowlist-intro-dialog')).toBeInTheDocument()
     })
 
-    it('opens the flow directly once the intro has been seen', async () => {
+    it('should open the intro again, when it has been seen, so the owner confirms every setup', async () => {
       mockIsAllowlistAvailable = true
       mockHasSeenAllowlistIntro = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
 
-      expect(setTxFlow).toHaveBeenCalledTimes(1)
-      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: RecipientAllowlistFlow })
-      expect(screen.queryByTestId('recipient-allowlist-intro-dialog')).not.toBeInTheDocument()
+      expect(await screen.findByTestId('recipient-allowlist-intro-dialog')).toBeInTheDocument()
+      expect(setTxFlow).not.toHaveBeenCalled()
     })
   })
 
@@ -650,11 +661,12 @@ describe('Policies', () => {
       expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
     })
 
-    it('should, when a pending allowlist row is clicked, open no panel yet', () => {
+    it('should, when a pending allowlist row is clicked, open the panel in its pending state', () => {
+      mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [] })
       render(<Policies policies={[mockPendingAllowlist()]} />)
       fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
 
-      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
+      expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
     })
 
     it('should hold one open panel at a time, so a second row replaces the first', () => {

@@ -11,6 +11,7 @@ import {
   getFallbackHandlerDeployment,
   getCompatibilityFallbackHandlerDeployments,
   getExtensibleFallbackHandlerDeployments,
+  getTokenCallbackHandlerDeployments,
   getProxyFactoryDeployment,
   getProxyFactoryDeployments,
   getSignMessageLibDeployment,
@@ -167,24 +168,28 @@ export const hasMatchingDeployment = (
   contractAddress: string,
   network: string,
   versions: SafeVersion[],
-): boolean => {
-  return versions.some((version) => {
-    const deployments = getDeployments({ version, network })
-    if (!deployments) {
-      return false
-    }
-    const deployedAddresses = toNetworkAddressList(deployments.networkAddresses[network] ?? [])
-    return deployedAddresses.some((deployedAddress) => sameAddress(deployedAddress, contractAddress))
-  })
-}
+): boolean =>
+  getDeploymentAddresses(getDeployments, network, versions).some((deployedAddress) =>
+    sameAddress(deployedAddress, contractAddress),
+  )
 
-export type OfficialFallbackHandlerType = 'compatibility' | 'extensible'
+/** Every address the deployments returned by `getDeployments` list on `network` for the given `versions`. */
+export const getDeploymentAddresses = (
+  getDeployments: (filter?: DeploymentFilter) => SingletonDeploymentV2 | undefined,
+  network: string,
+  versions: SafeVersion[],
+): string[] =>
+  versions.flatMap((version) =>
+    toNetworkAddressList(getDeployments({ version, network })?.networkAddresses[network] ?? []),
+  )
+
+export type OfficialFallbackHandlerType = 'compatibility' | 'extensible' | 'token-callback'
 
 /**
  * Identifies which official Safe fallback handler deployment an address matches on the
  * given chain, across the trusted deployment versions. The single source of truth for
- * "is this fallback handler official" — 1.5.0 ships TWO official handlers, so checking
- * only the CompatibilityFallbackHandler tables misses the ExtensibleFallbackHandler.
+ * "is this fallback handler official" — 1.5.0 ships three official handlers: the
+ * Compatibility-, the Extensible- and the TokenCallbackHandler, which a recipient allowlist sets.
  *
  * Note: CoW's TWAP handler is CoW's own ExtensibleFallbackHandler instance and is NOT
  * covered here — callers that trust it must check it separately.
@@ -216,6 +221,11 @@ export const identifyOfficialFallbackHandler = (
     )
   ) {
     return 'extensible'
+  }
+  if (
+    hasMatchingDeployment(getTokenCallbackHandlerDeployments, contractAddress, network, TRUSTED_DEPLOYMENT_VERSIONS)
+  ) {
+    return 'token-callback'
   }
   return undefined
 }

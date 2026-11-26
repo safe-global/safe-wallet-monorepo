@@ -10,7 +10,9 @@ import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/com
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import PolicyRule from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
-import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
+import AllowlistRuleCell from './components/AllowlistRuleCell'
+import AllowlistStatusCell from './components/AllowlistStatusCell'
+import PolicyStatusCell from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyStatusCell'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { getPendingStatusDetail } from '../utils/policyStatusDetail'
 import { AppRoutes } from '@/config/routes'
@@ -18,6 +20,7 @@ import { buildSafeHref } from '../../../utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import {
   getPolicyStatus,
+  isAllowlistPolicy,
   isProposerPolicy,
   type Policy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -51,9 +54,11 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       header: 'RULE',
       width: 'fit',
       sticky: true,
-      minWidth: 256,
+      // Fits an allowlist's name and recipient count beside "Guard removal", the longest change tag
+      minWidth: 280,
       cellTestId: 'policy-cell-rule',
-      cell: (policy) => <PolicyRule policy={policy} />,
+      cell: (policy) =>
+        isAllowlistPolicy(policy) ? <AllowlistRuleCell policy={policy} /> : <PolicyRule policy={policy} />,
     },
     {
       id: 'appliesTo',
@@ -128,7 +133,7 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       id: 'network',
       header: 'NETWORK',
       width: 'fit',
-      minWidth: 96,
+      minWidth: 80,
       align: 'center',
       priority: 'secondary',
       cellTestId: 'policy-cell-network',
@@ -151,22 +156,15 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       id: 'status',
       header: 'STATUS',
       width: 'fit',
-      minWidth: 140,
+      // Fits "Apply ready to execute", the longest status, clear of the open button
+      minWidth: 184,
       cellTestId: 'policy-cell-status',
-      cell: (policy) => {
-        const chip = <PolicyStatusChip status={getPolicyStatus(policy)} />
-        const detail = getPendingStatusDetail(policy)
-        if (!detail) return chip
-
-        return (
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>{chip}</TooltipTrigger>
-            <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
-              <span data-testid="policy-status-detail">{detail}</span>
-            </TooltipContent>
-          </Tooltip>
-        )
-      },
+      cell: (policy) =>
+        isAllowlistPolicy(policy) ? (
+          <AllowlistStatusCell policy={policy} />
+        ) : (
+          <PolicyStatusCell chip={{ status: getPolicyStatus(policy) }} detail={getPendingStatusDetail(policy)} />
+        ),
     },
     {
       id: 'open',

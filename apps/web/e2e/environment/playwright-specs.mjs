@@ -41,6 +41,7 @@ export const playwrightSpecs = {
     flags: ['POSITIONS'],
   },
   'e2e/proposer.spec.ts': { flags: ['PROPOSERS'] },
+  'e2e/recipient-allowlist.spec.ts': {},
   'e2e/proposer-settings.spec.ts': { flags: ['PROPOSERS'] },
   'e2e/recovery.spec.ts': { flags: ['RECOVERY'] },
   'e2e/reject.spec.ts': {},
