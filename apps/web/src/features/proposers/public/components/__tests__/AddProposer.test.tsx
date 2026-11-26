@@ -84,6 +84,7 @@ const mockDelegatorSelection = (): ReturnType<typeof useDelegatorSelection> => (
 
 describe('AddProposer signing logic', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     jest.clearAllMocks()
     // test-utils hydrates the store from localStorage, and the address book is persisted there
     localStorage.clear()
@@ -362,10 +363,7 @@ describe('AddProposer signing logic', () => {
 
       useDelegatesPostDelegateV3Mutation.mockReturnValue([addDelegateV3, {}])
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
-      jest.useFakeTimers()
     })
-
-    afterEach(() => jest.useRealTimers())
 
     it.each([
       ['the zero address', ZERO_ADDRESS],

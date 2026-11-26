@@ -17,6 +17,8 @@ const addOverlay = (markup: string) => {
   return el
 }
 
+beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
+
 describe('useUnlockBodyScroll helpers', () => {
   afterEach(() => {
     document.body.removeAttribute('style')
@@ -103,10 +105,8 @@ describe('useUnlockBodyScroll helpers', () => {
 })
 
 describe('useUnlockBodyScroll', () => {
-  beforeEach(() => jest.useFakeTimers())
   afterEach(() => {
     jest.runOnlyPendingTimers()
-    jest.useRealTimers()
     document.body.removeAttribute('style')
     document.body.innerHTML = ''
   })
