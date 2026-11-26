@@ -22,6 +22,19 @@ describe('AddressBookEmptyState', () => {
     expect(onClear).toHaveBeenCalledTimes(1)
   })
 
+  it.each([
+    { book: 'suggested' as const, description: 'Try another name, address or Safe.' },
+    { book: 'pending' as const, description: 'Try another name, address or member.' },
+  ])('offers to clear a search of $book that matches nothing', async ({ book, description }) => {
+    const onClear = jest.fn()
+    render(<AddressBookEmptyState kind="no-results" book={book} onClear={onClear} />)
+
+    expect(screen.getByText(description)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Clear search' }))
+
+    expect(onClear).toHaveBeenCalledTimes(1)
+  })
+
   it('explains an empty workspace book and shows its actions', () => {
     render(<AddressBookEmptyState kind="empty" book="workspace" actions={<button>Add contact</button>} />)
 

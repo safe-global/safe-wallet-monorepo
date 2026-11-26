@@ -75,7 +75,17 @@ describe('toSuggestedContacts', () => {
     const other = signer()
     const requests = [spaceAddressBookRequestBuilder().with({ address: requested.address.toLowerCase() }).build()]
 
-    const contacts = toSuggestedContacts([requested, other], [], [], requests)
+    const contacts = toSuggestedContacts([requested, other], [], [], { pendingRequests: requests })
+
+    expect(contacts.map((contact) => contact.address)).toEqual([other.address])
+  })
+
+  it('skips addresses in a local address book on any chain in any casing', () => {
+    const saved = signer({ chainIds: ['1'] })
+    const other = signer()
+    const localBooks = { '137': { [saved.address.toLowerCase()]: faker.person.fullName() } }
+
+    const contacts = toSuggestedContacts([saved, other], [], [], { localBooks })
 
     expect(contacts.map((contact) => contact.address)).toEqual([other.address])
   })

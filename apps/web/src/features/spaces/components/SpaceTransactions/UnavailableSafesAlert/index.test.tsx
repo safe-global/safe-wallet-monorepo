@@ -7,6 +7,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
+import type { RootState } from '@/store'
 import UnavailableSafesAlert, { countSafeAddresses, getUnavailableTitle, SPACE_QUEUE_MAX_SAFES } from '.'
 
 const mockNames = new Map<string, string>()
@@ -115,6 +116,52 @@ describe('UnavailableSafesAlert', () => {
     openList(1)
 
     expect(await screen.findByRole('button', { name: 'Reload' })).toBeInTheDocument()
+  })
+
+  const withUndeployed = (chainId: string, safeAddress: string) => ({
+    initialReduxState: {
+      undeployedSafes: {
+        [chainId]: {
+          [safeAddress]: {
+            status: { status: 'AWAITING_EXECUTION' },
+            props: { safeAccountConfig: { owners: [address()], threshold: 1 } },
+          },
+        },
+      },
+    } as unknown as Partial<RootState>,
+  })
+
+  it('leaves out a counterfactual Safe, which has no queue to load', () => {
+    render(
+      <UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />,
+      withUndeployed('137', unnamed),
+    )
+
+    expect(screen.getByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe account not loaded')
+  })
+
+  it('matches a counterfactual Safe in any address case', () => {
+    render(
+      <UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />,
+      withUndeployed('137', unnamed.toLowerCase()),
+    )
+
+    expect(screen.getByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe account not loaded')
+  })
+
+  it('still counts the same address on a network where it is deployed', () => {
+    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />, withUndeployed('1', unnamed))
+
+    expect(screen.getByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safe accounts not loaded')
+  })
+
+  it('shows nothing when every unavailable Safe is counterfactual', () => {
+    render(
+      <UnavailableSafesAlert spaceId={spaceId} safes={safes.slice(1)} onRetry={jest.fn()} />,
+      withUndeployed('137', unnamed),
+    )
+
+    expect(screen.queryByTestId('unavailable-safes-alert')).not.toBeInTheDocument()
   })
 
   it('disables reloading while a reload is running', async () => {

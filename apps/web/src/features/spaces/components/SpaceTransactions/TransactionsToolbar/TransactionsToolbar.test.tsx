@@ -190,6 +190,38 @@ describe('TransactionsToolbar', () => {
     expect(onFiltersChange).toHaveBeenCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
+  it('finds a signer in the Filter menu by its address', () => {
+    renderToolbar()
+
+    openFilterSection('Signer')
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search signers' }), {
+      target: { value: signerA.slice(2, 12).toLowerCase() },
+    })
+
+    const options = screen.getAllByRole('menuitemcheckbox')
+    expect(options).toHaveLength(1)
+    expect(options[0]).toHaveTextContent(/2$/)
+  })
+
+  it('finds the ready statuses in the Urgency menu by their chip wording', () => {
+    renderToolbar()
+
+    openFilterSection('Urgency')
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search urgency' }), { target: { value: 'ready' } })
+
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual(['Execute1', 'Sign10'])
+  })
+
+  it('shows no matches in the Urgency menu when the search names no status', () => {
+    renderToolbar()
+
+    openFilterSection('Urgency')
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search urgency' }), { target: { value: 'xyz' } })
+
+    expect(screen.queryAllByRole('menuitemcheckbox')).toHaveLength(0)
+    expect(screen.getByText('No matches')).toBeInTheDocument()
+  })
+
   it('removes the networks with the Network chip', () => {
     const filters = { ...NO_SPACE_QUEUE_FILTERS, chainIds: ['1'], signers: [signerA] }
     const onFiltersChange = renderToolbar(filters)

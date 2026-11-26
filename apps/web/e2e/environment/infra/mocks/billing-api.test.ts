@@ -138,8 +138,8 @@ describe('billing API', () => {
     const offers = links.map((link) => [link.metadata.planName, link.trialPeriodDays, link.metadata.gracePeriod])
     const expected = ['Business', 'Starter'].flatMap((name) => [
       [name, null, undefined],
-      [name, 30, 'true'],
-      [name, 30, 'false'],
+      [name, 14, 'true'],
+      [name, 14, 'false'],
     ])
     assert.deepEqual(offers, expected)
     for (const link of links) {
@@ -178,7 +178,7 @@ describe('billing API', () => {
     assert.equal(page.headers['Content-Type'], 'text/html; charset=utf-8')
     for (const line of [
       'Plan: Business',
-      '30 days free',
+      '14 days free',
       `Workspace: ${CUSTOMER}`,
       'Returns to: https://wallet.test/welcome/select-safes',
     ]) {

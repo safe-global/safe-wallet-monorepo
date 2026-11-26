@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { fn } from 'storybook/test'
+import { expect, fn, userEvent, within } from 'storybook/test'
 import SignerOptions from './SignerOptions'
 import { InOpenMenu } from './storyDecorators'
 
@@ -24,4 +24,25 @@ export const Default: Story = {}
 
 export const NoSigners: Story = {
   args: { options: [] },
+}
+
+const MANY_SIGNERS = Array.from({ length: 20 }, (_, index) => ({
+  address: `0x${(index + 1).toString(16).padStart(40, '0')}`,
+  name: `Signer ${index + 1}`,
+  count: 20 - index,
+  checked: index === 2,
+}))
+
+/** More signers than fit: the options scroll under the search field */
+export const ManySigners: Story = {
+  args: { options: MANY_SIGNERS },
+}
+
+export const NoMatches: Story = {
+  args: { options: MANY_SIGNERS },
+  play: async ({ canvasElement }) => {
+    const menu = within(canvasElement.ownerDocument.body)
+    await userEvent.type(await menu.findByRole('searchbox', { name: 'Search signers' }), 'Bob')
+    await expect(await menu.findByRole('status')).toHaveTextContent('No matches')
+  },
 }

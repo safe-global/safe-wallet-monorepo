@@ -1,6 +1,7 @@
 import { parseEther } from 'ethers'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { balanceOf, emptyBalance } from '../../src/chain/balances'
+import { RELAYER } from '../../src/data/constants'
 import { sponsoredTransactionsUsed } from '../../src/fixtures/email-session'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -10,8 +11,6 @@ import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { seedBusinessWorkspace } from '../../src/seed/workspace'
 
 const AMOUNT = '0.001'
-// The account that the stack's relay mock (environment/infra/mocks/relay-api.ts) sends every relayed transaction from
-const RELAYER = '0x5afe00000000000000000000000000000000beef'
 // FEATURE_SPONSORED_TRANSACTIONS of the Business plan in the billing mock (environment/infra/mocks/billing-api.ts)
 const BUSINESS_PLAN_RELAYS = 50
 

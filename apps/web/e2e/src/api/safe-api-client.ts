@@ -11,6 +11,7 @@ import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gate
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type {
+  CreationTransaction,
   QueuedItemPage,
   Transaction,
   TransactionDetails,
@@ -133,6 +134,15 @@ export class SafeApiClient {
     const txHash = (await this.findExecutedTransaction(safeAddress, nonce))?.txHash
     if (!txHash) throw new Error(`CGW has no execution hash for nonce ${nonce} of ${safeAddress}`)
     return txHash
+  }
+
+  /** Get the hash of the chain transaction that deployed the Safe; null until CGW has indexed the creation */
+  async findCreationTxHash(safeAddress: string): Promise<string | null> {
+    const response = await this.request(`/v1/chains/${this.chainId}/safes/${safeAddress}/transactions/creation`)
+    if (response.status === 404) return null
+    if (!response.ok) throw await apiError(response)
+    const creation = (await response.json()) as CreationTransaction
+    return creation.transactionHash
   }
 
   /** Get an off-chain message by its Safe message hash */

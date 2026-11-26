@@ -261,11 +261,19 @@ jobs:
           echo 'The build job did not finish within 10 minutes' >&2
           exit 1
 
+      # Revert to download-artifact after https://github.com/actions/download-artifact/pull/506
       - name: Download builds
-        uses: actions/download-artifact@v8.0.2
-        with:
-          name: isolated-e2e-builds
-          path: apps
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          for _ in $(seq 1 12); do
+            gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name isolated-e2e-builds --dir apps && exit 0
+            sleep 5
+          done
+          echo 'The isolated-e2e-builds artifact did not appear within 1 minute' >&2
+          exit 1
 
       - name: Serve Safe Apps and simulation adapter
         run: |

@@ -258,6 +258,65 @@ describe('AddContactDialog', () => {
     expect(screen.getByLabelText('Address or ENS')).toHaveAttribute('data-ens-chain', '1')
   })
 
+  describe('without a trigger', () => {
+    const prefill = { address: '0xdef', chainIds: ['137'] }
+
+    it('opens on mount and renders no trigger button', () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} onClose={jest.fn()} />)
+
+      expect(screen.getByRole('dialog', { name: 'Add contact' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /add shared contact/i })).not.toBeInTheDocument()
+    })
+
+    it('prefills the address', () => {
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} prefill={prefill} onClose={jest.fn()} />)
+
+      expect(screen.getByLabelText('Address or ENS')).toHaveValue('0xdef')
+    })
+
+    it('submits the prefilled address on the prefilled networks only', async () => {
+      const submit = jest.fn().mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={submit} prefill={prefill} onClose={jest.fn()} />)
+      fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alice' } })
+
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() => {
+        expect(submit).toHaveBeenCalledWith({ name: 'Alice', address: '0xdef', chainIds: ['137'] }, '42')
+      })
+    })
+
+    it('reports its close after a successful save', async () => {
+      const onClose = jest.fn()
+      render(
+        <AddContactDialog
+          {...baseProps}
+          submit={jest.fn().mockResolvedValue({})}
+          prefill={prefill}
+          onClose={onClose}
+        />,
+      )
+      fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alice' } })
+
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
+    })
+
+    it('reports its close when cancelled', () => {
+      const onClose = jest.fn()
+      render(<AddContactDialog {...baseProps} submit={jest.fn()} onClose={onClose} />)
+
+      fireEvent.click(screen.getByTestId('cancel-btn'))
+
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('tags', () => {
     it('creates a new tag at once from the Tags field', async () => {
       mockCreateTag.mockResolvedValue({})

@@ -109,7 +109,7 @@ const TxLayoutBase = ({
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
   const isDarkMode = useDarkMode()
-  // A flow opened from a Workspace has no Safe in the URL or sidebar, so the header names it
+  // Below md the dialog covers the topbar's Safe bar, so the title row names the Workspace flow's Safe
   const scope = useSafeScope()
 
   return (
@@ -149,7 +149,7 @@ const TxLayoutBase = ({
                 <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                   {title}
                 </Typography>
-                {scope && (
+                {isSmallScreen && scope && (
                   <div data-testid="tx-flow-scoped-safe" className="flex min-w-0 items-center gap-2 text-sm">
                     <EthHashInfo
                       address={scope.safeAddress}

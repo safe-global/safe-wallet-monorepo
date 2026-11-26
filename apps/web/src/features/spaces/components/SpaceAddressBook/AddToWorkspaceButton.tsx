@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Check, Plus } from 'lucide-react'
-import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { useAddOrRequestWorkspaceContact } from '../../hooks/useAddOrRequestWorkspaceContact'
+import NameContactsDialog from '@safe-global/views/features/spaces/components/AddressBookV2/NameContactsDialog'
+import useChains from '@/hooks/useChains'
+import { toChainInfos } from '../../utils'
 import { validateContactName } from './utils'
 
 type AddToWorkspaceButtonProps = {
@@ -19,19 +20,20 @@ type AddToWorkspaceButtonProps = {
 
 const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorkspaceButtonProps) => {
   const addOrRequestContact = useAddOrRequestWorkspaceContact()
+  const { configs } = useChains()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [added, setAdded] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  const nameError = validateContactName(name)
-
-  const handleAdd = async () => {
-    if (added || nameError) return
+  const handleAdd = async (addedName: string) => {
+    if (added) return
 
     setIsSubmitting(true)
     try {
-      if ((await addOrRequestContact({ address, name, chainIds })) !== 'added') return
+      if ((await addOrRequestContact({ address, name: addedName, chainIds })) !== 'added') return
       trackEvent(SPACE_EVENTS.LOCAL_CONTACT_ADDED, { [MixpanelEventParams.SOURCE]: 'local_contact_row' })
       setAdded(true)
+      setOpen(false)
     } finally {
       setIsSubmitting(false)
     }
@@ -46,26 +48,35 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
       variant="outline"
       size={isCompact ? 'icon-sm' : 'sm'}
       aria-label={isCompact ? label : undefined}
-      onClick={handleAdd}
-      disabled={isSubmitting || added || !!nameError}
+      onClick={() => setOpen(true)}
+      disabled={added}
     >
-      {isSubmitting ? <Spinner className="size-3.5" /> : isCompact ? icon : label}
+      {isCompact ? icon : label}
     </Button>
   )
 
-  if (nameError) {
-    return <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip>
-  }
-
-  if (!isCompact) {
-    return button
-  }
-
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <>
+      {isCompact ? (
+        <Tooltip>
+          <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
+          <TooltipContent>{label}</TooltipContent>
+        </Tooltip>
+      ) : (
+        button
+      )}
+
+      {open && (
+        <NameContactsDialog
+          contacts={[{ address, chains: toChainInfos(chainIds, configs), suggestedName: name }]}
+          validateName={validateContactName}
+          onConfirm={([contact]) => handleAdd(contact.name)}
+          onClose={() => setOpen(false)}
+          isSubmitting={isSubmitting}
+          description="Everyone in the Workspace will see this name. Leave it empty to keep your local name."
+        />
+      )}
+    </>
   )
 }
 

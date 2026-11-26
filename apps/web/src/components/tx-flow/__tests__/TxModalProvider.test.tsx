@@ -1,10 +1,11 @@
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext, TxModalProvider } from '..'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
 import { walletContextBuilder } from '@/tests/builders/wallet'
+import { TxFlowSafeReporterContext, useTxFlowSafe } from '../safe-scope/txFlowSafe'
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
   useTopbarElevation: jest.fn(),
@@ -274,5 +275,58 @@ describe('TxModalProvider parent Safe nonce', () => {
 
     await waitFor(() => expect(screen.queryByRole('button', { name: 'add to batch' })).not.toBeInTheDocument())
     expect(nonce).toBeUndefined()
+  })
+})
+
+describe('TxModalProvider flow Safe', () => {
+  const flowSafe = { chainId: '137', safeAddress: '0x1234567890123456789012345678901234567890' }
+
+  /** Stands in for the flow's SafeScopeProvider: reports its Safe while mounted. */
+  const ScopedFlow = () => {
+    const report = useContext(TxFlowSafeReporterContext)
+    useEffect(() => {
+      report?.(flowSafe)
+      return () => report?.(undefined)
+    }, [report])
+    return <div>{FLOW_TEXT}</div>
+  }
+
+  const FlowSafeProbe = () => {
+    const safe = useTxFlowSafe()
+    const { setTxFlow } = useContext(TxModalContext)
+    return (
+      <>
+        <span data-testid="flow-safe">{safe ? `${safe.chainId}:${safe.safeAddress}` : 'none'}</span>
+        <button onClick={() => setTxFlow(<ScopedFlow />, undefined, false)}>open scoped</button>
+      </>
+    )
+  }
+
+  it('exposes the Safe reported from inside the flow to the page, and drops it on close', async () => {
+    const user = userEvent.setup()
+    render(
+      <TxModalProvider>
+        <FlowSafeProbe />
+      </TxModalProvider>,
+    )
+    expect(screen.getByTestId('flow-safe')).toHaveTextContent('none')
+
+    await user.click(screen.getByRole('button', { name: 'open scoped' }))
+    await waitFor(() => expect(screen.getByTestId('flow-safe')).toHaveTextContent(`137:${flowSafe.safeAddress}`))
+
+    await clickClose(user)
+    await waitFor(() => expect(screen.getByTestId('flow-safe')).toHaveTextContent('none'))
+  })
+
+  it('gives the page no way to report a flow Safe', () => {
+    const Reporter = () => (
+      <span data-testid="has-reporter">{String(Boolean(useContext(TxFlowSafeReporterContext)))}</span>
+    )
+    render(
+      <TxModalProvider>
+        <Reporter />
+      </TxModalProvider>,
+    )
+    expect(screen.getByTestId('has-reporter')).toHaveTextContent('false')
   })
 })

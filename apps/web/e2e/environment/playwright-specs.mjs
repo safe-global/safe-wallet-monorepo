@@ -16,6 +16,7 @@ export const playwrightSpecs = {
     devices: ['trezor'],
   },
   'e2e/batch.spec.ts': { flags: ['BATCHING'] },
+  'e2e/billing.spec.ts': { scenarios: ['prepareBasicScenario'] },
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
   'e2e/contract-signature-execute.spec.ts': {},
@@ -33,7 +34,7 @@ export const playwrightSpecs = {
   'e2e/owner-management.spec.ts': {},
   'e2e/pay-from-safe.spec.ts': {},
   'e2e/policies.spec.ts': { flags: ['POLICIES'] },
-  'e2e/workspace.spec.ts': {},
+  'e2e/workspace.spec.ts': { flags: ['WORKSPACE_ONBOARDING_V2'] },
   'e2e/positions.spec.ts': {
     scenarios: ['prepareZerionPositionsScenario'],
     chains: [1],
@@ -90,9 +91,7 @@ export const playwrightSpecs = {
   'regression/wallet-reconnect.spec.ts': {
     scenarios: ['prepareBasicScenario'],
   },
-  'regression/auth0/step-up-billing.spec.ts': {
-    scenarios: ['prepareBasicScenario'],
-  },
+  'regression/auth0/step-up-billing.spec.ts': { flags: ['WORKSPACE_ONBOARDING_V2'] },
   'regression/auth0/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
   },

@@ -10,6 +10,7 @@ import { useSpacePendingTransactions } from '../../../hooks/useSpacePendingTrans
 import useSpaceAccountsData from '@/features/myAccounts/public/hooks/useSpaceAccountsData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { COMPLETED_STORAGE_KEY } from '../../../hooks/useSetupWidgetDismissal'
+import AggregatedBalance from '../AggregatedBalances'
 import SpaceDashboard from '../index'
 
 const MOCK_SPACE_ID = '42'
@@ -191,7 +192,7 @@ jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
 
 // Stub sub-components irrelevant to tracking
 jest.mock('../AddAccountsCard', () => () => null)
-jest.mock('../AggregatedBalances', () => () => null)
+jest.mock('../AggregatedBalances', () => ({ __esModule: true, default: jest.fn(() => null) }))
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
 jest.mock('../../AddAccounts', () => () => null)
 jest.mock(
@@ -245,6 +246,24 @@ const restoreDefaultMocks = () => {
 }
 
 // ---- Tests ----
+
+describe('SpaceDashboard – total value loading', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setPendingTxEntries()
+  })
+
+  const lastTotalProps = () => (AggregatedBalance as jest.Mock).mock.calls.at(-1)?.[0]
+
+  it.each([true, false])('passes safesLoading=%s while the Workspace Safes load', (isLoading) => {
+    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [], isLoading })
+
+    render(<SpaceDashboard />)
+
+    expect(lastTotalProps()).toMatchObject({ safesLoading: isLoading })
+  })
+})
 
 describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
   beforeEach(() => {
