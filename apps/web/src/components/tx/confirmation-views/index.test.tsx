@@ -3,6 +3,7 @@ import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERAT
 import { Operation, SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { fakerChecksummedAddress, render } from '@/tests/test-utils'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { getLatestSpendingLimitAddress } from '@/features/spending-limits/public/services/spendingLimitDeployments'
 import ConfirmationView from '.'
 
@@ -119,22 +120,42 @@ describe('ConfirmationView', () => {
   it.each([
     [
       SettingsInfoType.ADD_OWNER,
+      [target],
       { owner: { value: owner }, threshold: 1 },
       safeInterface.encodeFunctionData('addOwnerWithThreshold', [owner, 1]),
+      owner,
     ],
     [
       SettingsInfoType.REMOVE_OWNER,
+      [target, owner],
       { owner: { value: owner }, threshold: 1 },
       safeInterface.encodeFunctionData('removeOwner', [target, owner, 1]),
+      owner,
     ],
     [
       SettingsInfoType.SWAP_OWNER,
+      [owner],
       { oldOwner: { value: owner }, newOwner: { value: target } },
-      safeInterface.encodeFunctionData('swapOwner', [target, owner, target]),
+      safeInterface.encodeFunctionData('swapOwner', ['0x0000000000000000000000000000000000000001', owner, target]),
+      target,
     ],
-    [SettingsInfoType.CHANGE_THRESHOLD, { threshold: 1 }, safeInterface.encodeFunctionData('changeThreshold', [1])],
-  ])('shows the new signer setup for %s', async (type, fields, hexData) => {
-    const { findByText } = render(<ConfirmationView txPreview={settingsChange({ type, ...fields }, hexData)} />)
+  ])('shows the signer that %s changes', async (type, currentOwners, fields, hexData, changedSigner) => {
+    const safe = extendedSafeInfoBuilder()
+      .with({ owners: currentOwners.map((value) => ({ value })), threshold: 1 })
+      .build()
+
+    const { findAllByText } = render(<ConfirmationView txPreview={settingsChange({ type, ...fields }, hexData)} />, {
+      initialReduxState: { safeInfo: { data: safe, loaded: true, loading: false } },
+    })
+
+    expect((await findAllByText(changedSigner))[0]).toBeInTheDocument()
+  })
+
+  it('shows the new signer setup for a threshold change', async () => {
+    const hexData = safeInterface.encodeFunctionData('changeThreshold', [1])
+    const txPreview = settingsChange({ type: SettingsInfoType.CHANGE_THRESHOLD, threshold: 1 }, hexData)
+
+    const { findByText } = render(<ConfirmationView txPreview={txPreview} />)
 
     expect(await findByText('Signers')).toBeInTheDocument()
   })

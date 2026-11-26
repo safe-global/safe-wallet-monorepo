@@ -3,7 +3,7 @@ import { Operation, SettingsInfoType, TransactionInfoType } from '@safe-global/s
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
+import { fakerChecksummedAddress, fireEvent, render, screen } from '@/tests/test-utils'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -26,8 +26,26 @@ const safeTx = createSafeTx()
 
 const preview = {
   txInfo: { type: TransactionInfoType.SETTINGS_CHANGE, settingsInfo: { type: SettingsInfoType.DELETE_GUARD } },
-  txData: { to: { value: safeTx.data.to }, value: '0', operation: Operation.CALL, hexData: safeTx.data.data },
+  txData: {
+    to: { value: safeTx.data.to },
+    value: '0',
+    operation: Operation.CALL,
+    hexData: safeTx.data.data,
+    dataDecoded: { method: 'setGuard', parameters: [] },
+  },
 } as unknown as TransactionPreview
+
+const renderReview = () =>
+  render(
+    <SlotProvider>
+      <SafeTxContext.Provider
+        value={{ safeTx, setSafeTx: jest.fn(), setSafeTxError: jest.fn() } as unknown as SafeTxContextParams}
+      >
+        <ReviewRemoveGuard params={{ address: guardAddress }} onSubmit={jest.fn()} />
+      </SafeTxContext.Provider>
+    </SlotProvider>,
+    { initialReduxState: { safeInfo: { data: extendedSafeInfoBuilder().build(), loaded: true, loading: false } } },
+  )
 
 describe('ReviewRemoveGuard', () => {
   beforeEach(() => {
@@ -40,20 +58,19 @@ describe('ReviewRemoveGuard', () => {
   })
 
   it('shows the guard to remove once', async () => {
-    render(
-      <SlotProvider>
-        <SafeTxContext.Provider
-          value={{ safeTx, setSafeTx: jest.fn(), setSafeTxError: jest.fn() } as unknown as SafeTxContextParams}
-        >
-          <ReviewRemoveGuard params={{ address: guardAddress }} onSubmit={jest.fn()} />
-        </SafeTxContext.Provider>
-      </SlotProvider>,
-      { initialReduxState: { safeInfo: { data: extendedSafeInfoBuilder().build(), loaded: true, loading: false } } },
-    )
+    renderReview()
 
     expect(await screen.findByText('Transaction guard')).toBeInTheDocument()
     expect(screen.getByText('Transaction details')).toBeInTheDocument()
     expect(screen.getAllByText(guardAddress)).toHaveLength(1)
     expect(screen.queryByText('Delete guard')).not.toBeInTheDocument()
+  })
+
+  it('keeps the removal warning and the decoded setGuard call', async () => {
+    renderReview()
+
+    expect(await screen.findByText(/checks by the transaction guard will not be conducted/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Transaction details'))
+    expect(await screen.findByText('setGuard', { selector: 'code' })).toBeInTheDocument()
   })
 })

@@ -3,7 +3,7 @@ import { Operation, SettingsInfoType, TransactionInfoType } from '@safe-global/s
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
+import { fakerChecksummedAddress, fireEvent, render, screen } from '@/tests/test-utils'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -29,8 +29,26 @@ const preview = {
     type: TransactionInfoType.SETTINGS_CHANGE,
     settingsInfo: { type: SettingsInfoType.DISABLE_MODULE, module: { value: moduleAddress } },
   },
-  txData: { to: { value: safeTx.data.to }, value: '0', operation: Operation.CALL, hexData: safeTx.data.data },
+  txData: {
+    to: { value: safeTx.data.to },
+    value: '0',
+    operation: Operation.CALL,
+    hexData: safeTx.data.data,
+    dataDecoded: { method: 'disableModule', parameters: [] },
+  },
 } as unknown as TransactionPreview
+
+const renderReview = () =>
+  render(
+    <SlotProvider>
+      <SafeTxContext.Provider
+        value={{ safeTx, setSafeTx: jest.fn(), setSafeTxError: jest.fn() } as unknown as SafeTxContextParams}
+      >
+        <ReviewRemoveModule params={{ address: moduleAddress }} onSubmit={jest.fn()} />
+      </SafeTxContext.Provider>
+    </SlotProvider>,
+    { initialReduxState: { safeInfo: { data: extendedSafeInfoBuilder().build(), loaded: true, loading: false } } },
+  )
 
 describe('ReviewRemoveModule', () => {
   beforeEach(() => {
@@ -43,19 +61,18 @@ describe('ReviewRemoveModule', () => {
   })
 
   it('shows the module to remove once', async () => {
-    render(
-      <SlotProvider>
-        <SafeTxContext.Provider
-          value={{ safeTx, setSafeTx: jest.fn(), setSafeTxError: jest.fn() } as unknown as SafeTxContextParams}
-        >
-          <ReviewRemoveModule params={{ address: moduleAddress }} onSubmit={jest.fn()} />
-        </SafeTxContext.Provider>
-      </SlotProvider>,
-      { initialReduxState: { safeInfo: { data: extendedSafeInfoBuilder().build(), loaded: true, loading: false } } },
-    )
+    renderReview()
 
     expect(await screen.findByText('Module')).toBeInTheDocument()
     expect(screen.getByText('Transaction details')).toBeInTheDocument()
     expect(screen.getAllByText(moduleAddress)).toHaveLength(1)
+  })
+
+  it('keeps the removal warning and the decoded disableModule call', async () => {
+    renderReview()
+
+    expect(await screen.findByText(/any feature or app that uses this module might no longer work/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Transaction details'))
+    expect(await screen.findByText('disableModule', { selector: 'code' })).toBeInTheDocument()
   })
 })

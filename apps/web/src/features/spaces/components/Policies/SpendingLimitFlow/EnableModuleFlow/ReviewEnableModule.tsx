@@ -84,7 +84,7 @@ const ReviewEnableModule = ({ onSubmit, children }: ReviewTransactionProps): Rea
   }
 
   return (
-    <ReviewTransaction title={REVIEW_STEP_TITLE} onSubmit={onSubmit}>
+    <ReviewTransaction title={REVIEW_STEP_TITLE} onSubmit={onSubmit} withDecodedData={false}>
       {summary && <SpendingLimitSummary policy={summary} />}
       {children}
     </ReviewTransaction>

@@ -1,4 +1,5 @@
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ComponentProps, ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -6,10 +7,13 @@ import { InfoDetails } from '@safe-global/views/components/transactions/InfoDeta
 import { ThresholdWarning } from '@/components/transactions/Warning'
 import { UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
 type SettingsChangeTxInfoProps = {
   settingsInfo: SettingsChangeTransaction['settingsInfo']
   isTxExecuted?: boolean
+  /** The Safe the transaction belongs to; undefined means the current Safe. */
+  safeAddress?: string
 }
 
 const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' | 'showCopyButton' | 'hasExplorer'> = {
@@ -18,9 +22,26 @@ const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' 
   hasExplorer: true,
 }
 
+// The gateway sends no address for a deleted guard. While the transaction is pending, the guard it
+// removes is the one the Safe has now; after execution, or for another Safe, that is unknown.
+const DeleteGuardInfo = ({ isTxExecuted, safeAddress }: { isTxExecuted: boolean; safeAddress?: string }) => {
+  const { safe, safeAddress: currentSafeAddress } = useSafeInfo()
+  const isCurrentSafe = !safeAddress || sameAddress(safeAddress, currentSafeAddress)
+  const guard = !isTxExecuted && isCurrentSafe ? safe.guard : undefined
+
+  if (!guard) return <InfoDetails title="Delete guard" />
+
+  return (
+    <InfoDetails title="Delete guard:">
+      <EthHashInfo address={guard.value} name={guard.name} customAvatar={guard.logoUri} {...addressInfoProps} />
+    </InfoDetails>
+  )
+}
+
 const SettingsChangeTxInfo = ({
   settingsInfo,
   isTxExecuted = false,
+  safeAddress,
 }: SettingsChangeTxInfoProps): ReactElement | null => {
   const isUntrustedFallbackHandler = useHasUntrustedFallbackHandler(
     settingsInfo?.type === SettingsInfoType.SET_FALLBACK_HANDLER ? settingsInfo.handler.value : undefined,
@@ -137,7 +158,7 @@ const SettingsChangeTxInfo = ({
       )
     }
     case SettingsInfoType.DELETE_GUARD: {
-      return <InfoDetails title="Delete guard" />
+      return <DeleteGuardInfo isTxExecuted={isTxExecuted} safeAddress={safeAddress} />
     }
     case SettingsInfoType.SET_MODULE_GUARD: {
       return (
