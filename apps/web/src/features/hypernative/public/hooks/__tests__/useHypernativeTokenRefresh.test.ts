@@ -40,15 +40,11 @@ const setOnline = (isOnline: boolean) =>
 
 describe('useHypernativeTokenRefresh', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockCookieJar.clear()
     mockExchange.mockReset()
     mockExchange.mockResolvedValue(tokensFor(2))
     setOnline(true)
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('does nothing for a session without a refresh token', async () => {

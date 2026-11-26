@@ -34,8 +34,6 @@ const setupHandler = (status: 'pending' | 'applied', onRequest: () => void = () 
 const sessionId = () => `cs_${faker.string.alphanumeric(24)}`
 
 describe('CheckoutReturnScreen', () => {
-  afterEach(() => jest.useRealTimers())
-
   it('shows the setup in progress while the gateway applies it after a completed checkout', async () => {
     const setupPolled = jest.fn()
     server.use(sessionHandler('complete'), setupHandler('pending', setupPolled))
@@ -77,7 +75,6 @@ describe('CheckoutReturnScreen', () => {
   })
 
   it('stops waiting after a minute and lets the user open the Workspace', async () => {
-    jest.useFakeTimers()
     const setupPolled = jest.fn()
     server.use(sessionHandler('complete'), setupHandler('pending', setupPolled))
     const replace = jest.fn(() => Promise.resolve(true))
