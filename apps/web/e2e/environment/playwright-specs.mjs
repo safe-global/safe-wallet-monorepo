@@ -102,6 +102,7 @@ export const playwrightSpecs = {
   'regression/auth0/workspace-invite.spec.ts': {},
   'regression/workspace-address-book.spec.ts': {
     scenarios: ['prepareBasicScenario'],
+    flags: ['WORKSPACES_ADDRESS_BOOK_V2'],
   },
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
