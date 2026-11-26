@@ -377,4 +377,18 @@ describe('SafeScopeProvider', () => {
       expect(() => renderHook(useProbe, { wrapper: wrapperWith(targetA) })).not.toThrow()
     })
   })
+
+  it('leaves the active counter alone when armsSdkGuard is off', () => {
+    const target = { chainId: safeA.chainId, safeAddress: safeA.address.value }
+    const { unmount } = renderHook(useProbe, {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <SafeScopeProvider initial={target} armsSdkGuard={false}>
+          {children}
+        </SafeScopeProvider>
+      ),
+    })
+    expect(hasActiveScope()).toBe(false)
+    unmount()
+    expect(hasActiveScope()).toBe(false)
+  })
 })

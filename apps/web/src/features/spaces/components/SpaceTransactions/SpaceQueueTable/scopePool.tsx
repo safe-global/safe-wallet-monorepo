@@ -65,7 +65,12 @@ export const ScopePool = memo(
     return (
       <>
         {targets.map(({ scopeKey, chainId, safeAddress }) => (
-          <SafeScopeProvider key={scopeKey} initial={{ chainId, safeAddress }} pollSafeInfo={false}>
+          <SafeScopeProvider
+            key={scopeKey}
+            initial={{ chainId, safeAddress }}
+            pollSafeInfo={false}
+            armsSdkGuard={false}
+          >
             <PublishScope scopeKey={scopeKey} store={store} />
           </SafeScopeProvider>
         ))}

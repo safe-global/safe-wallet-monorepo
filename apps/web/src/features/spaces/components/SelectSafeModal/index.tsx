@@ -3,12 +3,9 @@ import dynamic from '@/utils/dynamic'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
-import { useSafeSignerCheck } from '../../hooks/useSafeSignerCheck'
 import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
-import useWallet from '@/hooks/wallets/useWallet'
-import { CheckWalletMessage } from '@/components/common/CheckWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import {
@@ -42,7 +39,6 @@ const SelectSafeModal = () => {
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
-  const isNewTxAction = actionType === ESafeAction.NewTransaction
   // Space flows can't handle counterfactual Safes (SafeScopeProvider); ones from other devices still show
   const selectableSafes = useMemo(
     () => flatSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
@@ -50,9 +46,6 @@ const SelectSafeModal = () => {
   )
   const areAllSafesUndeployed = flatSafes.length > 0 && selectableSafes.length === 0
   const filteredSafes = useSearchFilter(selectableSafes, query, matchSafe)
-  const wallet = useWallet()
-  // flatSafes, not selectableSafes: the same Safe set shares the overviews cache entry with useSpaceSafes
-  const getSignerStatus = useSafeSignerCheck(flatSafes, { skip: !opened || !isNewTxAction })
   const { actionMapper, resetActiveSafe } = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
@@ -71,17 +64,9 @@ const SelectSafeModal = () => {
         return { disabled: false }
       }
 
-      // Same gate as the Safe-level New transaction button (CheckWallet)
-      if (actionType === ESafeAction.NewTransaction) {
-        if (!wallet) return { disabled: true, tooltip: CheckWalletMessage.WalletNotConnected }
-        const status = getSignerStatus(safe)
-        if (status === 'pending') return { disabled: true }
-        if (status === 'not-signer') return { disabled: true, tooltip: CheckWalletMessage.NotSafeOwner }
-      }
-
       return { disabled: false }
     },
-    [actionType, chains, wallet, getSignerStatus],
+    [actionType, chains],
   )
 
   const handleClose = useCallback(() => {

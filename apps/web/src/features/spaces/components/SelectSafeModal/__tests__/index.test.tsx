@@ -61,17 +61,6 @@ jest.mock('@/hooks/useChains', () => ({
   default: () => mockUseChains(),
 }))
 
-const mockUseWallet = jest.fn()
-jest.mock('@/hooks/wallets/useWallet', () => ({
-  __esModule: true,
-  default: () => mockUseWallet(),
-}))
-
-const mockGetSignerStatus = jest.fn()
-jest.mock('../../../hooks/useSafeSignerCheck', () => ({
-  useSafeSignerCheck: () => mockGetSignerStatus,
-}))
-
 const renderModal = (actionType: ESafeAction, undeployedSafes: Record<string, Record<string, unknown>> = {}) =>
   render(<SelectSafeModal />, {
     initialReduxState: {
@@ -107,7 +96,6 @@ const cfState = (safe: SafeItem) => ({ [safe.chainId]: { [safe.address]: { statu
 describe('SelectSafeModal swap disabling', () => {
   beforeEach(() => {
     cardProps.length = 0
-    mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
     mockUseChains.mockReturnValue({ configs: [chainWithSwap, chainWithoutSwap] })
     mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
   })
@@ -129,14 +117,15 @@ describe('SelectSafeModal swap disabling', () => {
     const card = getCardFor(safeOnUnsupportedChain)
     expect(card?.disabled).toBe(true)
     expect(getTooltipFor(safeOnUnsupportedChain)).toBe(SWAP_DISABLED_TOOLTIP)
+    expect(getCardFor(safeOnUnsupportedChain)?.disabledTooltip).toBeUndefined()
+    const cardEl = screen.getByTestId(`card-${safeOnUnsupportedChain.chainId}:${safeOnUnsupportedChain.address}`)
+    expect(cardEl.closest('[data-testid="tooltip-trigger"]')).toHaveAttribute('data-trigger', 'div')
   })
 })
 
 describe('SelectSafeModal counterfactual safes', () => {
   beforeEach(() => {
     cardProps.length = 0
-    mockGetSignerStatus.mockReturnValue('signer')
-    mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
     mockUseChains.mockReturnValue({ configs: [chainWithSwap] })
     mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
   })
@@ -158,69 +147,18 @@ describe('SelectSafeModal counterfactual safes', () => {
   })
 })
 
-describe('SelectSafeModal new transaction gating', () => {
+describe('SelectSafeModal new transaction', () => {
   beforeEach(() => {
     cardProps.length = 0
-    mockGetSignerStatus.mockReturnValue('signer')
-    mockUseChains.mockReturnValue({ configs: [chainWithSwap] })
+    mockUseChains.mockReturnValue({ configs: [chainWithSwap, chainWithoutSwap] })
     mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
-    mockUseWallet.mockReturnValue({ address: '0x0000000000000000000000000000000000000abc' })
   })
 
-  it('disables every safe with the connect-wallet tooltip when no wallet is connected', () => {
-    mockUseWallet.mockReturnValue(null)
-
+  it('keeps every deployed Safe enabled without a tooltip, like Send', () => {
     renderModal(ESafeAction.NewTransaction, cfState(cfSafe))
 
-    const card = getCardFor(deployedSafe)
-    expect(card?.disabled).toBe(true)
-    expect(getTooltipFor(deployedSafe)).toBe('Please connect your wallet')
-  })
-
-  it('disables a Safe the wallet has no role on with the not-a-signer tooltip', () => {
-    mockGetSignerStatus.mockReturnValue('not-signer')
-
-    renderModal(ESafeAction.NewTransaction)
-
-    const card = getCardFor(deployedSafe)
-    expect(card?.disabled).toBe(true)
-    expect(getTooltipFor(deployedSafe)).toBe('Your connected wallet is not a signer of this Safe account')
-  })
-
-  it("anchors the tooltip to a block around the card, not to the card's own tooltip", () => {
-    mockGetSignerStatus.mockReturnValue('not-signer')
-
-    renderModal(ESafeAction.NewTransaction)
-
-    const card = screen.getByTestId(`card-${deployedSafe.chainId}:${deployedSafe.address}`)
-    expect(card.closest('[data-testid="tooltip-trigger"]')).toHaveAttribute('data-trigger', 'div')
-    expect(getCardFor(deployedSafe)?.disabledTooltip).toBeUndefined()
-  })
-
-  it('keeps a Safe disabled without a tooltip while its role checks are pending', () => {
-    mockGetSignerStatus.mockReturnValue('pending')
-
-    renderModal(ESafeAction.NewTransaction)
-
-    const card = getCardFor(deployedSafe)
-    expect(card?.disabled).toBe(true)
-    expect(getTooltipFor(deployedSafe)).toBeUndefined()
-  })
-
-  it('shows the connect-wallet tooltip before the not-a-signer one', () => {
-    mockUseWallet.mockReturnValue(null)
-    mockGetSignerStatus.mockReturnValue('not-signer')
-
-    renderModal(ESafeAction.NewTransaction)
-
-    expect(getTooltipFor(deployedSafe)).toBe('Please connect your wallet')
-  })
-
-  it('does not apply the signer check to send', () => {
-    mockGetSignerStatus.mockReturnValue('not-signer')
-
-    renderModal(ESafeAction.Send)
-
     expect(getCardFor(deployedSafe)?.disabled).toBe(false)
+    expect(getTooltipFor(deployedSafe)).toBeUndefined()
+    expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument()
   })
 })

@@ -12,17 +12,14 @@ type SafeRef = Pick<SafeItem, 'chainId' | 'address'>
 export const safeKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
 // Overview args match `useSpaceSafeOverviews` so they share its cache entry; one delegates request per chain
-export const useSafeRoleQueries = (
-  safes: SafeRef[],
-  { skip = false, skipProposers = false }: { skip?: boolean; skipProposers?: boolean } = {},
-) => {
+export const useSafeRoleQueries = (safes: SafeRef[], { skipProposers = false }: { skipProposers?: boolean } = {}) => {
   const { address: wallet = '' } = useWallet() || {}
   const currency = useAppSelector(selectCurrency)
   const { configs: chains, loading: isChainsLoading } = useChains()
 
   const overviewSafes = useMemo(() => safes.map(({ chainId, address }) => ({ chainId, address })), [safes])
   const overviewsQuery = useGetMultipleSafeOverviewsQuery(
-    !skip && overviewSafes.length > 0 ? { safes: overviewSafes, currency } : skipToken,
+    overviewSafes.length > 0 ? { safes: overviewSafes, currency } : skipToken,
   )
 
   const proposerChains = useMemo(() => {
@@ -30,9 +27,7 @@ export const useSafeRoleQueries = (
     return chains.filter((chain) => chainIds.has(chain.chainId))
   }, [chains, safes])
   const proposerSafesQuery = useGetProposerSafesQuery(
-    !skip && !skipProposers && wallet && proposerChains.length > 0
-      ? { chains: proposerChains, delegate: wallet }
-      : skipToken,
+    !skipProposers && wallet && proposerChains.length > 0 ? { chains: proposerChains, delegate: wallet } : skipToken,
   )
 
   // `currentData`: `data` still holds the previous args' result while a new key is in flight.
