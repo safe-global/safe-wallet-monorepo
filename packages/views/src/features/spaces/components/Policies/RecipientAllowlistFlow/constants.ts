@@ -22,9 +22,22 @@ export const RECIPIENT_RESERVED_ERROR = 'This recipient address is not valid'
 
 export const SUMMARY_DETAILS_LABEL = 'When this takes effect'
 
+export const SPENDING_LIMIT_TOKEN_HINT =
+  "This Safe account has a spending limit for this token. Add the token, so the allowlist doesn't block the spending limit."
+export const SELECT_ALL_LABEL = 'Select all'
+
+export const SPACE_CONTACTS_LABEL = 'Contacts of'
+export const LOCAL_CONTACTS_LABEL = 'Local contacts'
+export const LOCAL_CONTACTS_TOOLTIP = "Saved in this browser only. Other members of the Workspace can't see them."
+export const getSpaceContactsTooltip = (spaceName: string): string =>
+  `Shared with everyone in ${spaceName}. Only Workspace admins can add or change these contacts.`
+export const FALLBACK_SPACE_NAME = 'your Workspace'
+
 export const getAllowlistAccountLabel = (name: string, chainName: string): string => `${name} on ${chainName}`
 
 export const BLOCKED_LABEL = 'Blocked'
+
+export const RETRY_LABEL = 'Retry'
 
 export const getEditSummaryTitle = (account: string): string => `You're editing the allowlist on ${account}.`
 export const EDIT_SUMMARY_DESCRIPTION = 'Anything you deselect will be blocked once the change applies.'
