@@ -5,11 +5,11 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { logError } from '@/services/exceptions'
 import { makeStore } from '@/store'
 import { chainBuilder } from '@/tests/builders/chains'
-import { moduleGuardApi } from '../moduleGuardApi'
+import { guardSlotsApi } from '../guardSlotsApi'
 
 const mockLoadError = new Error('chunk failed')
 
-jest.mock('../../services/readModuleGuard', () => {
+jest.mock('../../services/readGuardSlots', () => {
   throw mockLoadError
 })
 jest.mock('@/hooks/wallets/getReadOnlyProvider', () => ({
@@ -17,7 +17,7 @@ jest.mock('@/hooks/wallets/getReadOnlyProvider', () => ({
 }))
 jest.mock('@/services/exceptions', () => ({ logError: jest.fn() }))
 
-describe('moduleGuardApi.getModuleGuard when the reader cannot be loaded', () => {
+describe('guardSlotsApi.getGuardSlots when the reader cannot be loaded', () => {
   it('logs the load failure and returns it as the error', async () => {
     const store = makeStore()
     await store.dispatch(
@@ -28,7 +28,7 @@ describe('moduleGuardApi.getModuleGuard when the reader cannot be loaded', () =>
       ),
     )
     const result = store.dispatch(
-      moduleGuardApi.endpoints.getModuleGuard.initiate({
+      guardSlotsApi.endpoints.getGuardSlots.initiate({
         chainId: '11155111',
         safeAddress: '0x3333333333333333333333333333333333333333',
         txHistoryTag: '1',

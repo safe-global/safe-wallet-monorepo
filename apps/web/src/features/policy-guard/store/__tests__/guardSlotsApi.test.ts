@@ -4,7 +4,8 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { makeStore } from '@/store'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getReadOnlyProvider } from '@/hooks/wallets/getReadOnlyProvider'
-import { moduleGuardApi } from '../moduleGuardApi'
+import { GUARD_STORAGE_SLOT, MODULE_GUARD_STORAGE_SLOT } from '../../public/constants'
+import { guardSlotsApi } from '../guardSlotsApi'
 
 jest.mock('@/hooks/wallets/getReadOnlyProvider', () => ({ getReadOnlyProvider: jest.fn() }))
 jest.mock('@/services/exceptions', () => ({ logError: jest.fn() }))
@@ -32,18 +33,19 @@ const mockStorage = (getStorage: jest.Mock) =>
 
 const read = (store: Awaited<ReturnType<typeof setupStore>>, txHistoryTag = '1') =>
   store.dispatch(
-    moduleGuardApi.endpoints.getModuleGuard.initiate({ chainId: '11155111', safeAddress: SAFE, txHistoryTag }),
+    guardSlotsApi.endpoints.getGuardSlots.initiate({ chainId: '11155111', safeAddress: SAFE, txHistoryTag }),
   )
 
-describe('moduleGuardApi.getModuleGuard', () => {
+describe('guardSlotsApi.getGuardSlots', () => {
   beforeEach(() => mockGetProvider.mockReset())
 
-  it('reads the module guard of the Safe', async () => {
+  it('reads both guard slots of the Safe', async () => {
     const store = await setupStore()
     const getStorage = jest.fn().mockResolvedValue(slotOf(GUARD))
     mockStorage(getStorage)
-    await expect(read(store).unwrap()).resolves.toBe(GUARD)
-    expect(getStorage).toHaveBeenCalledWith(SAFE, expect.any(String))
+    await expect(read(store).unwrap()).resolves.toEqual({ txGuard: GUARD, moduleGuard: GUARD })
+    expect(getStorage).toHaveBeenCalledWith(SAFE, GUARD_STORAGE_SLOT)
+    expect(getStorage).toHaveBeenCalledWith(SAFE, MODULE_GUARD_STORAGE_SLOT)
   })
 
   it('reads through the custom RPC given in the args', async () => {
@@ -51,7 +53,7 @@ describe('moduleGuardApi.getModuleGuard', () => {
     mockStorage(jest.fn().mockResolvedValue(slotOf(GUARD)))
     await store
       .dispatch(
-        moduleGuardApi.endpoints.getModuleGuard.initiate({
+        guardSlotsApi.endpoints.getGuardSlots.initiate({
           chainId: '11155111',
           safeAddress: SAFE,
           txHistoryTag: '1',
@@ -67,11 +69,11 @@ describe('moduleGuardApi.getModuleGuard', () => {
     const getStorage = jest.fn().mockResolvedValue(slotOf(GUARD))
     mockStorage(getStorage)
     const args = { chainId: '11155111', safeAddress: SAFE, txHistoryTag: '1' }
-    await store.dispatch(moduleGuardApi.endpoints.getModuleGuard.initiate(args)).unwrap()
+    await store.dispatch(guardSlotsApi.endpoints.getGuardSlots.initiate(args)).unwrap()
     await store
-      .dispatch(moduleGuardApi.endpoints.getModuleGuard.initiate({ ...args, customRpc: 'https://custom.rpc' }))
+      .dispatch(guardSlotsApi.endpoints.getGuardSlots.initiate({ ...args, customRpc: 'https://custom.rpc' }))
       .unwrap()
-    expect(getStorage).toHaveBeenCalledTimes(2)
+    expect(getStorage).toHaveBeenCalledTimes(4)
   })
 
   it('reads once for many subscribers of the same Safe', async () => {
@@ -79,7 +81,7 @@ describe('moduleGuardApi.getModuleGuard', () => {
     const getStorage = jest.fn().mockResolvedValue(slotOf(GUARD))
     mockStorage(getStorage)
     await Promise.all([read(store).unwrap(), read(store).unwrap(), read(store).unwrap()])
-    expect(getStorage).toHaveBeenCalledTimes(1)
+    expect(getStorage).toHaveBeenCalledTimes(2)
   })
 
   it('reads again after the Safe executes a transaction', async () => {
@@ -88,7 +90,7 @@ describe('moduleGuardApi.getModuleGuard', () => {
     mockStorage(getStorage)
     await read(store, '1').unwrap()
     await read(store, '2').unwrap()
-    expect(getStorage).toHaveBeenCalledTimes(2)
+    expect(getStorage).toHaveBeenCalledTimes(4)
   })
 
   it('returns an error when the chain has no RPC', async () => {
@@ -114,19 +116,15 @@ describe('moduleGuardApi.getModuleGuard', () => {
     const store = await setupStore()
     const rpcError = new Error('rpc down')
     let resolveRetry: (value: string) => void = () => {}
-    mockStorage(
-      jest
-        .fn()
-        .mockRejectedValueOnce(rpcError)
-        .mockReturnValueOnce(new Promise<string>((resolve) => (resolveRetry = resolve))),
-    )
+    const retried = new Promise<string>((resolve) => (resolveRetry = resolve))
+    mockStorage(jest.fn().mockRejectedValueOnce(rpcError).mockRejectedValueOnce(rpcError).mockReturnValue(retried))
     const args = { chainId: '11155111', safeAddress: SAFE, txHistoryTag: '1' }
-    const subscription = store.dispatch(moduleGuardApi.endpoints.getModuleGuard.initiate(args))
+    const subscription = store.dispatch(guardSlotsApi.endpoints.getGuardSlots.initiate(args))
     await subscription.unwrap().catch(() => {})
 
     const retry = subscription.refetch()
     await new Promise((resolve) => setTimeout(resolve, 0))
-    const pending = moduleGuardApi.endpoints.getModuleGuard.select(args)(store.getState())
+    const pending = guardSlotsApi.endpoints.getGuardSlots.select(args)(store.getState())
     expect(pending.status).toBe('pending')
     expect(pending.error).toBe(rpcError)
 
