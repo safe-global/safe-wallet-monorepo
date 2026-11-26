@@ -207,7 +207,7 @@ describe('SpacePlansPage', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
       'Entry Point': 'direct',
-      'Default Seats': undefined,
+      'Default Seats': 20,
       'Default Billing Period': 'monthly',
       'Plan Limit': 20,
       'Sponsored Remaining': 10,

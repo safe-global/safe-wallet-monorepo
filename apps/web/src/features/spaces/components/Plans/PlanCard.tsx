@@ -27,7 +27,8 @@ import {
   getCardSaving,
   getPlanCta,
   getPlanPrice,
-  isUnpaid,
+  isOnPlan,
+  opensOnSize,
   pickProps,
   pickSeatOption,
   plansClickParams,
@@ -216,13 +217,11 @@ export const PlanCard = ({
 } & PlanCardActions) => {
   const { subtitle, supportLevel, supportDetail } = tier.copy ?? {}
   const isPrimary = isOnlyCard || tier.name === RECOMMENDED_PLAN
-  const isUnpaidPlan = isUnpaid(actions.currentPlan)
-  // A trial is not a plan the user paid for, so its card gets no "Current" look.
-  const isCurrentPlan = Boolean(tier.isCurrent) && !isUnpaidPlan
-  const isFeatured = isOnlyCard || isCurrentPlan || (isPrimary && isUnpaidPlan)
+  const isOnThisPlan = isOnPlan(tier, actions.currentPlan)
+  const isCurrentPlan = isOnThisPlan && Boolean(tier.isCurrent)
+  const isFeatured = isOnlyCard || isOnThisPlan || (isPrimary && !actions.currentPlan)
   const option = pickSeatOption(tier, actions.currentPlan, seatsLabel)
-  // Without a paid plan, a plan sold in several sizes shows no size and no price until the user picks one.
-  const hasPicked = !isUnpaidPlan || tier.options.length < 2 || seatsLabel !== undefined
+  const hasPicked = seatsLabel !== undefined || opensOnSize(tier, actions.currentPlan)
   const price = !option ? undefined : hasPicked ? getPlanPrice(tier, option) : UNPICKED_PRICE
   const isYearly = tier.billingCycle === 'year'
   const saving = hasPicked ? getCardSaving(tier, option, counterpartTier) : undefined
