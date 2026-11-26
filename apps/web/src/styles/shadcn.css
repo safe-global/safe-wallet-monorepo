@@ -106,8 +106,8 @@
   --popover: #171717;
   --popover-foreground: #f5f5f5;
   --dialog: #1c1c1c;
-  /* Same scrim in dark mode: the blur, not the tint, is what separates the surface. */
-  --backdrop: rgba(0, 0, 0, 0.1);
+  /* Blur barely shows on a dark page, so the tint does the separating here. */
+  --backdrop: rgba(0, 0, 0, 0.5);
   --primary: #12ff80;
   --primary-foreground: #0a0a0a;
   --secondary: #262626;
