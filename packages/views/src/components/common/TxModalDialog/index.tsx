@@ -1,6 +1,6 @@
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import classnames from 'classnames'
-import type { ReactElement, ReactNode } from 'react'
+import { useRef, type ReactElement, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
 import css from './styles.module.css'
@@ -15,6 +15,7 @@ type TxModalDialogProps = {
 
 const TxModalDialog = ({ children, open, onClose, fullWidth = false }: TxModalDialogProps): ReactElement => {
   const portalContainer = usePortalContainer()
+  const popupRef = useRef<HTMLDivElement>(null)
 
   return (
     <DialogPrimitive.Root
@@ -25,6 +26,9 @@ const TxModalDialog = ({ children, open, onClose, fullWidth = false }: TxModalDi
     >
       <DialogPrimitive.Portal container={portalContainer}>
         <DialogPrimitive.Popup
+          ref={popupRef}
+          // A flow marks the control a user starts with; otherwise the dialog's own first focus applies
+          initialFocus={() => popupRef.current?.querySelector<HTMLElement>('[data-autofocus]') ?? true}
           className={classnames(css.dialog, css.paper, { [css.fullWidth]: fullWidth })}
           onClick={(e) => e.stopPropagation()}
         >
