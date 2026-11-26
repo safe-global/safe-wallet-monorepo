@@ -1,11 +1,13 @@
-import { useContext, type ReactNode } from 'react'
+import { useContext, useState, type ReactElement, type ReactNode } from 'react'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { safeInfoBuilder } from '@/tests/builders/safe'
-import { mockSetTxFlow, TxModalWithScope } from '@/tests/mocks/safeScope'
+import { mockSetTxFlow } from '@/tests/mocks/safeScope'
+import { TxModalContext } from '@/components/tx-flow'
+import * as notifications from '@/store/notificationsSlice'
 import { ScopedTxFlowOpenerContext } from '@/components/tx-flow/safe-scope/ScopedTxFlowOpener'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
-import UrlSafeTxFlowOpener from './UrlSafeTxFlowOpener'
+import UrlSafeTxFlowOpener, { LOAD_TIMEOUT_MS } from './UrlSafeTxFlowOpener'
 
 const Flow = () => null
 
@@ -27,13 +29,21 @@ const setUrlSafe = (safe: typeof sepoliaSafe | undefined, sdk = safe && sdkFor(s
   urlSdk = sdk
 }
 
+const TxModal = ({ setTxFlow, children }: { setTxFlow: jest.Mock; children: ReactNode }) => {
+  const [txFlow, setFlow] = useState<ReactElement>()
+  setTxFlow.mockImplementation((flow?: ReactElement) => setFlow(flow))
+  return (
+    <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth: jest.fn() }}>{children}</TxModalContext.Provider>
+  )
+}
+
 const renderOpener = () => {
   const setTxFlow = mockSetTxFlow()
   const replace = jest.fn().mockResolvedValue(true)
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <TxModalWithScope setTxFlow={setTxFlow}>
+    <TxModal setTxFlow={setTxFlow}>
       <UrlSafeTxFlowOpener>{children}</UrlSafeTxFlowOpener>
-    </TxModalWithScope>
+    </TxModal>
   )
   const hook = renderHook(() => useContext(ScopedTxFlowOpenerContext), {
     wrapper,
@@ -103,22 +113,61 @@ describe('UrlSafeTxFlowOpener', () => {
     expect(setTxFlow).not.toHaveBeenCalled()
   })
 
-  it('clears the URL Safe and calls the caller onClose when the flow closes', async () => {
-    const { result, rerender, setTxFlow, replace } = renderOpener()
+  it('passes the caller onClose to the flow', async () => {
+    const { result, rerender, setTxFlow } = renderOpener()
     const onClose = jest.fn()
 
     act(() => result.current?.(target, <Flow />, onClose))
     setUrlSafe(sepoliaSafe)
     rerender()
+
     await waitFor(() => expect(setTxFlow).toHaveBeenCalledTimes(1))
-    replace.mockClear()
+    expect(setTxFlow.mock.calls[0][1]).toBe(onClose)
+  })
 
-    act(() => setTxFlow.mock.calls[0][1]?.())
+  it('clears the URL Safe once the flow ends, however it ends', async () => {
+    const { result, rerender, setTxFlow, replace } = renderOpener()
 
-    expect(onClose).toHaveBeenCalledTimes(1)
-    expect(replace).toHaveBeenCalledWith({
+    act(() => result.current?.(target, <Flow />))
+    setUrlSafe(sepoliaSafe)
+    rerender()
+    await waitFor(() => expect(setTxFlow).toHaveBeenCalledTimes(1))
+    act(() => setTxFlow(<Flow />))
+    expect(replace).toHaveBeenCalledTimes(1)
+
+    act(() => setTxFlow(undefined))
+
+    expect(replace).toHaveBeenLastCalledWith({
       pathname: '/spaces/transactions',
       query: { spaceId: '1', safe: undefined, chain: undefined },
     })
+  })
+
+  it('shows an error and clears the URL Safe when the SDK fails', async () => {
+    const notify = jest.spyOn(notifications, 'showNotification')
+    const { result, rerender, setTxFlow, replace } = renderOpener()
+
+    act(() => result.current?.(target, <Flow />))
+    setUrlSafe(sepoliaSafe, { getAddress: () => Promise.reject(new Error('rpc')), getChainId: async () => 1n } as never)
+    rerender()
+
+    await waitFor(() => expect(notify).toHaveBeenCalledWith(expect.objectContaining({ variant: 'error' })))
+    expect(setTxFlow).not.toHaveBeenCalled()
+    expect(replace).toHaveBeenLastCalledWith(
+      expect.objectContaining({ query: expect.objectContaining({ safe: undefined }) }),
+    )
+  })
+
+  it('shows an error when the Safe never loads', () => {
+    jest.useFakeTimers()
+    const notify = jest.spyOn(notifications, 'showNotification')
+    const { result, setTxFlow } = renderOpener()
+
+    act(() => result.current?.(target, <Flow />))
+    act(() => jest.advanceTimersByTime(LOAD_TIMEOUT_MS))
+
+    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ variant: 'error' }))
+    expect(setTxFlow).not.toHaveBeenCalled()
+    jest.useRealTimers()
   })
 })
