@@ -5,8 +5,8 @@ import useOffersTrial from '../useOffersTrial'
 let mockQuery: Record<string, string> = {}
 let mockLock = { isLocked: false, reason: 'lapsed' }
 
-jest.mock('next/compat/router', () => ({
-  useRouter: () => ({ query: mockQuery }),
+jest.mock('../../../../hooks/billing/useIsCheckoutReturnUrl', () => ({
+  useIsCheckoutReturnUrl: () => Boolean(mockQuery.sessionId),
 }))
 
 jest.mock('../../../../hooks/useWorkspaceLock', () => ({

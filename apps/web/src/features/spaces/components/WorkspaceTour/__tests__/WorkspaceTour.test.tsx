@@ -43,6 +43,7 @@ const mockCheckoutReturn = jest.fn()
 jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
   useCheckoutReturn: () => mockCheckoutReturn(),
 }))
+jest.mock('../../../hooks/billing/useBillingSpaceId', () => ({ useBillingSpaceId: () => mockSpaceId }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ plan: null, refetch: jest.fn() }) }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({

@@ -281,4 +281,14 @@ describe('TrialEndingModal', () => {
 
     expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
   })
+
+  it('shows the reminder of the next Workspace after the member closed it in another one', () => {
+    const otherSpaceId = '22222222-2222-2222-2222-222222222222'
+    const { rerender } = render(<TrialEndingModal spaceId={SPACE_ID} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+
+    rerender(<TrialEndingModal spaceId={otherSpaceId} />)
+
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
+  })
 })

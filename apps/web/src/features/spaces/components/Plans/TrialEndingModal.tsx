@@ -147,12 +147,13 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
-  const [isClosed, setIsClosed] = useState(false)
+  // Per Workspace: switching to another Workspace reuses this instance
+  const [closedSpaceId, setClosedSpaceId] = useState<string>()
   const isDue =
     isTrialEndingSoon &&
     !hasPaymentMethod &&
     Boolean(membership && plan && subscription) &&
-    !isClosed &&
+    closedSpaceId !== spaceId &&
     !wasTrialReminderSeen(spaceId)
   const isShown = useOverlay({ kind: 'reminder', isDue })
 
@@ -160,7 +161,7 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
 
   const close = () => {
     markTrialReminderSeen(spaceId)
-    setIsClosed(true)
+    setClosedSpaceId(spaceId)
   }
   const currentPlan = toCurrentPlan(subscription, plan, isTrialing, seats?.quota)
 
