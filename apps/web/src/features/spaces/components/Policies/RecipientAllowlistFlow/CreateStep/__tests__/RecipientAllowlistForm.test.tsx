@@ -12,6 +12,10 @@ jest.mock('../TokensSection', () => ({
   __esModule: true,
   default: () => <div data-testid="tokens-section" />,
 }))
+jest.mock('../RecipientsSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="recipients-section" />,
+}))
 
 const ACCOUNT = { chainId: '1', address: checksumAddress(faker.finance.ethereumAddress()), label: 'Treasury' }
 const HELD_TOKENS: HeldTokenAddresses = {
@@ -48,17 +52,19 @@ const Form = ({
 )
 
 describe('RecipientAllowlistForm', () => {
-  it('renders the token section and no summary when creating an allowlist', () => {
+  it('renders both sections and no summary when creating an allowlist', () => {
     render(<Form />)
 
     expect(screen.getByTestId('tokens-section')).toBeInTheDocument()
+    expect(screen.getByTestId('recipients-section')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
-  it('renders the token section and no summary before a Safe is picked', () => {
+  it('renders both sections and no summary before a Safe is picked', () => {
     render(<Form hasAccount={false} />)
 
     expect(screen.getByTestId('tokens-section')).toBeInTheDocument()
+    expect(screen.getByTestId('recipients-section')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
@@ -84,6 +90,7 @@ describe('RecipientAllowlistForm', () => {
 
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
     expect(screen.queryByTestId('tokens-section')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('recipients-section')).not.toBeInTheDocument()
   })
 
   it('renders its children between the edit summary and the sections', () => {

@@ -10,6 +10,7 @@ import type { RecipientAllowlistFormValues } from '../types'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import type { SpendingLimitTokensResult } from '../hooks/useSpendingLimitTokens'
 import TokensSection from './TokensSection'
+import RecipientsSection from './RecipientsSection'
 
 export type RecipientAllowlistFormProps = {
   values: RecipientAllowlistFormValues
@@ -56,6 +57,13 @@ const RecipientAllowlistForm = ({
             heldTokens={heldTokens}
             spendingLimits={spendingLimits}
             hasAccount={Boolean(account)}
+          />
+          <RecipientsSection
+            key={`recipients-${accountKey}`}
+            values={values}
+            onChange={onChange}
+            safeAddress={account?.address}
+            chainId={account?.chainId}
           />
         </div>
       )}

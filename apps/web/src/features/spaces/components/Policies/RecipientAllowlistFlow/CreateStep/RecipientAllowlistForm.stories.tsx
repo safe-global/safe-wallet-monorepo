@@ -15,6 +15,7 @@ import {
 } from '../types'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import {
+  RECIPIENTS_SEARCH_PLACEHOLDER,
   SPENDING_LIMIT_TOKENS_GROUP_LABEL,
   TOKENS_SEARCH_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
@@ -199,6 +200,32 @@ export const CreateWithSpendingLimits: Story = {
   play: async ({ canvasElement }) => {
     await openSearch(canvasElement, TOKENS_SEARCH_PLACEHOLDER)
     await expect(await screen.findByText(SPENDING_LIMIT_TOKENS_GROUP_LABEL, {}, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** The recipient search focused: the Workspace's contacts, then the local ones, each under its header. */
+export const CreatePickingRecipients: Story = {
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, RECIPIENTS_SEARCH_PLACEHOLDER)
+    await expect(await screen.findByRole('option', { name: /Nicole/ }, { timeout: 30000 })).toBeVisible()
+  },
+}
+
+/** An address no contact has, pasted: offered as a new recipient. */
+export const CreatePastedRecipient: Story = {
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, RECIPIENTS_SEARCH_PLACEHOLDER)
+    await userEvent.paste(faker.finance.ethereumAddress())
+    await expect(await screen.findByRole('option', { name: /New recipient/ })).toBeVisible()
+  },
+}
+
+/** The Safe's own address, pasted: its error instead of an option. */
+export const CreatePastedInvalidRecipient: Story = {
+  play: async ({ canvasElement }) => {
+    await openSearch(canvasElement, RECIPIENTS_SEARCH_PLACEHOLDER)
+    await userEvent.paste(EF_SAFE)
+    await expect(await screen.findByRole('alert')).toBeVisible()
   },
 }
 
