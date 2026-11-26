@@ -77,7 +77,12 @@ type ScopedItem = Extract<QueueListItem, { kind: 'conflict' | 'transaction' }>
 
 const isScoped = (item: QueueListItem): item is ScopedItem => item.kind === 'conflict' || item.kind === 'transaction'
 
-const toTarget = ({ scopeKey, chainId, safeAddress }: ScopedItem): ScopeTarget => ({ scopeKey, chainId, safeAddress })
+const toTarget = ({ scopeKey, chainId, safeAddress, nextNonce }: ScopedItem): ScopeTarget => ({
+  scopeKey,
+  chainId,
+  safeAddress,
+  nextNonce,
+})
 
 /** The Safes and chains of the rendered rows, each once, in order */
 const getScopeTargets = (items: QueueListItem[]): ScopeTarget[] => {
