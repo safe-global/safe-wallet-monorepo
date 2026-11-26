@@ -49,6 +49,7 @@
 }
 /* Inset the hover pill off the row separator with transparent borders. The 5/8 split centres it: the
    row background paints the 1px line ~1px above the row's bottom edge. */
+/* ConflictBracket's segment offsets (top-[-6px] bottom-[-8px]) depend on these 5px/8px borders. */
 .table tbody td {
   border-top: 5px solid transparent;
   border-bottom: 8px solid transparent;
@@ -130,4 +131,49 @@
     border-start-start-radius: var(--radius-lg);
     border-end-start-radius: var(--radius-lg);
   }
+}
+
+/* `data-pin="start" | "end"`: stays at that edge while its container, marked `data-scrolls-x`, scrolls the table.
+   Square, edged in the container's `--table-pin-surface`, so nothing shows through its inset borders or corners. */
+[data-scrolls-x] > .table [data-pin] {
+  position: sticky;
+  z-index: 1;
+  border-radius: 0;
+}
+[data-scrolls-x] > .table [data-pin='start'] {
+  left: 0;
+  border-left-color: var(--table-pin-surface, var(--card));
+}
+[data-scrolls-x] > .table [data-pin='end'] {
+  right: 0;
+  border-right-color: var(--table-pin-surface, var(--card));
+}
+/* Outranks the hover pill's rounded ends */
+[data-scrolls-x] > .table tbody tr:not([data-disabled]):not([data-no-hover]):hover td[data-pin] {
+  border-radius: 0;
+}
+/* In a layer, so a row's own fill (hover, highlight, band) still paints over it */
+@layer components {
+  [data-scrolls-x] > .table tbody td[data-pin] {
+    background-color: var(--table-pin-surface, var(--card));
+  }
+}
+[data-scrolls-x] > .table thead tr th[data-pin] {
+  background-color: var(--table-pin-surface, var(--card));
+  background-clip: border-box;
+}
+[data-scrolls-x] > .table thead tr th[data-pin]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--muted);
+}
+[data-scrolls-x] > .table thead tr th[data-pin='start']::before {
+  border-start-start-radius: var(--radius-lg);
+  border-end-start-radius: var(--radius-lg);
+}
+[data-scrolls-x] > .table thead tr th[data-pin='end']::before {
+  border-start-end-radius: var(--radius-lg);
+  border-end-end-radius: var(--radius-lg);
 }

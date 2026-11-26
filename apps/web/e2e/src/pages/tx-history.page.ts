@@ -11,11 +11,13 @@ export class TxHistoryPage {
   readonly transactions: Locator
   readonly filterButton: Locator
   readonly applyFilterButton: Locator
+  readonly feesPayer: Locator
 
   constructor(private readonly page: Page) {
     this.transactions = page.getByTestId('transaction-item')
     this.filterButton = page.getByRole('button', { name: 'Filter' })
     this.applyFilterButton = page.getByTestId('apply-btn')
+    this.feesPayer = page.getByTestId('history-fees-paid-from')
   }
 
   /** Open the history of the Safe (`sep:0x…`) and wait until CGW answers the history request */
@@ -26,6 +28,11 @@ export class TxHistoryPage {
     await this.page.goto(`${ROUTES.transactionsHistory}?safe=${safe}`)
     const response = await history
     if (!response.ok()) throw new Error(`The history request answered ${response.status()}: ${response.url()}`)
+  }
+
+  /** Expand the row of `transaction` to its details */
+  async expand(transaction: Locator): Promise<void> {
+    await transaction.click()
   }
 
   /** Filter the history by the transaction type labelled `type`, e.g. "Incoming" */

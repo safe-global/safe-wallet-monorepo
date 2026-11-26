@@ -1,7 +1,6 @@
 import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { getResetTimeOptions } from '@/features/spending-limits/public/constants'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/public/services/spendingLimitValidation'
@@ -13,12 +12,12 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
-import TokenSelector from '../TokenSelector'
+import TokenSelector from '@/components/common/TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
+import { findTokenOption, tokenBalanceLabel, type TokenOption } from '@/utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
 import {
   existingTokensForSpender,
@@ -39,6 +38,7 @@ import {
   LIMIT_AMOUNT_PLACEHOLDER,
   REMOVE_LIMIT_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { SelectedTokenHelper } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/SelectedTokenHelper'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5
@@ -182,20 +182,18 @@ const TokenLimitCard = ({
                   value={field.value || undefined}
                   onChange={(next) => field.onChange(next ?? '')}
                   excludeAddresses={excludeAddresses}
+                  extraTokens={extraTokens}
                   disabledAddresses={existingTokens}
                   disabledAddressReason={EXISTING_LIMIT_TOOLTIP}
                   name={field.name}
                   error={!!tokenError}
                   helperText={
                     <HelperLine>
-                      {tokenError?.message ? (
-                        <span data-testid="token-error">{String(tokenError.message)}</span>
-                      ) : selectedToken?.balance !== undefined ? (
-                        <span data-testid="token-balance">
-                          {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
-                          {tokenOptionLabel(selectedToken)}
-                        </span>
-                      ) : null}
+                      <SelectedTokenHelper
+                        error={tokenError?.message ? String(tokenError.message) : undefined}
+                        untrusted={selectedToken?.untrusted}
+                        balance={tokenBalanceLabel(selectedToken)}
+                      />
                     </HelperLine>
                   }
                   data-testid="limit-token-selector"

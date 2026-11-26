@@ -6,6 +6,8 @@ export type LimitSummaryToken = {
   symbol: string
   decimals?: number
   logoUri?: string
+  /** On no trusted token list, so the review repeats the picker's warning. */
+  untrusted?: boolean
 }
 
 /** How this row differs from what the chain holds. Absent in the create flow, where nothing is being changed. */

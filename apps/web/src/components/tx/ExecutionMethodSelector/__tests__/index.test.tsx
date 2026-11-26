@@ -88,11 +88,11 @@ describe('ExecutionMethodSelector', () => {
   })
 
   describe('no-fee campaign', () => {
-    it('counts the free transactions left while the campaign is selected', () => {
+    it('counts the sponsored transactions left while the campaign is selected', () => {
       renderSelector(campaign())
 
       expect(screen.getByText('Sponsored gas')).toBeInTheDocument()
-      expect(screen.getByText('free transactions left')).toHaveTextContent('3 free transactions left')
+      expect(screen.getByText(/sponsored transactions left/)).toHaveTextContent('3 sponsored transactions left')
       expect(getRadio('relay-execution-method')).not.toHaveAttribute('data-disabled')
       expect(screen.queryByTestId('balance-info')).not.toBeInTheDocument()
     })
@@ -101,7 +101,7 @@ describe('ExecutionMethodSelector', () => {
       renderSelector(campaign(), { executionMethod: ExecutionMethod.WALLET })
 
       expect(screen.getByTestId('balance-info')).toBeInTheDocument()
-      expect(screen.queryByText('free transactions left')).not.toBeInTheDocument()
+      expect(screen.queryByText(/sponsored transactions left/)).not.toBeInTheDocument()
     })
 
     it('disables the campaign and shows the gas banner while gas is too high', () => {
@@ -174,8 +174,8 @@ describe('ExecutionMethodSelector', () => {
         isSubscription: false,
         isPro: true,
       })
-      expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('5 free transactions left today')
-      expect(screen.queryByText(/sponsored transactions left/)).not.toBeInTheDocument()
+      expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('5 sponsored transactions left today')
+      expect(screen.queryByText(/left this month/)).not.toBeInTheDocument()
       expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
       expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
     })
@@ -185,7 +185,7 @@ describe('ExecutionMethodSelector', () => {
       renderSelector(daily(null))
 
       expect(getProps('sponsored-txs-counter-props')).toMatchObject({ isSubscription: false, isPro: null })
-      expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('5 free transactions left today')
+      expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('5 sponsored transactions left today')
       expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
       expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
     })

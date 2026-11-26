@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import type { TokenOption } from '../utils/tokenOptions'
+import type { TokenOption } from '@/utils/tokenOptions'
 
 /** The loader resolves a token the option lists never offered by asking the chain, so this is complete. */
 const toTokenOption = ({ token }: SpendingLimitState): TokenOption | undefined => {
@@ -15,8 +15,8 @@ const toTokenOption = ({ token }: SpendingLimitState): TokenOption | undefined =
 /**
  * The tokens the Safe already limits, to be kept selectable alongside the balances and the popular list.
  *
- * @returns Those tokens in edit mode, where the form opens prefilled with them; nothing anywhere else,
- *   since the create flow only ever writes limits for tokens its lists already offered.
+ * @returns Those tokens in edit mode, where the form opens prefilled with them; nothing anywhere else.
+ *   Tokens picked by pasting an address come from `CustomTokensProvider` instead.
  *
  * @remarks
  * Without this, a limit on a token the balances endpoint withholds — untrusted under the default token

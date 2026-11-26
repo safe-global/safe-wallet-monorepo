@@ -1,11 +1,13 @@
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { useFlowActivationGuard } from '../useFlowActivationGuard'
+import { useRouterGuard } from '../..'
 import * as router from 'next/router'
 import * as store from '@/store'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import * as useIsSpaceRouteModule from '@/hooks/useIsSpaceRoute'
+import * as wizardFlag from '@/hooks/useIsWorkspaceWizardEnabled'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
@@ -26,6 +28,12 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: jest.fn(() => false),
 }))
 
+let mockSafeProFlag: boolean | undefined = true
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useSafeProFlag: () => mockSafeProFlag }))
+jest.mock('@/hooks/useIsWorkspaceWizardEnabled', () => ({
+  useIsWorkspaceWizardEnabled: jest.fn(() => undefined),
+}))
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -41,6 +49,8 @@ interface SetupOptions {
   isStoreHydrated?: boolean
   spaces?: Array<{ id: number; uuid: string; name: string }> | undefined
   isSpaceRoute?: boolean
+  isWorkspaceWizardEnabled?: boolean
+  isSafePro?: boolean
 }
 
 const defaultSpaces = [
@@ -57,9 +67,13 @@ const setupMocks = ({
   isStoreHydrated = true,
   spaces = defaultSpaces,
   isSpaceRoute = false,
+  isWorkspaceWizardEnabled,
+  isSafePro = true,
 }: SetupOptions = {}) => {
+  mockSafeProFlag = isSafePro
   ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query, isReady: true })
   ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
+  ;(wizardFlag.useIsWorkspaceWizardEnabled as jest.Mock).mockReturnValue(isWorkspaceWizardEnabled)
 
   jest.spyOn(useWalletModule, 'default').mockReturnValue(wallet as ReturnType<typeof useWalletModule.default>)
   jest
@@ -223,7 +237,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({ success: false, redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces` })
     })
 
     it('should redirect to welcome/spaces when not authenticated on /spaces/settings', async () => {
@@ -238,7 +252,10 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces%2Fsettings`,
+      })
     })
 
     it('should redirect to welcome/spaces when not authenticated on /spaces/members', async () => {
@@ -253,7 +270,10 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=%2Fspaces%2Fmembers`,
+      })
     })
 
     it('should allow when store is not hydrated even on /spaces (no redirect before hydration)', async () => {
@@ -286,7 +306,7 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({
         success: false,
-        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef`,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&next=%2Fspaces%2Fmembers%3Fsafe%3D1%253A0xdeadbeef`,
       })
     })
 
@@ -306,8 +326,26 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({
         success: false,
-        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}&next=${encodeURIComponent(
+          `/spaces/members?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
+        )}`,
       })
+    })
+
+    it('should pass the opened Workspace page as next, so that sign-in returns to it', async () => {
+      setupMocks({
+        pathname: '/spaces/transactions',
+        query: { spaceId: MOCK_SPACE_UUID, tab: 'history' },
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      const redirectUrl = new URL(guardResult.redirectTo!, 'http://localhost')
+      expect(redirectUrl.pathname).toBe(AppRoutes.welcome.spaces)
+      expect(redirectUrl.searchParams.get('spaceId')).toBe(MOCK_SPACE_UUID)
+      expect(redirectUrl.searchParams.get('next')).toBe(`/spaces/transactions?spaceId=${MOCK_SPACE_UUID}&tab=history`)
     })
 
     it('should preserve ?safe= in the welcome redirect when unauthenticated on a non-spaces route', async () => {
@@ -343,7 +381,9 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      const redirectUrl = new URL(guardResult.redirectTo!, 'http://localhost')
+      expect(redirectUrl.pathname).toBe(AppRoutes.welcome.spaces)
+      expect(redirectUrl.searchParams.has('safe')).toBe(false)
     })
   })
 
@@ -378,6 +418,21 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({ success: true })
     })
+
+    it.each([
+      ['plan', AppRoutes.welcome.plan],
+      ['survey', AppRoutes.welcome.survey],
+    ])(
+      'should allow the %s step to a user with no spaces, since the Workspace is only created at the end',
+      async (_, pathname) => {
+        setupMocks({ pathname, spaces: [] })
+
+        const { result } = renderHook(() => useFlowActivationGuard())
+        const guardResult = await result.current.activationGuard()
+
+        expect(guardResult).toEqual({ success: true })
+      },
+    )
 
     it('should preserve ?safe= when redirecting to create space onboarding', async () => {
       setupMocks({
@@ -434,6 +489,38 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
   // Authenticated with spaces on onboarding routes
   // -----------------------------------------------------------------------
+
+  describe('plan step of the onboarding wizard', () => {
+    it('should redirect to create space when the wizard is off', async () => {
+      setupMocks({ pathname: AppRoutes.welcome.plan, isWorkspaceWizardEnabled: false })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.createSpace })
+    })
+
+    it('should redirect to create space when Safe Pro is off, as the wizard then has no plan step', async () => {
+      setupMocks({ pathname: AppRoutes.welcome.plan, isWorkspaceWizardEnabled: true, isSafePro: false })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.createSpace })
+    })
+
+    it.each([true, undefined])(
+      'should allow the plan step when the wizard flag is %s',
+      async (isWorkspaceWizardEnabled) => {
+        setupMocks({ pathname: AppRoutes.welcome.plan, isWorkspaceWizardEnabled })
+
+        const { result } = renderHook(() => useFlowActivationGuard())
+        const guardResult = await result.current.activationGuard()
+
+        expect(guardResult).toEqual({ success: true })
+      },
+    )
+  })
 
   describe('authenticated with spaces on onboarding routes', () => {
     it('should allow create space without spaceId so that the user can create another space', async () => {
@@ -592,11 +679,15 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('guard identity', () => {
-    const mockRouterOnEachRender = (query: () => Record<string, string>) => {
+    const mockRouterOnEachRender = (
+      query: () => Record<string, string>,
+      pathname: string = AppRoutes.welcome.createSpace,
+    ) => {
       ;(router.useRouter as jest.Mock).mockImplementation(() => ({
-        pathname: AppRoutes.welcome.createSpace,
+        pathname,
         query: query(),
         isReady: true,
+        replace: jest.fn(),
       }))
     }
 
@@ -619,6 +710,35 @@ describe('useFlowActivationGuard', () => {
       const { result, rerender } = renderHook(() => useFlowActivationGuard())
       const firstGuard = result.current.activationGuard
       spaceId = MOCK_SPACE_UUID_ALT
+      rerender()
+
+      expect(result.current.activationGuard).not.toBe(firstGuard)
+    })
+
+    it('should keep the same guard and not refetch spaces when an unrelated query param changes', async () => {
+      setupMocks()
+      let tab = 'queue'
+      mockRouterOnEachRender(() => ({ spaceId: MOCK_SPACE_UUID, tab }), '/spaces/transactions')
+
+      // Through useRouterGuard, whose effect runs the guard again whenever it changes
+      const { rerender } = renderHook(() => useRouterGuard({ useGuard: useFlowActivationGuard }))
+      await waitFor(() => expect(mockFetchSpaces).toHaveBeenCalledTimes(1))
+      tab = 'history'
+      rerender()
+      // Let a re-run, if any, start
+      await act(async () => {})
+
+      expect(mockFetchSpaces).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return a new guard when the query changes while signed out on a Workspace page', () => {
+      setupMocks({ isAuthenticated: false })
+      let tab = 'queue'
+      mockRouterOnEachRender(() => ({ spaceId: MOCK_SPACE_UUID, tab }), '/spaces/transactions')
+
+      const { result, rerender } = renderHook(() => useFlowActivationGuard())
+      const firstGuard = result.current.activationGuard
+      tab = 'history'
       rerender()
 
       expect(result.current.activationGuard).not.toBe(firstGuard)

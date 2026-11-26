@@ -6,6 +6,7 @@ import { TxFlowStep } from '../../TxFlowStep'
 import type { NewSpendingLimitFlowProps } from '@/features/spending-limits/public/types'
 import CreateSpendingLimit from '@/features/spending-limits/public/components/CreateSpendingLimit'
 import ReviewSpendingLimit from '@/features/spending-limits/public/components/ReviewSpendingLimit'
+import { CustomTokensProvider } from '@/components/common/CustomTokensProvider'
 
 const defaultValues: NewSpendingLimitFlowProps = {
   beneficiary: '',
@@ -16,17 +17,19 @@ const defaultValues: NewSpendingLimitFlowProps = {
 
 const NewSpendingLimitFlow = () => {
   return (
-    <TxFlow
-      icon={SaveAddressIcon}
-      subtitle="Spending limit"
-      ReviewTransactionComponent={ReviewSpendingLimit}
-      eventCategory={TxFlowType.SETUP_SPENDING_LIMIT}
-      initialData={defaultValues}
-    >
-      <TxFlowStep title="New transaction">
-        <CreateSpendingLimit />
-      </TxFlowStep>
-    </TxFlow>
+    <CustomTokensProvider>
+      <TxFlow
+        icon={SaveAddressIcon}
+        subtitle="Spending limit"
+        ReviewTransactionComponent={ReviewSpendingLimit}
+        eventCategory={TxFlowType.SETUP_SPENDING_LIMIT}
+        initialData={defaultValues}
+      >
+        <TxFlowStep title="New transaction">
+          <CreateSpendingLimit />
+        </TxFlowStep>
+      </TxFlow>
+    </CustomTokensProvider>
   )
 }
 

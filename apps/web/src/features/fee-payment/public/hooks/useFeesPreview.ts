@@ -5,6 +5,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -19,7 +20,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from '../../hooks/useGasTokenCandidates'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
-import { IS_RELAYING_LIVE } from '../constants'
 import {
   computeTotalOutgoing,
   getSendInGasToken,
@@ -58,7 +58,7 @@ export type FeesPreviewData = {
    */
   safeHasEnoughGas?: boolean
   /**
-   * SafeTx merged with the CGW resolved GTF fee fields (safeTxGas / baseGas / gasPrice /
+   * SafeTx merged with the CGW resolved Pay from Safe fee fields (safeTxGas / baseGas / gasPrice /
    * gasToken / refundReceiver). Only set in the first-signer Safe-pays happy path when this
    * is the version that will actually be signed and simulated. Consumers (e.g. threat analysis)
    * use it to run against the same payload the user will sign, so checks like "Safe holds
@@ -69,11 +69,19 @@ export type FeesPreviewData = {
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
-export const useFeesPreview = (): FeesPreviewData => {
-  const { safeTx, feePaymentMode, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
+/**
+ * @param options.isExecution - the executor is known, so signer-pays is estimated, while signing it is not.
+ * @param options.isPayFromSafe - the Safe pays the fee, so the CGW quote is priced instead of the signer estimate.
+ */
+export const useFeesPreview = ({
+  isExecution = false,
+  isPayFromSafe = false,
+}: { isExecution?: boolean; isPayFromSafe?: boolean } = {}): FeesPreviewData => {
+  const { safeTx, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
+  const { isProposing } = useContext(TxFlowContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
-  const { balances } = useBalances()
+  const { balances, loaded: balancesLoaded } = useBalances()
   const currency = useAppSelector(selectCurrency)
 
   const nativeSymbol = chain?.nativeCurrency.symbol ?? 'ETH'
@@ -89,7 +97,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     : undefined
 
   // Once the first signer has signed, gas params are baked into the payload — later signers
-  // render what's locked in. The isPaidFromSafe guard excludes Signer-pays / pre-GTF queued txs.
+  // render what's locked in. The isPaidFromSafe guard excludes Signer-pays / pre-Pay-from-Safe queued txs.
   const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
   const isConfirmation = lockedGasToken !== undefined && !!safeTx && isPaidFromSafe(safeTx.data)
 
@@ -142,13 +150,9 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
-  // — render the signer-pays variant: free execution fee, no
-  // gas-token selector, and no call to the preview endpoint.
+  // Without PAY_FROM_SAFE on the chain there is no quote: render signer-pays and skip the preview call.
   const feePreviewAvailable = isPayFromSafeAvailable(chain)
-  const isSignerMode =
-    !isConfirmation &&
-    (!IS_RELAYING_LIVE || !feePreviewAvailable || feePaymentMode === 'signer' || candidates.length === 0)
+  const isSignerMode = !isConfirmation && (!feePreviewAvailable || !isPayFromSafe || candidates.length === 0)
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint
@@ -165,11 +169,12 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   // Sync `feeGasToken` with the latest preview state
   //  - preview unavailable (errored / no eligible token after settling): drop the persisted
-  //    selection so `mergePayFromSafeFeeParams` bails and the tx is signed as signer-pays.
+  //    selection, so no stale token is merged. The CTA is held while the quote is missing, and
+  //    `mergePayFromSafeFeeParams` throws if signing is reached without it.
   //  - preview succeeded and the user hasn't picked anything yet: persist the implicit
   //    default.
   useEffect(() => {
-    if (feePaymentMode !== 'safe') return
+    if (!isPayFromSafe) return
     if (isLegacySigned) return
     if (preview.isLoading || preview.isFetching) return
 
@@ -181,7 +186,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       setFeeGasToken(defaultAddress)
     }
   }, [
-    feePaymentMode,
+    isPayFromSafe,
     isLegacySigned,
     preview.isLoading,
     preview.isFetching,
@@ -193,8 +198,11 @@ export const useFeesPreview = (): FeesPreviewData => {
   ])
 
   // Fallback local estimation — drives the gas fee shown in the EOA fallback variant.
-  const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(safeTx)
+  // A proposer is no owner: execTransaction can't be simulated from their wallet, so skip the call.
+  const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(isProposing ? undefined : safeTx)
   const [gasPrice, gasPriceError, gasPriceLoading] = useGasPrice()
+  // Without a local estimate there is no number to show, only that the executor's wallet will price it.
+  const cannotEstimateLocally = isProposing || !!gasLimitError || !!gasPriceError
 
   // Memoize the merged signing payload so threat analysis (which receives this) doesn't
   // re-run on unrelated re-renders. Identity changes only when the CGW-resolved fee fields
@@ -237,9 +245,12 @@ export const useFeesPreview = (): FeesPreviewData => {
     const gasFiatUsd = gasTokenBalance
       ? Number(formatUnits(gasFeeBaseUnits, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
       : 0
+    // Unknown while the balances load or if they fail; once loaded, a missing token means the Safe holds none.
     const safeHasEnoughGas = gasTokenBalance
       ? BigInt(gasTokenBalance.balance) >= gasFeeBaseUnits + getSendInGasToken(safeTx, selectedAddress)
-      : false
+      : balancesLoaded
+        ? false
+        : undefined
 
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
@@ -258,7 +269,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
         fiatAmount: formatCurrencyMinimal(gasFiatUsd, currency),
@@ -270,16 +281,15 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }
 
-  // Signed payload without GTF fee setup. Locked confirmer-style UI: no selectors, gas fee
-  // shown as "Calculated at execution" (multi-sig — executor unknown) or local EOA estimate (1/1).
+  // Signed without Safe-pays fees: locked, "Calculated at execution" until the executor is known.
   if (isLegacySigned && safeTx) {
-    if (safe.threshold > 1) {
+    if ((!isExecution && safeTx.signatures.size < safe.threshold) || cannotEstimateLocally) {
       return {
         ...base,
         isConfirmation: true,
         isLegacySigned: true,
         canCoverFees: true,
-        gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
+        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
@@ -290,7 +300,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       isLegacySigned: true,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
         currency: nativeSymbol,
       },
@@ -300,43 +310,26 @@ export const useFeesPreview = (): FeesPreviewData => {
   }
 
   if (isSignerMode) {
-    // Multi-signer can't simulate execTransaction at sign time — executor unknown, signatures
-    // incomplete — so we surface an explanatory note instead of a fake number.
-    if (safe.threshold > 1) {
+    // The gas is priced once the executor is known: not while signing, nor for a proposer or a failed estimate.
+    if (!isExecution || safe.threshold > 1 || cannotEstimateLocally) {
       return {
         ...base,
         canCoverFees: true,
-        gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
+        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
     }
 
-    const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
-    const totalOutgoing = safeTx
-      ? computeTotalOutgoing({
-          safeTx,
-          gasFeeBaseUnits: localGasWei,
-          relayCostFiat: 0,
-          relayCostFiatCode: currency,
-          nativeSymbol,
-          nativeDecimals,
-          gasTokenAddress: ZERO_ADDRESS,
-          gasSymbol: nativeSymbol,
-          gasDecimals: nativeDecimals,
-          balances,
-        })
-      : undefined
-
+    // No total outgoing: the signer's wallet or a sponsor pays the gas, not the Safe.
     return {
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
         currency: nativeSymbol,
       },
-      totalOutgoing,
       loading: !safeTx || gasLimitLoading || gasPriceLoading,
       error: false,
     }
@@ -348,7 +341,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     return {
       ...base,
       canCoverFees: true,
-      gasFee: { label: 'Max gas fee', currency: gasSymbol },
+      gasFee: { label: 'Gas fee', currency: gasSymbol },
       loading: true,
       error: false,
     }
@@ -382,7 +375,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Max gas fee',
+        label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
         fiatAmount: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
@@ -404,7 +397,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     return {
       ...base,
       canCoverFees: false,
-      gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
+      gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
       loading: false,
       error: false,
     }
@@ -414,7 +407,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     ...base,
     canCoverFees: false,
     gasFee: {
-      label: 'Max gas fee',
+      label: 'Gas fee',
       amount: fallbackAmount,
       currency: nativeSymbol,
     },

@@ -10,7 +10,7 @@
     "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
   },
   "dependencies": {
-    "@base-ui/react": "^1.1.0",
+    "@base-ui/react": "^1.2.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@safe-global/protocol-kit": "^8.0.11",
     "@safe-global/store": "workspace:^",
@@ -29,8 +29,7 @@
     "react-resizable-panels": "^4.5.3",
     "sonner": "^2.0.7",
     "tabbable": "^6.4.0",
-    "tailwind-merge": "^3.4.0",
-    "vaul": "^1.1.2"
+    "tailwind-merge": "^3.4.0"
   },
   "peerDependencies": {
     "next": "*",

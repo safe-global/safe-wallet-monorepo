@@ -49,7 +49,7 @@ const FilterChips = ({
       label: 'Safe',
       values: safes.map(({ safeAddress, name }) => name || shortenAddress(safeAddress)),
     },
-    { filter: 'statuses', label: 'Status', values: statuses.map((option) => STATUS_OPTION_LABELS[option].chip) },
+    { filter: 'statuses', label: 'Urgency', values: statuses.map((option) => STATUS_OPTION_LABELS[option].chip) },
     { filter: 'chainIds', label: 'Network', values: networkNames },
     { filter: 'signers', label: 'Signer', values: signerNames },
   ]

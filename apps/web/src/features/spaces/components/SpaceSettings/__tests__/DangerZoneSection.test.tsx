@@ -14,9 +14,6 @@ jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
   },
-  get MemberRole() {
-    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
-  },
   get MEMBER_ALIAS_MAX_LENGTH() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
@@ -82,6 +79,7 @@ describe('DangerZoneSection', () => {
       memberCount: 0,
       safeCount: 0,
       experimentalFeatures: [],
+      setupStatus: null,
     }
 
     renderSection(space)
@@ -105,6 +103,7 @@ describe('DangerZoneSection', () => {
       memberCount: 0,
       safeCount: 0,
       experimentalFeatures: [],
+      setupStatus: null,
     }
 
     renderSection(viewedSpace)
@@ -122,6 +121,7 @@ describe('DangerZoneSection', () => {
       memberCount: 0,
       safeCount: 0,
       experimentalFeatures: [],
+      setupStatus: null,
     }
 
     beforeEach(() => {

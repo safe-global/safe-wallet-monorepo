@@ -59,10 +59,17 @@ const inputGroupVariants = cva(
         // `Button variant="outline"`. Pair the two when they share a row.
         outline: 'bg-transparent',
       },
+      // `below` hangs a nested error under the border, `hidden` suits search boxes
+      fieldError: {
+        below:
+          '[&_[data-slot=field-error]]:absolute [&_[data-slot=field-error]]:inset-x-0 [&_[data-slot=field-error]]:top-full [&_[data-slot=field-error]]:truncate has-[[data-slot=field-error]]:mb-6',
+        hidden: '[&_[data-slot=field-error]]:hidden',
+      },
     },
     defaultVariants: {
       inputSize: 'default',
       variant: 'default',
+      fieldError: 'below',
     },
   },
 )
@@ -71,6 +78,7 @@ function InputGroup({
   className,
   inputSize,
   variant,
+  fieldError,
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof inputGroupVariants>) {
   return (
@@ -79,7 +87,7 @@ function InputGroup({
       data-input-size={inputSize ?? 'default'}
       data-variant={variant ?? 'default'}
       role="group"
-      className={cn(inputGroupVariants({ inputSize, variant }), className)}
+      className={cn(inputGroupVariants({ inputSize, variant, fieldError }), className)}
       {...props}
     />
   )

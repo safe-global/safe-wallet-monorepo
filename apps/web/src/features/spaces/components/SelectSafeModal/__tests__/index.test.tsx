@@ -1,11 +1,11 @@
-import { render } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import SelectSafeModal from '../index'
 import { ESafeAction } from '../../../public/store/safeActionsModalSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { NO_ACTIVATED_SAFES_MESSAGE } from '../constants'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
-const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
 
 const deployedSafe: SafeItem = {
   chainId: '1',
@@ -31,8 +31,18 @@ jest.mock('../../../public/components/SafeCardReadOnly', () => ({
   __esModule: true,
   default: (props: { safe: SafeItem; disabled?: boolean; disabledTooltip?: string }) => {
     cardProps.push({ safe: props.safe, disabled: props.disabled, disabledTooltip: props.disabledTooltip })
-    return null
+    return <div data-testid={`card-${props.safe.chainId}:${props.safe.address}`} />
   },
+}))
+
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: React.ReactNode }) => <div data-testid="tooltip">{children}</div>,
+  TooltipTrigger: ({ children, render }: { children: React.ReactNode; render: React.ReactElement }) => (
+    <div data-testid="tooltip-trigger" data-trigger={render.type as string}>
+      {children}
+    </div>
+  ),
+  TooltipContent: ({ children }: { children: React.ReactNode }) => <div role="tooltip">{children}</div>,
 }))
 
 jest.mock('../useSafeActionMapper', () => ({
@@ -75,6 +85,12 @@ const chainWithoutSwap = {
 
 const getCardFor = (safe: SafeItem) => cardProps.find((c) => c.safe.address === safe.address)
 
+const getTooltipFor = (safe: SafeItem) =>
+  screen
+    .getByTestId(`card-${safe.chainId}:${safe.address}`)
+    .closest('[data-testid="tooltip"]')
+    ?.querySelector('[role="tooltip"]')?.textContent ?? undefined
+
 const cfState = (safe: SafeItem) => ({ [safe.chainId]: { [safe.address]: { status: {} } } })
 
 describe('SelectSafeModal swap disabling', () => {
@@ -84,38 +100,65 @@ describe('SelectSafeModal swap disabling', () => {
     mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
   })
 
-  it('disables a counterfactual safe with the activation tooltip for the swap action', () => {
-    renderModal(ESafeAction.Swap, cfState(cfSafe))
-
-    const card = getCardFor(cfSafe)
-    expect(card?.disabled).toBe(true)
-    expect(card?.disabledTooltip).toBe(SWAP_DISABLED_CF_TOOLTIP)
-  })
-
   it('keeps a deployed safe on a swap-supported chain enabled', () => {
     renderModal(ESafeAction.Swap, cfState(cfSafe))
 
     const card = getCardFor(deployedSafe)
     expect(card?.disabled).toBe(false)
-    expect(card?.disabledTooltip).toBeUndefined()
+    expect(getTooltipFor(deployedSafe)).toBeUndefined()
   })
 
-  it('prefers the unsupported-chain tooltip over the counterfactual one', () => {
-    const cfOnUnsupportedChain: SafeItem = { ...cfSafe, chainId: '137' }
-    mockUseSpaceSafes.mockReturnValue({ allSafes: [cfOnUnsupportedChain], isLoading: false })
+  it('disables a safe on a chain without swaps with the unsupported-chain tooltip', () => {
+    const safeOnUnsupportedChain: SafeItem = { ...deployedSafe, chainId: '137' }
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [safeOnUnsupportedChain], isLoading: false })
 
-    renderModal(ESafeAction.Swap, cfState(cfOnUnsupportedChain))
+    renderModal(ESafeAction.Swap)
 
-    const card = getCardFor(cfOnUnsupportedChain)
+    const card = getCardFor(safeOnUnsupportedChain)
     expect(card?.disabled).toBe(true)
-    expect(card?.disabledTooltip).toBe(SWAP_DISABLED_TOOLTIP)
+    expect(getTooltipFor(safeOnUnsupportedChain)).toBe(SWAP_DISABLED_TOOLTIP)
+    expect(getCardFor(safeOnUnsupportedChain)?.disabledTooltip).toBeUndefined()
+    const cardEl = screen.getByTestId(`card-${safeOnUnsupportedChain.chainId}:${safeOnUnsupportedChain.address}`)
+    expect(cardEl.closest('[data-testid="tooltip-trigger"]')).toHaveAttribute('data-trigger', 'div')
+  })
+})
+
+describe('SelectSafeModal counterfactual safes', () => {
+  beforeEach(() => {
+    cardProps.length = 0
+    mockUseChains.mockReturnValue({ configs: [chainWithSwap] })
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
   })
 
-  it('does not disable a counterfactual safe for non-swap actions', () => {
-    renderModal(ESafeAction.Send, cfState(cfSafe))
+  it.each(Object.values(ESafeAction))('hides counterfactual safes for the %s action', (action) => {
+    renderModal(action, cfState(cfSafe))
 
-    const card = getCardFor(cfSafe)
-    expect(card?.disabled).toBe(false)
-    expect(card?.disabledTooltip).toBeUndefined()
+    expect(getCardFor(cfSafe)).toBeUndefined()
+    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
+  })
+
+  it.each(Object.values(ESafeAction))('shows an empty state for %s when every safe is counterfactual', (action) => {
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [cfSafe], isLoading: false })
+
+    const { getByText } = renderModal(action, cfState(cfSafe))
+
+    expect(cardProps).toHaveLength(0)
+    expect(getByText(NO_ACTIVATED_SAFES_MESSAGE)).toBeInTheDocument()
+  })
+})
+
+describe('SelectSafeModal new transaction', () => {
+  beforeEach(() => {
+    cardProps.length = 0
+    mockUseChains.mockReturnValue({ configs: [chainWithSwap, chainWithoutSwap] })
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [deployedSafe, cfSafe], isLoading: false })
+  })
+
+  it('keeps every deployed Safe enabled without a tooltip, like Send', () => {
+    renderModal(ESafeAction.NewTransaction, cfState(cfSafe))
+
+    expect(getCardFor(deployedSafe)?.disabled).toBe(false)
+    expect(getTooltipFor(deployedSafe)).toBeUndefined()
+    expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument()
   })
 })

@@ -8,7 +8,7 @@ import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {

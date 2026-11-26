@@ -4,10 +4,11 @@ import { http, HttpResponse } from 'msw'
 import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
-import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { GATEWAY_URL } from '@/config/gateway'
+import { getStoreInstance } from '@/store'
 import { server } from '@/tests/server'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
@@ -151,5 +152,123 @@ describe('SpaceTransactionQueue live updates', () => {
     await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL - 1))
 
     expect(requests).toHaveLength(2)
+  })
+
+  it('stops polling while the tab is hidden and resumes once it is focused again', async () => {
+    const requests: URL[] = []
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, ({ request }) => {
+        requests.push(new URL(request.url))
+        return HttpResponse.json(queuePage(1))
+      }),
+    )
+    render(
+      <>
+        <Poller />
+        <SpaceTransactionQueue spaceId={spaceId} />
+      </>,
+    )
+    expect(await screen.findByText('1 of 3 signatures')).toBeInTheDocument()
+
+    act(() => {
+      getStoreInstance().dispatch(cgwClient.internalActions.onFocusLost())
+    })
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL * 4))
+
+    expect(requests).toHaveLength(1)
+
+    act(() => {
+      getStoreInstance().dispatch(cgwClient.internalActions.onFocus())
+    })
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+
+    await waitFor(() => expect(requests).toHaveLength(2))
+  })
+
+  describe('when the service is busy', () => {
+    const SECOND = 1_000
+    const HTML_503 = 'html 503'
+    let status: number | typeof HTML_503
+    let requestTimes: number[]
+
+    const serveQueue = () => {
+      status = 200
+      requestTimes = []
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, () => {
+          requestTimes.push(Date.now())
+          if (status === 200) return HttpResponse.json(queuePage(1))
+          if (status === HTML_503)
+            return HttpResponse.html('<html><body>503 Service Unavailable</body></html>', { status: 503 })
+          return new HttpResponse(null, { status })
+        }),
+      )
+    }
+
+    const renderQueue = async () => {
+      render(
+        <>
+          <Poller />
+          <SpaceTransactionQueue spaceId={spaceId} />
+        </>,
+      )
+      await screen.findByText('1 of 3 signatures')
+    }
+
+    const runPolls = async (count: number) => {
+      const target = requestTimes.length + count
+      while (requestTimes.length < target) {
+        await act(() => jest.advanceTimersByTimeAsync(SECOND))
+      }
+      await act(() => jest.advanceTimersByTimeAsync(0))
+    }
+
+    const gapsInSeconds = (times: number[]) => times.slice(1).map((time, i) => Math.round((time - times[i]) / SECOND))
+
+    beforeEach(serveQueue)
+
+    it.each([429, 503])('keeps the last queue and shows a notice when a poll gets a %i', async (failure) => {
+      await renderQueue()
+
+      status = failure
+      await runPolls(1)
+
+      expect(await screen.findByText("Couldn't refresh the queue")).toBeInTheDocument()
+      expect(screen.getByText('1 of 3 signatures')).toBeInTheDocument()
+      expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    })
+
+    it('backs off and shows a notice when a proxy answers a poll with an HTML 503', async () => {
+      await renderQueue()
+
+      status = HTML_503
+      await runPolls(3)
+
+      expect(await screen.findByText("Couldn't refresh the queue")).toBeInTheDocument()
+      expect(screen.getByText('1 of 3 signatures')).toBeInTheDocument()
+      expect(gapsInSeconds(requestTimes)).toEqual([15, 30, 60])
+    })
+
+    it('doubles the wait after each failed poll, from 15s up to 5 minutes', async () => {
+      await renderQueue()
+
+      status = 503
+      await runPolls(8)
+
+      expect(gapsInSeconds(requestTimes)).toEqual([15, 30, 60, 120, 240, 300, 300, 300])
+    })
+
+    it('hides the notice and polls every 15s again after a successful poll', async () => {
+      await renderQueue()
+      status = 503
+      await runPolls(3)
+      await screen.findByText("Couldn't refresh the queue")
+
+      status = 200
+      await runPolls(3)
+
+      await waitFor(() => expect(screen.queryByText("Couldn't refresh the queue")).not.toBeInTheDocument())
+      expect(gapsInSeconds(requestTimes.slice(-3))).toEqual([15, 15])
+    })
   })
 })

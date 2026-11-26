@@ -12,6 +12,7 @@ import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { TxFlowSafeContext } from '@/components/tx-flow/safe-scope/txFlowSafe'
 import { wcPopupStore } from '@/features/walletconnect/public/store/wcPopupStore'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
@@ -125,7 +126,12 @@ jest.mock('next/navigation', () => ({
 }))
 
 jest.mock('@/components/common/SpaceSafeBar', () => {
-  const MockSpaceSafeBar = () => <div data-testid="space-safe-bar" />
+  const MockSpaceSafeBar = ({ lockedSafe }: { lockedSafe?: { chainId: string; safeAddress: string } }) => (
+    <div
+      data-testid="space-safe-bar"
+      data-locked-safe={lockedSafe ? `${lockedSafe.chainId}:${lockedSafe.safeAddress}` : ''}
+    />
+  )
   MockSpaceSafeBar.displayName = 'SpaceSafeBar'
   return { __esModule: true, default: MockSpaceSafeBar }
 })
@@ -345,22 +351,107 @@ describe('Topbar', () => {
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
     })
 
-    // The policy flows pick their Safe inside step 1 and never set the URL Safe, so the bar would
-    // render an empty Safe selector over the Space.
-    it('keeps the search input on space routes when the open flow has no Safe of its own', () => {
+    describe('on a space route when the open flow has no URL Safe', () => {
+      const renderTopbar = (txFlow: TxModalContextType['txFlow']) =>
+        render(
+          <TxModalContext.Provider value={{ txFlow, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+            <Topbar />
+          </TxModalContext.Provider>,
+        )
+
+      beforeEach(() => {
+        mockIsSpaceRoute.mockReturnValue(true)
+        mockUsePathname.mockReturnValue('/spaces/transactions')
+        mockUseSafeAddress.mockReturnValue('')
+        setFeatureComponents({
+          WalletPopover: () => null,
+          GlobalSearchModal: () => null,
+          GlobalSearchInput: () => <div data-testid="global-search-input" />,
+          WalletConnectWidget: () => null,
+        })
+      })
+
+      it('shows the search input while no flow is open', () => {
+        renderTopbar(undefined)
+
+        expect(screen.getByTestId('global-search-input')).toBeInTheDocument()
+      })
+
+      it('shows neither the search input nor the safe bar while a flow is open', () => {
+        renderTopbar(<div data-testid="mock-tx-flow" />)
+
+        expect(screen.queryByTestId('global-search-input')).not.toBeInTheDocument()
+        expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      })
+
+      it('shows the search input again once the flow is closed', () => {
+        const { rerender } = renderTopbar(<div data-testid="mock-tx-flow" />)
+
+        rerender(
+          <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+            <Topbar />
+          </TxModalContext.Provider>,
+        )
+
+        expect(screen.getByTestId('global-search-input')).toBeInTheDocument()
+      })
+
+      it('does not reserve a row for the hidden search input', () => {
+        const { container } = renderTopbar(<div data-testid="mock-tx-flow" />)
+        const context = [...(container.querySelector('header')?.children ?? [])].at(-2)
+
+        expect(context?.className).not.toMatch(/basis-full/)
+        expect(context?.className).not.toContain(SEARCH_CONTEXT_HEIGHT)
+        expect(context?.className).toContain('mr-auto')
+      })
+    })
+
+    describe('with a Workspace flow that acts on a scoped Safe', () => {
+      const flowSafe = { chainId: '137', safeAddress: '0x1234567890123456789012345678901234567890' }
+      const renderWithScopedFlow = () =>
+        render(
+          <TxModalContext.Provider
+            value={{ txFlow: <div data-testid="mock-tx-flow" />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}
+          >
+            <TxFlowSafeContext.Provider value={flowSafe}>
+              <Topbar />
+            </TxFlowSafeContext.Provider>
+          </TxModalContext.Provider>,
+        )
+
+      it('shows the Safe bar locked to that Safe, though the URL has none', () => {
+        mockIsSpaceRoute.mockReturnValue(true)
+        mockUseSafeAddress.mockReturnValue('')
+        renderWithScopedFlow()
+
+        expect(screen.getByTestId('space-safe-bar')).toHaveAttribute(
+          'data-locked-safe',
+          `${flowSafe.chainId}:${flowSafe.safeAddress}`,
+        )
+      })
+
+      it('shows the locked Safe bar in place of the logo on the policies route', () => {
+        mockIsSpaceRoute.mockReturnValue(true)
+        mockUsePathname.mockReturnValue('/spaces/policies')
+        renderWithScopedFlow()
+
+        expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+        expect(screen.queryByTestId('logo-image')).not.toBeInTheDocument()
+      })
+    })
+
+    it('does not lock the Safe bar of a flow whose Safe comes from the URL', () => {
       mockIsSpaceRoute.mockReturnValue(true)
-      mockUseSafeAddress.mockReturnValue('')
-      const txModalValue: TxModalContextType = {
-        txFlow: <div data-testid="mock-tx-flow" />,
-        setTxFlow: jest.fn(),
-        setFullWidth: jest.fn(),
-      }
+      mockUseSafeAddress.mockReturnValue('0x1234567890123456789012345678901234567890')
       render(
-        <TxModalContext.Provider value={txModalValue}>
+        <TxModalContext.Provider
+          value={{ txFlow: <div data-testid="mock-tx-flow" />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}
+        >
           <Topbar />
         </TxModalContext.Provider>,
       )
-      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+
+      expect(screen.getByTestId('space-safe-bar')).toHaveAttribute('data-locked-safe', '')
     })
 
     it('renders SafeLogo on the policies route, with neither the safe bar nor the search input', () => {

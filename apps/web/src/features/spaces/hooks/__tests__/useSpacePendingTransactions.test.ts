@@ -36,8 +36,8 @@ const signedInAuth = {
 const queuedItemAt = (timestamp: number, conflictType?: Parameters<typeof queuedTransactionItem>[1]) =>
   queuedTransactionItem(multisigTransactionBuilder().with({ timestamp }).build(), conflictType)
 
-const createPage = (results: SpaceQueuedItemPage['results']): SpaceQueuedItemPage => ({
-  count: null,
+const createPage = (results: SpaceQueuedItemPage['results'], count: number | null = null): SpaceQueuedItemPage => ({
+  count,
   next: null,
   previous: null,
   results,
@@ -125,6 +125,32 @@ describe('useSpacePendingTransactions', () => {
     expect(result.current.isLoading).toBe(false)
   })
 
+  it('returns the size of the whole Space queue as the total count', async () => {
+    respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }, 12))
+
+    const { result } = renderInSpace(2)
+
+    await waitFor(() => expect(result.current.totalCount).toBe(12))
+    expect(result.current.count).toBe(2)
+  })
+
+  it('counts the returned transactions as the whole queue when the gateway omits the total and the page is not full', async () => {
+    respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }))
+
+    const { result } = renderInSpace(4)
+
+    await waitFor(() => expect(result.current.totalCount).toBe(2))
+  })
+
+  it('leaves the total count unknown when the gateway omits it and the page reached the limit', async () => {
+    respondWithQueue(createPage({ [SAFE_1]: { [CHAIN_1]: [queuedItemAt(1000), queuedItemAt(2000)] } }))
+
+    const { result } = renderInSpace(2)
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.totalCount).toBeUndefined()
+  })
+
   it('returns every transaction of a conflict group, oldest first', async () => {
     const newer = queuedItemAt(2000, 'HasNext')
     const older = queuedItemAt(1000, 'End')
@@ -202,6 +228,7 @@ describe('useSpacePendingTransactions', () => {
       chainId: CHAIN_1,
     })
     expect(spaceRequests).toHaveLength(0)
+    expect(result.current.totalCount).toBeUndefined()
   })
 
   it('reports loading until the chains config tells whether the Space queue is enabled', () => {

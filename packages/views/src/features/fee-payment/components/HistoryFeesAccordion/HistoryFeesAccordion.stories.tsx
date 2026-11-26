@@ -25,7 +25,7 @@ export const Collapsed: Story = {
 export const FreeExecutionFee: Story = {
   args: { data: defaultData },
   parameters: {
-    docs: { description: { story: 'Execution fee shown as FREE with strikethrough on the original amount.' } },
+    docs: { description: { story: 'Execution fee shown as Free with strikethrough on the original amount.' } },
   },
 }
 
@@ -71,7 +71,7 @@ export const Sponsored: Story = {
     data: {
       totalFee: { amount: '0.0000000777', currency: 'ETH', fiatAmount: '$0.03' },
       executionFee: { label: 'Execution fee', isFree: true },
-      gasFee: { label: 'Max gas fee', amount: '0.0000000777', currency: 'ETH', fiatAmount: '$0.03', isFree: true },
+      gasFee: { label: 'Gas fee', amount: '0.0000000777', currency: 'ETH', fiatAmount: '$0.03', isFree: true },
       paidFrom: 'sponsored',
     },
   },
@@ -88,7 +88,7 @@ export const AllPayers: Story = {
         data={{
           totalFee: { amount: '3.50', currency: 'USDC', fiatAmount: '$3.50' },
           executionFee: { label: 'Execution fee', isFree: true },
-          gasFee: { label: 'Max gas fee', amount: '3.50', currency: 'USDC', fiatAmount: '$3.50' },
+          gasFee: { label: 'Gas fee', amount: '3.50', currency: 'USDC', fiatAmount: '$3.50' },
           paidFrom: 'safe',
         }}
       />
@@ -96,7 +96,7 @@ export const AllPayers: Story = {
         data={{
           totalFee: { amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03' },
           executionFee: { label: 'Execution fee', isFree: true },
-          gasFee: { label: 'Max gas fee', amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03' },
+          gasFee: { label: 'Gas fee', amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03' },
           paidFrom: 'signer',
         }}
       />
@@ -104,7 +104,7 @@ export const AllPayers: Story = {
         data={{
           totalFee: { amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03' },
           executionFee: { label: 'Execution fee', isFree: true },
-          gasFee: { label: 'Max gas fee', amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03', isFree: true },
+          gasFee: { label: 'Gas fee', amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03', isFree: true },
           paidFrom: 'sponsored',
         }}
       />

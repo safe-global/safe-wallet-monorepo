@@ -17,8 +17,8 @@ import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChainsModule from '@/hooks/useChains'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
 import {
   EXISTING_LIMITS_LOAD_ERROR,
@@ -73,7 +73,7 @@ jest.mock('../../hooks/useSpendingLimitSafeAccounts', () => ({
     refetch: jest.fn(),
   }),
 }))
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('../../ExistingSpendingLimitsProvider', () => ({ useExistingSpendingLimits: jest.fn() }))
 
 const mockChain = chainBuilder().with({ chainId: '1' }).build()
@@ -134,8 +134,6 @@ const safeTxContext = (overrides: Partial<SafeTxContextParams> = {}): SafeTxCont
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  feePaymentMode: 'safe',
-  setFeePaymentMode: jest.fn(),
   setFeeGasToken: jest.fn(),
   ...overrides,
 })

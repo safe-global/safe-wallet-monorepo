@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { AppRoutes } from '@/config/routes'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import { useSpaceSafes } from '../../../public/hooks/useSpaceSafes'
@@ -9,6 +10,7 @@ import { useSpacePendingTransactions } from '../../../hooks/useSpacePendingTrans
 import useSpaceAccountsData from '@/features/myAccounts/public/hooks/useSpaceAccountsData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { COMPLETED_STORAGE_KEY } from '../../../hooks/useSetupWidgetDismissal'
+import AggregatedBalance from '../AggregatedBalances'
 import SpaceDashboard from '../index'
 
 const MOCK_SPACE_ID = '42'
@@ -25,10 +27,11 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
 }))
 
+const mockPush = jest.fn()
 const mockReplace = jest.fn()
 let mockQuery: Record<string, string> = {}
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: jest.fn(), replace: mockReplace, pathname: '/spaces', query: mockQuery }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace, pathname: '/spaces', query: mockQuery }),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -41,6 +44,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
     ADD_ACCOUNTS_MODAL: { action: 'add_accounts_modal', category: 'spaces' },
     ACCOUNTS_WIDGET_CLICKED: { action: 'accounts_widget_clicked', category: 'spaces' },
     PENDING_TX_WIDGET_CLICKED: { action: 'pending_tx_widget_clicked', category: 'spaces' },
+    PENDING_TX_WIDGET_VIEW_ALL_CLICKED: { action: 'pending_tx_widget_view_all_clicked', category: 'spaces' },
     WORKSPACE_DASHBOARD_VIEWED: { action: 'workspace_dashboard_viewed', category: 'spaces' },
   },
   SPACE_LABELS: { space_dashboard_card: 'space_dashboard_card' },
@@ -65,9 +69,6 @@ jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
 jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
-  },
-  get MemberRole() {
-    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
@@ -118,8 +119,19 @@ jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
 let mockPendingTxEntries: Array<{ safeAddress: string; txId: string }> = []
 jest.mock('../PendingTxWidget', () => ({
   __esModule: true,
-  default: ({ onItemClick }: { onItemClick?: (safeAddress: string, txId: string) => void }) => (
+  default: ({
+    onItemClick,
+    onViewAll,
+  }: {
+    onItemClick?: (safeAddress: string, txId: string) => void
+    onViewAll?: () => void
+  }) => (
     <>
+      {onViewAll && (
+        <button data-testid="pending-tx-view-all" onClick={onViewAll}>
+          View all
+        </button>
+      )}
       {mockPendingTxEntries.map(({ safeAddress, txId }) => (
         <div
           key={txId}
@@ -180,7 +192,7 @@ jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
 
 // Stub sub-components irrelevant to tracking
 jest.mock('../AddAccountsCard', () => () => null)
-jest.mock('../AggregatedBalances', () => () => null)
+jest.mock('../AggregatedBalances', () => ({ __esModule: true, default: jest.fn(() => null) }))
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
 jest.mock('../../AddAccounts', () => () => null)
 jest.mock(
@@ -234,6 +246,24 @@ const restoreDefaultMocks = () => {
 }
 
 // ---- Tests ----
+
+describe('SpaceDashboard – total value loading', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setPendingTxEntries()
+  })
+
+  const lastTotalProps = () => (AggregatedBalance as jest.Mock).mock.calls.at(-1)?.[0]
+
+  it.each([true, false])('passes safesLoading=%s while the Workspace Safes load', (isLoading) => {
+    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [], isLoading })
+
+    render(<SpaceDashboard />)
+
+    expect(lastTotalProps()).toMatchObject({ safesLoading: isLoading })
+  })
+})
 
 describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
   beforeEach(() => {
@@ -529,5 +559,74 @@ describe('SpaceDashboard – setup widget slot', () => {
 
     expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
     expect(screen.queryByTestId('setup-widget')).not.toBeInTheDocument()
+  })
+})
+
+describe('SpaceDashboard – pending transactions "View all"', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setPendingTxEntries([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    ;(useSpacePendingTransactions as jest.Mock).mockReturnValue({
+      transactions: [],
+      count: 4,
+      totalCount: 11,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+  })
+
+  it('opens the Workspace Transactions page when the Transactions page is enabled', () => {
+    mockUseHasFeature.mockReturnValue(true)
+
+    render(<SpaceDashboard />)
+    fireEvent.click(screen.getByTestId('pending-tx-view-all'))
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: AppRoutes.spaces.transactions,
+      query: { spaceId: MOCK_SPACE_ID },
+    })
+  })
+
+  it('fires PENDING_TX_WIDGET_VIEW_ALL_CLICKED once with the Workspace and the pending total', () => {
+    mockUseHasFeature.mockReturnValue(true)
+
+    render(<SpaceDashboard />)
+    fireEvent.click(screen.getByTestId('pending-tx-view-all'))
+
+    const calls = getCallsForEvent(SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED.action)
+    expect(calls).toEqual([
+      [
+        { ...SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED, label: MOCK_SPACE_ID },
+        { workspace_id: MOCK_SPACE_ID, pending_tx_count: 11 },
+      ],
+    ])
+  })
+
+  it('omits pending_tx_count from PENDING_TX_WIDGET_VIEW_ALL_CLICKED when the pending total is unknown', () => {
+    mockUseHasFeature.mockReturnValue(true)
+    ;(useSpacePendingTransactions as jest.Mock).mockReturnValue({
+      transactions: [],
+      count: 4,
+      totalCount: undefined,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+
+    render(<SpaceDashboard />)
+    fireEvent.click(screen.getByTestId('pending-tx-view-all'))
+
+    const [[, params]] = getCallsForEvent(SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED.action)
+    expect(params).toEqual({ workspace_id: MOCK_SPACE_ID })
+  })
+
+  it.each([false, undefined])('hides "View all" when the Transactions page flag is %s', (flag) => {
+    mockUseHasFeature.mockReturnValue(flag)
+
+    render(<SpaceDashboard />)
+
+    expect(screen.queryByTestId('pending-tx-view-all')).not.toBeInTheDocument()
   })
 })

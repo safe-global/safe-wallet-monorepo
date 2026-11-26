@@ -1,5 +1,6 @@
 import chains from '@safe-global/utils/config/chains'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import { render, screen } from '@/tests/test-utils'
 import LimitSummaryRow from '../LimitSummaryRow'
 import { limitSummaryBuilder, limitSummaryTokenBuilder } from '../SpendingLimitSummary.testData'
@@ -38,6 +39,23 @@ describe('LimitSummaryRow', () => {
     expect(errorSpy).not.toHaveBeenCalled()
 
     errorSpy.mockRestore()
+  })
+
+  it('repeats the not-trusted warning for a token on no trusted list', () => {
+    const token = limitSummaryTokenBuilder().with({ untrusted: true }).build()
+    const limit = limitSummaryBuilder().with({ token }).build()
+
+    render(<LimitSummaryRow limit={limit} chainId="1" />)
+
+    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(UNTRUSTED_TOKEN_WARNING)
+  })
+
+  it('shows no trust warning for a trusted token', () => {
+    const token = limitSummaryTokenBuilder().with({ untrusted: undefined }).build()
+
+    render(<LimitSummaryRow limit={limitSummaryBuilder().with({ token }).build()} chainId="1" />)
+
+    expect(screen.queryByTestId('token-untrusted-warning')).not.toBeInTheDocument()
   })
 
   it('renders the amount exactly as typed when the token decimals are unknown', () => {

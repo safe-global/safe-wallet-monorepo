@@ -17,7 +17,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Status: Story = {}
+export const Urgency: Story = {}
 
 /** The menu open on the Network grouping */
 export const Network: Story = {

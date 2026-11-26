@@ -1,7 +1,7 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelector/utils'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { safeAccountOptionBuilder } from '../SpendingLimitSummary.testData'
 import { toPolicySummaryModel } from '../toPolicySummaryModel'
@@ -65,6 +65,14 @@ describe('toPolicySummaryModel', () => {
 
     expect(named.spenders[0].name).toBe('Alice')
     expect(unnamed.spenders[0].name).toBeUndefined()
+  })
+
+  it('marks a token that is on no trusted list', () => {
+    const untrusted = tokenOptionBuilder().with({ address: ZERO_ADDRESS, untrusted: true }).build()
+
+    const model = toPolicySummaryModel(values, { accounts: [safe], tokens: [untrusted], names: {} })
+
+    expect(model.spenders[0].limits[0].token.untrusted).toBe(true)
   })
 
   it('stands in a shortened-address token when the option list does not know the token', () => {

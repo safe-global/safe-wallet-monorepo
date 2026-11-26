@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import { ChainLogo } from '@safe-global/views/features/spaces/components/AddressBookV2/ChainLogos'
-import { QUEUE_COLUMNS } from './columns'
+import { QUEUE_COLUMNS, QUEUE_ROW_LABEL } from './columns'
 
 const ChainHeaderRow = ({
   chain,
@@ -20,7 +20,7 @@ const ChainHeaderRow = ({
   rowProps?: ComponentProps<'tr'>
 }): ReactElement => (
   <TableRow data-no-hover className="cursor-pointer" onClick={onToggle} {...rowProps}>
-    <TableCell className="py-0!">
+    <TableCell data-pin="start" className="py-0!">
       <span className="flex justify-center">
         <Button
           size="icon-xs"
@@ -33,7 +33,7 @@ const ChainHeaderRow = ({
       </span>
     </TableCell>
     <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="py-0! pr-3!">
-      <div className="flex h-6 items-center gap-2 text-xs">
+      <div className={`flex h-6 items-center gap-2 text-xs ${QUEUE_ROW_LABEL}`}>
         <ChainLogo chain={chain} size="sm" />
         <span className="font-medium">{chain.chainName}</span>
         {nextNonce !== undefined && <span className="font-mono text-muted-foreground">Next #{nextNonce}</span>}

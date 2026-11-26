@@ -256,15 +256,15 @@ describe('Plans', () => {
     }
     render(
       <Plans
-        plan={trialing(14)}
+        plan={active}
         {...meters}
         tiers={buildPlanTiers([business], { subscription: subscription('Business', 499), seatsQuota: 20 })}
-        currentPlan={current('Business', 499, true)}
+        currentPlan={current('Business', 499, false)}
       />,
     )
 
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
-    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('20 Safe accounts')
+    expect(screen.getByRole('tab', { selected: true, name: '20 Safe accounts' })).toBeInTheDocument()
     expect(screen.queryByText('€6,990')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
@@ -273,7 +273,57 @@ describe('Plans', () => {
     expect(screen.getByRole('button', { name: 'Upgrade to 2 Safe accounts' })).toBeInTheDocument()
   })
 
-  it('names the picked seat option on the closed selector instead of its payment link id', () => {
+  it('opens the Business trial card on the trial size and price, and still lets the user pick another size', () => {
+    const business = {
+      name: 'Business',
+      offers: [offer('Business', 'pl_business_5', 299, 'month'), offer('Business', 'pl_business_y', 6990, 'year')],
+    }
+    render(
+      <Plans
+        plan={trialing(14)}
+        {...meters}
+        tiers={buildPlanTiers([business], { subscription: subscription('Business', 499), seatsQuota: 20 })}
+        currentPlan={current('Business', 499, true)}
+      />,
+    )
+
+    const card = screen.getByTestId('current-plan-card')
+    expect(within(card).getByRole('tab', { selected: true })).toHaveAccessibleName('20 Safe accounts')
+    expect(card).toHaveTextContent('€499')
+    expect(card).not.toHaveTextContent('Custom')
+    expect(screen.getByTestId('plan-current-badge')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add payment method' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('tab', { name: '2 Safe accounts' }))
+    expect(screen.getByText('€299')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Switch to Business 2' })).toBeInTheDocument()
+  })
+
+  it('features the Starter card on a Starter trial and keeps Business unpriced until a size is picked', () => {
+    const business = {
+      name: 'Business',
+      offers: [
+        { ...offer('Business', 'pl_business_5', 669, 'month'), seats: 5 },
+        { ...offer('Business', 'pl_business_10', 1099, 'month'), seats: 10 },
+      ],
+    }
+    render(
+      <Plans
+        plan={{ ...trialing(14), name: 'Starter' }}
+        {...meters}
+        tiers={buildPlanTiers([STARTER, business], { subscription: subscription('Starter', 149), seatsQuota: 2 })}
+        currentPlan={current('Starter', 149, true)}
+      />,
+    )
+
+    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Starter')
+    expect(screen.getByTestId('current-plan-card')).not.toHaveAttribute('data-hover-plan')
+    const businessCard = screen.getAllByTestId('plan-card').find((card) => card.textContent?.includes('Business'))
+    expect(businessCard).toHaveAttribute('data-hover-plan')
+    expect(businessCard).toHaveTextContent('Custom')
+  })
+
+  it('names each seat option on its tab instead of its payment link id', () => {
     const business = {
       name: 'Business',
       offers: [
@@ -283,7 +333,8 @@ describe('Plans', () => {
     }
     render(<Plans plan={null} {...meters} tiers={buildPlanTiers([business])} />)
 
-    expect(screen.getByText('2 Safe accounts')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '2 Safe accounts' })).toHaveTextContent('2 Safes')
+    expect(screen.getByRole('tab', { name: '50 Safe accounts' })).toHaveTextContent('50 Safes')
     expect(screen.queryByText('pl_business_10')).not.toBeInTheDocument()
   })
 
@@ -303,16 +354,17 @@ describe('Plans', () => {
     }
     const { user } = renderWithUserEvent(<Plans plan={null} {...meters} tiers={buildPlanTiers([business])} />)
 
-    await user.click(screen.getByRole('combobox'))
-    await user.click(await screen.findByRole('option', { name: '20 Safe accounts' }))
-    expect(screen.getByRole('combobox')).toHaveTextContent('20 Safe accounts')
+    const pickedSize = () => screen.getByRole('tab', { selected: true, name: /Safe accounts$/ })
+
+    await user.click(screen.getByRole('tab', { name: '20 Safe accounts' }))
+    expect(pickedSize()).toHaveAccessibleName('20 Safe accounts')
 
     await user.click(screen.getByRole('tab', { name: /Yearly/ }))
-    expect(screen.getByRole('combobox')).toHaveTextContent('20 Safe accounts')
+    expect(pickedSize()).toHaveAccessibleName('20 Safe accounts')
     expect(screen.getByText('€17,430')).toBeInTheDocument()
 
     await user.click(screen.getByRole('tab', { name: /Monthly/ }))
-    expect(screen.getByRole('combobox')).toHaveTextContent('20 Safe accounts')
+    expect(pickedSize()).toHaveAccessibleName('20 Safe accounts')
     expect(screen.getByText('€1,669')).toBeInTheDocument()
   })
 
