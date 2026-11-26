@@ -129,7 +129,7 @@
     {
       "key": "SEND_FLOW",
       "description": "New token send flow.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
