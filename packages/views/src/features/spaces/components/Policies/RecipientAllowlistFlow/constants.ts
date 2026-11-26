@@ -80,3 +80,5 @@ export const POLICY_LABELS = {
   removal: 'None, the rule is deleted',
   unknown: 'Other policy',
 } as const
+
+export const SAVE_CONFIGURATION_ERROR = "Couldn't save the allowlist. Try again."

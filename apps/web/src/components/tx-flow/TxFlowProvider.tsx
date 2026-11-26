@@ -79,6 +79,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   setIsSubmitLoading: Dispatch<SetStateAction<boolean>>
 
   isSubmitDisabled: boolean
+  setIsSubmitDisabled: Dispatch<SetStateAction<boolean>>
 
   submitError?: Error
   setSubmitError: Dispatch<SetStateAction<Error | undefined>>
@@ -126,6 +127,7 @@ export const initialContext: TxFlowContextType = {
   setIsSubmitLoading: () => {},
 
   isSubmitDisabled: false,
+  setIsSubmitDisabled: () => {},
 
   submitError: undefined,
   setSubmitError: () => {},
@@ -190,6 +192,7 @@ const TxFlowProvider = <T extends unknown>({
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(initialContext.isSubmitLoading)
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(initialContext.isSubmitDisabled)
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [gasPaymentOption, setGasPaymentOption] = useState<GasPayer | undefined>(initialContext.gasPaymentOption)
@@ -346,7 +349,8 @@ const TxFlowProvider = <T extends unknown>({
     isSubmitLoading,
     setIsSubmitLoading,
 
-    isSubmitDisabled: isSubmitLoading || isUntrustedSafeBlocked,
+    isSubmitDisabled: isSubmitDisabled || isSubmitLoading || isUntrustedSafeBlocked,
+    setIsSubmitDisabled,
 
     submitError,
     setSubmitError,
