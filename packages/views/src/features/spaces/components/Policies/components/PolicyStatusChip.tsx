@@ -1,10 +1,9 @@
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import type { PolicyStatus } from '../types'
 
-const BADGE_BY_STATUS: Record<
-  PolicyStatus,
-  { label: string; variant: 'success' | 'warning' | 'secondary' | 'destructive' }
-> = {
+export type PolicyStatusVariant = 'success' | 'warning' | 'info' | 'secondary' | 'destructive'
+
+const BADGE_BY_STATUS: Record<PolicyStatus, { label: string; variant: PolicyStatusVariant }> = {
   active: { label: 'Active', variant: 'success' },
   pending: { label: 'Pending', variant: 'warning' },
   activating: { label: 'Activating', variant: 'warning' },

@@ -1,10 +1,13 @@
+import { tz } from '@date-fns/tz'
 import {
   differenceInHours,
   differenceInMinutes,
   differenceInMonths,
   format,
   formatDistanceToNow,
+  formatDuration,
   formatRelative,
+  intervalToDuration,
 } from 'date-fns'
 import { maybePlural } from './formatters'
 
@@ -37,6 +40,28 @@ export const formatTime = (timestamp: number): string => formatWithSchema(timest
 export const formatDateTime = (timestamp: number): string => formatWithSchema(timestamp, 'MMM d, yyyy - h:mm:ss a')
 
 export const formatTimeInWords = (timestamp: number): string => formatDistanceToNow(timestamp, { addSuffix: true })
+
+// Chain time is UTC; the viewer's zone would misstate it.
+export const IN_UTC = { in: tz('UTC') }
+
+const MS_PER_SECOND = 1_000
+
+/** `Jun 24, 2026`, in UTC. Takes unix SECONDS. */
+export const formatUtcDate = (seconds: number): string => format(seconds * MS_PER_SECOND, 'MMM d, yyyy', IN_UTC)
+
+/** `Jun 24, 03:35 UTC`. Takes unix SECONDS. */
+export const formatUtcDayTime = (seconds: number): string =>
+  `${format(seconds * MS_PER_SECOND, 'MMM d, HH:mm', IN_UTC)} UTC`
+
+/** `Jun 24, 2026 · 03:35 UTC`. Takes unix SECONDS. */
+export const formatUtcDateTime = (seconds: number): string =>
+  `${format(seconds * MS_PER_SECOND, 'MMM d, yyyy · HH:mm', IN_UTC)} UTC`
+
+/** `23 hours 59 minutes`, `9 minutes`, or `less than a minute` once under a minute or past. Takes unix SECONDS. */
+export const formatTimeUntil = (until: number, nowMs: number): string =>
+  formatDuration(intervalToDuration({ start: nowMs, end: Math.max(nowMs, until * MS_PER_SECOND) }, IN_UTC), {
+    format: ['days', 'hours', 'minutes'],
+  }) || 'less than a minute'
 
 /**
  * Short relative time for tight spaces, e.g. "5h ago", "3d ago", "11mo ago".
