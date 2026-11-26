@@ -25,7 +25,6 @@ const onChains = (chainIds: string[], address: string): Deployment => ({
 const onIndexedChains = (address: string): Deployment => onChains(INDEXED_CHAIN_IDS, address)
 
 // Source: https://github.com/safe-global/policy-indexer (config.yaml and src/policies/registry.ts)
-// One guard per root-activation delay, all with a 604800s expiry
 const POLICY_GUARD_BY_DELAY: Record<string, Deployment> = {
   '0s': onIndexedChains('0x55c241591E12CE3c58491D02b737F12D3199ae95'),
   '60s': onIndexedChains('0xC83bC185770ac0Da8A970f35695064eEe62e236c'),
