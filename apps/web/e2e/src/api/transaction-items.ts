@@ -55,3 +55,17 @@ export function erc20TransfersIn(
       : [],
   )
 }
+
+/** The nonces of the on-chain rejections on a history page. */
+export function rejectionNonces(history: TransactionItemPage): Array<number | undefined> {
+  return transactionsIn(history)
+    .filter((tx) => tx.txInfo.type === 'Custom' && tx.txInfo.isCancellation)
+    .map(nonceOf)
+}
+
+/** The recipient of each transfer executed at `nonce` on a history page, or the type of any other transaction there. */
+export function recipientsAtNonce(history: TransactionItemPage, nonce: number): string[] {
+  return transactionsIn(history)
+    .filter((tx) => nonceOf(tx) === nonce)
+    .map((tx) => (tx.txInfo.type === 'Transfer' ? tx.txInfo.recipient.value : tx.txInfo.type))
+}
