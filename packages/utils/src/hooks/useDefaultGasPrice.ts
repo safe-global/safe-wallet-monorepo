@@ -164,15 +164,9 @@ const getGasParameters = (
   }
 
   if ('gasPrice' in estimation) {
-    const { gasPrice } = estimation
-    if (!isEIP1559) {
-      return { maxFeePerGas: gasPrice, maxPriorityFeePerGas: undefined }
-    }
-    const networkPriorityFee = feeData?.maxPriorityFeePerGas
     return {
-      maxFeePerGas: gasPrice,
-      // A tip above the fee cap makes the node reject the transaction.
-      maxPriorityFeePerGas: networkPriorityFee != null && networkPriorityFee > gasPrice ? gasPrice : networkPriorityFee,
+      maxFeePerGas: estimation.gasPrice,
+      maxPriorityFeePerGas: isEIP1559 ? feeData?.maxPriorityFeePerGas : undefined,
     }
   }
 
