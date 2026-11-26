@@ -43,8 +43,16 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
 // The selector has its own suite; here only what the step does with a pick is under test.
 jest.mock('../../../SafeAccountSelector', () => ({
   __esModule: true,
-  default: ({ value, onChange }: { value?: string; onChange: (id: string) => void }) => (
-    <div data-testid="selector" data-value={value ?? ''}>
+  default: ({
+    value,
+    onChange,
+    autoFocus,
+  }: {
+    value?: string
+    onChange: (id: string) => void
+    autoFocus?: boolean
+  }) => (
+    <div data-testid="selector" data-value={value ?? ''} data-autofocus={autoFocus || undefined}>
       <button type="button" onClick={() => onChange(buildSafeAccountId(SEPOLIA, SAFE_B))}>
         pick safe
       </button>
@@ -405,6 +413,15 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('allowlist-tokens-section')).toBeInTheDocument()
     expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it('should, before a Safe is picked, disable the token and recipient fields and mark the Safe selector for focus', () => {
+    accounts([option(SAFE_A)])
+    renderStep()
+
+    expect(screen.getByRole('combobox', { name: 'Search tokens by name or address' })).toBeDisabled()
+    expect(screen.getByRole('combobox', { name: 'Search contacts or paste an address' })).toBeDisabled()
+    expect(screen.getByTestId('selector')).toHaveAttribute('data-autofocus', 'true')
   })
 
   it('closes the flow without a discard prompt and opens the Safe settings for an unknown guard', async () => {

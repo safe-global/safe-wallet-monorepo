@@ -144,6 +144,7 @@ const CreateRecipientAllowlistPolicy = (): ReactElement => {
               description: getNestedSafesNoticeText('recipient allowlists'),
             }}
             readOnly={isEditMode}
+            autoFocus={!isEditMode}
             id="recipient-allowlist-safe-account"
           />
 

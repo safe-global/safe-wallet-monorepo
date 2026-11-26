@@ -242,7 +242,14 @@ const SearchPicker = ({
 
   return (
     <>
-      <InputGroup ref={anchorRef} variant="surface" inputSize="lg" fieldError="hidden" data-disabled={disabled}>
+      <InputGroup
+        ref={anchorRef}
+        variant="surface"
+        inputSize="lg"
+        fieldError="hidden"
+        data-disabled={disabled}
+        className="data-[disabled=true]:cursor-not-allowed data-[disabled=true]:bg-muted"
+      >
         <InputGroupAddon align="inline-start">
           <Search className="size-4" aria-hidden />
         </InputGroupAddon>

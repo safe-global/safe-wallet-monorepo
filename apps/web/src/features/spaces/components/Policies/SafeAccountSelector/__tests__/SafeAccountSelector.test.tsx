@@ -68,6 +68,18 @@ const openSelector = async (user: ReturnType<typeof renderSelector>['user']) => 
 }
 
 describe('SafeAccountSelector', () => {
+  it('should, when asked to autofocus, mark its trigger for the dialog to focus first', () => {
+    renderSelector({ autoFocus: true })
+
+    expect(screen.getByTestId('safe-account-selector')).toHaveAttribute('data-autofocus', 'true')
+  })
+
+  it('should, by default, leave its trigger unmarked', () => {
+    renderSelector()
+
+    expect(screen.getByTestId('safe-account-selector')).not.toHaveAttribute('data-autofocus')
+  })
+
   it('renders the default label and the eligibility helper text', () => {
     render(<SafeAccountSelector accounts={[singleChainAccount]} onChange={jest.fn()} />)
 
