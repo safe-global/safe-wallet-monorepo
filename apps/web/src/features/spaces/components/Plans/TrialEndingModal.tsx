@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -7,6 +7,7 @@ import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { trackEvent } from '@/services/analytics'
+import { useOverlay } from '@/services/overlay-queue/useOverlay'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -146,17 +147,20 @@ export default function TrialEndingModal({ spaceId }: { spaceId: string }) {
   const membership = useCurrentMembership(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId }, { skip: !isTrialEndingSoon || isAdmin })
-  const [isOpen, setIsOpen] = useState(false)
+  const [isClosed, setIsClosed] = useState(false)
+  const isDue =
+    isTrialEndingSoon &&
+    !hasPaymentMethod &&
+    Boolean(membership && plan && subscription) &&
+    !isClosed &&
+    !wasTrialReminderSeen(spaceId)
+  const isShown = useOverlay({ kind: 'reminder', isDue })
 
-  useEffect(() => {
-    if (isTrialEndingSoon && !hasPaymentMethod && membership && !wasTrialReminderSeen(spaceId)) setIsOpen(true)
-  }, [isTrialEndingSoon, hasPaymentMethod, membership, spaceId])
-
-  if (!isOpen || !plan || !subscription) return null
+  if (!isShown || !plan || !subscription) return null
 
   const close = () => {
     markTrialReminderSeen(spaceId)
-    setIsOpen(false)
+    setIsClosed(true)
   }
   const currentPlan = toCurrentPlan(subscription, plan, isTrialing, seats?.quota)
 
