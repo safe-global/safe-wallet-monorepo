@@ -1,7 +1,15 @@
-import { MIN_POLICY_GUARD_SAFE_VERSION } from '@safe-global/utils/features/policy-guard/constants'
+import {
+  MIN_POLICY_GUARD_SAFE_VERSION,
+  POLICY_GUARD_DELAY_SECONDS,
+} from '@safe-global/utils/features/policy-guard/constants'
+import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 
-/** How long a policy change waits before it applies. */
-export const POLICY_CHANGE_DELAY = '24 hours'
+/** How long a policy change waits before it applies, e.g. `3 minutes`. */
+export const formatPolicyChangeDelay = (delaySeconds: number): string =>
+  formatDurationFromMilliseconds(delaySeconds * 1_000, ['days', 'hours', 'minutes', 'seconds']) || '0 seconds'
+
+/** The delay of the guard the setup installs */
+export const POLICY_CHANGE_DELAY = formatPolicyChangeDelay(POLICY_GUARD_DELAY_SECONDS)
 
 export const FLOW_SUBTITLE = 'Allowlist'
 
@@ -58,3 +66,5 @@ export const FALLBACK_SPACE_NAME = 'your Workspace'
 
 export const IDENTICON_SIZE = 24
 export const getAllowlistAccountLabel = (name: string, chainName: string): string => `${name} on ${chainName}`
+
+export const BLOCKED_LABEL = 'Blocked'
