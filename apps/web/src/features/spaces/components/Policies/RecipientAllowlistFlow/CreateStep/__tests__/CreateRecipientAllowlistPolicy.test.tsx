@@ -5,12 +5,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/hooks/useSafeShield'
-import {
-  createDefaultAllowlistValues,
-  type AllowlistFormRecipient,
-  type RecipientAllowlistFormValues,
-} from '../../types'
+import type { RecipientAllowlistFormValues } from '../../types'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { GuardStatus } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
@@ -18,6 +13,7 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelec
 import { useRecipientAllowlistSafeAccounts } from '../../hooks/useRecipientAllowlistSafeAccounts'
 import { useGuardStatus } from '../../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../../hooks/useHeldTokenAddresses'
+import { useSpendingLimitTokens, type SpendingLimitTokensResult } from '../../hooks/useSpendingLimitTokens'
 import CreateRecipientAllowlistPolicy from '..'
 
 const SEPOLIA = '11155111'
@@ -36,26 +32,26 @@ jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
 }))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
+jest.mock('../../hooks/useSpendingLimitTokens', () => ({ useSpendingLimitTokens: jest.fn() }))
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
-  useMergedAddressBooks: () => ({ has: () => false }),
-}))
-jest.mock('../AddFromAddressBook', () => ({ __esModule: true, default: () => null }))
-jest.mock('../TokenDraftRow', () => ({ __esModule: true, default: () => null }))
-jest.mock('../RecipientDraftRow', () => ({
-  __esModule: true,
-  default: ({ onAdd }: { onAdd: (recipient: AllowlistFormRecipient) => void }) => (
-    <button type="button" onClick={() => onAdd({ address: RECIPIENT, name: 'Dave', selected: true })}>
-      confirm draft
-    </button>
-  ),
+  useMergedAddressBooks: () => ({ list: [], has: () => false, get: () => undefined }),
+  useSafeNameResolver: () => () => '',
 }))
 
 // The selector has its own suite; here only what the step does with a pick is under test.
 jest.mock('../../../SafeAccountSelector', () => ({
   __esModule: true,
-  default: ({ value, onChange }: { value?: string; onChange: (id: string) => void }) => (
-    <div data-testid="selector" data-value={value ?? ''}>
+  default: ({
+    value,
+    onChange,
+    autoFocus,
+  }: {
+    value?: string
+    onChange: (id: string) => void
+    autoFocus?: boolean
+  }) => (
+    <div data-testid="selector" data-value={value ?? ''} data-autofocus={autoFocus || undefined}>
       <button type="button" onClick={() => onChange(buildSafeAccountId(SEPOLIA, SAFE_B))}>
         pick safe
       </button>
@@ -68,7 +64,18 @@ const mockUseAccounts = useRecipientAllowlistSafeAccounts as jest.MockedFunction
 >
 const mockUseGuardStatus = useGuardStatus as jest.MockedFunction<typeof useGuardStatus>
 const mockHeld = useHeldTokenAddresses as jest.MockedFunction<typeof useHeldTokenAddresses>
-const mockPoisoning = useSafeShieldForAddressPoisoning as jest.MockedFunction<typeof useSafeShieldForAddressPoisoning>
+const mockSpendingLimits = useSpendingLimitTokens as jest.MockedFunction<typeof useSpendingLimitTokens>
+
+const ETH_LIMIT = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
+
+const spendingLimits = (overrides: Partial<SpendingLimitTokensResult> = {}) =>
+  mockSpendingLimits.mockReturnValue({
+    tokens: [],
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    ...overrides,
+  })
 
 const holdNative = (overrides: Partial<ReturnType<typeof useHeldTokenAddresses>> = {}) =>
   mockHeld.mockReturnValue({
@@ -85,8 +92,8 @@ const holdNative = (overrides: Partial<ReturnType<typeof useHeldTokenAddresses>>
   })
 
 const completeValues = (): RecipientAllowlistFormValues => ({
-  ...createDefaultAllowlistValues(),
-  recipients: [{ address: RECIPIENT, name: 'Dave', selected: true }],
+  tokens: [{ address: ZERO_ADDRESS, symbol: 'ETH' }],
+  recipients: [{ address: RECIPIENT, name: 'Dave' }],
 })
 
 const option = (address: string, extra: Partial<SafeAccountOption> = {}): SafeAccountOption => ({
@@ -137,16 +144,18 @@ const renderStep = (scopeKey?: string, data?: RecipientAllowlistFormValues) => {
             clearScope: jest.fn(),
           }}
         >
-          <CreateRecipientAllowlistPolicy
-            dismissedCallouts={{ tokens: false, recipients: false }}
-            onDismissCallout={jest.fn()}
-          />
+          <CreateRecipientAllowlistPolicy />
         </SafeScopeContext.Provider>
       </TxFlowContext.Provider>
     </TxModalContext.Provider>
   )
   const { rerender } = render(tree(scopeKey), { routerProps: { push: mockPush } })
-  return { setScope, onNext, switchTo: (key?: string) => rerender(tree(key)), rerender: () => rerender(tree(scopeKey)) }
+  return {
+    setScope,
+    onNext,
+    switchTo: (key?: string) => rerender(tree(key)),
+    rerender: () => rerender(tree(scopeKey)),
+  }
 }
 
 describe('CreateRecipientAllowlistPolicy', () => {
@@ -154,6 +163,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     jest.clearAllMocks()
     guard(undefined)
     holdNative()
+    spendingLimits()
   })
 
   it('scopes the flow to the picked Safe', () => {
@@ -196,39 +206,35 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.queryByTestId('allowlist-recipients-section')).not.toBeInTheDocument()
   })
 
-  it.each<GuardStatus>([
-    { status: 'none' },
-    { status: 'known' },
-    { status: 'partial', missingSlot: 'module' },
-    { status: 'partial', missingSlot: 'transaction' },
-  ])('enables Next once a token and a recipient are selected, with guard state %o', (status) => {
-    accounts([option(SAFE_A)])
-    guard(status)
-    const { onNext } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
-
-    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
-    expect(screen.getByTestId('next-btn')).toBeDisabled()
-
-    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
-    expect(screen.getByTestId('next-btn')).toBeEnabled()
-
-    fireEvent.click(screen.getByTestId('next-btn'))
-    expect(onNext).toHaveBeenCalledWith({
-      ...completeValues(),
-      rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }],
-    })
-  })
-
-  it('runs the address-poisoning check on every recipient', () => {
+  it('should, when the Safe has a spending limit, go on to the review on Next', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+    spendingLimits({ tokens: [ETH_LIMIT] })
+    const { onNext } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
-    expect(mockPoisoning).toHaveBeenLastCalledWith([])
+    fireEvent.click(screen.getByTestId('next-btn'))
 
-    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
+    expect(onNext).toHaveBeenCalledWith(
+      expect.objectContaining({ rules: [{ tokenAddress: ZERO_ADDRESS, recipients: [RECIPIENT] }] }),
+    )
+  })
 
-    expect(mockPoisoning).toHaveBeenLastCalledWith([RECIPIENT])
+  it('should, when the spending limits failed to load, keep Next disabled', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    spendingLimits({ isError: true })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it('should keep Next disabled, when the spending limits are still loading', () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    spendingLimits({ isLoading: true })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
+
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
   it('keeps Next disabled while the held tokens load', () => {
@@ -249,11 +255,20 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it('keeps Next disabled when every token is deselected', () => {
+  it('should, when no token is picked, keep Next disabled', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), { ...completeValues(), excludedTokens: [ZERO_ADDRESS] })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), { ...completeValues(), tokens: [] })
 
+    expect(screen.getByTestId('next-btn')).toBeDisabled()
+  })
+
+  it("should, when creating, start with none of the Safe's tokens and no recipient picked", () => {
+    accounts([option(SAFE_A)])
+    guard({ status: 'none' })
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+
+    expect(screen.queryByRole('button', { name: /^Allow / })).not.toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
@@ -274,32 +289,15 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'none' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
-    expect(screen.getByRole('button', { name: 'Allow Dave' })).toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeEnabled()
   })
 
-  it('resets the recipients and reopens the draft row when the Safe changes', () => {
-    accounts([option(SAFE_A), option(SAFE_B)])
-    guard({ status: 'none' })
-    const { switchTo } = renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
-
-    fireEvent.click(screen.getByRole('button', { name: 'confirm draft' }))
-    expect(screen.getByRole('button', { name: 'Allow Dave' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'confirm draft' })).not.toBeInTheDocument()
-
-    switchTo(buildSafeAccountId(SEPOLIA, SAFE_B))
-
-    expect(screen.queryByRole('button', { name: 'Allow Dave' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'confirm draft' })).toBeInTheDocument()
-    expect(screen.getByTestId('next-btn')).toBeDisabled()
-  })
-
-  it('names the picked Safe and its chain in the summary', () => {
+  it('should show no summary and no callouts, when a token and a recipient are selected', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
+    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
-    expect(screen.getByText(/Treasury on Sepolia/)).toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
   it.each<GuardStatus>([{ status: 'none' }, { status: 'known' }])(
@@ -319,7 +317,6 @@ describe('CreateRecipientAllowlistPolicy', () => {
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
     expect(screen.getByTestId('guard-status-warning')).toHaveTextContent('The Safe policy guard is only partly enabled')
-    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
   })
 
   it('shows the guard banner when the guard blocks an allowlist', () => {
@@ -330,13 +327,11 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('guard-status-destructive')).toHaveTextContent('This Safe account needs an update')
   })
 
-  it('shows the summary and both sections before a Safe is picked', () => {
+  it('should, before a Safe is picked, mark the Safe selector for focus', () => {
     accounts([option(SAFE_A)])
     renderStep()
 
-    expect(screen.getByText('Pick a Safe account to start.')).toBeInTheDocument()
-    expect(screen.getByTestId('allowlist-recipients-section')).toBeInTheDocument()
-    expect(screen.getByTestId('next-btn')).toBeDisabled()
+    expect(screen.getByTestId('selector')).toHaveAttribute('data-autofocus', 'true')
   })
 
   it('closes the flow without a discard prompt and opens the Safe settings for an unknown guard', async () => {
@@ -351,20 +346,6 @@ describe('CreateRecipientAllowlistPolicy', () => {
 
     expect(mockSetTxFlow).toHaveBeenCalledWith(undefined)
     expect(mockPush).toHaveBeenCalledWith(expect.stringContaining(`/settings/modules?safe=sep:${SAFE_A}`))
-  })
-
-  it.each<[GuardStatus, string]>([
-    [{ status: 'none' }, 'take effect as soon as this transaction is executed'],
-    [{ status: 'known' }, 'policy guard is already enabled'],
-    [{ status: 'partial', missingSlot: 'module' }, 'policy guard is already enabled'],
-  ])('explains when the changes apply for guard status %o', async (status, copy) => {
-    accounts([option(SAFE_A)])
-    guard(status)
-    renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
-
-    await userEvent.hover(screen.getByRole('button', { name: 'When this takes effect' }))
-
-    expect(await screen.findByText(new RegExp(copy))).toBeInTheDocument()
   })
 
   it('retries a failed guard check', () => {
@@ -386,12 +367,12 @@ describe('CreateRecipientAllowlistPolicy', () => {
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 
-  it('shows no summary for a selected Safe that cannot take an allowlist', () => {
+  it('hides the form for a selected Safe that cannot take an allowlist', () => {
     accounts([option(SAFE_A, { ineligibleReason: 'unsupported-safe-version' }), option(SAFE_B)])
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A))
 
-    expect(screen.queryByText('Pick a Safe account to start.')).not.toBeInTheDocument()
-    expect(screen.queryByText(/Treasury on Sepolia/)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-tokens-section')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('allowlist-recipients-section')).not.toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeDisabled()
   })
 

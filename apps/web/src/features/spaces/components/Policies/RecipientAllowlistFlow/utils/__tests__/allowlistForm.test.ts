@@ -9,22 +9,28 @@ import {
 import {
   createDefaultAllowlistValues,
   type AllowlistFormRecipient,
+  type AllowlistToken,
   type RecipientAllowlistFormValues,
 } from '../../types'
 import {
-  addAllowlistRecipients,
   buildAllowlistRules,
   getAllowedTokenAddresses,
-  getFormTokenAddresses,
-  getSelectedRecipients,
+  getUniqueRecipients,
   isAllowlistComplete,
+  parsePastedRecipient,
+  selectAllowlistTokens,
+  toggleByAddress,
   validateAllowlistRecipient,
 } from '../allowlistForm'
 
 const address = () => getAddress(faker.finance.ethereumAddress())
+const token = (overrides: Partial<AllowlistToken> = {}): AllowlistToken => ({
+  address: address(),
+  symbol: faker.finance.currencyCode(),
+  ...overrides,
+})
 const recipient = (overrides: Partial<AllowlistFormRecipient> = {}): AllowlistFormRecipient => ({
   address: address(),
-  selected: true,
   ...overrides,
 })
 const values = (overrides: Partial<RecipientAllowlistFormValues> = {}): RecipientAllowlistFormValues => ({
@@ -34,102 +40,105 @@ const values = (overrides: Partial<RecipientAllowlistFormValues> = {}): Recipien
 
 describe('allowlistForm', () => {
   describe('createDefaultAllowlistValues', () => {
-    it('starts with nothing excluded, added or listed', () => {
-      expect(createDefaultAllowlistValues()).toEqual({ excludedTokens: [], addedTokens: [], recipients: [] })
-    })
-  })
-
-  describe('getFormTokenAddresses', () => {
-    it('lists an added token that is also held once, held tokens first', () => {
-      const held = address()
-      const added = address()
-
-      const result = getFormTokenAddresses([held], values({ addedTokens: [added, held.toLowerCase()] }))
-
-      expect(result).toEqual([held, added])
+    it('should, when a form starts, pick no token and no recipient', () => {
+      expect(createDefaultAllowlistValues()).toEqual({ tokens: [], recipients: [] })
     })
   })
 
   describe('getAllowedTokenAddresses', () => {
-    it('omits excluded tokens case-insensitively', () => {
-      const [a, b] = [address(), address()]
+    it('should, when held and other tokens are picked, list the held ones first in held order, then the rest as picked', () => {
+      const [firstHeld, secondHeld, notPicked] = [address(), address(), address()]
+      const custom = token()
 
-      expect(getAllowedTokenAddresses([a, b], values({ excludedTokens: [a.toLowerCase()] }))).toEqual([b])
+      const result = getAllowedTokenAddresses(
+        [firstHeld, notPicked, secondHeld],
+        values({ tokens: [custom, token({ address: secondHeld }), token({ address: firstHeld })] }),
+      )
+
+      expect(result).toEqual([firstHeld, secondHeld, custom.address])
+    })
+
+    it('should, when a token is picked twice in different cases, list it once', () => {
+      const picked = token()
+
+      const result = getAllowedTokenAddresses(
+        [],
+        values({ tokens: [picked, { ...picked, address: picked.address.toLowerCase() }] }),
+      )
+
+      expect(result).toEqual([picked.address])
     })
   })
 
-  describe('getSelectedRecipients', () => {
-    it('omits deselected recipients', () => {
-      const kept = recipient()
+  describe('getUniqueRecipients', () => {
+    it('should, when recipients differ only in address case, keep the first', () => {
+      const first = recipient({ name: 'Alice' })
+      const second = recipient({ address: first.address.toLowerCase(), name: 'Alice (old)' })
+      const other = recipient()
 
-      expect(getSelectedRecipients(values({ recipients: [kept, recipient({ selected: false })] }))).toEqual([kept])
+      expect(getUniqueRecipients(values({ recipients: [first, other, second] }))).toEqual([first, other])
     })
   })
 
   describe('buildAllowlistRules', () => {
-    it('returns one rule per allowed token listing every selected recipient, native included', () => {
-      const token = address()
+    it('should, when tokens and recipients are picked, return one rule per token listing every recipient, native included', () => {
+      const erc20 = token()
       const [r1, r2] = [recipient(), recipient()]
 
-      const rules = buildAllowlistRules([ZERO_ADDRESS, token], values({ recipients: [r1, r2] }))
+      const rules = buildAllowlistRules(
+        [ZERO_ADDRESS, erc20.address],
+        values({ tokens: [erc20, token({ address: ZERO_ADDRESS })], recipients: [r1, r2] }),
+      )
 
       expect(rules).toEqual([
         { tokenAddress: ZERO_ADDRESS, recipients: [r1.address, r2.address] },
-        { tokenAddress: token, recipients: [r1.address, r2.address] },
+        { tokenAddress: erc20.address, recipients: [r1.address, r2.address] },
       ])
     })
 
-    it('omits excluded tokens and deselected recipients', () => {
-      const [kept, dropped] = [address(), address()]
-      const selected = recipient()
+    it('should, when a held token is not picked, leave it out', () => {
+      const picked = token()
 
       const rules = buildAllowlistRules(
-        [kept, dropped],
-        values({ excludedTokens: [dropped], recipients: [selected, recipient({ selected: false })] }),
+        [address(), picked.address],
+        values({ tokens: [picked], recipients: [recipient()] }),
       )
 
-      expect(rules).toEqual([{ tokenAddress: kept, recipients: [selected.address] }])
+      expect(rules.map(({ tokenAddress }) => tokenAddress)).toEqual([picked.address])
     })
 
-    it('returns no rules when there are no selected recipients', () => {
-      expect(buildAllowlistRules([address()], values())).toEqual([])
-      expect(buildAllowlistRules([address()], values({ recipients: [recipient({ selected: false })] }))).toEqual([])
+    it('should, when no recipient is picked, return no rules', () => {
+      expect(buildAllowlistRules([], values({ tokens: [token()] }))).toEqual([])
     })
 
-    it('includes an added token that is also held once', () => {
-      const token = address()
-
-      const rules = buildAllowlistRules(
-        [token],
-        values({ addedTokens: [token.toLowerCase()], recipients: [recipient()] }),
-      )
-
-      expect(rules).toHaveLength(1)
-    })
-
-    it('checksums the output addresses', () => {
-      const token = address()
-      const r = recipient()
-      const lower = { ...r, address: r.address.toLowerCase() }
-
-      const rules = buildAllowlistRules([token.toLowerCase()], values({ recipients: [lower] }))
-
-      expect(rules).toEqual([{ tokenAddress: token, recipients: [r.address] }])
-    })
-
-    it('lists a recipient entered twice in different cases once', () => {
+    it('should, when addresses are lowercase, checksum them', () => {
+      const picked = token()
       const r = recipient()
 
       const rules = buildAllowlistRules(
-        [address()],
-        values({ recipients: [r, { ...r, address: r.address.toLowerCase() }] }),
+        [],
+        values({
+          tokens: [{ ...picked, address: picked.address.toLowerCase() }],
+          recipients: [{ ...r, address: r.address.toLowerCase() }],
+        }),
+      )
+
+      expect(rules).toEqual([{ tokenAddress: picked.address, recipients: [r.address] }])
+    })
+
+    it('should, when a recipient is listed twice in different cases, list it once', () => {
+      const r = recipient()
+
+      const rules = buildAllowlistRules(
+        [],
+        values({ tokens: [token()], recipients: [r, { ...r, address: r.address.toLowerCase() }] }),
       )
 
       expect(rules[0].recipients).toEqual([r.address])
     })
 
-    it('gives every rule its own recipients array', () => {
-      const rules = buildAllowlistRules([address(), address()], values({ recipients: [recipient()] }))
+    it('should, when there are several rules, give each its own recipients array', () => {
+      const rules = buildAllowlistRules([], values({ tokens: [token(), token()], recipients: [recipient()] }))
 
       expect(rules[0].recipients).toEqual(rules[1].recipients)
       expect(rules[0].recipients).not.toBe(rules[1].recipients)
@@ -137,36 +146,64 @@ describe('allowlistForm', () => {
   })
 
   describe('isAllowlistComplete', () => {
-    it('is false with zero allowed tokens', () => {
-      const token = address()
-
-      expect(isAllowlistComplete([token], values({ excludedTokens: [token], recipients: [recipient()] }))).toBe(false)
-      expect(isAllowlistComplete([], values({ recipients: [recipient()] }))).toBe(false)
+    it('should, when no token is picked, be false', () => {
+      expect(isAllowlistComplete(values({ recipients: [recipient()] }))).toBe(false)
     })
 
-    it('is false with zero selected recipients', () => {
-      expect(isAllowlistComplete([address()], values({ recipients: [recipient({ selected: false })] }))).toBe(false)
+    it('should, when no recipient is picked, be false', () => {
+      expect(isAllowlistComplete(values({ tokens: [token()] }))).toBe(false)
     })
 
-    it('is true with an allowed token and a selected recipient', () => {
-      expect(isAllowlistComplete([address()], values({ recipients: [recipient()] }))).toBe(true)
+    it('should, when a token and a recipient are picked, be true', () => {
+      expect(isAllowlistComplete(values({ tokens: [token()], recipients: [recipient()] }))).toBe(true)
+    })
+  })
+
+  describe('toggleByAddress', () => {
+    it('should, when the address is not listed, append the item', () => {
+      const listed = token()
+      const added = token()
+
+      expect(toggleByAddress([listed], added)).toEqual([listed, added])
+    })
+
+    it('should, when the address is listed in another case, take it out', () => {
+      const listed = recipient()
+      const other = recipient()
+
+      expect(toggleByAddress([listed, other], { address: listed.address.toLowerCase() })).toEqual([other])
+    })
+  })
+
+  describe('selectAllowlistTokens', () => {
+    it('should, when selecting, append only the listed tokens not picked yet', () => {
+      const picked = token()
+      const listed = token()
+
+      expect(selectAllowlistTokens([picked], [{ ...picked, symbol: 'OTHER' }, listed], true)).toEqual([picked, listed])
+    })
+
+    it('should, when unselecting, take out only the listed tokens', () => {
+      const [unlisted, listed] = [token(), token()]
+
+      expect(selectAllowlistTokens([unlisted, listed], [listed], false)).toEqual([unlisted])
     })
   })
 
   describe('validateAllowlistRecipient', () => {
     const safeAddress = address()
 
-    it('rejects the Safe itself, whatever the case', () => {
+    it('should, when the address is the Safe in another case, reject it', () => {
       expect(validateAllowlistRecipient(safeAddress.toLowerCase(), { safeAddress, existing: [] })).toBe(
         RECIPIENT_IS_SAFE_ERROR,
       )
     })
 
-    it('rejects reserved addresses', () => {
+    it('should, when the address is reserved, reject it', () => {
       expect(validateAllowlistRecipient(ZERO_ADDRESS, { safeAddress, existing: [] })).toBe(RECIPIENT_RESERVED_ERROR)
     })
 
-    it('rejects an existing recipient in another case', () => {
+    it('should, when the address is already a recipient in another case, reject it', () => {
       const existing = recipient()
 
       expect(validateAllowlistRecipient(existing.address.toLowerCase(), { safeAddress, existing: [existing] })).toBe(
@@ -174,51 +211,57 @@ describe('allowlistForm', () => {
       )
     })
 
-    it('accepts a fresh address', () => {
+    it('should, when the address is fresh, accept it', () => {
       expect(validateAllowlistRecipient(address(), { safeAddress, existing: [recipient()] })).toBeUndefined()
-    })
-
-    it('accepts a recipient that is listed but deselected', () => {
-      const existing = recipient({ selected: false })
-
-      expect(validateAllowlistRecipient(existing.address, { safeAddress, existing: [existing] })).toBeUndefined()
     })
   })
 
-  describe('addAllowlistRecipients', () => {
-    it('appends new recipients after the listed ones', () => {
-      const listed = recipient()
-      const added = recipient()
+  describe('parsePastedRecipient', () => {
+    const safeAddress = address()
+    const options = { safeAddress, chainShortName: 'sep', existing: [] }
 
-      expect(addAllowlistRecipients([listed], [added])).toEqual([listed, added])
+    it.each(['Alice', '0x12', ''])('should, when the query %p does not read as an address, return nothing', (query) => {
+      expect(parsePastedRecipient(query, options)).toBeUndefined()
     })
 
-    it('selects a deselected recipient again instead of listing it twice', () => {
-      const listed = recipient({ selected: false })
+    it('should, when a lowercase address is pasted with spaces, return it checksummed', () => {
+      const pasted = address()
 
-      expect(
-        addAllowlistRecipients([listed], [{ address: listed.address.toLowerCase(), name: 'Alice', selected: true }]),
-      ).toEqual([{ ...listed, name: 'Alice', selected: true }])
+      expect(parsePastedRecipient(`  ${pasted.toLowerCase()} `, options)).toEqual({ address: pasted, error: undefined })
     })
 
-    it('adds a recipient repeated in the batch only once', () => {
-      const added = recipient({ name: 'Alice' })
+    it("should, when the address has the chain's prefix, accept it without the prefix", () => {
+      const pasted = address()
 
-      expect(addAllowlistRecipients([], [added, { ...added, address: added.address.toLowerCase() }])).toEqual([added])
+      expect(parsePastedRecipient(`sep:${pasted}`, options)).toEqual({ address: pasted, error: undefined })
     })
 
-    it('selects every new recipient', () => {
-      const added = recipient({ selected: false })
-
-      expect(addAllowlistRecipients([], [added])).toEqual([{ ...added, selected: true }])
+    it("should, when the prefix is another chain's, say so", () => {
+      expect(parsePastedRecipient(`eth:${address()}`, options)?.error).toBe(`"eth" doesn't match the current chain`)
     })
 
-    it('keeps the name a listed recipient already has', () => {
-      const listed = recipient({ name: 'Alice', selected: false })
+    it('should, when the checksum is wrong, say so', () => {
+      const pasted = address()
+      const broken = pasted.replace(/[a-fA-F]/, (letter) =>
+        letter === letter.toLowerCase() ? letter.toUpperCase() : letter.toLowerCase(),
+      )
 
-      expect(addAllowlistRecipients([listed], [{ ...listed, name: 'Bob', selected: true }])).toEqual([
-        { ...listed, selected: true },
-      ])
+      expect(parsePastedRecipient(broken, options)?.error).toBe('Invalid address checksum')
+    })
+
+    it.each([
+      ['the Safe itself', () => safeAddress, RECIPIENT_IS_SAFE_ERROR],
+      ['a reserved address', () => ZERO_ADDRESS, RECIPIENT_RESERVED_ERROR],
+    ])('should, when the address is %s, return its error', (_, pasted, error) => {
+      expect(parsePastedRecipient(pasted(), options)?.error).toBe(error)
+    })
+
+    it('should, when the address is already a recipient, return the duplicate error', () => {
+      const existing = recipient()
+
+      expect(parsePastedRecipient(existing.address, { ...options, existing: [existing] })?.error).toBe(
+        RECIPIENT_DUPLICATE_ERROR,
+      )
     })
   })
 })

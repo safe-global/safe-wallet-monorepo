@@ -13,11 +13,6 @@ import { createChainData, createChainsPageData } from '@/stories/mocks/chains'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { createChainsPageDataV2 } from '@/stories/mocks/chains'
 import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/public/constants'
-import {
-  ADDRESS_BOOK_TRIGGER_LABEL,
-  RECIPIENT_NAME_LABEL,
-  RECIPIENT_REMOVE_LABEL,
-} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import RecipientAllowlistFlow from '.'
 
 /** The policy guard is only deployed on Sepolia. */
@@ -248,35 +243,6 @@ export const CreateNoAccount: Story = {
   play: async ({ canvasElement }) => {
     const trigger = await within(canvasElement).findByRole('combobox', {}, { timeout: 30000 })
     await expect(trigger).toBeVisible()
-  },
-}
-
-/** A Safe picked, its held tokens listed and no recipients yet: the entry row starts open. */
-export const CreateNoRecipients: Story = {
-  play: async ({ canvasElement }) => {
-    await pickSafe(canvasElement)
-    await expect(
-      await within(canvasElement).findByRole('textbox', { name: RECIPIENT_NAME_LABEL }, { timeout: 30000 }),
-    ).toBeVisible()
-  },
-}
-
-/** USDC left out and four recipients picked from the address book. */
-export const Create: Story = {
-  play: async ({ canvasElement }) => {
-    await pickSafe(canvasElement)
-    const canvas = within(canvasElement)
-    await userEvent.click(await canvas.findByRole('button', { name: 'Allow USDC' }, { timeout: 30000 }))
-    await userEvent.click(await canvas.findByRole('button', { name: RECIPIENT_REMOVE_LABEL }))
-    // Two passes, since one pass lists Workspace contacts before local ones
-    for (const names of [['Payroll — Deel', 'Contractor — M. Ito', 'Ops wallet'], ['Coinbase Prime']]) {
-      await userEvent.click(await canvas.findByRole('button', { name: ADDRESS_BOOK_TRIGGER_LABEL }))
-      for (const name of names) {
-        await userEvent.click(await screen.findByRole('checkbox', { name: `Add ${name}` }))
-      }
-      await userEvent.click(await screen.findByRole('button', { name: /^Add$/ }))
-    }
-    await expect(await canvas.findByText(/to 4 recipients/)).toBeVisible()
   },
 }
 
