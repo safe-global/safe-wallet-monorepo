@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { _resetOverlayQueue } from '@/services/overlay-queue/store'
+import { useOverlay } from '@/services/overlay-queue/useOverlay'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { CONTACT_SALES_URL } from '../../../constants'
 import TrialEndingModal, { _endsIn } from '../TrialEndingModal'
@@ -124,9 +127,15 @@ const trial = (daysLeft: number, isTrialEndingSoon = daysLeft <= 7) => ({
   isLoading: false,
 })
 
+const Tour = () => {
+  const [isDue, setIsDue] = useState(true)
+  return useOverlay({ kind: 'guide', isDue }) ? <button onClick={() => setIsDue(false)}>Close tour</button> : null
+}
+
 describe('TrialEndingModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    _resetOverlayQueue()
     for (const key of Object.keys(storage)) delete storage[key]
     mockUseSpacePlan.mockReturnValue(trial(7))
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
@@ -239,5 +248,47 @@ describe('TrialEndingModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
     expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
+  })
+
+  it('comes before a tour that becomes due at the same time', () => {
+    render(
+      <>
+        <Tour />
+        <TrialEndingModal spaceId={SPACE_ID} />
+      </>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
+    // By text: an open dialog hides the rest of the page from role queries
+    expect(screen.queryByText('Close tour')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+
+    expect(screen.getByRole('button', { name: 'Close tour' })).toBeInTheDocument()
+  })
+
+  it('waits while a tour is already on screen, and opens once it closes', () => {
+    const { rerender } = render(<Tour />)
+    rerender(
+      <>
+        <Tour />
+        <TrialEndingModal spaceId={SPACE_ID} />
+      </>,
+    )
+    expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close tour' }))
+
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
+  })
+
+  it('shows the reminder of the next Workspace after the member closed it in another one', () => {
+    const otherSpaceId = '22222222-2222-2222-2222-222222222222'
+    const { rerender } = render(<TrialEndingModal spaceId={SPACE_ID} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+
+    rerender(<TrialEndingModal spaceId={otherSpaceId} />)
+
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
   })
 })
