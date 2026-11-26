@@ -18,7 +18,7 @@ export const Edit: Story = {}
 
 export const Removal: Story = { args: { change: 'removal', variant: 'info' } }
 
-/** The longest change, which the table's change column is sized for. */
+/** The longest change, which the table's first cell makes room for beside the allowlist's name. */
 export const GuardRemoval: Story = { args: { change: 'guard-removal', variant: 'info' } }
 
 export const Expired: Story = { args: { variant: 'secondary' } }

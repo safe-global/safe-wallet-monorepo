@@ -10,7 +10,7 @@ import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/com
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import PolicyRule from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
-import AllowlistChangeCell from './components/AllowlistChangeCell'
+import AllowlistRuleCell from './components/AllowlistRuleCell'
 import AllowlistStatusCell from './components/AllowlistStatusCell'
 import PolicyStatusCell from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyStatusCell'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
@@ -54,9 +54,11 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       header: 'RULE',
       width: 'fit',
       sticky: true,
-      minWidth: 256,
+      // Fits an allowlist's name and recipient count beside "Guard removal", the longest change tag
+      minWidth: 280,
       cellTestId: 'policy-cell-rule',
-      cell: (policy) => <PolicyRule policy={policy} />,
+      cell: (policy) =>
+        isAllowlistPolicy(policy) ? <AllowlistRuleCell policy={policy} /> : <PolicyRule policy={policy} />,
     },
     {
       id: 'appliesTo',
@@ -149,14 +151,6 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
           </Tooltip>
         </div>
       ),
-    },
-    {
-      id: 'change',
-      header: 'CHANGE',
-      width: 'fit',
-      minWidth: 136,
-      cellTestId: 'policy-cell-change',
-      cell: (policy) => (isAllowlistPolicy(policy) ? <AllowlistChangeCell policy={policy} /> : null),
     },
     {
       id: 'status',

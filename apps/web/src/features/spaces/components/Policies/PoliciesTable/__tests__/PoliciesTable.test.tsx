@@ -67,7 +67,6 @@ describe('PoliciesTable', () => {
       'SAFE ACCOUNT',
       'PROPOSER / TOKENS',
       'NETWORK',
-      'CHANGE',
       'STATUS',
       '',
     ])
@@ -166,7 +165,7 @@ describe('PoliciesTable', () => {
     await user.hover(screen.getByTestId('policy-status-edit-in-delay'))
     act(() => jest.runOnlyPendingTimers())
 
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
     expect(screen.getByTestId('policy-status-edit-in-delay')).toHaveTextContent('In delay')
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent(
       /^Can be applied in (1 day|23 hours 5[7-9] minutes), from .+ UTC\. Expires on .+ UTC\.$/,
@@ -181,7 +180,7 @@ describe('PoliciesTable', () => {
     await user.hover(screen.getByTestId('policy-status-edit-pending'))
     act(() => jest.runOnlyPendingTimers())
 
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
     expect(screen.getByTestId('policy-status-edit-pending')).toHaveTextContent('Pending · 1/2')
     expect(screen.getByTestId('policy-status-detail')).toHaveTextContent('Waiting for signatures: 1 of 2.')
   })
@@ -195,14 +194,14 @@ describe('PoliciesTable', () => {
   it('should, when an allowlist setup executed and CGW does not serve it yet, show setup and processing', () => {
     render(<PoliciesTable policies={[mockProcessingAllowlist({ appliesOnExecution: true })]} />)
 
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Setup')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Setup')
     expect(screen.getByTestId('policy-status-processing')).toHaveTextContent('Processing')
   })
 
   it('should, when the signing window of a queued allowlist edit closed, show edit and expired', () => {
     render(<PoliciesTable policies={[mockExpiredPendingAllowlist()]} />)
 
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
     expect(screen.getByTestId('policy-status-edit-expired')).toHaveTextContent('Expired')
   })
 
@@ -216,28 +215,37 @@ describe('PoliciesTable', () => {
     expect(screen.getByTestId('policy-status-active')).toBeInTheDocument()
   })
 
-  it('should, when an allowlist is in no change, leave its change column empty', () => {
+  it('should, when an allowlist is in no change, show no change tag beside its name', () => {
     render(<PoliciesTable policies={[mockActiveAllowlist()]} />)
 
-    expect(screen.getByTestId('policy-cell-change')).toBeEmptyDOMElement()
+    expect(within(screen.getByTestId('policy-cell-rule')).queryByTestId(/^policy-change-/)).not.toBeInTheDocument()
     expect(screen.getByTestId('policy-status-active')).toHaveTextContent('Active')
   })
 
-  it('should, when the policy is not an allowlist, leave its change column empty', () => {
+  it('should, when the policy is not an allowlist, show no change tag beside its name', () => {
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 
-    expect(screen.getByTestId('policy-cell-change')).toBeEmptyDOMElement()
+    expect(within(screen.getByTestId('policy-cell-rule')).queryByTestId(/^policy-change-/)).not.toBeInTheDocument()
     expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
   })
 
-  it('should, when the apply of an allowlist removal has every signature, show removal and apply ready to execute in their own columns', () => {
+  it('should, when an allowlist is in a change, tag the change beside its name and recipient count', () => {
+    render(<PoliciesTable policies={[mockPendingAllowlistUpdate()]} />)
+
+    const rule = screen.getByTestId('policy-cell-rule')
+    expect(within(rule).getByText('Allowlist')).toBeInTheDocument()
+    expect(within(rule).getByText('3 recipients')).toBeInTheDocument()
+    expect(within(rule).getByTestId('policy-change-edit')).toHaveTextContent('Edit')
+  })
+
+  it('should, when the apply of an allowlist removal has every signature, tag removal beside its name and show apply ready to execute as its status', () => {
     render(
       <PoliciesTable
         policies={[mockPendingAllowlist({ operation: 'remove', step: 'apply', confirmationsSubmitted: 2 })]}
       />,
     )
 
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Removal')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Removal')
     expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Apply ready to execute')
   })
 

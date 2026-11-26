@@ -1,9 +1,18 @@
 import { Typography } from '@safe-global/views/components/ui/typography'
+import AllowlistChangeChip, {
+  type AllowlistChangeChipProps,
+} from '@safe-global/views/features/spaces/components/Policies/components/AllowlistChangeChip'
 import { getPolicyLabel, getPolicySummary } from '../../utils/policyLabel'
 import { getPolicyIcon } from '../../utils/policyIcon'
 import type { Policy } from '../../types'
 
-const PolicyRule = ({ policy }: { policy: Policy }) => {
+export type PolicyRuleProps = {
+  policy: Policy
+  /** The change an allowlist is in, tagged beside its name; unset while it is in none. */
+  change?: AllowlistChangeChipProps
+}
+
+const PolicyRule = ({ policy, change }: PolicyRuleProps) => {
   const Icon = getPolicyIcon(policy.type)
 
   return (
@@ -20,6 +29,8 @@ const PolicyRule = ({ policy }: { policy: Policy }) => {
           {getPolicySummary(policy)}
         </Typography>
       </div>
+
+      {change && <AllowlistChangeChip {...change} />}
     </div>
   )
 }

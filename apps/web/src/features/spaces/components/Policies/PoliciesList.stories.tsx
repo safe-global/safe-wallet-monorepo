@@ -21,10 +21,12 @@ import {
   mockAllowlistRemovalScheduled,
   mockCgwAllowlist,
   mockCgwUnenforcedAllowlist,
+  mockExpiredPendingAllowlist,
   mockExpiredRequestAllowlist,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
+  mockProcessingAllowlist,
   mockReadyToApplyAllowlist,
 } from '../../public/utils/allowlistPolicies'
 import PoliciesList from './PoliciesList'
@@ -100,7 +102,7 @@ export const AllowlistChangePending: Story = {
   args: { policies: [mockAllowlistChangePending()] },
 }
 
-/** One allowlist in each change and status, sorted with the ones that need the user first. */
+/** One allowlist in each change and status, sorted with the ones that need the user first; the change is tagged beside the name. */
 export const AllowlistStatuses: Story = {
   args: {
     policies: [
@@ -122,7 +124,9 @@ export const AllowlistStatuses: Story = {
         step: 'remove-guard',
         confirmationsSubmitted: 2,
       }),
-      { ...mockPendingAllowlist({ id: 'processing', operation: 'update', step: 'apply' }), status: 'activating' },
+      mockProcessingAllowlist({ id: 'processing', operation: 'update', step: 'apply' }),
+      mockExpiredPendingAllowlist(),
+      mockFailedAllowlist(),
     ],
   },
 }

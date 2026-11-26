@@ -49,7 +49,7 @@ const openOnlyRow = async ({ user }: ReturnType<typeof renderPage>) => {
 const openRowWithStatus = async ({ user }: ReturnType<typeof renderPage>, change: string, status: string) => {
   const row = (await screen.findAllByTestId('table-row')).find(
     (candidate) =>
-      within(candidate).getByTestId('policy-cell-change').textContent === change &&
+      within(candidate).queryByTestId(/^policy-change-/)?.textContent === change &&
       within(candidate).getByTestId('policy-cell-status').textContent === status,
   )
   if (!row) throw new Error(`No row with change ${change} and status ${status}`)
@@ -146,7 +146,7 @@ describe('Policies page with delayed allowlist requests', () => {
     const view = renderPage(workspace)
 
     expect(await screen.findByTestId('policy-cell-status')).toHaveTextContent('Apply pending · 1/2')
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
     const drawer = await openOnlyRow(view)
 
     expect(within(drawer).getByText('Pending signatures')).toBeInTheDocument()
@@ -199,7 +199,7 @@ describe('Policies page with delayed allowlist requests', () => {
 
     const drawer = await openOnlyRow(view)
 
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Edit')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Edit')
     expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('In delay')
     expect(within(drawer).getByText(/^Your changes can be applied in (9|10) minutes$/)).toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: /^Apply in (9|10) minutes$/ })).toBeDisabled()

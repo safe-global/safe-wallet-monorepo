@@ -95,7 +95,7 @@ describe('Policies page with an executed allowlist setup', () => {
     await waitFor(() => expect(within(drawer).getByTestId('allowlist-status-tags')).toHaveTextContent('Processing'))
     expect(within(drawer).getByTestId('allowlist-status-tags')).toHaveTextContent('Setup')
     expect(screen.getByTestId('policy-cell-status')).toHaveTextContent('Processing')
-    expect(screen.getByTestId('policy-cell-change')).toHaveTextContent('Setup')
+    expect(within(screen.getByTestId('policy-cell-rule')).getByTestId(/^policy-change-/)).toHaveTextContent('Setup')
   })
 
   it('should, while the transaction waits for execution, show ready to execute in both the table and its panel', async () => {
