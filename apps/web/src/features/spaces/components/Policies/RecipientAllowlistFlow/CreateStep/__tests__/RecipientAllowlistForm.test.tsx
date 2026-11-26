@@ -8,6 +8,11 @@ import { createDefaultAllowlistValues } from '../../types'
 import type { HeldTokenAddresses } from '../../hooks/useHeldTokenAddresses'
 import RecipientAllowlistForm from '../RecipientAllowlistForm'
 
+jest.mock('../TokensSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="tokens-section" />,
+}))
+
 const ACCOUNT = { chainId: '1', address: checksumAddress(faker.finance.ethereumAddress()), label: 'Treasury' }
 const HELD_TOKENS: HeldTokenAddresses = {
   addresses: [ZERO_ADDRESS],
@@ -43,15 +48,17 @@ const Form = ({
 )
 
 describe('RecipientAllowlistForm', () => {
-  it('renders no summary when creating an allowlist', () => {
+  it('renders the token section and no summary when creating an allowlist', () => {
     render(<Form />)
 
+    expect(screen.getByTestId('tokens-section')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
-  it('renders no summary before a Safe is picked', () => {
+  it('renders the token section and no summary before a Safe is picked', () => {
     render(<Form hasAccount={false} />)
 
+    expect(screen.getByTestId('tokens-section')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
@@ -68,7 +75,7 @@ describe('RecipientAllowlistForm', () => {
     )
   })
 
-  it('hides the edit summary when blocked with an account', () => {
+  it('hides the edit summary and the sections when blocked with an account', () => {
     render(
       <EditModeProvider>
         <Form showSections={false} />
@@ -76,9 +83,10 @@ describe('RecipientAllowlistForm', () => {
     )
 
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('tokens-section')).not.toBeInTheDocument()
   })
 
-  it('renders its children after the edit summary', () => {
+  it('renders its children between the edit summary and the sections', () => {
     render(
       <EditModeProvider>
         <Form>
@@ -89,6 +97,8 @@ describe('RecipientAllowlistForm', () => {
 
     const summary = screen.getByRole('status')
     const field = screen.getByTestId('account-field')
+    const sections = screen.getByTestId('tokens-section')
     expect(summary.compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(field.compareDocumentPosition(sections) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 })

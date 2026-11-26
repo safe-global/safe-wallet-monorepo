@@ -219,13 +219,17 @@ describe('CreateRecipientAllowlistPolicy', () => {
     )
   })
 
-  it('should, when the spending limits failed to load, keep Next disabled', () => {
+  it('should, when the spending limits failed to load, keep Next disabled and offer to load them again', () => {
     accounts([option(SAFE_A)])
     guard({ status: 'none' })
-    spendingLimits({ isError: true })
+    const refetch = jest.fn()
+    spendingLimits({ isError: true, refetch })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+
     expect(screen.getByTestId('next-btn')).toBeDisabled()
+    expect(refetch).toHaveBeenCalled()
   })
 
   it('should keep Next disabled, when the spending limits are still loading', () => {
@@ -289,6 +293,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'none' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
+    expect(screen.getByRole('button', { name: 'Allow ETH' })).toBeInTheDocument()
     expect(screen.getByTestId('next-btn')).toBeEnabled()
   })
 
@@ -297,6 +302,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     guard({ status: 'none' })
     renderStep(buildSafeAccountId(SEPOLIA, SAFE_A), completeValues())
 
+    expect(screen.getByTestId('allowlist-tokens-section')).toBeInTheDocument()
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
@@ -331,6 +337,7 @@ describe('CreateRecipientAllowlistPolicy', () => {
     accounts([option(SAFE_A)])
     renderStep()
 
+    expect(screen.getByRole('combobox', { name: 'Search tokens by name or address' })).toBeDisabled()
     expect(screen.getByTestId('selector')).toHaveAttribute('data-autofocus', 'true')
   })
 

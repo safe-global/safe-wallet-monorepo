@@ -11,6 +11,8 @@ export type CustomTokenLookup = {
   /** Only an ERC-20 the Transaction Service knows; a 404 or any other token type leaves it unset. */
   option?: TokenOption
   isLoading: boolean
+  /** CGW doesn't know the address as any token. */
+  isNotFound: boolean
   /** A failure other than not found. */
   isError: boolean
   refetch: () => void
@@ -30,7 +32,14 @@ const useCustomTokenLookup = (query: string, options: readonly TokenOption[]): C
   const option = useMemo(() => (token?.type === 'ERC20' ? toCustomTokenOption(token) : undefined), [token])
   const isNotFound = !!error && 'status' in error && error.status === 404
 
-  return { address, option, isLoading: !!address && isFetching, isError: !!address && isError && !isNotFound, refetch }
+  return {
+    address,
+    option,
+    isLoading: !!address && isFetching,
+    isNotFound: !!address && !isFetching && isNotFound,
+    isError: !!address && isError && !isNotFound,
+    refetch,
+  }
 }
 
 export default useCustomTokenLookup
