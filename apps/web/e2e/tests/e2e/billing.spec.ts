@@ -8,17 +8,21 @@ import {
   clearSubscription,
   createEmailSession,
   createWorkspace,
+  hasPaymentMethod,
   inviteMember,
   planName,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
   workspaceResource,
+  workspaceUrl,
   type EmailSession,
 } from '../../src/fixtures/email-session'
 import { WorkspacePage } from '../../src/pages/workspace.page'
 
 const BUSINESS_SEATS = 20
+const HOUR_SECONDS = 60 * 60
+const DAY_SECONDS = 24 * HOUR_SECONDS
 
 test.describe('Safe Pro billing of a Workspace', { tag: '@e2e' }, () => {
   let user: EmailSession
@@ -78,6 +82,27 @@ test.describe('Safe Pro billing of a Workspace', { tag: '@e2e' }, () => {
     await workspace.subscriptionActivatedDialog.getByRole('button', { name: 'Get started' }).click()
     await expect(workspace.planChooserModal).toBeHidden()
     await expect.poll(() => planName(user, workspaceId)).toBe('Business')
+  })
+
+  test('should remind the admin before the free access ends and add a payment method through the billing portal', async ({
+    safePage,
+  }) => {
+    const endsInThreeDays = Math.floor(Date.now() / 1000) + 3 * DAY_SECONDS - HOUR_SECONDS
+    await storeSubscription(user, workspaceId, { plan: 'starter', currentPeriodEnd: endsInThreeDays })
+    await workspace.gotoDashboard(workspaceId)
+
+    await expect(workspace.trialEndingModal).toContainText('Your free access will end in 3 days')
+    await workspace.trialEndingModal.getByRole('button', { name: 'Add payment method' }).click()
+    await expect(safePage.getByRole('heading', { name: 'Local billing portal' })).toBeVisible()
+    await expect(safePage.getByText(`Workspace: ${workspaceId.replaceAll('-', '')}`)).toBeVisible()
+    await workspace.portalAddCardButton.click()
+
+    await expect(safePage).toHaveURL(workspaceUrl('/spaces/plans', workspaceId))
+    await expect(safePage.getByText(/^Active until .+ · 3 days left$/)).toBeVisible()
+    await expect(workspace.managePlanButton).toBeVisible()
+    await expect(safePage.getByRole('button', { name: 'Add payment method' })).toBeHidden()
+    await expect(workspace.trialEndingModal).toBeHidden()
+    await expect.poll(() => hasPaymentMethod(user, workspaceId)).toBe(true)
   })
 
   test('should move the Workspace to Business when the admin upgrades from Starter', async () => {

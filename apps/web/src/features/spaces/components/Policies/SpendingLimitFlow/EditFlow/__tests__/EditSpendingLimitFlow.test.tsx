@@ -7,8 +7,8 @@ import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
 import {
   useAddCustomToken as mockUseAddCustomToken,
   useCustomTokens as mockUseCustomTokens,
-} from '../../CustomTokensProvider'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+} from '@/components/common/CustomTokensProvider'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import EditSpendingLimitFlow from '..'
 
 const SAFE = getAddress('0x1000000000000000000000000000000000000001')

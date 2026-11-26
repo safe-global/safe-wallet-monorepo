@@ -1,7 +1,5 @@
 import { useMemo } from 'react'
-import useSpendingLimitTokenOptions, {
-  type TokenOptionsResult,
-} from '../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
+import useSpendingLimitTokenOptions, { type TokenOptionsResult } from '@/hooks/useSpendingLimitTokenOptions'
 
 export type HeldTokenAddresses = TokenOptionsResult & {
   addresses: string[]

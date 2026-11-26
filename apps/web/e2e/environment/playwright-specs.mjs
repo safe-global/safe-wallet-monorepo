@@ -50,6 +50,7 @@ export const playwrightSpecs = {
   'e2e/safe-shield-untrusted-safe.spec.ts': {},
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': { flags: ['SPENDING_LIMIT'] },
+  'e2e/workspace-safe-spending-limit.spec.ts': { flags: ['SPENDING_LIMIT'] },
   'e2e/tx-history-filter.spec.ts': {},
   'e2e/portfolio.spec.ts': {
     scenarios: ['prepareZerionPortfolioScenario'],
@@ -95,13 +96,11 @@ export const playwrightSpecs = {
   'regression/auth0/step-up-outside-workspace.spec.ts': {
     scenarios: ['prepareBasicScenario'],
   },
-  'regression/auth0/step-up-workspace-actions.spec.ts': {
-    scenarios: ['prepareBasicScenario'],
-  },
   'regression/auth0/step-up-workspace-rename.spec.ts': {},
   'regression/auth0/workspace-invite.spec.ts': {},
   'regression/workspace-address-book.spec.ts': {
     scenarios: ['prepareBasicScenario'],
+    flags: ['WORKSPACES_ADDRESS_BOOK_V2'],
   },
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {

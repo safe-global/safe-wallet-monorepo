@@ -397,8 +397,8 @@
     {
       "key": "WORKSPACES_ADDRESS_BOOK_V2",
       "description": "Version 2 of the Workspace address book.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
+      "scope": "GLOBAL",
+      "enabled": true,
       "defaultChains": []
     },
     {
