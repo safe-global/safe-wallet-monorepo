@@ -6,13 +6,13 @@ import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { erc20TokenMetadataBuilder, erc721TokenMetadataBuilder } from '@/tests/builders/tokens'
 import useChainId from '@/hooks/useChainId'
-import { CustomTokensProvider, useCustomTokens } from '../../CustomTokensProvider'
+import { CustomTokensProvider, useCustomTokens } from '@/components/common/CustomTokensProvider'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOptionsResult } from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../utils/tokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
+import type { TokenOptionsResult } from '@/hooks/useSpendingLimitTokenOptions'
+import type { TokenOption } from '@/utils/tokenOptions'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import TokenSelector from '..'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -27,7 +27,7 @@ import {
   TOKEN_SELECTOR_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 // Render the tooltip parts inline so a disabled row's reason is assertable without hovering a portal.
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -134,6 +134,14 @@ describe('TokenSelector — rendering', () => {
     await user.click(screen.getByRole('option', { name: /USDC/ }))
 
     expect(onChange).toHaveBeenCalledWith(heldUsdc.address)
+  })
+
+  it('passes its extra tokens to the options hook, so they stay selectable', () => {
+    const existingLimitToken = option({ group: 'held' })
+
+    renderSelector({ extraTokens: [existingLimitToken] })
+
+    expect(mockUseOptions).toHaveBeenCalledWith([existingLimitToken])
   })
 
   it('renders a token without a logo', async () => {
