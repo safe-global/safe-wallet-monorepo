@@ -39,7 +39,7 @@ export const COMPARE_SECTIONS: CompareSection[] = [
     rows: [
       { feature: 'Safenet checks', values: fromBusiness, isComingSoon: true },
       { feature: 'More policies', values: fromBusiness, isComingSoon: true },
-      { feature: 'Pay gas fees from Safe account', values: fromBusiness, isComingSoon: true },
+      { feature: 'Pay gas fees from Safe account', values: every(true), isComingSoon: true },
     ],
   },
   {
