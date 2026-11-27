@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@safe-global/views/components/ui/accordion'
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -287,8 +287,12 @@ const SignMessage = ({ message, origin, requestId, declared }: SignMessageProps)
     onClose: () => setTxFlow(undefined),
   })
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const handleSign = async () => {
+    setIsSubmitting(true)
     const updatedMessage = await onSign()
+    setIsSubmitting(false)
 
     if (updatedMessage) {
       setSafeMessage(updatedMessage)
@@ -414,7 +418,7 @@ const SignMessage = ({ message, origin, requestId, declared }: SignMessageProps)
             <TxCardActions>
               <CheckWallet checkNetwork={!isDisabled}>
                 {(isOk) => (
-                  <Button onClick={handleSign} disabled={!isOk || isDisabled}>
+                  <Button onClick={handleSign} disabled={!isOk || isDisabled || isSubmitting}>
                     Sign
                   </Button>
                 )}
