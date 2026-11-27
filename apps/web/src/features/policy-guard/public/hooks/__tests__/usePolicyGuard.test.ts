@@ -61,6 +61,7 @@ const mockGuardSlots = (result: Partial<GuardSlotsQuery>) => {
 
 describe('usePolicyGuard', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     jest.restoreAllMocks()
     mockChain([FEATURES.POLICY_RECIPIENT_ALLOWLIST])
   })
@@ -244,9 +245,6 @@ describe('usePolicyGuard', () => {
   })
 
   describe('re-reads', () => {
-    beforeEach(() => jest.useFakeTimers())
-    afterEach(() => jest.useRealTimers())
-
     it('retries a failed read after one polling interval', () => {
       mockSafe()
       const { refetch } = mockGuardSlots({ isError: true, error: new Error('rpc down') })
