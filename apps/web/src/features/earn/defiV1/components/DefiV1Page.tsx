@@ -39,7 +39,8 @@ import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
 import { MoveFundsDialog, type HubTab } from './MoveFundsDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
-import { OpportunityToolbar } from './OpportunityToolbar'
+import { OpportunityCards } from './OpportunityCards'
+import { OpportunityToolbar, type OpportunityView } from './OpportunityToolbar'
 import type { CreatedInvestment } from './InvestmentForm'
 import { SetUpInvestmentFlow } from './SetUpInvestmentStepper'
 import { TreasurySummary } from './TreasurySummary'
@@ -91,6 +92,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [safeFilter, setSafeFilter] = useState(ALL)
   const [search, setSearch] = useState('')
   const [groupBy, setGroupBy] = useState<GroupBy>('none')
+  const [view, setView] = useState<OpportunityView>('cards')
   const [sort, setSort] = useState<Sort | null>(null)
   const [showAll, setShowAll] = useState(false)
   const [compareIds, setCompareIds] = useState<string[]>([])
@@ -268,17 +270,27 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           compareCount={compareIds.length}
           onCompare={() => setIsComparing(true)}
           hasInvestments={investedIds.length > 0}
+          view={view}
+          onView={setView}
           invest={
             <Button size="action" onClick={() => deposit(null)} data-testid="deposit-button">
               {DEFI_V1_COPY.action.deposit}
             </Button>
           }
         />
-        <OpportunitiesTable
-          label={hasInvestments ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities}
-          groups={groups}
-          {...tableProps}
-        />
+        {view === 'cards' ? (
+          <OpportunityCards
+            label={hasInvestments ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities}
+            groups={groups}
+            {...tableProps}
+          />
+        ) : (
+          <OpportunitiesTable
+            label={hasInvestments ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities}
+            groups={groups}
+            {...tableProps}
+          />
+        )}
         <div className="flex flex-wrap items-center justify-between gap-2">
           {hiddenCount > 0 ? (
             <Button variant="ghost" size="sm" onClick={() => setShowAll(true)}>

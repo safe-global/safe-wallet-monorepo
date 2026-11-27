@@ -105,7 +105,7 @@ export const CompareDialog = ({
               {items.map((item) => (
                 <TableHead key={item.id} scope="col" className="h-11 px-4 py-0 align-middle font-semibold">
                   <span className="flex min-w-0 items-center gap-2">
-                    <OpportunityMark invested={investedIds.includes(item.id)} />
+                    <OpportunityMark opportunity={item} invested={investedIds.includes(item.id)} />
                     <span className="truncate">{item.name}</span>
                     {investedIds.includes(item.id) && (
                       <Badge variant="mint" size="status" shape="status">

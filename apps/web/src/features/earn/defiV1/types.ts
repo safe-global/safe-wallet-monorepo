@@ -11,6 +11,7 @@ export type Opportunity = {
   name: string
   /** Initials on the opportunity's icon. */
   mark: string
+  logo?: string
   runBy: string
   curator?: string
   category: OpportunityCategory
