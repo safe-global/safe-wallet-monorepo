@@ -14,6 +14,7 @@ const SPACES_PREFIX_ROUTES = [
   AppRoutes.spaces.activity,
   AppRoutes.spaces.policies,
   AppRoutes.spaces.transactions,
+  AppRoutes.spaces.assets,
 ]
 
 export const useIsSpaceRoute = (): boolean => {

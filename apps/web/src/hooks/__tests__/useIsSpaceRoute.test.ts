@@ -57,6 +57,12 @@ describe('useIsSpaceRoute', () => {
     expect(result.current).toBe(true)
   })
 
+  it('returns true on /spaces/assets', () => {
+    mockUsePathname.mockReturnValue('/spaces/assets')
+    const { result } = renderHook(() => useIsSpaceRoute())
+    expect(result.current).toBe(true)
+  })
+
   it('does not match a prefix-overlap like /spaces/settings-foo', () => {
     mockUsePathname.mockReturnValue('/spaces/settings-foo')
     const { result } = renderHook(() => useIsSpaceRoute())

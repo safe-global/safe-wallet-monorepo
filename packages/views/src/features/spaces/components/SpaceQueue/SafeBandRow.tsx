@@ -13,6 +13,8 @@ const SafeBandRow = ({
   summary,
   onToggle,
   rowProps,
+  columnCount = QUEUE_COLUMNS.length,
+  showSummary = 'collapsed',
 }: {
   safeAddress: string
   title: ReactNode
@@ -20,6 +22,10 @@ const SafeBandRow = ({
   summary: string
   onToggle: () => void
   rowProps?: ComponentProps<'tr'>
+  /** The table's column count, for a table other than the queue */
+  columnCount?: number
+  /** When the summary shows: only while collapsed, as in the queue, or always */
+  showSummary?: 'collapsed' | 'always'
 }): ReactElement => (
   <TableRow
     data-no-hover
@@ -41,10 +47,10 @@ const SafeBandRow = ({
         </Button>
       </span>
     </TableCell>
-    <TableCell colSpan={QUEUE_COLUMNS.length - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
+    <TableCell colSpan={columnCount - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
       <div className={`flex min-h-11 items-center gap-3 text-sm ${QUEUE_ROW_LABEL}`}>
         {title}
-        {collapsed && summary && (
+        {(collapsed || showSummary === 'always') && summary && (
           <span className="ml-auto truncate text-xs tabular-nums text-muted-foreground">{summary}</span>
         )}
       </div>

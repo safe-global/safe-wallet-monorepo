@@ -8,10 +8,16 @@ const MAX_SEARCH_LENGTH = 100 // the gateway rejects longer searches
 type SearchTransactionsProps = {
   /** Called with the trimmed text once typing pauses, and at once when cleared */
   onSearch: (query: string) => void
+  label?: string
+  placeholder?: string
 }
 
 // Holds the typed text itself so a keystroke re-renders the input, not the queue below it
-const SearchTransactions = ({ onSearch }: SearchTransactionsProps): ReactElement => {
+const SearchTransactions = ({
+  onSearch,
+  label = 'Search transactions',
+  placeholder = 'Safes, networks, urgency, pending signers…',
+}: SearchTransactionsProps): ReactElement => {
   const [value, setValue] = useState('')
   const debouncedQuery = useDebounce(value.trim(), SEARCH_DEBOUNCE_MS)
   const lastQuery = useRef('')
@@ -30,8 +36,8 @@ const SearchTransactions = ({ onSearch }: SearchTransactionsProps): ReactElement
 
   return (
     <SearchInput
-      aria-label="Search transactions"
-      placeholder="Safes, networks, urgency, pending signers…"
+      aria-label={label}
+      placeholder={placeholder}
       value={value}
       maxLength={MAX_SEARCH_LENGTH}
       onChange={(event) => setValue(event.target.value)}

@@ -796,6 +796,13 @@
       "defaultChains": []
     },
     {
+      "key": "SPACE_ASSETS",
+      "description": "Token balances and positions across all Safes in a Workspace.",
+      "scope": "PER_CHAIN",
+      "enabled": false,
+      "defaultChains": []
+    },
+    {
       "key": "WORKSPACES_ADDRESS_BOOK_V2",
       "description": "Version 2 of the Workspace address book.",
       "scope": "GLOBAL",

@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactElement } from 'react'
+import type { ComponentProps, ReactElement, ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
@@ -12,12 +12,18 @@ const ChainHeaderRow = ({
   collapsed,
   onToggle,
   rowProps,
+  columnCount = QUEUE_COLUMNS.length,
+  end,
 }: {
   chain: ChainInfo
   nextNonce?: number
   collapsed: boolean
   onToggle: () => void
   rowProps?: ComponentProps<'tr'>
+  /** The table's column count, for a table other than the queue */
+  columnCount?: number
+  /** Shown at the row's end, such as the network's total */
+  end?: ReactNode
 }): ReactElement => (
   <TableRow data-no-hover className="cursor-pointer" onClick={onToggle} {...rowProps}>
     <TableCell data-pin="start" className="py-0!">
@@ -32,11 +38,12 @@ const ChainHeaderRow = ({
         </Button>
       </span>
     </TableCell>
-    <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="py-0! pr-3!">
+    <TableCell colSpan={columnCount - 1} className="py-0! pr-3!">
       <div className={`flex h-6 items-center gap-2 text-xs ${QUEUE_ROW_LABEL}`}>
         <ChainLogo chain={chain} size="sm" />
         <span className="font-medium">{chain.chainName}</span>
         {nextNonce !== undefined && <span className="font-mono text-muted-foreground">Next #{nextNonce}</span>}
+        {end && <span className="ml-auto tabular-nums text-muted-foreground">{end}</span>}
       </div>
     </TableCell>
   </TableRow>

@@ -36,6 +36,12 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     activeMemberOnly: true,
   },
   {
+    icon: Coins,
+    label: 'Assets',
+    href: AppRoutes.spaces.assets,
+    activeMemberOnly: true,
+  },
+  {
     icon: WalletCards,
     label: 'Safe accounts',
     href: AppRoutes.spaces.safeAccounts,
