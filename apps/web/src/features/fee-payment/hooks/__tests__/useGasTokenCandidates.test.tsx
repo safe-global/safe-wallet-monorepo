@@ -175,9 +175,10 @@ describe('useGasTokenCandidates', () => {
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
     expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH'])
+    expect(result.current.hasGasTokenList).toBe(true)
   })
 
-  it('offers the native token while the gas token list is still loading', () => {
+  it('offers the native token while the gas token list is loading or failed', () => {
     mockGasTokens(undefined)
     jest
       .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
@@ -191,6 +192,8 @@ describe('useGasTokenCandidates', () => {
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
     expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH'])
+    // Missing (loading or failed), so nobody should claim the native token is the only one that pays
+    expect(result.current.hasGasTokenList).toBe(false)
   })
 
   it('skips the gas token request until the chain is known', () => {

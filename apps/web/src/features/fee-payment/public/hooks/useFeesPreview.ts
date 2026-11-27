@@ -107,7 +107,7 @@ export const useFeesPreview = ({
   // the UI for confirmers regardless of how the tx got there.
   const isLegacySigned = !!safeTx && safeTx.signatures.size > 0 && !isPaidFromSafe(safeTx.data)
 
-  const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
+  const { candidates, defaultAddress, hasGasTokenList } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
   const lockedCandidate = useMemo<GasTokenCandidate | undefined>(() => {
     if (!lockedGasToken) return undefined
@@ -136,13 +136,14 @@ export const useFeesPreview = ({
   // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
   // Skip while the candidates list is empty — that's the transient remount window (Back/Forward
   // between flow steps) where balances haven't repopulated yet, not a real "token unavailable".
+  // Same while the gas tokens list is missing: an ERC-20 drops out of candidates without being unavailable.
   useEffect(() => {
     if (!feeGasToken) return
-    if (candidates.length === 0) return
+    if (candidates.length === 0 || !hasGasTokenList) return
     if (!candidates.some((c) => sameAddress(c.address, feeGasToken))) {
       setFeeGasToken(undefined)
     }
-  }, [feeGasToken, candidates, setFeeGasToken])
+  }, [feeGasToken, candidates, hasGasTokenList, setFeeGasToken])
 
   const availableGasTokens = isConfirmation && lockedCandidate ? [lockedCandidate] : candidates
   const selectedAddress = lockedGasToken ?? feeGasToken ?? defaultAddress ?? ZERO_ADDRESS

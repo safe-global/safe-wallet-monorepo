@@ -20,6 +20,7 @@ export type GasTokenCandidate = {
 export type GasTokenCandidatesResult = {
   candidates: GasTokenCandidate[]
   defaultAddress?: string
+  hasGasTokenList: boolean
 }
 
 const toFiat = (fiatBalance: string): number => {
@@ -27,19 +28,7 @@ const toFiat = (fiatBalance: string): number => {
   return Number.isFinite(value) ? value : 0
 }
 
-/**
- * Tokens the Safe holds that the fee service accepts as Pay from Safe gas tokens on this chain.
- *
- * The accepted ERC-20s come from the CGW (`/fees/gas-tokens`), which serves the Config Service
- * list the fee service itself checks against — so the selector can't offer a token the quote
- * would reject. No `/fees/preview` probes are needed.
- *
- * The native gas token is always included when held: the fee service accepts it everywhere and
- * it is not part of the list, so the flow still works on chains with no ERC-20 gas tokens.
- *
- * Order: native first, then the held tokens by fiat value, so the ones that can actually cover
- * the fee come first.
- */
+// The native token is not in the gas tokens list: the fee service accepts it on every chain.
 export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCandidatesResult => {
   const [balances] = useTrustedTokenBalances()
   const { safe } = useSafeInfo()
@@ -80,5 +69,5 @@ export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCan
       .map(({ isNative: _isNative, ...candidate }) => candidate)
   }, [tx, balances, chain?.chainId, chain?.nativeCurrency.logoUri, safe.threshold, gasTokens])
 
-  return { candidates, defaultAddress: candidates[0]?.address }
+  return { candidates, defaultAddress: candidates[0]?.address, hasGasTokenList: gasTokens !== undefined }
 }
