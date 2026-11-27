@@ -53,14 +53,15 @@ export const FilledWithMaxEther: Story = {
   },
 }
 
-// Prototype: private notes on the Review step. These open on the form: retype the amount, then press Next. A scripted
-// amount does not validate the form here, so there is no play function. Each state alone: Features/TxNotes/TxNoteInput.
-const REVIEW_ARGS = { recipients: [{ recipient: RECIPIENT, tokenAddress: ZERO_ADDRESS, amount: '1' }] }
+// Prototype: private notes on the Review step, full screen. `initialStep` opens the flow there with the form filled.
+const REVIEW_ARGS = {
+  recipients: [{ recipient: RECIPIENT, tokenAddress: ZERO_ADDRESS, amount: '1' }],
+  initialStep: 1,
+}
 
 const reviewStory = (...decorators: NonNullable<Story['decorators']>[]): Story => ({
   args: REVIEW_ARGS,
   decorators: decorators.flat(),
-  tags: ['skip-visual-test'],
 })
 
 /** Signed in to a Workspace on Pro: the proposer can leave a private note */

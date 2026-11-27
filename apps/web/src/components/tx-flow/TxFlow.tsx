@@ -44,6 +44,8 @@ type TxFlowProps<T extends unknown> = {
   declared?: TxFlowProviderProps<T>['declared']
   ReviewTransactionComponent?: ComponentType<ReviewTransactionProps>
   eventCategory?: string
+  /** Prototype stories: opens the flow on a later step, with `initialData` filled */
+  initialStep?: number
 } & TxFlowContextType['txLayoutProps']
 
 /**
@@ -66,9 +68,10 @@ export const TxFlow = <T extends unknown>({
   declared,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
+  initialStep,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
-  const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
+  const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory, initialStep)
 
   const childrenArray = Array.isArray(children) ? children : [children]
   const [signedTxId, setSignedTxId] = useState<string>()
