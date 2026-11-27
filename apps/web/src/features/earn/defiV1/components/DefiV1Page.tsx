@@ -26,6 +26,7 @@ import {
   groupOpportunities,
   heldIn,
   holdingsFor,
+  depositedByInvestment,
   earnedByInvestment,
   idleByAsset,
   investedFirst,
@@ -248,6 +249,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           <TreasurySummary
             summary={summary}
             idleAssets={idleByAsset(summary.idle, IDLE_MIX)}
+            depositedBy={depositedByInvestment(positions)}
             earnedBy={earnedByInvestment(positions)}
           />
         ) : (

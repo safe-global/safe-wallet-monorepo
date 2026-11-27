@@ -237,3 +237,7 @@ export const earnedByInvestment = (
   }
   return [...totals].map(([label, value]) => ({ label, value })).sort(byValue)
 }
+
+export const depositedByInvestment = (
+  positions: { opportunity: { name: string }; principal: number; pending: boolean }[],
+): Slice[] => earnedByInvestment(positions.map((position) => ({ ...position, earned: position.principal })))
