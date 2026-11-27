@@ -9,7 +9,7 @@
  * Register a Safe's state with `node policy-indexer.ts register <chainId> <address>` and the state as JSON on stdin:
  * `{ "GuardPolicyBinding": [Binding, …], "ConfigurationRoot": [Root, …] }`. It replaces what the Safe had.
  */
-import { isMain, json, localRequest, readText, serve } from './http.ts'
+import { isMain, isRecord, json, localRequest, readText, serve } from './http.ts'
 import type { MockRequest, Reply } from './http.ts'
 
 const PORT = 8094
@@ -49,8 +49,6 @@ type Variables = { guardPolicyBindings?: unknown; guardPolicyKinds?: unknown; ro
 class InvalidState extends Error {}
 
 const safeKey = (chainId: number, safe: string): string => `${chainId}:${safe.toLowerCase()}`
-
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
 function rowsOf(value: unknown, field: string, chainId: number, safe: string): Record<string, unknown>[] {
   if (value === undefined) return []

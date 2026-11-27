@@ -4,7 +4,7 @@ import { connect } from 'node:net'
 import type { AddressInfo } from 'node:net'
 import { describe, it } from 'node:test'
 import { setTimeout as sleep } from 'node:timers/promises'
-import { json, serve } from './http.ts'
+import { isRecord, json, serve } from './http.ts'
 
 // Node's default server closes an idle keep-alive connection 6 s after its last response
 const PAST_NODE_IDLE_TIMEOUT_MS = 7_000
@@ -26,5 +26,9 @@ describe('mock HTTP server', () => {
       socket.destroy()
       server.close()
     }
+  })
+
+  it('treats objects and arrays as records, and null and primitives as not', () => {
+    assert.deepEqual([{}, [], null, 'row', 1, undefined].map(isRecord), [true, true, false, false, false, false])
   })
 })

@@ -1,10 +1,10 @@
-import { Contract, getAddress, zeroPadValue } from 'ethers'
+import { AbiCoder, Contract, getAddress, keccak256, toBeHex, zeroPadValue } from 'ethers'
+import { GUARD_STORAGE_SLOT, MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/public/constants'
 import type { JourneyEnvironment } from '../fixtures/journey.fixture'
 import { readChain } from './local-provider'
 
-// keccak256("guard_manager.guard.address") and keccak256("module_manager.module_guard.address") of Safe v1.5.0
-const TRANSACTION_GUARD_SLOT = '0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8'
-const MODULE_GUARD_SLOT = '0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947'
+// SafePolicyGuard keeps `mapping(address safe => mapping(bytes32 root => uint256 readyAt))` at this storage slot
+const ROOT_CONFIGURED_SLOT = 3
 const GUARD_ABI = ['function rootConfigured(address safe, bytes32 root) view returns (uint256)']
 const ERC20_TRANSFER_POLICY_ABI = [
   'function getRecipientPermission(address policyGuard, address safe, address token, address recipient) view returns (uint8)',
@@ -21,8 +21,8 @@ const addressInSlot = (word: string): string => getAddress(`0x${zeroPadValue(wor
 export function readGuardSlots(env: JourneyEnvironment, safe: string): Promise<GuardSlots> {
   return readChain(env, async (provider) => {
     const [transactionGuard, moduleGuard] = await Promise.all([
-      provider.getStorage(safe, TRANSACTION_GUARD_SLOT),
-      provider.getStorage(safe, MODULE_GUARD_SLOT),
+      provider.getStorage(safe, GUARD_STORAGE_SLOT),
+      provider.getStorage(safe, MODULE_GUARD_STORAGE_SLOT),
     ])
     return { transactionGuard: addressInSlot(transactionGuard), moduleGuard: addressInSlot(moduleGuard) }
   })
@@ -60,15 +60,31 @@ export function readRecipientPermission(
   })
 }
 
+const rootConfiguredSlot = (safe: string, root: string): string => {
+  const coder = AbiCoder.defaultAbiCoder()
+  const safeMapping = keccak256(coder.encode(['address', 'uint256'], [safe, ROOT_CONFIGURED_SLOT]))
+  return keccak256(coder.encode(['bytes32', 'bytes32'], [root, safeMapping]))
+}
+
 /**
- * Mines the next block at `timestamp`, which moves the fork's clock forward instead of waiting for it. Every worker
- * shares the fork, so it only ever moves the clock to the time a journey needs.
+ * Makes the Safe's pending request for `root` applicable now, by moving its `readyAt` back to the latest block's time
+ * instead of moving the fork's clock, which every worker of the shard shares. Returns the new `readyAt`.
  */
-export function mineBlockAt(env: JourneyEnvironment, timestamp: number): Promise<void> {
+export function makeConfigurationApplicable(
+  env: JourneyEnvironment,
+  { guard, safe, root }: { guard: string; safe: string; root: string },
+): Promise<number> {
   return readChain(env, async (provider) => {
+    const slot = rootConfiguredSlot(safe, root)
+    const readyAt: bigint = await new Contract(guard, GUARD_ABI, provider).getFunction('rootConfigured')(safe, root)
+    if (readyAt === 0n || BigInt(await provider.getStorage(guard, slot)) !== readyAt) {
+      throw new Error(`The guard holds no request for ${root} at the expected storage slot`)
+    }
     const latest = await provider.getBlock('latest')
-    if (latest && latest.timestamp >= timestamp) return
-    await provider.send('evm_setNextBlockTimestamp', [timestamp])
-    await provider.send('evm_mine', [])
+    if (!latest) throw new Error('The fork has no latest block')
+    if (BigInt(latest.timestamp) < readyAt) {
+      await provider.send('anvil_setStorageAt', [guard, slot, toBeHex(latest.timestamp, 32)])
+    }
+    return Math.min(latest.timestamp, Number(readyAt))
   })
 }

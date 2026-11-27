@@ -187,7 +187,9 @@ describe('policy indexer', () => {
   })
 
   it('reports healthy', () => {
-    assert.deepEqual(dispatch({ method: 'GET', path: '/health', body: '' }, new Map()).status, 200)
+    const reply = dispatch({ method: 'GET', path: '/health', body: '' }, new Map())
+
+    assert.deepEqual([reply.status, JSON.parse(reply.body)], [200, { ready: true }])
   })
 
   it('fails other requests explicitly', () => {

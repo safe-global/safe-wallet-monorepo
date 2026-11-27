@@ -7,6 +7,8 @@
  */
 import { readFileSync } from 'node:fs'
 import { AbiCoder, Interface, ZeroAddress, getAddress, keccak256 } from 'ethers'
+import { SAFE_SETTER_SELECTORS } from '@/features/policy-guard/public/services/guardExit'
+import { REJECT_SELECTOR } from '@/features/policy-guard/public/services/rejectAccess'
 import { registerGuardPolicies } from '../../environment/scenarios/policy-indexer.mjs'
 import { executeTransaction, openSafe } from '../../environment/scenarios/safe.mjs'
 import { readChain } from '../chain/local-provider'
@@ -37,10 +39,6 @@ const ALLOW_POLICY = addressOf('AllowPolicy')
 export const ROOT_EXPIRY_SECONDS = 604_800
 
 const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
-const SET_GUARD_SELECTOR = '0xe19a9dd9'
-const SET_MODULE_GUARD_SELECTOR = '0xe068df37'
-const SET_FALLBACK_HANDLER_SELECTOR = '0xf08a0323'
-const REJECT_SELECTOR = '0x00000000'
 const CALL = 0
 const PERMISSION_ALWAYS = 2
 const CONFIGURATION = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
@@ -75,7 +73,7 @@ function rejectAccessOf(safe: string): Configuration {
 
 /** The unbinding of the Safe setters a removal allows, which the wallet puts before every allowlist */
 function clearedGuardExitOf(safe: string): Configuration[] {
-  return [SET_GUARD_SELECTOR, SET_MODULE_GUARD_SELECTOR, SET_FALLBACK_HANDLER_SELECTOR].map((selector) => ({
+  return SAFE_SETTER_SELECTORS.map((selector) => ({
     target: getAddress(safe),
     selector,
     operation: CALL,
