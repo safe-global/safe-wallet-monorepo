@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { ChevronDown, ListFilter } from 'lucide-react'
+import { ListFilter } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import TagMenu, { existingTagIds, sameTagIds, type TagActions } from './TagMenu'
@@ -45,13 +45,12 @@ const TagFilterDropdown = ({
       triggerContent={
         <>
           <ListFilter aria-hidden="true" data-icon="inline-start" />
-          Filters
+          Filter
           {selected.length > 0 && (
             <Badge variant="secondary" size="sm" data-testid="tag-menu-count">
               {selected.length}
             </Badge>
           )}
-          <ChevronDown className="text-muted-foreground size-4" aria-hidden="true" />
         </>
       }
       tags={tags}

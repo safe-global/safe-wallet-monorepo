@@ -48,6 +48,8 @@ export type TagMenuProps = {
   beforeCreate?: () => string | undefined
   onCreated?: (tag: WorkspaceTag) => void
   onOpenChange?: (open: boolean) => void
+  /** Shown above the list; omitted where the trigger already names it. */
+  heading?: string
 }
 
 /** What the Filters and the tag picker share: search, tick, create, rename and delete, in a popover. */
@@ -64,6 +66,7 @@ const TagMenu = ({
   beforeCreate,
   onCreated,
   onOpenChange,
+  heading,
 }: TagMenuProps) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -130,6 +133,7 @@ const TagMenu = ({
           onChange={(next) => select(next.map(Number))}
           onCreate={actions && handleCreate}
           tagEditing={tagEditing}
+          heading={heading}
         />
 
         {error && (

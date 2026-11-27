@@ -137,6 +137,25 @@ describe('AddressBookTable', () => {
     expect(onEditTags).toHaveBeenCalledWith(payroll)
   })
 
+  it('offers Add tag on an untagged contact and hands it to Edit tags', async () => {
+    const onEditTags = jest.fn()
+    const untagged = { ...treasury, address: ADDRESSES.usdc, tags: [] }
+    render(<AddressBookTable contacts={[payroll, untagged]} onEditTags={onEditTags} />)
+
+    const [payrollRow, untaggedRow] = screen.getAllByTestId('table-row')
+    expect(within(payrollRow).queryByRole('button', { name: 'Add tag' })).not.toBeInTheDocument()
+    await userEvent.click(within(untaggedRow).getByRole('button', { name: 'Add tag' }))
+
+    expect(onEditTags).toHaveBeenCalledWith(untagged)
+  })
+
+  it('shows a dash instead of Add tag when tags cannot be edited', () => {
+    render(<AddressBookTable contacts={[{ ...treasury, address: ADDRESSES.usdc, tags: [] }]} />)
+
+    expect(screen.queryByRole('button', { name: 'Add tag' })).not.toBeInTheDocument()
+    expect(within(screen.getByTestId('table-row')).getByText('—')).toBeInTheDocument()
+  })
+
   it('sorts by the first tag name ignoring case, untagged contacts last', async () => {
     const untagged = { ...treasury, address: ADDRESSES.usdc, name: 'Untagged', tags: [] }
     const lowercase = { ...atlas, name: 'Lowercase', tags: [{ id: 99, name: 'acme', color: 'slate' as const }] }

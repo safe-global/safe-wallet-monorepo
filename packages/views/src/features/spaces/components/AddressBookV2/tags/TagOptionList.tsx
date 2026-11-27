@@ -27,7 +27,11 @@ type TagOptionListProps<T> = {
   onCreate?: (text: string) => Promise<boolean>
   /** Rename and delete; without it the tags are read-only. */
   tagEditing?: TagEditing<T>
+  heading?: string
 }
+
+// CGW assigns the real colour once the tag is created
+const NEW_TAG_PREVIEW_COLOR: TagColor = 'slate'
 
 const deleteConfirmation = (name: string, contactCount = 0): string =>
   contactCount > 0 ? `Delete ‘${name}’ from ${contactCount} contact${maybePlural(contactCount)}?` : `Delete ‘${name}’?`
@@ -37,7 +41,7 @@ const SectionHeading = ({ children }: { children: string }) => (
 )
 
 /** The tag list the Filters dropdown and the tag picker share: search, tick, rename and delete. */
-function TagOptionList<T>({ options, value, onChange, onCreate, tagEditing }: TagOptionListProps<T>) {
+function TagOptionList<T>({ options, value, onChange, onCreate, tagEditing, heading }: TagOptionListProps<T>) {
   const optionOf = (optionValue: string) => options.find((option) => option.value === optionValue)
 
   const facetOptions: FacetOption[] = options.map((option) => ({
@@ -49,13 +53,14 @@ function TagOptionList<T>({ options, value, onChange, onCreate, tagEditing }: Ta
 
   return (
     <>
-      <SectionHeading>Tags</SectionHeading>
+      {heading && <SectionHeading>{heading}</SectionHeading>}
       <FacetOptionList
         label="Tags"
         options={facetOptions}
         value={value}
         onChange={onChange}
         onCreate={onCreate}
+        renderCreateLabel={(text) => <TagChip name={text} color={NEW_TAG_PREVIEW_COLOR} />}
         isSameText={sameTagName}
         searchable
         searchPlaceholder={onCreate ? 'Search or create a tag' : 'Search tags'}
