@@ -4,8 +4,7 @@ import useNow from '../useNow'
 describe('useNow', () => {
   const start = new Date('2026-11-23T12:00:00.000Z').getTime()
 
-  beforeEach(() => jest.useFakeTimers({ now: start }))
-  afterEach(() => jest.useRealTimers())
+  beforeEach(() => jest.setSystemTime(start))
 
   it('ticks every second', () => {
     const { result } = renderHook(() => useNow())

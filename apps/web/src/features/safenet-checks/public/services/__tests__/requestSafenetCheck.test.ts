@@ -86,6 +86,7 @@ const requestSafenetCheck = (
 
 describe('requestSafenetCheck', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false, doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
     jest.clearAllMocks()
     openPage(`safe=gno:${safeAddress}&spaceId=${spaceId}`)
   })
@@ -200,14 +201,6 @@ describe('requestSafenetCheck', () => {
   })
 
   describe('transient failures', () => {
-    beforeEach(() => {
-      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     // Runs the fake clock until the request, retries included, has settled
     const settle = async (request: Promise<void>): Promise<void> => {
       let isSettled = false

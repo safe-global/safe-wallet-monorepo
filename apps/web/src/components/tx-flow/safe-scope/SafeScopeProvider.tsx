@@ -28,6 +28,8 @@ type SafeScopeProviderProps = {
   initial?: SafeScopeTarget
   /** Keep the Safe info fresh while the scope is mounted. Off where many scopes render at once, e.g. a Space queue. */
   pollSafeInfo?: boolean
+  /** Off for scopes that only feed rows, never a flow, so they don't block flows that run on the URL Safe. */
+  armsSdkGuard?: boolean
   children: ReactNode
 }
 
@@ -38,12 +40,17 @@ type SafeScopeProviderProps = {
  * for different Safes in one session. Every effect below is keyed on the target, so switching Safe
  * mid-flow discards the previous SafeState, provider and SDK before the new ones resolve.
  */
-export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: SafeScopeProviderProps): ReactElement => {
+export const SafeScopeProvider = ({
+  initial,
+  pollSafeInfo = true,
+  armsSdkGuard = true,
+  children,
+}: SafeScopeProviderProps): ReactElement => {
   const [target, setTarget] = useState<SafeScopeTarget | undefined>(initial)
   const scopeKey = target ? buildSafeScopeKey(target.chainId, target.safeAddress) : undefined
 
   // Tell `getAndValidateSafeSDK` a scope is live so a forgotten `scope` argument is logged, not silent.
-  useEffect(() => registerActiveScope(), [])
+  useEffect(() => (armsSdkGuard ? registerActiveScope() : undefined), [armsSdkGuard])
 
   // Inside the tx modal, report this flow's Safe to the topbar.
   const reportFlowSafe = useContext(TxFlowSafeReporterContext)

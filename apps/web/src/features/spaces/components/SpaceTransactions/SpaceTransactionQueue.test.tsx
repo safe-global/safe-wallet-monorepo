@@ -89,6 +89,10 @@ const page = (
 })
 
 describe('SpaceTransactionQueue', () => {
+  beforeEach(() =>
+    jest.useFakeTimers({ advanceTimers: false, doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] }),
+  )
+
   const spaceId = faker.string.uuid()
   const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
   const safeA = checksumAddress(faker.finance.ethereumAddress())
@@ -111,7 +115,6 @@ describe('SpaceTransactionQueue', () => {
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     // The Group by pick is saved to localStorage and read back by the next render
     localStorage.clear()
   })
@@ -267,7 +270,6 @@ describe('SpaceTransactionQueue', () => {
   })
 
   it('polls the filtered queue it shows', async () => {
-    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
     const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     await screen.findByTestId('space-queue-safe')

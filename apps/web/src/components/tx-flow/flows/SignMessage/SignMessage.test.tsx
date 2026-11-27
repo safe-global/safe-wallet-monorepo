@@ -167,11 +167,7 @@ const extendedSafeInfo = {
 
 describe('SignMessage', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
-  })
-
-  afterAll(() => {
-    jest.useRealTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   beforeEach(() => {

@@ -31,11 +31,10 @@ const processing = (submittedAt: number): PendingTx => ({
 
 describe('useIsSpeedUpAvailable', () => {
   beforeEach(() => {
-    jest.useFakeTimers({ now: NOW })
+    jest.setSystemTime(NOW)
     ;(useHasFeature as jest.Mock).mockReturnValue(true)
     ;(useWallet as jest.Mock).mockReturnValue(connectedWalletBuilder().with({ address: signerAddress }).build())
   })
-  afterEach(() => jest.useRealTimers())
 
   it('is false with speed up off on the chain', async () => {
     ;(useHasFeature as jest.Mock).mockReturnValue(false)

@@ -95,11 +95,10 @@ describe('SpaceTransactionQueue live updates', () => {
   beforeEach(() => {
     setBaseUrl(GATEWAY_URL)
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
+    jest.useFakeTimers({ advanceTimers: false, doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     jest.restoreAllMocks()
   })
 

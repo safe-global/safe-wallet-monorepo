@@ -42,10 +42,11 @@ const dispatchSuccess = (chainId: string, safeAddress: string) =>
     txDispatch(TxEvent.SUCCESS, { chainId, safeAddress, txId: faker.string.uuid(), groupKey: faker.string.uuid() })
   })
 
-const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+const settle = () => advanceClock(50)
 
 describe('useClearPortfolioOnTx', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false, doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
     jest.mocked(useChains).mockReturnValue({
       configs: [
         chainBuilder()
@@ -127,14 +128,6 @@ describe('useClearPortfolioOnTx', () => {
   describe('once the post-tx snapshot settles', () => {
     const SETTLE_LIFETIME_MS = 120_000
     const REGULAR_LIFETIME_MS = 60 * 60_000
-
-    beforeEach(() => {
-      jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
 
     const serveSnapshots = (lifetimeMs: number, serverOffsetMs = 0, expiresAt?: string) => {
       const summaries: Array<{ safe: string; currency: string | null }> = []
