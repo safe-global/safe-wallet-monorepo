@@ -66,7 +66,7 @@ export type BlockedSpendingLimitDrawerProps = {
       /** The allowlist leaves out the limit's tokens, so the limit can't be used. */
       variant: 'blocked'
       blockedTokens: string[]
-      /** "See policy here". */
+      /** "View allowlist". */
       onOpenAllowlist?: () => void
     }
   | {
@@ -104,14 +104,14 @@ export const BlockedSpendingLimitDrawer = (props: BlockedSpendingLimitDrawerProp
               title="This spending limit can't be used anymore"
               description={
                 <>
-                  You have a policy that restricts sending of {joinTokens(props.blockedTokens)}.{' '}
+                  The allowlist on {account.name} blocks sending {joinTokens(props.blockedTokens)}.{' '}
                   {props.onOpenAllowlist && (
                     <button
                       type="button"
                       onClick={props.onOpenAllowlist}
                       className="cursor-pointer font-medium text-foreground underline underline-offset-2"
                     >
-                      See policy here
+                      View allowlist
                     </button>
                   )}
                 </>
@@ -121,7 +121,7 @@ export const BlockedSpendingLimitDrawer = (props: BlockedSpendingLimitDrawerProp
             <M2Alert
               tone="info"
               title="This spending limit is locked"
-              description={`The allowlist on ${account.name} applies to it, so it can't be changed. Turn that off in the allowlist to edit it.`}
+              description={`The allowlist on ${account.name} covers it, so it can't be changed. Edit the allowlist to change it.`}
             />
           )}
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage />

@@ -117,6 +117,7 @@ const ACCOUNT_SPENDING_LIMITS: Record<string, AccountSpendingLimit[]> = {
     { spender: 'Market maker bot', token: 'USDC', label: 'Market maker bot · 250 USDC per day' },
     { spender: 'Rebalancer', token: 'ETH', label: 'Rebalancer · 2 ETH per week' },
   ],
+  [getAccountKey(TREASURY)]: [{ spender: 'Ops bot', token: 'USDC', label: 'Ops bot · 500 USDC per day' }],
 }
 
 /** Every other account has none. */
@@ -534,6 +535,10 @@ header[class*="@container"]:has(> button[aria-label="Open sidebar menu"]) > div:
 /* DrawerBody's scroll fade, bottom edge only: the top one showed over the first section before any scrolling. */
 [data-slot="sheet-content"] [class*="scrollFade"] {
   mask-image: linear-gradient(to bottom, black 0, black calc(100% - var(--drawer-fade-bottom)), transparent 100%);
+}
+/* An open search list hangs past TxCard's clipped edge; the dialog scrolls further to fit it. */
+.txCardRoot:has([data-m2-search-list]) {
+  overflow: visible;
 }
 /* "Mark new components" (prototype bar): only applies while <html> carries the flag, so portals are marked too. */
 html[data-m2-mark-new] [data-m2-new] {

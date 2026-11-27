@@ -22,7 +22,6 @@ import { SafeAddress } from './m2Prototype'
 import {
   getEligibilityCopy,
   INELIGIBILITY_TEXT,
-  SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import {
@@ -30,7 +29,11 @@ import {
   type SafeAccountEntry,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import NoEligibleAccounts from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/components/NoEligibleAccounts'
 import { M2Alert } from './m2Alert'
+
+/** Production's selector label, with "Safe account" in sentence case. */
+const ACCOUNT_LABEL = 'Which Safe account does this apply to?'
 
 const TRIGGER_CONTENT_HEIGHT = 'min-h-9'
 
@@ -160,6 +163,8 @@ export const AccountSelect = ({
   notice,
   id,
   readOnly = false,
+  noEligibleAccounts,
+  defaultOpen = false,
 }: {
   accounts: SafeAccountEntry[]
   /** `${chainId}:${address}` */
@@ -169,6 +174,9 @@ export const AccountSelect = ({
   id?: string
   /** M1's read-only field (edit flow): the picked account, dimmed, and no dropdown. */
   readOnly?: boolean
+  /** M1's empty dropdown: the wallet isn't a signer or proposer anywhere, or no wallet is connected. */
+  noEligibleAccounts?: 'no-signer' | 'no-wallet'
+  defaultOpen?: boolean
 }): ReactElement => {
   const generatedId = useId()
   const fieldId = id ?? generatedId
@@ -189,7 +197,7 @@ export const AccountSelect = ({
   if (readOnly && selectedAccount) {
     return (
       <div className="flex w-full flex-col gap-1.5" data-m2-new="M1 copy · Account select (read-only)">
-        <Label htmlFor={fieldId}>{SAFE_ACCOUNT_SELECTOR_LABEL}</Label>
+        <Label htmlFor={fieldId}>{ACCOUNT_LABEL}</Label>
 
         {/* No copy button: SafeAddress's tooltip already copies. */}
         <div
@@ -208,9 +216,10 @@ export const AccountSelect = ({
 
   return (
     <div className="flex w-full flex-col gap-1.5" data-m2-new="M1 copy · Account select">
-      <Label htmlFor={fieldId}>{SAFE_ACCOUNT_SELECTOR_LABEL}</Label>
+      <Label htmlFor={fieldId}>{ACCOUNT_LABEL}</Label>
 
       <Select
+        defaultOpen={defaultOpen}
         value={value || null}
         onValueChange={(next) => {
           if (next != null) onChange(next)
@@ -218,7 +227,7 @@ export const AccountSelect = ({
       >
         <SelectTrigger
           id={fieldId}
-          aria-label={SAFE_ACCOUNT_SELECTOR_LABEL}
+          aria-label={ACCOUNT_LABEL}
           aria-invalid={ineligibilityText ? true : undefined}
           data-testid="safe-account-selector"
           // A plain `min-h-16` loses to SelectTrigger's own height; the `data-[size=default]` prefix is its escape hatch.
@@ -248,7 +257,11 @@ export const AccountSelect = ({
           side="bottom"
           collisionAvoidance={{ side: 'none' }}
         >
-          {notice && (
+          {noEligibleAccounts && (
+            <NoEligibleAccounts hasWallet={noEligibleAccounts === 'no-signer'} onSwitchWallet={() => {}} />
+          )}
+
+          {!noEligibleAccounts && notice && (
             <M2Alert
               tone="info"
               title={notice.title}
@@ -257,7 +270,7 @@ export const AccountSelect = ({
             />
           )}
 
-          {accounts.map((entry) =>
+          {(noEligibleAccounts ? [] : accounts).map((entry) =>
             isSafeAccountGroup(entry) ? (
               <SelectGroup key={entry.address}>
                 <AccountGroupHeader group={entry} />

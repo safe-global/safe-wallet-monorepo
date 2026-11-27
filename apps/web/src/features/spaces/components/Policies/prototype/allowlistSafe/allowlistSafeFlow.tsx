@@ -499,6 +499,8 @@ type PickerItem = {
   address?: string
   icon: ReactNode
   searchText?: string
+  /** An info icon after the label, with this on hover. */
+  tooltip?: string
 }
 type PickerGroup = { id: string; header?: ReactNode; items: PickerItem[] }
 
@@ -572,6 +574,7 @@ const SearchPicker = ({
           id={listId}
           role="listbox"
           aria-multiselectable
+          data-m2-search-list=""
           className="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-lg border border-border bg-card px-1 pb-1 shadow-lg"
           // Keeps focus in the field, so the list stays open while picking several.
           onMouseDown={(event) => event.preventDefault()}
@@ -623,7 +626,19 @@ const SearchPicker = ({
                         <span className="flex size-6 shrink-0 overflow-hidden rounded-full">{item.icon}</span>
                       )}
                       <span className="flex min-w-0 flex-col">
-                        <span className="truncate">{item.label}</span>
+                        <span className="flex min-w-0 items-center gap-1">
+                          <span className="truncate">{item.label}</span>
+                          {item.tooltip && (
+                            <Tooltip>
+                              <TooltipTrigger
+                                render={<Info className="size-3.5 shrink-0 cursor-help text-muted-foreground" />}
+                              />
+                              <TooltipContent sideOffset={TOOLTIP_OFFSET} className="max-w-72">
+                                {item.tooltip}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </span>
                         {item.detail && (
                           <span
                             className={cn(
@@ -704,17 +719,59 @@ const NetworksGroup = ({
   )
 }
 
-const TokensPicker = ({
+const SPENDING_LIMIT_TOKEN_TOOLTIP =
+  "This Safe account has spending limits for these tokens. Add them, so the allowlist doesn't block the spending limits."
+
+export const TokensPicker = ({
   selected,
   onChange,
+  tokens = POPULAR_TOKENS,
+  spendingLimitTokens = [],
+  footer,
 }: {
   selected: string[]
   onChange: (symbols: string[]) => void
+  /** What the search lists; the Allowlist MVP passes the Safe's own tokens first. */
+  tokens?: { symbol: string; name: string; logoUri: string; address?: string }[]
+  /** Symbols the Safe has spending limits for, listed first under their own header. */
+  spendingLimitTokens?: string[]
+  /** Under the chips, e.g. a warning about what's left out. */
+  footer?: ReactNode
 }): ReactElement => {
   const toggle = (symbol: string) =>
     onChange(selected.includes(symbol) ? selected.filter((item) => item !== symbol) : [...selected, symbol])
-  const tokenFor = (symbol: string) => POPULAR_TOKENS.find((token) => token.symbol === symbol)
+  const tokenFor = (symbol: string) => tokens.find((token) => token.symbol === symbol)
   const tokenIcon = (logoUri: string) => <img src={logoUri} alt="" className="size-6 rounded-full" />
+  const toItem = ({ symbol, name, logoUri, address }: (typeof tokens)[number]): PickerItem => ({
+    id: symbol,
+    label: symbol,
+    detail: name,
+    searchText: address,
+    icon: tokenIcon(logoUri),
+  })
+  const limited = tokens.filter(({ symbol }) => spendingLimitTokens.includes(symbol))
+  const others = tokens.filter(({ symbol }) => !spendingLimitTokens.includes(symbol))
+  const tokenGroups: PickerGroup[] =
+    limited.length > 0
+      ? [
+          {
+            id: 'spending-limits',
+            header: (
+              <ContactsHeader
+                label="In spending limits"
+                tooltip={SPENDING_LIMIT_TOKEN_TOOLTIP}
+                count={limited.length}
+              />
+            ),
+            items: limited.map(toItem),
+          },
+          {
+            id: 'tokens',
+            header: <ContactsHeader label="Other tokens" count={others.length} />,
+            items: others.map(toItem),
+          },
+        ]
+      : [{ id: 'tokens', items: tokens.map(toItem) }]
 
   return (
     <GroupSurface
@@ -725,18 +782,7 @@ const TokensPicker = ({
       <SearchPicker
         placeholder="Search tokens by name or address"
         emptyLabel="No tokens found"
-        groups={[
-          {
-            id: 'tokens',
-            items: POPULAR_TOKENS.map(({ symbol, name, logoUri, address }) => ({
-              id: symbol,
-              label: symbol,
-              detail: name,
-              searchText: address,
-              icon: tokenIcon(logoUri),
-            })),
-          },
-        ]}
+        groups={tokenGroups}
         selected={selected}
         onToggle={({ id }) => toggle(id)}
         onSelectAll={(ids, isSelecting) =>
@@ -757,11 +803,12 @@ const TokensPicker = ({
           ))}
         </ChipGrid>
       )}
+      {footer}
     </GroupSurface>
   )
 }
 
-const RecipientsPicker = ({
+export const RecipientsPicker = ({
   selected,
   onChange,
 }: {

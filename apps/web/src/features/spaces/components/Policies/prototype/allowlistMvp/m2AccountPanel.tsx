@@ -442,7 +442,7 @@ const PanelBody = ({
             signed={signedCount}
             required={account.threshold}
           />
-          <M2Alert tone="success" title="All signatures are in. Anyone on the team can execute it." />
+          <M2Alert tone="success" title="All signatures are in. Anyone can execute it." />
 
           {state === 'executing' && (
             <div className="flex items-center gap-2">
@@ -454,7 +454,7 @@ const PanelBody = ({
       )
 
     case 'execution-failed':
-      return <M2Alert tone="error" title="Execution failed. Nothing changed on this account." />
+      return <M2Alert tone="error" title="Execution failed. Nothing changed on this Safe account." />
 
     case 'enforcing':
       return (
@@ -499,7 +499,7 @@ const PanelBody = ({
             </ShowDetails>
           </DrawerSection>
 
-          <M2Alert tone="info" title="Changes take 24 hours to apply. Any signer can cancel them." />
+          <M2Alert tone="info" title="Changes have a 24-hour review window. Any signer can cancel them." />
         </div>
       )
   }

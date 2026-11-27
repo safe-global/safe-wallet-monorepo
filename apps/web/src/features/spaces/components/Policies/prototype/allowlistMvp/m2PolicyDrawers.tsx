@@ -1,5 +1,5 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
-import { ChevronDown, ChevronRight, ShieldCheck } from 'lucide-react'
+import { ChevronDown, ChevronRight, Loader2, ShieldCheck } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -33,8 +33,10 @@ import { PAYMENTS_LIMIT } from './m2AccountPanel'
 import { M2Alert } from './m2Alert'
 import { BlockedSpendingLimitDrawer } from './m2BlockedSpendingLimitDrawer'
 import {
+  getAllowlistTag,
   getStatusDetail,
   POLICY_ROW_LABELS,
+  StatusTagChip,
   POLICY_TYPES,
   RowStatusChip,
   TOM_ADDRESS,
@@ -43,6 +45,8 @@ import {
   type Person,
   type PolicyRow,
   type RowStatus,
+  type SpecChange,
+  type SpecStage,
 } from './m2OverviewPage'
 import {
   getAccountKey,
@@ -64,7 +68,16 @@ const GUARD_ADDRESS = '0x1a4f7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4c802'
 const ENFORCED_BY = 'Safe policy contract'
 
 /** M1's PolicyDrawerHeader markup; its chip only knows M1's statuses, so this one also shows "Change pending". */
-const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | null }): ReactElement => {
+const M2DrawerHeader = ({
+  row,
+  status,
+  useTag = false,
+}: {
+  row: PolicyRow
+  status: RowStatus | null
+  /** Shows the table's spec 5.7 tag, so the panel and its row read the same. */
+  useTag?: boolean
+}): ReactElement => {
   const { Icon } = POLICY_TYPES[row.type]
 
   return (
@@ -73,7 +86,9 @@ const M2DrawerHeader = ({ row, status }: { row: PolicyRow; status: RowStatus | n
         <Icon className="size-4 text-muted-foreground" />
       </div>
       <DrawerTitle size="lg">{POLICY_ROW_LABELS[row.type]}</DrawerTitle>
-      <div className="ml-auto">{status && <RowStatusChip status={status} />}</div>
+      <div className="ml-auto">
+        {useTag ? <StatusTagChip tag={getAllowlistTag(row)} /> : status && <RowStatusChip status={status} />}
+      </div>
     </DrawerHeader>
   )
 }
@@ -328,30 +343,96 @@ export type PanelOutcome = 'executed' | 'failed' | 'replaced' | 'deleted'
 /** A side panel state picked from the prototype bar. Without one, the panel follows the prototype's own state. */
 export type AllowlistPanelScenario = { viewer: PanelViewer; operation?: PanelOperation; outcome?: PanelOutcome }
 
-// M1's SpendingLimitDrawer copy (SpendingLimitDrawer/messages.ts), worded for the allowlist.
-const PENDING_TITLE: Record<PanelOperation, string> = {
-  create: 'The allowlist is not active as the transaction is not yet executed.',
-  update: 'The current recipients still apply until the change is executed.',
-  remove: 'This allowlist is still active until the removal is executed.',
+// Setup's side panel copy, the one pattern every allowlist transaction follows: same states, same sentences, its own goal.
+type TxCopy = {
+  /** Yellow title while signatures are missing: what stays true until it's executed. */
+  pending: string
+  /** "Sign and execute the transaction to …" */
+  signGoal: string
+  /** Blue, fully signed: "Execute the transaction to …" */
+  executeGoal: string
+  /** After "The transaction is executed." while the result loads. */
+  processing: string
 }
 
-const OPERATION_TAIL: Record<PanelOperation, string> = {
-  create: 'to activate',
-  update: 'to apply the change',
-  remove: 'to remove it',
+export const TX_COPY: Record<PanelOperation, TxCopy> = {
+  create: {
+    pending: "The allowlist isn't active until the transaction is executed.",
+    signGoal: 'activate it',
+    executeGoal: 'activate the allowlist',
+    processing: 'The allowlist will appear as active in a moment.',
+  },
+  update: {
+    pending: '',
+    signGoal: 'start the 24-hour review window',
+    executeGoal: 'start the 24-hour review window',
+    processing: 'The change applies on {at}, after the 24-hour review window.',
+  },
+  'update-apply': {
+    pending: 'The current rules still apply until the transaction is executed.',
+    signGoal: 'apply the new rules',
+    executeGoal: 'apply the new rules',
+    processing: 'The new rules will appear in a moment.',
+  },
+  'update-cancel': {
+    pending: "The change isn't canceled until the transaction is executed.",
+    signGoal: 'cancel the change',
+    executeGoal: 'cancel the change',
+    processing: 'The change will disappear in a moment.',
+  },
+  remove: {
+    pending: '',
+    signGoal: 'start the 24-hour review window',
+    executeGoal: 'start the 24-hour review window',
+    processing: 'The removal applies on {at}, after the 24-hour review window.',
+  },
+  'remove-apply': {
+    pending: 'The allowlist stays active until the transaction is executed.',
+    signGoal: 'remove the allowlist',
+    executeGoal: 'remove the allowlist',
+    processing: 'The allowlist will disappear in a moment.',
+  },
+  'remove-cancel': {
+    pending: "The removal isn't canceled until the transaction is executed.",
+    signGoal: 'cancel the removal',
+    executeGoal: 'cancel the removal',
+    processing: 'The removal will disappear in a moment.',
+  },
 }
 
-const DELAY_MS = 24 * 60 * 60 * 1000
+const lowerFirst = (text: string): string => text.charAt(0).toLowerCase() + text.slice(1)
 
-/** "Oct 22, 2026 · 14:30 UTC", the date format the side panels already use. */
+const signLine = (operation: PanelOperation): string =>
+  `Sign and execute the transaction to ${TX_COPY[operation].signGoal}.`
+const executeLine = (operation: PanelOperation): string =>
+  `Execute the transaction to ${TX_COPY[operation].executeGoal}.`
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/** "Oct 13, 20:00 UTC", the date format the side panels already use. */
 const formatUtc = (date: Date): string =>
-  `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })} · ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' })} UTC`
+  `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: 'UTC' })} UTC`
 
-// Every change to the allowlist waits out the 24‑hour delay after execution; the prototype counts it from now.
-const EXECUTED_LINE: Record<PanelOperation, (at: string) => string> = {
-  create: (at) => `The allowlist becomes active after the 24‑hour delay, on ${at}.`,
-  update: (at) => `The new rules apply after the 24‑hour delay, on ${at}.`,
-  remove: (at) => `The allowlist is removed after the 24‑hour delay, on ${at}.`,
+const processingLine = (operation: PanelOperation): string =>
+  `The transaction is executed. ${TX_COPY[operation].processing.replace('{at}', formatUtc(new Date(Date.now() + DAY_MS)))}`
+const waitingLine = (missing: number): string => `Waiting for ${missing} more signature${missing === 1 ? '' : 's'}`
+
+/** The transaction-only spec stages, as the setup operation they read like. */
+const SPEC_TX_OPERATION: Partial<Record<SpecStage, Record<'Edit' | 'Removal', PanelOperation>>> = {
+  pending: { Edit: 'update', Removal: 'remove' },
+  'ready to execute': { Edit: 'update', Removal: 'remove' },
+  'apply pending': { Edit: 'update-apply', Removal: 'remove-apply' },
+  'apply ready to execute': { Edit: 'update-apply', Removal: 'remove-apply' },
+  'cancel pending': { Edit: 'update-cancel', Removal: 'remove-cancel' },
+  'cancel ready to execute': { Edit: 'update-cancel', Removal: 'remove-cancel' },
+}
+
+const getSpecOperation = (change: SpecChange, stage: SpecStage): PanelOperation | undefined =>
+  change === 'Edit' || change === 'Removal' ? SPEC_TX_OPERATION[stage]?.[change] : undefined
+
+// M1's outcome titles, without "nonce".
+const OUTCOME_TITLE: Record<PanelOutcome, string> = {
+  ...PENDING_OUTCOME_TITLE,
+  replaced: "Another transaction replaced this one, so it can't be executed.",
 }
 
 const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this allowlist.'
@@ -371,6 +452,30 @@ type PanelState =
     }
   | { kind: 'closed'; operation: PanelOperation; outcome: PanelOutcome }
 
+/** A queued allowlist transaction, by viewer: setup's four cases, or execute once fully signed. */
+const resolvePendingState = (
+  row: PolicyRow,
+  viewer: PanelViewer,
+  operation: PanelOperation,
+  signed: number,
+  required: number,
+): PanelState => {
+  const base = { kind: 'pending', operation, signed, required } as const
+  const missing = required - signed
+
+  if (viewer === 'disconnected') {
+    return { ...base, action: 'connect', line2: CONNECT_TO_SIGN_LINE, helper: connectHelper(row.account.name) }
+  }
+  // Anyone can execute a fully signed Safe transaction, so this outranks the signer checks below.
+  if (signed >= required) return { ...base, action: 'execute', line2: executeLine(operation) }
+  if (viewer === 'non-signer') {
+    return { ...base, action: 'copy-link', line2: `${signed}/${required} signed. ${waitingLine(missing)}` }
+  }
+  if (viewer === 'signer-signed')
+    return { ...base, action: 'copy-link', line2: `You've signed. ${waitingLine(missing)}.` }
+  return { ...base, action: 'review', line2: signLine(operation) }
+}
+
 /** M1's resolveSpendingLimitDrawerState, step for step: the row's status, then the viewer, decides what the panel shows. */
 const resolvePanelState = (
   row: PolicyRow,
@@ -384,27 +489,8 @@ const resolvePanelState = (
 
   if (row.status === 'pending') {
     if (outcome) return { kind: 'closed', operation, outcome }
-
     const { signed, required } = row.signatures ?? { signed: 0, required: row.account.threshold }
-    const base = { kind: 'pending', operation, signed, required } as const
-
-    if (viewer === 'disconnected') {
-      return { ...base, action: 'connect', line2: CONNECT_TO_SIGN_LINE, helper: connectHelper(row.account.name) }
-    }
-    // Anyone can execute a fully signed Safe transaction, so this outranks the signer checks below.
-    if (signed >= required)
-      return { ...base, action: 'execute', line2: `Execute the transaction ${OPERATION_TAIL[operation]}.` }
-    if (viewer === 'non-signer') return { ...base, action: 'copy-link' }
-    if (viewer === 'signer-signed') {
-      const missing = required - signed
-      return {
-        ...base,
-        action: 'copy-link',
-        line2: `You've signed. Waiting for ${missing} more signature${missing === 1 ? '' : 's'}.`,
-      }
-    }
-    // Signatures are still missing, the viewer's among them: the transaction can't be executed yet, only reviewed and signed.
-    return { ...base, action: 'review', line2: `Sign and execute the transaction ${OPERATION_TAIL[operation]}.` }
+    return resolvePendingState(row, viewer, operation, signed, required)
   }
 
   if (viewer === 'disconnected') return { kind: 'live', action: 'connect' }
@@ -423,13 +509,34 @@ const getPanelStatus = (row: PolicyRow, state: PanelState): RowStatus | null => 
   return isFailure(state.outcome) ? 'failed' : null
 }
 
+/** Spec 5.8: executed, but not served yet, so the panel waits for it. */
+const ProcessingAlert = ({ operation }: { operation: PanelOperation }): ReactElement => (
+  <div data-m2-new="Spec 5.8 · Processing">
+    <M2Alert
+      tone="neutral"
+      title={
+        <span className="inline-flex items-center gap-2">
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+          Processing
+        </span>
+      }
+      description={processingLine(operation)}
+      showIcon={false}
+    />
+  </div>
+)
+
 /** SpendingLimitDrawer's top of body: the pending or closed banner and the signatures, or the change waiting out its delay. */
 const StatusSection = ({ row, state }: { row: PolicyRow; state: PanelState }): ReactElement | null => {
   switch (state.kind) {
     case 'pending':
       return (
         <div className="flex flex-col gap-6">
-          <M2Alert tone="warning" title={PENDING_TITLE[state.operation]} description={state.line2} />
+          {state.action === 'execute' ? (
+            <M2Alert tone="info" description={state.line2} />
+          ) : (
+            <M2Alert tone="warning" title={TX_COPY[state.operation].pending} description={state.line2} />
+          )}
           {/* M1's PendingSignatures layout, with the tooltip address in place of its copy icon. */}
           <DrawerSection title="Pending signatures" rightNode={`${state.signed} of ${state.required} signatures`}>
             <DrawerList
@@ -456,55 +563,212 @@ const StatusSection = ({ row, state }: { row: PolicyRow; state: PanelState }): R
         return (
           <M2Alert
             tone="error"
-            title={PENDING_OUTCOME_TITLE[state.outcome]}
+            title={OUTCOME_TITLE[state.outcome]}
             description="Close this panel to see the current policies."
           />
         )
       }
 
-      return (
-        <M2Alert
-          tone="warning"
-          title={PENDING_OUTCOME_TITLE[state.outcome]}
-          description={
-            state.outcome === 'executed'
-              ? EXECUTED_LINE[state.operation](formatUtc(new Date(Date.now() + DELAY_MS)))
-              : 'Close this panel to see the current policies.'
-          }
-        />
-      )
+      return <ProcessingAlert operation={state.operation} />
 
-    // Executed, waiting out the guard's 24‑hour delay.
+    // Spec 5.8: executed, but not served yet, so the panel waits for it.
     case 'activating':
-      return (
-        <M2Alert
-          tone="warning"
-          title="Change pending"
-          description={
-            <>
-              <div>Until then, transactions aren&apos;t checked against it.</div>
-              <div>{getStatusDetail(row)}</div>
-            </>
-          }
-        />
-      )
+      return <ProcessingAlert operation="create" />
 
     case 'change-pending':
       return (
         <M2Alert
           tone="warning"
-          title="Change pending"
-          description={
-            <>
-              <div>Any signer can cancel it before then.</div>
-              <div>{getStatusDetail(row)}</div>
-            </>
-          }
+          title={`The change ${lowerFirst(getStatusDetail(row) ?? '')}.`}
+          description="Any signer can cancel it before then."
         />
       )
 
     case 'live':
       return null
+  }
+}
+
+/** The example change's review window (spec 5.6.6): requested, applies from, expires 7 days later. */
+const REVIEW_DATES = { requested: 'Oct 12, 20:00', appliesFrom: 'Oct 13, 20:00', expires: 'Oct 20, 20:00' }
+
+/** What a spec 5.7 stage shows: its banner, the signatures when it waits for them, and its actions. */
+type SpecPanel = {
+  tone: 'warning' | 'info' | 'neutral' | 'error'
+  title: string
+  description: string
+  signatures?: boolean
+  actions: 'cancel' | 'apply' | 'discard' | 'remove'
+  /** The lists read as removed, as M1's removal does. */
+  isRemoved: boolean
+}
+
+const CHANGE_NOUN: Record<SpecChange, string> = {
+  Edit: 'change',
+  Removal: 'removal',
+  'Guard removal': 'removal',
+  Guard: 'policy',
+}
+
+const getSpecPanel = (change: SpecChange, stage: SpecStage, row: PolicyRow): SpecPanel | undefined => {
+  const noun = CHANGE_NOUN[change]
+  const isRemoval = change !== 'Edit'
+  const removed = isRemoval && !['expired', 'cancel pending', 'cancel ready to execute'].includes(stage)
+
+  switch (stage) {
+    case 'in delay':
+      return {
+        tone: 'warning',
+        title: `The ${noun} ${lowerFirst(getStatusDetail(row) ?? '')}.`,
+        description: 'Any signer can cancel it before then.',
+        actions: 'cancel',
+        isRemoved: removed,
+      }
+    case 'ready to apply':
+      return {
+        tone: 'info',
+        title: `The ${noun} is ready to apply.`,
+        description: `It doesn't apply on its own. Apply it before ${REVIEW_DATES.expires}, or it expires.`,
+        actions: 'apply',
+        isRemoved: removed,
+      }
+    case 'expired':
+      return {
+        tone: 'neutral',
+        title: `This ${noun} expired.`,
+        description:
+          change === 'Edit'
+            ? "It wasn't applied within 7 days, so the current rules still apply."
+            : "It wasn't applied within 7 days, so the allowlist stays active.",
+        actions: 'discard',
+        isRemoved: false,
+      }
+    case 'missing':
+      return {
+        tone: 'error',
+        title: "This allowlist isn't applied.",
+        description:
+          "It was removed from this Safe account outside the app, so transactions aren't checked against it.",
+        actions: 'remove',
+        isRemoved: false,
+      }
+    default:
+      return undefined
+  }
+}
+
+/** The spec 5.7 stage's banner, and M1's pending signatures when it waits for them. */
+const SpecStatusSection = ({ row, panel, stage }: { row: PolicyRow; panel: SpecPanel; stage: SpecStage }) => {
+  const required = row.account.threshold
+  const signed = stage.endsWith('ready to execute') ? required : 1
+
+  return (
+    <div className="flex flex-col gap-6" data-m2-new="Spec 5.7 · Side panel state">
+      <M2Alert tone={panel.tone} title={panel.title} description={panel.description} />
+      {(stage === 'in delay' || stage === 'ready to apply') && (
+        <DrawerSection title="Review window">
+          <DrawerList
+            items={[
+              { label: 'Requested', content: REVIEW_DATES.requested },
+              { label: 'Applies from', content: REVIEW_DATES.appliesFrom },
+              { label: 'Expires', content: REVIEW_DATES.expires },
+              ...(stage === 'ready to apply'
+                ? [{ label: 'Signatures needed', content: `${required} of ${row.account.owners}` }]
+                : []),
+            ]}
+          />
+        </DrawerSection>
+      )}
+      {panel.signatures && (
+        <DrawerSection title="Pending signatures" rightNode={`${signed} of ${required} signatures`}>
+          <DrawerList
+            items={[
+              { label: 'Time to sign', content: SIGNING_TIME_LEFT },
+              { label: 'Safe account', content: <SafeAddress name={row.account.name} address={row.account.address} /> },
+              {
+                label: 'Waiting for',
+                content: <WaitingForSigners signed={signed} required={required} owners={row.account.owners} />,
+              },
+            ]}
+          />
+        </DrawerSection>
+      )}
+    </div>
+  )
+}
+
+/** Spec 5.6.8: signers act, non-signers get the button disabled with the reason, no wallet gets Connect wallet. */
+const SpecActions = ({
+  panel,
+  change,
+  viewer,
+  onConfirm,
+  onCancelChange,
+}: M2DrawerHandlers & { panel: SpecPanel; change: SpecChange; viewer: PanelViewer }): ReactElement | null => {
+  const noun = CHANGE_NOUN[change]
+  const capitalNoun = noun.charAt(0).toUpperCase() + noun.slice(1)
+  const { label, verb } = {
+    cancel: { label: `Cancel ${noun}`, verb: `cancel this ${noun}` },
+    apply: { label: `Apply ${noun}`, verb: `apply or cancel this ${noun}` },
+    discard: { label: `Discard ${noun}`, verb: `discard this ${noun}` },
+    remove: { label: 'Remove allowlist', verb: 'remove this allowlist' },
+  }[panel.actions]
+
+  if (viewer === 'disconnected') {
+    return (
+      <PolicyDrawerActions
+        actionLabel="Connect wallet"
+        onClick={() => {}}
+        hint={`Connect a signer wallet to ${verb}.`}
+      />
+    )
+  }
+  if (viewer === 'non-signer') {
+    return <PolicyDrawerActions actionLabel={label} hint={`Only signers of this Safe account can ${verb}.`} disabled />
+  }
+
+  switch (panel.actions) {
+    // Spec 5.6.6: Apply is there but disabled until the review window ends.
+    case 'cancel':
+      return (
+        <DrawerFooter>
+          <div className="flex flex-col gap-2">
+            <Button className="w-full" disabled>
+              Apply {noun}
+            </Button>
+            <Typography variant="paragraph-mini" color="muted" className="text-center">
+              You can apply it from {REVIEW_DATES.appliesFrom}.
+            </Typography>
+            <Button variant="secondary" className="w-full" onClick={onCancelChange}>
+              Cancel {noun}
+            </Button>
+          </div>
+        </DrawerFooter>
+      )
+    case 'apply':
+      return (
+        <DrawerFooter>
+          <div className="flex flex-col gap-2">
+            <Button className="w-full" onClick={onConfirm}>
+              Apply {noun}
+            </Button>
+            <Button variant="secondary" className="w-full" onClick={onCancelChange}>
+              Cancel {noun}
+            </Button>
+          </div>
+        </DrawerFooter>
+      )
+    case 'discard':
+      return <PolicyDrawerActions actionLabel={`Discard ${noun}`} variant="secondary" onClick={() => {}} />
+    case 'remove':
+      return (
+        <PolicyDrawerActions
+          actionLabel={label}
+          variant="secondary"
+          onClick={() => {}}
+          hint={change === 'Guard' ? undefined : `${capitalNoun} expired.`}
+        />
+      )
   }
 }
 
@@ -597,29 +861,56 @@ const AllowlistDrawer = ({
   onClose: () => void
 }): ReactElement => {
   // A signer already in the transaction's signatures has signed, whichever state was picked.
-  const picked: AllowlistPanelScenario = scenario ?? { viewer: row.viewer ?? 'signer-signed' }
-  const state = resolvePanelState(
-    row,
-    picked.viewer === 'signer' && viewerHasSigned ? { ...picked, viewer: 'signer-signed' } : picked,
-  )
-  const isRemoved = (state.kind === 'pending' || state.kind === 'closed') && state.operation === 'remove'
+  const picked: AllowlistPanelScenario = scenario ?? {
+    viewer: row.viewer ?? (row.example ? 'signer' : 'signer-signed'),
+    outcome: row.panelOutcome,
+  }
+  const viewer: PanelViewer = picked.viewer === 'signer' && viewerHasSigned ? 'signer-signed' : picked.viewer
+  // Spec 6.6: the main flow's change waiting out its delay reads as the spec's Edit in delay.
+  const example =
+    row.example ??
+    (row.status === 'change-pending' ? { change: 'Edit' as const, stage: 'in delay' as const } : undefined)
+  const specOperation = example && getSpecOperation(example.change, example.stage)
+  const required = row.account.threshold
+  // Spec transactions read exactly like setup's, by viewer; the other spec stages keep their own banner.
+  const state: PanelState = specOperation
+    ? picked.outcome
+      ? { kind: 'closed', operation: specOperation, outcome: picked.outcome }
+      : resolvePendingState(
+          row,
+          viewer,
+          specOperation,
+          example.stage.endsWith('ready to execute') ? required : 1,
+          required,
+        )
+    : resolvePanelState(row, { ...picked, viewer })
+  const spec = example && !specOperation ? getSpecPanel(example.change, example.stage, row) : undefined
+  const isRemoved = spec
+    ? spec.isRemoved
+    : specOperation
+      ? specOperation === 'remove' || specOperation === 'remove-apply'
+      : (state.kind === 'pending' || state.kind === 'closed') && state.operation === 'remove'
   const tokens = getAccountTokens(row.account).filter(({ symbol }) => !excludedTokens.includes(symbol))
   const spendingLimitCount = getAccountSpendingLimits(row.account).length
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={POLICY_ROW_LABELS[row.type]}>
-      <M2DrawerHeader row={row} status={getPanelStatus(row, state)} />
+      <M2DrawerHeader row={row} status={getPanelStatus(row, state)} useTag={!scenario?.outcome} />
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
           {justActivated && state.kind === 'live' && (
             <M2Alert
               tone="success"
-              title="Your allowlist is now active"
-              description={`${row.account.name} can only send the allowed tokens to the ${row.people.length} allowed ${row.people.length === 1 ? 'recipient' : 'recipients'}. Further changes will take 24 hours to apply.`}
+              title="The allowlist is active"
+              description={`${row.account.name} can only send allowed tokens to ${row.people.length} allowed ${row.people.length === 1 ? 'recipient' : 'recipients'}. Every later change has a 24-hour review window.`}
             />
           )}
-          <StatusSection row={row} state={state} />
+          {spec && example ? (
+            <SpecStatusSection row={row} panel={spec} stage={example.stage} />
+          ) : (
+            <StatusSection row={row} state={state} />
+          )}
           <RecipientList recipients={row.people} isRemoved={isRemoved} />
           <TokenList tokens={tokens} isRemoved={isRemoved} />
           {spendingLimitCount > 0 && !isRemoved && (
@@ -630,7 +921,11 @@ const AllowlistDrawer = ({
         </div>
       </DrawerBody>
 
-      <M2DrawerActions row={row} state={state} {...handlers} />
+      {spec && example ? (
+        <SpecActions panel={spec} change={example.change} viewer={viewer} {...handlers} />
+      ) : (
+        <M2DrawerActions row={row} state={state} {...handlers} />
+      )}
     </Drawer>
   )
 }

@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
   type ContextType,
+  type RefObject,
   type FormEvent,
   type ReactElement,
   type ReactNode,
@@ -50,6 +51,7 @@ import MethodCall from '@/components/transactions/TxDetails/TxData/DecodedData/M
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import singleTxCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
 import {
+  CircleAlert,
   Building2,
   Check,
   ChevronDown,
@@ -117,15 +119,12 @@ import { Field, FieldContent, FieldLabel } from '@safe-global/views/components/u
 import { Input } from '@safe-global/views/components/ui/input'
 import { Switch } from '@safe-global/views/components/ui/switch'
 import { Toggle } from '@safe-global/views/components/ui/toggle'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { AccountSelect } from './m2AccountSelect'
 import { M2Alert } from './m2Alert'
-import {
-  INELIGIBILITY_TEXT,
-  NESTED_SAFES_NOTICE_TITLE,
-} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import { RecipientsPicker, TokensPicker } from '../allowlistSafe/allowlistSafeFlow'
+import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { EDIT_STEP_TITLE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import { POLICY_ICONS } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
@@ -246,11 +245,36 @@ const FIAT_TOTALS: Record<string, string> = {
   [getAccountKey(TRADING_DESK)]: '312780.40',
   [getAccountKey(VAULT_3)]: '9050.00',
   [getAccountKey(OPERATIONS)]: '29800.00',
+  '1:0x2c71b3e8f4a90d5c6b1e7f8a2d3c4b5e6f7a8b9c': '15200.00',
 }
 
 // Prototype only: M1's selector has a fixed set of reasons, so this one is registered on its text map at runtime.
 const HAS_ALLOWLIST = 'has-allowlist' as string as SafeAccountIneligibility
 INELIGIBILITY_TEXT[HAS_ALLOWLIST] = 'Already has an allowlist'
+const UNSUPPORTED_NETWORK = 'allowlist-unsupported-network' as string as SafeAccountIneligibility
+INELIGIBILITY_TEXT[UNSUPPORTED_NETWORK] = 'Allowlists are only available on Ethereum, Polygon and Sepolia for now.'
+const NESTED_SAFE = 'allowlist-nested-safe' as string as SafeAccountIneligibility
+INELIGIBILITY_TEXT[NESTED_SAFE] =
+  "Allowlists aren't available yet for Safe accounts that have another Safe account as a signer."
+
+// Spec 3.3: Ethereum, Polygon and Sepolia only.
+const ALLOWLIST_CHAIN_IDS = ['1', '137', '11155111']
+
+/** Dropdown-only: a Safe with another Safe as a signer, which can't have an allowlist yet (spec 3.2). */
+const GRANTS_NESTED: M2Account = {
+  name: 'Grants',
+  address: '0x2c71b3e8f4a90d5c6b1e7f8a2d3c4b5e6f7a8b9c',
+  chainId: '1',
+  version: '1.5.0',
+  threshold: 2,
+  owners: 3,
+}
+
+const getIneligibleReason = (account: M2Account, disabledKeys: string[]): SafeAccountIneligibility | undefined => {
+  if (account === GRANTS_NESTED) return NESTED_SAFE
+  if (!ALLOWLIST_CHAIN_IDS.includes(account.chainId)) return UNSUPPORTED_NETWORK
+  return disabledKeys.includes(getAccountKey(account)) ? HAS_ALLOWLIST : undefined
+}
 
 /** An M2 account as M1's Safe account row takes it, so "Applies to" and the dropdown are M1's own rows. */
 const toSafeAccountOption = (account: M2Account, ineligibleReason?: SafeAccountIneligibility): SafeAccountOption => ({
@@ -278,12 +302,10 @@ const ACCOUNT_GROUPS: M2Account[][] = [
 export const findM2Account = (key: string): M2Account | undefined =>
   ACCOUNT_GROUPS.flat().find((account) => getAccountKey(account) === key)
 
-/** M1's dropdown entries; accounts that already have an allowlist are disabled with that reason. */
+/** M1's dropdown entries; accounts that can't take an allowlist are greyed out with the reason as a tooltip. */
 const getAccountEntries = (disabledKeys: string[]): SafeAccountEntry[] =>
-  ACCOUNT_GROUPS.map((accounts) => {
-    const options = accounts.map((account) =>
-      toSafeAccountOption(account, disabledKeys.includes(getAccountKey(account)) ? HAS_ALLOWLIST : undefined),
-    )
+  [...ACCOUNT_GROUPS, [GRANTS_NESTED]].map((accounts) => {
+    const options = accounts.map((account) => toSafeAccountOption(account, getIneligibleReason(account, disabledKeys)))
     if (options.length === 1) return options[0]
 
     const [first] = accounts
@@ -298,11 +320,6 @@ const getAccountEntries = (disabledKeys: string[]): SafeAccountEntry[] =>
       owners: isShared ? first.owners : undefined,
     }
   })
-
-const NESTED_SAFES_NOTICE = {
-  title: NESTED_SAFES_NOTICE_TITLE,
-  description: 'To manage allowlists for the Nested Safe accounts, go to the Safe account settings.',
-}
 
 const GUARD_ADDRESS = '0x1a4f7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4c802'
 
@@ -419,6 +436,11 @@ const ACCOUNT_TOKENS: Record<string, AccountToken[]> = {
   [getAccountKey(VAULT_3)]: [USDC('8,400'), ETH('0.2')],
   [getAccountKey(OPERATIONS)]: [USDC('22,000'), USDT('5,000'), ETH('0.9')],
 }
+
+/** Every token any account holds: excluding them all starts Create's token list empty. */
+export const ALL_HELD_TOKEN_SYMBOLS = [
+  ...new Set(Object.values(ACCOUNT_TOKENS).flatMap((tokens) => tokens.map(({ symbol }) => symbol))),
+]
 
 export const getAccountTokens = (account?: M2Account): AccountToken[] =>
   account ? (ACCOUNT_TOKENS[getAccountKey(account)] ?? []) : []
@@ -597,13 +619,10 @@ const PolicyDetailsCard = ({
   safe,
   tokens,
   recipients,
-  allowedSettings,
 }: {
   safe: SafeAccountOption
   tokens: Marked<AccountToken>[]
   recipients: Marked<Recipient>[]
-  /** Titles of the Safe account settings left selected. */
-  allowedSettings: string[]
 }): ReactElement => (
   // Two cards, as the spending limit review in production: the account on its own, then the rules.
   <div className="flex flex-col gap-3" data-m2-new="New · Policy details card">
@@ -611,7 +630,8 @@ const PolicyDetailsCard = ({
       <div className="p-4">
         <SummaryRow label="Applies to">
           {/* One even gap between account, signers, network and value; SafeRowStats renders its cells as siblings. */}
-          <div className="flex min-h-10 flex-wrap items-center gap-x-8 gap-y-2">
+          {/* Account, signers, network and balance spread evenly across the row. */}
+          <div className="flex min-h-10 w-full flex-wrap items-center justify-between gap-x-8 gap-y-2">
             <div className="min-w-0">
               <SafeAddress name={safe.name} address={safe.address} />
             </div>
@@ -676,40 +696,16 @@ const PolicyDetailsCard = ({
 
         <Separator className="my-3" />
 
-        {/* Closed by default: the title and the count, the list opening underneath. */}
-        <Collapsible data-m2-new="New · Allowed account changes dropdown">
-          <CollapsibleTrigger className="group flex min-h-10 w-full cursor-pointer items-center gap-3 rounded-md text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
-            <Typography variant="paragraph-small" className="flex-1">
-              Allowed account changes
-            </Typography>
-            <Typography variant="paragraph-small-medium">{allowedSettings.length}</Typography>
-            <ChevronDown
-              className="size-4 shrink-0 text-muted-foreground transition-transform group-data-[panel-open]:rotate-180"
-              aria-hidden
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            {/* SummaryRow's grid with an empty label cell, so the list starts where the values above start. */}
-            <div className="@container w-full pt-2 pb-1">
-              <div className="grid grid-cols-1 gap-1 @md:grid-cols-[176px_1fr] @md:gap-6">
-                <span aria-hidden />
-                <div className="flex flex-col gap-2">
-                  {allowedSettings.length > 0 ? (
-                    allowedSettings.map((title) => (
-                      <Typography key={title} variant="paragraph-small-medium">
-                        {title}
-                      </Typography>
-                    ))
-                  ) : (
-                    <Typography variant="paragraph-small" color="muted">
-                      None. Every change to the Safe account will be blocked.
-                    </Typography>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+        <div data-m2-new="#9420 · Every other action row">
+          <SummaryRow label="Every other action">
+            <SummaryLine>
+              <Badge variant="destructive" size="status" shape="status">
+                <X aria-hidden />
+                Blocked
+              </Badge>
+            </SummaryLine>
+          </SummaryRow>
+        </div>
       </div>
     </Card>
   </div>
@@ -722,6 +718,29 @@ type ChoiceHandlers = {
 
 /** Every failed check stops the setup; an account that already has an allowlist opens the edit flow instead. */
 const isBlockingPreflight = (preflight: Preflight): preflight is 'old-version' | 'other-guard' => preflight !== 'ready'
+
+/** #9420's Policies step warning, now shown under the token chips when a spending limit's token is left out. */
+const BlockedLimitsWarning = ({ blockedLimits }: { blockedLimits: ExistingPermission[] }): ReactElement | null => {
+  if (blockedLimits.length === 0) return null
+  const [first] = blockedLimits
+  return (
+    <div data-m2-new="#9420 · Spending limit warning">
+      <M2Alert
+        tone="warning"
+        title={
+          blockedLimits.length === 1
+            ? 'This allowlist blocks 1 spending limit.'
+            : `This allowlist blocks ${blockedLimits.length} spending limits.`
+        }
+        description={
+          blockedLimits.length === 1
+            ? `Add ${first.token} so ${first.holder} can keep sending it.`
+            : 'Add their tokens so they keep working.'
+        }
+      />
+    </div>
+  )
+}
 
 const PreflightFailure = ({ preflight }: { preflight: Exclude<Preflight, 'ready'> }): ReactElement => {
   const { title, description, action, href, tone = 'error' } = PREFLIGHT_FAILURES[preflight]
@@ -1574,6 +1593,80 @@ const PrimaryAction = ({
   )
 }
 
+/** An allowance the Safe gave a contract, which the allowlist can't stop (spec 1.1.1). */
+type OpenApproval = { token: string; spender: string; spenderAddress: string; allowance: string }
+
+// Prototype data: Payments has open approvals, Treasury has none.
+const OPEN_APPROVALS: Record<string, OpenApproval[]> = {
+  [getAccountKey(PAYMENTS)]: [
+    {
+      token: 'USDC',
+      spender: 'CoW Protocol',
+      spenderAddress: '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110',
+      allowance: 'Unlimited',
+    },
+    {
+      token: 'USDT',
+      spender: 'Uniswap Permit2',
+      spenderAddress: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+      allowance: '25,000 USDT',
+    },
+  ],
+}
+
+const getOpenApprovals = (account?: M2Account): OpenApproval[] =>
+  account ? (OPEN_APPROVALS[getAccountKey(account)] ?? []) : []
+
+const getRevokeUrl = ({ address, chainId }: M2Account): string =>
+  `https://revoke.cash/address/${address}?chainId=${chainId}`
+
+/** The Safe's open approvals, before anything else can be set up: revoke them, then check again. */
+const OpenApprovals = ({ account, approvals }: { account: M2Account; approvals: OpenApproval[] }): ReactElement => (
+  <div className="flex flex-col gap-4" data-m2-new="New · Open approvals">
+    <M2Alert
+      tone="warning"
+      title={`We recommend revoking ${approvals.length === 1 ? 'this approval' : `these ${approvals.length} approvals`}`}
+      description={`${approvals.length === 1 ? 'This contract' : 'These contracts'} can take tokens from ${account.name}, and the allowlist can't stop them.`}
+    />
+    <GroupSurface
+      title="Open approvals"
+      description="Contracts this Safe account has allowed to spend its tokens."
+      markNew="New · Open approvals list"
+    >
+      <div className="flex flex-col gap-2">
+        {approvals.map(({ token, spender, spenderAddress, allowance }) => {
+          const tokenInfo = POPULAR_TOKENS.find(({ symbol }) => symbol === token)
+          return (
+            <ItemSurface key={`${token}:${spenderAddress}`}>
+              <div className="flex items-center gap-3">
+                <img src={tokenInfo?.logoUri} alt="" className="size-8 shrink-0 rounded-full" />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <Typography variant="paragraph-small-medium">
+                    {token} · {spender}
+                  </Typography>
+                  <MutedLine>
+                    <span className="font-mono">
+                      {spenderAddress.slice(0, 6)}...{spenderAddress.slice(-4)}
+                    </span>
+                  </MutedLine>
+                </div>
+                <Badge variant="outline" size="status" shape="status">
+                  {allowance}
+                </Badge>
+              </div>
+            </ItemSurface>
+          )
+        })}
+      </div>
+    </GroupSurface>
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <ExternalLink href={getRevokeUrl(account)} mode="button">
+        Revoke on revoke.cash
+      </ExternalLink>
+    </div>
+  </div>
+)
+
 /** One form, laid out like M1's SpendingLimitPolicyForm: blocks stacked with its `gap-5`, Next at the bottom. */
 const CreateStep = ({
   account,
@@ -1581,6 +1674,8 @@ const CreateStep = ({
   onChoicesChange,
   preflight,
   onNext,
+  showsApprovals = false,
+  onPassApprovals,
   isEditMode = false,
   isUnchangedEdit = false,
   scrollToTokens = false,
@@ -1589,6 +1684,9 @@ const CreateStep = ({
   account?: M2Account
   preflight: Preflight
   onNext: () => void
+  /** The account's open approvals show first; Next moves on to the pickers. */
+  showsApprovals?: boolean
+  onPassApprovals?: () => void
   /** M1's edit mode: the account fixed. */
   isEditMode?: boolean
   /** The edit allows what the live allowlist does, so Next stays off, as in M1. */
@@ -1600,6 +1698,40 @@ const CreateStep = ({
   const hasRecipient = getShownRecipients(choices, account).some((recipient) => recipient.selected)
   const hasToken = getAllowedTokens(choices, account).length > 0
   const tokensRef = useRef<HTMLElement>(null)
+  const approvals = getOpenApprovals(account)
+  const heldTokens = getAccountTokens(account)
+  const pickerTokens = [
+    ...heldTokens,
+    ...POPULAR_TOKENS.filter(({ symbol }) => !heldTokens.some((held) => held.symbol === symbol)),
+  ]
+  const allowedSymbols = getAllowedTokens(choices, account).map(({ symbol }) => symbol)
+  // Nothing picked yet reads as a fresh start, not as every spending limit blocked.
+  const blockedLimits =
+    account && allowedSymbols.length > 0
+      ? getExistingPermissions(account).filter(({ token }) => !allowedSymbols.includes(token))
+      : []
+  const setTokens = (symbols: string[]) =>
+    onChoicesChange({
+      ...choices,
+      excludedTokens: heldTokens.map(({ symbol }) => symbol).filter((symbol) => !symbols.includes(symbol)),
+      addedTokens: symbols.filter((symbol) => !heldTokens.some((held) => held.symbol === symbol)),
+    })
+  const setRecipients = (contacts: { name: string; address: string }[]) => {
+    const picked = contacts.map(({ address }) => address.toLowerCase())
+    const known = choices.recipients.map(({ address }) => address.toLowerCase())
+    onChoicesChange({
+      ...choices,
+      recipients: [
+        ...choices.recipients.map((recipient) => ({
+          ...recipient,
+          selected: picked.includes(recipient.address.toLowerCase()),
+        })),
+        ...contacts
+          .filter(({ address }) => !known.includes(address.toLowerCase()))
+          .map(({ name, address }) => ({ name, address, selected: true })),
+      ],
+    })
+  }
 
   // Two frames: the layout resets the scroll to the top in the first, after this effect, so the tokens scroll in the next.
   useEffect(() => {
@@ -1621,8 +1753,25 @@ const CreateStep = ({
     <TxCard>
       <div className="flex flex-col gap-5">
         {/* A failed check leaves only the account and its banner: there is nothing to set up until it's resolved. */}
-        {account && isBlockingPreflight(preflight) ? (
+        {/* Setup starts with the Safe alone; nothing else shows until one is picked. */}
+        {!account && !isEditMode ? null : account && isBlockingPreflight(preflight) ? (
           <PreflightFailure preflight={preflight} />
+        ) : account && showsApprovals ? (
+          <OpenApprovals account={account} approvals={approvals} />
+        ) : !isEditMode ? (
+          <div className="flex min-w-0 flex-col gap-4" data-m2-new="Prototype 3 · Token and recipient pickers">
+            <TokensPicker
+              tokens={pickerTokens}
+              spendingLimitTokens={getAccountSpendingLimits(account).map(({ token }) => token)}
+              footer={<BlockedLimitsWarning blockedLimits={blockedLimits} />}
+              selected={getAllowedTokens(choices, account).map(({ symbol }) => symbol)}
+              onChange={setTokens}
+            />
+            <RecipientsPicker
+              selected={getSelectedRecipients(choices).map(({ name, address }) => ({ name, address }))}
+              onChange={setRecipients}
+            />
+          </div>
         ) : (
           <div className="flex min-w-0 flex-col gap-4">
             <TokensGroup
@@ -1643,8 +1792,12 @@ const CreateStep = ({
 
         <PrimaryAction
           label="Next"
-          disabled={!account || isBlockingPreflight(preflight) || !hasToken || !hasRecipient || isUnchangedEdit}
-          onClick={onNext}
+          disabled={
+            !account ||
+            isBlockingPreflight(preflight) ||
+            (!showsApprovals && (!hasToken || !hasRecipient || isUnchangedEdit))
+          }
+          onClick={showsApprovals ? onPassApprovals : onNext}
         />
       </div>
     </TxCard>
@@ -1674,7 +1827,6 @@ const PolicySummary = ({
         recipients={
           initialChoices ? markChanges(selected, getSelectedRecipients(initialChoices), recipientKey) : selected
         }
-        allowedSettings={getAllowedSettings(choices).map(({ title }) => title)}
       />
     </div>
   )
@@ -2600,6 +2752,51 @@ const PolicyReviewContent = ({
   )
 }
 
+/** Spec 4.5: the one warning on Review, asking to confirm every other action is blocked before signing. Continue scrolls back here until it's ticked. */
+const ReviewWarning = ({
+  boxRef,
+  title,
+  checked,
+  hasError,
+  onChange,
+}: {
+  boxRef: RefObject<HTMLDivElement | null>
+  title: string
+  checked: boolean
+  hasError: boolean
+  onChange: (checked: boolean) => void
+}): ReactElement => {
+  const checkboxId = useId()
+  const isMissing = hasError && !checked
+
+  // One red warning: the rule, then the confirmation, its checkbox in the icon's column.
+  return (
+    <div
+      ref={boxRef}
+      role="alert"
+      className="flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
+      data-m2-new="Spec 4.5 · One review warning with the confirmation"
+    >
+      <div className="flex items-center gap-3">
+        <CircleAlert className="size-4 shrink-0 text-destructive" aria-hidden />
+        <Typography variant="paragraph-small-medium">{title}</Typography>
+      </div>
+      <label htmlFor={checkboxId} className="flex cursor-pointer items-center gap-3">
+        <Checkbox
+          id={checkboxId}
+          checked={checked}
+          aria-invalid={isMissing}
+          onCheckedChange={(next) => onChange(next === true)}
+          className="bg-card"
+        />
+        <Typography variant="paragraph-small" className={classnames(isMissing && 'text-destructive')}>
+          I understand other actions are blocked and later changes take 24 hours.
+        </Typography>
+      </label>
+    </div>
+  )
+}
+
 const ReviewStep = ({
   account,
   choices,
@@ -2621,8 +2818,27 @@ const ReviewStep = ({
     [choices, mode, account],
   )
 
+  const summary = useSetupSummary(account, choices, REVIEW_STEP, mode === 'edit')
+  const [isUnderstood, setIsUnderstood] = useState(false)
+  const [hasConsentError, setHasConsentError] = useState(false)
+  const consentRef = useRef<HTMLDivElement>(null)
+
+  const submit = () => {
+    if (isUnderstood) return onNext()
+    setHasConsentError(true)
+    consentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
   return (
-    <PolicyReviewContent txPreview={txPreview} onSubmit={onNext}>
+    <PolicyReviewContent txPreview={txPreview} onSubmit={submit}>
+      <ReviewWarning
+        boxRef={consentRef}
+        title={summary.title}
+        checked={isUnderstood}
+        hasError={hasConsentError}
+        onChange={setIsUnderstood}
+      />
+
       <PolicySummary choices={choices} account={account} initialChoices={initialChoices} />
 
       <MutedLine>
@@ -2856,8 +3072,8 @@ type SetupSummary = {
   description?: string
   /** Behind the info icon at the end of the description. */
   details?: string
-  /** Yellow when the choice leaves funds exposed; blue otherwise. */
-  tone?: 'info' | 'warning'
+  /** Red on Review, where signing blocks everything else; yellow when funds are exposed; blue otherwise. */
+  tone?: 'info' | 'warning' | 'error'
 }
 
 const useSetupSummary = (
@@ -2879,8 +3095,8 @@ const useSetupSummary = (
 
   const allowedRule =
     isComplete && who
-      ? `${who} will only be able to send ${describeTokens(tokens)} to ${describeRecipients(recipients)}.`
-      : `To create an allowlist policy on ${who}, select at least one token and one recipient.`
+      ? `${who} can only send ${describeTokens(tokens)} to ${describeRecipients(recipients)}.`
+      : `Select at least one token and one recipient for ${who}.`
   const limitCount = account ? getExistingPermissions(account).length : 0
   const limits = limitCount === 1 ? 'Your spending limit' : `Your ${limitCount} spending limits`
   const allowedSettingCount = getAllowedSettings(choices).length
@@ -2917,19 +3133,20 @@ const useSetupSummary = (
             description:
               'Only the account changes you select below can still be made. Every other change will be blocked.',
           },
-    // Spending limits left out turn it yellow; in edit mode it points at the Added/Removed marks instead.
+    // Always red: once signed, everything outside the allowlist is blocked.
     [REVIEW_STEP]: isEditMode
       ? {
           title: `You're changing the allowlist on ${who}.`,
           description: "Check what's added and removed below before you sign.",
+          tone: 'error',
         }
       : limitCount > 0 && !choices.applyToSpendingLimits
         ? {
             title: allowedRule,
             description: `${limits} won't follow these rules, so your Safe account could be exposed.`,
-            tone: 'warning',
+            tone: 'error',
           }
-        : { title: allowedRule, description: 'Check the details below before you sign.' },
+        : { title: allowedRule, description: 'Check the details below before you sign.', tone: 'error' },
     [CONFIRM_STEP]: {
       title: `Sign to add the ${isEditMode ? 'change' : 'allowlist'} to the queue.`,
       description:
@@ -2938,13 +3155,13 @@ const useSetupSummary = (
           : 'Your signature is the only one needed. It can be executed right after.',
     },
     [EXECUTE_STEP]: isEditMode
-      ? { title: 'Execute to start the 24-hour wait.', description: 'The change applies after that.' }
-      : { title: 'Execute to turn the allowlist on.', description: 'It applies right away.' },
+      ? { title: 'Execute to start the 24-hour review window.', description: 'The change applies after that.' }
+      : { title: 'Execute to activate the allowlist.', description: 'It applies right away.' },
   }
   const banner: SetupSummary = who
     ? STEP_BANNERS[step]
     : {
-        title: 'Pick a Safe account to start.',
+        title: 'Select a Safe account to start.',
         description: 'Then choose which tokens it can send and who can receive them.',
       }
 
@@ -3343,6 +3560,8 @@ export type SetUpPoliciesFlowProps = ChoiceHandlers & {
   topBar?: ReactNode
   /** The account field is read-only; an edit started from Create, by picking an account with an allowlist, keeps it changeable. */
   isAccountLocked?: boolean
+  /** Opens the account dropdown on load; `no-signer` and `no-wallet` show M1's empty dropdown instead of the accounts. */
+  accountPicker?: 'open' | 'no-signer' | 'no-wallet'
 }
 
 export const SetUpPoliciesFlow = ({
@@ -3363,18 +3582,25 @@ export const SetUpPoliciesFlow = ({
   initialChoices,
   topBar,
   isAccountLocked = mode === 'edit',
+  accountPicker,
 }: SetUpPoliciesFlowProps): ReactElement => {
   // "Change tokens" on Permissions: Create scrolls to its tokens once it shows, then clears this.
   const [isTokensScrollPending, setIsTokensScrollPending] = useState(false)
+  // Open approvals are a suggestion: Next moves past them to the pickers, once per account.
+  const [approvalsSeenFor, setApprovalsSeenFor] = useState<string>()
   const clearTokensScroll = useCallback(() => setIsTokensScrollPending(false), [])
   const isEditMode = mode === 'edit'
   const editBaseline = isEditMode ? initialChoices : undefined
   const currentStep = Math.min(Math.max(step, 0), WIZARD_STEP_NAMES.length - 1)
+  const showsApprovals =
+    currentStep === CREATE_STEP &&
+    !isEditMode &&
+    getOpenApprovals(account).length > 0 &&
+    (!account || approvalsSeenFor !== getAccountKey(account))
   const reviewedAccount = account ?? PAYMENTS
-  // Shown until an account without permissions is picked, and kept while a jump is showing it.
-  const hasPermissionsStep = !account || hasExistingPermissions(account) || currentStep === PERMISSIONS_STEP
+  // Spending limits are handled in Create's token list, and there's no settings step: neither step shows.
   const visibleSteps = WIZARD_STEP_NAMES.map((_, index) => index).filter(
-    (index) => index !== PERMISSIONS_STEP || hasPermissionsStep,
+    (index) => index !== PERMISSIONS_STEP && index !== SETTINGS_STEP,
   )
   const earlierSteps = visibleSteps.filter((index) => index < currentStep)
   const next = () => onStepChange(visibleSteps.find((index) => index > currentStep) ?? currentStep)
@@ -3426,15 +3652,21 @@ export const SetUpPoliciesFlow = ({
                 const picked = findM2Account(id)
                 if (picked) onAccountChange(picked)
               }}
-              notice={NESTED_SAFES_NOTICE}
               id="recipient-allowlist-safe-account"
               readOnly={isAccountLocked}
+              defaultOpen={accountPicker !== undefined}
+              noEligibleAccounts={accountPicker === 'open' ? undefined : accountPicker}
             />
           </div>
         )
       }
       summary={summary}
-      hideSummary={isPreflightBlocked}
+      hideSummary={
+        isPreflightBlocked ||
+        // Review has its own warning, with the confirmation in it.
+        currentStep === REVIEW_STEP ||
+        showsApprovals
+      }
       summaryAccount={summaryAccount}
     >
       <CreateStep
@@ -3445,6 +3677,8 @@ export const SetUpPoliciesFlow = ({
         // The pre-setup checks passed when the allowlist was created.
         preflight={isEditMode ? 'ready' : preflight}
         onNext={next}
+        showsApprovals={showsApprovals}
+        onPassApprovals={() => account && setApprovalsSeenFor(getAccountKey(account))}
         isEditMode={isEditMode}
         // Settings, the last step before Review, can still change the edit, so the check waits for its Next.
         isUnchangedEdit={false}
@@ -3537,7 +3771,7 @@ export const SecondSignerConfirm = ({ choices, onConfirm, onClose }: SecondSigne
   const summary =
     reviewSummary.tone === 'warning'
       ? reviewSummary
-      : { ...reviewSummary, description: 'Check the details below before you approve.' }
+      : { ...reviewSummary, description: 'Check the details below before you confirm.' }
 
   return (
     <TxModalDialog open fullWidth onClose={onClose}>

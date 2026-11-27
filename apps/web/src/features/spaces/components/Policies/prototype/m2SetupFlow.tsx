@@ -937,20 +937,24 @@ export const ContactsHeader = ({
   tooltip,
   count,
 }: {
-  Icon: LucideIcon
+  Icon?: LucideIcon
   label: string
-  tooltip: string
+  tooltip?: string
   count: number
 }): ReactElement => (
   // Sticky over a popover-coloured strip, so rows scrolling under it don't show through the inset around the bar.
   <div className="sticky top-0 z-10 bg-popover pb-1">
     <div className="flex h-10 items-center gap-1.5 rounded-lg bg-muted px-4 text-xs leading-4 font-semibold text-muted-foreground uppercase">
-      <Icon className="size-3.5 shrink-0" aria-hidden />
+      {Icon && <Icon className="size-3.5 shrink-0" aria-hidden />}
       <span className="min-w-0 truncate">{label}</span>
-      <Tooltip>
-        <TooltipTrigger render={<Info className="size-3.5 shrink-0 cursor-help" />} />
-        <TooltipContent sideOffset={TOOLTIP_OFFSET}>{tooltip}</TooltipContent>
-      </Tooltip>
+      {tooltip && (
+        <Tooltip>
+          <TooltipTrigger render={<Info className="size-3.5 shrink-0 cursor-help" />} />
+          <TooltipContent sideOffset={TOOLTIP_OFFSET} className="max-w-72">
+            {tooltip}
+          </TooltipContent>
+        </Tooltip>
+      )}
       <span className="ml-auto">{count}</span>
     </div>
   </div>
