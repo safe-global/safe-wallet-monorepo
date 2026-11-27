@@ -113,7 +113,7 @@ describe('TokenTransfer utils', () => {
         initialReduxState: { settings: { hideDust: false } as SettingsState },
       })
 
-      expect(result.current).toStrictEqual(balance.items)
+      expect(result.current.tokens).toStrictEqual(balance.items)
     })
 
     it('only returns spending limit tokens if its a spending limit beneficiary', () => {
@@ -172,7 +172,7 @@ describe('TokenTransfer utils', () => {
         initialReduxState: { settings: { hideDust: false } as SettingsState },
       })
 
-      expect(result.current).toStrictEqual([mockToken])
+      expect(result.current.tokens).toStrictEqual([mockToken])
     })
 
     it('ignores the spending limits of the Safe in the URL inside a Safe scope', () => {
@@ -225,7 +225,31 @@ describe('TokenTransfer utils', () => {
         wrapper: ({ children }) => createElement(SafeScopeContext.Provider, { value: scope }, children),
       })
 
-      expect(result.current).toStrictEqual(balance.items)
+      expect(result.current.tokens).toStrictEqual(balance.items)
+    })
+
+    it('is loading until the balances are read', () => {
+      jest.spyOn(spendingLimitBeneficiary, 'default').mockReturnValue(false)
+      jest.spyOn(trustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([undefined, undefined, true])
+
+      const { result } = renderHook(() => useVisibleTokens(), {
+        initialReduxState: { settings: { hideDust: false } as SettingsState },
+      })
+
+      expect(result.current).toEqual({ tokens: [], loading: true })
+    })
+
+    it('is loading while the spending limits are read', () => {
+      const balance: Balances = { fiatTotal: '0', items: [] }
+      jest.spyOn(spendingLimitBeneficiary, 'default').mockReturnValue(false)
+      jest.spyOn(trustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balance, undefined, false])
+      jest.spyOn(spendingLimits, 'default').mockReturnValue({ spendingLimits: [], loading: true })
+
+      const { result } = renderHook(() => useVisibleTokens(), {
+        initialReduxState: { settings: { hideDust: false } as SettingsState },
+      })
+
+      expect(result.current.loading).toBe(true)
     })
   })
 })

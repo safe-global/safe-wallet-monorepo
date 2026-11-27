@@ -23,16 +23,17 @@ export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) 
 const filterHiddenTokens = (items: Balances['items'], hiddenAssets: string[]) =>
   items.filter((balanceItem) => !hiddenAssets.includes(balanceItem.tokenInfo.address))
 
-export const useVisibleTokens = () => {
+/** The tokens the wallet may send; `loading` until the balances and the spending limits are read. */
+export const useVisibleTokens = (): { tokens: Balances['items']; loading: boolean } => {
   const isOnlySpendingLimitBeneficiary = useIsOnlySpendingLimitBeneficiary()
   const [balances] = useTrustedTokenBalances()
-  const { spendingLimits } = useSpendingLimits()
+  const { spendingLimits, loading: spendingLimitsLoading } = useSpendingLimits()
   const wallet = useWallet()
   const hiddenTokens = useHiddenTokens()
   const { showNativeInBalances } = useNativeTokenDisplay()
   const isScoped = !!useSafeScope()
 
-  return useMemo(() => {
+  const tokens = useMemo(() => {
     if (!balances) {
       return []
     }
@@ -61,4 +62,6 @@ export const useVisibleTokens = () => {
     spendingLimits,
     wallet?.address,
   ])
+
+  return { tokens, loading: !balances || spendingLimitsLoading }
 }

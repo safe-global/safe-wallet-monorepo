@@ -217,10 +217,12 @@ const TokenSwitchTestWrapper = ({
   balances = mockBalances,
   defaultTokenAddress = ZERO_ADDRESS,
   validateRecipient = async () => undefined,
+  isTokenListLoading = false,
 }: {
   balances?: Balances['items']
   defaultTokenAddress?: string
   validateRecipient?: () => Promise<undefined>
+  isTokenListLoading?: boolean
 }) => {
   const methods = useForm({
     defaultValues: {
@@ -241,6 +243,7 @@ const TokenSwitchTestWrapper = ({
         maxAmount={BigInt(selectedToken?.balance || '0')}
         fieldArray={{ name: 'recipients', index: 0 }}
         deps={['recipients']}
+        isTokenListLoading={isTokenListLoading}
       />
       <input aria-label="Recipient" {...methods.register('recipients.0.recipient', { validate: validateRecipient })} />
     </FormProvider>
@@ -279,14 +282,24 @@ describe('TokenAmountInput', () => {
       expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
     })
 
-    it('keeps the picked token when the token list is empty for a moment', async () => {
+    it('keeps the picked token while the token list loads again', async () => {
+      const { user, rerender } = renderOnFakeClock(<TokenSwitchTestWrapper />)
+      await pickToken(user, 'USD Coin')
+
+      rerender(<TokenSwitchTestWrapper balances={[]} isTokenListLoading />)
+      rerender(<TokenSwitchTestWrapper />)
+
+      expect(within(screen.getByTestId('token-selector')).getByText('USD Coin')).toBeInTheDocument()
+    })
+
+    it('drops the picked token once a loaded token list no longer has it', async () => {
       const { user, rerender } = renderOnFakeClock(<TokenSwitchTestWrapper />)
       await pickToken(user, 'USD Coin')
 
       rerender(<TokenSwitchTestWrapper balances={[]} />)
       rerender(<TokenSwitchTestWrapper />)
 
-      expect(within(screen.getByTestId('token-selector')).getByText('USD Coin')).toBeInTheDocument()
+      expect(within(screen.getByTestId('token-selector')).queryByText('USD Coin')).not.toBeInTheDocument()
     })
 
     it('stops re-validating the form once the amount is typed while no token is picked', async () => {
