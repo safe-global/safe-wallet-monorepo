@@ -115,35 +115,36 @@ Supported versions:
 ```
 src/features/spending-limits/
 ├── public/                  # Entry point for other code
-│   ├── components/          # Gated components: SpendingLimitsSettings, SpendingLimitsLoader, ...
-│   ├── hooks/
+│   ├── components/          # Gated components: SpendingLimitsSettings, ...
+│   ├── hooks/               # useSpendingLimits, useSpendingLimit, ...
 │   ├── services/
-│   └── store/               # spendingLimitsSlice
+│   └── store/               # spendingLimitsRefreshListener
 ├── components/              # Private UI
 ├── hooks/                   # Private hooks
-└── services/                # Private services
+├── services/                # Private services
+├── store/                   # spendingLimitsApi (RTK Query endpoint)
+└── stories/                 # withSpendingLimits story decorator
 ```
 
 ### Data Loading
 
-Spending limits data is loaded automatically on app start via the `SpendingLimitsLoader` component.
+The `getSpendingLimits` RTK Query endpoint in `store/spendingLimitsApi.ts` reads the limits from the chain. The key is the chain, the Safe address, its module addresses and the custom RPC, so every caller shares one read per Safe. The loader service is imported on the first read only.
 
-**Architecture:**
-
-1. **Global loader component** (`SpendingLimitsLoader`) - Lazy-loaded, fetches data when Safe is loaded
-2. **Store selectors** - Components read data from Redux store
-
-This keeps the heavy fetching logic lazy-loaded while making data available to all components.
+- The read gets no token list. ERC-20 symbols and decimals come from the chain, and the native token comes from the chain config. The settings table adds the logos from the balances (`services/withTokenLogos.ts`).
+- When the Safe's `txHistoryTag` changes, `spendingLimitsRefreshListener` invalidates that Safe's tag. The refetch keeps the old limits on screen until the new ones arrive.
+- A Safe without modules reads nothing.
+- A failed read is read again every 30 seconds (`SPENDING_LIMITS_RETRY_MS`) until it succeeds.
 
 **How to read spending limits:**
 
 ```typescript
-import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
-import { useAppSelector } from '@/store'
+import useSpendingLimits from '@/features/spending-limits/public/hooks/useSpendingLimits'
 
-// Read data from store (loaded on app start)
-const spendingLimits = useAppSelector(selectSpendingLimits)
+// The Safe in the URL, also inside a Space flow; empty while the SPENDING_LIMIT flag is off
+const { spendingLimits, loading } = useSpendingLimits()
 ```
+
+In a story, put the limits in the cache with `withSpendingLimits(limits)` inside the store decorator.
 
 ### Feature Flag
 

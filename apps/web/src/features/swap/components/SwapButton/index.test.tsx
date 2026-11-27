@@ -3,6 +3,7 @@ import { tokenInfoBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
+import useSpendingLimits from '@/features/spending-limits/public/hooks/useSpendingLimits'
 import { mockRole, type TestRole } from '@/tests/mocks/roles'
 import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
@@ -18,6 +19,7 @@ jest.mock('@/hooks/useProposers')
 jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
+jest.mock('@/features/spending-limits/public/hooks/useSpendingLimits')
 
 jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
   ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
@@ -47,11 +49,10 @@ const spendingLimitsOf = (beneficiary: string | undefined, limit: Limit): Spendi
   return [{ ...spendingLimit, beneficiary, token: { ...spendingLimit.token, address: token.address } }]
 }
 
-const renderSwapButton = (spendingLimits: SpendingLimitState[], routerProps?: Partial<NextRouter>) =>
-  render(<SwapButton tokenInfo={swappedToken} amount="0" trackingLabel={SWAP_LABELS.asset} />, {
-    initialReduxState: { spendingLimits: { data: spendingLimits, loading: false, loaded: true } },
-    routerProps,
-  })
+const renderSwapButton = (spendingLimits: SpendingLimitState[], routerProps?: Partial<NextRouter>) => {
+  jest.mocked(useSpendingLimits).mockReturnValue({ spendingLimits, loading: false })
+  return render(<SwapButton tokenInfo={swappedToken} amount="0" trackingLabel={SWAP_LABELS.asset} />, { routerProps })
+}
 
 describe('SwapButton role gating', () => {
   beforeEach(() => {

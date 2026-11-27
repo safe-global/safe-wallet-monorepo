@@ -50,6 +50,7 @@ import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 import { safeOverviewsTokenListListener } from './api/gateway/safeOverviewsTokenListListener'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 import { spaceQueueReconciliationListener } from '@/features/spaces/public/store/spaceQueueReconciliationListener'
+import { spendingLimitsRefreshListener } from '@/features/spending-limits/public/store/spendingLimitsRefreshListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -64,7 +65,6 @@ const rootReducer = combineReducers({
   [slices.settingsSlice.name]: slices.settingsSlice.reducer,
   [slices.cookiesAndTermsSlice.name]: slices.cookiesAndTermsSlice.reducer,
   [slices.popupSlice.name]: slices.popupSlice.reducer,
-  [slices.spendingLimitSlice.name]: slices.spendingLimitSlice.reducer,
   [slices.safeAppsSlice.name]: slices.safeAppsSlice.reducer,
   [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
   [slices.batchSlice.name]: slices.batchSlice.reducer,
@@ -165,6 +165,7 @@ const listeners = [
   spaceQueueReconciliationListener,
   hnSessionListener,
   safeOverviewsTokenListListener,
+  spendingLimitsRefreshListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {

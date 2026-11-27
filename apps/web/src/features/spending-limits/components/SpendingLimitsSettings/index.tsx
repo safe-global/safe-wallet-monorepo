@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
 import AddIcon from '@/public/images/common/add.svg'
@@ -14,10 +14,11 @@ import SafeProLock from '@/components/common/SafeProLock'
 import Track from '@/components/common/Track'
 import { TxModalContext } from '@/components/tx-flow'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useAppSelector } from '@/store'
 import { usePlanGate } from '@/features/spaces/public/hooks/usePlanGate'
-import { selectSpendingLimits, selectSpendingLimitsLoading } from '../../public/store/spendingLimitsSlice'
+import useSpendingLimits from '../../public/hooks/useSpendingLimits'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
+import { withTokenLogos } from '../../services/withTokenLogos'
+import useBalances from '@/hooks/useBalances'
 
 const SpendingLimitsSettings = () => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -30,9 +31,12 @@ const SpendingLimitsSettings = () => {
     showProTag,
   } = usePlanGate(FEATURES.SPENDING_LIMIT_GATING)
 
-  // Read data from store (loaded on app start via SpendingLimitsLoader)
-  const spendingLimits = useAppSelector(selectSpendingLimits)
-  const spendingLimitsLoading = useAppSelector(selectSpendingLimitsLoading)
+  const { spendingLimits, loading: spendingLimitsLoading } = useSpendingLimits()
+  const { balances } = useBalances()
+  const spendingLimitsWithLogos = useMemo(
+    () => withTokenLogos(spendingLimits, balances.items),
+    [spendingLimits, balances.items],
+  )
 
   const renderNewSpendingLimitButton = (
     <CheckWallet>
@@ -97,7 +101,7 @@ const SpendingLimitsSettings = () => {
 
               {isSupported && !spendingLimits.length && !spendingLimitsLoading && <NoSpendingLimits />}
               {spendingLimits.length > 0 && (
-                <SpendingLimitsTable isLoading={spendingLimitsLoading} spendingLimits={spendingLimits} />
+                <SpendingLimitsTable isLoading={spendingLimitsLoading} spendingLimits={spendingLimitsWithLogos} />
               )}
             </div>
           ) : (

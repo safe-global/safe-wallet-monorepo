@@ -18,8 +18,7 @@ import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
-import { useAppSelector } from '@/store'
+import useSpendingLimits from '@/features/spending-limits/public/hooks/useSpendingLimits'
 import { useVisibleTokens } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
@@ -47,7 +46,7 @@ type RecipientRowProps = {
 
 const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
   const balancesItems = useVisibleTokens()
-  const spendingLimits = useAppSelector(selectSpendingLimits)
+  const { spendingLimits } = useSpendingLimits()
 
   const {
     formState: { errors },

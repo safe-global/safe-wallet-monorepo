@@ -1,8 +1,7 @@
 import useIsOnlySpendingLimitBeneficiary from '@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'
 import useSpendingLimit from '@/features/spending-limits/public/hooks/useSpendingLimit'
-import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
+import useSpendingLimits from '@/features/spending-limits/public/hooks/useSpendingLimits'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAppSelector } from '@/store'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
@@ -27,7 +26,7 @@ const filterHiddenTokens = (items: Balances['items'], hiddenAssets: string[]) =>
 export const useVisibleTokens = () => {
   const isOnlySpendingLimitBeneficiary = useIsOnlySpendingLimitBeneficiary()
   const [balances] = useTrustedTokenBalances()
-  const spendingLimits = useAppSelector(selectSpendingLimits)
+  const { spendingLimits } = useSpendingLimits()
   const wallet = useWallet()
   const hiddenTokens = useHiddenTokens()
   const { showNativeInBalances } = useNativeTokenDisplay()
@@ -46,7 +45,7 @@ export const useVisibleTokens = () => {
 
     if (isOnlySpendingLimitBeneficiary && !isScoped) {
       return items.filter(({ tokenInfo }) => {
-        return spendingLimits?.some(({ beneficiary, token }) => {
+        return spendingLimits.some(({ beneficiary, token }) => {
           return sameAddress(beneficiary, wallet?.address) && sameAddress(tokenInfo.address, token.address)
         })
       })

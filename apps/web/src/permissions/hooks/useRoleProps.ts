@@ -1,5 +1,4 @@
-import { useSelector } from 'react-redux'
-import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
+import useSpendingLimits from '@/features/spending-limits/public/hooks/useSpendingLimits'
 import { type RolePropsMap, Role } from '../config'
 
 /**
@@ -7,7 +6,7 @@ import { type RolePropsMap, Role } from '../config'
  * @returns Object with the props per role.
  */
 export const useRoleProps = (): RolePropsMap => {
-  const spendingLimits = useSelector(selectSpendingLimits)
+  const { spendingLimits } = useSpendingLimits()
 
   return {
     [Role.SpendingLimitBeneficiary]: { spendingLimits },

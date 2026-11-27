@@ -12,11 +12,13 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { dispatchSpendingLimitTxExecution } from '../../public/services/spendingLimitExecution'
+import useSpendingLimits from '../../public/hooks/useSpendingLimits'
 import ReviewSpendingLimitTx, { type TokenTransferParams } from '.'
 
 const MAINNET = '1'
 
 jest.mock('../../public/services/spendingLimitExecution', () => ({ dispatchSpendingLimitTxExecution: jest.fn() }))
+jest.mock('../../public/hooks/useSpendingLimits')
 jest.mock('../../hooks/useSpendingLimitGas', () => ({
   __esModule: true,
   default: () => ({ gasLimit: BigInt(100_000), gasLimitLoading: false }),
@@ -45,11 +47,11 @@ const renderReview = () => {
   const onSubmit = jest.fn()
   const txModal: TxModalContextType = { txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() }
   const limit = spendingLimitStateBuilder().with({ beneficiary: beneficiary.address, token: usdc }).build()
+  jest.mocked(useSpendingLimits).mockReturnValue({ spendingLimits: [limit], loading: false })
   render(
     <TxModalContext.Provider value={txModal}>
       <ReviewSpendingLimitTx params={transfer} onSubmit={onSubmit} />
     </TxModalContext.Provider>,
-    { initialReduxState: { spendingLimits: { data: [limit], loaded: true, loading: false } } },
   )
   return { onSubmit, setTxFlow: txModal.setTxFlow }
 }

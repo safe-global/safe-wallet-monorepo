@@ -1,43 +1,18 @@
 import { renderHook } from '@/tests/test-utils'
-import * as reactRedux from 'react-redux'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
+import useSpendingLimits from '@/features/spending-limits/public/hooks/useSpendingLimits'
 import { useRoleProps } from './useRoleProps'
 import { Role } from '../config'
-import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
+
+jest.mock('@/features/spending-limits/public/hooks/useSpendingLimits')
 
 describe('useRoleProps', () => {
-  const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector')
+  it("gives the spending limit beneficiary role the open Safe's spending limits", () => {
+    const spendingLimits = [spendingLimitStateBuilder().build(), spendingLimitStateBuilder().build()]
+    jest.mocked(useSpendingLimits).mockReturnValue({ spendingLimits, loading: false })
 
-  const mockSpendingLimits = [{ limit: 1000 }, { limit: 2000 }] as unknown as SpendingLimitState[]
+    const { result } = renderHook(() => useRoleProps())
 
-  beforeEach(() => {
-    useSelectorSpy.mockReturnValue(mockSpendingLimits)
-  })
-
-  afterEach(() => {
-    jest.clearAllMocks()
-  })
-
-  describe('SpendingLimitBeneficiary', () => {
-    it('should return correct props', () => {
-      const { result } = renderHook(() => useRoleProps())
-
-      expect(result.current).toEqual({
-        [Role.SpendingLimitBeneficiary]: { spendingLimits: mockSpendingLimits },
-      })
-
-      expect(useSelectorSpy).toHaveBeenCalledWith(expect.any(Function))
-    })
-
-    it('should return empty spendingLimits when selector returns undefined', () => {
-      useSelectorSpy.mockReturnValue(undefined)
-
-      const { result } = renderHook(() => useRoleProps())
-
-      expect(result.current).toEqual({
-        [Role.SpendingLimitBeneficiary]: { spendingLimits: undefined },
-      })
-
-      expect(useSelectorSpy).toHaveBeenCalledWith(expect.any(Function))
-    })
+    expect(result.current).toEqual({ [Role.SpendingLimitBeneficiary]: { spendingLimits } })
   })
 })

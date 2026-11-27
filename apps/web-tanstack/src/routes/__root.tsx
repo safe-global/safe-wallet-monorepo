@@ -39,7 +39,6 @@ import Analytics from '@/services/analytics/Analytics'
 import Recovery from '@/features/recovery/public/components/Recovery'
 import CounterfactualHooks from '@/features/counterfactual/public/components/CounterfactualHooks'
 import { useLocation, useSearch } from '@tanstack/react-router'
-import SpendingLimitsLoader from '@/features/spending-limits/public/components/SpendingLimitsLoader'
 
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
@@ -90,7 +89,6 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
       <AppChrome />
       <Recovery />
       <CounterfactualHooks />
-      <SpendingLimitsLoader />
     </>
   )
 })

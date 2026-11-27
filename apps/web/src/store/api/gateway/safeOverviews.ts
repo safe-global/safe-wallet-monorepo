@@ -11,6 +11,7 @@ import { isTrustedTokenList } from '@/utils/tokenList'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { delay } from '@safe-global/utils/utils/helpers'
 import { makeSafeTag, makeSafeOverviewTag } from '.'
+import type { GatewayTagType } from './tagTypes'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
 type InitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
@@ -178,9 +179,7 @@ type MultiOverviewQueryParams = {
   safes: Pick<SafeItem, 'chainId' | 'address'>[]
 }
 
-export const safeOverviewEndpoints = (
-  builder: EndpointBuilder<any, 'Submissions' | 'SafeOverviews', 'gatewayApi'>,
-) => ({
+export const safeOverviewEndpoints = (builder: EndpointBuilder<any, GatewayTagType, 'gatewayApi'>) => ({
   getSafeOverview: builder.query<SafeOverview | null, { safeAddress: string; walletAddress?: string; chainId: string }>(
     {
       providesTags: (result) =>

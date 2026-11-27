@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import type { SpendingLimitState } from '../../public/types'
+import { withSpendingLimits } from '../../stories/withSpendingLimits'
 import ReviewSpendingLimitTx from './index'
 
 // First owner of the `efSafe` fixture — this is the address the `owner` wallet
@@ -36,16 +37,15 @@ const spendingLimit = (token: typeof USDC): SpendingLimitState => ({
 // The `efSafe` fixture has `modules: null`, so `useSpendingLimitGas` early-returns
 // and no on-chain gas estimation is performed — the review renders fully in
 // isolation without a live wallet/provider.
-const makeSetup = (token: typeof USDC) =>
-  createMockStory({
+const makeSetup = (token: typeof USDC) => {
+  const { decorator, parameters } = createMockStory({
     scenario: 'efSafe',
     wallet: 'owner',
     pathname: '/balances',
     shadcn: true,
-    store: {
-      spendingLimits: { data: [spendingLimit(token)], loading: false, loaded: true },
-    },
   })
+  return { parameters, decorators: [withSpendingLimits([spendingLimit(token)]), decorator] }
+}
 
 const meta = {
   title: 'Features/SpendingLimits/ReviewSpendingLimitTx',
@@ -75,7 +75,7 @@ export const Default: Story = (() => {
       params: { recipient: RECIPIENT_ADDRESS, tokenAddress: USDC.address, amount: '100' },
     },
     parameters: { ...setup.parameters },
-    decorators: [setup.decorator],
+    decorators: setup.decorators,
   }
 })()
 
@@ -89,6 +89,6 @@ export const NativeToken: Story = (() => {
       params: { recipient: RECIPIENT_ADDRESS, tokenAddress: ETH.address, amount: '0.5' },
     },
     parameters: { ...setup.parameters },
-    decorators: [setup.decorator],
+    decorators: setup.decorators,
   }
 })()

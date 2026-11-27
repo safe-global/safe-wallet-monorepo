@@ -1,16 +1,7 @@
-import type { fakeBaseQuery } from '@reduxjs/toolkit/query/react'
-import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
-
 import { cgwApi as delegatesApi, type DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-
-// Local copy of payFromSafeFeePreview.ts's alias, so this module needs no import from the barrel it joins.
-type GatewayEndpointBuilder = EndpointBuilder<
-  ReturnType<typeof fakeBaseQuery<Error>>,
-  'Submissions' | 'SafeOverviews',
-  'gatewayApi'
->
+import type { GatewayEndpointBuilder } from './tagTypes'
 
 /** Cursor-paged: follow `next`, but bound it. The page size is pinned so the bound is a known one. */
 export const MAX_DELEGATE_PAGES = 5

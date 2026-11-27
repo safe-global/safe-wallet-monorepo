@@ -8,7 +8,7 @@ import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { findTokenOption, toTokenInfo } from '@/utils/tokenOptions'
 import { trackEvent } from '@/services/analytics'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
-import { selectSpendingLimits } from '../../public/store/spendingLimitsSlice'
+import useSpendingLimits from '../../public/hooks/useSpendingLimits'
 import { formatVisualAmount, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { UntrustedTokenWarning } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/SelectedTokenHelper'
@@ -17,12 +17,11 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { createNewSpendingLimitTx } from '../../public/services/spendingLimitExecution'
-import { useAppSelector } from '@/store'
 import SpendingLimitReviewDetails from './SpendingLimitReviewDetails'
 
 const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
   const { data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
-  const spendingLimits = useAppSelector(selectSpendingLimits)
+  const { spendingLimits } = useSpendingLimits()
   const { safe } = useSafeInfo()
   const chainId = useChainId()
   const chain = useCurrentChain()
