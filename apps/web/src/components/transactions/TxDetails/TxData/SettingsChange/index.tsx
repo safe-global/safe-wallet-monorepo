@@ -1,15 +1,25 @@
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
-import type { SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import type {
+  SettingsChangeTransaction,
+  TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ComponentProps, ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import { ThresholdWarning } from '@/components/transactions/Warning'
 import { UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { isTxQueued } from '@/utils/transaction-guards'
 
 type SettingsChangeTxInfoProps = {
   settingsInfo: SettingsChangeTransaction['settingsInfo']
   isTxExecuted?: boolean
+  /** Undefined for a preview of a new transaction, which is queued. */
+  txStatus?: TransactionDetails['txStatus']
+  /** The Safe the transaction belongs to; undefined means the current Safe. */
+  safeAddress?: string
 }
 
 const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' | 'showCopyButton' | 'hasExplorer'> = {
@@ -18,9 +28,29 @@ const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' 
   hasExplorer: true,
 }
 
+// The gateway sends no address for a deleted guard. While the transaction is queued, the guard it
+// removes is the one the Safe has now, unless an earlier queued transaction changes it. Once the
+// transaction is executed or replaced, or for another Safe, that guard is unknown.
+const DeleteGuardInfo = ({ txStatus, safeAddress }: Pick<SettingsChangeTxInfoProps, 'txStatus' | 'safeAddress'>) => {
+  const { safe, safeAddress: currentSafeAddress } = useSafeInfo()
+  const isQueued = !txStatus || isTxQueued(txStatus)
+  const isCurrentSafe = !safeAddress || sameAddress(safeAddress, currentSafeAddress)
+  const guard = isQueued && isCurrentSafe ? safe.guard : undefined
+
+  if (!guard) return <InfoDetails title="Delete guard" />
+
+  return (
+    <InfoDetails title="Delete guard:">
+      <EthHashInfo address={guard.value} name={guard.name} customAvatar={guard.logoUri} {...addressInfoProps} />
+    </InfoDetails>
+  )
+}
+
 const SettingsChangeTxInfo = ({
   settingsInfo,
   isTxExecuted = false,
+  txStatus,
+  safeAddress,
 }: SettingsChangeTxInfoProps): ReactElement | null => {
   const isUntrustedFallbackHandler = useHasUntrustedFallbackHandler(
     settingsInfo?.type === SettingsInfoType.SET_FALLBACK_HANDLER ? settingsInfo.handler.value : undefined,
@@ -137,7 +167,22 @@ const SettingsChangeTxInfo = ({
       )
     }
     case SettingsInfoType.DELETE_GUARD: {
-      return <InfoDetails title="Delete guard" />
+      return <DeleteGuardInfo txStatus={txStatus} safeAddress={safeAddress} />
+    }
+    case SettingsInfoType.SET_MODULE_GUARD: {
+      return (
+        <InfoDetails title="Set module guard:">
+          <EthHashInfo
+            address={settingsInfo.moduleGuard.value}
+            name={settingsInfo.moduleGuard?.name}
+            customAvatar={settingsInfo.moduleGuard?.logoUri}
+            {...addressInfoProps}
+          />
+        </InfoDetails>
+      )
+    }
+    case SettingsInfoType.DELETE_MODULE_GUARD: {
+      return <InfoDetails title="Delete module guard" />
     }
     default:
       return <></>
