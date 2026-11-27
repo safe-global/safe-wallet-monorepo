@@ -55,6 +55,7 @@ import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
 import { HnQueueAssessmentProvider } from '@/features/hypernative/public/components/HnQueueAssessmentProvider'
+import PrivateNotesAppProvider from '@/features/tx-notes/public/components/PrivateNotesAppProvider'
 import { useHypernativeTokenRefresh } from '@/features/hypernative/public/hooks/useHypernativeTokenRefresh'
 import { useOidcLoginCallback } from '@/features/oidc-auth/public/hooks/useOidcLoginCallback'
 import { useStepUpRecovery } from '@/features/oidc-auth/public/hooks/useStepUpRecovery'
@@ -128,11 +129,14 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     <ShadcnProvider dark={isDarkMode}>
       <WalletProvider>
         <GeoblockingProvider>
-          <TxModalProvider>
-            <AddressBookSourceProvider>
-              <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
-            </AddressBookSourceProvider>
-          </TxModalProvider>
+          {/* Around the tx flow modal too: the note is written there and read on the pages */}
+          <PrivateNotesAppProvider>
+            <TxModalProvider>
+              <AddressBookSourceProvider>
+                <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+              </AddressBookSourceProvider>
+            </TxModalProvider>
+          </PrivateNotesAppProvider>
         </GeoblockingProvider>
       </WalletProvider>
     </ShadcnProvider>

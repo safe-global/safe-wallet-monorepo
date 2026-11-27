@@ -1,4 +1,4 @@
-export const QUEUE_COLUMNS = ['Nonce', 'Safe', 'Transaction', 'Details', 'Status', 'Action'] as const
+export const QUEUE_COLUMNS = ['Nonce', 'Safe', 'Transaction', 'Details', 'Note', 'Status', 'Action'] as const
 
 export type QueueColumn = (typeof QUEUE_COLUMNS)[number]
 
@@ -11,6 +11,8 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
   Safe: 160,
   Transaction: 160,
   Details: undefined,
+  // Only the note icon. The header sets the width in use: see QUEUE_NOTE_WIDTHS
+  Note: 68,
   // Only the gauge: a 16px icon and a 5ch count (71px). Pending and expired states sit in the Action column
   Status: 104,
   // Fits "Blocked by #8888" and its arrow beside the More button (169px), the widest action
@@ -19,6 +21,22 @@ export const QUEUE_COLUMN_WIDTHS: Record<QueueColumn, number | undefined> = {
 
 /** The queue table's floor: Details at 268px, so it fits the 1002px panel of a 1280px window with the sidebar open */
 export const QUEUE_TABLE_MIN_WIDTH = 'min-w-[960px]'
+
+/**
+ * How a transaction's note shows, by the panel's width: `inline` puts its icon in Details and gives the Note column
+ * no width, `icon` gives it the Note column, `text` widens the column for the note's text.
+ */
+export type QueueNoteDisplay = 'inline' | 'icon' | 'text'
+
+const NOTE_COLUMN_MIN_PANEL_WIDTH = 1050
+const NOTE_TEXT_MIN_PANEL_WIDTH = 1880
+
+export const QUEUE_NOTE_WIDTHS: Record<QueueNoteDisplay, number> = { inline: 0, icon: 68, text: 320 }
+
+export const getQueueNoteDisplay = (panelWidth: number): QueueNoteDisplay => {
+  if (panelWidth >= NOTE_TEXT_MIN_PANEL_WIDTH) return 'text'
+  return panelWidth >= NOTE_COLUMN_MIN_PANEL_WIDTH ? 'icon' : 'inline'
+}
 
 /** The columns that stay in view while the table scrolls sideways in its panel (`data-pin`, see table.module.css) */
 export const QUEUE_PINNED_COLUMNS: Partial<Record<QueueColumn, 'start' | 'end'>> = { Nonce: 'start', Action: 'end' }

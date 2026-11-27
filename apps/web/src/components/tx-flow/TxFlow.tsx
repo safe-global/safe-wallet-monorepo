@@ -9,6 +9,7 @@ import ReviewTransaction, { type ReviewTransactionProps } from '../tx/ReviewTran
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteTxStep } from '../tx/ExecuteTxStep'
 import TxNote from '@/components/tx-flow/features/TxNote'
+import { usePrivateNotesPrototype } from '@/features/tx-notes/public/services/privateNotesPrototype'
 import SignerSelect from '@/components/tx-flow/features/SignerSelect'
 import BalanceChanges from '@/components/tx-flow/features/BalanceChanges'
 import FeeCard from '@/components/tx-flow/features/FeeCard'
@@ -43,6 +44,8 @@ type TxFlowProps<T extends unknown> = {
   declared?: TxFlowProviderProps<T>['declared']
   ReviewTransactionComponent?: ComponentType<ReviewTransactionProps>
   eventCategory?: string
+  /** Prototype stories: opens the flow on a later step, with `initialData` filled */
+  initialStep?: number
 } & TxFlowContextType['txLayoutProps']
 
 /**
@@ -65,9 +68,10 @@ export const TxFlow = <T extends unknown>({
   declared,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
+  initialStep,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
-  const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
+  const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory, initialStep)
 
   const childrenArray = Array.isArray(children) ? children : [children]
   const [signedTxId, setSignedTxId] = useState<string>()
@@ -79,20 +83,24 @@ export const TxFlow = <T extends unknown>({
 
   const trackTimeSpent = useTrackTimeSpent()
 
+  const { commitDraft: saveNote } = usePrivateNotesPrototype()
+
   const handleFlowSubmit = useCallback<SubmitCallback>(
     (props) => {
+      if (props?.txId) saveNote(props.txId)
       onSubmit?.({ ...props, data })
       trackTimeSpent()
     },
-    [onSubmit, data, trackTimeSpent],
+    [onSubmit, data, trackTimeSpent, saveNote],
   )
 
   const handleContinueToExecute = useCallback(
     (txId: string) => {
+      saveNote(txId)
       setSignedTxId(txId)
       nextStep()
     },
-    [nextStep],
+    [nextStep, saveNote],
   )
 
   return (

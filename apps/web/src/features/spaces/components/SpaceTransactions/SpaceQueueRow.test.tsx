@@ -145,10 +145,10 @@ describe('SpaceQueueRow', () => {
     renderRow({})
 
     const cells = within(screen.getByTestId('space-queue-row')).getAllByRole('cell')
-    expect(cells).toHaveLength(6)
+    expect(cells).toHaveLength(7)
     expect(cells[0]).toHaveAttribute('data-pin', 'start')
-    expect(cells[5]).toHaveAttribute('data-pin', 'end')
-    cells.slice(1, 5).forEach((cell) => expect(cell).not.toHaveAttribute('data-pin'))
+    expect(cells[6]).toHaveAttribute('data-pin', 'end')
+    cells.slice(1, 6).forEach((cell) => expect(cell).not.toHaveAttribute('data-pin'))
   })
 
   it('puts everything but the nonce in one cell when compact, with no type column or proposed time', () => {
@@ -157,7 +157,7 @@ describe('SpaceQueueRow', () => {
     const row = screen.getByTestId('space-queue-row')
     const cells = within(row).getAllByRole('cell')
     expect(cells).toHaveLength(2)
-    expect(cells[1]).toHaveAttribute('colspan', '5')
+    expect(cells[1]).toHaveAttribute('colspan', '6')
     expect(row).not.toHaveClass('h-14')
   })
 

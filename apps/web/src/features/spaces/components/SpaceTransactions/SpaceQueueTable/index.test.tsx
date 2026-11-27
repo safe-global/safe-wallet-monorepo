@@ -40,6 +40,7 @@ import type SpaceQueueRowType from '../SpaceQueueRow'
 import {
   QUEUE_COLUMN_WIDTHS,
   QUEUE_COLUMNS,
+  QUEUE_NOTE_WIDTHS,
   QUEUE_TABLE_MIN_WIDTH,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 
@@ -267,11 +268,10 @@ describe('SpaceQueueTable', () => {
     (groupBy) => {
       render(<SpaceQueueTable sections={sections} groupBy={groupBy} />)
 
-      const headers = screen.getAllByRole('columnheader').slice(0, 5)
-      expect(headers.map((header) => header.textContent)).toEqual(['Nonce', 'Safe', 'Transaction', 'Details', 'Status'])
-      headers.forEach((header) => expect(header.querySelector('.sr-only')).toBeNull())
-      expect(screen.getAllByRole('columnheader')).toHaveLength(6)
-      expect(screen.queryByRole('columnheader', { name: 'Note' })).not.toBeInTheDocument()
+      const headers = screen.getAllByRole('columnheader')
+      expect(headers).toHaveLength(7)
+      const titled = headers.filter((header) => !header.querySelector('.sr-only'))
+      expect(titled.map((header) => header.textContent)).toEqual(['Nonce', 'Safe', 'Transaction', 'Details', 'Status'])
     },
   )
 
@@ -283,7 +283,7 @@ describe('SpaceQueueTable', () => {
       expect(container.querySelector('table')).toHaveClass(QUEUE_TABLE_MIN_WIDTH)
       expect([...container.querySelectorAll('col')].map((col) => col.style.width)).toEqual(
         QUEUE_COLUMNS.map((column) => {
-          const width = QUEUE_COLUMN_WIDTHS[column]
+          const width = column === 'Note' ? QUEUE_NOTE_WIDTHS.inline : QUEUE_COLUMN_WIDTHS[column]
           return width === undefined ? '' : `${width}px`
         }),
       )
@@ -295,7 +295,7 @@ describe('SpaceQueueTable', () => {
 
     const headers = screen.getAllByRole('columnheader')
     expect(headers[0]).toHaveAttribute('data-pin', 'start')
-    expect(headers[5]).toHaveAttribute('data-pin', 'end')
+    expect(headers[6]).toHaveAttribute('data-pin', 'end')
     expect(container.querySelector('table')?.parentElement).toHaveClass('overflow-x-auto', '@container')
     renderedRows().forEach((row) => expect(row).toHaveAttribute('data-compact', 'false'))
   })
@@ -324,6 +324,7 @@ describe('SpaceQueueTable', () => {
         expect(container.querySelector('table')).not.toHaveClass(QUEUE_TABLE_MIN_WIDTH)
         expect([...container.querySelectorAll('col')].map((col) => col.style.width)).toEqual([
           `${QUEUE_COLUMN_WIDTHS.Nonce}px`,
+          '',
           '',
           '',
           '',
@@ -1063,13 +1064,13 @@ describe('SpaceQueueTable', () => {
 
       const executing = cellsOf(0)
       expect(
-        within(within(executing[5]).getByTestId('queue-row-pending-chip')).getByText('Processing 1:22'),
+        within(within(executing[6]).getByTestId('queue-row-pending-chip')).getByText('Processing 1:22'),
       ).toBeVisible()
-      expect(executing[4]).not.toHaveTextContent(/Processing/)
+      expect(executing[5]).not.toHaveTextContent(/Processing/)
 
       const other = cellsOf(1)
-      expect(within(other[5]).getByRole('button', { name: 'Execute' })).toBeDisabled()
-      expect(within(other[5]).getByTestId('queue-row-nonce-taken')).toBeInTheDocument()
+      expect(within(other[6]).getByRole('button', { name: 'Execute' })).toBeDisabled()
+      expect(within(other[6]).getByTestId('queue-row-nonce-taken')).toBeInTheDocument()
       expect(screen.queryByText(/Locked/)).not.toBeInTheDocument()
     })
 
@@ -1084,8 +1085,8 @@ describe('SpaceQueueTable', () => {
         },
       })
 
-      expect(within(within(cellsOf(0)[5]).getByTestId('queue-row-pending-chip')).getByText('Signing')).toBeVisible()
-      expect(cellsOf(0)[4]).not.toHaveTextContent(/Signing/)
+      expect(within(within(cellsOf(0)[6]).getByTestId('queue-row-pending-chip')).getByText('Signing')).toBeVisible()
+      expect(cellsOf(0)[5]).not.toHaveTextContent(/Signing/)
       expect(screen.queryByTestId('queue-row-nonce-taken')).not.toBeInTheDocument()
     })
 
@@ -1097,7 +1098,7 @@ describe('SpaceQueueTable', () => {
       renderRow(next)
 
       const cells = screen.getByTestId('space-queue-row').querySelectorAll('td')
-      expect(cells).toHaveLength(6)
+      expect(cells).toHaveLength(7)
       expect(cells[1]).toHaveTextContent(shortenAddress(safeA, 3))
     })
   })

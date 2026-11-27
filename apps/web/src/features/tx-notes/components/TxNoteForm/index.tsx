@@ -1,6 +1,7 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TxNote from '../TxNote'
 import TxNoteInput from '../TxNoteInput'
+import { usePrivateNote } from '../../public/services/privateNotesPrototype'
 
 export default function TxNoteForm({
   isCreation,
@@ -11,7 +12,8 @@ export default function TxNoteForm({
   txDetails?: TransactionDetails
   onChange: (note: string) => void
 }) {
-  if (!isCreation && !txDetails?.note) return null
+  const privateNote = usePrivateNote(txDetails?.txId)
+  if (!isCreation && !txDetails?.note && !privateNote) return null
 
   return (
     <div className="pt-6">{isCreation ? <TxNoteInput onChange={onChange} /> : <TxNote txDetails={txDetails} />}</div>

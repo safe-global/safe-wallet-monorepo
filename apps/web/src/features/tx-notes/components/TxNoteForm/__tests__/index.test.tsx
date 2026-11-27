@@ -7,7 +7,7 @@ describe('TxNoteForm', () => {
   it('shows the note input when creating a transaction', () => {
     render(<TxNoteForm isCreation onChange={jest.fn()} />)
 
-    expect(screen.getByRole('textbox', { name: 'Note' })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Private note' })).toBeInTheDocument()
   })
 
   it('shows the note of an existing transaction as read-only text', () => {

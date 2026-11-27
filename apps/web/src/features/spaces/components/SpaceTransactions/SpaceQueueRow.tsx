@@ -23,12 +23,19 @@ import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import PartyCard from './QueueParty/PartyCard'
 import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
+import QueueNote from '@/features/tx-notes/public/components/QueueNote'
 import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
 import QueueNonce from '@safe-global/views/features/spaces/components/SpaceQueue/QueueNonce'
 import { QueueTriggerHint } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueHint'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
-import { QUEUE_COLUMNS, QUEUE_PINNED_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import {
+  QUEUE_COLUMNS,
+  QUEUE_PINNED_COLUMNS,
+  type QueueNoteDisplay,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { getTxLink } from '@/utils/tx-link'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { cn } from '@safe-global/views/utils/cn'
@@ -133,6 +140,8 @@ type SpaceQueueRowProps = {
   rowProps?: ComponentProps<'tr'>
   /** Phones: one cell beside the nonce */
   compact?: boolean
+  /** Where the note shows: in Details, in the Note column, or there with its text */
+  noteDisplay?: QueueNoteDisplay
 }
 
 const SpaceQueueRow = ({
@@ -147,7 +156,9 @@ const SpaceQueueRow = ({
   safeAddress,
   rowProps,
   compact = false,
+  noteDisplay = 'inline',
 }: SpaceQueueRowProps): ReactElement => {
+  const spaceId = useUrlSpaceId()
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, tx.id))
@@ -158,6 +169,8 @@ const SpaceQueueRow = ({
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const { configs } = useChains()
   const bridgeTo = isBridgeOrderTxInfo(tx.txInfo) ? tx.txInfo.toChain : undefined
+  const chain = configs.find((config) => config.chainId === chainId)
+  const txLink = chain ? getTxLink(tx.id, chain, safeAddress, spaceId).href : undefined
   const warnings = getQueueWarnings({
     tx,
     safeAddress,
@@ -257,6 +270,7 @@ const SpaceQueueRow = ({
                 <QueueTxDetails.Summary tx={tx} />
               </span>
               {warnings.length > 0 && <QueueWarningMarker warnings={warnings} />}
+              <QueueNote txId={tx.id} nonce={nonce} href={txLink} />
             </span>
             {/* Wraps under the gauge sooner than overflow: the action has to stay in view */}
             <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
@@ -295,9 +309,18 @@ const SpaceQueueRow = ({
                   <QueueProposedTime timestamp={tx.timestamp} />
                 </span>
                 {proposedOnly && executionInfo && <QueueProposerMark threshold={executionInfo.confirmationsRequired} />}
+                {noteDisplay === 'inline' && <QueueNote txId={tx.id} nonce={nonce} href={txLink} />}
               </DetailsSlot>
             </span>
           </TableCell>
+
+          {noteDisplay === 'inline' ? (
+            <TableCell className="p-0!" />
+          ) : (
+            <TableCell className={noteDisplay === 'text' ? 'py-2 whitespace-normal' : 'py-2'}>
+              <QueueNote txId={tx.id} nonce={nonce} href={txLink} showText={noteDisplay === 'text'} />
+            </TableCell>
+          )}
 
           <TableCell className="py-1">
             <span className="flex min-w-0 items-center">{gauge}</span>

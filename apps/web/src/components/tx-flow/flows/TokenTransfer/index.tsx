@@ -24,6 +24,8 @@ export {
 type MultiTokenTransferFlowProps = {
   recipients?: Partial<TokenTransferParams>[]
   txNonce?: number
+  /** Prototype stories: 1 opens on the Review step */
+  initialStep?: number
 }
 
 const defaultParams: MultiTokenTransferParams = {
@@ -37,7 +39,7 @@ const defaultParams: MultiTokenTransferParams = {
   type: TokenTransferType.multiSig,
 }
 
-const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) => {
+const TokenTransferFlow = ({ txNonce, initialStep, ...params }: MultiTokenTransferFlowProps) => {
   const initialData = useMemo<MultiTokenTransferParams>(
     () => ({
       ...defaultParams,
@@ -54,6 +56,7 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
   return (
     <TxFlow
       initialData={initialData}
+      initialStep={initialStep}
       icon={AssetsIcon}
       subtitle="Send tokens"
       eventCategory={TxFlowType.TOKEN_TRANSFER}
