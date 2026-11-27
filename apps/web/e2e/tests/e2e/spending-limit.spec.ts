@@ -6,7 +6,7 @@ import { HomePage } from '../../src/pages/home.page'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedAllowance } from '../../src/seed/allowance'
 import { seedSafe } from '../../src/seed/safe'
-import { SEPOLIA_USDC, seedTokenBalance } from '../../src/seed/tokens'
+import { SEPOLIA_USDC, seedTokenBalance, waitForNativeBalance } from '../../src/seed/tokens'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { ROUTES } from '../../src/data/constants'
@@ -80,5 +80,40 @@ test.describe('Send with a spending limit', { tag: '@e2e' }, () => {
 
     await safePage.goto(`${ROUTES.settingsSetup}?safe=${safe.prefixedAddress}`)
     await expect(safePage.getByTestId('spent-amount')).toContainText(`${USDC_AMOUNT} of ${USDC_ALLOWANCE} ${symbol}`)
+  })
+
+  test('should let a beneficiary who is not a signer send only the limited token from its allowance', async ({
+    safePage,
+    journey,
+  }) => {
+    const { address: usdc, decimals, symbol } = SEPOLIA_USDC
+    const beneficiary = journey.owners.alice.address
+    const safe = await seedSafe(journey, { owners: ['bob'], threshold: 1 })
+    const recipient = journey.newAddress()
+    await waitForNativeBalance(safe)
+    await seedTokenBalance(safe, { token: SEPOLIA_USDC, amount: parseUnits(USDC_BALANCE, decimals) })
+    await seedAllowance(safe, { delegate: beneficiary, amount: parseUnits(USDC_ALLOWANCE, decimals), token: usdc })
+    const nonceBefore = await safe.context.safe.getNonce()
+    const sendTokens = new SendTokensPage(safePage)
+    await new HomePage(safePage).goto(safe.prefixedAddress)
+    await sendTokens.open()
+
+    await sendTokens.openTokenList()
+    await expect(sendTokens.tokenOptions).toHaveText([new RegExp(symbol)])
+    await sendTokens.tokenOptions.click()
+    await sendTokens.fillTransfer({ recipient, amount: USDC_AMOUNT })
+    await sendTokens.spendingLimitOption.click()
+    await sendTokens.nextButton.click()
+    await new TxReviewPage(safePage).spendingLimitExecuteButton.click()
+
+    await expect
+      .poll(() => tokenBalanceOf(journey.env, { token: usdc, holder: recipient }))
+      .toBe(parseUnits(USDC_AMOUNT, decimals))
+    const allowance = await allowanceOf(journey.env, { safe: safe.address, delegate: beneficiary, token: usdc })
+    expect(allowance).toEqual({
+      amount: parseUnits(USDC_ALLOWANCE, decimals),
+      spent: parseUnits(USDC_AMOUNT, decimals),
+    })
+    expect(await safe.context.safe.getNonce()).toBe(nonceBefore)
   })
 })
