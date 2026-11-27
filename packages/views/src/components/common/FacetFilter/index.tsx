@@ -1,8 +1,9 @@
 import { useMemo, useState, type ReactNode } from 'react'
-import { Check, Pencil, Trash2, X } from 'lucide-react'
+import { Check, CornerDownLeft, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Input } from '@safe-global/views/components/ui/input'
+import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { cn } from '@safe-global/views/utils/cn'
 
@@ -33,6 +34,8 @@ export type FacetOptionListProps<V extends string = string> = {
   onCreate?: (text: string) => Promise<boolean> | boolean
   /** Whether the search text names an existing option, so no "Create" row is offered. Defaults to ignoring case. */
   isSameText?: (a: string, b: string) => boolean
+  /** How the "Create" row previews the new option, such as a tag chip. Defaults to the quoted text. */
+  renderCreateLabel?: (text: string) => ReactNode
   /**
    * Adds a rename action to each option. Resolves to an error message to keep the editor open, or
    * `undefined` once the rename is done.
@@ -51,6 +54,27 @@ const OPTION_ROW =
 const optionText = (option: FacetOption): string =>
   option.searchText ?? (typeof option.label === 'string' ? option.label : String(option.value))
 
+/** Pinned first and highlighted, so a name that matches nothing reads as something to create. */
+const CreateOptionRow = ({ onCreate, children }: { onCreate: () => void; children: ReactNode }) => (
+  <li role="none">
+    <button
+      type="button"
+      role="option"
+      aria-selected={false}
+      onClick={onCreate}
+      className={cn(OPTION_ROW, 'bg-accent w-full')}
+      data-testid="facet-create-option"
+    >
+      <Plus className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+      <span className="text-muted-foreground shrink-0">Create</span>
+      <span className="min-w-0 truncate">{children}</span>
+      <Kbd className="ml-auto shrink-0" aria-hidden="true">
+        <CornerDownLeft />
+      </Kbd>
+    </button>
+  </li>
+)
+
 /**
  * The checkbox list of a facet: optional search, a count per option, optional create, rename and
  * delete. Used inside a popover with other sections.
@@ -65,6 +89,7 @@ export function FacetOptionList<V extends string = string>({
   emptyText = 'No options',
   onCreate,
   isSameText = (a, b) => a.toLowerCase() === b.toLowerCase(),
+  renderCreateLabel,
   onRenameOption,
   onDeleteOption,
   deleteConfirmation,
@@ -143,6 +168,11 @@ export function FacetOptionList<V extends string = string>({
       )}
 
       <ul role="listbox" aria-multiselectable aria-label={label} className="max-h-64 overflow-y-auto">
+        {canCreate && (
+          <CreateOptionRow onCreate={() => void handleCreate()}>
+            {renderCreateLabel?.(trimmedQuery) ?? <>&lsquo;{trimmedQuery}&rsquo;</>}
+          </CreateOptionRow>
+        )}
         {visibleOptions.map((option) => {
           const isSelected = selected.has(option.value)
           const text = optionText(option)
@@ -264,20 +294,6 @@ export function FacetOptionList<V extends string = string>({
             </li>
           )
         })}
-        {canCreate && (
-          <li role="none">
-            <button
-              type="button"
-              role="option"
-              aria-selected={false}
-              onClick={() => void handleCreate()}
-              className={cn(OPTION_ROW, 'w-full')}
-            >
-              <span className="text-muted-foreground">Create</span>
-              <span className="truncate">&lsquo;{trimmedQuery}&rsquo;</span>
-            </button>
-          </li>
-        )}
         {visibleOptions.length === 0 && !canCreate && (
           <li role="none" className="text-muted-foreground px-2 py-2 text-center text-sm">
             {emptyText}

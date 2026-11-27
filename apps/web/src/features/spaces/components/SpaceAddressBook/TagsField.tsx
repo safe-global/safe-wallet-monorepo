@@ -28,6 +28,7 @@ const TagsField = ({ workspaceTags, onLimitReached }: TagsFieldProps) => {
             onChange={field.onChange}
             actions={tagActions}
             onLimitReached={onLimitReached}
+            size="lg"
           />
         )}
       />

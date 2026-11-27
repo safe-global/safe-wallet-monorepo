@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { Plus } from 'lucide-react'
+import { Button } from '@safe-global/views/components/ui/button'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import AddedBy, { EmptyCell } from './AddedBy'
 import ChainLogos from './ChainLogos'
@@ -25,6 +27,22 @@ export type AddressBookTableProps = {
   renderRowAction?: (contact: AddressBookContact, context: { isCompact: boolean }) => ReactNode
   pageSize?: number
 }
+
+const AddTagButton = ({ onClick }: { onClick: () => void }) => (
+  <Button
+    variant="outline"
+    size="chip"
+    className="text-muted-foreground border-dashed"
+    data-testid="add-tag-button"
+    onClick={(event) => {
+      event.stopPropagation()
+      onClick()
+    }}
+  >
+    <Plus aria-hidden="true" data-icon="inline-start" />
+    Add tag
+  </Button>
+)
 
 const AddressBookTable = ({
   contacts,
@@ -55,7 +73,11 @@ const AddressBookTable = ({
     // Three short tags on one line
     minWidth: 240,
     sortValue: (contact) => contact.tags?.map((tag) => tag.name.toLowerCase()).sort()[0] ?? null,
-    cell: (contact) => (contact.tags?.length ? <TagChips tags={contact.tags} /> : <EmptyCell />),
+    cell: (contact) => {
+      if (contact.tags?.length) return <TagChips tags={contact.tags} />
+      if (onEditTags) return <AddTagButton onClick={() => onEditTags(contact)} />
+      return <EmptyCell />
+    },
   }
 
   const addedByColumn: DataTableColumn<AddressBookContact> = {

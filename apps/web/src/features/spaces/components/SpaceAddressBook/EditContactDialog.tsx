@@ -168,7 +168,7 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
                 />
 
                 <div>
-                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Networks</p>
                   <p className="text-muted-foreground mb-2 text-sm">
                     Add contact on all networks or only on specific ones of your choice.
                   </p>

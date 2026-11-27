@@ -52,6 +52,26 @@ describe('FacetOptionList', () => {
     expect(onCreate).toHaveBeenCalledWith('Vendor')
   })
 
+  it('lists the Create row first, previewed with renderCreateLabel', async () => {
+    render(
+      <FacetOptionList
+        label="Role"
+        options={options}
+        value={[]}
+        onChange={jest.fn()}
+        searchable
+        onCreate={jest.fn()}
+        renderCreateLabel={(text) => <span data-testid="create-preview">{text}</span>}
+      />,
+    )
+
+    await userEvent.type(screen.getByRole('searchbox'), 'Signatory')
+
+    const [first] = screen.getAllByRole('option')
+    expect(first).toHaveAccessibleName(/Create/)
+    expect(screen.getByTestId('create-preview')).toHaveTextContent('Signatory')
+  })
+
   it('creates on Enter and clears the search once created', async () => {
     const onCreate = jest.fn().mockResolvedValue(true)
     render(
