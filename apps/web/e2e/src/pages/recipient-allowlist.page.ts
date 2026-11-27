@@ -1,0 +1,114 @@
+/**
+ * The recipient allowlist of a Workspace's Policies page: its setup flow, its row in the policies table and its panel.
+ *
+ * Rule: Page Objects hold locators and actions only. Assertions belong in the test.
+ */
+import { type Locator, type Page } from '@playwright/test'
+import { short } from '../../environment/scenarios/chain.mjs'
+
+// The flow reads the Safe's guard slots and its tokens from the RPC and CGW before it offers the sections
+const FORM_LOAD_TIMEOUT_MS = 30_000
+
+export class RecipientAllowlistPage {
+  /** The catalogue's tile, shown while the Workspace has no policies */
+  readonly setPolicyButton: Locator
+  /** The policies list's button, shown once the Workspace has policies */
+  readonly addPolicyButton: Locator
+  readonly safeAccountSelector: Locator
+  readonly tokensSection: Locator
+  readonly recipientsSection: Locator
+  readonly nextButton: Locator
+  /** One row per call of the reviewed transaction, in execution order: "<n> <target>: <method>" */
+  readonly setupCalls: Locator
+  /** The rules of the configuring call, listed once its row is expanded */
+  readonly rules: Locator
+  /** The panel of an allowlist, opened from its table row */
+  readonly panel: Locator
+  /** The panel's main action: opens the review of the apply, or of the queued transaction while it is signed */
+  readonly reviewTransactionButton: Locator
+  /** The panel's action while a requested change waits out the guard's delay, offered disabled */
+  readonly disabledPanelAction: Locator
+
+  constructor(private readonly page: Page) {
+    this.setPolicyButton = page.getByRole('button', { name: 'Set policy: Recipient allowlist' })
+    this.addPolicyButton = page.getByRole('button', { name: 'Add policy', exact: true })
+    this.safeAccountSelector = page.getByTestId('safe-account-selector')
+    this.tokensSection = page.getByTestId('allowlist-tokens-section')
+    this.recipientsSection = page.getByTestId('allowlist-recipients-section')
+    this.nextButton = page.getByTestId('recipient-allowlist-create-step').getByTestId('next-btn')
+    this.setupCalls = page.getByTestId('allowlist-setup-actions').getByTestId('action-item')
+    this.rules = page.getByTestId('allowlist-setup-actions').getByTestId('allowlist-rule')
+    this.panel = page.getByRole('dialog', { name: 'Allowlist' })
+    this.reviewTransactionButton = this.panel.getByRole('button', { name: 'Review transaction' })
+    this.disabledPanelAction = this.panel.getByRole('button', { disabled: true })
+  }
+
+  async startFromCatalogue(): Promise<void> {
+    await this.setPolicyButton.click()
+    await this.proceedFromIntro()
+  }
+
+  async startFromAddPolicy(): Promise<void> {
+    await this.addPolicyButton.click()
+    await this.page
+      .getByRole('dialog', { name: 'Add policy' })
+      .getByRole('button', { name: /Recipient allowlist/ })
+      .click()
+    await this.proceedFromIntro()
+  }
+
+  /** The intro's Set up stays disabled until the owner confirms that every other action is blocked */
+  private async proceedFromIntro(): Promise<void> {
+    const intro = this.page.getByTestId('recipient-allowlist-intro-dialog')
+    await intro.getByRole('checkbox', { name: /I understand that anything not allowed/ }).click()
+    await intro.getByRole('button', { name: 'Set up allowlist' }).click()
+  }
+
+  async selectSafe(safeName: string): Promise<void> {
+    await this.safeAccountSelector.click()
+    await this.page.getByRole('option').filter({ hasText: safeName }).click()
+  }
+
+  /** The chip that allows `label`, a token symbol or a recipient's name; only picked items have one */
+  allowChip(label: string): Locator {
+    return this.page.getByRole('button', { name: `Allow ${label}`, exact: true })
+  }
+
+  /** Waits until the form lists the Safe's tokens, then allows `symbol` from the token search */
+  async pickToken(symbol: string): Promise<void> {
+    const search = this.tokensSection.getByRole('combobox', { name: 'Search tokens by name or address' })
+    await search.click({ timeout: FORM_LOAD_TIMEOUT_MS })
+    await search.fill(symbol)
+    await this.page
+      .getByRole('option')
+      .filter({ has: this.page.getByText(symbol, { exact: true }) })
+      .click({ timeout: FORM_LOAD_TIMEOUT_MS })
+    // The open list would cover the recipients below it
+    await search.press('Escape')
+  }
+
+  /** Allows `address` by pasting it in the recipient search and choosing it as a new recipient */
+  async addRecipient(address: string): Promise<void> {
+    const search = this.recipientsSection.getByRole('combobox', { name: 'Search contacts or paste an address' })
+    await search.click({ timeout: FORM_LOAD_TIMEOUT_MS })
+    await search.fill(address)
+    await this.page.getByRole('option', { name: /New recipient/ }).click()
+    await search.press('Escape')
+  }
+
+  /** The table row of the Safe's allowlist, found by the Safe's short address that it shows */
+  row(safeAddress: string): Locator {
+    return this.page
+      .getByRole('row')
+      .filter({ hasText: 'Allowlist' })
+      .filter({ hasText: short(safeAddress) })
+  }
+
+  async openPanel(safeAddress: string): Promise<void> {
+    await this.page.getByRole('button', { name: `Open Allowlist for ${short(safeAddress)}` }).click()
+  }
+
+  async closePanel(): Promise<void> {
+    await this.page.keyboard.press('Escape')
+  }
+}

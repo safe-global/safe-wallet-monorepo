@@ -6,7 +6,7 @@ import { test } from 'node:test'
 import { mergeForkCaches, readForkCache, writeForkCache } from './fork-cache.mjs'
 
 const cache = (overrides) => ({
-  meta: { block_env: { number: '0x98b86a' }, hosts: ['fork-upstream'], source_id: '0xproxy' },
+  meta: { block_env: { number: '0xb769a4' }, hosts: ['fork-upstream'], source_id: '0xproxy' },
   accounts: {},
   storage: {},
   block_hashes: {},
@@ -16,16 +16,16 @@ const cache = (overrides) => ({
 test('merges accounts, storage slots and block hashes, keeping the first meta', () => {
   const proxy = cache({ accounts: { '0xa': { nonce: 1 } }, storage: { '0xa': { '0x1': '0x5' } } })
   const older = cache({
-    meta: { block_env: { number: '0x98b86a' }, hosts: ['sepolia.infura.io'], source_id: '0xkey' },
+    meta: { block_env: { number: '0xb769a4' }, hosts: ['sepolia.infura.io'], source_id: '0xkey' },
     accounts: { '0xb': { nonce: 2 } },
     storage: { '0xa': { '0x2': '0x6' }, '0xb': { '0x1': '0x7' } },
-    block_hashes: { '0x98b86a': '0xhash' },
+    block_hashes: { '0xb769a4': '0xhash' },
   })
   const merged = mergeForkCaches([proxy, older])
   assert.deepEqual(merged.meta, proxy.meta)
   assert.deepEqual(Object.keys(merged.accounts), ['0xa', '0xb'])
   assert.deepEqual(merged.storage, { '0xa': { '0x1': '0x5', '0x2': '0x6' }, '0xb': { '0x1': '0x7' } })
-  assert.deepEqual(merged.block_hashes, { '0x98b86a': '0xhash' })
+  assert.deepEqual(merged.block_hashes, { '0xb769a4': '0xhash' })
   assert.deepEqual(proxy.storage, { '0xa': { '0x1': '0x5' } })
 })
 

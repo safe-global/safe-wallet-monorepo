@@ -7,7 +7,7 @@
  *
  * Register with `node zerion-api.ts register <address>` and the rows as JSON on stdin: `{ "rows": [Row, …] }`.
  */
-import { isMain, json, localRequest, readText, serve } from './http.ts'
+import { isMain, isRecord, json, localRequest, readText, serve } from './http.ts'
 import type { MockRequest, Reply } from './http.ts'
 
 const PORT = 8095
@@ -71,7 +71,7 @@ function parseRows(body: string): Row[] {
   } catch {
     throw new InvalidRows('The body is not JSON')
   }
-  const rows = typeof data === 'object' && data !== null && 'rows' in data ? data.rows : undefined
+  const rows = isRecord(data) ? data.rows : undefined
   if (!Array.isArray(rows) || !rows.every(isRow)) {
     throw new InvalidRows(
       `Send { rows: Row[] }; each row needs chainId (${Object.keys(NETWORKS)}), a position type, a token and a decimal quantity`,

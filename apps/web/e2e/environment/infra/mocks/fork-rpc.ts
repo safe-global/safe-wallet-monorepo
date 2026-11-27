@@ -3,7 +3,7 @@
  * block and the trace and filter methods, so indexing never reaches the archive RPC for old history.
  * GET /status reports how many log requests arrived and the lowest block they started at.
  */
-import { isMain, json, postJson, requiredEnv, serve } from './http.ts'
+import { isMain, isRecord, json, postJson, requiredEnv, serve } from './http.ts'
 import type { Handler, Reply } from './http.ts'
 
 const RPC_TIMEOUT_MS = 60_000
@@ -62,7 +62,7 @@ export function validateRequest(request: unknown, forkBlock: number): CheckedReq
 }
 
 function requestId(request: unknown): unknown {
-  return typeof request === 'object' && request !== null ? ((request as RpcRequest).id ?? null) : null
+  return isRecord(request) ? ((request as RpcRequest).id ?? null) : null
 }
 
 /** Forwards each valid call; a refused call gets a JSON-RPC error and never reaches Anvil. */

@@ -31,6 +31,12 @@ class RequestTooLarge extends Error {}
 /** A call that got no HTTP answer at all. The message names only the error type, never the URL. */
 export class UpstreamUnreachable extends Error {}
 
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+/** The registry key of a Safe on a chain, the same whatever the address casing */
+export const safeKey = (chainId: number, safe: string): string => `${chainId}:${safe.toLowerCase()}`
+
 export function json(status: number, payload: unknown): Reply {
   return { status, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
 }

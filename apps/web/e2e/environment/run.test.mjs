@@ -21,7 +21,7 @@ import {
 import { fileURLToPath } from 'node:url'
 import { chainProfiles } from './local-stack.mjs'
 
-const manifest = { gatewayUrl: 'http://localhost:8000/cgw', chainId: 11155111, forkBlock: 10008682 }
+const manifest = { gatewayUrl: 'http://localhost:8000/cgw', chainId: 11155111, forkBlock: 12020132 }
 
 test('uses the checked-in backend by default and permits an explicit comparison checkout', () => {
   assert.equal(configuration(['status'], {}).infrastructure, fileURLToPath(new URL('./infra', import.meta.url)))
