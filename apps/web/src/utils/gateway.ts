@@ -1,9 +1,13 @@
 import type { JsonRpcSigner } from 'ethers'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { signTypedData } from '@safe-global/utils/utils/web3'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { deleteTransaction } from './transactions'
 
+type DeleteTxChain = Pick<Chain, 'chainId' | 'features'>
+
 export const signTxServiceMessage = async (
-  chainId: string,
+  chain: DeleteTxChain,
   safeAddress: string,
   safeTxHash: string,
   signer: JsonRpcSigner,
@@ -16,9 +20,9 @@ export const signTxServiceMessage = async (
       ],
     },
     domain: {
-      name: 'Safe Transaction Service',
+      name: hasFeature(chain, FEATURES.QUEUE_SERVICE) ? 'Safe Queue Service' : 'Safe Transaction Service',
       version: '1.0',
-      chainId: Number(chainId),
+      chainId: Number(chain.chainId),
       verifyingContract: safeAddress,
     },
     message: {
@@ -30,16 +34,16 @@ export const signTxServiceMessage = async (
 }
 
 export const deleteTx = async ({
-  chainId,
+  chain,
   safeAddress,
   safeTxHash,
   signer,
 }: {
-  chainId: string
+  chain: DeleteTxChain
   safeAddress: string
   safeTxHash: string
   signer: JsonRpcSigner
 }) => {
-  const signature = await signTxServiceMessage(chainId, safeAddress, safeTxHash, signer)
-  return await deleteTransaction(chainId, safeTxHash, signature)
+  const signature = await signTxServiceMessage(chain, safeAddress, safeTxHash, signer)
+  return await deleteTransaction(chain.chainId, safeTxHash, signature)
 }

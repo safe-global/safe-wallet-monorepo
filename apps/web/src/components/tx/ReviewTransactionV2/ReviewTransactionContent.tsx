@@ -4,8 +4,8 @@ import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import TxCheckError from '../TxCheckError'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import ApprovalEditor from '../ApprovalEditor'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
@@ -14,9 +14,9 @@ import UnknownContractError from '@/components/tx/shared/errors/UnknownContractE
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Separator } from '@safe-global/views/components/ui/separator'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -64,10 +64,10 @@ export const ReviewTransactionContent = ({
           isApproval={isApproval}
           withDecodedData={withDecodedData}
         >
-          {!isRejection && (
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-              {isApproval && <ApprovalEditor safeTransaction={safeTx} />}
-            </ObservabilityErrorBoundary>
+          {!isRejection && isApproval && (
+            <ParsingErrorBoundary>
+              <ApprovalEditor safeTransaction={safeTx} />
+            </ParsingErrorBoundary>
           )}
         </ConfirmationView>
 

@@ -2,30 +2,30 @@ import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import type { LinkProps } from 'next/link'
 import { useRouter } from 'next/router'
-import { TableCell, TableRow } from '@/components/ui/table'
+import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
 import { GripVertical } from 'lucide-react'
 import { SimilarityWarningIcon } from './SimilarityBand'
 import type { SimilarWarning } from '@/features/address-poisoning'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import FiatBalance from '@/components/common/FiatBalance'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Skeleton } from '@/components/ui/skeleton'
+import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
 import { useAddressBookWriteScope } from '@/features/spaces'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import { NetworkLogosPill } from '@/features/multichain'
 import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
-import type { SafeAccountColumn } from './columns'
-import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
-import { Checkbox } from '@/components/ui/checkbox'
+import type { SafeAccountColumn } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
+import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@safe-global/views/components/common/AccountBadges'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { WorkspaceAvatars } from './cells'
 
 /** Precomputed checkbox state for a selectable row (see SafeAccountsSelection). */
@@ -104,7 +104,7 @@ const NameCellContent = ({
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
       onRename={canRename ? onRename : undefined}
-      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
+      nameAdornment={warning ? <SimilarityWarningIcon address={line.address} warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
       nameLink={nameLink}

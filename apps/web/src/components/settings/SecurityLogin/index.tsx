@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { useIsRecoverySupported } from '@/features/recovery'
 import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'

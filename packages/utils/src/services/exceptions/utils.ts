@@ -8,6 +8,15 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 
 interface ErrorWithStatus extends Error {
   status?: number | string
+  code?: number
+}
+
+// EIP-1193 and JSON-RPC codes are safe integers, which cannot hold a secret; any other code could
+const safeIntegerCode = (thrown: unknown): number | undefined => {
+  if (typeof thrown !== 'object' || thrown === null || Array.isArray(thrown)) return undefined
+
+  const { code } = thrown as { code?: unknown }
+  return typeof code === 'number' && Number.isSafeInteger(code) ? code : undefined
 }
 
 const isFetchBaseQueryError = (error: unknown): error is FetchBaseQueryError => {
@@ -80,7 +89,14 @@ export const asError = (thrown: unknown): ErrorWithStatus => {
     message = `Non-Error object of type: ${typeof thrown}${Array.isArray(thrown) ? ' (array)' : ''}`
   }
 
-  return new Error(message) as ErrorWithStatus
+  const code = safeIntegerCode(thrown)
+  if (code === undefined) {
+    return new Error(message) as ErrorWithStatus
+  }
+
+  const error = new Error(`${message} (code ${code})`) as ErrorWithStatus
+  error.code = code
+  return error
 }
 
 /** CGW SDK errors flatten the HTTP status into the message: "CGW error - 422: ..." */

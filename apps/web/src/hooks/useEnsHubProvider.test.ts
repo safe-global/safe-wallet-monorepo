@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
-import { useEnsHubProvider, _clearEnsHubProviders } from './useEnsHubProvider'
+import { useEnsHubProvider } from './useEnsHubProvider'
+import { _clearSharedReadOnlyProviders } from '@/hooks/wallets/sharedReadOnlyProvider'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/store/gateway/types'
 
@@ -39,7 +40,7 @@ const baseChain = chainBuilder().with({ chainId: '8453', shortName: 'base', isTe
 describe('useEnsHubProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    _clearEnsHubProviders()
+    _clearSharedReadOnlyProviders()
     mockUseCurrentChain.mockReturnValue(baseChain)
     mockUseChain.mockImplementation((chainId: string) => {
       if (chainId === '1') return mainnetChain

@@ -14,8 +14,8 @@ import { logError } from '@/services/exceptions'
 import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { isOwner } from '@/utils/transaction-guards'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
-import { hasActiveScope } from '@/components/tx-flow/safe-scope/activeScope'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
+import { hasActiveScope } from '@safe-global/views/components/tx-flow/safe-scope/activeScope'
 
 export class Gs026PreCheckError extends Error {
   /** The GS code this pre-check prevents — lets the Details panel show it. */

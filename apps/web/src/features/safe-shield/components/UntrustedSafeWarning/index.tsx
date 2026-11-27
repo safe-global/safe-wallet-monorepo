@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { SafeAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { SeverityIcon } from '../SeverityIcon'
 import { AddTrustedSafeDialog, useSimilarAddressDetection } from '@/features/myAccounts'

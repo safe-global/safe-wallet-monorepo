@@ -1,12 +1,12 @@
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import ActivateAccountButton from '../ActivateAccountButton'
 import Track from '@/components/common/Track'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { COUNTERFACTUAL_EVENTS } from '@/services/analytics/events/counterfactual'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { Alert, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 const CheckBalance = () => {
   const { safe, safeAddress } = useSafeInfo()

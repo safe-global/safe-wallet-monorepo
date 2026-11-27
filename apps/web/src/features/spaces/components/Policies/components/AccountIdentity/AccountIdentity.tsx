@@ -1,20 +1,16 @@
 import type { ReactElement, ReactNode } from 'react'
-import NextLink, { type LinkProps } from 'next/link'
-import { blo } from 'blo'
+import NextLink from 'next/link'
+import type { AccountIdentityProps } from '@safe-global/views/features/spaces/components/Policies/components/AccountIdentity/types'
+import { getIdenticonSrc } from '@safe-global/views/components/common/Identicon'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getInitials, getSafeDisplayInfo, TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
-export type AccountIdentityProps = {
-  address: string
-  name?: string
-  showCopyButton?: boolean
-  href?: LinkProps['href']
-}
+export type { AccountIdentityProps } from '@safe-global/views/features/spaces/components/Policies/components/AccountIdentity/types'
 
 const AccountIdentity = ({ address, name, showCopyButton, href }: AccountIdentityProps): ReactElement => {
   const { displayName, shortAddress } = getSafeDisplayInfo(name ?? '', address)
@@ -41,7 +37,7 @@ const AccountIdentity = ({ address, name, showCopyButton, href }: AccountIdentit
   return (
     <div className="flex min-w-0 items-center gap-2">
       <Avatar size="xs" className="shrink-0">
-        <AvatarImage src={blo(address as `0x${string}`)} alt={displayName} />
+        <AvatarImage src={getIdenticonSrc(address)} alt={displayName} />
         <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
       </Avatar>
 

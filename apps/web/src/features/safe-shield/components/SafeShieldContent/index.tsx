@@ -8,13 +8,13 @@ import type {
   SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
-import { SafeShieldAnalysisEmpty } from './SafeShieldAnalysisEmpty'
+import { SafeShieldAnalysisEmpty } from '@safe-global/views/features/safe-shield/components/SafeShieldContent/SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
 import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
 import { ProChecksRow } from '../ProChecksRow'
-import { LockedCheckRow } from '../LockedCheckRow'
+import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
@@ -24,7 +24,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { analysisVisibilityDelay, calculateAnalysisDelays, useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
-import { SafenetChecksFeature } from '@/features/safenet-checks'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
 
@@ -42,6 +42,7 @@ export const SafeShieldContent = ({
   onAddToTrustedList,
   hasProFeatures = true,
   isSafePro = true,
+  isOffchainMessage = false,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -58,9 +59,11 @@ export const SafeShieldContent = ({
   hasProFeatures?: boolean
   /** Off: the pre-Pro layout, with the counterparty checks among the open ones and the simulation run by hand. */
   isSafePro?: boolean
+  isOffchainMessage?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
   const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
@@ -83,6 +86,8 @@ export const SafeShieldContent = ({
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
   const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
+
+  const showProSection = isSafePro && shouldShowContent && !isOffchainMessage && (!hasProFeatures || hasProContent)
 
   // Contract and deadlock checks come from the counterparty analysis, a Safe Pro feature like the recipient check
   const contractCard = (
@@ -154,8 +159,6 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          {shouldShowContent && <safenet.SafenetChecksSection />}
-
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
@@ -163,9 +166,12 @@ export const SafeShieldContent = ({
               highlightedSeverity={highlightedSeverity}
             />
           )}
+
+          {/* Safenet is the final check, including when the Pro rollout is off. */}
+          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
         </div>
 
-        {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent) && (
+        {showProSection && (
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
@@ -197,6 +203,9 @@ export const SafeShieldContent = ({
                 />
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
+
+              {isSafenetEnabled &&
+                (hasProFeatures ? <safenet.SafenetChecksSection /> : <safenet.SafenetChecksSection locked />)}
             </div>
           </div>
         )}

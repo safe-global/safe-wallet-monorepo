@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react'
 import Link, { type LinkProps } from 'next/link'
 import { DrawerFooter } from '@/components/common/Drawer'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 export type PolicyDrawerActionsProps = {
   actionLabel: string

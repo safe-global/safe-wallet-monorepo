@@ -4,7 +4,7 @@ import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import type { ProposerOverviewProps } from '../../ProposerDrawer/components/ProposerOverview'
-import type { ProposerRef } from './types'
+import type { ProposerRef } from '@safe-global/views/features/spaces/components/Policies/ProposerDetails/hooks/types'
 
 /** The grant carries no timestamp, so the drawer cannot say when it was made. */
 const NO_TIMESTAMP = 'Not available'

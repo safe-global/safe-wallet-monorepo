@@ -4,13 +4,14 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import TransactionsIcon from '@/public/images/transactions/transactions.svg'
-import CheckIcon from '@/public/images/common/check.svg'
+import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import { OrderByOption } from '@/store/orderByPreferenceSlice'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics'
+import Track from '@/components/common/Track'
 
 type OrderByButtonProps = {
   orderBy: OrderByOption
@@ -26,11 +27,6 @@ const orderByLabels = {
 }
 
 const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: OrderByButtonProps) => {
-  const handleOrderByChange = (newOrderBy: OrderByOption) => {
-    trackEvent({ ...OVERVIEW_EVENTS.SORT_SAFES, label: orderByLabels[newOrderBy] })
-    onOrderByChange(newOrderBy)
-  }
-
   return (
     <div className="flex">
       <DropdownMenu>
@@ -52,17 +48,21 @@ const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: O
 
         <DropdownMenuContent align="end" className="min-w-[250px]">
           <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-          <DropdownMenuItem
-            data-testid="last-visited-option"
-            onClick={() => handleOrderByChange(OrderByOption.LAST_VISITED)}
-          >
-            <span className="mr-4">{orderByLabels[OrderByOption.LAST_VISITED]}</span>
-            {orderBy === OrderByOption.LAST_VISITED && <CheckIcon className="ml-auto size-4" />}
-          </DropdownMenuItem>
-          <DropdownMenuItem data-testid="name-option" onClick={() => handleOrderByChange(OrderByOption.NAME)}>
-            <span>{orderByLabels[OrderByOption.NAME]}</span>
-            {orderBy === OrderByOption.NAME && <CheckIcon className="ml-auto size-4" />}
-          </DropdownMenuItem>
+          <Track {...OVERVIEW_EVENTS.SORT_SAFES} label={orderByLabels[OrderByOption.LAST_VISITED]}>
+            <DropdownMenuItem
+              data-testid="last-visited-option"
+              onClick={() => onOrderByChange(OrderByOption.LAST_VISITED)}
+            >
+              <span className="mr-4">{orderByLabels[OrderByOption.LAST_VISITED]}</span>
+              {orderBy === OrderByOption.LAST_VISITED && <CheckIcon className="ml-auto size-4" />}
+            </DropdownMenuItem>
+          </Track>
+          <Track {...OVERVIEW_EVENTS.SORT_SAFES} label={orderByLabels[OrderByOption.NAME]}>
+            <DropdownMenuItem data-testid="name-option" onClick={() => onOrderByChange(OrderByOption.NAME)}>
+              <span>{orderByLabels[OrderByOption.NAME]}</span>
+              {orderBy === OrderByOption.NAME && <CheckIcon className="ml-auto size-4" />}
+            </DropdownMenuItem>
+          </Track>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

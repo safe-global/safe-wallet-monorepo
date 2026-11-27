@@ -34,7 +34,7 @@ describe('TxFilterForm Component Tests', () => {
     renderComponent()
 
     Object.values(TxFilterType).forEach((type) => {
-      expect(screen.getByLabelText(type)).toBeInTheDocument()
+      expect(screen.getByRole('radio', { name: type })).toBeInTheDocument()
     })
   })
 
@@ -146,7 +146,7 @@ describe('TxFilterForm Component Tests', () => {
   it('Verify that characters and negative numbers cannot be entered in nonce filed', async () => {
     renderComponent()
 
-    const outgoingRadio = screen.getByLabelText('Outgoing')
+    const outgoingRadio = screen.getByRole('radio', { name: 'Outgoing' })
     fireEvent.click(outgoingRadio)
 
     const nonceInput = screen.getByTestId('nonce-input') as HTMLInputElement
@@ -166,7 +166,7 @@ describe('TxFilterForm Component Tests', () => {
   it('Verify that entering random characters in module field shows error', async () => {
     renderComponent()
 
-    const outgoingRadio = screen.getByLabelText('Module-based')
+    const outgoingRadio = screen.getByRole('radio', { name: 'Module-based' })
     fireEvent.click(outgoingRadio)
 
     const addressInput = screen.getByLabelText('Module') as HTMLInputElement

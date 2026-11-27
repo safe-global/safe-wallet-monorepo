@@ -1,0 +1,5 @@
+.env.test
+.test-runs/
+__pycache__/
+*.pyc
+.anvil-cache/

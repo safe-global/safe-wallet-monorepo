@@ -1,11 +1,19 @@
 import { useState } from 'react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { SafeProPlanSwitchedModal, SafeProSubscriptionActivatedModal } from '../SafeProModals'
+import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
+import {
+  SafeProPlanSwitchedModal,
+  SafeProSubscriptionActivatedModal,
+} from '@safe-global/views/features/spaces/components/SafeProModals'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import ChangePlanDialog from './ChangePlanDialog'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
-import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
+import type {
+  CurrentPlan,
+  PlanChangeDirection,
+  PlanPick,
+  SafeRef,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 /** The accounts step leads to the change summary, not to Stripe: a live plan is moved, not bought. */
 export const _continueLabelFor = (direction: PlanChangeDirection): string =>
@@ -21,12 +29,15 @@ export default function ChangePlanFlow({
   spaceId,
   pick,
   currentPlan,
+  entry,
   onClose,
   onChanged,
 }: {
   spaceId: string
   pick: PlanPick
   currentPlan: CurrentPlan
+  /** Analytics: where plan selection started, carried onto the confirmation. */
+  entry: Record<string, unknown>
   /** The flow is over: dismissed at any step, or the confirmation acknowledged. */
   onClose: () => void
   /** The plan changed and the confirmation is up; a parent chooser can step aside. */
@@ -80,6 +91,7 @@ export default function ChangePlanFlow({
       spaceId={spaceId}
       pick={pick}
       currentPlan={currentPlan}
+      entry={entry}
       removed={removed}
       onClose={onClose}
       onChanged={() => {

@@ -18,6 +18,7 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  roots: ['<rootDir>', '<rootDir>/../../packages/views/src'],
 
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
@@ -28,6 +29,7 @@ const customJestConfig = {
     isows: '<rootDir>/node_modules/isows/_cjs/index.js',
     '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
     '^@safe-global/store/(.*)$': '<rootDir>/../../packages/store/src/$1',
+    '^@safe-global/views/(.*)$': '<rootDir>/../../packages/views/src/$1',
   },
   // https://github.com/mswjs/jest-fixed-jsdom
   // without this environment it is basically impossible to run tests with msw

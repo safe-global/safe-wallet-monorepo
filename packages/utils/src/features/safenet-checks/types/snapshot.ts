@@ -40,6 +40,8 @@ export type SafenetCheckSnapshot = {
    * when the header read failed — a missing date never suppresses a verdict.
    */
   attestedAtMs: number | null
+  /** When the deadline block was mined, in ms, once a TIMED_OUT check is past it. Null otherwise. */
+  timedOutAtMs: number | null
   /**
    * The submission time this read aimed its block window at, in ms — the
    * earliest one any surface offered for the check. Null when none was offered

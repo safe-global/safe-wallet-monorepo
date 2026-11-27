@@ -1,4 +1,4 @@
-# Ignore auto-generated service workers but allow public/beamer-embed.js
+# Ignore auto-generated service workers
 public/work*.js
 
 # testing

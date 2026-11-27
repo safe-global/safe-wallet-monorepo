@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useCsvExportGetExportStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import type { ReactElement } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -9,10 +9,10 @@ import CsvTxExportModal from '../CsvTxExportModal'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { OnboardingTooltip } from '@/components/common/OnboardingTooltip'
-import { Chip } from '@/components/common/Chip'
+import { Chip } from '@safe-global/views/components/common/Chip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import OnlyOwnerOrProposer from '@/components/common/OnlyOwnerOrProposer'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 
 const getCsvExportFileName = () => {
@@ -47,10 +47,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
     ? { backgroundColor: 'static.main', color: 'secondary.main' }
     : { backgroundColor: 'secondary.main', color: 'static.main' }
 
-  const onClick = () => {
-    setOpenExportModal(true)
-    trackEvent(TX_LIST_EVENTS.CSV_EXPORT_CLICKED)
-  }
+  const onClick = () => setOpenExportModal(true)
 
   useEffect(() => {
     if (exportJobId && !exportTimeout.current) {
@@ -146,10 +143,12 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
         <div>
           <OnlyOwnerOrProposer placement="top">
             {(isOk) => (
-              <Button variant="outline" size="action" onClick={onClick} disabled={!isOk || !!exportJobId}>
-                {exportJobId ? <Spinner className="size-5" /> : <ExportIcon className="size-5" />}
-                {exportJobId ? 'Exporting' : 'Export'}
-              </Button>
+              <Track {...TX_LIST_EVENTS.CSV_EXPORT_CLICKED}>
+                <Button variant="outline" size="action" onClick={onClick} disabled={!isOk || !!exportJobId}>
+                  {exportJobId ? <Spinner className="size-5" /> : <ExportIcon className="size-5" />}
+                  {exportJobId ? 'Exporting' : 'Export'}
+                </Button>
+              </Track>
             )}
           </OnlyOwnerOrProposer>
         </div>

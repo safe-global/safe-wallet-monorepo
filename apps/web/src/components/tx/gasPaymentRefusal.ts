@@ -6,7 +6,7 @@ import {
   RelayerUnavailableError,
 } from '@safe-global/utils/services/gasPaymentErrors'
 import { SPONSORED_OPTIONS, type GasPayer, type SponsoredOption } from '@/utils/gasPayment'
-import { sponsoredQuotaMessage } from './sponsoredQuotaMessage'
+import { sponsoredQuotaMessage } from '@/utils/quotaMessage'
 
 const LIMIT_REACHED_MESSAGE = 'No sponsored transactions left. Choose another gas payment method and execute again.'
 const UNAVAILABLE_MESSAGE =

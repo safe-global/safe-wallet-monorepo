@@ -4,14 +4,22 @@ import { TypedDataEncoder } from 'ethers'
 import type { TypedDataDomain } from 'ethers'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
+import {
+  hashDelegateTypedData,
+  isQueueServiceDelegateMessage,
+  normalizeDelegateTypedData,
+} from '@safe-global/utils/services/delegates'
 
 export const hashTypedData = (typedData: TypedData): string => {
+  // ethers rejects the queue service delegate's non-standard `safe` domain key
+  if (isQueueServiceDelegateMessage(typedData)) return hashDelegateTypedData(typedData)
   // `ethers` doesn't require `EIP712Domain` and otherwise throws
   const { EIP712Domain: _, ...types } = typedData.types
   return TypedDataEncoder.hash(typedData.domain as TypedDataDomain, types, typedData.message)
 }
 
 export const normalizeTypedData = (typedData: TypedData): TypedData => {
+  if (isQueueServiceDelegateMessage(typedData)) return normalizeDelegateTypedData(typedData)
   const { EIP712Domain: _, ...types } = typedData.types
   const payload = TypedDataEncoder.getPayload(typedData.domain as TypedDataDomain, types, typedData.message)
 

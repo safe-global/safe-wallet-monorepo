@@ -11,11 +11,9 @@ const CANCELED_STATUSES = new Set<Subscription['status']>(['canceled', 'incomple
 
 /** From this many days before your free access ends the UI turns to warnings and reminders. */
 export const TRIAL_ENDING_SOON_DAYS = 7
-/** From here on the trial label counts down; further out it just says "Free access". */
-export const TRIAL_COUNTDOWN_DAYS = 14
 
-export const trialLabel = (daysLeft: number | null | undefined): string => {
-  if (daysLeft == null || daysLeft > TRIAL_COUNTDOWN_DAYS) return 'Free access'
+export const trialLabel = (daysLeft: number | null | undefined, countdownDays = TRIAL_ENDING_SOON_DAYS): string => {
+  if (daysLeft == null || daysLeft > countdownDays) return 'Free access'
   return `Free access · ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`
 }
 
@@ -33,6 +31,10 @@ export const isLivePlanStatus = (status: PlanStatus): boolean => status === 'act
 export const isPlanChangeable = isLivePlanStatus
 
 export const isSpaceDeletionBlocked = (status: PlanStatus): boolean => status !== 'none' && status !== 'canceled'
+
+/** The tracking plan's plan states: a trial is free access, anything not live is locked. */
+export const toPlanStatus = (status: PlanStatus): string =>
+  status === 'trialing' ? 'free_access' : status === 'active' || status === 'none' ? status : 'locked'
 
 export const getPlanStatus = (subscription: Subscription | undefined): PlanStatus => {
   if (!subscription) return 'none'

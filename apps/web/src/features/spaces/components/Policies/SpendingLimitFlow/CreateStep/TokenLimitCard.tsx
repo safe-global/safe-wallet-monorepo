@@ -9,13 +9,13 @@ import useChainId from '@/hooks/useChainId'
 import { computeFiatValue } from '@/utils/fiat'
 import FiatValue from '@/components/common/FiatValue'
 import NumberField from '@/components/common/NumberField'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import TokenSelector from '../TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import { useIsEditMode } from '../EditFlow/EditModeContext'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
@@ -26,14 +26,19 @@ import {
   validateNoExistingLimit,
   validateUniqueToken,
 } from '../utils/validation'
-import { limitPath, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
+import {
+  limitPath,
+  limitsPath,
+  spenderAddressPath,
+  type SpendingLimitPolicyFormValues,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   EXISTING_LIMIT_TOOLTIP,
   FREQUENCY_LABEL,
   LIMIT_AMOUNT_LABEL,
   LIMIT_AMOUNT_PLACEHOLDER,
   REMOVE_LIMIT_LABEL,
-} from '../constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5

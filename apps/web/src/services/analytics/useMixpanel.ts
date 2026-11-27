@@ -11,6 +11,7 @@ import {
   mixpanelSetEOAWalletNetwork,
   mixpanelSetWorkspaceId,
   mixpanelSetAuthMethod,
+  mixpanelSetPlanState,
   mixpanelOptInTracking,
   mixpanelOptOutTracking,
 } from './mixpanel'
@@ -28,7 +29,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useMixpanelUserProperties } from './useMixpanelUserProperties'
 import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useSpacePlanState } from '@/features/spaces'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 
 const useMixpanel = () => {
@@ -49,6 +50,7 @@ const useMixpanel = () => {
   const lastUserPropertiesRef = useRef<string | null>(null)
   const spaceId = useCurrentSpaceId()
   const { data: session } = useAuthGetMeV1Query(undefined, { skip: !isSpaceRoute })
+  const planState = useSpacePlanState(isSpaceRoute && spaceId ? spaceId : null)
 
   useEffect(() => {
     if (isMixpanelEnabled) {
@@ -140,6 +142,10 @@ const useMixpanel = () => {
   useEffect(() => {
     mixpanelSetAuthMethod(isSpaceRoute && session?.authMethod ? session.authMethod : '')
   }, [isSpaceRoute, session?.authMethod])
+
+  useEffect(() => {
+    mixpanelSetPlanState(planState?.status ?? '', planState?.tier ?? '', planState?.role ?? '')
+  }, [planState?.status, planState?.tier, planState?.role])
 }
 
 export default useMixpanel

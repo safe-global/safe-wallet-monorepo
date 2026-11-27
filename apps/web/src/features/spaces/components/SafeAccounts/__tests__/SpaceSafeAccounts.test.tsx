@@ -80,10 +80,10 @@ jest.mock('@/store/slices', () => ({
 }))
 
 jest.mock('@/features/myAccounts', () => ({
-  SafeAccountsTable: ({ items }: { items: Array<{ name?: string; address: string }> }) => (
+  SafeAccountsTable: ({ items }: { items: Array<{ name?: string; address: string; chainId?: string }> }) => (
     <div data-testid="safe-accounts-table">
       {items.map((item) => (
-        <div key={item.address}>{item.name}</div>
+        <div key={`${item.chainId}:${item.address}`}>{item.name}</div>
       ))}
     </div>
   ),
@@ -94,7 +94,7 @@ jest.mock('../SpaceSafeContextMenu', () => ({
   default: () => null,
 }))
 
-jest.mock('../EmptySafeAccounts', () => ({
+jest.mock('@safe-global/views/features/spaces/components/SafeAccounts/EmptySafeAccounts', () => ({
   __esModule: true,
   default: () => <div data-testid="empty-safe-accounts" />,
 }))

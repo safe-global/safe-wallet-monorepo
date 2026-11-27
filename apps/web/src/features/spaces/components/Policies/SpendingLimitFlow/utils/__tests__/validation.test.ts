@@ -1,7 +1,11 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import { DUPLICATE_SPENDER_ERROR, DUPLICATE_TOKEN_ERROR, EXISTING_LIMIT_ERROR } from '../../constants'
+import {
+  DUPLICATE_SPENDER_ERROR,
+  DUPLICATE_TOKEN_ERROR,
+  EXISTING_LIMIT_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
   existingTokensForSpender,
   validateLimitAmount,

@@ -16,7 +16,12 @@ process.env.NEXT_PUBLIC_APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || pac
 process.env.NEXT_PUBLIC_APP_HOMEPAGE = process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../packages/views/src/**/*.mdx',
+    '../../../packages/views/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
 
   addons: [
     '@storybook/addon-onboarding',
@@ -66,9 +71,16 @@ const config: StorybookConfig = {
       'mocks/useBytecodeComparison.ts',
     )
 
-    // Mock next/image to bypass the image loader stub that fails on static imports
-    // This resolves the "unsupported file type: undefined" error when building Storybook
-    ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
+    // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
+    ;(config.resolve.alias as Record<string, string>)['@cowprotocol/widget-react$'] = path.resolve(
+      __dirname,
+      'mocks/cowSwapWidget.tsx',
+    )
+
+    // Stories in packages/views would otherwise get the root react-hook-form, a different copy (and context) than the app's
+    ;(config.resolve.alias as Record<string, string>)['react-hook-form'] = path.dirname(
+      require.resolve('react-hook-form/package.json'),
+    )
 
     // Mock next/navigation so app-router hooks (usePathname/useRouter/useSearchParams)
     // resolve without nextjs.appDirectory, which would otherwise disable the

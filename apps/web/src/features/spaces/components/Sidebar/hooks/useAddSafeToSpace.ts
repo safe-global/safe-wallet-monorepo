@@ -10,13 +10,12 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Errors, logError } from '@/services/exceptions'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
-import { getSeatLimitMessage } from '../../../utils/seatLimitError'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 type AddOutcome = 'added' | 'stepUp' | 'failed'
 
@@ -28,26 +27,30 @@ interface UseAddSafeToSpaceResult {
 /** Adds the current Safe to a Workspace, then opens the Safe in that Workspace. */
 export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
   const [addSafeToSpace] = useSpaceSafesCreateV1Mutation()
   const [loadingSpaceId, setLoadingSpaceId] = useState<string | null>(null)
 
-  const showError = (detail: string) =>
+  const showFailure = (detail: string, variant: 'error' | 'warning' = 'error') =>
     dispatch(
       showNotification({
         message: `Failed to add Safe to Workspace. ${detail}`,
-        variant: 'error',
+        variant,
         groupKey: 'add-safe-to-workspace-error',
       }),
     )
 
   const handleAddError = (error: FetchBaseQueryError | SerializedError) => {
-    const seatLimit = getSeatLimitMessage(error)
+    if (!getQuotaExceededError(error)) {
+      showFailure(getRtkQueryErrorMessage(error))
+      return
+    }
     // Refreshes the meters of every Workspace, so the Workspace selector also sees the spent seats
-    if (seatLimit) dispatch(entitlementsApi.util.invalidateTags(['entitlements']))
-    showError(seatLimit ?? getRtkQueryErrorMessage(error))
+    dispatch(entitlementsApi.util.invalidateTags(['entitlements']))
+    showFailure(getRtkQueryErrorMessage(error), 'warning')
   }
 
   const handleAdded = (spaceId: string, added: SpaceSafeDto, spaceQuery: typeof router.query) => {
@@ -57,10 +60,6 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
         variant: 'success',
         groupKey: 'add-safe-to-workspace-success',
       }),
-    )
-    trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-      { workspace_id: spaceId, safe_address: added.address, chain_id: added.chainId },
     )
     void router.replace({ pathname: router.pathname, query: spaceQuery }, undefined, { shallow: true })
   }
@@ -83,7 +82,8 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const addToSpace = async (spaceId: string): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
     const toAdd = { chainId: chain.chainId, address: safe.address.value }
-    const { spaceId: _replaced, ...query } = router.query
+    // The Safe comes from safeLinkQuery: router.query is still empty if the user clicks before the router is ready
+    const { spaceId: _replaced, ...query } = { ...router.query, ...safeLinkQuery }
     const spaceQuery = withSpaceId(query, spaceId)
     // A step-up reloads the page, so it returns to this URL instead
     const stepUpReturnUrl = `${router.pathname}?${stringify(spaceQuery)}`
@@ -92,7 +92,7 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
     dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
     const outcome = await requestAdd(spaceId, toAdd, spaceQuery).catch((error: unknown): AddOutcome => {
       logError(Errors._651, error)
-      showError(error instanceof Error ? error.message : '')
+      showFailure(error instanceof Error ? error.message : '')
       return 'failed'
     })
     if (outcome !== 'stepUp') dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))

@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 
 export { BRIDGE_WIDGET_URL, LOCAL_STORAGE_CONSENT_KEY } from './constants'
 

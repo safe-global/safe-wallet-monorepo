@@ -2,7 +2,10 @@ import type { ReactElement } from 'react'
 import { ActiveProposer } from './ActiveProposer'
 import { NotActivatedProposer } from './NotActivatedProposer'
 import { PendingProposer } from './PendingProposer'
-import { ProposerStatus, type ProposerVariantContentProps } from './types'
+import {
+  ProposerStatus,
+  type ProposerVariantContentProps,
+} from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 export const ProposerVariantContent = (props: ProposerVariantContentProps): ReactElement => {
   switch (props.status) {

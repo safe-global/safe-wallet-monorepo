@@ -53,7 +53,7 @@ const setupSafeInfoMock = (overrides: Partial<ReturnType<typeof useSafeInfoHook.
   })
 }
 
-jest.mock('@/components/tx-flow/SafeTxContext', () => ({
+jest.mock('@safe-global/views/components/tx-flow/SafeTxContext', () => ({
   SafeTxContext: {
     _currentValue: {
       safeTx: undefined,
@@ -79,13 +79,13 @@ describe('useSafeShieldAssessmentUrl', () => {
 
   describe('when safeTx is set', () => {
     beforeEach(() => {
-      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      const { SafeTxContext } = jest.requireMock('@safe-global/views/components/tx-flow/SafeTxContext')
       SafeTxContext._currentValue.safeTx = buildMockSafeTx()
       mockCalculateSafeTransactionHash.mockReturnValue(MOCK_TX_HASH)
     })
 
     afterEach(() => {
-      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      const { SafeTxContext } = jest.requireMock('@safe-global/views/components/tx-flow/SafeTxContext')
       SafeTxContext._currentValue.safeTx = undefined
     })
 
@@ -123,7 +123,7 @@ describe('useSafeShieldAssessmentUrl', () => {
 
   describe('when calculateSafeTransactionHash throws', () => {
     beforeEach(() => {
-      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      const { SafeTxContext } = jest.requireMock('@safe-global/views/components/tx-flow/SafeTxContext')
       SafeTxContext._currentValue.safeTx = buildMockSafeTx()
       mockCalculateSafeTransactionHash.mockImplementation(() => {
         throw new Error('Invalid transaction data')
@@ -131,7 +131,7 @@ describe('useSafeShieldAssessmentUrl', () => {
     })
 
     afterEach(() => {
-      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      const { SafeTxContext } = jest.requireMock('@safe-global/views/components/tx-flow/SafeTxContext')
       SafeTxContext._currentValue.safeTx = undefined
     })
 
@@ -146,12 +146,12 @@ describe('useSafeShieldAssessmentUrl', () => {
       setupSafeInfoMock({
         safe: { ...mockSafe, version: '' },
       })
-      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      const { SafeTxContext } = jest.requireMock('@safe-global/views/components/tx-flow/SafeTxContext')
       SafeTxContext._currentValue.safeTx = buildMockSafeTx()
     })
 
     afterEach(() => {
-      const { SafeTxContext } = jest.requireMock('@/components/tx-flow/SafeTxContext')
+      const { SafeTxContext } = jest.requireMock('@safe-global/views/components/tx-flow/SafeTxContext')
       SafeTxContext._currentValue.safeTx = undefined
     })
 

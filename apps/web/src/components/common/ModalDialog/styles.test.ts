@@ -4,7 +4,10 @@ import postcss, { type Rule } from 'postcss'
 
 const MODULES = {
   ModalDialog: join(__dirname, 'styles.module.css'),
-  TxModalDialog: join(__dirname, '..', 'TxModalDialog', 'styles.module.css'),
+  TxModalDialog: join(
+    __dirname,
+    '../../../../../../packages/views/src/components/common/TxModalDialog/styles.module.css',
+  ),
 }
 
 const selectorsOf = (path: string): string[] => {

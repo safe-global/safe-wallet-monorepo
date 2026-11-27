@@ -31,12 +31,8 @@ exports[`./HnDashboardBanner.stories Default 1`] = `
           <img
             alt="Guardian badge"
             class="badge"
-            data-nimg="1"
-            decoding="async"
             height="54"
-            loading="lazy"
             src="/images/hypernative/guardian-badge.svg"
-            style="color: transparent;"
             width="54"
           />
         </div>

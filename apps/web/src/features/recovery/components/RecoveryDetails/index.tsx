@@ -7,6 +7,7 @@ import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
 import RecoverySigners from '../RecoverySigners'
 import RecoveryDescription from '../RecoveryDescription'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
+import { formatRecoveryTime } from '../../services/formatRecoveryTime'
 import classNames from 'classnames'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
@@ -27,12 +28,12 @@ export default function RecoveryDetails({ item }: { item: RecoveryQueueItem }): 
             <div className="text-sm">{dateString(Number(timestamp))}</div>
           </TxDataRow>
           <TxDataRow title="Executable">
-            <div className="text-sm">{dateString(Number(validFrom))}</div>
+            <div className="text-sm">{formatRecoveryTime(validFrom, timestamp, dateString)}</div>
           </TxDataRow>
 
           {expiresAt !== null && (
             <TxDataRow title="Expires">
-              <div className="text-sm">{dateString(Number(expiresAt))}</div>
+              <div className="text-sm">{formatRecoveryTime(expiresAt, timestamp, dateString)}</div>
             </TxDataRow>
           )}
 

@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import React from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'

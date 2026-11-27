@@ -1,6 +1,6 @@
 # Shared Packages AI Contributor Guidelines
 
-Guidance for shared libraries under `packages/` (`store`, `theme`, `utils`) consumed by both `apps/web/` and `apps/mobile/`. For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md).
+Guidance for shared libraries under `packages/` (`store`, `theme`, `utils`) consumed by both `apps/web/` and `apps/mobile/`. `views` is web only and has its own guide: [views/AGENTS.md](views/AGENTS.md). For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md).
 
 ## Verifying packages/ changes (IMPORTANT)
 

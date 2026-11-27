@@ -16,7 +16,6 @@ const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
 const link = (id: string, planName: string, trialPeriodDays?: number): PaymentLink => ({
   id,
-  url: `https://buy.stripe.com/${id}`,
   active: true,
   metadata: { planName, FEATURE_SAFE_SEATS: '10' },
   lineItems: [{ price: { id: `price_${id}`, unitAmount: 49_900, currency: 'eur', recurring: { interval: 'month' } } }],

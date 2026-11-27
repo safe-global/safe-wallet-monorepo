@@ -10,7 +10,6 @@ import {
 } from '../paymentLinks'
 
 const link = (overrides: Partial<PaymentLink> & { id: string }): PaymentLink => ({
-  url: 'https://buy.stripe.com/x',
   active: true,
   metadata: {},
   ...overrides,
@@ -117,9 +116,18 @@ describe('paymentLinks', () => {
       billingCycle: 'month',
       trialPeriodDays: 60,
       features: [],
+      copy: {},
     })
     expect(_toPlanOffer(starter)?.trialPeriodDays).toBeNull()
     expect(_toPlanOffer(link({ id: 'x', metadata: { planName: 'Starter' } }))?.priceId).toBeNull()
+    expect(
+      _toPlanOffer(
+        link({
+          id: 'x',
+          metadata: { planName: 'Starter', planSubtitle: ' For small teams ', planSupportLevel: 'Standard' },
+        }),
+      )?.copy,
+    ).toEqual({ subtitle: 'For small teams', supportLevel: 'Standard' })
   })
 
   it('groups offers by plan name in catalog order, monthly before yearly, seats ascending', () => {

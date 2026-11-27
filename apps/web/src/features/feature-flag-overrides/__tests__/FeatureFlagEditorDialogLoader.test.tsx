@@ -30,10 +30,10 @@ describe('FeatureFlagEditorDialogLoader', () => {
     setIsProduction('true')
 
     // The guard runs once, when the module is evaluated, so the loader has to be re-imported into
-    // a fresh registry to see the production env. next/dynamic is stood in for by a component that
+    // a fresh registry to see the production env. @/utils/dynamic is stood in for by a component that
     // renders synchronously, so an empty DOM can only mean the guard replaced the dialog.
     await jest.isolateModulesAsync(async () => {
-      jest.doMock('next/dynamic', () => ({
+      jest.doMock('@/utils/dynamic', () => ({
         __esModule: true,
         default: () => () => <span data-testid="dynamic-dialog" />,
       }))

@@ -1,7 +1,7 @@
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
-import css from '../AccountItems/styles.module.css'
+import css from '@safe-global/views/features/myAccounts/components/AccountItems/styles.module.css'
 import type { SafeItem } from '@/hooks/safes'
 import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'

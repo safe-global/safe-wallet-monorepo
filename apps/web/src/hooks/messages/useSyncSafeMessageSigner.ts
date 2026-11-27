@@ -1,6 +1,7 @@
 import type { TypedData, MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import useWallet from '@/hooks/wallets/useWallet'
+import useSafeSignerAddress from '@/hooks/wallets/useSafeSignerAddress'
 import { Errors, logError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
@@ -49,6 +50,7 @@ const useSyncSafeMessageSigner = (
 ) => {
   const [submitError, setSubmitError] = useState<Error | undefined>()
   const wallet = useWallet()
+  const safeSignerAddress = useSafeSignerAddress()
   const { safe } = useSafeInfo()
 
   // If the message gets updated in the messageSlice we dispatch it if the signature is complete
@@ -71,7 +73,13 @@ const useSyncSafeMessageSigner = (
     try {
       // When collecting the first signature
       if (!message) {
-        await dispatchSafeMsgProposal({ provider: wallet.provider, safe, message: decodedMessage, origin })
+        await dispatchSafeMsgProposal({
+          provider: wallet.provider,
+          safe,
+          message: decodedMessage,
+          origin,
+          safeSignerAddress,
+        })
 
         // Fetch updated message
         const updatedMsg = await fetchSafeMessage(safeMessageHash, safe.chainId)
@@ -82,7 +90,12 @@ const useSyncSafeMessageSigner = (
         }
         return updatedMsg
       } else {
-        await dispatchSafeMsgConfirmation({ provider: wallet.provider, safe, message: decodedMessage })
+        await dispatchSafeMsgConfirmation({
+          provider: wallet.provider,
+          safe,
+          message: decodedMessage,
+          safeSignerAddress,
+        })
 
         // No requestID => we are in the confirm message dialog and do not need to leave the window open
         if (!requestId) {
@@ -99,7 +112,7 @@ const useSyncSafeMessageSigner = (
     } catch (e) {
       setSubmitError(asError(e))
     }
-  }, [wallet, safe, message, decodedMessage, origin, safeMessageHash, onClose, requestId])
+  }, [wallet, safeSignerAddress, safe, message, decodedMessage, origin, safeMessageHash, onClose, requestId])
 
   return { submitError, onSign }
 }

@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
 import { useCurrentChain } from '@/hooks/useChains'
 

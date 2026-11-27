@@ -1,5 +1,5 @@
 import { render } from '@/tests/test-utils'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeVersion } from '@safe-global/types-kit'
@@ -17,6 +17,7 @@ const mockChain = {
   chainId: '100',
   chainName: 'Gnosis Chain',
   l2: false,
+  features: [] as Chain['features'],
   theme: { backgroundColor: '#000', textColor: '#fff' },
 } as Chain
 
@@ -67,5 +68,25 @@ describe('SetNameStep', () => {
     await userEvent.click(screen.getByTestId('cancel-btn'))
 
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
+  })
+
+  it('suggests a name for the selected network as the placeholder', () => {
+    renderStep({})
+
+    expect(screen.getByRole('textbox', { name: 'Name' })).toHaveAttribute(
+      'placeholder',
+      expect.stringMatching(/^[A-Z][a-z-]+ Gnosis Chain Safe$/),
+    )
+  })
+
+  it('disables Next when no network is selected', async () => {
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: [mockChain], loading: false })
+    renderStep({})
+
+    await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Gnosis Chain' }))
+
+    await waitFor(() => expect(screen.getByTestId('next-btn')).toBeDisabled())
   })
 })

@@ -1,8 +1,8 @@
 import { useContext, useMemo } from 'react'
 import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxContext'
-import { hnSecurityReportBtnConfig } from '../components/HnSecurityReportBtn/config'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { hnSecurityReportBtnConfig } from '@safe-global/views/features/hypernative/components/HnSecurityReportBtn/config'
 import { buildSecurityReportUrl } from '../utils/buildSecurityReportUrl'
 
 /**

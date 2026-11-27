@@ -38,10 +38,7 @@ const SKIPPED_GROUPS: Record<string, string> = {
 
 /** Coverage info for a component */
 type ComponentCoverage =
-  | { type: 'own' }
-  | { type: 'family'; familyName: string }
-  | { type: 'group'; groupName: string }
-  | { type: 'none' }
+  { type: 'own' } | { type: 'family'; familyName: string } | { type: 'group'; groupName: string } | { type: 'none' }
 
 // ============================================================================
 // Helper Functions

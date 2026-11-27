@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import RecoveryPlus from '@/public/images/common/recovery-plus.svg'
+import RecoveryPlus from '@safe-global/views/assets/images/common/recovery-plus.svg'
 import { UpsertRecoveryFlowReview as UpsertRecoveryFlowReview } from './UpsertRecoveryFlowReview'
 import { UpsertRecoveryFlowSettings as UpsertRecoveryFlowSettings } from './UpsertRecoveryFlowSettings'
 import { UpsertRecoveryFlowIntro as UpsertRecoveryFlowIntro } from './UpsertRecoveryFlowIntro'

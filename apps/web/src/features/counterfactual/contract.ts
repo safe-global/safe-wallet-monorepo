@@ -13,7 +13,7 @@
  *   Import them directly from '@/features/counterfactual/store'
  */
 import type { Dispatch, SetStateAction } from 'react'
-import type { SignOrExecuteProps } from '@/components/tx/shared/types'
+import type { SignOrExecuteProps } from '@safe-global/views/components/tx/shared/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { PayMethod } from './types'
 

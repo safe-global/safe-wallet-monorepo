@@ -5,7 +5,7 @@ import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import TxCard, { TxCardActions } from '../../common/TxCard'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -13,33 +13,40 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { RecovererWarning } from './RecovererSmartContractWarning'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
-import { TOOLTIP_TITLES } from '../../common/constants'
+import { TOOLTIP_TITLES } from '@safe-global/views/components/tx-flow/common/constants'
 import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
 import css from './styles.module.css'
 import NumberField from '@/components/common/NumberField'
-import { getDelay, isCustomDelaySelected } from './utils'
+import {
+  getDelay,
+  isCustomDelaySelected,
+  MAX_CUSTOM_DELAY_DAYS,
+  MAX_CUSTOM_DELAY_DIGITS,
+  validateCustomDelay,
+} from './utils'
+import { cn } from '@safe-global/views/utils/cn'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { isSmartContractWallet } from '@/utils/wallets'
 import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
-import { Typography } from '@/components/ui/typography'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { Collapsible, CollapsibleContent } from '@safe-global/views/components/ui/collapsible'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Label } from '@safe-global/views/components/ui/label'
 
 enum AddressType {
   EOA = 'EOA',
@@ -111,13 +118,6 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
       recoverer && delay && expiry
 
   const validateRecoverer = (recoverer: string) => _validateRecoverer(recoverer, safeAddress)
-
-  const validateCustomDelay = (delay: string) => {
-    if (!delay) return ''
-    if (delay === '0' || !Number.isInteger(Number(delay))) {
-      return 'Invalid number'
-    }
-  }
 
   const onShowAdvanced = () => {
     setShowAdvanced((prev) => !prev)
@@ -214,27 +214,33 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               )}
             />
 
-            <div className="flex max-w-[180px] min-w-[140px] flex-1 gap-4">
-              {isCustomDelaySelected(selectedDelay) && (
-                <>
-                  <Controller
-                    control={formMethods.control}
-                    name={UpsertRecoveryFlowFields.customDelay}
-                    rules={{ validate: validateCustomDelay }}
-                    render={({ field, fieldState }) => (
+            {isCustomDelaySelected(selectedDelay) && (
+              <Controller
+                control={formMethods.control}
+                name={UpsertRecoveryFlowFields.customDelay}
+                rules={{ validate: validateCustomDelay }}
+                render={({ field, fieldState }) => (
+                  <div className="mt-3">
+                    <div className="w-[180px]">
                       <NumberField
-                        label={fieldState.error?.message}
                         error={!!fieldState.error}
                         {...field}
                         required
                         placeholder="E.g. 100"
+                        maxLength={MAX_CUSTOM_DELAY_DIGITS}
+                        endAdornment="days"
                       />
-                    )}
-                  />
-                  <Typography className="my-auto">days.</Typography>
-                </>
-              )}
-            </div>
+                    </div>
+                    <Typography
+                      variant="paragraph-small"
+                      className={cn('mt-1', fieldState.error ? 'text-destructive' : 'text-muted-foreground')}
+                    >
+                      {fieldState.error?.message || `Up to ${MAX_CUSTOM_DELAY_DAYS} days`}
+                    </Typography>
+                  </div>
+                )}
+              />
+            )}
           </div>
 
           <div className="mb-6">

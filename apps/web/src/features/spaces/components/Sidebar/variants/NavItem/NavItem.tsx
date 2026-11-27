@@ -1,9 +1,9 @@
 import type { ReactElement, ReactNode } from 'react'
 import Link from 'next/link'
-import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
-import type { ResolvedSidebarItem } from '../../types'
+import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@safe-global/views/components/ui/sidebar'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
+import type { ResolvedSidebarItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { getSidebarItemTestId } from '../../utils'
 import css from '../../styles.module.css'
 import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
@@ -14,6 +14,8 @@ import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import { AppRoutes } from '@/config/routes'
+import { PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
+import { trackPlanSelectionStarted } from '../../../Plans/planSelection'
 
 const customNavEvents: Record<
   string,
@@ -82,6 +84,9 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false, chil
       const customEvent = customNavEvents[item.href]
       if (customEvent) {
         trackEvent({ ...customEvent.event, label: customEvent.label }, customEvent.mixpanelParams)
+      }
+      if (item.href === AppRoutes.spaces.plans) {
+        trackPlanSelectionStarted({ [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.SIDEBAR })
       }
     }
 

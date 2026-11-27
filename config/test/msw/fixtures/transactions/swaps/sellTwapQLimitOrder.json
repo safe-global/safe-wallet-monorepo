@@ -1,0 +1,366 @@
+{
+  "item": {
+    "type": "TRANSACTION",
+    "transaction": {
+      "txInfo": {
+        "type": "TwapOrder",
+        "humanDescription": null,
+        "status": "presignaturePending",
+        "kind": "sell",
+        "class": "limit",
+        "activeOrderUid": null,
+        "validUntil": 1824568343,
+        "sellAmount": "300000000000000000000",
+        "buyAmount": "883047512477792023860",
+        "executedSellAmount": "0",
+        "executedBuyAmount": "0",
+        "executedFee": "0",
+        "executedFeeToken": {
+          "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+          "name": "CoW Protocol Token",
+          "symbol": "COW",
+          "trusted": true
+        },
+        "sellToken": {
+          "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+          "name": "CoW Protocol Token",
+          "symbol": "COW",
+          "trusted": true
+        },
+        "buyToken": {
+          "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
+          "decimals": 18,
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D.png",
+          "name": "DAI (test)",
+          "symbol": "DAI",
+          "trusted": false
+        },
+        "receiver": "0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2",
+        "owner": "0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2",
+        "fullAppData": {
+          "appCode": "Safe Wallet Swaps",
+          "metadata": {
+            "orderClass": {
+              "orderClass": "twap"
+            },
+            "partnerFee": {
+              "bps": 35,
+              "recipient": "0x63695Eee2c3141BDE314C5a6f89B98E62808d716"
+            },
+            "quote": {
+              "slippageBips": 1000
+            },
+            "widget": {
+              "appCode": "CoW Swap-SafeApp",
+              "environment": "production"
+            }
+          },
+          "version": "1.3.0"
+        },
+        "numberOfParts": "2",
+        "partSellAmount": "150000000000000000000",
+        "minPartLimit": "441523756238896011930",
+        "timeBetweenParts": 15768000,
+        "durationOfPart": {
+          "durationType": "AUTO"
+        },
+        "startTime": {
+          "startType": "AT_MINING_TIME"
+        }
+      },
+      "id": "multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0x0f9fb46e5d85bdb11f85bdf356078bb2caaf5508504b5ddb8aba2ce5e3aa58ae",
+      "txHash": null,
+      "timestamp": 1738238245788,
+      "txStatus": "AWAITING_CONFIRMATIONS",
+      "executionInfo": {
+        "type": "MULTISIG",
+        "nonce": 2,
+        "confirmationsRequired": 2,
+        "confirmationsSubmitted": 1,
+        "missingSigners": [
+          {
+            "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+            "name": null,
+            "logoUri": null
+          }
+        ]
+      },
+      "safeAppInfo": null,
+      "note": null
+    },
+    "conflictType": "None"
+  },
+  "details": {
+    "safeAddress": "0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2",
+    "txId": "multisig_0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2_0x0f9fb46e5d85bdb11f85bdf356078bb2caaf5508504b5ddb8aba2ce5e3aa58ae",
+    "executedAt": null,
+    "txStatus": "AWAITING_CONFIRMATIONS",
+    "txInfo": {
+      "type": "TwapOrder",
+      "humanDescription": null,
+      "status": "presignaturePending",
+      "kind": "sell",
+      "class": "limit",
+      "activeOrderUid": null,
+      "validUntil": 1824568343,
+      "sellAmount": "300000000000000000000",
+      "buyAmount": "883047512477792023860",
+      "executedSellAmount": "0",
+      "executedBuyAmount": "0",
+      "executedFee": "0",
+      "executedFeeToken": {
+        "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+        "name": "CoW Protocol Token",
+        "symbol": "COW",
+        "trusted": true
+      },
+      "sellToken": {
+        "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+        "name": "CoW Protocol Token",
+        "symbol": "COW",
+        "trusted": true
+      },
+      "buyToken": {
+        "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D.png",
+        "name": "DAI (test)",
+        "symbol": "DAI",
+        "trusted": false
+      },
+      "receiver": "0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2",
+      "owner": "0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2",
+      "fullAppData": {
+        "appCode": "Safe Wallet Swaps",
+        "metadata": {
+          "orderClass": {
+            "orderClass": "twap"
+          },
+          "partnerFee": {
+            "bps": 35,
+            "recipient": "0x63695Eee2c3141BDE314C5a6f89B98E62808d716"
+          },
+          "quote": {
+            "slippageBips": 1000
+          },
+          "widget": {
+            "appCode": "CoW Swap-SafeApp",
+            "environment": "production"
+          }
+        },
+        "version": "1.3.0"
+      },
+      "numberOfParts": "2",
+      "partSellAmount": "150000000000000000000",
+      "minPartLimit": "441523756238896011930",
+      "timeBetweenParts": 15768000,
+      "durationOfPart": {
+        "durationType": "AUTO"
+      },
+      "startTime": {
+        "startType": "AT_MINING_TIME"
+      }
+    },
+    "txData": {
+      "hexData": "0x8d80ff0a0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000046400d8b85a669413b25a8be7d7698f88b7bfa20889d200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024f08a03230000000000000000000000002f55e8b20d0b9fefa187aa7d00b6cbe563605bf500d8b85a669413b25a8be7d7698f88b7bfa20889d2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000443365582cdaee378bd0eb30ddf479272accf91761e697bc00e067a268f95f1d2732ed230b000000000000000000000000fdafc9d1902f4e0b84f65f49f244b32b31013b74000625afb445c3b6b7b929342a04a22599fd5dbb5900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00fdafc9d1902f4e0b84f65f49f244b32b31013b74000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002640d0d9800000000000000000000000000000000000000000000000000000000000000008000000000000000000000000052ed56da04309aca4c3fecc595298d80c2f16bac000000000000000000000000000000000000000000000000000000000000024000000000000000000000000000000000000000000000000000000000000000010000000000000000000000006cf1e9ca41f7611def408122793c358a3d11e5a5000000000000000000000000000000000000000000000000000000194b712d75000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001400000000000000000000000000625afb445c3b6b7b929342a04a22599fd5dbb59000000000000000000000000b4f1737af37711e9a5890d9510c9bb60e170cb0d000000000000000000000000d8b85a669413b25a8be7d7698f88b7bfa20889d200000000000000000000000000000000000000000000000821ab0d4414980000000000000000000000000000000000000000000000000017ef5f7d01938e9a9a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000f099c0000000000000000000000000000000000000000000000000000000000000000090c4d11e20189648805e2886053933dbbcc7e354d6ba233d4edc939866d48a37000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "dataDecoded": {
+        "method": "multiSend",
+        "parameters": [
+          {
+            "name": "transactions",
+            "type": "bytes",
+            "value": "0x00d8b85a669413b25a8be7d7698f88b7bfa20889d200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024f08a03230000000000000000000000002f55e8b20d0b9fefa187aa7d00b6cbe563605bf500d8b85a669413b25a8be7d7698f88b7bfa20889d2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000443365582cdaee378bd0eb30ddf479272accf91761e697bc00e067a268f95f1d2732ed230b000000000000000000000000fdafc9d1902f4e0b84f65f49f244b32b31013b74000625afb445c3b6b7b929342a04a22599fd5dbb5900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00fdafc9d1902f4e0b84f65f49f244b32b31013b74000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002640d0d9800000000000000000000000000000000000000000000000000000000000000008000000000000000000000000052ed56da04309aca4c3fecc595298d80c2f16bac000000000000000000000000000000000000000000000000000000000000024000000000000000000000000000000000000000000000000000000000000000010000000000000000000000006cf1e9ca41f7611def408122793c358a3d11e5a5000000000000000000000000000000000000000000000000000000194b712d75000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001400000000000000000000000000625afb445c3b6b7b929342a04a22599fd5dbb59000000000000000000000000b4f1737af37711e9a5890d9510c9bb60e170cb0d000000000000000000000000d8b85a669413b25a8be7d7698f88b7bfa20889d200000000000000000000000000000000000000000000000821ab0d4414980000000000000000000000000000000000000000000000000017ef5f7d01938e9a9a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000f099c0000000000000000000000000000000000000000000000000000000000000000090c4d11e20189648805e2886053933dbbcc7e354d6ba233d4edc939866d48a370000000000000000000000000000000000000000000000000000000000000000",
+            "valueDecoded": [
+              {
+                "to": "0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2",
+                "value": "0",
+                "data": "0xf08a03230000000000000000000000002f55e8b20d0b9fefa187aa7d00b6cbe563605bf5",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "setFallbackHandler",
+                  "parameters": [
+                    {
+                      "name": "handler",
+                      "type": "address",
+                      "value": "0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              },
+              {
+                "to": "0xD8b85a669413b25a8BE7D7698f88b7bFA20889d2",
+                "value": "0",
+                "data": "0x3365582cdaee378bd0eb30ddf479272accf91761e697bc00e067a268f95f1d2732ed230b000000000000000000000000fdafc9d1902f4e0b84f65f49f244b32b31013b74",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "setDomainVerifier",
+                  "parameters": [
+                    {
+                      "name": "domainSeparator",
+                      "type": "bytes32",
+                      "value": "0xdaee378bd0eb30ddf479272accf91761e697bc00e067a268f95f1d2732ed230b",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "newVerifier",
+                      "type": "address",
+                      "value": "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              },
+              {
+                "to": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+                "value": "0",
+                "data": "0x095ea7b3000000000000000000000000c92e8bdf79f0507f65a392b0ab4667716bfe0110ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "approve",
+                  "parameters": [
+                    {
+                      "name": "spender",
+                      "type": "address",
+                      "value": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "amount",
+                      "type": "uint256",
+                      "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              },
+              {
+                "to": "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74",
+                "value": "0",
+                "data": "0x0d0d9800000000000000000000000000000000000000000000000000000000000000008000000000000000000000000052ed56da04309aca4c3fecc595298d80c2f16bac000000000000000000000000000000000000000000000000000000000000024000000000000000000000000000000000000000000000000000000000000000010000000000000000000000006cf1e9ca41f7611def408122793c358a3d11e5a5000000000000000000000000000000000000000000000000000000194b712d75000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000001400000000000000000000000000625afb445c3b6b7b929342a04a22599fd5dbb59000000000000000000000000b4f1737af37711e9a5890d9510c9bb60e170cb0d000000000000000000000000d8b85a669413b25a8be7d7698f88b7bfa20889d200000000000000000000000000000000000000000000000821ab0d4414980000000000000000000000000000000000000000000000000017ef5f7d01938e9a9a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000f099c0000000000000000000000000000000000000000000000000000000000000000090c4d11e20189648805e2886053933dbbcc7e354d6ba233d4edc939866d48a370000000000000000000000000000000000000000000000000000000000000000",
+                "operation": 0,
+                "dataDecoded": {
+                  "method": "createWithContext",
+                  "parameters": [
+                    {
+                      "name": "params",
+                      "type": "(address,bytes32,bytes)",
+                      "value": [
+                        "0x6cF1e9cA41f7611dEf408122793c358a3d11E5a5",
+                        "0x000000000000000000000000000000000000000000000000000000194b712d75",
+                        "0x0000000000000000000000000625afb445c3b6b7b929342a04a22599fd5dbb59000000000000000000000000b4f1737af37711e9a5890d9510c9bb60e170cb0d000000000000000000000000d8b85a669413b25a8be7d7698f88b7bfa20889d200000000000000000000000000000000000000000000000821ab0d4414980000000000000000000000000000000000000000000000000017ef5f7d01938e9a9a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000f099c0000000000000000000000000000000000000000000000000000000000000000090c4d11e20189648805e2886053933dbbcc7e354d6ba233d4edc939866d48a37"
+                      ],
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "factory",
+                      "type": "address",
+                      "value": "0x52eD56Da04309Aca4c3FECC595298d80C2f16BAc",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "data",
+                      "type": "bytes",
+                      "value": "0x",
+                      "valueDecoded": null
+                    },
+                    {
+                      "name": "dispatch",
+                      "type": "bool",
+                      "value": "True",
+                      "valueDecoded": null
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "accuracy": "FULL_MATCH"
+      },
+      "to": {
+        "value": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+        "name": "Safe: MultiSendCallOnly 1.4.1",
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x9641d764fc13c8B624c04430C7356C1C7C8102e2.png"
+      },
+      "value": "0",
+      "operation": 1,
+      "trustedDelegateCallTarget": true,
+      "addressInfoIndex": {
+        "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74": {
+          "value": "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74",
+          "name": "ComposableCoW",
+          "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74.png"
+        },
+        "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59": {
+          "value": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
+          "name": "CoW Protocol Token",
+          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png"
+        }
+      },
+      "tokenInfoIndex": null
+    },
+    "txHash": null,
+    "detailedExecutionInfo": {
+      "type": "MULTISIG",
+      "submittedAt": 1738238245788,
+      "nonce": 2,
+      "safeTxGas": "0",
+      "baseGas": "0",
+      "gasPrice": "0",
+      "gasToken": "0x0000000000000000000000000000000000000000",
+      "fee": "0",
+      "payment": "0",
+      "refundReceiver": {
+        "value": "0x0000000000000000000000000000000000000000",
+        "name": null,
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      },
+      "safeTxHash": "0x0f9fb46e5d85bdb11f85bdf356078bb2caaf5508504b5ddb8aba2ce5e3aa58ae",
+      "executor": null,
+      "signers": [
+        {
+          "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+          "name": null,
+          "logoUri": null
+        },
+        {
+          "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+          "name": null,
+          "logoUri": null
+        }
+      ],
+      "confirmationsRequired": 2,
+      "confirmations": [
+        {
+          "signer": {
+            "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+            "name": null,
+            "logoUri": null
+          },
+          "signature": "0xeccb7f9da4ec86cf4abb31f2757dee33925b830fde16e8b96941a8fd65ecb9044e0f5c011db5e1b6fdf91d0f853a501a56e2604b77d8456d91ac7171f026ede41b",
+          "submittedAt": 1738238253494
+        }
+      ],
+      "rejectors": [],
+      "gasTokenInfo": null,
+      "trusted": true,
+      "proposer": {
+        "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+        "name": null,
+        "logoUri": null
+      },
+      "proposedByDelegate": null
+    },
+    "safeAppInfo": null,
+    "note": null
+  }
+}

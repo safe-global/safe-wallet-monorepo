@@ -7,8 +7,10 @@ const PLANS_HREF = { pathname: '/spaces/plans', query: { spaceId: SPACE_ID } }
 
 let mockFlags: FEATURES[] = []
 let mockCurrentSpaceId: string | null = SPACE_ID
+let mockIsSignedIn = true
 const mockUseSpaceEntitlements = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: (feature: FEATURES) => mockFlags.includes(feature) }))
+jest.mock('@/store', () => ({ useAppSelector: () => mockIsSignedIn }))
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockCurrentSpaceId }))
 jest.mock('../billing/useSpaceEntitlements', () => ({
   useSpaceEntitlements: (spaceId: string | null) => mockUseSpaceEntitlements(spaceId),
@@ -24,6 +26,7 @@ describe('usePlanGate', () => {
     jest.clearAllMocks()
     mockFlags = [FEATURES.SAFE_PRO, FEATURES.PROPOSER_GATING]
     mockCurrentSpaceId = SPACE_ID
+    mockIsSignedIn = true
     mockUseSpaceEntitlements.mockReturnValue(entitlements([]))
   })
 
@@ -36,7 +39,12 @@ describe('usePlanGate', () => {
 
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
-    expect(result.current).toEqual({ mustUpgradeToSafePro: false, isLoading: false, upgradeHref: PLANS_HREF })
+    expect(result.current).toEqual({
+      mustUpgradeToSafePro: false,
+      isLoading: false,
+      showProTag: false,
+      upgradeHref: PLANS_HREF,
+    })
     expect(mockUseSpaceEntitlements).toHaveBeenCalledWith(null)
   })
 
@@ -44,7 +52,12 @@ describe('usePlanGate', () => {
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
     expect(mockUseSpaceEntitlements).toHaveBeenCalledWith(SPACE_ID)
-    expect(result.current).toEqual({ mustUpgradeToSafePro: true, isLoading: false, upgradeHref: PLANS_HREF })
+    expect(result.current).toEqual({
+      mustUpgradeToSafePro: true,
+      isLoading: false,
+      showProTag: true,
+      upgradeHref: PLANS_HREF,
+    })
   })
 
   it('opens once the active Workspace plan grants the entitlement', () => {
@@ -68,6 +81,26 @@ describe('usePlanGate', () => {
 
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
-    expect(result.current).toEqual({ mustUpgradeToSafePro: true, isLoading: false, upgradeHref: '/welcome/spaces' })
+    expect(result.current).toMatchObject({
+      mustUpgradeToSafePro: true,
+      isLoading: false,
+      upgradeHref: '/welcome/spaces',
+    })
+  })
+
+  it('shows the Pro tag to signed-in users once the plan grants the entitlement', () => {
+    mockUseSpaceEntitlements.mockReturnValue(entitlements(['policies']))
+
+    const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
+
+    expect(result.current.showProTag).toBe(true)
+  })
+
+  it('hides the Pro tag from signed-out users', () => {
+    mockIsSignedIn = false
+
+    const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
+
+    expect(result.current.showProTag).toBe(false)
   })
 })

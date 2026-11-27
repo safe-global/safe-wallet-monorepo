@@ -2,9 +2,9 @@ import { useId } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 
-import { Switch } from '@/components/ui/switch'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Typography } from '@/components/ui/typography'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useAppDispatch } from '@/store'
 import { setDarkMode } from '@/store/settingsSlice'
 import SettingsHeader from '@/components/settings/SettingsHeader'
@@ -41,8 +41,15 @@ const Appearance: NextPage = () => {
 
             <div>
               <Field orientation="horizontal">
-                <Switch id={darkModeId} checked={isDarkMode} onCheckedChange={handleDarkModeToggle} />
-                <FieldLabel htmlFor={darkModeId}>Dark mode</FieldLabel>
+                <Switch
+                  id={darkModeId}
+                  aria-labelledby={`${darkModeId}-label`}
+                  checked={isDarkMode}
+                  onCheckedChange={handleDarkModeToggle}
+                />
+                <FieldLabel id={`${darkModeId}-label`} htmlFor={darkModeId}>
+                  Dark mode
+                </FieldLabel>
               </Field>
             </div>
           </div>

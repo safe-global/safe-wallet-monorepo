@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
 
@@ -40,6 +40,19 @@ export const WithName: Story = {
   args: {
     open: true,
     safe: { ...baseSafe, name: 'My Treasury Safe' },
+    onConfirm: () => alert('Confirmed!'),
+    onCancel: () => alert('Cancelled'),
+  },
+}
+
+export const AddressBookContact: Story = {
+  args: {
+    open: true,
+    safe: { address: baseSafe.address },
+    description:
+      'This address is similar to an address in your address book. This could indicate an address poisoning attack.',
+    addressLabel: 'Address',
+    hint: 'Verify the full address carefully. Continue only if you recognize this address.',
     onConfirm: () => alert('Confirmed!'),
     onCancel: () => alert('Cancelled'),
   },

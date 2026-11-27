@@ -1,4 +1,5 @@
 import EventBus from '@/services/EventBus'
+import { IS_DEV } from '@/config/constants'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 
 export enum TxEvent {
@@ -45,6 +46,8 @@ interface TxEvents {
     SafeContext & {
       parentSafeAddress: string
       txHashOrParentSafeTxHash: string
+      executed: boolean
+      method: 'approveHash' | 'execTransaction'
     }
   [TxEvent.EXECUTING]: Id & SafeContext
   [TxEvent.PROCESSING]: Id &
@@ -61,7 +64,7 @@ interface TxEvents {
   [TxEvent.FAILED]: Id & SafeContext & { error: Error }
   [TxEvent.SUCCESS]: Id & SafeContext & { txHash?: string }
   [TxEvent.SAFE_APPS_REQUEST]: { safeAppRequestId: RequestId; safeTxHash: string; txId?: string }
-  [TxEvent.BATCH_ADD]: Id
+  [TxEvent.BATCH_ADD]: { nonce: number }
 }
 
 const txEventBus = new EventBus<TxEvents>()
@@ -70,9 +73,10 @@ export const txDispatch = txEventBus.dispatch.bind(txEventBus)
 
 export const txSubscribe = txEventBus.subscribe.bind(txEventBus)
 
-// Log all events
-Object.values(TxEvent).forEach((event: TxEvent) => {
-  txSubscribe<TxEvent>(event, (detail) => {
-    console.info(`Transaction ${event} event received`, detail)
+if (IS_DEV) {
+  Object.values(TxEvent).forEach((event: TxEvent) => {
+    txSubscribe<TxEvent>(event, (detail) => {
+      console.info(`Transaction ${event} event received`, detail)
+    })
   })
-})
+}

@@ -1,13 +1,13 @@
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { getMemberDisplayName } from '../../hooks/useSpaceMembers'
 
 const MemberName = ({ member, isCompact = false }: { member: MemberDto; isCompact?: boolean }) => {

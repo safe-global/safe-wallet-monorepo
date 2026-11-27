@@ -18,6 +18,11 @@ import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positio
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain, ChainPage } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type {
+  TransactionDetails,
+  TransactionItem,
+  TransactionItemPage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Portfolio fixtures
 import portfolioEfSafe from './portfolio/ef-safe.json'
@@ -52,6 +57,35 @@ import chainMainnet from './chains/mainnet.json'
 
 // Safe Apps fixtures
 import safeAppsMainnet from './safe-apps/mainnet.json'
+
+// Transaction history fixtures
+import txHistory from './transactions/history.json'
+import txOnChainRejection from './transactions/details/on-chain-rejection.json'
+import txBatch from './transactions/details/batch.json'
+import txAddOwner from './transactions/details/add-owner.json'
+import txSwapOwner from './transactions/details/swap-owner.json'
+import txRemoveOwner from './transactions/details/remove-owner.json'
+import txDisableModule from './transactions/details/disable-module.json'
+import txChangeThreshold from './transactions/details/change-threshold.json'
+import txReceiveQtrust from './transactions/details/receive-qtrust.json'
+
+// Swap order and staking fixtures: the list item and the details of each transaction
+import swapSell1Action from './transactions/swaps/sell1Action.json'
+import swapBuy2actions from './transactions/swaps/buy2actions.json'
+import swapSafeAppSwapOrder from './transactions/swaps/safeAppSwapOrder.json'
+import swapSellLimitOrder from './transactions/swaps/sellLimitOrder.json'
+import swapWrapSwap from './transactions/swaps/wrapSwap.json'
+import swapSell3Actions from './transactions/swaps/sell3Actions.json'
+import swapSellCancelled from './transactions/swaps/sellCancelled.json'
+import swapSellLimitOrderFilled from './transactions/swaps/sellLimitOrderFilled.json'
+import swapPartiallyFilledLimit from './transactions/swaps/partiallyFilledLimit.json'
+import swapTwapPartial from './transactions/swaps/twapPartial.json'
+import swapTwapFilled from './transactions/swaps/twapFilled.json'
+import swapSellQLimitOrder from './transactions/swaps/sellQLimitOrder.json'
+import swapSellSwapQLimitOrder from './transactions/swaps/sellSwapQLimitOrder.json'
+import swapSellTwapQLimitOrder from './transactions/swaps/sellTwapQLimitOrder.json'
+import stakingStake from './transactions/staking/stake.json'
+import stakingWithdrawal from './transactions/staking/withdrawal.json'
 
 /**
  * Portfolio fixtures by scenario
@@ -133,6 +167,68 @@ export const safeAppsFixtures = {
   mainnet: safeAppsMainnet as SafeApp[],
   /** Empty Safe Apps list */
   empty: [] as SafeApp[],
+}
+
+/**
+ * SEP_STATIC_SAFE_7 on Sepolia, the Safe whose history the transaction fixtures record
+ */
+export const TX_HISTORY_SAFE = {
+  address: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
+  chainId: '11155111',
+  shortName: 'sep',
+  version: '1.3.0',
+} as const
+
+/**
+ * Transaction history of SEP_STATIC_SAFE_7 on Sepolia, with the details of selected rows
+ */
+export const transactionFixtures = {
+  history: txHistory as TransactionItemPage,
+  details: {
+    onChainRejection: txOnChainRejection as TransactionDetails,
+    // CGW sends `dataDecoded: null` for undecoded multiSend actions; the generated type only allows undefined
+    batch: txBatch as unknown as TransactionDetails,
+    addOwner: txAddOwner as TransactionDetails,
+    swapOwner: txSwapOwner as TransactionDetails,
+    removeOwner: txRemoveOwner as TransactionDetails,
+    disableModule: txDisableModule as TransactionDetails,
+    changeThreshold: txChangeThreshold as TransactionDetails,
+    receiveQtrust: txReceiveQtrust as TransactionDetails,
+  },
+}
+
+export type RecordedTransaction = {
+  item: TransactionItem
+  details: TransactionDetails
+}
+
+/**
+ * CoW swap, limit and TWAP orders on Sepolia: executed ones from the history of their Safes,
+ * queued ones from the queue of SEP_STATIC_SAFE_34
+ */
+export const swapOrderFixtures = {
+  sell1Action: swapSell1Action as RecordedTransaction,
+  buy2actions: swapBuy2actions as RecordedTransaction,
+  safeAppSwapOrder: swapSafeAppSwapOrder as RecordedTransaction,
+  sellLimitOrder: swapSellLimitOrder as RecordedTransaction,
+  wrapSwap: swapWrapSwap as RecordedTransaction,
+  sell3Actions: swapSell3Actions as RecordedTransaction,
+  sellCancelled: swapSellCancelled as RecordedTransaction,
+  sellLimitOrderFilled: swapSellLimitOrderFilled as RecordedTransaction,
+  partiallyFilledLimit: swapPartiallyFilledLimit as RecordedTransaction,
+  twapPartial: swapTwapPartial as RecordedTransaction,
+  twapFilled: swapTwapFilled as RecordedTransaction,
+  sellQLimitOrder: swapSellQLimitOrder as RecordedTransaction,
+  sellSwapQLimitOrder: swapSellSwapQLimitOrder as RecordedTransaction,
+  sellTwapQLimitOrder: swapSellTwapQLimitOrder as RecordedTransaction,
+}
+
+/**
+ * A native stake and a withdraw request of a mainnet Safe
+ */
+export const stakingFixtures = {
+  stake: stakingStake as RecordedTransaction,
+  withdrawal: stakingWithdrawal as RecordedTransaction,
 }
 
 /**

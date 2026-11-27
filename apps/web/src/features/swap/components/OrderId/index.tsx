@@ -1,5 +1,5 @@
 import CopyButton from '@/components/common/CopyButton'
-import ExplorerButton from '@/components/common/ExplorerButton'
+import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 
 const OrderId = ({
   orderId,

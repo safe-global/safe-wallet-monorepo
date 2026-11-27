@@ -12,5 +12,7 @@ export { spaceNavigationSlice, setLastUsedSpaceOrigin, selectLastUsedSpaceOrigin
 export type { SpaceNavigationOrigin } from './spaceNavigationSlice'
 export { spaceSafesEntitlementsListener } from './spaceSafesEntitlementsListener'
 export { planChangeSyncListener } from './planChangeSyncListener'
+export { checkoutTrackingListener } from './checkoutTrackingListener'
+export { workspaceTrackingListener } from './workspaceTrackingListener'
 export { spaceSafesCacheListener } from './spaceSafesCacheListener'
 export { trialReminderListener } from './trialReminder'

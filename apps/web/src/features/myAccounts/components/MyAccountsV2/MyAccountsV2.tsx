@@ -6,7 +6,7 @@ import GetStartedCard from './components/GetStartedCard'
 import TrustedAccountsActions from './components/TrustedAccountsActions'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import AddTrustedSafesCard from '@/components/common/AddTrustedSafesCard'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import madProps from '@/utils/mad-props'
 import css from '../../styles.module.css'
@@ -49,9 +49,9 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
 
         {isSafeProAnnouncementEnabled &&
           (showList ? (
-            <SafeProWorkspacesBanner className="mb-4" />
+            <SafeProWorkspacesBanner className="mb-4" location="my_accounts" />
           ) : (
-            <SafeProBanner className="mx-auto -mb-6 w-full max-w-[440px]" />
+            <SafeProBanner className="mx-auto -mb-6 w-full max-w-[440px]" location="my_accounts" />
           ))}
 
         {showGetStarted && <GetStartedCard />}

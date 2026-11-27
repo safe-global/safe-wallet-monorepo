@@ -8,6 +8,7 @@ import { type ListTableItem } from '../../ListTable'
 import { LifiSwapHeader } from './LifiSwapHeader'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { getTotalBridgeFee } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/getTotalBridgeFee'
 
 interface LifiSwapTransactionProps {
   txId: string
@@ -46,16 +47,19 @@ export function LifiSwapTransaction({ txId, executionInfo, txInfo }: LifiSwapTra
     })
 
     // Fees
-    const totalFee = formatUnits(
-      BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n),
-      txInfo.fromToken.decimals,
-    )
+    const totalFee = getTotalBridgeFee(txInfo.fees)
 
     items.push({
       label: 'Fees',
       render: () => (
         <Text>
-          {Number(totalFee).toFixed(6)} {txInfo.fromToken.symbol}
+          {totalFee === null ? (
+            'Unknown'
+          ) : (
+            <>
+              {Number(formatUnits(totalFee, txInfo.fromToken.decimals)).toFixed(6)} {txInfo.fromToken.symbol}
+            </>
+          )}
         </Text>
       ),
     })

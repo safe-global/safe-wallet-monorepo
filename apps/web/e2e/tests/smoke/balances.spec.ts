@@ -6,21 +6,18 @@
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { AssetsPage } from '../../src/pages/assets.page'
-import { SAFES, ROUTES, DUST_THRESHOLD_USD } from '../../src/data/constants'
-
-const safeAddress = SAFES.SEP_STATIC_SAFE_1.split(':')[1]
-const assetsSafeAddress = SAFES.SEP_ASSETS_SAFE.split(':')[1]
+import { ROUTES, DUST_THRESHOLD_USD } from '../../src/data/constants'
 
 test.describe('Balances page', { tag: '@smoke' }, () => {
-  test('should display token balances matching API data', async ({ safePage, safeApiClient }) => {
+  test('should display token balances matching API data', async ({ safePage, safeApiClient, safes }) => {
     // 1. API: get expected balances
-    const balances = await safeApiClient.getBalances(safeAddress)
+    const balances = await safeApiClient.getBalances(safes.SEP_STATIC_SAFE_1.split(':')[1])
 
     // Precondition: test Safe must have tokens — fail fast if test data is broken
     expect(balances.items.length).toBeGreaterThan(0)
 
     // 2. UI: navigate to balances page
-    await safePage.goto(`${ROUTES.balances}?safe=${SAFES.SEP_STATIC_SAFE_1}`)
+    await safePage.goto(`${ROUTES.balances}?safe=${safes.SEP_STATIC_SAFE_1}`)
 
     // 3. Verify: UI shows the first token symbol from API.
     // Matched on the symbol cell's own testid rather than by text: `getByText` is a case-insensitive
@@ -32,8 +29,8 @@ test.describe('Balances page', { tag: '@smoke' }, () => {
   test(
     'should list every token in both token-list modes when small balances are shown and only tokens above the dust threshold when they are hidden',
     { tag: '@migration' },
-    async ({ safePage, safeApiClient }) => {
-      const balances = await safeApiClient.getBalances(assetsSafeAddress)
+    async ({ safePage, safeApiClient, safes }) => {
+      const balances = await safeApiClient.getBalances(safes.SEP_ASSETS_SAFE.split(':')[1])
       const aboveDust = balances.items.filter((item) => Number(item.fiatBalance) >= DUST_THRESHOLD_USD)
       const dust = balances.items.filter((item) => Number(item.fiatBalance) < DUST_THRESHOLD_USD)
       // Precondition: the filter is only observable when the Safe holds tokens on both sides of the threshold.
@@ -41,7 +38,7 @@ test.describe('Balances page', { tag: '@smoke' }, () => {
       expect(dust.length).toBeGreaterThan(0)
 
       const assets = new AssetsPage(safePage)
-      await assets.goto(SAFES.SEP_ASSETS_SAFE)
+      await assets.goto(safes.SEP_ASSETS_SAFE)
       await expect(assets.tokenRows.first()).toBeVisible()
 
       // Sepolia has no portfolio endpoint, so the app disables trusted-token filtering there and

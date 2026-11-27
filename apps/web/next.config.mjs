@@ -111,8 +111,10 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
-  eslint: {
-    dirs: ['src', 'cypress'],
+  agentRules: false,
+  logging: {
+    // Forwarding browser logs to the terminal makes the next-rspack dev server panic on client navigation.
+    browserToTerminal: false,
   },
   ...(isProd || enableExperimentalOptimizations
     ? {
@@ -121,7 +123,17 @@ const nextConfig = {
         },
       }
     : {}),
-  webpack(config, { dev }) {
+  webpack(config, { dev, isServer, webpack }) {
+    // The static export never uses the dev server render, so the dev server compiles every page as empty.
+    if (dev && isServer) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /[\\/]apps[\\/]web[\\/]src[\\/]pages[\\/](?!_document)/,
+          path.resolve(__dirname, 'scripts/dev-server-page-stub.js'),
+        ),
+      )
+    }
+
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },

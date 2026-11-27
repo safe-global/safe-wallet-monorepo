@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { Share2 as ShareIcon } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'

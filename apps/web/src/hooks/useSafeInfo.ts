@@ -4,7 +4,7 @@ import { useAppSelector } from '@/store'
 import { selectSafeInfo } from '@/store/safeInfoSlice'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { useSafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo

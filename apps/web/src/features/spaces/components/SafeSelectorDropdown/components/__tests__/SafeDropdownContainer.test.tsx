@@ -2,7 +2,7 @@ import React, { act } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SafeDropdownContainer from '../SafeDropdownContainer'
-import type { SafeItemData } from '../../types'
+import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 // Resolver is exercised in its own unit test; here we stub it so the component renders without a
 // store. Default behaviour mirrors production: the safe's own name wins, else the address-book name.
@@ -31,7 +31,7 @@ class ResizeObserverStub {
 
 // Render SelectContent as a plain div carrying the `data-slot` marker that the
 // component's `closest()` lookup relies on, so the scroll-hint effect can find it.
-jest.mock('@/components/ui/select', () => ({
+jest.mock('@safe-global/views/components/ui/select', () => ({
   __esModule: true,
   SelectContent: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
     <div data-slot="select-content" data-testid="select-content" className={className}>

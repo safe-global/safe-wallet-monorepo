@@ -8,7 +8,7 @@ import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useChain } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
-import { getPopularTokenAddresses } from '../popularTokens'
+import { getPopularTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/popularTokens'
 import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenOption } from '../utils/tokenOptions'
 
 export type TokenOptionsResult = {

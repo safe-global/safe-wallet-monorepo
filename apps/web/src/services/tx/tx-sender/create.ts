@@ -1,13 +1,14 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { toSafeSignature } from '@safe-global/utils/utils/safeTransaction'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getTransactionDetails } from '@/utils/transactions'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'
 import { getAndValidateSafeSDK } from './sdk'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 
 /**
  * Create a transaction from raw params
@@ -120,6 +121,7 @@ export const createExistingTx = async (
   chainId: string,
   txId: string,
   txDetails?: TransactionDetails,
+  scope?: TxSenderScope,
 ): Promise<SafeTransaction> => {
   // Get the tx details from the backend if not provided
   txDetails = txDetails || (await getTransactionDetails(chainId, txId))
@@ -128,15 +130,9 @@ export const createExistingTx = async (
   const { txParams, signatures } = extractTxInfo(txDetails)
 
   // Create a tx and add pre-approved signatures
-  const safeTx = await createTx(txParams, txParams.nonce)
+  const safeTx = await createTx(txParams, txParams.nonce, scope)
   Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
+    safeTx.addSignature(toSafeSignature(signer, data))
   })
 
   return safeTx

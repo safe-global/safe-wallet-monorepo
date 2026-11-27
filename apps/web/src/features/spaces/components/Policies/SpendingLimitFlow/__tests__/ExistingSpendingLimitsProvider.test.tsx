@@ -3,8 +3,8 @@ import type { JsonRpcProvider } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useLoadFeature } from '@/features/__core__'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
-import type { SafeScope } from '@/components/tx-flow/safe-scope'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Errors, logError } from '@/services/exceptions'
 import { addressExBuilder, extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
@@ -12,8 +12,8 @@ import { tokenOptionBuilder } from '../utils/tokenOptions.fixtures'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 
-jest.mock('@/components/tx-flow/safe-scope', () => ({
-  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
 jest.mock('@/features/__core__', () => ({

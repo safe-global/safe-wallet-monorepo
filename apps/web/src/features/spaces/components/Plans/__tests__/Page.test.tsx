@@ -1,5 +1,9 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import SpacePlansPage from '../Page'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -94,6 +98,7 @@ const onPlan = (name: string, price: number, status: 'active' | 'trialing') => {
     sponsoredTxs: { used: 0, quota: 10 },
     subscription: subscription(name, price, status),
     status,
+    tierName: name,
     isTrialing: status === 'trialing',
     isLoading: false,
   })
@@ -123,7 +128,7 @@ describe('SpacePlansPage', () => {
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Business')
-    expect(screen.getByText('Starter')).toBeInTheDocument()
+    expect(screen.getAllByTestId('plan-card')[0]).toHaveTextContent('Starter')
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Switch to Starter' })).not.toBeInTheDocument()
   })
@@ -134,7 +139,8 @@ describe('SpacePlansPage', () => {
 
     expect(mockUseChangePlan).toHaveBeenCalledWith(SPACE_ID)
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Business')
-    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
     expect(screen.queryByRole('button', { name: /Continue with/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
@@ -189,5 +195,26 @@ describe('SpacePlansPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter_m')
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
+  })
+
+  it('tracks the page as viewed with what it showed, and the plan button clicked', () => {
+    onPlan('Business', 499, 'trialing')
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER, BUSINESS], isLoading: false })
+    render(<SpacePlansPage spaceId={SPACE_ID} />)
+
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
+      'Entry Point': 'direct',
+      'Default Seats': 20,
+      'Default Billing Period': 'monthly',
+      'Plan Limit': 20,
+      'Sponsored Remaining': 10,
+      'Sponsored Quota': 10,
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFE_PRO_EVENTS.PLAN_CTA_CLICKED,
+      expect.objectContaining({ CTA: 'switch_plan', Location: 'plans_page' }),
+    )
   })
 })

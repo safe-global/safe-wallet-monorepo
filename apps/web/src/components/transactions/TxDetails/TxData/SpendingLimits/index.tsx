@@ -1,10 +1,10 @@
-import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenIcon from '@/components/common/TokenIcon'
-import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
+import SpendingLimitLabel from '@safe-global/views/components/common/SpendingLimitLabel'
 import { useCurrentChain } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -17,11 +17,11 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type SpendingLimitsProps = {
   txData?: TransactionData | null
-  txInfo: CustomTransactionInfo
   type: SpendingLimitMethods
+  resetsSpent?: boolean
 }
 
-export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
+export const SpendingLimits = ({ txData, type, resetsSpent = false }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const tokens = useMemo(() => balances.items.map(({ tokenInfo }) => tokenInfo), [balances.items])
@@ -35,8 +35,10 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
     [chain?.chainId, resetTimeMin],
   )
   const tokenInfo = useMemo(
-    () => tokens.find(({ address }) => sameAddress(address, tokenAddress as string)),
-    [tokenAddress, tokens],
+    () =>
+      tokens.find(({ address }) => sameAddress(address, tokenAddress as string)) ??
+      Object.values(txData?.tokenInfoIndex ?? {}).find(({ address }) => sameAddress(address, tokenAddress as string)),
+    [tokenAddress, tokens, txData?.tokenInfoIndex],
   )
 
   if (!txData) return null
@@ -80,6 +82,12 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
       {isSetAllowanceMethod && (
         <TxDetailsRow label="Reset time" grid>
           <SpendingLimitLabel label={resetTimeLabel || 'One-time spending limit'} isOneTime={!resetTimeLabel} />
+        </TxDetailsRow>
+      )}
+
+      {isSetAllowanceMethod && resetsSpent && (
+        <TxDetailsRow label="Spent amount" grid>
+          <Typography>Reset to 0</Typography>
         </TxDetailsRow>
       )}
     </div>

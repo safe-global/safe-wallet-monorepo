@@ -1,25 +1,26 @@
 import { useId, useMemo, useState, type ReactElement } from 'react'
 import { Check, ChevronsUpDown, Plus, CircleFadingPlus, LayoutGrid, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/router'
-import { SidebarMenuButton } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { SidebarMenuButton } from '@safe-global/views/components/ui/sidebar'
+import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
-import { cn } from '@/utils/cn'
-import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../constants'
+import { cn } from '@safe-global/views/utils/cn'
+import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '@safe-global/views/features/spaces/components/Sidebar/constants'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
 import css from '../../styles.module.css'
-import type { SpaceItem } from '../../types'
+import type { SpaceItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { getAddToSpaceStatus, truncateSpaceName, type AddToSpaceStatus } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
 import { useSafeAddressFromUrl, useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
@@ -28,7 +29,7 @@ import { isUserActiveAdmin } from '@/features/spaces/utils'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { AdminOnlyWorkspaceTooltip } from '../../../AdminOnlyWorkspaceTooltip'
+import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import { getDeterministicColor } from '@/utils/colors'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
@@ -108,14 +109,8 @@ export const SpaceSelectorDropdown = ({
   }
 
   const handleCreateSpace = () => {
-    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.SIDEBAR })
     // eslint-disable-next-line no-restricted-syntax -- The Workspace to create does not exist yet
     router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
-  }
-
-  const handleViewSpaces = () => {
-    trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.space_selector })
-    router.push(AppRoutes.welcome.spaces)
   }
 
   const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)
@@ -233,12 +228,19 @@ export const SpaceSelectorDropdown = ({
 
         <DropdownMenuSeparator className="my-1" />
 
-        <AddWorkspaceMenuItem isAtSpacesLimit={spaces.length >= SPACES_LIMIT} onClick={handleCreateSpace} />
+        <Track
+          {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+          mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.SIDEBAR }}
+        >
+          <AddWorkspaceMenuItem isAtSpacesLimit={spaces.length >= SPACES_LIMIT} onClick={handleCreateSpace} />
+        </Track>
 
-        <DropdownMenuItem onClick={handleViewSpaces} className={MENU_ITEM_CLASS}>
-          <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-          <span>View all</span>
-        </DropdownMenuItem>
+        <Track {...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE} label={SPACE_LABELS.space_selector}>
+          <DropdownMenuItem onClick={() => router.push(AppRoutes.welcome.spaces)} className={MENU_ITEM_CLASS}>
+            <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
+            <span>View all</span>
+          </DropdownMenuItem>
+        </Track>
       </DropdownMenuContent>
     </DropdownMenu>
   )

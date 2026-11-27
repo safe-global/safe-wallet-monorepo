@@ -101,12 +101,16 @@ const isSingleBatchFile = (batchFile: unknown): batchFile is BatchFile => {
   return typeof batchFile === 'object' && batchFile !== null && 'meta' in batchFile && 'transactions' in batchFile
 }
 
+const isBatchLibraryFile = (file: unknown): file is { data: Record<string, BatchFile> } => {
+  return typeof file === 'object' && file !== null && 'data' in file && typeof file.data === 'object' && !!file.data
+}
+
 const importFile = async (file: File): Promise<BatchFile | undefined> => {
   return new Promise((resolve) => {
     const reader = new FileReader()
     reader.readAsText(file)
     reader.onload = async () => {
-      const batchFile: BatchFile | { data: Record<string, BatchFile> } = JSON.parse(reader.result as string)
+      const batchFile: unknown = JSON.parse(reader.result as string)
 
       if (isSingleBatchFile(batchFile)) {
         resolve(batchFile)
@@ -115,8 +119,9 @@ const importFile = async (file: File): Promise<BatchFile | undefined> => {
         return
       }
 
-      const data = batchFile.data
-      await importBatches(data)
+      if (isBatchLibraryFile(batchFile)) {
+        await importBatches(batchFile.data)
+      }
       resolve(undefined)
     }
   })

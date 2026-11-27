@@ -127,6 +127,14 @@ export const mixpanelSetAuthMethod = (authMethod: string): void => {
   safeMixpanelRegister({ [MixpanelEventParams.AUTH_METHOD]: authMethod })
 }
 
+export const mixpanelSetPlanState = (status: string, tier: string, role: string): void => {
+  safeMixpanelRegister({
+    [MixpanelEventParams.PLAN_STATUS]: status,
+    [MixpanelEventParams.PLAN_TIER]: tier,
+    [MixpanelEventParams.USER_ROLE]: role,
+  })
+}
+
 export const mixpanelTrack = (eventName: string, properties?: Record<string, any>): void => {
   safeMixpanelTrack(eventName, properties)
 

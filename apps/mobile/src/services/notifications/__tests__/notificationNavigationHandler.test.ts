@@ -41,12 +41,10 @@ describe('NotificationNavigationHandler', () => {
   }
 
   const mockSelectAllSafes = jest.fn()
-  const mockSetActiveSafe = jest.fn(
-    (payload: { address: Address; chainId: string }): MockActiveSafeAction => ({
-      type: 'activeSafe/setActiveSafe',
-      payload,
-    }),
-  )
+  const mockSetActiveSafe = jest.fn((payload: { address: Address; chainId: string }): MockActiveSafeAction => ({
+    type: 'activeSafe/setActiveSafe',
+    payload,
+  }))
 
   // Set up mocks before importing the module
   beforeAll(() => {

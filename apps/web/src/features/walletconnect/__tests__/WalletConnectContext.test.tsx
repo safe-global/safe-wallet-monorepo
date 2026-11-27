@@ -560,6 +560,98 @@ describe('WalletConnectProvider', () => {
       expect(approveSessionSpy).not.toHaveBeenCalled()
       expect(rejectSessionSpy).not.toHaveBeenCalled()
     })
+
+    describe('when the proposal expired', () => {
+      const expiredError = new Error(`Missing or invalid. Record was recently deleted - proposal: ${proposalId}`)
+      const expiredMessage = 'This connection request has expired. Please start a new connection from the dApp.'
+
+      const renderWithProposal = () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'onSessionPropose').mockImplementation((callback) => {
+          setTimeout(() => callback(mockSessionProposal), 100)
+          return jest.fn()
+        })
+
+        return render(
+          <WalletConnectProvider>
+            <TestComponent />
+            <ContextControlComponent />
+          </WalletConnectProvider>,
+          { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
+        )
+      }
+
+      it('drops the proposal and explains the expiry when approving', async () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'approveSession').mockRejectedValue(expiredError)
+        const { getByText, queryByText } = renderWithProposal()
+
+        await waitFor(() => expect(getByText('Session proposal received')).toBeInTheDocument())
+        fireEvent.click(getByText('Approve Session'))
+
+        await waitFor(() => expect(getByText(expiredMessage)).toBeInTheDocument())
+        expect(queryByText('Session proposal received')).not.toBeInTheDocument()
+      })
+
+      it('drops the proposal and explains the expiry when rejecting', async () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'rejectSession').mockRejectedValue(expiredError)
+        const { getByText, queryByText } = renderWithProposal()
+
+        await waitFor(() => expect(getByText('Session proposal received')).toBeInTheDocument())
+        fireEvent.click(getByText('Reject Session'))
+
+        await waitFor(() => expect(getByText(expiredMessage)).toBeInTheDocument())
+        expect(queryByText('Session proposal received')).not.toBeInTheDocument()
+      })
+
+      it('explains the expiry once instead of retrying an auto-approved proposal', async () => {
+        jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([{ '5': { [proposalOrigin]: true } }, jest.fn()])
+        jest.spyOn(WalletConnectWallet.prototype, 'approveSession').mockRejectedValue(expiredError)
+        const { getByText, queryByText } = renderWithProposal()
+
+        await waitFor(() => expect(getByText(expiredMessage)).toBeInTheDocument())
+        expect(queryByText('Session proposal received')).not.toBeInTheDocument()
+        expect(WalletConnectWallet.prototype.approveSession).toHaveBeenCalledTimes(1)
+      })
+
+      it('keeps the proposal and the original error for other failures', async () => {
+        jest.spyOn(WalletConnectWallet.prototype, 'approveSession').mockRejectedValue(new Error('Relay unavailable'))
+        const { getByText } = renderWithProposal()
+
+        await waitFor(() => expect(getByText('Session proposal received')).toBeInTheDocument())
+        fireEvent.click(getByText('Approve Session'))
+
+        await waitFor(() => expect(getByText('Relay unavailable')).toBeInTheDocument())
+        expect(getByText('Session proposal received')).toBeInTheDocument()
+      })
+    })
+
+    it('clears an earlier error when a proposal arrives', async () => {
+      let propose: (proposal: WalletKitTypes.SessionProposal) => void = () => {}
+      jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
+      jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
+      jest.spyOn(WalletConnectWallet.prototype, 'onSessionPropose').mockImplementation((callback) => {
+        propose = callback
+        return jest.fn()
+      })
+
+      const { getByText, queryByText } = render(
+        <WalletConnectProvider>
+          <TestComponent />
+          <ContextControlComponent />
+        </WalletConnectProvider>,
+        { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
+      )
+
+      await waitFor(() => expect(getByText('WalletConnect initialized')).toBeInTheDocument())
+      fireEvent.click(getByText('Set Error'))
+      expect(getByText('Test error')).toBeInTheDocument()
+
+      act(() => propose(mockSessionProposal))
+
+      expect(queryByText('Test error')).not.toBeInTheDocument()
+      expect(getByText('Session proposal received')).toBeInTheDocument()
+    })
   })
 
   describe('session auth (one-click auth)', () => {

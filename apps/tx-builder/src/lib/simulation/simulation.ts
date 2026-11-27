@@ -5,14 +5,13 @@ import { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { TenderlySimulatePayload, TenderlySimulation, StateObject } from './types'
 import { encodeMultiSendCall, getMultiSendCallOnlyAddress } from './multisend'
 import { getChainConfig, FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTenderlyConfig } from '../../utils/env'
 
 type OptionalExceptFor<T, TRequired extends keyof T = keyof T> = Partial<Pick<T, Exclude<keyof T, TRequired>>> &
   Required<Pick<T, TRequired>>
 
 // api docs: https://www.notion.so/Simulate-API-Documentation-6f7009fe6d1a48c999ffeb7941efc104
-const TENDERLY_SIMULATE_ENDPOINT_URL = import.meta.env.VITE_TENDERLY_SIMULATE_ENDPOINT_URL || ''
-const TENDERLY_PROJECT_NAME = import.meta.env.VITE_TENDERLY_PROJECT_NAME || ''
-const TENDERLY_ORG_NAME = import.meta.env.VITE_TENDERLY_ORG_NAME || ''
+const { simulateEndpointUrl, projectName, orgName } = getTenderlyConfig()
 
 const isSimulationSupported = async (chainId: string) => {
   const config = await getChainConfig(chainId)
@@ -20,13 +19,13 @@ const isSimulationSupported = async (chainId: string) => {
 }
 
 const getSimulation = async (tx: TenderlySimulatePayload): Promise<TenderlySimulation> => {
-  const response = await axios.post<TenderlySimulation>(TENDERLY_SIMULATE_ENDPOINT_URL, tx)
+  const response = await axios.post<TenderlySimulation>(simulateEndpointUrl, tx)
 
   return response.data
 }
 
 const getSimulationLink = (simulationId: string): string => {
-  return `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`
+  return `https://dashboard.tenderly.co/public/${orgName}/${projectName}/simulator/${simulationId}`
 }
 
 /* We need to overwrite the threshold stored in smart contract storage to 1

@@ -44,7 +44,7 @@ jest.mock('@/components/transactions/TxDetails/Summary/SafeTxHashDataRow', () =>
 }))
 
 // Stub heavy children that pull in unrelated hook chains (address book, ENS, explorer links).
-jest.mock('./NameChip', () => ({ __esModule: true, default: () => null }))
+jest.mock('./NameChip', () => ({ __esModule: true, default: () => <span data-testid="name-chip" /> }))
 jest.mock('@/components/common/EthHashInfo', () => ({
   __esModule: true,
   default: ({ address, children }: { address: string; children?: unknown }) => (
@@ -194,5 +194,44 @@ describe('Receipt GasToken identity', () => {
     const { queryByTestId } = renderReceipt({ gtfSelectedGasToken: ERC20_GAS_TOKEN }, erc20Data)
 
     expect(queryByTestId('gas-token-icon')).not.toBeInTheDocument()
+  })
+})
+
+describe('Receipt To row', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRelayer = { type: 'RELAY_FEE' }
+    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+  })
+
+  it('renders the name chip beside the label and the address on a right-aligned full-width line below', () => {
+    const { getByTestId, getByText } = renderReceipt({})
+
+    const chip = getByTestId('name-chip')
+    const row = chip.parentElement
+    const address = getByText(baseSafeTxData.to).parentElement
+
+    expect(row).toHaveClass('flex-wrap', 'justify-between')
+    expect(row?.firstElementChild).toHaveTextContent('To')
+    expect(chip.nextElementSibling).toBe(address)
+    expect(address).toHaveClass('w-full', 'text-right', '[&>*]:justify-end')
+  })
+})
+
+describe('Receipt Operation row', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockRelayer = { type: 'RELAY_FEE' }
+    mockUseGtfFeePreview.mockReturnValue({ data: undefined })
+  })
+
+  it.each([
+    { operation: 0, label: '0 (call)' },
+    { operation: 1, label: '1 (delegate call)' },
+  ])('labels operation $operation as "$label" among the gas parameters', ({ operation, label }) => {
+    const { getByText } = renderReceipt({}, { ...baseSafeTxData, operation })
+
+    expect(getByText(label)).toBeInTheDocument()
+    expect(getByText('BaseGas')).toBeInTheDocument()
   })
 })

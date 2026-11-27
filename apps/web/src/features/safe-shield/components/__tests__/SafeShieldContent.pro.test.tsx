@@ -5,6 +5,7 @@ import {
   DeadlockAnalysisBuilder,
   RecipientAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
+import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
@@ -16,6 +17,7 @@ jest.mock('../../hooks/useHasOwnTenderly', () => ({ useHasOwnTenderly: () => moc
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ chainId: '1', features: ['TX_SIMULATION'] }),
   useHasFeature: () => true,
+  useChain: () => undefined,
 }))
 jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
   ...jest.requireActual('@safe-global/utils/components/tx/security/tenderly/utils'),
@@ -299,4 +301,27 @@ describe('SafeShieldContent Safe Pro gating', () => {
 
     expect(screen.queryByTestId('pro-checks-row')).not.toBeInTheDocument()
   })
+
+  it.each([true, false])(
+    'shows only the threat analysis on an off-chain message, with no Pro section (hasProFeatures: %s)',
+    (hasProFeatures) => {
+      render(
+        <SafeShieldContent
+          recipient={emptyAnalysis}
+          contract={emptyAnalysis}
+          threat={ThreatAnalysisBuilder.noThreat()}
+          deadlock={emptyAnalysis}
+          hasProFeatures={hasProFeatures}
+          isOffchainMessage
+        />,
+      )
+
+      expect(screen.getByTestId('threat-analysis-group-card')).toBeInTheDocument()
+      expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('pro-checks-row')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('recipient-analysis-locked')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('tenderly-simulation-locked')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('tenderly-simulation')).not.toBeInTheDocument()
+    },
+  )
 })

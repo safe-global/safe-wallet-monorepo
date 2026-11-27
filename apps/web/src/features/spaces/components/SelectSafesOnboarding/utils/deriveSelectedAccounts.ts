@@ -1,7 +1,7 @@
 import { flattenSafeItems, isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SafeAppMockupAccount } from '../../OnboardingLayout/mockup/types'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
+import type { SafeAppMockupAccount } from '@safe-global/views/features/spaces/components/OnboardingLayout/mockup/types'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 
 /** The selected Safes as side-panel accounts, deduped by address so a multichain Safe appears once. */
 export const deriveSidePanelAccounts = (

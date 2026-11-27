@@ -4,6 +4,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokensGetTokensV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
+import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type TokenMetadata = TokensGetTokensV1ApiResponse[number]
 
@@ -23,24 +24,10 @@ export const toPopularToken = (token: TokenMetadata): PopularToken => ({
   logoUri: token.logoUri,
 })
 
-export type TokenOptionGroup = 'held' | 'popular'
-
-/** One selectable token. `group` decides which section it renders in and whether a balance is shown. */
-export type TokenOption = {
-  /** `ZERO_ADDRESS` for the native currency. */
-  address: string
-  symbol: string
-  name: string
-  decimals: number
-  logoUri?: string
-  group: TokenOptionGroup
-  /** Raw units; held tokens only. */
-  balance?: string
-  /** Held tokens only. */
-  fiatBalance?: string
-  /** Held tokens only: the fiat price of one whole token. */
-  fiatConversion?: string
-}
+export type {
+  TokenOption,
+  TokenOptionGroup,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type NativeCurrencyInfo = {
   symbol: string

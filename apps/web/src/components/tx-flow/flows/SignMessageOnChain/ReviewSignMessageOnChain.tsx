@@ -2,13 +2,13 @@ import type { ReactElement } from 'react'
 import { useContext, useEffect, useState } from 'react'
 import { useMemo } from 'react'
 import { hashMessage, TypedDataEncoder } from 'ethers'
-import { Typography } from '@/components/ui/typography'
-import WarningIcon from '@/public/images/notifications/warning.svg'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
 import { type EIP712TypedData, Methods, type RequestId } from '@safe-global/safe-apps-sdk'
 import { OperationType } from '@safe-global/types-kit'
 
 import SendFromBlock from '@/components/tx/SendFromBlock'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
+import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { getReadOnlySignMessageLibContract } from '@/services/contracts/safeContracts'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
@@ -21,7 +21,7 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
@@ -112,9 +112,9 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
       </InfoDetails>
 
       {isEIP712TypedData(decodedMessage) && (
-        <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+        <ParsingErrorBoundary>
           <ApprovalEditor safeMessage={decodedMessage} />
-        </ObservabilityErrorBoundary>
+        </ParsingErrorBoundary>
       )}
 
       {safeTx && (

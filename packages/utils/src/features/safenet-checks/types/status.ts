@@ -18,7 +18,9 @@ export enum CheckStatus {
   BENIGN = 'BENIGN',
   /** A negative verdict was observed (rejected / disapproved). */
   MALICIOUS = 'MALICIOUS',
-  /** Deadline passed without a resolving verdict (includes frozen disputes). */
+  /** A sentinel flagged the transaction and its dispute is open: no ruling, no timeout yet. */
+  DISPUTED = 'DISPUTED',
+  /** Deadline passed without a resolving verdict (includes an arbitration that ended without a ruling). */
   TIMED_OUT = 'TIMED_OUT',
   /** The reader could not determine state (RPC/config failure). */
   UNAVAILABLE = 'UNAVAILABLE',
@@ -30,6 +32,7 @@ export type PublicCheckStatus =
   | CheckStatus.IN_PROGRESS
   | CheckStatus.BENIGN
   | CheckStatus.MALICIOUS
+  | CheckStatus.DISPUTED
   | CheckStatus.TIMED_OUT
   | CheckStatus.UNAVAILABLE
 

@@ -1,12 +1,12 @@
 import type { SafenetChecksContract } from './types'
 import SafenetAuditRow from './components/SafenetAuditRow'
 import SafenetChecksSection from './components/SafenetChecksSection'
-import SafenetQueueStatus from './components/SafenetQueueStatus'
+import SafenetDetailsCard from './components/SafenetDetailsCard'
 
 const feature: SafenetChecksContract = {
   SafenetAuditRow,
   SafenetChecksSection,
-  SafenetQueueStatus,
+  SafenetDetailsCard,
 }
 
 export default feature

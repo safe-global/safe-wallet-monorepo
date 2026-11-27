@@ -1,6 +1,6 @@
-import InfoIcon from '@/public/images/notifications/info.svg'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Typography } from '@/components/ui/typography'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import useSafeMessages from '@/hooks/messages/useSafeMessages'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'

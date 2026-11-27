@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import SpendingLimitFlow from '.'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
@@ -44,7 +44,7 @@ const setup = createMockStory({
   layout: 'fullPage',
   shadcn: true,
   pathname: '/spaces/policies',
-  query: { spaceId: 'uuid-1' },
+  query: { spaceId: MOCK_SPACE_ID },
 })
 
 const meta = {

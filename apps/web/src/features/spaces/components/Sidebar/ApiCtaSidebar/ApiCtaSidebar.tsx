@@ -1,12 +1,11 @@
 import type { ReactElement } from 'react'
-import Image from 'next/image'
 import { X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Typography } from '@/components/ui/typography'
-import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@safe-global/views/components/ui/sidebar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import css from '../styles.module.css'
 
@@ -31,7 +30,7 @@ export const ApiCtaSidebar = (): ReactElement => {
         >
           <Tooltip>
             <TooltipTrigger render={<div />} className="flex min-w-0 cursor-pointer items-center gap-3">
-              <Image
+              <img
                 src="/images/spaces/api-sidebar.svg"
                 alt="API"
                 width={16}
@@ -62,7 +61,7 @@ export const ApiCtaSidebar = (): ReactElement => {
         data-testid="api-cta-sidebar"
       >
         <div className="flex w-full items-start justify-between">
-          <Image
+          <img
             src="/images/spaces/api-sidebar.svg"
             alt="API"
             width={24}

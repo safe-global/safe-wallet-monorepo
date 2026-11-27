@@ -29,12 +29,7 @@ import {
 } from '@/config/constants'
 
 type DatadogSite =
-  | 'datadoghq.com'
-  | 'datadoghq.eu'
-  | 'us3.datadoghq.com'
-  | 'us5.datadoghq.com'
-  | 'ddog-gov.com'
-  | 'ap1.datadoghq.com'
+  'datadoghq.com' | 'datadoghq.eu' | 'us3.datadoghq.com' | 'us5.datadoghq.com' | 'ddog-gov.com' | 'ap1.datadoghq.com'
 
 export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN) && !IS_TEST_E2E
 
@@ -248,6 +243,8 @@ export class DatadogProvider implements IObservabilityProvider {
         service: DATADOG_RUM_SERVICE,
         env: DATADOG_RUM_ENV,
         version: COMMIT_HASH,
+        // No session cookie and no data until Analytics.tsx grants analytics consent
+        trackingConsent: 'not-granted',
         sessionSampleRate: DATADOG_RUM_SESSION_SAMPLE_RATE,
         sessionReplaySampleRate: DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE,
         trackUserInteractions: DATADOG_RUM_TRACK_USER_INTERACTIONS,

@@ -1,11 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import SettingsRail from '../SettingsRail'
 import { AppRoutes } from '@/config/routes'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const mockRouterQuery: { spaceId?: string } = {}
 
 jest.mock('next/router', () => ({
   useRouter: () => ({ query: mockRouterQuery }),
+}))
+
+const mockUseHasFeature = jest.fn()
+
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: (feature: FEATURES) => mockUseHasFeature(feature),
 }))
 
 const setSpaceId = (id: string | undefined) => {
@@ -24,6 +31,7 @@ const parseHref = (anchor: HTMLAnchorElement) => {
 describe('SettingsRail', () => {
   beforeEach(() => {
     setSpaceId(undefined)
+    mockUseHasFeature.mockReturnValue(true)
   })
 
   it('marks the active page with aria-current="page"', () => {
@@ -33,6 +41,14 @@ describe('SettingsRail', () => {
     expect(screen.getByTestId('settings-rail-general')).toHaveAttribute('aria-current', 'page')
     expect(screen.getByTestId('settings-rail-account')).not.toHaveAttribute('aria-current')
     expect(screen.getByTestId('settings-rail-about')).not.toHaveAttribute('aria-current')
+    expect(screen.getByTestId('settings-rail-experimental')).not.toHaveAttribute('aria-current')
+  })
+
+  it('marks the experimental page as active', () => {
+    render(<SettingsRail activePage="experimental" />)
+
+    expect(screen.getByTestId('settings-rail-experimental')).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByTestId('settings-rail-general')).not.toHaveAttribute('aria-current')
   })
 
   it('updates the active page when activePage prop changes', () => {
@@ -51,10 +67,28 @@ describe('SettingsRail', () => {
     const general = parseHref(screen.getByTestId('settings-rail-general') as HTMLAnchorElement)
     const account = parseHref(screen.getByTestId('settings-rail-account') as HTMLAnchorElement)
     const about = parseHref(screen.getByTestId('settings-rail-about') as HTMLAnchorElement)
+    const experimental = parseHref(screen.getByTestId('settings-rail-experimental') as HTMLAnchorElement)
 
     expect(general).toEqual({ pathname: AppRoutes.spaces.settingsGeneral, spaceId: '42' })
     expect(account).toEqual({ pathname: AppRoutes.spaces.settingsAccount, spaceId: '42' })
     expect(about).toEqual({ pathname: AppRoutes.spaces.settingsAbout, spaceId: '42' })
+    expect(experimental).toEqual({ pathname: AppRoutes.spaces.settingsExperimental, spaceId: '42' })
+  })
+
+  it('hides the experimental section when WORKSPACES_EXPERIMENTAL_FEATURES is off', () => {
+    mockUseHasFeature.mockImplementation((feature) => feature !== FEATURES.WORKSPACES_EXPERIMENTAL_FEATURES)
+    render(<SettingsRail activePage="general" />)
+
+    expect(screen.queryByTestId('settings-rail-experimental')).not.toBeInTheDocument()
+    expect(screen.queryByText('More')).not.toBeInTheDocument()
+    expect(screen.getByTestId('settings-rail-about')).toBeInTheDocument()
+  })
+
+  it('hides the experimental section while the chain config is loading', () => {
+    mockUseHasFeature.mockReturnValue(undefined)
+    render(<SettingsRail activePage="general" />)
+
+    expect(screen.queryByTestId('settings-rail-experimental')).not.toBeInTheDocument()
   })
 
   it('omits the spaceId query when none is present in the router', () => {

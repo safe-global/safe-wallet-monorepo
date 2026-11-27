@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import ManageTrustedSafesContent from './ManageTrustedSafesContent'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 

@@ -2,6 +2,7 @@ import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isAddress } from 'ethers'
 import { isTotpValid } from '@/features/proposers/utils/totp'
+import { isQueueServiceDelegateMessage } from '@safe-global/utils/services/delegates'
 import type { DelegationOrigin, PendingDelegation } from '@/features/proposers/types'
 
 export type DelegationWithTimestamp = PendingDelegation & { _timestamp: number }
@@ -27,6 +28,28 @@ export function parseDelegationOrigin(originStr: string | null | undefined): Del
     // Invalid JSON - not a delegation origin
   }
   return null
+}
+
+const DELEGATION_ACTIONS = new Map<unknown, DelegationOrigin['action']>([
+  ['add', 'add'],
+  ['delete', 'remove'],
+])
+
+/**
+ * Reads the delegation a parent Safe message carries. The queue service drops custom origins, so its signed
+ * typed data is the source; the origin only identifies messages stored by the transaction service.
+ */
+export function parseDelegation({ message, origin }: Pick<MessageItem, 'message' | 'origin'>): DelegationOrigin | null {
+  if (typeof message === 'string' || !isQueueServiceDelegateMessage(message)) {
+    return parseDelegationOrigin(origin)
+  }
+
+  const action = DELEGATION_ACTIONS.get(message.message.action)
+  const delegate = message.message.delegateAddress
+  const nestedSafe = message.domain.safe
+  if (!action || !isAddress(delegate) || !isAddress(nestedSafe)) return null
+
+  return { type: 'proposer-delegation', action, delegate, nestedSafe }
 }
 
 /**
@@ -62,8 +85,8 @@ export function parseMessageToDelegation(
   safeAddress: string,
   parentSafeAddress: string,
 ): DelegationWithTimestamp | null {
-  const origin = parseDelegationOrigin(message.origin)
-  if (!origin || !sameAddress(origin.nestedSafe, safeAddress)) {
+  const delegation = parseDelegation(message)
+  if (!delegation || !sameAddress(delegation.nestedSafe, safeAddress)) {
     return null
   }
 
@@ -75,9 +98,9 @@ export function parseMessageToDelegation(
 
   return {
     messageHash: message.messageHash,
-    action: origin.action,
-    delegateAddress: origin.delegate,
-    nestedSafeAddress: origin.nestedSafe,
+    action: delegation.action,
+    delegateAddress: delegation.delegate,
+    nestedSafeAddress: delegation.nestedSafe,
     parentSafeAddress,
     totp: messageTotp,
     status,

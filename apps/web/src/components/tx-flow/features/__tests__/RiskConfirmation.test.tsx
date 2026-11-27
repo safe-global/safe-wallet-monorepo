@@ -1,8 +1,8 @@
-import { renderHook } from '@/tests/test-utils'
+import { render, renderHook, screen } from '@/tests/test-utils'
 import { type PropsWithChildren } from 'react'
 import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
 import { useSlotIds } from '@/components/tx-flow/slots/hooks'
-import RiskConfirmationSlot from '../RiskConfirmation'
+import RiskConfirmationSlot, { RiskConfirmation } from '../RiskConfirmation'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
@@ -67,5 +67,32 @@ describe('RiskConfirmation slot registration', () => {
     })
 
     expect(result.current).not.toContain('riskConfirmation')
+  })
+})
+
+describe('RiskConfirmation', () => {
+  const mockRiskState = (needsRiskConfirmation: boolean) =>
+    mockUseSafeShield.mockReturnValue({
+      needsRiskConfirmation,
+      isRiskConfirmed: false,
+      setIsRiskConfirmed: jest.fn(),
+    } as unknown as ReturnType<typeof useSafeShield>)
+
+  it('names the subject that the user confirms', () => {
+    mockRiskState(true)
+
+    render(<RiskConfirmation subject="transaction" />)
+
+    expect(
+      screen.getByText('I understand the risks and would like to proceed with this transaction.'),
+    ).toBeInTheDocument()
+  })
+
+  it('renders nothing when no risk confirmation is needed', () => {
+    mockRiskState(false)
+
+    render(<RiskConfirmation subject="transaction" />)
+
+    expect(screen.queryByTestId('risk-confirmation-checkbox')).not.toBeInTheDocument()
   })
 })

@@ -77,6 +77,7 @@ describe('SafeShieldWidget', () => {
       addToTrustedList: jest.fn(),
       hasProFeatures: true,
       isSafePro: true,
+      isOffchainMessage: false,
     })
     mockUseHypernativeOAuth.mockReturnValue(hypernativeAuthStatusBuilder().build())
     mockUseIsHypernativeEligible.mockReturnValue(makeEligibility())

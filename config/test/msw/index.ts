@@ -18,6 +18,7 @@ export {
   safeFixtures,
   chainFixtures,
   safeAppsFixtures,
+  transactionFixtures,
   SAFE_ADDRESSES,
 } from './fixtures'
 export type { FixtureScenario } from './fixtures'

@@ -19,16 +19,18 @@ import { APP_HOMEPAGE, APP_VERSION } from '@/config/version'
 import { BRAND_NAME, SAFE_PRO_TERMS_URL, SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import { HELP_CENTER_URL, PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useLoadFeature } from '@/features/__core__'
 import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
 import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
 const RELEASE_URL = `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`

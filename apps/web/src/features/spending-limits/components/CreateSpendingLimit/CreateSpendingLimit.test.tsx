@@ -112,7 +112,25 @@ describe('CreateSpendingLimit', () => {
     expect(screen.getByTestId('token-selector')).toHaveTextContent('ETH')
   })
 
+  it('resets the limit only once by default', () => {
+    mockBalances([nativeBalance])
+
+    renderForm()
+
+    expect(screen.getByTestId('time-period-section')).toHaveTextContent('One time')
+  })
+
   describe('Next button', () => {
+    it('stays disabled and asks for more than 0 when the amount is 0', async () => {
+      mockBalances([nativeBalance])
+
+      renderForm()
+      await fillForm('0')
+
+      expect(await screen.findByText('The value must be greater than 0')).toBeInTheDocument()
+      expect(screen.getByTestId('next-btn')).toBeDisabled()
+    })
+
     it('is disabled while the form is empty', () => {
       mockBalances([nativeBalance])
 

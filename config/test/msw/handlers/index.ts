@@ -43,6 +43,7 @@ export {
   createPositionHandlersFromFixture,
   createPortfolioHandlersFromFixture,
   createSafeAppsHandlersFromFixture,
+  createTransactionHandlersFromFixture,
   fixtureHandlers,
   FIXTURE_SCENARIOS,
 } from './fromFixtures'

@@ -20,6 +20,6 @@
       "@types/*": ["./src/types/*"]
     }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts", "playwright.config.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "playwright.config.ts", "playwright.isolated.config.ts"],
   "exclude": ["node_modules", "dist", "test-results", "reports"]
 }

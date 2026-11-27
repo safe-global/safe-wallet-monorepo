@@ -1,6 +1,4 @@
 import { renderHook, act } from '@testing-library/react'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useSpaceSubmit from './useSpaceSubmit'
 
 const mockPush = jest.fn()
@@ -10,16 +8,6 @@ const mockUpdateSpace = jest.fn()
 let mockRouterQuery: Record<string, string> = {}
 let mockIsSafePro = false
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsSafePro }))
-
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
-
-jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: {
-    WORKSPACE_CREATED: { action: 'Workspace created', category: 'spaces' },
-  },
-}))
 
 jest.mock('next/router', () => ({
   useRouter: () => ({ push: mockPush, query: mockRouterQuery }),
@@ -44,52 +32,6 @@ jest.mock('@/utils/rtkQuery', () => ({
 jest.mock('@/config/routes', () => ({
   AppRoutes: { welcome: { selectSafes: '/welcome' } },
 }))
-
-describe('useSpaceSubmit tracking', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockRouterQuery = {}
-  })
-
-  const setupHook = (spaceId?: string, isEditMode = false) => {
-    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
-
-    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, spaceId, isEditMode))
-    return result
-  }
-
-  it('tracks WORKSPACE_CREATED with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
-    mockCreateSpaceWithUser.mockResolvedValue({
-      data: { id: 42, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
-    })
-
-    const result = setupHook(undefined, false)
-
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.WORKSPACE_CREATED, label: '11111111-1111-1111-1111-111111111111' },
-      { workspace_id: '11111111-1111-1111-1111-111111111111' },
-    )
-  })
-
-  it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
-    mockCreateSpaceWithUser.mockResolvedValue({ error: 'Something went wrong' })
-
-    const result = setupHook(undefined, false)
-
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-
-    expect(trackEvent).not.toHaveBeenCalledWith(
-      expect.objectContaining({ action: SPACE_EVENTS.WORKSPACE_CREATED.action }),
-      expect.anything(),
-    )
-  })
-})
 
 describe('useSpaceSubmit under Safe Pro', () => {
   beforeEach(() => {

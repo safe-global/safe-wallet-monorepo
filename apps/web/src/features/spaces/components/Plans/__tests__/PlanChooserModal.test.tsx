@@ -1,5 +1,7 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import PlanChooserModal, { chooserCopy, _LAPSED_DATA_NOTE } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()
@@ -8,6 +10,7 @@ const mockNeedsTrim = jest.fn()
 const mockOpenPortal = jest.fn()
 let mockTrimState: Record<string, unknown> = {}
 
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
@@ -60,6 +63,7 @@ const PLANS = [
 ]
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const ENDED_AT = Date.UTC(2026, 11, 5, 12)
+const LOCKED_ENTRY = { 'Entry Point': 'locked_modal' }
 
 describe('PlanChooserModal', () => {
   beforeEach(() => {
@@ -99,17 +103,22 @@ describe('PlanChooserModal', () => {
     expect(screen.getByText('Choose a plan to unlock your Workspace.')).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
-    expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_URL)
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(onBack).toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, undefined)
   })
 
   it('goes straight to Stripe when the picked plan covers the Workspace', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, LOCKED_ENTRY)
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFE_PRO_EVENTS.PLAN_CTA_CLICKED,
+      expect.objectContaining({ Location: 'locked_modal' }),
+    )
     expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_business', undefined)
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
@@ -117,7 +126,7 @@ describe('PlanChooserModal', () => {
   it('asks which Safes stay when the picked plan covers fewer than the Workspace holds', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     expect(mockCheckout).not.toHaveBeenCalled()
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
@@ -126,7 +135,7 @@ describe('PlanChooserModal', () => {
     fireEvent.click(screen.getByText('step-back'))
     expect(screen.getByRole('heading', { name: 'Your Safe Pro free access ended on Dec 5, 2026' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     fireEvent.click(screen.getByText('step-continue'))
     expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_starter', [{ chainId: '1', address: '0xC' }])
   })
@@ -137,6 +146,7 @@ describe('PlanChooserModal', () => {
     expect(screen.queryByRole('button', { name: 'Continue with Business' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /Update billing details/ }))
     expect(mockOpenPortal).toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, LOCKED_ENTRY)
   })
 
   it('shows a skeleton while loading, an empty state without plans and a checkout error', () => {

@@ -8,8 +8,9 @@ import { useContext } from 'react'
 import useWallet from './wallets/useWallet'
 
 const ReplacedStatus = 'WILL_BE_REPLACED'
+const AwaitingParentStatus = 'AWAITING_PARENT_SIGNATURE'
 
-type TxLocalStatus = TransactionStatus | PendingStatus | typeof ReplacedStatus
+type TxLocalStatus = TransactionStatus | PendingStatus | typeof ReplacedStatus | typeof AwaitingParentStatus
 
 export const STATUS_LABELS: Record<TxLocalStatus, string> = {
   [TransactionStatus.AWAITING_CONFIRMATIONS]: 'Awaiting confirmations',
@@ -24,6 +25,7 @@ export const STATUS_LABELS: Record<TxLocalStatus, string> = {
   [PendingStatus.SIGNING]: 'Signing',
   [PendingStatus.NESTED_SIGNING]: 'Signing',
   [ReplacedStatus]: 'Transaction will be replaced',
+  [AwaitingParentStatus]: 'Awaiting parent signature',
 }
 
 const WALLET_STATUS_LABELS: Record<TxLocalStatus, string> = {
@@ -47,6 +49,11 @@ const useTransactionStatus = (txSummary: Transaction): string => {
   }
 
   const statuses = wallet?.address && isSignableBy(txSummary, wallet.address) ? WALLET_STATUS_LABELS : STATUS_LABELS
+
+  // The child tx is only queued in the parent Safe; nothing happens until the parent's owners execute
+  if (pendingTx?.status === PendingStatus.NESTED_SIGNING && !pendingTx.executed) {
+    return statuses[AwaitingParentStatus]
+  }
 
   return statuses[pendingTx?.status || txStatus] || ''
 }

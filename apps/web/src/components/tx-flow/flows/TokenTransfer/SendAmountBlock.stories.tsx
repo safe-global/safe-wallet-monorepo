@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SendAmountBlock from './SendAmountBlock'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { parseUnits } from 'ethers'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const usdcToken: Balance['tokenInfo'] = {

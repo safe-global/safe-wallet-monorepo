@@ -134,11 +134,11 @@ export type SubscriptionPlan = {
   description?: string | null
   currentPrice: number
   originalPrice: number | null
-  paymentMethod: 'fiat'
-  currency: 'usd' | 'eur'
+  paymentMethod: string
+  currency: string
   features: string[]
-  billingCycle?: ('month' | 'year') | null
-  type: 'standard' | 'premium' | 'enterprise'
+  billingCycle?: string | null
+  type: string
   product: string | null
 }
 export type Subscription = {
@@ -174,11 +174,11 @@ export type Plan = {
   description?: string | null
   currentPrice: number
   originalPrice: number | null
-  paymentMethod: 'fiat'
-  currency: 'usd' | 'eur'
+  paymentMethod: string
+  currency: string
   features: string[]
-  billingCycle?: ('month' | 'year') | null
-  type: 'standard' | 'premium' | 'enterprise'
+  billingCycle?: string | null
+  type: string
   product: Product
 }
 export type UrlResponse = {
@@ -186,7 +186,6 @@ export type UrlResponse = {
 }
 export type PaymentLink = {
   id: string
-  url: string
   active: boolean
   metadata: object
   customText?: object

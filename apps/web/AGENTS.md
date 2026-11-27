@@ -9,10 +9,13 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature` from `src/hooks/useChains.ts`, passing a flag from `FEATURES` (imported from `@safe-global/utils/utils/chains`)
 - A new Redux slice must be exported from `src/store/slices.ts` and registered in the `rootReducer` in `src/store/index.ts`; adding it to `persistedSlices` there both persists it to localStorage **and** syncs it across tabs (`persistStore.ts` and `broadcast.ts` share that list)
 - Use theme variables from vars.css instead of hard-coded CSS values
-- Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
-- **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@/components/ui/overlay`](src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
+- Build UI from the shadcn/ui primitives in `@safe-global/views/components/ui/*` (Tailwind); MUI/Emotion are removed
+- **Put as much markup as possible in `packages/views`.** New UI is a view in `packages/views/src/features/<feature>/components/` that only turns props into markup. The component in `apps/web` calls the hooks, the store and the router, and renders that view with the results. This holds even when the code around it is still in `apps/web`: that code has not been moved yet and is not an example to follow. What may go in a view: [packages/views/AGENTS.md](../../packages/views/AGENTS.md).
+- **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@safe-global/views/components/ui/overlay`](../../packages/views/src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
 - **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
+- **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`; an event that mirrors an API result is sent by a store listener on the endpoint's `matchFulfilled`, with props from the request args, the response or the RTK cache (see `features/spaces/store/workspaceTrackingListener.ts`). Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
+- **Don't add `next/*` imports that have a plain replacement; we are migrating away from Next.** Use `<img>` instead of `next/image`, `<a>` instead of `next/link` for external links, `dynamic` from `@/utils/dynamic` instead of `next/dynamic` (it renders nothing on the server, so the module does not load during the static export), and a plain function component instead of the `NextPage` type. Routing and document APIs (`next/router`, `next/navigation`, `next/link` for internal routes, `next/head`, `next/app`, `next/document`) have no replacement yet, so keep using them.
 
 ## Component variants over custom styling
 
@@ -24,7 +27,7 @@ add a variant or a preset instead of pasting the classes again. The **`UI/Button
 - **On `<Button>`, `className` is LAYOUT-ONLY** (`w-full`, margins, grid placement); size/skin utilities are
   **ESLint-enforced errors** (`no-restricted-syntax` in `eslint.config.mjs`). The only sanctioned escape is a
   justified `// eslint-disable-next-line no-restricted-syntax -- <reason>` — when a pattern recurs, add a
-  size/variant to `components/ui/button.tsx` rather than disabling.
+  size/variant to `packages/views/src/components/ui/button.tsx` rather than disabling.
 - **Prefer the closed presets in `components/common/`** (`SubmitButton`, `ActionBar`+`ActionButton`,
   `DialogActions`, `OnboardingFooter`, `IconAction`) over the raw primitive — they take semantic props and
   reject styling `className` at the type level.
@@ -122,9 +125,25 @@ Before writing or changing any test, read the cross-cutting conventions in [docs
 
 ### E2E tests
 
-**All new E2E tests are Playwright** — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md), 12-step output format mandatory before writing any test).
+**All new E2E tests are Playwright** — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md); answer the 4 questions in [e2e/docs/AI_TEST_OUTPUT_FORMAT.md](e2e/docs/AI_TEST_OUTPUT_FORMAT.md) before writing any test).
 
 **Cypress is legacy — no new tests.** Maintenance conventions for the existing suite: [cypress/AGENTS.md](cypress/AGENTS.md).
+
+### Choose the test level
+
+Write each test at the lowest level that can show the behaviour. **A Playwright test is only for behaviour that needs a real browser or several real services together**: a user action that a wallet signs, the chain executes, and the Transaction Service and CGW then show; a Safe App in an iframe; WalletConnect; a session or storage across a redirect or a reload. Everything else goes in Jest.
+
+| The behaviour                                     | Test                                         | Example                                                                                                                                       |
+| ------------------------------------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| A rule or a calculation                           | Unit test                                    | [UntrustedFallbackHandlerTxAlert.test.ts](src/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert.test.ts)        |
+| A component shows a CGW response                  | Component test with an MSW fixture           | [ExpandableTransactionItem.swaps.fixtures.test.tsx](src/components/transactions/TxListItem/ExpandableTransactionItem.swaps.fixtures.test.tsx) |
+| A component reacts to the user                    | Component test                               | [TxShareLink.test.tsx](src/components/transactions/TxShareLink/TxShareLink.test.tsx)                                                          |
+| A user action changes state on chain and in CGW   | Playwright journey on the isolated stack     | [multisig-confirm.spec.ts](e2e/tests/e2e/multisig-confirm.spec.ts)                                                                            |
+| A browser flow has paths the stack cannot produce | Playwright with `page.route` for those paths | [step-up-auth.spec.ts](e2e/tests/regression/step-up-auth.spec.ts)                                                                             |
+
+Mock in Playwright only when the flow needs the browser (a redirect, a session, a reload) and the isolated stack cannot produce the path: an error, an expired session, a third-party answer. When the browser adds nothing to a spec that mocks every call, write the test in Jest.
+
+A Playwright test does not make up for missing unit and component tests: if a feature lacks them, add them. Developers own the Jest tests. QA owns the Playwright suite and advises on it, and developers add and change Playwright tests too. Full agreement: [Developer Testability Contract](e2e/docs/developer-testability-contract.md).
 
 ### Test Decision Matrix
 
@@ -145,16 +164,6 @@ Before writing or changing any test, read the cross-cutting conventions in [docs
 - Auto-generated files (`AUTO_GENERATED/`, contract types)
 - Storybook stories themselves (covered by snapshot workflow)
 
-### Developer-owned tests rule
-
-Always consider what developers should test before QA automation. For every changed feature, suggest developer-owned tests first:
-
-- **Unit tests** — pure functions, parsers, validators, formatters, hooks
-- **Component tests** — React components render correctly with props
-- **Integration tests** — hooks + stores + API mocks wired together
-
-If a feature lacks unit and component coverage, the correct response is to flag missing developer tests — not to write a Playwright test that compensates for them. Playwright tests are the top of the pyramid, not the foundation. Full QA-developer agreement: [Developer Testability Contract](e2e/docs/developer-testability-contract.md).
-
 ## Storybook
 
 Run: `yarn workspace @safe-global/web storybook` (port 6006). Every new component gets a story, colocated with it and with an explicit `meta.title`. Full reference — title taxonomy, fixtures, MSW patterns, decorator stacking, Argos: [docs/storybook-guide.md](docs/storybook-guide.md).
@@ -162,7 +171,7 @@ Run: `yarn workspace @safe-global/web storybook` (port 6006). Every new componen
 Choosing a setup:
 
 1. **No store/API needs** → plain `Meta`/`StoryObj`.
-2. **Redux hooks only** → `decorators: [withMockProvider()]` from `@/storybook/preview`.
+2. **Redux hooks only** → `decorators: [withMockProvider()]` from `@/storybook/decorators`.
 3. **Pages/widgets needing API mocks** → `createMockStory` from `@/stories/mocks` — do NOT hand-roll `StoreDecorator`/provider stacks/MSW handlers.
 
 ```typescript
@@ -174,7 +183,7 @@ export const Default: Story = { parameters: { ...setup.parameters }, decorators:
 
 Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't override feature flags unless testing a disabled state.
 
-**Visual regression (Argos) does NOT auto-run on PRs** — the workflow is currently `workflow_dispatch`-only. Verify UI changes via the story (or live page) yourself; run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
+**Visual regression (Argos) does NOT run on PRs** — the workflow runs weekly on `dev` and by hand before a release. Verify UI changes via the story (or live page) yourself; run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
 
 ## Web-specific common pitfalls
 
@@ -201,8 +210,15 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
    an overlapping MAX button (ISSUE-052). The variant lint cannot catch this: raw `div`s contain
    no design-system component to flag. If a field needs something the primitives lack, extend
    the primitive, don't wrap it.
-6. **`src/components/ui/` primitives are managed via the shadcn CLI** – read
-   [src/components/ui/README.md](src/components/ui/README.md) before hand-editing them.
+6. **`packages/views/src/components/ui/` primitives are managed via the shadcn CLI** – read
+   [packages/views/src/components/ui/README.md](../../packages/views/src/components/ui/README.md) before hand-editing them.
+7. **`next dev` and `next build` need `--webpack`** – Next 16 uses Turbopack by default, and
+   Turbopack ignores the `webpack()` config in `next.config.mjs` (SVGR, SRI, the dev page stub).
+   The `dev`, `dev:full`, `start` and `build` scripts pass the flag; keep it when adding a script.
+8. **The dev server renders every page as empty** – in `next dev`, `next.config.mjs` replaces
+   each page with `scripts/dev-server-page-stub.js` for the server compile, and `_app.tsx`
+   renders nothing until the client mounts (`RenderAfterMount`). Page code never runs on the
+   server in dev. Production builds and the static export do not use the stub.
 
 ## Code complexity
 

@@ -6,8 +6,8 @@ import { renderHook, waitFor, fakerChecksummedAddress } from '@/tests/test-utils
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { getMockTx } from '@/tests/mocks/transactions'
-import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
-import type { SafeScopeContextValue, SafeScopeTarget } from '@/components/tx-flow/safe-scope/types'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { SafeScopeContextValue, SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import useTxQueue, { useQueuedTxByNonce } from '../useTxQueue'
 import usePreviousNonces from '../usePreviousNonces'
 

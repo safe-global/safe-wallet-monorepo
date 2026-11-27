@@ -1,13 +1,10 @@
 import type { ReactElement } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Typography } from '@/components/ui/typography'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { AccountIdentity } from '../../../components/AccountIdentity'
+import type { SignatureSafeInfo } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/SafeSignatureInfo/types'
 
-export type SignatureSafeInfo = {
-  address: string
-  name?: string
-  threshold: number
-}
+export type { SignatureSafeInfo } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/SafeSignatureInfo/types'
 
 export type SafeSignatureInfoProps = {
   safe: SignatureSafeInfo

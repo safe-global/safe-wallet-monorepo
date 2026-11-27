@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants'
-import * as ls from '../../support/localstorage_data.js'
 
 // Common button text strings
 export const nextBtnStr = 'Next'
@@ -8,7 +7,6 @@ export const acceptSelectionStr = 'Save settings'
 
 // Common table selectors
 export const tableRow = '[data-testid="table-row"]'
-export const tableContainer = '[data-testid="table-container"]'
 export const nextPageBtn = '[data-testid="next-page-btn"]'
 export const previousPageBtn = '[data-testid="prev-page-btn"]'
 
@@ -27,27 +25,44 @@ const connectedOwnerBlock = '[data-testid="open-account-center"]'
 export const modalDialogCloseBtn = '[data-testid="modal-dialog-close-btn"]'
 const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
-export const noRelayAttemptsError = 'Not enough relay attempts remaining'
+/**
+ * Yields whether `isReady()` returns true within `timeout` ms. Unlike an assertion, it does not
+ * fail the test, so the caller can recover, for example by clicking again.
+ */
+export function pollUntil(isReady, timeout) {
+  return cy.wrap(null, { log: false }).then(
+    { timeout: timeout + 1000 },
+    () =>
+      new Cypress.Promise((resolve) => {
+        const deadline = Date.now() + timeout
+        const check = () => {
+          if (isReady()) resolve(true)
+          else if (Date.now() > deadline) resolve(false)
+          else setTimeout(check, 100)
+        }
+        check()
+      }),
+  )
+}
+
+// NameInput can miss its 50-character error when keystrokes come with no delay (the Cypress 16 default).
+export const nameTypingOptions = { delay: 10 }
 
 /** Waits for the page to settle before Argos captures the screenshot. */
 export function awaitVisualStability() {
   cy.wait(constants.VISUAL_SETTLE_TIME)
 }
 
-export function acceptWidgetDisclaimer() {
-  cy.get('button').contains('Continue').click()
-}
-
 /**
- * Intercepts the chains list endpoint to inject a feature flag for a specific chain,
+ * Intercepts the chains list endpoint to inject and/or remove a feature flag for a specific chain,
  * and optionally aliases the feature's data endpoint for use with cy.wait().
  *
  * Handles both list responses ({ results: [...] }) and single-chain responses ({ chainId, ... }).
  *
  * @param {object} options
  * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
- * @param {string} options.addFlag       - Feature flag to inject (e.g. constants.chainFeatures.positions)
- * @param {string} [options.removeFlag]  - Optional legacy flag to remove before adding the new one
+ * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.nativeSwaps)
+ * @param {string} [options.removeFlag]  - Feature flag to remove (before adding `addFlag`, if any)
  * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
  * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
  */
@@ -57,7 +72,7 @@ export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint,
       const applyFlags = (chain) => {
         let features = chain.features || []
         if (removeFlag) features = features.filter((f) => f !== removeFlag)
-        if (!features.includes(addFlag)) features.push(addFlag)
+        if (addFlag && !features.includes(addFlag)) features.push(addFlag)
         return { ...chain, features }
       }
 
@@ -86,21 +101,6 @@ export function selectDropdownOption(itemSelector, text) {
   cy.get('@dropdownOption').trigger('mousemove', { scrollBehavior: 'center' })
   cy.get('@dropdownOption').should('have.attr', 'tabindex', '0')
   cy.get('@dropdownOption').click({ scrollBehavior: 'center' })
-}
-
-// Base UI attaches tooltip hover listeners in an effect after mount, so an early mouseenter
-// can be lost: re-trigger until this trigger reports its popup open (data-popup-open).
-export function hoverUntilTooltipOpen(getTrigger, retries = 5) {
-  const attempt = (left) => {
-    getTrigger().trigger('mouseenter', { force: true })
-    cy.wait(300)
-    getTrigger().then(($trigger) => {
-      if ($trigger.attr('data-popup-open') !== undefined) return
-      if (left <= 0) throw new Error('Tooltip never opened')
-      attempt(left - 1)
-    })
-  }
-  attempt(retries)
 }
 
 export function clickOnExecuteBtn() {
@@ -158,86 +158,6 @@ export const getSafeBalance = (safeAddress, chain) => {
     })
 }
 
-export const getSafeNFTs = (safeAddress, chain) => {
-  return cy
-    .request({
-      method: 'GET',
-      url: `${constants.stagingCGWUrlv2}${constants.stagingCGWChains}${chain}${constants.stagingCGWSafes}${safeAddress}${constants.stagingCGWCollectibles}`,
-      headers: {
-        accept: 'application/json',
-      },
-    })
-    .then((response) => {
-      expect(response.status).to.eq(200)
-      return response
-    })
-}
-
-export const getSafeNonce = (safeAddress, chain) => {
-  return cy
-    .request({
-      method: 'GET',
-      url: `${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chain}${constants.stagingCGWSafes}${safeAddress}${constants.stagingCGWNone}`,
-      headers: {
-        accept: 'application/json',
-      },
-    })
-    .then((response) => {
-      expect(response.status).to.eq(200)
-    })
-}
-
-export function fetchCurrentNonce(safeAddress) {
-  return getSafeNonce(safeAddress.substring(4), constants.networkKeys.sepolia).then(
-    (response) => response.body.currentNonce,
-  )
-}
-
-export const getRelayRemainingAttempts = (safeAddress) => {
-  const chain = constants.networkKeys.sepolia
-
-  return cy
-    .request({
-      method: 'GET',
-      url: `${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chain}${constants.relayPath}${safeAddress}`,
-      headers: {
-        accept: 'application/json',
-      },
-    })
-    .then((response) => {
-      console.log('Remaining relay attempts: ', response.body.remaining)
-      return response.body.remaining
-    })
-}
-
-export function verifyNonceChange(safeAddress, expectedNonce, retries = 30, delay = 10000) {
-  let attempts = 0
-
-  function checkNonce() {
-    return fetchCurrentNonce(safeAddress).then((newNonce) => {
-      console.log(`Attempt ${attempts + 1}: newNonce = ${newNonce}, expectedNonce = ${expectedNonce}`)
-
-      if (newNonce === expectedNonce) {
-        console.log('Nonce matches the expected value')
-        expect(newNonce).to.equal(expectedNonce)
-        return
-      }
-
-      attempts += 1
-      if (attempts < retries) {
-        return new Promise((resolve) => {
-          setTimeout(resolve, delay)
-        }).then(checkNonce)
-      } else {
-        console.error(`Nonce did not change to expected value after ${retries} attempts`)
-        return Promise.reject(new Error(`Nonce did not change to expected value after ${retries} attempts`))
-      }
-    })
-  }
-
-  return checkNonce()
-}
-
 export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {
   getSafeBalance(safeAddress.substring(4), constants.networkKeys.sepolia).then((response) => {
     const targetToken = response.body.items.find((token) => token.tokenInfo.symbol === tokenSymbol)
@@ -246,31 +166,8 @@ export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {
   })
 }
 
-export function checkTokenBalanceIsNull(safeAddress, tokenSymbol) {
-  let pollCount = 0
-
-  function poll() {
-    getSafeNFTs(safeAddress.substring(4), constants.networkKeys.sepolia).then((response) => {
-      const targetToken = response.body.results.find((token) => token.tokenSymbol === tokenSymbol)
-      if (targetToken === undefined) {
-        console.log('Token is undefined as expected. Stopping polling.')
-        return true
-      } else if (pollCount < 10) {
-        pollCount++
-        console.log('Token is not undefined, retrying...')
-        cy.wait(5000)
-        poll()
-      } else {
-        throw new Error('Failed to validate token status within the allowed polling attempts.')
-      }
-    })
-  }
-  cy.wrap(null).then(poll).should('be.true')
-}
-
+// The global beforeEach stores the current cookie consent, so the banner shows only when that storage is gone.
 export function acceptCookies(index = 0) {
-  cy.wait(1000)
-
   cy.findAllByText('Got it!')
     .should('have.length.at.least', index)
     .each(($el) => $el.click())
@@ -284,26 +181,24 @@ export function acceptCookies(index = 0) {
       }
       cy.wrap($button).click()
       cy.contains(acceptSelection).should('not.exist')
-      cy.wait(500)
     })
 }
 
 export function acceptCookies2() {
-  cy.wait(2000)
   cy.get('body').then(($body) => {
     if ($body.find('button:contains(' + acceptSelection + ')').length > 0) {
       cy.contains('button', acceptSelection).click()
-      cy.wait(500)
+      cy.contains('button', acceptSelection).should('not.exist')
     }
   })
 }
 
+// The global beforeEach stores the outreach session key, so the popup shows only when that storage is gone.
 export function closeOutreachPopup() {
-  cy.wait(1000)
   cy.get('body').then(($body) => {
     if ($body.find(closeOutreachPopupBtn).length > 0) {
       cy.get(closeOutreachPopupBtn).click()
-      cy.wait(500)
+      cy.get(closeOutreachPopupBtn).should('not.exist')
     }
   })
 }
@@ -323,10 +218,6 @@ export function verifyOwnerConnected(prefix = 'sep:') {
   cy.get(connectedOwnerBlock).should('contain', prefix)
 }
 
-export function verifyHomeSafeUrl(safe) {
-  cy.location('href', { timeout: 10000 }).should('include', constants.homeUrl + safe)
-}
-
 export function verifyLinkContainsUrl(linkSelector, urlPattern) {
   if (typeof linkSelector === 'string') {
     cy.contains(linkSelector).closest('a').should('have.attr', 'href').and('include', urlPattern)
@@ -344,17 +235,6 @@ export function checkTextsExistWithinElement(element, texts) {
       })
   })
 }
-export function checkTextsExistWithinElementScroll(element, texts) {
-  texts.forEach((text) => {
-    cy.get(element)
-      .scrollIntoView()
-      .should('be.visible')
-      .within(() => {
-        cy.get('div').contains(text).scrollIntoView().should('be.visible')
-      })
-  })
-}
-
 export function verifyCheckboxeState(element, index, state) {
   cy.get(element).eq(index).should(state)
 }
@@ -412,22 +292,6 @@ export function verifyElementsIsVisible(elements) {
   })
 }
 
-export function getTextToArray(selector, textArray) {
-  cy.get(selector).each(($element) => {
-    textArray.push($element.text())
-  })
-}
-
-export function extractDigitsToArray(selector, digitsArray) {
-  cy.get(selector).each(($element) => {
-    const text = $element.text()
-    const digits = text.match(/\d+\.\d+|\d+\b/g)
-    if (digits) {
-      digitsArray.push(...digits)
-    }
-  })
-}
-
 export function isItemInLocalstorage(key, expectedValue, maxAttempts = 10, delay = 100) {
   return new Promise((resolve, reject) => {
     let attempts = 0
@@ -469,21 +333,6 @@ export function addToAppLocalStorage(key, jsonValue) {
   })
 }
 
-/**
- * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
- * This function sets up the settings and verifies they are stored correctly before proceeding
- * @returns {Promise} A promise that resolves when settings are set and verified
- */
-export function setupSafeSettingsWithAllTokens() {
-  const settings = {
-    ...ls.safeSettings.slimitSettings,
-  }
-  return cy
-    .wrap(null)
-    .then(() => addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, settings))
-    .then(() => isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__settings, settings))
-}
-
 export function checkTextOrder(selector, expectedTextArray) {
   cy.get(selector).each((element, index) => {
     const text = Cypress.$(element).text().trim()
@@ -495,14 +344,6 @@ export function verifyElementsStatus(elements, status) {
   elements.forEach((element) => {
     cy.get(element).should(status)
   })
-}
-
-export function formatAddressInCaps(address) {
-  if (address.startsWith('sep:0x')) {
-    return '0x' + address.substring(6).toUpperCase()
-  } else {
-    return 'Invalid address format'
-  }
 }
 
 export function verifyTextVisibility(stringsArray) {
@@ -525,39 +366,8 @@ export const checkButtonByTextExists = (buttonText) => {
   cy.get('button').contains(buttonText).should('exist')
 }
 
-/**
- * Read a key from the AUT's localStorage (after cy.visit) and assert its parsed
- * value deep-equals `expectedValue`. Uses `.should()` so Cypress retries until
- * the value matches or the default command timeout elapses — needed for keys
- * the app writes asynchronously after sync completes.
- */
-export function verifyAppLocalStorageItemEquals(key, expectedValue) {
-  cy.window()
-    .its('localStorage')
-    .invoke('getItem', key)
-    .should((stored) => {
-      const parsed = stored ? JSON.parse(stored) : null
-      expect(parsed).to.deep.equal(expectedValue)
-    })
-}
-
-export function getAddedSafeAddressFromLocalStorage(chainId, index) {
-  return cy.window().then((win) => {
-    const addedSafes = win.localStorage.getItem(constants.localStorageKeys.SAFE_v2__addedSafes)
-    const addedSafesObj = JSON.parse(addedSafes)
-    const safeAddress = Object.keys(addedSafesObj[chainId])[index]
-    return safeAddress
-  })
-}
-
 export function changeSafeChainName(originalChain, newChain) {
   return originalChain.replace(/^[^:]+:/, newChain + ':')
-}
-
-export function getSafeAddressFromUrl(url) {
-  const addressPattern = /0x[a-fA-F0-9]{40}/
-  const match = url.match(addressPattern)
-  return match ? match[0] : null
 }
 
 export function shortenAddress(address) {
@@ -572,10 +382,6 @@ export function waitForElementByTextInContainer(containerSelector, elementText) 
     .contains(elementText, { timeout: 10000 }) // Then find text inside
     .should('exist')
     .should('be.visible')
-}
-
-export function verifyElementByTextExists(text) {
-  cy.contains(text).should('exist')
 }
 
 // ===========================================

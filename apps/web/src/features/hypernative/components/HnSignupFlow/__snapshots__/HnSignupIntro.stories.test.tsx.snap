@@ -187,6 +187,7 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             class="actions"
           >
             <span
+              class="contents"
               data-track="hypernative: Guardian Form Started"
             >
               <button

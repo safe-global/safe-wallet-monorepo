@@ -1,13 +1,13 @@
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
-import { ProHighlight } from '@/components/common/ProHighlight'
+import { ProHighlight } from '@safe-global/views/components/common/ProHighlight'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 type Item = {
   label: string

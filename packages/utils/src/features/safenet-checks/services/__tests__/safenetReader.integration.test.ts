@@ -5,37 +5,24 @@ import { decodeLogs, type RawLog } from '../../utils/decodeLogs'
 import { AttestationVerificationStatus, CheckEventType, type Hex, type OracleAttestedEvent } from '../../types'
 
 /**
- * Opt-in integration spec — runs only under `yarn test:integration` against a
- * live Safenet network. Defaults target the redeployed (2026-08-20) Sepolia
- * contracts the golden vector was captured from:
- *
- *   SAFENET_IT_RPC=https://ethereum-sepolia-rpc.publicnode.com \
- *     SAFENET_IT_CHAIN_ID=11155111 \
- *     yarn workspace @safe-global/utils test:integration
- *
- * Consensus / coordinator addresses and the single-entry oracle allowlist
- * default to the checked-in golden vector but can be overridden with
- * SAFENET_CONSENSUS / SAFENET_COORDINATOR / SAFENET_ORACLE.
+ * Opt-in live Gnosis checks:
+ * SAFENET_IT_RPC=https://rpc.gnosischain.com yarn workspace @safe-global/utils test:integration
+ * Addresses default to the capture provenance; SAFENET_CONSENSUS,
+ * SAFENET_COORDINATOR, and SAFENET_ORACLE can override them.
  */
-type Golden = {
-  chainId: string
-  consensus: string
-  coordinator: string
-  oracle: string
-  epoch: string
-  safeTxHash: Hex
-  requestId: Hex
-  signatureId: Hex
-  oracleDataHash: Hex
-  groupKey: { x: string; y: string }
-  r: { x: string; y: string }
-  z: string
-  logs: RawLog[]
+const fixture = JSON.parse(
+  readFileSync(join(__dirname, '../../__fixtures__/safenet-gnosis-chain.captured.json'), 'utf8'),
+) as {
+  provenance: { chainId: string; consensus: string; coordinator: string; oracle: string }
+  captures: Array<{
+    epoch: string
+    safeTxHash: Hex
+    requestId: Hex
+    groupKey: { x: string; y: string }
+    logs: RawLog[]
+  }>
 }
-
-const golden: Golden = JSON.parse(
-  readFileSync(join(__dirname, '../../__fixtures__/sepolia-relaunch-attestation.golden.json'), 'utf8'),
-)
+const golden = { ...fixture.provenance, ...fixture.captures[0] }
 
 // `|| undefined` so an empty string (a common way to "unset" in CI) still skips.
 const RPC = process.env.SAFENET_IT_RPC || undefined
@@ -52,45 +39,34 @@ const goldenAttested = (): OracleAttestedEvent => {
 const makeReader = () =>
   new SafenetReader({
     rpcUrls: [RPC as string],
-    chainId: process.env.SAFENET_IT_CHAIN_ID ?? golden.chainId,
+    chainId: golden.chainId,
     consensus: process.env.SAFENET_CONSENSUS ?? golden.consensus,
     coordinator: process.env.SAFENET_COORDINATOR ?? golden.coordinator,
     oracles: [process.env.SAFENET_ORACLE ?? golden.oracle],
   })
 
-if (!RPC) {
-  describe('SafenetReader integration (skipped)', () => {
-    it('requires SAFENET_IT_RPC — set it to run against a live network', () => {
-      console.warn(
-        '[safenet integration] SAFENET_IT_RPC unset — skipping live checks. Run:\n' +
-          '  SAFENET_IT_RPC=http://127.0.0.1:8547 SAFENET_IT_CHAIN_ID=31337 ' +
-          'yarn workspace @safe-global/utils test:integration',
-      )
-      expect(RPC).toBeUndefined()
-    })
+;(RPC ? describe : describe.skip)('SafenetReader integration — live network', () => {
+  jest.setTimeout(30_000)
+
+  it('loads the epoch group public key live and matches the golden vector', async () => {
+    const key = await makeReader().loadGroupKey(golden.epoch)
+    expect(key).toEqual(golden.groupKey)
   })
-} else {
-  describe('SafenetReader integration — live network', () => {
-    jest.setTimeout(30_000)
 
-    it('loads the epoch group public key live and matches the golden vector', async () => {
-      const key = await makeReader().loadGroupKey(golden.epoch)
-      expect(key).toEqual(golden.groupKey)
-    })
-
-    it('verifies the real FROST attestation against the live group key (VERIFIED)', async () => {
-      const result = await makeReader().verifyAttestation(goldenAttested())
-      expect(result.status).toBe(AttestationVerificationStatus.VERIFIED)
-    })
-
-    it('derives the same requestId from the on-chain Proposed event (when in lookback range)', async () => {
-      const read = await makeReader().fetchCheckState(golden.safeTxHash)
-      const proposed = read.events.find((event) => event.type === CheckEventType.ORACLE_PROPOSED)
-      if (!proposed) {
-        console.warn('[safenet integration] Proposed event outside the lookback window — skipping requestId equality')
-        return
-      }
-      expect(read.requestId).toBe(golden.requestId)
-    })
+  it('verifies the real FROST attestation against the live group key (VERIFIED)', async () => {
+    const result = await makeReader().verifyAttestation(goldenAttested())
+    expect(result.status).toBe(AttestationVerificationStatus.VERIFIED)
   })
-}
+
+  it('derives the same requestId from the captured on-chain Proposed event', async () => {
+    const capturedProposal = decodeLogs(golden.logs).find((event) => event.type === CheckEventType.ORACLE_PROPOSED)
+    expect(capturedProposal).toBeDefined()
+    const reader = makeReader()
+    const timestampMs = await reader.blockTimeMs(capturedProposal!.blockNumber)
+    expect(timestampMs).not.toBeNull()
+    expect(timestampMs).toBeGreaterThan(0)
+    const read = await reader.fetchCheckState(golden.safeTxHash, { timestampMs })
+    expect(read.events).toContainEqual(capturedProposal)
+    expect(read.requestId).toBe(golden.requestId)
+  })
+})

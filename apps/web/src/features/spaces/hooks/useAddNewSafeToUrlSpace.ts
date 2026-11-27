@@ -8,7 +8,7 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
-import { getSeatLimitMessage } from '../utils/seatLimitError'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import { useIsAdmin } from './useSpaceMembers'
 
 export type AddNewSafeToSpaceResult = {
@@ -57,12 +57,12 @@ export const useAddNewSafeToUrlSpace = (): ((
       dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
       if (!result.error) return { spaceId, isStepUpPending: false }
 
-      const seatLimit = getSeatLimitMessage(result.error)
-      if (seatLimit) refreshSpaceEntitlements(dispatch, spaceId)
+      const isQuotaRefusal = getQuotaExceededError(result.error) !== undefined
+      if (isQuotaRefusal) refreshSpaceEntitlements(dispatch, spaceId)
       dispatch(
         showNotification({
-          message: `Safe created in My accounts, but not added to the Workspace. ${seatLimit ?? getRtkQueryErrorMessage(result.error)}`,
-          variant: seatLimit ? 'info' : 'error',
+          message: `Safe created in My accounts, but not added to the Workspace. ${getRtkQueryErrorMessage(result.error)}`,
+          variant: isQuotaRefusal ? 'warning' : 'error',
           groupKey: 'new-safe-space-error',
         }),
       )

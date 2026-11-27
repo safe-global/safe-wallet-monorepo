@@ -2,7 +2,8 @@ import { LabelValue } from '@safe-global/store/gateway/types'
 import type { Transaction, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
-import { selectPendingTxIdsBySafe } from '@/store/pendingTxsSlice'
+import { selectPendingTxIdsBySafe, selectPendingTxs } from '@/store/pendingTxsSlice'
+import { selectQueuedTransactions } from '@/store/txQueueSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import {
   isConflictHeaderQueuedItem,
@@ -21,8 +22,12 @@ export const usePendingTxIds = (): Array<Transaction['id']> => {
 }
 
 export const useHasPendingTxs = (): boolean => {
-  const pendingIds = usePendingTxIds()
-  return pendingIds.length > 0
+  const { safe, safeAddress } = useSafeInfo()
+  const { chainId, nonce } = safe
+  return useAppSelector((state) => {
+    const pendingTxs = selectPendingTxs(state)
+    return selectPendingTxIdsBySafe(state, chainId, safeAddress).some((id) => pendingTxs[id].nonce >= nonce)
+  })
 }
 
 /**
@@ -34,10 +39,18 @@ export const useShowUnsignedQueue = (): boolean => {
   return safe.threshold === 1 && hasPending
 }
 
-export const filterUntrustedQueue = (untrustedQueue: QueuedItemPage, pendingIds: Array<Transaction['id']>) => {
-  // Only keep labels and pending unsigned transactions
+export const filterUntrustedQueue = (
+  untrustedQueue: QueuedItemPage,
+  pendingIds: Array<Transaction['id']>,
+  trustedIds: Array<Transaction['id']> = [],
+) => {
+  // Only keep labels and pending unsigned transactions that the trusted queue does not already show
   const results = untrustedQueue.results
-    .filter((item) => !isTransactionQueuedItem(item) || pendingIds.includes(item.transaction.id))
+    .filter(
+      (item) =>
+        !isTransactionQueuedItem(item) ||
+        (pendingIds.includes(item.transaction.id) && !trustedIds.includes(item.transaction.id)),
+    )
     .filter((item) => !isConflictHeaderQueuedItem(item))
     .filter(
       (item) =>
@@ -73,6 +86,8 @@ export const usePendingTxsQueue = (): {
   const { chainId } = safe
   const pendingIds = usePendingTxIds()
   const hasPending = pendingIds.length > 0
+  const trustedQueue = useAppSelector(selectQueuedTransactions)
+  const trustedIds = useMemo(() => trustedQueue?.map((item) => item.transaction.id) ?? [], [trustedQueue])
 
   const [untrustedNext, error, loading] = useAsync<QueuedItemPage | undefined>(
     async () => {
@@ -87,8 +102,8 @@ export const usePendingTxsQueue = (): {
   const pendingTxPage = useMemo(() => {
     if (!untrustedNext || !pendingIds.length) return
 
-    return filterUntrustedQueue(untrustedNext, pendingIds)
-  }, [untrustedNext, pendingIds])
+    return filterUntrustedQueue(untrustedNext, pendingIds, trustedIds)
+  }, [untrustedNext, pendingIds, trustedIds])
 
   return useMemo(
     () => ({

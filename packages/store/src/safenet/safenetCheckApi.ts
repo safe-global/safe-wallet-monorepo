@@ -1,14 +1,19 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
+import type { BaseQueryApi } from '@reduxjs/toolkit/query'
+import { INFURA_TOKEN } from '@safe-global/utils/config/constants'
+import { apiSliceWithChainsConfig } from '../gateway/chains'
+import type { RpcUri } from '../gateway/AUTO_GENERATED/chains'
 import {
   AttestationVerificationStatus,
   CheckStatus,
+  SAFENET_CHAIN_ID,
   UNVERIFIED_ATTESTATION,
   bindAttestations,
   deriveCheckState,
   getSafenetReader,
   mergeMonotonic,
   type AttestationVerification,
-  type AttestedCheckEvent,
+  type OracleAttestedEvent,
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
@@ -39,7 +44,7 @@ const VERIFICATION_RANK: Record<AttestationVerificationStatus, number> = {
   [AttestationVerificationStatus.UNVERIFIED]: 0,
 }
 
-type SelectedAttestation = { event: AttestedCheckEvent; attestation: AttestationVerification }
+type SelectedAttestation = { event: OracleAttestedEvent; attestation: AttestationVerification }
 
 /**
  * Verify candidates in order and stop at the first signature that verifies. An
@@ -48,7 +53,7 @@ type SelectedAttestation = { event: AttestedCheckEvent; attestation: Attestation
  */
 const selectAttestation = async (
   reader: SafenetReader,
-  candidates: ReadonlyArray<AttestedCheckEvent>,
+  candidates: ReadonlyArray<OracleAttestedEvent>,
 ): Promise<SelectedAttestation | null> => {
   let best: SelectedAttestation | null = null
   for (const event of candidates) {
@@ -59,6 +64,43 @@ const selectAttestation = async (
     if (attestation.status === AttestationVerificationStatus.VERIFIED) break
   }
   return best
+}
+
+/** Dates a check past its deadline from the deadline block — one header read per poll until polling stops. */
+const timedOutAtMs = async (
+  reader: SafenetReader,
+  status: CheckStatus,
+  { deadlineBlock, headBlock }: Pick<SafenetCheckSnapshot, 'deadlineBlock' | 'headBlock'>,
+): Promise<number | null> => {
+  const pastDeadline = deadlineBlock !== null && headBlock !== null && BigInt(headBlock) > BigInt(deadlineBlock)
+  return status === CheckStatus.TIMED_OUT && pastDeadline ? reader.blockTimeMs(Number(deadlineBlock)) : null
+}
+
+const configuredRpcUrl = (rpcUri: RpcUri | undefined): string => {
+  if (!rpcUri?.value) throw new Error('Safenet chain RPC configuration unavailable')
+  if (rpcUri.authentication === 'API_KEY_PATH' && !INFURA_TOKEN) {
+    throw new Error('Safenet chain RPC token unavailable')
+  }
+  return rpcUri.authentication === 'API_KEY_PATH' ? `${rpcUri.value}${INFURA_TOKEN}` : rpcUri.value
+}
+
+const configuredReader = async ({ dispatch, getState }: Pick<BaseQueryApi, 'dispatch' | 'getState'>) => {
+  // The key the app already queried chains with; env and the web default only before that.
+  const serviceKey =
+    apiSliceWithChainsConfig.util.selectCachedArgsForQuery(
+      getState() as Parameters<typeof apiSliceWithChainsConfig.util.selectCachedArgsForQuery>[0],
+      'getChainsConfigV2',
+    )[0] ||
+    process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY ||
+    process.env.EXPO_PUBLIC_CONFIG_SERVICE_KEY ||
+    'WALLET_WEB'
+  const chainQuery = dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(serviceKey))
+  try {
+    const chainConfig = await chainQuery
+    return getSafenetReader(configuredRpcUrl(chainConfig.data?.entities[SAFENET_CHAIN_ID]?.rpcUri))
+  } finally {
+    chainQuery.unsubscribe()
+  }
 }
 
 /**
@@ -76,7 +118,7 @@ export const safenetCheckApi = createApi({
       async queryFn(identity, { getState, dispatch }) {
         const { safeTxHash, chainId, safeAddress } = identity
         try {
-          const reader = getSafenetReader()
+          const reader = await configuredReader({ dispatch, getState })
           // Read at execution time, so every poll replays the best aim known
           // then — never the timestamp of whichever surface subscribed first.
           const aimedAtMs = resolveAim(identity)
@@ -114,6 +156,7 @@ export const safenetCheckApi = createApi({
             headBlock: read.headBlock,
             attestation,
             attestedAtMs,
+            timedOutAtMs: await timedOutAtMs(reader, status, read),
             aimedAtMs,
             windowCoverage: read.windowCoverage,
             events,

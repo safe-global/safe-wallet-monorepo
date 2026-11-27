@@ -1,4 +1,4 @@
-import { getProposerErrorText } from './proposerErrors'
+import { getProposerErrorText, PendingDelegationConflictError } from './proposerErrors'
 
 const FALLBACK = 'Error adding proposer'
 
@@ -27,6 +27,12 @@ describe('getProposerErrorText', () => {
     const error = new Error('User rejected the request')
 
     expect(getProposerErrorText(error, FALLBACK)).toBe('The signature request was rejected. Try again to continue.')
+  })
+
+  it('shows the reason of a pending delegation conflict, which tells the user how long to wait', () => {
+    const error = new PendingDelegationConflictError('Please wait for it to expire (~1 hour).')
+
+    expect(getProposerErrorText(error, FALLBACK)).toBe('Please wait for it to expire (~1 hour).')
   })
 
   it('returns the fallback for an unmapped error', () => {

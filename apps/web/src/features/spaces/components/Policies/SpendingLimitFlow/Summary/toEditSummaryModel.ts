@@ -2,9 +2,13 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitState } from '@/features/spending-limits'
 import { isSameAllowance } from '@/features/spending-limits/services'
-import type { SpendingLimitPolicyFormValues } from '../types'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { toPolicySummaryModel, type PolicySummarySources } from './toPolicySummaryModel'
-import type { LimitSummary, SpenderSummary, SpendingLimitSummaryModel } from './types'
+import type {
+  LimitSummary,
+  SpenderSummary,
+  SpendingLimitSummaryModel,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 type PreviousLimit = NonNullable<LimitSummary['previous']>
 

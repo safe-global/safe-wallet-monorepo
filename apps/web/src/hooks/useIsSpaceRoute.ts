@@ -13,6 +13,7 @@ const SPACES_PREFIX_ROUTES = [
   AppRoutes.spaces.security,
   AppRoutes.spaces.activity,
   AppRoutes.spaces.policies,
+  AppRoutes.spaces.transactions,
 ]
 
 export const useIsSpaceRoute = (): boolean => {

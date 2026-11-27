@@ -1,12 +1,12 @@
 import type { NativeStakingDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import FieldsGrid from '@/components/tx/FieldsGrid'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import ConfirmationOrderHeader from '@/components/tx/ConfirmationOrder/ConfirmationOrderHeader'
 import { formatDurationFromMilliseconds, formatVisualAmount, maybePlural } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import StakingStatus from './StakingStatus'
-import { InfoTooltip } from '@/components/common/InfoTooltip'
+import { InfoTooltip } from '@safe-global/views/components/common/InfoTooltip'
 import { BRAND_NAME } from '@/config/constants'
 
 type StakingOrderConfirmationViewProps = {

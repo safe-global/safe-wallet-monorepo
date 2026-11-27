@@ -36,10 +36,12 @@ import InviteMembersOnboarding from './components/InviteMembersOnboarding'
 import SurveyOnboarding from './components/SurveyOnboarding'
 import SelectSafeModal from './components/SelectSafeModal'
 import SafeWorkspaceSignInDialog from './components/SafeWorkspaceSignInDialog'
+import SafeWorkspaceChooserDialog from './components/SafeWorkspaceChooserDialog'
 import SecurityHubPage from './components/SecurityHub/Page'
 import SpaceActivityLogPage from './components/SpaceActivityLog/Page'
 import SpacePlansPage from './components/Plans/Page'
 import SpacePoliciesPage from './components/Policies/Page'
+import SpaceTransactionsPage from './components/SpaceTransactions/Page'
 
 // Service imports
 import { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -65,6 +67,7 @@ const feature: SpacesContract = {
   // Modal components
   SelectSafeModal,
   SafeWorkspaceSignInDialog,
+  SafeWorkspaceChooserDialog,
 
   // Onboarding page components
   CreateSpaceOnboarding,
@@ -82,6 +85,7 @@ const feature: SpacesContract = {
   SpaceActivityLogPage,
   SpacePlansPage,
   SpacePoliciesPage,
+  SpaceTransactionsPage,
 
   // Services
   isUnauthorized,

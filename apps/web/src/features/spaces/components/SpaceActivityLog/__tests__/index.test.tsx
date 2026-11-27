@@ -31,7 +31,7 @@ jest.mock('../ActivityLogFilters', () => ({
   ),
   EMPTY_FILTERS: {},
 }))
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
 })
@@ -221,7 +221,7 @@ describe('SpaceActivityLog', () => {
     const { rerender } = render(<SpaceActivityLog />)
     rerender(<SpaceActivityLog />)
 
-    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_VIEWED)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ACTIVITY_LOG_VIEWED, undefined)
     expect(trackEvent).toHaveBeenCalledTimes(1)
   })
 

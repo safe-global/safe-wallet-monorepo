@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import AuditEventRow from './AuditEventRow'
 
 const baseSetup = createMockStory({
   scenario: 'efSafe',
   features: { spaces: true },
-  query: { spaceId: 'uuid-1' },
+  query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
 })
 

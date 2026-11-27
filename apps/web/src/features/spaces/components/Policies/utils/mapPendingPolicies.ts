@@ -1,6 +1,7 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { PendingPolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type {
+  PendingAllowanceChange,
   PendingPolicyOperation,
   PendingSpendingLimitPolicy,
   Policy,
@@ -8,8 +9,8 @@ import type {
   PolicySafe,
   PolicySpender,
   SpendingLimitPolicy,
-} from '../types'
-import { unknownToken, type ResolveTokenInfo } from './mapActivePolicies'
+} from '@safe-global/views/features/spaces/components/Policies/types'
+import { toPolicyToken } from './toPolicyToken'
 
 type PendingChange = PendingPolicyDto['data']['changes'][number]
 type ActiveSpendingLimit = SpendingLimitPolicy & { status: 'active' }
@@ -54,11 +55,7 @@ const getOperation = (changes: PendingChange[], active: ActiveSpendingLimit | un
   return createsSomething ? 'create' : 'update'
 }
 
-const toSpenders = (
-  dto: PendingPolicyDto,
-  active: ActiveSpendingLimit | undefined,
-  resolveToken: ResolveTokenInfo,
-): PolicySpender[] => {
+const toSpenders = (dto: PendingPolicyDto, active: ActiveSpendingLimit | undefined): PolicySpender[] => {
   const byDelegate = new Map<string, PolicySpender>()
   const spenderFor = (delegate: string): PolicySpender => {
     const key = delegate.toLowerCase()
@@ -68,16 +65,26 @@ const toSpenders = (
   }
   const findQueuedAllowance = (delegate: string, token: string): PolicyAllowance | undefined =>
     byDelegate.get(delegate.toLowerCase())?.allowances.find((allowance) => sameAddress(allowance.token.address, token))
-  const upsertAllowance = (delegate: string, allowance: PolicyAllowance) => {
+  // Marked only against an active policy, like the edit flow: a brand-new policy changes nothing that exists.
+  const upsertAllowance = (delegate: string, allowance: PolicyAllowance, change: PendingAllowanceChange) => {
     const { allowances } = spenderFor(delegate)
+    const marked = active ? { ...allowance, change } : allowance
     const index = allowances.findIndex((existing) => sameAddress(existing.token.address, allowance.token.address))
-    if (index === -1) allowances.push(allowance)
-    else allowances[index] = allowance
+    if (index === -1) allowances.push(marked)
+    else allowances[index] = marked
   }
 
   for (const change of dto.data.changes) {
     switch (change.kind) {
+      // Re-enabling an unenforced policy's module applies its indexed limits again, unchanged.
       case 'enable-module':
+        if (active && !active.enabled) {
+          active.data.spenders.forEach(({ spender, isActive, allowances }) => {
+            const queued = spenderFor(spender)
+            queued.isActive = isActive
+            queued.allowances.push(...allowances.map((allowance) => ({ ...allowance })))
+          })
+        }
         break
       case 'add-delegate':
         spenderFor(change.delegate)
@@ -86,7 +93,7 @@ const toSpenders = (
         const current = active?.data.spenders.find((spender) => sameAddress(spender.spender, change.delegate))
         spenderFor(change.delegate)
         // Upserted: the edit flow deletes each allowance before it unlinks the delegate.
-        current?.allowances.forEach((allowance) => upsertAllowance(change.delegate, allowance))
+        current?.allowances.forEach((allowance) => upsertAllowance(change.delegate, allowance, 'removed'))
         break
       }
       case 'set-allowance': {
@@ -97,26 +104,36 @@ const toSpenders = (
         const spent = current?.spent ?? '0'
         const remaining = BigInt(change.amount) - BigInt(spent)
 
-        upsertAllowance(change.delegate, {
-          token: resolveToken(dto.safe.chainId, change.token) ?? unknownToken(change.token),
-          amount: change.amount,
-          spent,
-          remaining: (remaining > 0n ? remaining : 0n).toString(),
-          resetPeriodMinutes: change.resetPeriodMinutes,
-          resetsAtMinute: change.resetPeriodMinutes === 0 ? null : (current?.resetsAtMinute ?? null),
-        })
+        upsertAllowance(
+          change.delegate,
+          {
+            token: toPolicyToken(change.token, change.tokenMetadata),
+            amount: change.amount,
+            spent,
+            remaining: (remaining > 0n ? remaining : 0n).toString(),
+            resetPeriodMinutes: change.resetPeriodMinutes,
+            resetsAtMinute: change.resetPeriodMinutes === 0 ? null : (current?.resetsAtMinute ?? null),
+          },
+          findActiveAllowance(active, change.delegate, change.token) ? 'changed' : 'added',
+        )
         break
       }
       case 'reset-allowance': {
         const current =
           findQueuedAllowance(change.delegate, change.token) ??
           findActiveAllowance(active, change.delegate, change.token)
-        if (current) upsertAllowance(change.delegate, { ...current, spent: '0', remaining: current.amount })
+        if (current) {
+          upsertAllowance(
+            change.delegate,
+            { ...current, spent: '0', remaining: current.amount },
+            current.change ?? 'changed',
+          )
+        }
         break
       }
       case 'delete-allowance': {
         const current = findActiveAllowance(active, change.delegate, change.token)
-        if (current) upsertAllowance(change.delegate, current)
+        if (current) upsertAllowance(change.delegate, current, 'removed')
         break
       }
     }
@@ -130,16 +147,13 @@ export const getPendingTxId = ({ safe, safeTxHash }: Pick<PendingSpendingLimitPo
   `multisig_${safe.address}_${safeTxHash}`
 
 /** One row per queued transaction and module, shown beside the active rows. */
-export const mapPendingPolicies = (
-  dtos: PendingPolicyDto[],
-  active: Policy[],
-  resolveToken: ResolveTokenInfo,
-): PendingSpendingLimitPolicy[] =>
+export const mapPendingPolicies = (dtos: PendingPolicyDto[], active: Policy[]): PendingSpendingLimitPolicy[] =>
   dtos.flatMap((dto) => {
     if (dto.type !== 'spending-limit' || dto.data.changes.length === 0) return []
 
     const current = findActive(dto.safe, dto.enforcement.moduleAddress, active)
     const operation = getOperation(dto.data.changes, current)
+    const enablesModule = dto.data.changes.some((change) => change.kind === 'enable-module')
 
     return [
       {
@@ -148,14 +162,14 @@ export const mapPendingPolicies = (
         status: 'pending',
         safe: dto.safe,
         enforcement: dto.enforcement,
-        enabled: current?.enabled ?? true,
+        enabled: enablesModule || (current?.enabled ?? true),
         operation,
         safeTxHash: dto.safeTxHash,
         nonce: dto.nonce,
         confirmationsSubmitted: dto.confirmations,
         confirmationsRequired: dto.confirmationsRequired,
         proposedAt: dto.proposedAt,
-        data: { spenders: toSpenders(dto, current, resolveToken) },
+        data: { spenders: toSpenders(dto, current) },
       },
     ]
   })
@@ -183,12 +197,18 @@ export const isPendingChangeIndexed = (row: PendingSpendingLimitPolicy, active: 
 
   return (
     current !== undefined &&
-    row.data.spenders.every(
-      ({ spender, allowances }) =>
-        findSpender(spender) !== undefined &&
-        allowances.every((allowance) =>
-          isAllowanceIndexed(allowance, findActiveAllowance(current, spender, allowance.token.address)),
-        ),
-    )
+    current.enabled === row.enabled &&
+    row.data.spenders.every(({ spender, allowances }) => {
+      // A spender whose every limit is being removed leaves the active rows altogether.
+      const isLeaving = allowances.length > 0 && allowances.every((allowance) => allowance.change === 'removed')
+
+      return (
+        (isLeaving || findSpender(spender) !== undefined) &&
+        allowances.every((allowance) => {
+          const indexed = findActiveAllowance(current, spender, allowance.token.address)
+          return allowance.change === 'removed' ? indexed === undefined : isAllowanceIndexed(allowance, indexed)
+        })
+      )
+    })
   )
 }

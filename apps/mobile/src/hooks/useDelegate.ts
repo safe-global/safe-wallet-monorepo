@@ -4,9 +4,9 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useSign } from './useSign/useSign'
 import { selectAllChains } from '@/src/store/chains'
 import { addDelegate } from '@/src/store/delegatesSlice'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import Logger from '@/src/utils/logger'
-import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { getDelegateTypedData, signDelegateTypedDataWithKey } from '@safe-global/utils/services/delegates'
+import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { getDelegateKeyId } from '@/src/utils/delegate'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
@@ -32,8 +32,7 @@ export const useDelegate = (): UseDelegateProps => {
   // Get all available chains
   const allChains = useAppSelector(selectAllChains)
 
-  // Access API endpoints
-  const [registerDelegate] = cgwApi.useDelegatesPostDelegateV2Mutation()
+  const { addDelegate: registerDelegate } = useDelegateMutations()
 
   const createDelegate = useCallback(
     async (ownerPrivateKey: string, safe: string | null = null) => {
@@ -75,15 +74,12 @@ export const useDelegate = (): UseDelegateProps => {
               await new Promise((resolve) => setTimeout(resolve, 300 * index))
             }
 
-            // Generate typed data for this chain
-            const typedData = getDelegateTypedData(chain.chainId, delegateWallet.address)
+            const typedData = getDelegateTypedData(chain, delegateWallet.address, safe)
 
-            // Sign the message with the owner's wallet
-            const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
+            const signature = signDelegateTypedDataWithKey(ownerWallet.signingKey, typedData)
 
-            // Register delegate on the backend
             await registerDelegate({
-              chainId: chain.chainId,
+              chain,
               createDelegateDto: {
                 safe,
                 delegate: delegateWallet.address,

@@ -1,8 +1,8 @@
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { Typography } from '@/components/ui/typography'
-import { DataRow } from '@/components/common/Table/DataRow'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { DataRow } from '@safe-global/views/components/common/Table/DataRow'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 export const TxDataRow = DataRow

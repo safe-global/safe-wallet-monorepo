@@ -1,26 +1,37 @@
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import NetworkSelector from '@/components/common/NetworkSelector'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import AddressInput from '@/components/common/AddressInput'
-import { largeFormFieldSurfaceClassName } from '@/components/common/formFieldStyles'
-import React from 'react'
+import { largeFormFieldSurfaceClassName } from '@safe-global/views/components/common/formFieldStyles'
+import React, { useState } from 'react'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectAddedSafes } from '@/store/addedSafesSlice'
-import { LOAD_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import ExternalLink from '@/components/common/ExternalLink'
+import {
+  ADDRESS_POISONING_EVENTS,
+  DismissAction,
+  LOAD_SAFE_EVENTS,
+  LookalikeWarningLocation,
+  MixpanelEventParams,
+  trackEvent,
+} from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/SimilarityConfirmDialog'
+import { useAddressPoisoningCheck } from '@/features/address-poisoning'
+import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 
 enum Field {
@@ -39,6 +50,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
   const currentChainId = useChainId()
   const addedSafes = useAppSelector((state) => selectAddedSafes(state, currentChainId))
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
+  const [pendingData, setPendingData] = useState<FormData>()
   const formMethods = useForm<FormData>({
     mode: 'all',
     defaultValues: {
@@ -57,6 +69,9 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
   const safeAddress = watch(Field.address)
   const randomName = useMnemonicSafeName()
   const { ens, name, resolving } = useAddressResolver(safeAddress)
+  const similar = useAddressPoisoningCheck(safeAddress)
+  const lookalikeTracking = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADD_SAFE }
+  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, lookalikeTracking, !!similar)
 
   // Address book, ENS, mnemonic
   const fallbackName = name || ens || randomName
@@ -76,7 +91,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
     }
   }
 
-  const onFormSubmit = handleSubmit((data: FormData) => {
+  const goToNextStep = (data: FormData) => {
     onSubmit({
       ...data,
       [Field.name]: data[Field.name] || fallbackName,
@@ -85,7 +100,28 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
     if (data[Field.name]) {
       trackEvent(LOAD_SAFE_EVENTS.NAME_SAFE)
     }
+  }
+
+  const onFormSubmit = handleSubmit((data: FormData) => {
+    if (similar) return setPendingData(data)
+    goToNextStep(data)
   })
+
+  const onConfirmLookalike = () => {
+    if (!pendingData) return
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
+    setPendingData(undefined)
+    goToNextStep(pendingData)
+  }
+
+  const onCancelLookalike = () => {
+    if (!pendingData) return
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+      ...lookalikeTracking,
+      [MixpanelEventParams.DISMISS_ACTION]: DismissAction.CANCEL,
+    })
+    setPendingData(undefined)
+  }
 
   const handleBack = () => {
     const formData = getValues()
@@ -142,6 +178,10 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
               validate={validateSafeAddress}
               name={Field.address}
             />
+
+            {similar && (
+              <SimilarSavedAddressNotice subject="This Safe account" enteredAddress={safeAddress} similar={similar} />
+            )}
           </div>
 
           <Typography className="mt-8 block">
@@ -170,6 +210,15 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
           </div>
         </div>
       </form>
+
+      <SimilarityConfirmDialog
+        open={!!pendingData}
+        safe={{ address: pendingData?.[Field.address] ?? safeAddress, name: pendingData?.[Field.name] || undefined }}
+        addressLabel="Safe account"
+        description={`This Safe account is similar to ${similar?.source === 'accounts' ? 'a Safe in your accounts' : 'an address in your address book'}. This could indicate an address poisoning attack.`}
+        onConfirm={onConfirmLookalike}
+        onCancel={onCancelLookalike}
+      />
     </FormProvider>
   )
 }

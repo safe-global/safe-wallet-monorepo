@@ -36,7 +36,7 @@ describe('CsvTxExportButton', () => {
     const exportButton = getByText('Export')
     fireEvent.click(exportButton)
 
-    expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_CLICKED)
+    expect(mockTrackEvent).toHaveBeenCalledWith(TX_LIST_EVENTS.CSV_EXPORT_CLICKED, undefined)
   })
 
   it('should render export button correctly', () => {

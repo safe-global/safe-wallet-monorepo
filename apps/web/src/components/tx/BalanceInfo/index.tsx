@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import css from './styles.module.css'
 import useWalletBalance from '@/hooks/wallets/useWalletBalance'
 import WalletBalance from '@/components/common/WalletBalance'

@@ -1,6 +1,6 @@
-export type SecurityGrade = 'Low' | 'Medium' | 'High' | 'Critical'
+import type { CheckStatus, SecurityGrade } from '@safe-global/views/features/security/types'
 
-export type CheckStatus = 'clear' | 'issue' | 'partial' | 'not_applicable' | 'inconclusive'
+export type { SecurityGrade, CheckStatus } from '@safe-global/views/features/security/types'
 
 export type CheckResult = {
   id: string

@@ -156,6 +156,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_5_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -334,6 +335,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_b_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -564,6 +566,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_h_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -794,6 +797,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_n_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -940,6 +944,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_r_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -1089,6 +1094,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_v_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -1233,6 +1239,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_13_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -1463,6 +1470,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                       id="base-ui-_r_19_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -1662,6 +1670,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_2p_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -1840,6 +1849,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_2v_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -2070,6 +2080,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_35_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -2300,6 +2311,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_3b_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -2446,6 +2458,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_3f_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -2595,6 +2608,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_3j_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -2739,6 +2753,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_3n_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -2969,6 +2984,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                       id="base-ui-_r_3t_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -3168,6 +3184,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_43_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -3346,6 +3363,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_49_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -3576,6 +3594,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_4f_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -3806,6 +3825,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_4l_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -3952,6 +3972,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_4p_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -4101,6 +4122,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_4t_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -4245,6 +4267,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_51_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -4475,6 +4498,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                       id="base-ui-_r_57_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -4674,6 +4698,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_1f_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -4852,6 +4877,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_1l_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -5082,6 +5108,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_1r_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -5312,6 +5339,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_21_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -5458,6 +5486,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_25_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -5607,6 +5636,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_29_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -5751,6 +5781,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_2d_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -5981,6 +6012,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                       id="base-ui-_r_2j_"
                     >
                       <span
+                        class="contents"
                         data-track="tx-list: Confirm transaction"
                       >
                         <button
@@ -6895,6 +6927,7 @@ exports[`./TxSummary.stories Batch 1`] = `
                     id="base-ui-_r_5r_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -7056,6 +7089,7 @@ exports[`./TxSummary.stories CustomTransaction 1`] = `
                     id="base-ui-_r_5v_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -7817,6 +7851,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                           id="base-ui-_r_6h_"
                         >
                           <span
+                            class="contents"
                             data-track="tx-list: Confirm transaction"
                           >
                             <button
@@ -8015,6 +8050,7 @@ exports[`./TxSummary.stories SendAt360 1`] = `
                     id="base-ui-_r_6t_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -8210,6 +8246,7 @@ exports[`./TxSummary.stories SendAt600 1`] = `
                     id="base-ui-_r_73_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -8405,6 +8442,7 @@ exports[`./TxSummary.stories SendAt1000 1`] = `
                     id="base-ui-_r_6n_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -8600,6 +8638,7 @@ exports[`./TxSummary.stories SendErc20 1`] = `
                     id="base-ui-_r_79_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -8795,6 +8834,7 @@ exports[`./TxSummary.stories SendNativeToken 1`] = `
                     id="base-ui-_r_7f_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -8958,6 +8998,7 @@ exports[`./TxSummary.stories SettingsChange 1`] = `
                     id="base-ui-_r_7j_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -9205,6 +9246,7 @@ exports[`./TxSummary.stories SwapAt360 1`] = `
                     id="base-ui-_r_7v_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -9452,6 +9494,7 @@ exports[`./TxSummary.stories SwapAt600 1`] = `
                     id="base-ui-_r_85_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -9699,6 +9742,7 @@ exports[`./TxSummary.stories SwapAt1000 1`] = `
                     id="base-ui-_r_7p_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -9946,6 +9990,7 @@ exports[`./TxSummary.stories SwapBuyOrder 1`] = `
                     id="base-ui-_r_8b_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -10193,6 +10238,7 @@ exports[`./TxSummary.stories SwapOrderWithLongSymbols 1`] = `
                     id="base-ui-_r_8h_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button
@@ -10440,6 +10486,7 @@ exports[`./TxSummary.stories SwapSellOrder 1`] = `
                     id="base-ui-_r_8n_"
                   >
                     <span
+                      class="contents"
                       data-track="tx-list: Confirm transaction"
                     >
                       <button

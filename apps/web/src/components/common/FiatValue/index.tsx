@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'

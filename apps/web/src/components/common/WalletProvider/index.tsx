@@ -12,7 +12,11 @@ export type SignerWallet = {
   provider: Eip1193Provider | null
   address: string
   chainId: string
+  // In-app nested signer: only proposes in the parent, never executes
   isSafe?: boolean
+  // The connected wallet is itself a Safe, e.g. via WalletConnect
+  isConnectedSafe?: boolean
+  threshold?: number
 }
 
 export type WalletContextType = {
@@ -42,6 +46,14 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
     },
   )
 
+  // Chain-gated so a same-address Safe on another chain isn't misdetected
+  const { currentData: connectedSafeInfo } = useSafesGetSafeV1Query(
+    { chainId: currentChain?.chainId || '', safeAddress: wallet?.address || '' },
+    {
+      skip: !wallet?.address || !currentChain || wallet.chainId !== currentChain.chainId,
+    },
+  )
+
   useEffect(() => {
     if (!onboard) return
 
@@ -60,8 +72,11 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
     if (wallet && nestedSafeInfo && web3ReadOnly) {
       return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router)
     }
+    if (wallet && connectedSafeInfo) {
+      return { ...wallet, isConnectedSafe: true as const, threshold: connectedSafeInfo.threshold }
+    }
     return wallet
-  }, [wallet, nestedSafeInfo, web3ReadOnly, router])
+  }, [wallet, nestedSafeInfo, connectedSafeInfo, web3ReadOnly, router])
 
   return (
     <WalletContext.Provider

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { AppRoutes } from '@/config/routes'
-import SafeLogo from '@/public/images/logo-no-text.svg'
+import SafeLogo from '@safe-global/views/assets/images/logo-no-text.svg'
 
 interface OnboardingLayoutProps {
   main: ReactNode

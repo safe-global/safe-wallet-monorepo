@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 const ConnectWalletButton = ({
   onConnect,

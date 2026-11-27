@@ -1,8 +1,13 @@
 import type { ReactElement } from 'react'
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
-import { Chip } from '@/components/ui/chip'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@safe-global/views/components/ui/accordion'
+import { Chip } from '@safe-global/views/components/ui/chip'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import PendingDelegation from './PendingDelegation'
 import DelegationErrorBoundary from './DelegationErrorBoundary'
 import { usePendingDelegations } from '../hooks/usePendingDelegations'

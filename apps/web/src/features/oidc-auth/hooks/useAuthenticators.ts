@@ -4,7 +4,7 @@ import {
   useOidcAuthListAuthenticatorsV1Query,
   type Authenticator,
 } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
-import { GATEWAY_URL } from '@/config/gateway'
+import { gatewayUrl } from '@/config/gateway'
 import { navigateTo } from '@/utils/navigation'
 
 export type { Authenticator }
@@ -37,7 +37,7 @@ export const useAuthenticators = () => {
     const returnUrl = new URL(window.location.href)
     returnUrl.searchParams.delete('error')
 
-    const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)
+    const url = gatewayUrl(AUTHORIZE_PATH)
     url.searchParams.set('redirect_url', returnUrl.toString())
     url.searchParams.set('enroll', 'true')
     navigateTo(url.toString())

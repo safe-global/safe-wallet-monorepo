@@ -7,6 +7,7 @@
  *   their content to <body> can false-positive — check before filing)
  * - BLANK_RENDER: mounted but paints no text and no visible box (missing mock data)
  * - PAGE_ERROR / CONSOLE: uncaught errors while loading
+ * - RENDER_TIMEOUT: the story (play function included) did not finish in time
  *
  * Usage (from apps/web): yarn storybook:sweep [-- --filter=ui- --modes=light --concurrency=4]
  *   --base=<url>        Storybook to sweep (default http://localhost:6006 or $SB_BASE).
@@ -26,7 +27,16 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { chromium, type Browser, type BrowserContext } from 'playwright'
+import { chromium, type Browser, type BrowserContext, type Page } from 'playwright'
+import { STORY_FINISHED } from 'storybook/internal/core-events'
+
+declare global {
+  interface Window {
+    __STORYBOOK_ADDONS_CHANNEL__?: { last: (eventName: string) => unknown }
+  }
+}
+
+const STORY_FINISHED_TIMEOUT_MS = 30000
 
 type Mode = string
 
@@ -65,6 +75,22 @@ async function launch(): Promise<Browser> {
   }
 }
 
+// STORY_FINISHED is emitted after the play function, the animation wait and afterEach.
+async function waitForStoryFinished(page: Page): Promise<boolean> {
+  return page
+    .waitForFunction(
+      (eventName) =>
+        window.__STORYBOOK_ADDONS_CHANNEL__?.last(eventName) !== undefined ||
+        document.body.classList.contains('sb-show-errordisplay'),
+      STORY_FINISHED,
+      { timeout: STORY_FINISHED_TIMEOUT_MS },
+    )
+    .then(
+      () => true,
+      () => false,
+    )
+}
+
 async function checkStory(context: BrowserContext, base: string, story: StoryEntry, mode: Mode): Promise<Finding> {
   const page = await context.newPage()
   const consoleErrors: string[] = []
@@ -80,20 +106,7 @@ async function checkStory(context: BrowserContext, base: string, story: StoryEnt
       waitUntil: 'domcontentloaded',
       timeout: 60000,
     })
-    await page
-      .waitForFunction(
-        () => {
-          const root = document.querySelector('#storybook-root')
-          const ready =
-            document.body.classList.contains('sb-show-main') &&
-            !document.querySelector('.sb-preparing-story, .sb-loader') &&
-            root !== null &&
-            root.childNodes.length > 0
-          return ready || document.body.classList.contains('sb-show-errordisplay')
-        },
-        { timeout: 20000 },
-      )
-      .catch(() => {})
+    if (!(await waitForStoryFinished(page))) result.issues.push('RENDER_TIMEOUT')
     await page.waitForTimeout(1500) // let MSW/RTK settle past skeletons
 
     const state = await page.evaluate(() => {

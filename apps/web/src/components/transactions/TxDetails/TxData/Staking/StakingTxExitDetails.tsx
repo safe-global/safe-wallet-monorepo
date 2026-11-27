@@ -1,7 +1,8 @@
+import { Fragment } from 'react'
 import type { NativeStakingValidatorsExitTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
-import { Link } from '@/components/ui/link'
-import FieldsGrid from '@/components/tx/FieldsGrid'
+import { Link } from '@safe-global/views/components/ui/link'
+import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import StakingStatus from './StakingStatus'
 import { formatDurationFromMilliseconds } from '@safe-global/utils/utils/formatters'
 import { getBeaconChainLink } from '@safe-global/utils/features/stake/utils/beaconChain'
@@ -18,10 +19,10 @@ const StakingTxExitDetails = ({ info }: { info: NativeStakingValidatorsExitTrans
       <FieldsGrid title="Exit">
         {info.validators.map((validator: string, index: number) => {
           return (
-            <>
-              <BeaconChainLink name={`Validator ${index + 1}`} validator={validator} key={index} />
+            <Fragment key={validator}>
+              <BeaconChainLink name={`Validator ${index + 1}`} validator={validator} />
               {index < info.validators.length - 1 && ' | '}
-            </>
+            </Fragment>
           )
         })}
       </FieldsGrid>

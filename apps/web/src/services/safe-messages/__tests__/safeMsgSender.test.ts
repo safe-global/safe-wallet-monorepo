@@ -6,7 +6,7 @@ import { dispatchSafeMsgConfirmation, dispatchSafeMsgProposal } from '@/services
 import * as utils from '@safe-global/utils/utils/safe-messages'
 import * as events from '@/services/safe-messages/safeMsgEvents'
 import * as sdk from '@/services/tx/tx-sender/sdk'
-import { zeroPadValue } from 'ethers'
+import { concat, dataLength, toBeHex, zeroPadValue } from 'ethers'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -277,6 +277,65 @@ describe('safeMsgSender', () => {
         messageHash: '0x0123',
         error: expect.any(Error),
       })
+    })
+  })
+
+  describe('a Safe as the signer', () => {
+    const SIGNER_SAFE = zeroPadValue('0x0abc', 20)
+    const safe = {
+      version: '1.3.0',
+      chainId: '5',
+      address: { value: zeroPadValue('0x0789', 20) },
+    } as unknown as SafeState
+
+    // EIP-1271: the owner Safe, the offset of its signature, v = 0, then the signature with its length
+    const contractSignatureOf = (owner: string, signature: string) =>
+      concat([
+        zeroPadValue(owner, 32),
+        zeroPadValue(toBeHex(65), 32),
+        '0x00',
+        zeroPadValue(toBeHex(dataLength(signature)), 32),
+        signature,
+      ])
+
+    const captureBody = (path: string) => {
+      const captured: { body?: unknown } = {}
+      server.use(
+        http.post(`${GATEWAY_URL}${path}`, async ({ request }) => {
+          captured.body = await request.json()
+          return HttpResponse.json({})
+        }),
+      )
+      return captured
+    }
+
+    it('proposes the message with a contract signature of the signer Safe', async () => {
+      const captured = captureBody('/v1/chains/:chainId/safes/:safeAddress/messages')
+
+      await dispatchSafeMsgProposal({
+        provider: MockEip1193Provider,
+        safe,
+        message: 'Hello world',
+        origin: undefined,
+        safeSignerAddress: SIGNER_SAFE,
+      })
+
+      expect(captured.body).toEqual(
+        expect.objectContaining({ signature: contractSignatureOf(SIGNER_SAFE, mockValidSignature) }),
+      )
+    })
+
+    it('confirms the message with a contract signature of the signer Safe', async () => {
+      const captured = captureBody('/v1/chains/:chainId/messages/:messageHash/signatures')
+
+      await dispatchSafeMsgConfirmation({
+        provider: MockEip1193Provider,
+        safe,
+        message: 'Hello world',
+        safeSignerAddress: SIGNER_SAFE,
+      })
+
+      expect(captured.body).toEqual({ signature: contractSignatureOf(SIGNER_SAFE, mockValidSignature) })
     })
   })
 

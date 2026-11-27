@@ -124,7 +124,12 @@ function publicAssetsPlugin(): Plugin {
 }
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../packages/views/src/**/*.mdx',
+    '../../../packages/views/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
 
   addons: [
     '@storybook/addon-onboarding',
@@ -168,8 +173,8 @@ const config: StorybookConfig = {
       ...(config.resolve.alias || {}),
       // Mock useIsOfficialHost to always return true in Storybook
       '@/hooks/useIsOfficialHost': path.resolve(__dirname, '../.storybook/mocks/useIsOfficialHost.ts'),
-      // Mock next/image to bypass the image loader stub
-      'next/image': path.resolve(__dirname, '../.storybook/mocks/nextImage.js'),
+      // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
+      '@cowprotocol/widget-react': path.resolve(__dirname, '../.storybook/mocks/cowSwapWidget.tsx'),
       // Polyfill Node.js querystring module for browser
       querystring: path.resolve(__dirname, '../.storybook/mocks/querystring.ts'),
     }
@@ -184,7 +189,7 @@ const config: StorybookConfig = {
 
     // Ensure proper resolution of monorepo packages
     config.resolve = config.resolve || {}
-    config.resolve.dedupe = [...(config.resolve.dedupe || []), 'react', 'react-dom']
+    config.resolve.dedupe = [...(config.resolve.dedupe || []), 'react', 'react-dom', 'react-hook-form']
 
     return config
   },

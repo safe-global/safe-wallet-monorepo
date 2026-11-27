@@ -1,5 +1,5 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 // The address as both address-book tables render it: its own column on desktop, and under the
 // name in the compact layout, which drops that column.

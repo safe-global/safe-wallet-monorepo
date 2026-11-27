@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import CopyButton from '@/components/common/CopyButton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
 
 export const getMemberIdentifier = ({ user }: MemberDto) => {
   if (user.email) return { value: user.email, isAddress: false }

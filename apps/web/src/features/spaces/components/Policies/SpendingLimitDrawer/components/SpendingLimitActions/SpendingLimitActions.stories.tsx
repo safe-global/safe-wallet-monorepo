@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { PENDING_BANNER_TITLE, signAndExecuteLine } from '../../messages'
+import {
+  PENDING_BANNER_TITLE,
+  signAndExecuteLine,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import SpendingLimitActions from './SpendingLimitActions'
 
 const meta = {
@@ -13,6 +16,7 @@ const meta = {
       reviewTransactionHref: '/transactions/tx?id=0x9f3c',
     },
     onEdit: fn(),
+    onEnableModule: fn(),
     onConnectWallet: fn(),
   },
   decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],
@@ -52,6 +56,31 @@ export const ManageDisabled: Story = {
       action: 'manage',
       disabled: true,
       helper: 'Only signers of this Safe account can delete or edit this spending limit.',
+    },
+  },
+}
+
+export const EnableModule: Story = {
+  args: {
+    state: {
+      kind: 'unenforced',
+      action: 'enable',
+      disabled: false,
+      bannerTitle: 'Spending limit module deleted',
+      bannerLine2: 'Spending limit not applied as module is deleted.',
+    },
+  },
+}
+
+export const EnableModuleDisabled: Story = {
+  args: {
+    state: {
+      kind: 'unenforced',
+      action: 'enable',
+      disabled: true,
+      bannerTitle: 'Spending limit module deleted',
+      bannerLine2: 'Spending limit not applied as module is deleted.',
+      helper: 'Only signers of this Safe account can add the module.',
     },
   },
 }

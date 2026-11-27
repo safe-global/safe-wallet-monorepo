@@ -1,8 +1,9 @@
 import { useMemo, type ReactElement } from 'react'
+import compact from 'lodash/compact'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type {
   ContractAnalysisResults,
@@ -15,13 +16,14 @@ import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
+import { getOverallStatus, getPrimaryResult } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
+import { useIsSafenetChecksEnabled, useSafenetShieldState } from '@/features/safenet-checks'
 
 const shieldLogoOnHover = [
   'cursor-pointer',
@@ -45,6 +47,7 @@ export const SafeShieldDisplay = ({
   onAddToTrustedList,
   hasProFeatures = true,
   isSafePro = true,
+  isOffchainMessage = false,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -59,6 +62,7 @@ export const SafeShieldDisplay = ({
   hasProFeatures?: boolean
   /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
   isSafePro?: boolean
+  isOffchainMessage?: boolean
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -87,6 +91,15 @@ export const SafeShieldDisplay = ({
     [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResults],
   )
 
+  const safenet = useSafenetShieldState({
+    enabled: useIsSafenetChecksEnabled() && !isOffchainMessage,
+    isSafePro,
+    hasProFeatures,
+  })
+
+  // A Safenet risk outranks a calmer overall result, so the header never reads "all passed" beside it.
+  const headerStatus = getPrimaryResult(compact([overallStatus, safenet.risk])) ?? undefined
+
   const checks = useMemo(
     () =>
       countChecks({
@@ -98,6 +111,8 @@ export const SafeShieldDisplay = ({
         hasSimulation,
         isSimulationSuccess,
         isContractCall: isContractCall(safeTx),
+        isOffchainMessage,
+        safenet: safenet.check,
       }),
     [
       threatResults,
@@ -108,6 +123,8 @@ export const SafeShieldDisplay = ({
       hasSimulation,
       isSimulationSuccess,
       safeTx,
+      isOffchainMessage,
+      safenet.check,
     ],
   )
 
@@ -123,7 +140,7 @@ export const SafeShieldDisplay = ({
           contract={contract}
           threat={threat}
           deadlock={deadlock}
-          overallStatus={overallStatus}
+          overallStatus={headerStatus}
           checks={checks}
         />
 
@@ -141,6 +158,7 @@ export const SafeShieldDisplay = ({
           onAddToTrustedList={onAddToTrustedList}
           hasProFeatures={hasProFeatures}
           isSafePro={isSafePro}
+          isOffchainMessage={isOffchainMessage}
         />
       </div>
 

@@ -1,8 +1,8 @@
 import {
   ARBITRATION_POLL_MS,
   ARBITRATION_WINDOW_MS,
+  DISPUTED_POLL_MS,
   LATE_WINDOW_BLOCKS,
-  PLAIN_DEADLINE_BLOCKS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
   UNAVAILABLE_GRACE_MS,
@@ -19,12 +19,6 @@ type PollingInput = {
   headBlock: string | null
   deadlineBlock: string | null
   /**
-   * Block of the check's earliest observed event; substitutes for the deadline
-   * on the plain path. Callers should pass anchors that persist across reads —
-   * null anchors fail open to the fast interval.
-   */
-  firstEventBlock: string | null
-  /**
    * Transaction submission time, the anchor of the UNAVAILABLE grace window.
    * `null` or absent disables the window.
    */
@@ -40,22 +34,24 @@ type PollingInput = {
 
 /**
  * How often to re-poll a check, in ms; `0` = stop (RTK Query's convention).
- * Stops on a rejection; otherwise fast (6s) up to the effective deadline
- * (on-chain, or {@link PLAIN_DEADLINE_BLOCKS} past the first event), slow (30s)
- * through the ~1h late window, then stops. UNAVAILABLE polls slowly inside
- * {@link UNAVAILABLE_GRACE_MS} of submission and BENIGN inside
+ * Stops on a rejection; otherwise fast (6s) up to the on-chain deadline, slow
+ * (30s) through the ~1h late window, then stops. DISPUTED polls every
+ * {@link DISPUTED_POLL_MS} for as long as the dispute is open. UNAVAILABLE polls
+ * slowly inside {@link UNAVAILABLE_GRACE_MS} of submission and BENIGN inside
  * {@link ARBITRATION_WINDOW_MS} of the attestation, then both stop.
  */
 export const computePollingInterval = ({
   status,
   headBlock,
   deadlineBlock,
-  firstEventBlock,
   submittedAtMs,
   attestedAtMs,
   nowMs,
 }: PollingInput): number => {
   if (status === CheckStatus.MALICIOUS || status === CheckStatus.VERIFICATION_FAILED) return 0
+
+  // The dispute deadline is ~28 days out, so the deadline cadence below would poll at 6s the whole time.
+  if (status === CheckStatus.DISPUTED) return DISPUTED_POLL_MS
 
   // ponytail: BENIGN keeps a slow poll for the arbitration window. The merge
   // permits BENIGN → MALICIOUS precisely because arbitration can still reject a
@@ -85,12 +81,7 @@ export const computePollingInterval = ({
   }
 
   const head = headBlock !== null ? BigInt(headBlock) : null
-  const deadline =
-    deadlineBlock !== null
-      ? BigInt(deadlineBlock)
-      : firstEventBlock !== null
-        ? BigInt(firstEventBlock) + BigInt(PLAIN_DEADLINE_BLOCKS)
-        : null
+  const deadline = deadlineBlock !== null ? BigInt(deadlineBlock) : null
 
   if (deadline === null || head === null || head <= deadline) return POLL_INTERVAL_FAST_MS
   if (head <= deadline + BigInt(LATE_WINDOW_BLOCKS)) return POLL_INTERVAL_LATE_MS

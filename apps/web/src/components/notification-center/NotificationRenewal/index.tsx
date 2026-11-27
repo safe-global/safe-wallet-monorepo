@@ -1,11 +1,11 @@
 import { useState, type ReactElement } from 'react'
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { useNotificationsRenewal } from '@/components/settings/PushNotifications/hooks/useNotificationsRenewal'
 import { useIsNotificationsRenewalEnabled } from '@/components/settings/PushNotifications/hooks/useNotificationsTokenVersion'
-import { RENEWAL_MESSAGE } from '@/components/settings/PushNotifications/constants'
+import { RENEWAL_MESSAGE } from '@safe-global/views/components/settings/PushNotifications/constants'
 import { Permission } from '@/permissions/config'
 
 const NotificationRenewal = (): ReactElement => {

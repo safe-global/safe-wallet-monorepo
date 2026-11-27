@@ -1,12 +1,12 @@
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Chip } from '@/components/ui/chip'
-import { Link } from '@/components/ui/link'
+import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
+import { Label } from '@safe-global/views/components/ui/label'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Chip } from '@safe-global/views/components/ui/chip'
+import { Link } from '@safe-global/views/components/ui/link'
 import type { Dispatch, SetStateAction, ReactElement } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
-import WalletIcon from '@/components/common/WalletIcon'
+import WalletIcon from '@safe-global/views/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 
 import RemainingRelays from '../RemainingRelays'
@@ -234,7 +234,7 @@ export const _ExecutionMethodSelector = ({
               className="flex flex-1 cursor-pointer items-center gap-2"
             >
               <RadioGroupItem value={ExecutionMethod.WALLET} />
-              <Typography className={css.radioLabel}>
+              <Typography as="span" className={css.radioLabel}>
                 <WalletIcon provider={wallet?.label || ''} width={20} height={20} icon={wallet?.icon} /> Connected
                 wallet
               </Typography>

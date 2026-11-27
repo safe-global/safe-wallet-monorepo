@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react'
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
-import { Countdown } from '@/components/common/Countdown'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Countdown } from '@safe-global/views/components/common/Countdown'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
@@ -24,8 +24,14 @@ import { AppRoutes } from '@/config/routes'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import type { DelegateAction } from '@safe-global/utils/services/delegates'
 import type { PendingDelegation as PendingDelegationType } from '@/features/proposers/types'
 import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+
+const SIGNING_ACTION_BY_DELEGATION: Record<PendingDelegationType['action'], DelegateAction> = {
+  add: 'add',
+  remove: 'delete',
+}
 
 type PendingDelegationProps = {
   delegation: PendingDelegationType
@@ -59,7 +65,7 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     : ''
 
   const handleSign = async () => {
-    if (!wallet?.provider) return
+    if (!wallet?.provider || !chain) return
 
     setError(undefined)
     setIsSignLoading(true)
@@ -67,10 +73,14 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     try {
       const signer = await getAssertedChainSigner(wallet.provider)
 
+      const signingAction = SIGNING_ACTION_BY_DELEGATION[delegation.action]
+
       const eoaSignature = await signProposerTypedDataForSafe(
-        chainId,
+        chain,
         delegation.delegateAddress,
         delegation.parentSafeAddress,
+        delegation.nestedSafeAddress,
+        signingAction,
         signer,
       )
 

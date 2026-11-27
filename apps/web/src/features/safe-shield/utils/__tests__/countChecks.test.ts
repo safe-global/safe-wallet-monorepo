@@ -45,6 +45,12 @@ describe('countChecks', () => {
     ).toEqual({ passed: 1, total: 1 })
   })
 
+  it('reads 1 of 1 on an off-chain message: no locked rows and no simulation, whatever the plan', () => {
+    const offchainMessage = { threat, hasSimulation: true, isSimulationSuccess: false, isOffchainMessage: true }
+    expect(countChecks({ ...offchainMessage, hasProFeatures: false })).toEqual({ passed: 1, total: 1 })
+    expect(countChecks({ ...offchainMessage, hasProFeatures: true })).toEqual({ passed: 1, total: 1 })
+  })
+
   it('adds the contract and deadlock rows only when they have results, and a simulation not yet run', () => {
     expect(
       countChecks({
@@ -60,5 +66,12 @@ describe('countChecks', () => {
       passed: 0,
       total: 0,
     })
+  })
+
+  it('adds the Safenet row only when shown, and passes it only on its own verdict', () => {
+    const allPassed = { threat, recipient, hasProFeatures: true, hasSimulation: true, isSimulationSuccess: true }
+    expect(countChecks({ ...allPassed, safenet: { shown: true, passed: false } })).toEqual({ passed: 3, total: 4 })
+    expect(countChecks({ ...allPassed, safenet: { shown: true, passed: true } })).toEqual({ passed: 4, total: 4 })
+    expect(countChecks({ ...allPassed, safenet: { shown: false, passed: true } })).toEqual({ passed: 3, total: 3 })
   })
 })

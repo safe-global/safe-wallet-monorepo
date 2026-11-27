@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceActivityLog from './index'
 import type { MockStoryConfig } from '@/stories/mocks/types'
@@ -79,7 +79,7 @@ const storyConfig = (handlers: MockStoryConfig['handlers']): MockStoryConfig => 
   wallet: 'owner',
   features: { spaces: true },
   pathname: '/spaces/activity',
-  query: { spaceId: 'uuid-1' },
+  query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
   handlers,
 })

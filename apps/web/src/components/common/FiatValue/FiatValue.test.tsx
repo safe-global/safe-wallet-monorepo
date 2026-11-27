@@ -1,4 +1,5 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { initialState } from '@/store/settingsSlice'
 
 const normalizer = (text: string) => text.replace(/\u200A/g, ' ')
 
@@ -22,6 +23,15 @@ describe('FiatValue', () => {
     await user.hover(span)
     const tooltip = await screen.findByText('$ 100.00', { selector: '[data-slot="tooltip-content"]' })
     expect(tooltip).toBeInTheDocument()
+  })
+
+  it('should render fiat value in the selected currency', () => {
+    const FiatValue = require('.').default
+    const { container } = render(<FiatValue value={100} />, {
+      initialReduxState: { settings: { ...initialState, currency: 'eur' } },
+    })
+
+    expect(normalizer(container.textContent ?? '')).toMatch(/^€\s?100/)
   })
 
   it('should render a big fiat value', async () => {

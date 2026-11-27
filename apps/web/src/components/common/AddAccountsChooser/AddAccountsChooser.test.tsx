@@ -47,7 +47,7 @@ describe('AddAccountsChooser (My accounts)', () => {
     await userEvent.click(screen.getByTestId('add-accounts-select-existing'))
 
     expect(push).toHaveBeenCalledWith({ pathname: '/new-safe/load', query: { next: '/welcome/accounts' } })
-    expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining({ action: 'Add Safe to watchlist' }))
+    expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining({ action: 'Add Safe to watchlist' }), undefined)
   })
 
   it('navigates to /new-safe/create with the current page as `next` when creating new', async () => {
@@ -56,7 +56,7 @@ describe('AddAccountsChooser (My accounts)', () => {
     await userEvent.click(screen.getByTestId('add-accounts-create-new'))
 
     expect(push).toHaveBeenCalledWith({ pathname: '/new-safe/create', query: { next: '/welcome/accounts' } })
-    expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining({ action: 'Create new Safe' }))
+    expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining({ action: 'Create new Safe' }), undefined)
   })
 
   it('calls onLinkClick when a row navigates (closes the sidebar drawer)', async () => {

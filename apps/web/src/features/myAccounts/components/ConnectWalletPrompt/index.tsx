@@ -1,5 +1,5 @@
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle, AlertDescription } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
 import { WalletIcon } from 'lucide-react'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 

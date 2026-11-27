@@ -1,6 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import SafeItem from '../SafeItem'
-import type { SafeItemData, SafeItemDataChain } from '../../types'
+import type {
+  SafeItemData,
+  SafeItemDataChain,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
@@ -24,7 +27,7 @@ jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('../BalanceDisplay', () => {
+jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay', () => {
   const Mock = () => <div data-testid="balance-display" />
   Mock.displayName = 'BalanceDisplay'
   return { __esModule: true, default: Mock }

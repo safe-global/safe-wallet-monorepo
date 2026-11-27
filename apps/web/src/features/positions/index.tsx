@@ -1,14 +1,19 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import PositionsHeader from './components/PositionsHeader'
 import { PositionGroup } from './components/PositionGroup'
 import usePositions from './hooks/usePositions'
 import PositionsEmpty from './components/PositionsEmpty'
 import usePositionsFiatTotal from './hooks/usePositionsFiatTotal'
 import React from 'react'
-import PositionsUnavailable from './components/PositionsUnavailable'
+import PositionsUnavailable from '@safe-global/views/features/positions/components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
-import PositionsSkeleton from './components/PositionsSkeleton'
+import PositionsSkeleton from '@safe-global/views/features/positions/components/PositionsSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
 import { useLoadFeature } from '@/features/__core__'
 

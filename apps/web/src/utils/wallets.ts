@@ -1,4 +1,3 @@
-import type { EthersError } from '@/utils/ethers-utils'
 import { getWalletConnectLabel, type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { WALLET_KEYS } from '@/hooks/wallets/consts'
@@ -7,21 +6,20 @@ const EMPTY_DATA = '0x'
 import memoize from 'lodash/memoize'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 import { type Eip1193Provider, type JsonRpcProvider } from 'ethers'
+import type { SignerWallet } from '@/components/common/WalletProvider'
 
 const WALLETCONNECT = 'WalletConnect'
 const WC_LEDGER = 'Ledger Wallet'
 export const EIP_7702_DELEGATED_ACCOUNT_PREFIX = '0xef0100'
 
-const isWCRejection = (err: Error): boolean => {
-  return /rejected/.test(err?.message)
-}
+// EIP-1193 "User Rejected Request"; a provider can reject with a plain object that has only this code and a message
+const USER_REJECTED_REQUEST = 4001
 
-const isEthersRejection = (err: EthersError): boolean => {
-  return err.code === 'ACTION_REJECTED'
-}
-
-export const isWalletRejection = (err: EthersError | Error): boolean => {
-  return isEthersRejection(err as EthersError) || isWCRejection(err)
+/** Whether the wallet's user refused the request; takes the raw thrown value, which need not be an Error. */
+export const isWalletRejection = (err: unknown): boolean => {
+  if (typeof err !== 'object' || err === null) return false
+  if ('code' in err && (err.code === 'ACTION_REJECTED' || err.code === USER_REJECTED_REQUEST)) return true
+  return 'message' in err && typeof err.message === 'string' && /rejected/.test(err.message)
 }
 
 export const isEthSignWallet = (wallet: ConnectedWallet): boolean => {
@@ -69,6 +67,8 @@ export const isEIP7702DelegatedAccount = async (address: string, provider?: Json
   const code = await getAccountCode(address, provider)
   return code.startsWith(EIP_7702_DELEGATED_ACCOUNT_PREFIX)
 }
+
+export const isSafeSigner = (signer: SignerWallet): boolean => Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
 
 export const isSmartContractWallet = memoize(
   async (chainId: string, address: string, provider?: JsonRpcProvider): Promise<boolean> => {

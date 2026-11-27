@@ -3,7 +3,7 @@ import { PushNotifications } from '.'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsMac } from '@/hooks/useIsMac'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { useNotificationPreferences } from './hooks/useNotificationPreferences'
 import { useNotificationRegistrations } from './hooks/useNotificationRegistrations'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -17,7 +17,7 @@ jest.mock('@/hooks/useIsSafeOwner')
 
 jest.mock('@/hooks/useIsMac')
 
-jest.mock('@/hooks/use-mobile')
+jest.mock('@safe-global/views/hooks/use-mobile')
 
 jest.mock('./hooks/useNotificationPreferences')
 
@@ -107,6 +107,22 @@ describe('PushNotifications', () => {
     expect(screen.getByLabelText('Incoming transactions')).toBeInTheDocument()
     expect(screen.getByLabelText('Outgoing transactions')).toBeInTheDocument()
     expect(screen.getByText('Confirmation requests')).toBeInTheDocument()
+  })
+
+  it('disables the switch for a Safe that is not deployed yet', () => {
+    ;(useSafeInfo as jest.MockedFunction<typeof useSafeInfo>).mockReturnValue({
+      safe: extendedSafeInfoBuilder()
+        .with({ address: { value: mockSafeAddress } })
+        .with({ chainId: '1' })
+        .with({ deployed: false })
+        .build(),
+      safeAddress: mockSafeAddress,
+      safeLoaded: true,
+    } as ReturnType<typeof useSafeInfo>)
+
+    render(<PushNotifications />)
+
+    expect(screen.getByTestId('notifications-switch')).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('registers the Safe when the switch is toggled on', async () => {

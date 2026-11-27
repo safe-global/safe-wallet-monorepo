@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import ClaimTrialModal, { claimCopy, _freeLabel } from '../ClaimTrialModal'
 
 const mockUseSpaceOffers = jest.fn()
@@ -9,6 +11,7 @@ const mockSpaceSafes = jest.fn()
 let mockCheckoutState: Record<string, unknown> = {}
 let mockRemoveState: Record<string, unknown> = {}
 
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
@@ -57,9 +60,13 @@ const offer = (planName: string, paymentLinkId: string, seats: number, price: nu
   billingCycle: 'month',
   trialPeriodDays: 60,
 })
-const BUSINESS = { name: 'Business', offers: [offer('Business', 'pl_business', 20, 499)] }
+const BUSINESS = {
+  name: 'Business',
+  offers: [{ ...offer('Business', 'pl_business', 20, 499), features: ['Policy engine'] }],
+}
 const STARTER = { name: 'Starter', offers: [offer('Starter', 'pl_starter', 2, 149)] }
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
+const LOGIN_ENTRY = { 'Entry Point': 'workspace_login' }
 
 describe('ClaimTrialModal', () => {
   beforeEach(() => {
@@ -125,6 +132,23 @@ describe('ClaimTrialModal', () => {
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
+  })
+
+  it('tracks the offer, the claim and the dismissal with the entry point', () => {
+    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_VIEWED, {
+      ...LOGIN_ENTRY,
+      'Free Access Length': 60,
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED, LOGIN_ENTRY)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED, {
+      ...LOGIN_ENTRY,
+      'Dismiss Action': 'go_to_my_accounts',
+    })
   })
 
   it('greets a brand-new Workspace with the full feature list and sends it straight to Stripe', () => {

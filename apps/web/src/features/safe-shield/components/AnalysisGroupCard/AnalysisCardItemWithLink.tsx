@@ -1,7 +1,7 @@
 import { type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { type ComponentProps, type ReactElement, type ReactNode } from 'react'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 
 interface AnalysisCardItemWithLinkProps {
   result: AnalysisResult

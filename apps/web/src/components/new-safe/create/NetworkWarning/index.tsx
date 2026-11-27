@@ -1,4 +1,4 @@
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { useCurrentChain } from '@/hooks/useChains'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
 import useIsWrongChain from '@/hooks/useIsWrongChain'

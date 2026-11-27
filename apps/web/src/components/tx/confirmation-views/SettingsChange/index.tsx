@@ -1,7 +1,7 @@
 import type { SettingsChangeTransaction as SettingsChangeType } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NarrowConfirmationViewProps } from '../types'
 import { OwnerList } from '@/components/tx-flow/common/OwnerList'
@@ -9,7 +9,7 @@ import MinusIcon from '@/public/images/common/minus.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { useContext } from 'react'
-import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
+import { SettingsChangeContext } from '@safe-global/views/components/tx-flow/flows/AddOwner/context'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export interface SettingsChangeProps extends NarrowConfirmationViewProps {

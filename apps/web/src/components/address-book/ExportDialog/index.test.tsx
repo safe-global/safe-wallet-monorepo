@@ -1,6 +1,11 @@
+import { faker } from '@faker-js/faker'
 import { _getCsvData } from '.'
 import ExportDialog from '.'
-import { render, screen } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render, screen, waitFor, fireEvent } from '@/tests/test-utils'
+
+jest.mock('@/services/analytics')
+
+const contact = (): [string, string] => [fakerChecksummedAddress(), faker.person.firstName()]
 
 describe('ExportDialog', () => {
   describe('getCsvData', () => {
@@ -29,5 +34,38 @@ describe('ExportDialog', () => {
     const onClose = jest.fn()
     render(<ExportDialog handleClose={onClose} />)
     expect(screen.getByText('Export address book')).toBeInTheDocument()
+  })
+
+  describe('with entries on two chains', () => {
+    const mainnet = [contact(), contact()]
+    const sepolia = [contact()]
+    const addressBook = { '1': Object.fromEntries(mainnet), '11155111': Object.fromEntries(sepolia) }
+
+    it('shows the number of entries across all chains', () => {
+      render(<ExportDialog handleClose={jest.fn()} />, { initialReduxState: { addressBook } })
+
+      expect(screen.getByTestId('export-summary')).toHaveTextContent('3 address book entries')
+    })
+
+    it('downloads a CSV with one row per entry of every chain', async () => {
+      const createObjectURL = jest.fn<string, [Blob]>(() => 'blob:address-book')
+      window.URL.createObjectURL = createObjectURL
+      const anchorClick = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+      render(<ExportDialog handleClose={jest.fn()} />, { initialReduxState: { addressBook } })
+
+      fireEvent.click(screen.getByTestId('export-modal-btn'))
+
+      await waitFor(() => expect(anchorClick).toHaveBeenCalled())
+      const csv = (await createObjectURL.mock.calls[0][0].text()).trim()
+      expect(csv.split(/\r?\n/)).toEqual([
+        'address,name,chainId',
+        ...mainnet.map(([address, name]) => `${address},${name},1`),
+        ...sepolia.map(([address, name]) => `${address},${name},11155111`),
+      ])
+      const anchor = anchorClick.mock.contexts[0] as HTMLAnchorElement
+      expect(anchor.getAttribute('download')).toMatch(/^safe-address-book-\d{4}-\d{2}-\d{2}/)
+
+      anchorClick.mockRestore()
+    })
   })
 })
