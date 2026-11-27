@@ -1,52 +1,76 @@
 /**
- * Workspace Transactions Page Object — the Pending tab of a Workspace: its New transaction button and Safe picker,
- * and the queue rows with their Sign and Execute buttons and their actions menu.
+ * Workspace Transactions Page Object — the Pending tab, which lists the queue of every Safe in a Workspace: its New
+ * transaction button and Safe picker, and the queue rows with their signature gauge, Sign and Execute buttons and
+ * actions menu.
  *
  * Rule: Page Objects hold locators and actions only. Assertions belong in the test file.
  */
 import { type Page, type Locator } from '@playwright/test'
+import { ROUTES } from '../data/constants'
 
 export class WorkspaceTransactionsPage {
+  readonly queueTable: Locator
+  readonly rows: Locator
+  readonly emptyQueue: Locator
   readonly newTransactionButton: Locator
   readonly safePicker: Locator
   readonly sendTokensButton: Locator
-  readonly rows: Locator
-  readonly emptyQueue: Locator
   readonly confirmDeleteButton: Locator
 
   constructor(private readonly page: Page) {
+    this.queueTable = page.getByRole('table', { name: 'Pending transactions' })
+    this.rows = this.queueTable.getByTestId('space-queue-row')
+    this.emptyQueue = page.getByText('Pending transactions of your Safe accounts will appear here')
     this.newTransactionButton = page.getByRole('button', { name: 'New transaction' })
     this.safePicker = page.getByRole('dialog', { name: 'New transaction from' })
     this.sendTokensButton = page.getByTestId('send-tokens-btn')
-    this.rows = page.getByTestId('space-queue-row')
-    this.emptyQueue = page.getByText('Pending transactions of your Safe accounts will appear here')
     this.confirmDeleteButton = page.getByTestId('delete-tx-btn')
   }
 
   async goto(workspaceId: string): Promise<void> {
-    await this.page.goto(`/spaces/transactions?spaceId=${workspaceId}`)
+    await this.page.goto(`${ROUTES.spacesTransactions}?spaceId=${workspaceId}`)
   }
 
-  /** From New transaction, pick the Safe named `safeName` in the Workspace and open its send-tokens form */
-  async startTransfer(safeName: string): Promise<void> {
+  /** From New transaction, pick the Safe named `safeName` in the Workspace; the new-transaction flow opens */
+  async newTransaction(safeName: string): Promise<void> {
     await this.newTransactionButton.click()
     await this.safePicker.getByTestId('safe-list-item').filter({ hasText: safeName }).click()
+  }
+
+  /** From New transaction, pick the Safe named `safeName` and open its send-tokens form */
+  async startTransfer(safeName: string): Promise<void> {
+    await this.newTransaction(safeName)
     await this.sendTokensButton.click()
   }
 
-  /** The queue row of the transaction with `nonce` */
+  /** The row of the transaction with `nonce`, for a Workspace whose only queued Safe is the one under test */
   row(nonce: number): Locator {
     return this.rows.filter({ has: this.actionsMenuButton(nonce) })
   }
 
-  /** Sign the transaction with `nonce` from its row; its review opens */
-  async sign(nonce: number): Promise<void> {
-    await this.row(nonce).getByRole('button', { name: 'Sign', exact: true }).click()
+  /** The signature gauge of `row`, named by the row's status and count, e.g. "Ready to sign. 1 of 3 signatures" */
+  signatures(row: Locator): Locator {
+    return row.getByRole('button', { name: / of \d+ signatures?$/ })
   }
 
-  /** Execute the fully signed transaction with `nonce` from its row; its review opens */
-  async execute(nonce: number): Promise<void> {
-    await this.row(nonce).getByTestId('execute-tx-btn').click()
+  /** Each row's nonce, Safe and summary, signatures and status, without the relative time, which changes on its own */
+  rowStates(): Promise<string[]> {
+    return this.rows.evaluateAll((rows) =>
+      rows.map((row) => {
+        const cells = row.querySelectorAll('td')
+        return [0, 1, 4, 5].map((cell) => cells[cell]?.innerText.trim() ?? '').join(' | ')
+      }),
+    )
+  }
+
+  /** Sign the transaction in `row`; its review opens for the row's Safe */
+  async sign(row: Locator): Promise<void> {
+    await row.getByRole('button', { name: 'Sign', exact: true }).click()
+  }
+
+  /** Execute the fully signed transaction in `row`; its review opens for the row's Safe */
+  async execute(row: Locator): Promise<void> {
+    await row.getByTestId('execute-tx-btn').click()
   }
 
   /** Start a transfer that replaces the transaction with `nonce`; the send-tokens form opens */
