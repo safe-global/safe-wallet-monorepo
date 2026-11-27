@@ -84,8 +84,8 @@ describe('allowlistConfigurations', () => {
     const token = getAddress('0xabcdef0000000000000000000000000000000001')
 
     const configurations = buildAllowlistConfigurations(CHAIN_ID, [
-      { tokenAddress: token.toLowerCase(), recipients: [ALICE] },
-      { tokenAddress: token, recipients: [BOB] },
+      { tokenAddress: token, recipients: [ALICE] },
+      { tokenAddress: token.toLowerCase(), recipients: [BOB] },
     ])
 
     expect(configurations).toHaveLength(1)
