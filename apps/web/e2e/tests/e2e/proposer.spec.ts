@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 import { parseEther } from 'ethers'
+import { confirmationsOf, proposedByDelegateOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { HomePage } from '../../src/pages/home.page'
 import { test, expect, type Journey } from '../../src/fixtures/journey.fixture'
@@ -40,12 +41,9 @@ test.describe('Proposer', { tag: '@e2e' }, () => {
     await sendTokens.nextButton.click()
     await review.propose()
 
-    await expect.poll(() => safeApiClient.getQueued(safe.address)).toHaveLength(1)
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([0])
     const [{ id: txId }] = await safeApiClient.getQueued(safe.address)
-    const details = await safeApiClient.findTransaction(txId)
-    const execution = details?.detailedExecutionInfo
-    expect(execution?.type === 'MULTISIG' && execution.proposedByDelegate?.value).toBe(journey.owners.dave.address)
-    expect(execution?.type === 'MULTISIG' && execution.confirmations).toEqual([])
+    expect(proposedByDelegateOf(await safeApiClient.findTransaction(txId))).toBe(journey.owners.dave.address)
 
     await journey.connectAs('alice')
     await queue.goto(safe.prefixedAddress)

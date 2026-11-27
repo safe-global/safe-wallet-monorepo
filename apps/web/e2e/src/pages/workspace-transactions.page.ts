@@ -43,7 +43,7 @@ export class WorkspaceTransactionsPage {
     await this.sendTokensButton.click()
   }
 
-  /** The row of the transaction with `nonce`, for a Workspace whose only queued Safe is the one under test */
+  /** The row of the transaction with `nonce`; a nonce is unique only in a Workspace with one queued Safe */
   row(nonce: number): Locator {
     return this.rows.filter({ has: this.actionsMenuButton(nonce) })
   }
@@ -94,7 +94,9 @@ export class WorkspaceTransactionsPage {
   }
 
   private async chooseAction(nonce: number, action: string): Promise<void> {
-    await this.actionsMenuButton(nonce).click()
+    await this.row(nonce)
+      .getByRole('button', { name: `More actions for #${nonce}`, exact: true })
+      .click()
     await this.page.getByRole('menuitem', { name: action, exact: true }).click()
   }
 }

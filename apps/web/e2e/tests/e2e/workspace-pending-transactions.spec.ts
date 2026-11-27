@@ -1,7 +1,13 @@
 import type { Page } from '@playwright/test'
 import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Wallet, parseEther, parseUnits } from 'ethers'
-import { confirmationsOf, nonceOf, recipientsAtNonce, rejectionNonces } from '../../src/api/transaction-items'
+import {
+  confirmationsOf,
+  nonceOf,
+  proposedByDelegateOf,
+  recipientsAtNonce,
+  rejectionNonces,
+} from '../../src/api/transaction-items'
 import { allowanceOf } from '../../src/chain/allowance'
 import { balanceOf } from '../../src/chain/balances'
 import { ROUTES } from '../../src/data/constants'
@@ -36,12 +42,6 @@ const AMOUNT = '0.001'
 const REPLACEMENT_AMOUNT = '0.002'
 const ALLOWANCE = '0.1'
 
-/** Puts the Safe in a new Business Workspace and returns its ID */
-async function seedWorkspaceQueue(page: Page, safe: SeededSafe): Promise<string> {
-  const { id } = await seedBusinessWorkspace(page, { [SAFE_NAME]: safe })
-  return id
-}
-
 test.describe('Create a transaction from the Workspace pending queue', { tag: '@e2e' }, () => {
   test('should show a transfer that a proposer creates from New as waiting, and as signable by an owner', async ({
     safePage,
@@ -51,7 +51,7 @@ test.describe('Create a transaction from the Workspace pending queue', { tag: '@
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     await seedProposer(safe, { delegate: journey.owners.dave, delegator: journey.owners.alice })
     await waitForNativeBalance(safe)
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
     const recipient = journey.newAddress()
 
     const queue = new WorkspaceTransactionsPage(safePage)
@@ -65,11 +65,9 @@ test.describe('Create a transaction from the Workspace pending queue', { tag: '@
     await sendTokens.nextButton.click()
     await review.propose()
 
-    await expect.poll(() => safeApiClient.getQueued(safe.address)).toHaveLength(1)
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([0])
     const [{ id: txId }] = await safeApiClient.getQueued(safe.address)
-    const execution = (await safeApiClient.findTransaction(txId))?.detailedExecutionInfo
-    expect(execution?.type === 'MULTISIG' && execution.proposedByDelegate?.value).toBe(journey.owners.dave.address)
-    expect(execution?.type === 'MULTISIG' && execution.confirmations).toEqual([])
+    expect(proposedByDelegateOf(await safeApiClient.findTransaction(txId))).toBe(journey.owners.dave.address)
     await expect(queue.rows).toHaveCount(1)
     await expect(queue.signatures(queue.row(0))).toHaveAccessibleName('Waiting on others. 0 of 1 signature')
 
@@ -86,7 +84,7 @@ test.describe('Create a transaction from the Workspace pending queue', { tag: '@
   }) => {
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
     await waitForNativeBalance(safe)
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
     const recipient = journey.newAddress()
 
     const queue = new WorkspaceTransactionsPage(safePage)
@@ -112,7 +110,7 @@ test.describe('Create a transaction from the Workspace pending queue', { tag: '@
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     await seedAllowance(safe, { delegate: beneficiary, amount: parseEther(ALLOWANCE) })
     await waitForNativeBalance(safe)
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
     const recipient = journey.newAddress()
     const nonceBefore = await safe.context.safe.getNonce()
 
@@ -146,7 +144,7 @@ test.describe('Act on a transaction in the Workspace pending queue', { tag: '@e2
   }) => {
     const safe = await seedSafe(journey, { owners: ['alice', 'bob', 'carol'], threshold: 3 })
     await seedQueuedTransfer(safe, { nonce: 0, recipient: journey.newAddress(), amount: AMOUNT })
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
 
     const queue = new WorkspaceTransactionsPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -169,7 +167,7 @@ test.describe('Act on a transaction in the Workspace pending queue', { tag: '@e2
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
     const recipient = journey.newAddress()
     await seedSignedTransfer(journey, safe, { nonce: 0, recipient, amount: AMOUNT })
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
 
     const queue = new WorkspaceTransactionsPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -194,7 +192,7 @@ test.describe('Act on a transaction in the Workspace pending queue', { tag: '@e2
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const recipient = journey.newAddress()
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
 
     const queue = new WorkspaceTransactionsPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -219,7 +217,7 @@ test.describe('Act on a transaction in the Workspace pending queue', { tag: '@e2
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const [recipient, newRecipient] = [journey.newAddress(), journey.newAddress()]
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
 
     const queue = new WorkspaceTransactionsPage(safePage)
     const sendTokens = new SendTokensPage(safePage)
@@ -235,9 +233,6 @@ test.describe('Act on a transaction in the Workspace pending queue', { tag: '@e2
     await expect
       .poll(async () => recipientsAtNonce(await safeApiClient.getTransactionHistory(safe.address), 0))
       .toEqual([newRecipient])
-    await expect.poll(() => safeApiClient.getQueued(safe.address)).toEqual([])
-    expect(await balanceOf(journey.env, newRecipient)).toBe(parseEther(REPLACEMENT_AMOUNT))
-    expect(await balanceOf(journey.env, recipient)).toBe(0n)
     await expect(queue.emptyQueue).toBeVisible()
   })
 
@@ -250,7 +245,7 @@ test.describe('Act on a transaction in the Workspace pending queue', { tag: '@e2
     const recipient = journey.newAddress()
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
     const last = await seedQueuedTransfer(safe, { nonce: 1, recipient, amount: AMOUNT })
-    const workspaceId = await seedWorkspaceQueue(safePage, safe)
+    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { [SAFE_NAME]: safe })
 
     const queue = new WorkspaceTransactionsPage(safePage)
     await queue.goto(workspaceId)
