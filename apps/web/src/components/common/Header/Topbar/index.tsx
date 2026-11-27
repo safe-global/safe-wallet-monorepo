@@ -1,10 +1,10 @@
-import type { Dispatch, SetStateAction } from 'react'
+import type { Dispatch, MouseEvent, SetStateAction } from 'react'
 import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { Button } from '@safe-global/views/components/ui/button'
 import { AppRoutes } from '@/config/routes'
-import { HeaderNavigation, HeaderAccountInfo } from '@/features/spaces'
+import { HeaderNavigation, HeaderAccountInfo, UnifiedAppBar, useIsUnifiedShell } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
 import { GlobalSearchFeature } from '@/features/global-search'
@@ -40,9 +40,11 @@ export const SAFE_BAR_CONTEXT_WRAP = '@max-[1150px]:order-last @max-[1150px]:bas
 interface TopbarProps {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
   onBatchToggle?: Dispatch<SetStateAction<boolean>>
+  /** Read by the design prototype's app bar, which also hides and shows the sidebar on desktop. */
+  isSidebarOpen?: boolean
 }
 
-const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
+const Topbar = ({ onMenuToggle, onBatchToggle, isSidebarOpen = true }: TopbarProps): ReactElement => {
   const dispatch = useAppDispatch()
   const isBelowMd = useIsBelowMd()
   const {
@@ -72,6 +74,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const draftBatch = useDraftBatch()
   const showSafeToken = useSafeTokenEnabled()
   const { txFlow } = useContext(TxModalContext)
+  const isUnifiedShell = useIsUnifiedShell()
 
   const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress))
 
@@ -92,6 +95,65 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
   const showMenuButton = Boolean(onMenuToggle && isBelowMd)
+
+  const navigationProps = {
+    walletAddress: wallet?.address ?? '',
+    walletEns: walletName,
+    isConnected: Boolean(wallet),
+    walletIcon: wallet?.icon,
+    walletLabel: wallet?.label,
+    messages: unreadCount,
+    showSearch: !isSpaceRoute && !isWelcomeListRoute,
+    onSearchClick: () => dispatch(openGlobalSearch()),
+    onNotificationsClick: (e: MouseEvent<HTMLButtonElement>) => notificationsRef.current?.handleClick(e),
+    onWalletClick: handleWalletClick,
+    walletConnectSlot: <WalletConnectWidget />,
+    showBatch: !isSpaceRoute && showBatchButton,
+    batchCount: draftBatch.length,
+    onBatchClick: () => onBatchToggle?.((open) => !open),
+  }
+
+  const popovers = (
+    <>
+      <GlobalSearchModal />
+
+      <NotificationsPopover ref={notificationsRef} />
+
+      {wallet && (
+        <WalletPopover
+          wallet={wallet}
+          open={walletOpen}
+          anchorEl={walletAnchorEl}
+          onClose={handleWalletClose}
+          onWalletSwitch={handleWalletSwitch}
+          onWalletDisconnect={handleWalletDisconnect}
+        />
+      )}
+    </>
+  )
+
+  // Design prototype, off in production builds: one app bar in place of this header.
+  if (isUnifiedShell) {
+    return (
+      <>
+        <UnifiedAppBar
+          isSidebarOpen={isSidebarOpen}
+          onSidebarToggle={onMenuToggle && (() => onMenuToggle((open) => !open))}
+          onSearchClick={navigationProps.onSearchClick}
+          renderTools={({ showSafeTools, isCompact }) => (
+            <HeaderNavigation
+              {...navigationProps}
+              showSearch={false}
+              walletConnectSlot={showSafeTools ? navigationProps.walletConnectSlot : null}
+              showBatch={showSafeTools && showBatchButton}
+              isCompact={isCompact}
+            />
+          )}
+        />
+        {popovers}
+      </>
+    )
+  }
 
   return (
     <>
@@ -131,41 +193,13 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             </div>
           )}
 
-          <HeaderNavigation
-            walletAddress={wallet?.address ?? ''}
-            walletEns={walletName}
-            isConnected={Boolean(wallet)}
-            walletIcon={wallet?.icon}
-            walletLabel={wallet?.label}
-            messages={unreadCount}
-            showSearch={!isSpaceRoute && !isWelcomeListRoute}
-            onSearchClick={() => dispatch(openGlobalSearch())}
-            onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
-            onWalletClick={handleWalletClick}
-            walletConnectSlot={<WalletConnectWidget />}
-            showBatch={!isSpaceRoute && showBatchButton}
-            batchCount={draftBatch.length}
-            onBatchClick={() => onBatchToggle?.((open) => !open)}
-          />
+          <HeaderNavigation {...navigationProps} />
 
           <HeaderAccountInfo />
         </div>
       </header>
 
-      <GlobalSearchModal />
-
-      <NotificationsPopover ref={notificationsRef} />
-
-      {wallet && (
-        <WalletPopover
-          wallet={wallet}
-          open={walletOpen}
-          anchorEl={walletAnchorEl}
-          onClose={handleWalletClose}
-          onWalletSwitch={handleWalletSwitch}
-          onWalletDisconnect={handleWalletDisconnect}
-        />
-      )}
+      {popovers}
     </>
   )
 }

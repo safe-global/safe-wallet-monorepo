@@ -146,3 +146,6 @@ export { default as SpacesLogin } from './components/SpacesLogin'
 
 export { ProPreview as UnifiedSidebarProPreview } from './components/Sidebar/unified/ProPreview'
 export { useUnifiedSidebarSafes } from './components/Sidebar/unified/useUnifiedSidebarSafes'
+export { useIsUnifiedShell } from './components/Sidebar/unified/useIsUnifiedShell'
+export { UnifiedAppBar } from './components/Sidebar/unified/AppBar'
+export { ShellStandIn as UnifiedShellStandIn } from './components/Sidebar/unified/ShellStandIn'

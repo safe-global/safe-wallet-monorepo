@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { SafeItem } from '@/hooks/safes'
-import { getMockSafes, getPersonalSafes, isInWorkspace, type MockSafe } from './fixtures'
+import { getMockSafes, getPersonalSafes, getSafeAddress, isInWorkspace, type MockSafe } from './fixtures'
 import { useIsPrototypeOn, useScenario } from './scenario'
 
 const SEPOLIA_CHAIN_ID = '11155111'
@@ -13,7 +13,7 @@ export type UnifiedSidebarSafes = {
 
 const toSafeItem = ({ name, safe }: MockSafe): SafeItem => ({
   chainId: SEPOLIA_CHAIN_ID,
-  address: safe.split(':').pop() ?? safe,
+  address: getSafeAddress(safe),
   isReadOnly: true,
   isPinned: true,
   lastVisited: 0,
@@ -28,7 +28,7 @@ export const useUnifiedSidebarSafes = (): UnifiedSidebarSafes | null => {
 
   return useMemo(() => {
     if (!isOn) return null
-    const safes = isWorkspace ? getMockSafes(scenario.safes) : getPersonalSafes()
+    const safes = isWorkspace ? getMockSafes(scenario.safes) : getPersonalSafes(scenario.safes)
     return { isWorkspace, safes: safes.map(toSafeItem) }
   }, [isOn, isWorkspace, scenario.safes])
 }

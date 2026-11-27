@@ -130,6 +130,8 @@ jest.mock('@/features/spaces', () => ({
     return jest.requireActual('@/features/spaces/components/HeaderNavigation').HeaderNavigation
   },
   HeaderAccountInfo: () => <div data-testid="header-account-info" />,
+  useIsUnifiedShell: () => false,
+  UnifiedAppBar: () => null,
 }))
 
 jest.mock(

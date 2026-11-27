@@ -1,8 +1,22 @@
 import { act, renderHook } from '@testing-library/react'
-import { DEFAULT_SCENARIO, syncSwitchFromUrl, turnPrototypeOff, useIsPrototypeOn, useScenario } from '../scenario'
-import { getActiveSummary, getPlanSummary, getSafeName } from '../fixtures'
+import {
+  DEFAULT_SCENARIO,
+  SCENARIO_KEY,
+  syncSwitchFromUrl,
+  turnPrototypeOff,
+  useIsPrototypeOn,
+  useIsShellOn,
+  useScenario,
+} from '../scenario'
+import {
+  formatSafeAddress,
+  getActiveSummary,
+  getMockWorkspaces,
+  getPersonalSafes,
+  getPlanSummary,
+  getSafeName,
+} from '../fixtures'
 import { useUnifiedSidebarSafes } from '../useUnifiedSidebarSafes'
-import { getWorkspacePage } from '../proItems'
 
 describe('unified sidebar prototype switch', () => {
   beforeEach(() => localStorage.clear())
@@ -50,9 +64,40 @@ describe('useScenario', () => {
   })
 
   it('falls back to the default on unreadable storage', () => {
-    localStorage.setItem('unifiedSidebarPrototype.scenario.v2', '{not json')
+    localStorage.setItem(SCENARIO_KEY, '{not json')
     const { result } = renderHook(() => useScenario())
     expect(result.current[0]).toEqual(DEFAULT_SCENARIO)
+  })
+
+  it('falls back to the default on a layout that no longer exists', () => {
+    localStorage.setItem(SCENARIO_KEY, JSON.stringify({ layout: 'proposed', plan: 'free' }))
+    const { result } = renderHook(() => useScenario())
+    expect(result.current[0]).toEqual(DEFAULT_SCENARIO)
+  })
+
+  it('falls back to the default on a plan that does not exist', () => {
+    localStorage.setItem(SCENARIO_KEY, JSON.stringify({ plan: 'platinum' }))
+    const { result } = renderHook(() => useScenario())
+    expect(result.current[0]).toEqual(DEFAULT_SCENARIO)
+  })
+
+  it('starts in the Pro Workspace on the Safe filter layout', () => {
+    expect(DEFAULT_SCENARIO).toMatchObject({ layout: 'filter', context: 'workspace', plan: 'paid' })
+  })
+})
+
+describe('useIsShellOn', () => {
+  beforeEach(() => localStorage.clear())
+
+  it('is on only with the switch on and the Safe filter layout', () => {
+    const { result } = renderHook(() => [useIsShellOn(), useScenario()[1]] as const)
+    expect(result.current[0]).toBe(false)
+
+    act(() => syncSwitchFromUrl('proto=sidebar'))
+    expect(result.current[0]).toBe(true)
+
+    act(() => result.current[1]({ layout: 'today' }))
+    expect(result.current[0]).toBe(false)
   })
 })
 
@@ -119,13 +164,31 @@ describe('useUnifiedSidebarSafes', () => {
 
     act(() => result.current[1]({ context: 'accounts' }))
     expect(result.current[0]).toMatchObject({ isWorkspace: false })
-    expect(result.current[0]?.safes.map((s) => s.name)).toEqual(['Treasury', 'Savings', 'Cold storage'])
+    expect(result.current[0]?.safes).toHaveLength(12)
+    expect(result.current[0]?.safes.slice(0, 3).map((s) => s.name)).toEqual(['Treasury', 'Savings', 'Cold storage'])
   })
 })
 
-describe('getWorkspacePage', () => {
-  it('maps a preview key back to its production Workspace route', () => {
-    expect(getWorkspacePage('members')).toEqual({ route: '/spaces/members', label: 'Team' })
-    expect(getWorkspacePage('nope')).toBeUndefined()
+describe('mock workspaces', () => {
+  it('sizes My accounts with the Safe count, keeping Treasury in both', () => {
+    expect(getPersonalSafes(1).map((s) => s.name)).toEqual(['Treasury'])
+    expect(getPersonalSafes(3).map((s) => s.name)).toEqual(['Treasury', 'Savings', 'Cold storage'])
+    expect(getPersonalSafes(12)).toHaveLength(12)
+  })
+
+  it('has only My accounts on Free, and the Workspace once a trial has started', () => {
+    expect(getMockWorkspaces({ ...DEFAULT_SCENARIO, plan: 'free' }).map((w) => w.name)).toEqual(['My accounts'])
+    expect(getMockWorkspaces({ ...DEFAULT_SCENARIO, plan: 'trial-ended' }).map((w) => w.name)).toEqual([
+      'My accounts',
+      'Acme',
+    ])
+  })
+})
+
+describe('formatSafeAddress', () => {
+  it('keeps the network prefix and shortens the address unless asked for all of it', () => {
+    const safe = 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415'
+    expect(formatSafeAddress(safe)).toBe('sep:0xBd69…6415')
+    expect(formatSafeAddress(safe, true)).toBe(safe)
   })
 })
