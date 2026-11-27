@@ -12,6 +12,7 @@ import {
   getProxyFactoryDeployments,
   getCompatibilityFallbackHandlerDeployments,
   getExtensibleFallbackHandlerDeployments,
+  getTokenCallbackHandlerDeployments,
   getSafeToL2SetupDeployment,
 } from '@safe-global/safe-deployments'
 import * as useChains from '@/hooks/useChains'
@@ -37,6 +38,7 @@ const FALLBACK_HANDLER_150_DEPLOYMENTS = getCompatibilityFallbackHandlerDeployme
 const EXTENSIBLE_FALLBACK_HANDLER_150_DEPLOYMENTS = getExtensibleFallbackHandlerDeployments({
   version: '1.5.0',
 })?.deployments
+const TOKEN_CALLBACK_HANDLER_150_DEPLOYMENTS = getTokenCallbackHandlerDeployments({ version: '1.5.0' })?.deployments
 const SAFE_TO_L2_SETUP_150_ADDRESS = getSafeToL2SetupDeployment({ version: '1.5.0' })?.defaultAddress
 
 const mockChains = [
@@ -254,6 +256,29 @@ describe('useCompatibleNetworks', () => {
         to: ZERO_ADDRESS,
         data: EMPTY_DATA,
         fallbackHandler: EXTENSIBLE_FALLBACK_HANDLER_150_DEPLOYMENTS?.canonical?.address!,
+        paymentToken: ZERO_ADDRESS,
+        payment: 0,
+        paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+      },
+      safeVersion: '1.5.0',
+    }
+    const { result } = renderHook(() => useCompatibleNetworks(creationData, mockChains as Chain[]))
+    const availability = Object.fromEntries(result.current.map((chain) => [chain.chainId, chain.available]))
+    expect(availability['1']).toBe(true)
+    expect(availability['10200']).toBe(false)
+  })
+
+  it('should treat the official TokenCallbackHandler as an existing fallback handler', () => {
+    const creationData: ReplayedSafeProps = {
+      factoryAddress: PROXY_FACTORY_150_DEPLOYMENTS?.canonical?.address!,
+      masterCopy: L2_150_MASTERCOPY_DEPLOYMENTS?.canonical?.address!,
+      saltNonce: '0',
+      safeAccountConfig: {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+        to: ZERO_ADDRESS,
+        data: EMPTY_DATA,
+        fallbackHandler: TOKEN_CALLBACK_HANDLER_150_DEPLOYMENTS?.canonical?.address!,
         paymentToken: ZERO_ADDRESS,
         payment: 0,
         paymentReceiver: ECOSYSTEM_ID_ADDRESS,
