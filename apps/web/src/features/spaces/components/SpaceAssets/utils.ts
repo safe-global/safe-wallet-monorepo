@@ -32,6 +32,8 @@ export type AssetHolding = {
   protocol?: string
   amount: number
   fiat: number
+  /** The 24h price change, in the unit the gateway sends */
+  change?: number
 }
 
 export type ChainAssetsReport = {
@@ -72,6 +74,12 @@ const toNumber = (value: string | number | undefined): number => {
   return Number.isFinite(number) ? number : 0
 }
 
+const toChange = (value: string | null | undefined): number | undefined => {
+  if (value === null || value === undefined || value === '') return undefined
+  const number = Number(value)
+  return Number.isFinite(number) ? number : undefined
+}
+
 const toAmount = (balance: string, decimals: number | null | undefined): number =>
   toNumber(safeFormatUnits(balance, decimals ?? 0))
 
@@ -96,6 +104,7 @@ export const toHoldings = (
       type: 'Token',
       amount: toAmount(item.balance, item.tokenInfo.decimals),
       fiat: toNumber(item.fiatBalance),
+      change: toChange(item.fiatBalance24hChange),
     }))
   const positions = (protocols ?? []).flatMap((protocol) =>
     protocol.items.flatMap((group, groupIndex) =>
@@ -113,6 +122,7 @@ export const toHoldings = (
         // A loan's balance is what is owed, so it takes away from the asset as its value does
         amount: (position.position_type === 'loan' ? -1 : 1) * toAmount(position.balance, position.tokenInfo.decimals),
         fiat: toNumber(position.fiatBalance),
+        change: toChange(position.fiatBalance24hChange),
       })),
     ),
   )
@@ -175,6 +185,8 @@ export type HoldingsRow = {
   safes: SafeShare[]
   amount: number
   fiat: number
+  /** The 24h change of its holdings, weighted by their value; undefined when none has one */
+  change?: number
 }
 
 export type HoldingsGroup = {
@@ -207,6 +219,14 @@ const toSafeShares = (items: AssetHolding[]): SafeShare[] =>
     }))
     .sort((a, b) => b.fiat - a.fiat)
 
+const weightedChange = (items: AssetHolding[]): number | undefined => {
+  const withChange = items.filter((item) => item.change !== undefined)
+  const weight = withChange.reduce((total, item) => total + Math.abs(item.fiat), 0)
+  if (withChange.length === 0) return undefined
+  if (weight === 0) return withChange[0].change
+  return withChange.reduce((total, item) => total + (item.change ?? 0) * Math.abs(item.fiat), 0) / weight
+}
+
 const toRow = (id: string, items: AssetHolding[]): HoldingsRow => {
   const [first] = [...items].sort((a, b) => b.fiat - a.fiat)
   return {
@@ -221,6 +241,7 @@ const toRow = (id: string, items: AssetHolding[]): HoldingsRow => {
     safes: toSafeShares(items),
     amount: sum(items, 'amount'),
     fiat: sum(items, 'fiat'),
+    change: weightedChange(items),
   }
 }
 

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { formatPercentage, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
@@ -62,6 +62,11 @@ const givenAssets = (byChainAndAddress: Record<string, SafeAssetsResult>) =>
     ({ chainId, address }: { chainId: string; address: string }) => byChainAndAddress[`${chainId}:${address}`],
   )
 
+const withChange = (balance: ReturnType<typeof token>, fiatBalance24hChange: string) => ({
+  ...balance,
+  fiatBalance24hChange,
+})
+
 const totals = () => within(screen.getByTestId('space-assets-totals'))
 
 describe('SpaceAssets', () => {
@@ -114,6 +119,20 @@ describe('SpaceAssets', () => {
       expect(within(rows[0]).getByText('$ 6,000')).toBeInTheDocument()
       expect(within(rows[0]).getByText('2 networks')).toBeInTheDocument()
       expect(within(rows[1]).getByText('Ethereum')).toBeInTheDocument()
+    })
+
+    it('shows the value with its decimals and the 24h change under it, as on the Safe Assets page', () => {
+      givenAssets({
+        [`1:${treasury}`]: loaded(withChange(token('ETH', '3000.5'), '10'), token('USDC', '1')),
+        [`100:${treasury}`]: loaded(token('ETH', '2000')),
+        [`1:${ops}`]: loaded(withChange(token('ETH', '1000'), '-10')),
+      })
+
+      render(<SpaceAssets />)
+
+      const [eth] = screen.getAllByTestId('space-assets-row')
+      expect(within(eth).getByText('.50')).toBeInTheDocument()
+      expect(within(eth).getByText(formatPercentage(0.05))).toBeInTheDocument()
     })
 
     it('lists the Safes holding a token, with their share, when the token is hovered', async () => {

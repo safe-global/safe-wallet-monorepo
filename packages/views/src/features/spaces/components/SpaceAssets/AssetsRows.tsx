@@ -35,7 +35,7 @@ type AssetsGroupRowProps = {
   title: string
   /** The networks the group spans */
   chains: ChainInfo[]
-  value: string
+  value: ReactNode
   collapsed: boolean
   onToggle: () => void
 }
@@ -87,7 +87,9 @@ type AssetHoldingRowProps = {
   subtitle?: string
   chains: ChainInfo[]
   balance: string
-  value: string
+  value: ReactNode
+  /** The 24h change, under the value as on the Safe's Assets page */
+  change?: ReactNode
   /** Opens on the asset, as the queue's signers do on the status: here, the Safe accounts holding it */
   owners?: ReactNode
   ownersLabel?: string
@@ -101,6 +103,7 @@ export const AssetHoldingRow = ({
   chains,
   balance,
   value,
+  change,
   owners,
   ownersLabel,
 }: AssetHoldingRowProps): ReactElement => (
@@ -128,7 +131,10 @@ export const AssetHoldingRow = ({
     <TableCell className="text-right tabular-nums text-muted-foreground">
       <span className="block truncate">{balance}</span>
     </TableCell>
-    <TableCell className="text-right font-medium tabular-nums">{value}</TableCell>
+    <TableCell className="text-right font-medium tabular-nums">
+      <div>{value}</div>
+      {change && <div className="text-sm font-normal">{change}</div>}
+    </TableCell>
   </TableRow>
 )
 

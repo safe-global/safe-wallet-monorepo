@@ -5,6 +5,8 @@ import { formatAmount, formatCurrency } from '@safe-global/utils/utils/formatNum
 import AssetLogo from '@safe-global/views/features/spaces/components/SpaceAssets/AssetLogo'
 import { AssetHoldingRow, AssetsGroupRow } from '@safe-global/views/features/spaces/components/SpaceAssets/AssetsRows'
 import SignersList from '@safe-global/views/features/spaces/components/SpaceQueue/SignersList'
+import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
+import FiatValue from '@/components/common/FiatValue'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
@@ -61,7 +63,7 @@ const AssetsGroups = ({ groups, isCollapsed, onToggle }: AssetsGroupsProps): Rea
               }
               title={GROUP_LABELS[group.id]}
               chains={chainsOf(group.chainIds)}
-              value={formatCurrency(group.fiat, currency)}
+              value={<FiatValue value={group.fiat} precise />}
               collapsed={collapsed}
               onToggle={() => onToggle(group.id)}
             />
@@ -74,7 +76,8 @@ const AssetsGroups = ({ groups, isCollapsed, onToggle }: AssetsGroupsProps): Rea
                   subtitle={subtitleOf(row)}
                   chains={chainsOf(row.chainIds)}
                   balance={`${formatAmount(row.amount)} ${row.symbol}`}
-                  value={formatCurrency(row.fiat, currency)}
+                  value={<FiatValue value={row.fiat} precise />}
+                  change={row.change === undefined ? undefined : <FiatChange change={String(row.change)} inline />}
                   owners={ownersOf(row)}
                   ownersLabel={`${row.name}: held by ${row.safes.length} Safe ${row.safes.length === 1 ? 'account' : 'accounts'}`}
                 />

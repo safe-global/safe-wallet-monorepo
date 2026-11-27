@@ -266,6 +266,22 @@ describe('groupHoldings', () => {
     ])
   })
 
+  it('weights the 24h change of an asset by the value of each holding', () => {
+    const [tokens] = groupHoldings([
+      holding({ safeAddress: treasury, fiat: 3000, change: 10 }),
+      holding({ safeAddress: ops, fiat: 1000, change: -10 }),
+      holding({ safeAddress: ops, chainId: '10', fiat: 500 }),
+    ])
+
+    expect(tokens.rows[0].change).toBe(5)
+  })
+
+  it('has no 24h change when no holding of the asset has one', () => {
+    const [tokens] = groupHoldings([holding({ fiat: 10 })])
+
+    expect(tokens.rows[0].change).toBeUndefined()
+  })
+
   it('leaves out a group with nothing in it', () => {
     expect(groupHoldings([holding({})]).map(({ id }) => id)).toEqual(['tokens'])
   })

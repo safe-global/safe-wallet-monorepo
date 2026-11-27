@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { Coins, Layers } from 'lucide-react'
 import { fn } from 'storybook/test'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
 import SignersList from '@safe-global/views/features/spaces/components/SpaceQueue/SignersList'
 import AssetLogo from './AssetLogo'
 import { AssetHoldingRow, AssetsGroupRow, AssetsNoteRow } from './AssetsRows'
@@ -68,7 +69,8 @@ export const Table: Story = {
         subtitle="USDC"
         chains={[ETHEREUM, GNOSIS]}
         balance="4,500 USDC"
-        value="$ 4,500"
+        value="$ 4,500.12"
+        change={<FiatChange change="-0.02" inline />}
       />
       <AssetHoldingRow
         logo={<AssetLogo label="ETH" />}
@@ -76,7 +78,8 @@ export const Table: Story = {
         subtitle="ETH"
         chains={[ETHEREUM, BASE]}
         balance="3.5 ETH"
-        value="$ 3,818"
+        value="$ 3,818.42"
+        change={<FiatChange change="2.31" inline />}
         owners={ETH_OWNERS}
         ownersLabel="Ether: held by 2 Safe accounts"
       />
