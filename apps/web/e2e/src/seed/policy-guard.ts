@@ -6,15 +6,23 @@
  * journeys register the bindings and configuration roots that the real indexer would read from the guard's events.
  */
 import { readFileSync } from 'node:fs'
-import { AbiCoder, Interface, ZeroAddress, getAddress, keccak256 } from 'ethers'
-import { SAFE_SETTER_SELECTORS } from '@/features/policy-guard/public/services/guardExit'
+import { getAddress } from 'ethers'
 import { REJECT_SELECTOR } from '@/features/policy-guard/public/services/rejectAccess'
 import { registerGuardPolicies } from '../../environment/scenarios/policy-indexer.mjs'
 import { executeTransaction, openSafe } from '../../environment/scenarios/safe.mjs'
 import { readChain } from '../chain/local-provider'
 import { CHAIN_IDS } from '../data/constants'
 import type { Journey, JourneyEnvironment, OwnerName } from '../fixtures/journey.fixture'
+import {
+  configurationRootOf as rootOf,
+  ERC20_TRANSFER_SELECTOR,
+  firstSetupCalls,
+  type PolicyEngine,
+  type TokenAllowlist,
+} from './policy-guard-configuration'
 import type { SeededSafe } from './safe'
+
+export type { TokenAllowlist }
 
 type ContractName =
   'SafePolicyGuard' | 'ERC20TransferPolicy' | 'ERC20ApprovePolicy' | 'AllowPolicy' | 'DenyPolicy' | 'MultiSendPolicy'
@@ -38,58 +46,15 @@ const ALLOW_POLICY = addressOf('AllowPolicy')
 /** The guard's `EXPIRY`: how long a requested root stays applicable after its delay */
 export const ROOT_EXPIRY_SECONDS = 604_800
 
-const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
-const CALL = 0
-const PERMISSION_ALWAYS = 2
-const CONFIGURATION = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
-const guardInterface = new Interface([`function configureImmediately(${CONFIGURATION}[] configurations)`])
-const safeInterface = new Interface([
-  'function setGuard(address guard)',
-  'function setModuleGuard(address moduleGuard)',
-])
-
-export type TokenAllowlist = { token: string; recipients: string[] }
-
-type Configuration = { target: string; selector: string; operation: number; policy: string; data: string }
-
-/** The guard configuration of an ERC-20 allowlist, as the wallet builds it */
-function configurationOf({ token, recipients }: TokenAllowlist): Configuration {
-  return {
-    target: getAddress(token),
-    selector: ERC20_TRANSFER_SELECTOR,
-    operation: CALL,
-    policy: ERC20_TRANSFER_POLICY,
-    data: AbiCoder.defaultAbiCoder().encode(
-      ['tuple(address recipient, uint8 permission)[]'],
-      [recipients.map((recipient) => [getAddress(recipient), PERMISSION_ALWAYS])],
-    ),
-  }
-}
-
-/** The rule of the wallet's first setup that lets the signers reject a transaction: the Safe calls itself with no data */
-function rejectAccessOf(safe: string): Configuration {
-  return { target: getAddress(safe), selector: REJECT_SELECTOR, operation: CALL, policy: ALLOW_POLICY, data: '0x' }
-}
-
-/** The unbinding of the Safe setters a removal allows, which the wallet puts before every allowlist */
-function clearedGuardExitOf(safe: string): Configuration[] {
-  return SAFE_SETTER_SELECTORS.map((selector) => ({
-    target: getAddress(safe),
-    selector,
-    operation: CALL,
-    policy: ZeroAddress,
-    data: '0x',
-  }))
+const ENGINE: PolicyEngine = {
+  guard: POLICY_GUARD,
+  erc20TransferPolicy: ERC20_TRANSFER_POLICY,
+  allowPolicy: ALLOW_POLICY,
 }
 
 /** The root that `requestConfiguration` takes for the allowlist on `safe`: the hash `applyConfiguration` checks. */
 export function configurationRootOf(allowlist: TokenAllowlist, safe: string): string {
-  return keccak256(
-    AbiCoder.defaultAbiCoder().encode(
-      [`${CONFIGURATION}[]`],
-      [[...clearedGuardExitOf(safe), configurationOf(allowlist)]],
-    ),
-  )
+  return rootOf(allowlist, safe, ENGINE)
 }
 
 /** Writes the guard and policy code on the fork where it is missing; parallel workers write the same code. */
@@ -115,17 +80,7 @@ export async function seedAllowlist(
 ): Promise<void> {
   const { context } = safe
   let setup = await context.safe.createTransaction({
-    transactions: [
-      {
-        to: POLICY_GUARD,
-        value: '0',
-        data: guardInterface.encodeFunctionData('configureImmediately', [
-          [configurationOf(allowlist), rejectAccessOf(safe.address)],
-        ]),
-      },
-      { to: safe.address, value: '0', data: safeInterface.encodeFunctionData('setGuard', [POLICY_GUARD]) },
-      { to: safe.address, value: '0', data: safeInterface.encodeFunctionData('setModuleGuard', [POLICY_GUARD]) },
-    ],
+    transactions: firstSetupCalls(allowlist, safe.address, ENGINE),
     onlyCalls: true,
   })
   for (const cosigner of cosigners) {
