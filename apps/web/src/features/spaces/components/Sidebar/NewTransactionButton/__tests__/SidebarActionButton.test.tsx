@@ -30,6 +30,10 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: () => [false, undefined, false],
+}))
+
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
 jest.mock('@/hooks/useIsWrongChain')

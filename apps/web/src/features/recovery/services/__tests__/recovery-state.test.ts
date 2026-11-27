@@ -1,3 +1,7 @@
+import {
+  getDelayQueueItemTimestamps as _getRecoveryQueueItemTimestamps,
+  _addedTransactionsCache,
+} from '@/services/delay/state'
 import { faker } from '@faker-js/faker'
 import { id, zeroPadValue } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
@@ -5,12 +9,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import type { TransactionAddedEvent, Delay } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import type { TransactionReceipt } from 'ethers'
 
-import {
-  _getRecoveryStateItem,
-  _getRecoveryQueueItemTimestamps,
-  _isMaliciousRecovery,
-  _addedTransactionsCache,
-} from '../recovery-state'
+import { _getRecoveryStateItem, _isMaliciousRecovery } from '../recovery-state'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import {
   getMultiSendCallOnlyDeployment,

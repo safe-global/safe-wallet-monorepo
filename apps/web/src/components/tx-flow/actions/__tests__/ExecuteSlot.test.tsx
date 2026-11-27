@@ -31,6 +31,12 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(),
 }))
 
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: jest.fn(() => [false, undefined, false]),
+}))
+const mockUseIsGnosisPaySafe = jest.requireMock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe')
+  .useIsGnosisPaySafe as jest.Mock
+
 jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
@@ -127,6 +133,7 @@ const mockSigner = ({ isSafe }: { isSafe: boolean }) =>
 describe('Execute slot', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseIsGnosisPaySafe.mockReturnValue([false, undefined, false])
     mockSafe(1)
     mockSigner({ isSafe: false })
     mockIsSmartContractWallet.mockResolvedValue(false)
@@ -170,6 +177,20 @@ describe('Execute slot', () => {
       expect(result.current).toContain('sign')
       expect(result.current).not.toContain('execute')
     })
+  })
+
+  it('keeps standard Sign and Execute unavailable on a Gnosis Pay Safe even when fully signed', async () => {
+    mockUseIsGnosisPaySafe.mockReturnValue([true, undefined, false])
+
+    const { result } = renderSlotIds({
+      safeTx: buildSafeTx({ signed: true }),
+      txId: 'multisig_0x1_0x2',
+      isExecutable: true,
+    })
+
+    await act(async () => {})
+    expect(result.current).not.toContain('sign')
+    expect(result.current).not.toContain('execute')
   })
 
   it('offers Execute once the 1/n transaction carries a signature', async () => {

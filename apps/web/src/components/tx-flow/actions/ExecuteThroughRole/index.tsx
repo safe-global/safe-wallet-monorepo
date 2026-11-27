@@ -2,6 +2,7 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import { useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteThroughRoleForm from './ExecuteThroughRoleForm'
+import { useIsGnosisPaySafe } from '@/features/gnosispay/public/hooks/useIsGnosisPaySafe'
 import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
@@ -59,11 +60,14 @@ const ExecuteThroughRole = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const { canExecuteThroughRole, canExecute, isProposing } = useContext(TxFlowContext)
   const isSafeOwner = useIsSafeOwner()
 
   // Don't offer role execution when the owner can use regular Execute
-  return !isCounterfactualSafe && canExecuteThroughRole && !isProposing && !(canExecute && isSafeOwner)
+  return (
+    !isCounterfactualSafe && !isGnosisPaySafe && canExecuteThroughRole && !isProposing && !(canExecute && isSafeOwner)
+  )
 }
 
 const ExecuteThroughRoleSlot = withSlot({

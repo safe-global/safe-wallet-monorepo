@@ -27,7 +27,5 @@ export async function getGnosisProxyMasterCopy(address: string, provider: JsonRp
   const gnosisProxyAbi = ['function masterCopy() external view returns (address)']
   const gnosisProxyContract = new Contract(address, gnosisProxyAbi, provider)
 
-  const [masterCopy] = await gnosisProxyContract.masterCopy()
-
-  return masterCopy
+  return gnosisProxyContract.masterCopy()
 }

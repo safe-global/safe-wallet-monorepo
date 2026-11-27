@@ -38,6 +38,8 @@ Each feature's `public/` folder is its only entry point. Import the one file you
 
 ESLint enforces the `public/` boundary for every feature (`config/eslint/feature-public-imports.mjs`). Full guide: [docs/feature-architecture.md](docs/feature-architecture.md).
 
+Shared Delay proxy detection, signing and queue reads live in `src/services/delay`; recovery adds its own policy checks in its feature adapter.
+
 ## Error logging
 
 Report an error where it is caught, imperatively — never from the render layer (component body, `useMemo`, `useEffect` keyed on an error), which re-runs and reports one failure many times. Patterns for async calls, throwing transforms, choke points, RTK Query listeners, throttling, expected failures and tests: [docs/error-logging.md](docs/error-logging.md).

@@ -6,7 +6,7 @@ import type { JsonRpcProvider } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { MAX_RECOVERER_PAGE_SIZE } from '../../services/recovery-state'
+import { MAX_MODULE_PAGE_SIZE } from '@/services/delay/state'
 import type { UpsertRecoveryFlowProps } from '@/components/tx-flow/flows/UpsertRecovery'
 
 export async function _getRecoverySetupTransactions({
@@ -104,7 +104,7 @@ export async function _getEditRecoveryTransactions({
   const [oldExpiry, oldDelay, [recoverers]] = await Promise.all([
     delayModifierContract.txExpiration(),
     delayModifierContract.txCooldown(),
-    delayModifierContract.getModulesPaginated(SENTINEL_ADDRESS, MAX_RECOVERER_PAGE_SIZE),
+    delayModifierContract.getModulesPaginated(SENTINEL_ADDRESS, MAX_MODULE_PAGE_SIZE),
   ])
 
   // Recovery management transaction data

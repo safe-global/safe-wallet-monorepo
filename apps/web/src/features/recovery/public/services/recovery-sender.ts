@@ -1,4 +1,3 @@
-import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
@@ -7,30 +6,7 @@ import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 import { didReprice, didRevert } from '@/utils/ethers-utils'
 import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from '../../services/recoveryEvents'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { getUncheckedSigner } from '@/services/tx/tx-sender/sdk'
-import { isSmartContractWallet } from '@/utils/wallets'
-
-async function getDelayModifierContract({
-  provider,
-  chainId,
-  delayModifierAddress,
-  signerAddress,
-}: {
-  provider: Eip1193Provider
-  chainId: string
-  delayModifierAddress: string
-  signerAddress: string
-}) {
-  const isSmartContract = await isSmartContractWallet(chainId, signerAddress)
-
-  const signer = await getUncheckedSigner(provider)
-  const delayModifier = getModuleInstance(KnownContracts.DELAY, delayModifierAddress, signer).connect(signer)
-
-  return {
-    isUnchecked: isSmartContract,
-    delayModifier,
-  }
-}
+import { getDelayModifierContract } from '@/services/delay/signer'
 
 function waitForRecoveryTx({
   tx,

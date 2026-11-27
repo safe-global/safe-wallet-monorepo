@@ -899,6 +899,13 @@
       "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
+    },
+    {
+      "key": "GNOSIS_PAY",
+      "description": "Gnosis Pay Delay queue and transaction execution.",
+      "scope": "PER_CHAIN",
+      "enabled": false,
+      "defaultChains": []
     }
   ]
 }

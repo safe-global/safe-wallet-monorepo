@@ -1,3 +1,4 @@
+jest.mock('@/components/tx-flow/actions/GnosisPay', () => ({ __esModule: true, default: () => null }))
 import type { ReactNode } from 'react'
 import type { PropsWithChildren } from 'react'
 import { render, screen } from '@/tests/test-utils'

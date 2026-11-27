@@ -1,6 +1,7 @@
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
+import { useIsGnosisPaySafe } from '@/features/gnosispay/public/hooks/useIsGnosisPaySafe'
 import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import CounterfactualForm from '@/features/counterfactual/public/components/CounterfactualForm'
 import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
@@ -34,8 +35,9 @@ const Counterfactual = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const { isProposing } = useContext(TxFlowContext)
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
 
-  return isCounterfactualSafe && !isProposing
+  return isCounterfactualSafe && !isProposing && !isGnosisPaySafe
 }
 
 const CounterfactualSlot = withSlot({

@@ -4,6 +4,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { isDelegateCall as checkIsDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../../TxFlowProvider'
+import { useIsGnosisPaySafe } from '@/features/gnosispay/public/hooks/useIsGnosisPaySafe'
 import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import { useUpdateBatch } from '@/features/batching/public/hooks/useDraftBatch'
 import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
@@ -87,6 +88,7 @@ export const Batching = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const { isBatch, isProposing, willExecuteThroughRole, isCreation, isBatchable, data } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
   const { safeTx } = useContext(SafeTxContext)
@@ -101,6 +103,7 @@ const useShouldRegisterSlot = () => {
     isCreation &&
     !isBatch &&
     !isCounterfactualSafe &&
+    !isGnosisPaySafe &&
     !willExecuteThroughRole &&
     !isProposing &&
     (!isDelegateCall || (isMultiSend && isFromTxBuilder)) &&

@@ -7,6 +7,10 @@ import { mockRole, type TestRole } from '@/tests/mocks/roles'
 import { render, screen } from '@/tests/test-utils'
 import SendButton from '../SendButton'
 
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: () => [false, undefined, false],
+}))
+
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
 jest.mock('@/hooks/useIsWrongChain')

@@ -2,6 +2,7 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import { type ReactNode, useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
+import { useIsGnosisPaySafe } from '@/features/gnosispay/public/hooks/useIsGnosisPaySafe'
 import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
@@ -58,9 +59,10 @@ export const Execute = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const { canExecute, isProposing, willSignBeforeExecute } = useContext(TxFlowContext)
 
-  return !isCounterfactualSafe && canExecute && !isProposing && !willSignBeforeExecute
+  return !isCounterfactualSafe && !isGnosisPaySafe && canExecute && !isProposing && !willSignBeforeExecute
 }
 
 const ExecuteSlot = withSlot({

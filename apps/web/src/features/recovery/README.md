@@ -214,9 +214,9 @@ Malicious proposals are flagged with a warning icon and message.
 - `useRecoveryTxNotifications`: Shows toast notifications for recovery events
 - `useClock`: Provides current time for countdown calculations
 - `useIsValidRecoveryExecTransactionFromModule`: Validates a recovery execution (imports zodiac, so it stays private)
-- **services/recovery-state.ts**: State management, queue fetching
+- **services/recovery-state.ts**: Recovery policy adapter over shared Delay queue reads
 - **services/delay-modifier.ts**: Delay Modifier contract interactions
-- **services/proxies.ts**: Proxy contract detection utilities
+- **src/services/delay/proxies.ts**: Shared proxy contract detection utilities
 - **services/recoveryEvents.ts**: Event system for recovery transactions
 
 ## State Management

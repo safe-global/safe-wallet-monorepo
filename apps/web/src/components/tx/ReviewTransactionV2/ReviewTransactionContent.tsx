@@ -88,7 +88,7 @@ export const ReviewTransactionContent = ({
 
         <TxCardActions className="!mt-0">
           {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
+          <CheckWallet allowNonOwner={onlyExecute} allowGnosisPaySafe checkNetwork={!isSubmitDisabled}>
             {(isOk) => {
               return (
                 <Button

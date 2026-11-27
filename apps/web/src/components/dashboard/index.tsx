@@ -1,3 +1,4 @@
+import GnosisPayBanner from '@/features/gnosispay/public/components/GnosisPayBanner'
 import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement } from 'react'
@@ -45,6 +46,7 @@ const Dashboard = (): ReactElement => {
     <>
       <div className={css.dashboardGrid}>
         <div className={css.leftCol}>
+          <GnosisPayBanner />
           <Overview />
 
           {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}

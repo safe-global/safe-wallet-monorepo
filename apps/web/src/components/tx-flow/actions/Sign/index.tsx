@@ -2,6 +2,7 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import SignForm from './SignForm'
+import { useIsGnosisPaySafe } from '@/features/gnosispay/public/hooks/useIsGnosisPaySafe'
 import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
@@ -44,12 +45,21 @@ const useShouldRegisterSlot = () => {
   const { isProposing, willExecuteThroughRole } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const hasSigned = useAlreadySigned(safeTx)
   const { safe } = useSafeInfo()
 
   const isFullySigned = safeTx ? safeTx.signatures.size >= safe.threshold : false
 
-  return !!safeTx && !hasSigned && !isFullySigned && !isCounterfactualSafe && !willExecuteThroughRole && !isProposing
+  return (
+    !!safeTx &&
+    !hasSigned &&
+    !isFullySigned &&
+    !isCounterfactualSafe &&
+    !isGnosisPaySafe &&
+    !willExecuteThroughRole &&
+    !isProposing
+  )
 }
 
 const SignSlot = withSlot({

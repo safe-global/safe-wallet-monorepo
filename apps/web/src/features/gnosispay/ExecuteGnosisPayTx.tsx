@@ -1,0 +1,48 @@
+import { GnosisPayTxDetails } from './GnosisPayTxDetails'
+import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
+import TxLayout from '@/components/tx-flow/common/TxLayout'
+import { RiskConfirmation } from '@/components/tx-flow/features/RiskConfirmation'
+import GnosisPayExecutionForm from './GnosisPayExecutionForm'
+import { type GnosisPayTxItem } from './types'
+import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useContext, useEffect } from 'react'
+import SafeTxProvider from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { createTx } from '@/services/tx/tx-sender/create'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
+
+const ExecuteGnosisPayModal = ({ gnosisPayTx }: { gnosisPayTx: GnosisPayTxItem }) => {
+  const { setSafeTx } = useContext(SafeTxContext)
+
+  const [fakeSafeTx] = useAsync(() => {
+    return createTx(gnosisPayTx.txData)
+  }, [gnosisPayTx])
+
+  useEffect(() => {
+    if (fakeSafeTx) {
+      setSafeTx(fakeSafeTx)
+    }
+  }, [fakeSafeTx, setSafeTx])
+
+  return (
+    <TxCard>
+      <GnosisPayTxDetails txData={gnosisPayTx.txData} />
+      <RiskConfirmation subject="transaction" />
+      <GnosisPayExecutionForm queuedGnosisPayTx={gnosisPayTx} disableSubmit={!fakeSafeTx} />
+    </TxCard>
+  )
+}
+
+const ExecuteGnosisPayTx = ({ gnosisPayTx }: { gnosisPayTx: GnosisPayTxItem }) => {
+  return (
+    <SafeTxProvider>
+      <SafeShieldProvider>
+        <TxLayout title="Execute Gnosis Pay transaction" step={0} hideNonce>
+          <ExecuteGnosisPayModal gnosisPayTx={gnosisPayTx} />
+        </TxLayout>
+      </SafeShieldProvider>
+    </SafeTxProvider>
+  )
+}
+
+export default ExecuteGnosisPayTx

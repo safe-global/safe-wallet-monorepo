@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import { getGenericProxyMasterCopy, isGenericProxy, isGnosisProxy } from '../proxies'
+import { getGenericProxyMasterCopy, isGenericProxy, isGnosisProxy } from '@/services/delay/proxies'
 
 describe('proxies', () => {
   describe('isGenericProxy', () => {

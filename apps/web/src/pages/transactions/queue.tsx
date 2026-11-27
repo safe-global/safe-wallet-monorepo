@@ -1,3 +1,5 @@
+import GnosisPayBanner from '@/features/gnosispay/public/components/GnosisPayBanner'
+import GnosisPayQueue from '@/features/gnosispay/public/components/GnosisPayQueue'
 import { useId } from 'react'
 import Head from 'next/head'
 import useTxQueue from '@/hooks/useTxQueue'
@@ -38,7 +40,11 @@ const Queue = () => {
 
         <main>
           <div className="mb-8">
+            <GnosisPayBanner />
+
             <RecoveryList />
+
+            <GnosisPayQueue />
 
             {/* Pending unsigned transactions */}
             {showPending && (

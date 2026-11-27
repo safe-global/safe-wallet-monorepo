@@ -6,6 +6,12 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 
+jest.mock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe', () => ({
+  useIsGnosisPaySafe: jest.fn(() => [false, undefined, false]),
+}))
+const mockIsGnosisPay = jest.requireMock('@/features/gnosispay/public/hooks/useIsGnosisPaySafe')
+  .useIsGnosisPaySafe as jest.Mock
+
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')
 jest.mock('@/hooks/useIsWrongChain')
@@ -38,6 +44,7 @@ const renderButton = (props: GateProps = {}) =>
 describe('CheckWallet', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsGnosisPay.mockReturnValue([false, undefined, false])
     mockRole('owner')
     mockSafeInfo({ deployed: true })
   })
@@ -234,5 +241,27 @@ describe('CheckWallet', () => {
 
     expect(getByText('Continue')).toBeDisabled()
     expect(queryByLabelText(NOT_OWNER)).not.toBeInTheDocument()
+  })
+})
+
+describe('Gnosis Pay navigation gate', () => {
+  beforeEach(() => {
+    mockRole('nonOwner')
+    mockSafeInfo({ deployed: true })
+    mockIsGnosisPay.mockReturnValue([true, undefined, false])
+  })
+  it('permits a connected read-only viewer only when explicitly allowed', () => {
+    const { getByText, rerender } = renderButton({ allowGnosisPaySafe: true })
+    expect(getByText('Continue')).toBeEnabled()
+    rerender(<CheckWallet>{(ok) => <button disabled={!ok}>Continue</button>}</CheckWallet>)
+    expect(getByText('Continue')).toBeDisabled()
+  })
+  it('still requires a connected wallet', () => {
+    mockRole('disconnected')
+    expect(renderButton({ allowGnosisPaySafe: true }).getByText('Continue')).toBeDisabled()
+  })
+  it('still enforces the requested network check', () => {
+    mockRole('wrongChain')
+    expect(renderButton({ allowGnosisPaySafe: true, checkNetwork: true }).getByText('Continue')).toBeDisabled()
   })
 })

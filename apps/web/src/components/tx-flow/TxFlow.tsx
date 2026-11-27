@@ -1,3 +1,4 @@
+import GnosisPay from '@/components/tx-flow/actions/GnosisPay'
 import React, { useCallback, useMemo, useState, type ComponentType, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
@@ -134,6 +135,7 @@ export const TxFlow = <T extends unknown>({
                   ) : (
                     <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
                       <Counterfactual />
+                      <GnosisPay />
 
                       <ComboSubmit>
                         <Sign />
