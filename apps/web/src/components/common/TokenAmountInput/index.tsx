@@ -37,6 +37,8 @@ type TokenAmountInputProps = {
   fieldArray?: { name: FieldArrayPath<FieldValues>; index: number }
   deps?: string[]
   defaultTokenAddress?: string
+  /** While the list loads it may be empty, which is no reason to drop the picked token. */
+  isTokenListLoading?: boolean
   onMaxClick?: () => void
 }
 
@@ -48,6 +50,7 @@ const TokenAmountInput = ({
   fieldArray,
   deps,
   defaultTokenAddress,
+  isTokenListLoading = false,
   onMaxClick,
 }: TokenAmountInputProps) => {
   const {
@@ -118,10 +121,10 @@ const TokenAmountInput = ({
     trigger(deps)
   }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
+  // The Select reports null when the picked token leaves the list: kept while it loads, cleared once it has loaded
   const handleTokenChange = (value: string | null) => {
-    // The Select reports null when the picked token leaves the list, which is not a user choice
-    if (value === null) return
-    setValue(tokenAddressField, value, { shouldValidate: true })
+    if (value === null && isTokenListLoading) return
+    setValue(tokenAddressField, value ?? '', { shouldValidate: true })
   }
 
   // The amount survives a token change; its validators close over the new token's decimals and
