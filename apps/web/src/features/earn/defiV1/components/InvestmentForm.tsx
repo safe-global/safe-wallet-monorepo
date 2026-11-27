@@ -45,17 +45,22 @@ type Where = 'nested' | 'this'
 type Who = 'any' | 'some'
 type Schedule = 'once' | 'recurring'
 
-export type CreatedInvestment = { operation?: Operation; opportunity: Opportunity; amount: number }
+export type CreatedInvestment = { operation?: Operation; opportunity: Opportunity; amount: number; safe?: string }
 
 const parseAmount = (value: string) => Number(value.replace(/[^0-9.]/g, '')) || 0
 
-/** Form state shared by the dialog and drawer versions of set up investment. */
-export const useInvestmentForm = (opportunity: Opportunity | null, options: Opportunity[]) => {
+/** `nested` offers a nested Safe with its own signers and budget (Safe Pro); `safes` lets a workspace pick the Safe to deposit from. */
+export const useInvestmentForm = (
+  opportunity: Opportunity | null,
+  options: Opportunity[],
+  { nested = true, safes }: { nested?: boolean; safes?: string[] } = {},
+) => {
   const { safe } = useSafeInfo()
   const owners = safe.owners.map((owner) => owner.value)
   const [pickedId, setPickedId] = useState(opportunity?.id ?? options[0]?.id ?? '')
   const [first, setFirst] = useState(String(IDLE_CASH.amount))
-  const [where, setWhere] = useState<Where>('nested')
+  const [where, setWhere] = useState<Where>(nested ? 'nested' : 'this')
+  const [fromSafe, setFromSafe] = useState(safes?.[0])
   const [name, setName] = useState('')
   const [who, setWho] = useState<Who>('any')
   const [picked, setPicked] = useState<string[]>(owners.slice(0, 2))
@@ -91,16 +96,7 @@ export const useInvestmentForm = (opportunity: Opportunity | null, options: Oppo
       : undefined
 
   const toCreated = (): CreatedInvestment | undefined =>
-    investment ? { operation: toOperation(), opportunity: investment, amount } : undefined
-
-  const steps = investment
-    ? [
-        ...(where === 'nested'
-          ? [COPY.stepCreate(safeName, 1, executors.length), COPY.stepMove(formatAmount(amount), investment.asset)]
-          : []),
-        COPY.stepDeposit(formatAmount(amount), investment.asset, investment.name),
-      ]
-    : []
+    investment ? { operation: toOperation(), opportunity: investment, amount, safe: fromSafe } : undefined
 
   const reviewSteps = investment
     ? [
@@ -112,6 +108,10 @@ export const useInvestmentForm = (opportunity: Opportunity | null, options: Oppo
     : []
 
   return {
+    nested,
+    safes,
+    fromSafe,
+    setFromSafe,
     reviewSteps,
     safe,
     owners,
@@ -143,7 +143,6 @@ export const useInvestmentForm = (opportunity: Opportunity | null, options: Oppo
     frequency,
     setFrequency,
     scheduleText,
-    steps,
     toOperation,
     toCreated,
     reset: () => setName(''),
@@ -242,11 +241,34 @@ const InvestmentCards = ({ form }: { form: InvestmentForm }) => (
   </Section>
 )
 
-/** `cards` puts the amount first and lists the investments as radio cards. */
+const FromField = ({ form }: { form: InvestmentForm }) =>
+  form.safes && form.safes.length > 1 ? (
+    <Section label={SUMMARY.rows.from}>
+      <Select
+        items={form.safes.map((name) => ({ value: name, label: name }))}
+        value={form.fromSafe}
+        onValueChange={(next) => next && form.setFromSafe(String(next))}
+      >
+        <SelectTrigger aria-label={SUMMARY.rows.from} className="w-full" data-testid="deposit-from">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {form.safes.map((name) => (
+            <SelectItem key={name} value={name}>
+              {name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Section>
+  ) : null
+
+/** `cards` puts the amount first and lists the opportunities as radio cards. */
 export const AmountFields = ({ form, cards }: { form: InvestmentForm; cards?: boolean }) => {
   if (cards)
     return (
       <>
+        <FromField form={form} />
         <AmountInput form={form} />
         <InvestmentCards form={form} />
       </>
@@ -416,33 +438,6 @@ export const ScheduleFields = ({ form }: { form: InvestmentForm }) => (
   </Section>
 )
 
-/** The proposal in plain steps, with one note on what is at risk. */
-export const StepsSummary = ({ form }: { form: InvestmentForm }) =>
-  form.investment ? (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col rounded-lg bg-card">
-        <div className="flex items-center justify-between gap-3 border-b border-border px-3 py-2.5 text-sm">
-          <span className="font-medium">{COPY.proposalTitle}</span>
-          <span className="text-muted-foreground">{COPY.approvedBy(form.safe.threshold, form.owners.length)}</span>
-        </div>
-        <ol className="flex flex-col gap-2.5 px-3 py-3">
-          {form.reviewSteps.map((step, index) => (
-            <li key={step} className="flex items-center gap-3 text-sm">
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                {index + 1}
-              </span>
-              {step}
-            </li>
-          ))}
-        </ol>
-      </div>
-      <p className="flex items-start gap-2 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-        {COPY.riskNote}
-      </p>
-    </div>
-  ) : null
-
 const SummaryRow = ({ label, value, onEdit }: { label: string; value: string; onEdit?: () => void }) => (
   <div className="flex min-h-11 items-center gap-3 border-t border-border px-3 py-1.5 text-sm first:border-t-0">
     <span className="w-28 shrink-0 text-muted-foreground">{label}</span>
@@ -460,13 +455,28 @@ const SetupCard = ({ form, onEdit }: { form: InvestmentForm; onEdit?: (step: num
   if (!form.investment) return null
   const asset = form.investment.asset
   const edit = (step: number) => (onEdit ? () => onEdit(step) : undefined)
+  const deposit = (
+    <SummaryRow
+      label={SUMMARY.rows.investment}
+      value={SUMMARY.investment(formatAmount(form.amount), asset, form.investment.name)}
+      onEdit={edit(0)}
+    />
+  )
+  const from = form.fromSafe && <SummaryRow label={SUMMARY.rows.from} value={form.fromSafe} onEdit={edit(0)} />
+
+  if (!form.nested)
+    return (
+      <div className="flex flex-col rounded-lg border border-border">
+        {deposit}
+        {from}
+        <SummaryRow label={SUMMARY.rows.safe} value={SUMMARY.thisSafe(form.safe.threshold, form.owners.length)} />
+      </div>
+    )
+
   return (
     <div className="flex flex-col rounded-lg border border-border">
-      <SummaryRow
-        label={SUMMARY.rows.investment}
-        value={SUMMARY.investment(formatAmount(form.amount), asset, form.investment.name)}
-        onEdit={edit(0)}
-      />
+      {deposit}
+      {from}
       <SummaryRow
         label={SUMMARY.rows.safe}
         value={form.where === 'nested' ? SUMMARY.nested(form.safeName) : COPY.thisSafe}
@@ -500,21 +510,23 @@ export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?:
   const budget = formatAmount(form.budgetAmount)
   const count = form.executors.length
   const isNested = form.where === 'nested'
-  const outcomes: { icon: LucideIcon; text: string }[] = [
-    isNested
-      ? { icon: ShieldPlus, text: SUMMARY.create(form.safeName, count) }
-      : { icon: UserCheck, text: SUMMARY.allow(count, budget, asset) },
-    ...(isNested ? [{ icon: ArrowRightLeft, text: SUMMARY.move(amount, asset) }] : []),
-    { icon: Coins, text: SUMMARY.deposit(amount, asset, investment.name) },
-    ...(form.schedule === 'recurring'
-      ? [
-          {
-            icon: Repeat,
-            text: SUMMARY.repeat(formatAmount(parseAmount(form.each)), asset, COPY.frequencies[form.frequency]),
-          },
-        ]
-      : []),
-  ]
+  const outcomes: { icon: LucideIcon; text: string }[] = !form.nested
+    ? [{ icon: Coins, text: SUMMARY.deposit(amount, asset, investment.name) }]
+    : [
+        isNested
+          ? { icon: ShieldPlus, text: SUMMARY.create(form.safeName, count) }
+          : { icon: UserCheck, text: SUMMARY.allow(count, budget, asset) },
+        ...(isNested ? [{ icon: ArrowRightLeft, text: SUMMARY.move(amount, asset) }] : []),
+        { icon: Coins, text: SUMMARY.deposit(amount, asset, investment.name) },
+        ...(form.schedule === 'recurring'
+          ? [
+              {
+                icon: Repeat,
+                text: SUMMARY.repeat(formatAmount(parseAmount(form.each)), asset, COPY.frequencies[form.frequency]),
+              },
+            ]
+          : []),
+      ]
 
   return (
     <div className="flex flex-col gap-4" data-testid="investment-review">
@@ -542,13 +554,15 @@ export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?:
             ))}
           </ol>
           <div className="flex flex-col gap-2 border-t border-border/60 px-3 py-3 text-xs text-muted-foreground">
-            <p className="flex items-start gap-2">
-              <Zap className="size-3.5 shrink-0 translate-y-px text-badge-dot-success" aria-hidden />
-              {SUMMARY.after(form.who === 'any' ? SUMMARY.anyoneWho : SUMMARY.someWho(count), budget, asset)}
-            </p>
+            {form.nested && (
+              <p className="flex items-start gap-2">
+                <Zap className="size-3.5 shrink-0 translate-y-px text-badge-dot-success" aria-hidden />
+                {SUMMARY.after(form.who === 'any' ? SUMMARY.anyoneWho : SUMMARY.someWho(count), budget, asset)}
+              </p>
+            )}
             <p className="flex items-start gap-2">
               <ShieldCheck className="size-3.5 shrink-0 translate-y-px" aria-hidden />
-              {isNested ? SUMMARY.nestedRisk(form.safeName) : SUMMARY.thisRisk}
+              {!form.nested ? SUMMARY.returnOnly : isNested ? SUMMARY.nestedRisk(form.safeName) : SUMMARY.thisRisk}
             </p>
           </div>
         </div>
@@ -621,7 +635,7 @@ export const ProposedView = ({ form }: { form: InvestmentForm }) => {
   )
 }
 
-/** Close, or jump straight to the investment that was just proposed. */
+/** Close, or jump straight to the deposit that was just proposed. */
 export const ProposedActions = ({ onClose, onView }: { onClose: () => void; onView: () => void }) => (
   <div className="flex w-full gap-2">
     <Button variant="outline" size="lg" className="flex-1" onClick={onClose}>

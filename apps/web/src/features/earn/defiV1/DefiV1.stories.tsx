@@ -1,6 +1,5 @@
-import type { ComponentType } from 'react'
 import type { Decorator, Meta, StoryObj } from '@storybook/react'
-import { within } from 'storybook/test'
+import { expect, within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { spaceWithSafesHandler } from '@/stories/mocks/handlers'
 import { localItem } from '@/services/local-storage/local'
@@ -8,23 +7,15 @@ import Home from '@/pages/home'
 import Earn from '@/pages/earn'
 import { EARN_CONSENT_STORAGE_KEY } from '../public/constants'
 import { DefiV1Context } from './context'
-import { PartnerView } from './components/PartnerView'
-import type { DefiV1Framing, DefiV1Milestone, DefiV1Nudge, DefiV1Plan, DefiV1Scope, DefiV1Setup } from './types'
+import type { DefiV1Nudge, DefiV1Plan, DefiV1Scope } from './types'
 
-type Page = 'home' | 'earn' | 'partner'
+type Page = 'home' | 'earn'
 type Args = {
   page: Page
-  framing: DefiV1Framing
   nudge: DefiV1Nudge
   plan: DefiV1Plan
-  setup: DefiV1Setup
-  milestone: DefiV1Milestone
   scope: DefiV1Scope
-  empty: boolean
 }
-
-const PATHNAMES: Record<Page, string> = { home: '/home', earn: '/earn', partner: '/earn' }
-const PAGES: Record<Page, ComponentType> = { home: Home, earn: Earn, partner: PartnerView }
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -50,130 +41,100 @@ const withLayout: Decorator<Args> = (Story, context) =>
   (context.args.scope === 'workspace' ? workspaceSetup : setup).decorator(Story, context)
 
 const withPrototype: Decorator<Args> = (Story, { args }) => (
-  <DefiV1Context.Provider
-    value={{
-      framing: args.framing,
-      nudge: args.nudge,
-      plan: args.plan,
-      setup: args.setup,
-      milestone: args.milestone,
-      scope: args.scope,
-      empty: args.empty,
-    }}
-  >
+  <DefiV1Context.Provider value={{ framing: 'treasury', nudge: args.nudge, plan: args.plan, scope: args.scope }}>
     <Story />
   </DefiV1Context.Provider>
 )
 
 /**
- * DES-201 prototype: the DeFi story on the production Home and Earn pages, with mock opportunities.
- * Controls switch the variants under review. `milestone` shows M1 (ships first: deposits from this Safe)
- * or M2 (later: nested Safes, swap and bridge). `scope` shows one Safe or the whole workspace.
+ * DES-201 prototype on the production Home and Earn pages, with mock opportunities. Three views to demo:
+ * Pro workspace (every Safe), Pro workspace Safe (one Safe in a Pro workspace) and Free Safe.
  */
 const meta = {
   title: 'Prototypes/DeFi V1',
   parameters: { layout: 'fullscreen', ...setup.parameters },
   decorators: [withLayout, withPrototype],
   beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).set(true),
-  args: {
-    page: 'earn',
-    framing: 'treasury',
-    nudge: 'home',
-    plan: 'free',
-    setup: 'stepper',
-    milestone: 'm1',
-    scope: 'safe',
-    empty: false,
-  },
+  args: { page: 'earn', nudge: 'home', plan: 'free', scope: 'safe' },
   argTypes: {
-    page: { control: 'inline-radio', options: ['home', 'earn', 'partner'] },
-    framing: { control: 'inline-radio', options: ['treasury', 'defi'] },
+    page: { control: 'inline-radio', options: ['home', 'earn'] },
     nudge: { control: 'inline-radio', options: ['home', 'assets', 'off'] },
     plan: { control: 'inline-radio', options: ['free', 'pro'] },
-    setup: { control: 'inline-radio', options: ['dialog', 'drawer', 'stepper'], description: 'M2 only' },
-    milestone: {
-      control: { type: 'inline-radio', labels: { m1: 'M1 · ships soon', m2: 'M2 · later' } },
-      options: ['m1', 'm2'],
-    },
     scope: { control: 'inline-radio', options: ['safe', 'workspace'] },
-    empty: { control: 'boolean' },
   },
-  render: ({ page }) => {
-    const PageComponent = PAGES[page]
-    return <PageComponent />
-  },
+  render: ({ page }) => (page === 'home' ? <Home /> : <Earn />),
 } satisfies Meta<Args>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-const at = (page: Page, args: Partial<Args> = {}): Story => ({
-  args: { page, ...args },
-  parameters: { nextjs: { router: { ...setup.parameters.nextjs.router, pathname: PATHNAMES[page] } } },
+const onPage = (pathname: string) => ({
+  nextjs: { router: { ...setup.parameters.nextjs.router, pathname } },
 })
 
+const describe = (story: string) => ({ docs: { description: { story } } })
+
 export const HomeNudge: Story = {
-  ...at('home', { nudge: 'home' }),
+  args: { page: 'home', nudge: 'home' },
+  parameters: onPage('/home'),
   play: async ({ canvasElement }) => {
     await within(canvasElement).findByTestId('idle-cash-nudge')
   },
 }
 
 export const AssetsNudge: Story = {
-  ...at('home', { nudge: 'assets' }),
+  args: { page: 'home', nudge: 'assets' },
+  parameters: onPage('/home'),
   play: async ({ canvasElement }) => {
     await within(canvasElement).findByTestId('idle-cash-nudge-inline')
   },
 }
 
-export const Treasury: Story = {
-  ...at('earn'),
-  play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('defi-opportunities')
-  },
-}
-
-export const DefiList: Story = {
-  ...at('earn', { framing: 'defi' }),
-  play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('opportunity-aave-usdc')
-  },
-}
-
-export const TreasuryPro: Story = {
-  ...at('earn', { plan: 'pro' }),
-  play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('deposit-button')
-  },
-}
-
-export const TreasuryWorkspace: Story = {
-  args: { page: 'earn', plan: 'pro', scope: 'workspace' },
+export const ProWorkspace: Story = {
+  name: 'Pro workspace',
+  args: { plan: 'pro', scope: 'workspace' },
   parameters: {
     ...workspaceSetup.parameters,
     msw: { handlers: [spaceWithSafesHandler, ...workspaceSetup.handlers] },
+    ...describe(
+      'Treasury in the workspace sidebar. Every Safe in one place: filter by Safe, stat cards across all Safes, and the deposit modal asks which Safe to deposit from.',
+    ),
   },
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('safe-filter')
+    const canvas = within(canvasElement)
+    await canvas.findByTestId('safe-filter')
+    await canvas.findByTestId('treasury-summary')
   },
 }
 
-export const TreasuryEmpty: Story = {
-  ...at('earn', { empty: true }),
+export const ProWorkspaceSafe: Story = {
+  name: 'Pro workspace · Safe',
+  args: { plan: 'pro', scope: 'safe' },
+  parameters: {
+    ...onPage('/earn'),
+    ...describe(
+      'Deposits in the Safe sidebar, for a Safe in a Pro workspace. This Safe only, with stat cards and a link back to Treasury. Deposits can run in a nested Safe with its own signers and budget.',
+    ),
+  },
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('treasury-empty')
+    const canvas = within(canvasElement)
+    await canvas.findByTestId('workspace-link')
+    await canvas.findByTestId('treasury-summary')
   },
 }
 
-export const TreasuryM2: Story = {
-  ...at('earn', { plan: 'pro', milestone: 'm2' }),
+export const FreeSafe: Story = {
+  name: 'Free · Safe',
+  args: { plan: 'free', scope: 'safe' },
+  parameters: {
+    ...onPage('/earn'),
+    ...describe(
+      'Deposits in the Safe sidebar on the free plan. One summary line instead of stat cards, Pro-only options locked, and deposits come straight from this Safe in two steps.',
+    ),
+  },
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('invest-button')
+    const canvas = within(canvasElement)
+    await canvas.findByTestId('summary-line')
+    await expect(canvas.queryByTestId('treasury-summary')).toBeNull()
   },
 }
-
-export const TreasuryM2SetupDrawer: Story = at('earn', { plan: 'pro', milestone: 'm2', setup: 'drawer' })
-
-export const TreasuryM2SetupDialog: Story = at('earn', { plan: 'pro', milestone: 'm2', setup: 'dialog' })
-
-export const Partner: Story = at('partner')

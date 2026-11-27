@@ -80,7 +80,6 @@ export const CompareDialog = ({
   isLocked,
   onClose,
   onDeposit,
-  onInvest,
   onSelect,
 }: {
   items: Opportunity[]
@@ -89,7 +88,6 @@ export const CompareDialog = ({
   isLocked: (item: Opportunity) => boolean
   onClose: () => void
   onDeposit: (item: Opportunity) => void
-  onInvest: (item: Opportunity) => void
   onSelect: (item: Opportunity) => void
 }) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
@@ -149,20 +147,15 @@ export const CompareDialog = ({
               <TableCell />
               {items.map((item) => {
                 const locked = isLocked(item)
-                const invested = investedIds.includes(item.id)
                 return (
                   <TableCell key={item.id} className="px-4 py-3">
                     <Button
                       variant={locked ? 'outline' : 'default'}
                       size="sm"
-                      onClick={() => (locked ? onSelect(item) : invested ? onDeposit(item) : onInvest(item))}
+                      onClick={() => (locked ? onSelect(item) : onDeposit(item))}
                     >
                       {locked && <Lock />}
-                      {locked
-                        ? DEFI_V1_COPY.proOnly
-                        : invested
-                          ? DEFI_V1_COPY.factSheet.deposit
-                          : DEFI_V1_COPY.operations.invest}
+                      {locked ? DEFI_V1_COPY.proOnly : DEFI_V1_COPY.action.deposit}
                     </Button>
                   </TableCell>
                 )

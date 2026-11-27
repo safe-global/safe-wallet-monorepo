@@ -1,15 +1,8 @@
-import { Fragment, useState, type ComponentProps, type ReactNode } from 'react'
-import { Check } from 'lucide-react'
+import { Fragment, useState, type ReactNode } from 'react'
+import { Check, Lock } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@safe-global/views/components/ui/dialog'
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
@@ -27,38 +20,31 @@ import {
   type CreatedInvestment,
   type InvestmentForm,
 } from './InvestmentForm'
-import { FLOW_DIALOG } from './MoveFundsDialog'
 import { OpportunityMark } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.operations
-const STEPS = COPY.stepperSteps
 
 type StepState = 'done' | 'current' | 'upcoming'
 
 const compact = (value: number) => formatCompactUsd(value).replace('$', '')
 
-/** One or two words per step, so the stepper reads as a summary of the choices so far. */
-const summaries = (form: InvestmentForm): string[] => [
-  `${compact(form.amount)} ${form.investment?.asset ?? ''}`.trim(),
-  form.where === 'nested' ? COPY.short.nested : COPY.short.thisSafe,
-  form.who === 'any' ? COPY.anySigner : COPY.short.signers(form.executors.length),
-  `${compact(form.budgetAmount)}, ${form.schedule === 'once' ? COPY.short.once : COPY.short.recurring}`,
-  '',
-]
+const depositSummary = (form: InvestmentForm) => `${compact(form.amount)} ${form.investment?.asset ?? ''}`.trim()
 
 const Stepper = ({
+  steps,
   current,
   reached,
   labels,
   onJump,
 }: {
+  steps: string[]
   current: number
   reached: number
   labels: string[]
   onJump: (index: number) => void
 }) => (
   <ol className="flex items-start pb-1" data-testid="investment-stepper">
-    {STEPS.map((title, index) => {
+    {steps.map((title, index) => {
       const state: StepState = index === current ? 'current' : index <= reached ? 'done' : 'upcoming'
       const canJump = state === 'done'
       return (
@@ -87,7 +73,7 @@ const Stepper = ({
               {state === 'done' ? labels[index] : ''}
             </span>
           </li>
-          {index < STEPS.length - 1 && (
+          {index < steps.length - 1 && (
             <span className={cn('mt-2.5 h-px flex-1', index < reached ? 'bg-foreground' : 'bg-border')} aria-hidden />
           )}
         </Fragment>
@@ -96,10 +82,29 @@ const Stepper = ({
   </ol>
 )
 
-/** Set up investment one clear step at a time, with a stepper that summarises each answer. */
+const ProHint = () => (
+  <p
+    className="flex items-start gap-2 rounded-lg bg-card px-3 py-2 text-xs text-muted-foreground"
+    data-testid="pro-hint"
+  >
+    <Lock className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+    <span>
+      {COPY.proHint} <span className="font-medium text-foreground">{DEFI_V1_COPY.seePro}</span>
+    </span>
+  </p>
+)
+
+type View = { step: string; summary: string; heading?: string; content: ReactNode; valid: boolean }
+
+/**
+ * Start earning one step at a time. With `nested` (Safe Pro) it adds where the deposits run, who can deposit
+ * and a budget; without it, it deposits from this Safe and goes straight to review.
+ */
 export const SetUpInvestmentFlow = ({
   opportunity,
   options,
+  nested,
+  safes,
   onClose,
   onCreate,
   onView,
@@ -107,12 +112,14 @@ export const SetUpInvestmentFlow = ({
 }: {
   opportunity: Opportunity | null
   options: Opportunity[]
+  nested: boolean
+  safes?: string[]
   onClose: () => void
   onCreate: (created: CreatedInvestment) => void
   onView: (opportunity: Opportunity) => void
   tabs?: ReactNode
 }) => {
-  const form = useInvestmentForm(opportunity, options)
+  const form = useInvestmentForm(opportunity, options, { nested, safes })
   const [current, setCurrent] = useState(0)
   const [reached, setReached] = useState(0)
   const [proposed, setProposed] = useState(false)
@@ -120,30 +127,57 @@ export const SetUpInvestmentFlow = ({
 
   if (!investment) return null
 
-  const views: { heading?: string; content: ReactNode; valid: boolean }[] = [
-    { content: <AmountFields form={form} cards />, valid: form.amount > 0 },
-    { heading: COPY.stepHeadings[0], content: <WhereFields form={form} labelled={false} />, valid: true },
-    {
-      heading: COPY.stepHeadings[1],
-      content: <WhoFields form={form} labelled={false} />,
-      valid: form.executors.length > 0,
-    },
-    {
-      heading: COPY.stepHeadings[2],
-      content: (
-        <>
-          <BudgetFields form={form} />
-          <ScheduleFields form={form} />
-        </>
-      ),
-      valid: form.budgetAmount >= form.amount,
-    },
-    {
-      heading: COPY.stepHeadings[3],
-      content: <ReviewSummary form={form} onEdit={setCurrent} />,
-      valid: form.isValid,
-    },
-  ]
+  const [depositStep, safeStep, signersStep, budgetStep, reviewStep] = COPY.stepperSteps
+  const first: View = {
+    step: depositStep,
+    summary: depositSummary(form),
+    content: (
+      <>
+        <AmountFields form={form} cards />
+        {!nested && <ProHint />}
+      </>
+    ),
+    valid: form.amount > 0,
+  }
+  const review: View = {
+    step: reviewStep,
+    summary: '',
+    heading: COPY.stepHeadings[3],
+    content: <ReviewSummary form={form} onEdit={setCurrent} />,
+    valid: form.isValid,
+  }
+  const views: View[] = nested
+    ? [
+        first,
+        {
+          step: safeStep,
+          summary: form.where === 'nested' ? COPY.short.nested : COPY.short.thisSafe,
+          heading: COPY.stepHeadings[0],
+          content: <WhereFields form={form} labelled={false} />,
+          valid: true,
+        },
+        {
+          step: signersStep,
+          summary: form.who === 'any' ? COPY.anySigner : COPY.short.signers(form.executors.length),
+          heading: COPY.stepHeadings[1],
+          content: <WhoFields form={form} labelled={false} />,
+          valid: form.executors.length > 0,
+        },
+        {
+          step: budgetStep,
+          summary: `${compact(form.budgetAmount)}, ${form.schedule === 'once' ? COPY.short.once : COPY.short.recurring}`,
+          heading: COPY.stepHeadings[2],
+          content: (
+            <>
+              <BudgetFields form={form} />
+              <ScheduleFields form={form} />
+            </>
+          ),
+          valid: form.budgetAmount >= form.amount,
+        },
+        review,
+      ]
+    : [first, review]
   const view = views[current]
   const isLast = current === views.length - 1
 
@@ -220,7 +254,13 @@ export const SetUpInvestmentFlow = ({
           />
         ) : (
           <>
-            <Stepper current={current} reached={reached} labels={summaries(form)} onJump={setCurrent} />
+            <Stepper
+              steps={views.map((item) => item.step)}
+              current={current}
+              reached={reached}
+              labels={views.map((item) => item.summary)}
+              onJump={setCurrent}
+            />
             <div className="flex gap-2">
               {current > 0 && (
                 <Button variant="outline" size="lg" className="flex-1" onClick={() => setCurrent(current - 1)}>
@@ -237,15 +277,3 @@ export const SetUpInvestmentFlow = ({
     </>
   )
 }
-
-export const SetUpInvestmentStepper = ({
-  open,
-  onClose,
-  ...props
-}: ComponentProps<typeof SetUpInvestmentFlow> & { open: boolean }) => (
-  <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-    <DialogContent size="sm" className={FLOW_DIALOG} data-testid="set-up-investment-stepper">
-      <SetUpInvestmentFlow onClose={onClose} {...props} />
-    </DialogContent>
-  </Dialog>
-)
