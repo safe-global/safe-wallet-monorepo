@@ -96,12 +96,12 @@ const describe = (title: string, slices: Slice[], format: (value: number) => str
 
 const PartStat = ({ part, total }: { part: Part; total: number }) => (
   <div className="flex min-w-0 flex-col gap-0.5">
-    <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
       <span aria-hidden className={cn('size-2 shrink-0 rounded-full', part.className)} />
       {part.label}
       <span className="tabular-nums">· {percent(part.value, total)}</span>
     </span>
-    <span className="text-lg font-semibold tabular-nums">{part.format(part.value)}</span>
+    <span className="text-sm font-semibold tabular-nums">{part.format(part.value)}</span>
   </div>
 )
 
@@ -142,17 +142,19 @@ export const TreasurySummary = ({
   ]
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl bg-card px-4 py-4" data-testid="treasury-summary">
-      <div className="flex flex-col gap-0.5">
-        <span className="text-sm font-medium">{COPY.total}</span>
-        <span className="text-2xl font-semibold tabular-nums">{formatCompactUsd(total)}</span>
+    <div className="flex flex-col gap-3 rounded-xl bg-card px-4 py-4" data-testid="treasury-summary">
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-medium">{COPY.total}</span>
+          <span className="text-2xl font-semibold tabular-nums">{formatCompactUsd(total)}</span>
+        </div>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {parts.map((part) => (
+            <PartStat key={part.label} part={part} total={total} />
+          ))}
+        </div>
       </div>
       <StackedBar parts={parts} label={describe(COPY.total, parts, formatCompactUsd)} />
-      <div className="grid gap-4 @2xl:grid-cols-3 @2xl:gap-6">
-        {parts.map((part) => (
-          <PartStat key={part.label} part={part} total={total} />
-        ))}
-      </div>
     </div>
   )
 }
