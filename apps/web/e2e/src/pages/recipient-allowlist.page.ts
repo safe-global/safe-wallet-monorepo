@@ -43,13 +43,11 @@ export class RecipientAllowlistPage {
     this.disabledPanelAction = this.panel.getByRole('button', { disabled: true })
   }
 
-  /** Starts the setup from the catalogue tile, through the intro that opens before every setup */
   async startFromCatalogue(): Promise<void> {
     await this.setPolicyButton.click()
     await this.proceedFromIntro()
   }
 
-  /** Starts the setup from Add policy, when the Workspace already lists policies */
   async startFromAddPolicy(): Promise<void> {
     await this.addPolicyButton.click()
     await this.page

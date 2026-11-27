@@ -1,11 +1,9 @@
-/**
- * The policy engine of the recipient allowlist on the fork, and the indexer state the gateway reads about it.
- *
- * The indexer mock has no chain access, so journeys register the bindings and configuration roots that the real
- * indexer would read from the guard's events.
- */
+// The indexer mock has no chain access, so journeys register the rows the real indexer would read from guard events
 import { getAddress } from 'ethers'
-import { getPolicyEngineAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
+import {
+  getPolicyEngineAddress,
+  getPolicyGuardDelay,
+} from '@/features/policy-guard/public/services/policyEngineDeployments'
 import type { PolicyEngineContract } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import { REJECT_SELECTOR } from '@/features/policy-guard/public/services/rejectAccess'
 import { registerGuardPolicies } from '../../environment/scenarios/policy-indexer.mjs'
@@ -30,8 +28,11 @@ const deployedOnSepolia = (contract: PolicyEngineContract): string => {
   return getAddress(address)
 }
 
-/** The 3-minute delay guard that the wallet sets up on Sepolia */
+/** The 3-minute delay guard, which the wallet sets up when NEXT_PUBLIC_POLICY_GUARD_DELAY_SECONDS is 180 */
 export const POLICY_GUARD = getAddress('0x4d1fB05cc9bcd31cCA651B2833b4E71229c31d1f')
+if (getPolicyGuardDelay(CHAIN_IDS.sepolia, POLICY_GUARD) !== 180) {
+  throw new Error(`The wallet lists no 180 s policy guard at ${POLICY_GUARD} on Sepolia`)
+}
 export const ERC20_TRANSFER_POLICY = deployedOnSepolia('ERC20TransferPolicy')
 const ALLOW_POLICY = deployedOnSepolia('AllowPolicy')
 /** The guard's `EXPIRY`: how long a requested root stays applicable after its delay */
@@ -48,11 +49,7 @@ export function configurationRootOf(allowlist: TokenAllowlist, safe: string): st
   return rootOf(allowlist, safe, ENGINE)
 }
 
-/**
- * Sets up the allowlist as the wallet's first setup does, in one Safe transaction: `configureImmediately` with the
- * token rule and the reject rule, then both guard slots. `cosigners` sign first, as a Safe with a threshold above 1
- * needs; the Safe's context signer signs last and executes. Registers the bindings in the indexer.
- */
+/** Cosigners sign first, as a threshold above 1 needs; the Safe's context signer signs last and executes */
 export async function seedAllowlist(
   journey: Journey,
   safe: SeededSafe,

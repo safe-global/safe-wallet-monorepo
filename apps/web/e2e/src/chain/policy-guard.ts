@@ -12,9 +12,6 @@ const ERC20_TRANSFER_POLICY_ABI = [
 
 export type GuardSlots = { transactionGuard: string; moduleGuard: string }
 
-/** ERC20TransferPolicy's `Permission` enum */
-export const RECIPIENT_PERMISSION = { NONE: 0, ONCE: 1, ALWAYS: 2 } as const
-
 const addressInSlot = (word: string): string => getAddress(`0x${zeroPadValue(word, 32).slice(-40)}`)
 
 /** The guards in the Safe's transaction and module guard slots; the zero address where a slot is empty. */

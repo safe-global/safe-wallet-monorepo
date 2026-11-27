@@ -1,19 +1,20 @@
 import { AbiCoder, Interface, ZeroAddress, getAddress, keccak256 } from 'ethers'
 import { SAFE_SETTER_SELECTORS } from '@/features/policy-guard/public/services/guardExit'
 import { REJECT_SELECTOR } from '@/features/policy-guard/public/services/rejectAccess'
+import type { PolicyConfiguration } from '@/features/policy-guard/public/types'
 
 export type TokenAllowlist = { token: string; recipients: string[] }
 
 /** The deployed guard and the policies an allowlist binds */
 export type PolicyEngine = { guard: string; erc20TransferPolicy: string; allowPolicy: string }
 
-export type Configuration = { target: string; selector: string; operation: 0 | 1; policy: string; data: string }
+/** ERC20TransferPolicy's `Permission` enum */
+export const RECIPIENT_PERMISSION = { NONE: 0, ONCE: 1, ALWAYS: 2 } as const
 
 export type SetupCall = { to: string; value: string; data: string }
 
 export const ERC20_TRANSFER_SELECTOR = '0xa9059cbb'
 const CALL = 0
-const PERMISSION_ALWAYS = 2
 const CONFIGURATION = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'
 const guardInterface = new Interface([`function configureImmediately(${CONFIGURATION}[] configurations)`])
 const safeInterface = new Interface([
@@ -21,7 +22,10 @@ const safeInterface = new Interface([
   'function setModuleGuard(address moduleGuard)',
 ])
 
-function tokenRuleOf({ token, recipients }: TokenAllowlist, { erc20TransferPolicy }: PolicyEngine): Configuration {
+function tokenRuleOf(
+  { token, recipients }: TokenAllowlist,
+  { erc20TransferPolicy }: PolicyEngine,
+): PolicyConfiguration {
   return {
     target: getAddress(token),
     selector: ERC20_TRANSFER_SELECTOR,
@@ -29,7 +33,7 @@ function tokenRuleOf({ token, recipients }: TokenAllowlist, { erc20TransferPolic
     policy: getAddress(erc20TransferPolicy),
     data: AbiCoder.defaultAbiCoder().encode(
       ['tuple(address recipient, uint8 permission)[]'],
-      [recipients.map((recipient) => [getAddress(recipient), PERMISSION_ALWAYS])],
+      [recipients.map((recipient) => [getAddress(recipient), RECIPIENT_PERMISSION.ALWAYS])],
     ),
   }
 }
@@ -39,8 +43,8 @@ export function firstSetupConfigurations(
   allowlist: TokenAllowlist,
   safe: string,
   engine: PolicyEngine,
-): Configuration[] {
-  const reject: Configuration = {
+): PolicyConfiguration[] {
+  const reject: PolicyConfiguration = {
     target: getAddress(safe),
     selector: REJECT_SELECTOR,
     operation: CALL,
@@ -55,8 +59,8 @@ export function requestedConfigurations(
   allowlist: TokenAllowlist,
   safe: string,
   engine: PolicyEngine,
-): Configuration[] {
-  const clearedGuardExit = SAFE_SETTER_SELECTORS.map((selector): Configuration => ({
+): PolicyConfiguration[] {
+  const clearedGuardExit = SAFE_SETTER_SELECTORS.map((selector): PolicyConfiguration => ({
     target: getAddress(safe),
     selector,
     operation: CALL,

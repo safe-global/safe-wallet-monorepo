@@ -182,8 +182,52 @@ describe('policy indexer', () => {
       register(registry, SEPOLIA, SAFE, { ConfigurationRoot: [{ ...root(SAFE), readyAt: 1800000060 }] })[0],
       400,
     )
+    assert.equal(
+      register(registry, SEPOLIA, SAFE, { ConfigurationRoot: [{ ...root(SAFE), expiresAt: 1800604860 }] })[0],
+      400,
+    )
     assert.equal(register(registry, SEPOLIA, SAFE, { GuardPolicyBinding: 'none' })[0], 400)
+    assert.equal(register(registry, SEPOLIA, SAFE, { GuardPolicyBinding: [{ chainId: SEPOLIA, safe: SAFE }] })[0], 400)
     assert.equal(registry.size, 0)
+  })
+
+  it('refuses a registration body that is not a JSON object', () => {
+    const registry: Registry = new Map()
+    const path = `/__test/chains/${SEPOLIA}/safes/${SAFE}/guard-policies`
+    const statuses = ['not json', '[]', 'null'].map((body) => dispatch({ method: 'POST', path, body }, registry).status)
+
+    assert.deepEqual(statuses, [400, 400, 400])
+    assert.equal(registry.size, 0)
+  })
+
+  it('registers only on POST', () => {
+    const registry: Registry = new Map()
+    const path = `/__test/chains/${SEPOLIA}/safes/${SAFE}/guard-policies`
+
+    assert.equal(dispatch({ method: 'GET', path, body: JSON.stringify({}) }, registry).status, 404)
+    assert.equal(registry.size, 0)
+  })
+
+  it('reads the roots by their own Safe filter', () => {
+    const registry: Registry = new Map()
+    register(registry, SEPOLIA, SAFE, { GuardPolicyBinding: [binding(SAFE)], ConfigurationRoot: [root(SAFE)] })
+    const [, answer] = query(registry, { ...guardQuery([SAFE]), roots: safeFilter(SEPOLIA, [OTHER_SAFE]) })
+    const { data } = answer as { data: { GuardPolicyBinding: Binding[]; ConfigurationRoot: Root[] } }
+
+    assert.deepEqual([data.GuardPolicyBinding, data.ConfigurationRoot], [[binding(SAFE)], []])
+  })
+
+  it('answers a field named like an object property with an empty list', () => {
+    const reply = dispatch(
+      {
+        method: 'POST',
+        path: '/v1/graphql',
+        body: JSON.stringify({ query: '{ constructor { id } __proto__ { id } }' }),
+      },
+      new Map(),
+    )
+
+    assert.equal(reply.body, '{"data":{"constructor":[],"__proto__":[]}}')
   })
 
   it('reports healthy', () => {

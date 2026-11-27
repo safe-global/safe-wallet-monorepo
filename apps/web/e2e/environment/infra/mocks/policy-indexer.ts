@@ -14,7 +14,8 @@ import type { MockRequest, Reply } from './http.ts'
 
 const PORT = 8094
 const REGISTER_PATH = /^\/__test\/chains\/(\d+)\/safes\/(0x[0-9a-fA-F]{40})\/guard-policies$/
-const ROOT_STATUSES = ['PENDING', 'APPLIED', 'INVALIDATED']
+const ROOT_STATUSES = ['PENDING', 'APPLIED', 'INVALIDATED'] as const
+const isUnixSeconds = (value: unknown) => typeof value === 'string' && /^\d+$/.test(value)
 
 /** One `SafePolicy` row of the indexer, which the query aliases to `GuardPolicyBinding`. */
 export type Binding = {
@@ -37,7 +38,7 @@ export type Root = {
   root: string
   readyAt: string
   expiresAt: string
-  status: 'PENDING' | 'APPLIED' | 'INVALIDATED'
+  status: (typeof ROOT_STATUSES)[number]
 }
 
 export type SafeState = { GuardPolicyBinding: Binding[]; ConfigurationRoot: Root[] }
@@ -47,6 +48,16 @@ type SafeFilter = { chainId?: { _eq?: unknown }; safe?: { _in?: unknown } }
 type Variables = { guardPolicyBindings?: unknown; guardPolicyKinds?: unknown; roots?: unknown }
 
 class InvalidState extends Error {}
+
+const BINDING_TEXT_FIELDS = ['guard', 'target', 'selector', 'kind', 'policy'] as const
+
+function isBinding(row: Record<string, unknown>): row is Binding {
+  return (
+    BINDING_TEXT_FIELDS.every((field) => typeof row[field] === 'string') &&
+    (row.operation === 'CALL' || row.operation === 'DELEGATECALL') &&
+    'state' in row
+  )
+}
 
 function rowsOf(value: unknown, field: string, chainId: number, safe: string): Record<string, unknown>[] {
   if (value === undefined) return []
@@ -70,17 +81,20 @@ export function parseState(body: string, chainId: number, safe: string): SafeSta
   } catch {
     throw new InvalidState('The state is not JSON')
   }
-  if (!isRecord(parsed)) throw new InvalidState('The state must be an object')
+  if (!isRecord(parsed) || Array.isArray(parsed)) throw new InvalidState('The state must be an object')
   const roots = rowsOf(parsed.ConfigurationRoot, 'ConfigurationRoot', chainId, safe)
   for (const root of roots) {
-    if (!ROOT_STATUSES.includes(String(root.status))) throw new InvalidState(`Unknown root status ${root.status}`)
-    const isUnixSeconds = (value: unknown) => typeof value === 'string' && /^\d+$/.test(value)
+    if (!(ROOT_STATUSES as readonly unknown[]).includes(root.status)) {
+      throw new InvalidState(`Unknown root status ${root.status}`)
+    }
     if (!isUnixSeconds(root.readyAt) || !isUnixSeconds(root.expiresAt)) {
       throw new InvalidState('readyAt and expiresAt must be decimal strings of unix seconds')
     }
   }
+  const bindings = rowsOf(parsed.GuardPolicyBinding, 'GuardPolicyBinding', chainId, safe)
+  if (!bindings.every(isBinding)) throw new InvalidState('Every GuardPolicyBinding row needs every binding field')
   return {
-    GuardPolicyBinding: rowsOf(parsed.GuardPolicyBinding, 'GuardPolicyBinding', chainId, safe) as Binding[],
+    GuardPolicyBinding: bindings,
     ConfigurationRoot: roots as Root[],
   }
 }
@@ -142,11 +156,11 @@ export function queryState(registry: Registry, body: string): Reply {
   const rootSafes = requestedSafes(variables.roots)
   const bindings = [...bindingSafes].flatMap((key) => registry.get(key)?.GuardPolicyBinding ?? [])
   const roots = [...rootSafes].flatMap((key) => registry.get(key)?.ConfigurationRoot ?? [])
-  const state: Record<string, unknown[]> = {
-    GuardPolicyBinding: bindings.filter((binding) => kinds.includes(binding.kind)),
-    ConfigurationRoot: roots,
-  }
-  return json(200, { data: Object.fromEntries(fields.map((field) => [field, state[field] ?? []])) })
+  const state = new Map<string, unknown[]>([
+    ['GuardPolicyBinding', bindings.filter((binding) => kinds.includes(binding.kind))],
+    ['ConfigurationRoot', roots],
+  ])
+  return json(200, { data: Object.fromEntries(fields.map((field) => [field, state.get(field) ?? []])) })
 }
 
 function register(registry: Registry, chainId: number, safe: string, body: string): Reply {

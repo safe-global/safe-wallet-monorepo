@@ -10,6 +10,7 @@
         "e2e/environment/infra/docker-compose.test.yml",
         "e2e/environment/playwright-specs.mjs",
         "e2e/environment/released-without-e2e.json",
+        "e2e/src/seed/policy-guard-configuration.ts",
         "$TURBO_ROOT$/apps/mobile/config/remote-config.json",
         "$TURBO_ROOT$/packages/utils/src/**",
         "$TURBO_ROOT$/packages/store/src/**"
