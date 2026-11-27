@@ -147,15 +147,7 @@ export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRu
       }))
     }
 
-    return [
-      {
-        target: tokenAddress,
-        selector: ERC20_TRANSFER_SELECTOR,
-        operation: OperationType.Call,
-        policy: requirePolicy(chainId, 'ERC20TransferPolicy'),
-        data: encodeErc20TransferPolicyData(recipients),
-      },
-    ]
+    return [erc20TransferConfiguration(chainId, tokenAddress, recipients, PERMISSION_ALWAYS)]
   })
 
   if (configurations.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
