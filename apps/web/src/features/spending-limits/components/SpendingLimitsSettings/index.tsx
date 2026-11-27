@@ -17,7 +17,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePlanGate } from '@/features/spaces/public/hooks/usePlanGate'
 import useSpendingLimits from '../../public/hooks/useSpendingLimits'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
-import { withTokenLogos } from '../../services/withTokenLogos'
+import { withTokenLogos } from '../../public/services/withTokenLogos'
 import useBalances from '@/hooks/useBalances'
 
 const SpendingLimitsSettings = () => {
@@ -34,7 +34,11 @@ const SpendingLimitsSettings = () => {
   const { spendingLimits, loading: spendingLimitsLoading } = useSpendingLimits()
   const { balances } = useBalances()
   const spendingLimitsWithLogos = useMemo(
-    () => withTokenLogos(spendingLimits, balances.items),
+    () =>
+      withTokenLogos(
+        spendingLimits,
+        balances.items.map(({ tokenInfo }) => tokenInfo),
+      ),
     [spendingLimits, balances.items],
   )
 
