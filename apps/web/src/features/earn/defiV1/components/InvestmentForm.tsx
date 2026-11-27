@@ -34,7 +34,7 @@ import InitialsAvatar from '@/components/common/InitialsAvatar'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { TransactionsLink } from './TransactionsLink'
 import { DEFI_V1_COPY, formatAmount, formatApy } from '../copy'
-import { IDLE_CASH } from '../opportunities'
+import { idleBalance } from '../opportunities'
 import { dedicatedSafeName } from '../shelf'
 import type { Frequency, Operation, Opportunity } from '../types'
 
@@ -59,7 +59,7 @@ export const useInvestmentForm = (
   const { safe } = useSafeInfo()
   const owners = safe.owners.map((owner) => owner.value)
   const [pickedId, setPickedId] = useState(opportunity?.id ?? options[0]?.id ?? '')
-  const [first, setFirst] = useState(String(IDLE_CASH.amount))
+  const [first, setFirst] = useState(() => prefill(opportunity ?? options[0]))
   const [where, setWhere] = useState<Where>(nested ? 'nested' : 'this')
   const [fromSafe, setFromSafe] = useState(safes?.[0])
   const [name, setName] = useState('')
@@ -70,6 +70,11 @@ export const useInvestmentForm = (
   const [each, setEach] = useState('100000')
   const [frequency, setFrequency] = useState<Frequency>('month')
   const investment = options.find((item) => item.id === pickedId) ?? opportunity ?? options[0]
+  const pick = (id: string) => {
+    const next = options.find((item) => item.id === id)
+    if (next && next.asset !== investment?.asset) setFirst(prefill(next))
+    setPickedId(id)
+  }
   const safeName = name.trim() || (investment ? dedicatedSafeName(investment) : '')
   const amount = parseAmount(first)
   const budgetAmount = parseAmount(budget)
@@ -120,7 +125,7 @@ export const useInvestmentForm = (
     options,
     investment,
     pickedId: investment?.id ?? pickedId,
-    setPickedId,
+    setPickedId: pick,
     first,
     setFirst,
     amount,
@@ -204,14 +209,21 @@ export const Section = ({
   </div>
 )
 
+const prefill = (opportunity?: Opportunity) => {
+  const { amount } = idleBalance(opportunity?.asset ?? '')
+  return amount > 0 ? String(amount) : ''
+}
+
 const optionLabel = (option: Opportunity) => `${option.name} · ${formatApy(option.apy)} · ${option.exitShort}`
 
+const fromHint = (opportunity?: Opportunity) => {
+  const asset = opportunity?.asset ?? ''
+  const { amount, chain } = idleBalance(asset)
+  return DEFI_V1_COPY.deposit.fromValue(asset, chain, formatAmount(amount))
+}
+
 const AmountInput = ({ form }: { form: InvestmentForm }) => (
-  <Section
-    label={COPY.firstDeposit}
-    htmlFor="investment-amount"
-    hint={DEFI_V1_COPY.deposit.fromValue(IDLE_CASH.asset, IDLE_CASH.chain, formatAmount(IDLE_CASH.amount))}
-  >
+  <Section label={COPY.firstDeposit} htmlFor="investment-amount" hint={fromHint(form.investment)}>
     <Input
       id="investment-amount"
       inputMode="decimal"

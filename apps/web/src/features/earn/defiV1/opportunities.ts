@@ -321,6 +321,14 @@ export const IDLE_CASH = {
   idleDays: 30,
 }
 
+/** Idle balance per asset in this Safe, so a deposit starts from what's actually there. */
+export const IDLE_BALANCES: Record<string, { amount: number; chain: string }> = {
+  [IDLE_CASH.asset]: { amount: IDLE_CASH.amount, chain: IDLE_CASH.chain },
+  ETH: { amount: 120, chain: 'Ethereum' },
+}
+
+export const idleBalance = (asset: string) => IDLE_BALANCES[asset] ?? { amount: 0, chain: 'Ethereum' }
+
 export const CHAIN_IDS: Record<string, string> = { Ethereum: '1', Base: '8453', Arbitrum: '42161' }
 
 export const TREASURY_TOTAL = 6_700_000
