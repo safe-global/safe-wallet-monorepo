@@ -207,7 +207,7 @@ export const SetUpInvestmentFlow = ({
       ) : (
         <DialogHeader divided="subtle">
           <div className="flex items-center gap-3">
-            <OpportunityMark />
+            <OpportunityMark opportunity={form.investment ?? undefined} />
             <div className="flex min-w-0 flex-col">
               <div className="flex items-center gap-2">
                 <DialogTitle>{COPY.newSafe}</DialogTitle>

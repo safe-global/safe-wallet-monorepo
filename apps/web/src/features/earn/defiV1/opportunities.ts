@@ -1,11 +1,14 @@
 import type { Operation, Opportunity } from './types'
 
+const PROTOCOL_ICONS = 'https://protocol-icons.s3.amazonaws.com/icons'
+
 // Mock figures for the prototype, rounded from public sources; not live rates.
 export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'aave-usdc',
     name: 'Aave USDC',
     mark: 'Aa',
+    logo: `${PROTOCOL_ICONS}/aave-v3.jpg`,
     runBy: 'Aave DAO',
     category: 'cash',
     type: 'lending',
@@ -61,6 +64,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     id: 'partner-vault',
     name: 'Partner vault (USD)',
     mark: 'M',
+    logo: `${PROTOCOL_ICONS}/morpho-blue.jpg`,
     runBy: 'Morpho',
     curator: 'Independent risk curator',
     category: 'yield',
@@ -117,6 +121,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     id: 'lido-steth',
     name: 'Lido staked ETH',
     mark: 'L',
+    logo: `${PROTOCOL_ICONS}/lido.jpg`,
     runBy: 'Lido DAO',
     category: 'staking',
     type: 'staking',
@@ -144,6 +149,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     id: 'kiln-eth',
     name: 'Kiln native staking',
     mark: 'K',
+    logo: `${PROTOCOL_ICONS}/kiln.jpg`,
     runBy: 'Kiln',
     category: 'staking',
     type: 'staking',
@@ -171,6 +177,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     id: 'spark-savings',
     name: 'Spark savings USDC',
     mark: 'Sp',
+    logo: `${PROTOCOL_ICONS}/spark.jpg`,
     runBy: 'Spark',
     category: 'cash',
     type: 'lending',
@@ -198,6 +205,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     id: 'compound-usdc',
     name: 'Compound USDC',
     mark: 'Co',
+    logo: `${PROTOCOL_ICONS}/compound-v3.jpg`,
     runBy: 'Compound DAO',
     category: 'cash',
     type: 'lending',
@@ -252,6 +260,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     id: 'ethena-susde',
     name: 'Ethena staked USDe',
     mark: 'Et',
+    logo: `${PROTOCOL_ICONS}/ethena.jpg`,
     runBy: 'Ethena',
     category: 'yield',
     type: 'staking',

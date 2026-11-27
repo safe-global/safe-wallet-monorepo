@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
-import { Columns3, Rows3, Search, X } from 'lucide-react'
+import { Columns3, LayoutGrid, List, Rows3, Search, X } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
+import { ButtonGroup } from '@safe-global/views/components/ui/button-group'
+import { Toggle } from '@safe-global/views/components/ui/toggle'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +22,13 @@ import {
 import { DEFI_V1_COPY } from '../copy'
 import type { GroupBy } from '../types'
 
+export type OpportunityView = 'cards' | 'table'
+
 const COPY = DEFI_V1_COPY.toolbar
+const VIEWS = [
+  { value: 'cards', icon: LayoutGrid },
+  { value: 'table', icon: List },
+] as const
 const GROUP_OPTIONS = Object.keys(COPY.groupByOption) as Exclude<GroupBy, 'none'>[]
 
 export const OpportunityToolbar = ({
@@ -31,6 +39,8 @@ export const OpportunityToolbar = ({
   compareCount,
   onCompare,
   hasInvestments,
+  view,
+  onView,
   invest,
 }: {
   search: string
@@ -40,6 +50,8 @@ export const OpportunityToolbar = ({
   compareCount: number
   onCompare: () => void
   hasInvestments: boolean
+  view: OpportunityView
+  onView: (value: OpportunityView) => void
   invest: ReactNode
 }) => (
   <div className="flex flex-wrap items-center gap-3" data-testid="opportunity-toolbar">
@@ -64,7 +76,21 @@ export const OpportunityToolbar = ({
       )}
     </InputGroup>
     <div className="flex flex-wrap items-center gap-2">
-      {compareCount > 1 && (
+      <ButtonGroup data-testid="view-toggle">
+        {VIEWS.map(({ value, icon: Icon }) => (
+          <Toggle
+            key={value}
+            variant="outline"
+            pressed={view === value}
+            onPressedChange={() => onView(value)}
+            aria-label={COPY.view[value]}
+            data-testid={`view-${value}`}
+          >
+            <Icon />
+          </Toggle>
+        ))}
+      </ButtonGroup>
+      {compareCount > 1 && view === 'table' && (
         <Button variant="outline" onClick={onCompare} data-testid="compare">
           <Columns3 />
           {COPY.compare}

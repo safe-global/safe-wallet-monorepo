@@ -32,6 +32,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { TransactionsLink } from './TransactionsLink'
 import { DEFI_V1_COPY, formatAmount, formatApy } from '../copy'
 import { IDLE_CASH } from '../opportunities'
 import { dedicatedSafeName } from '../shelf'
@@ -598,6 +599,7 @@ export const ProposedView = ({ form }: { form: InvestmentForm }) => {
           <Typography variant="paragraph-small" color="muted">
             {investment.name} · {COPY.variableApy(formatApy(investment.apy))}
           </Typography>
+          <TransactionsLink size="sm" />
         </div>
       </div>
 

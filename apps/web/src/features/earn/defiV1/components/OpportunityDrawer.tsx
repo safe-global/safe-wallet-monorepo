@@ -85,7 +85,7 @@ export const OpportunityDrawer = ({
       {opportunity && (
         <>
           <DrawerHeader
-            media={<OpportunityMark invested={Boolean(holding)} />}
+            media={<OpportunityMark opportunity={opportunity} invested={Boolean(holding)} />}
             title={opportunity.name}
             subtitle={`${opportunity.runBy} · ${DEFI_V1_COPY.assetType[opportunity.type].label}`}
             status={

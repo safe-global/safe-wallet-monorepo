@@ -113,12 +113,14 @@ export const DEFI_V1_COPY = {
     withdraw: 'Withdraw',
     pending: 'Awaiting signatures',
     pendingAmount: (amount: string) => `${amount} awaiting signatures`,
+    viewInTransactions: 'View in transactions',
     withdrawTitle: (name: string) => `Withdraw from ${name}`,
     withdrawLead: 'Funds return to this Safe. Signers approve one proposal.',
   },
   toolbar: {
     searchPlaceholder: 'Search opportunities, assets, and providers…',
     groupBy: 'Group',
+    view: { cards: 'Card view', table: 'Table view' },
     compare: 'Compare',
     groupByOption: {
       asset: 'Asset',

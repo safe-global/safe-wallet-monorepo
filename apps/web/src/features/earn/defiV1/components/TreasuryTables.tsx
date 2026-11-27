@@ -1,8 +1,19 @@
 import { Fragment, type MouseEvent, type ReactNode } from 'react'
-import { ArrowDown, ArrowUp, ArrowUpDown, Clock, Coins, Lock, Sprout } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Clock,
+  HandCoins,
+  Landmark,
+  Layers,
+  Lock,
+  Sprout,
+  type LucideIcon,
+} from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
+import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -10,8 +21,9 @@ import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
 import { CHAIN_IDS } from '../opportunities'
 import { budgetLeft } from '../shelf'
-import type { Holding, Operation, Opportunity, Sort, SortKey } from '../types'
+import type { AssetType, Holding, Operation, Opportunity, Sort, SortKey } from '../types'
 import { GroupBand, TableCard } from './GroupedTable'
+import { TransactionsLink } from './TransactionsLink'
 
 const OPS = DEFI_V1_COPY.operations
 const COLUMN_WIDTHS = ['', 'w-24', 'w-28', 'w-32', 'w-24', 'w-32 @6xl:w-44', 'w-40']
@@ -102,18 +114,29 @@ export const Tag = ({ children, muted }: { children: ReactNode; muted?: boolean 
   </span>
 )
 
-export const OpportunityMark = ({ invested = false }: { invested?: boolean }) => {
-  const Icon = invested ? Coins : Sprout
+/** The protocol's logo, or its initials; with no opportunity yet it shows a neutral sprout. */
+export const OpportunityMark = ({
+  opportunity,
+  invested = false,
+}: {
+  opportunity?: Opportunity
+  invested?: boolean
+}) => {
+  if (!opportunity)
+    return (
+      <span
+        className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"
+        aria-hidden
+      >
+        <Sprout className="size-4" />
+      </span>
+    )
   return (
-    <span
-      className={cn(
-        'flex size-8 shrink-0 items-center justify-center rounded-md',
-        invested ? 'bg-success-tint text-badge-dot-success' : 'bg-muted text-muted-foreground',
-      )}
-      aria-hidden
-    >
-      <Icon className="size-4" />
-    </span>
+    <Avatar size="sm" className="rounded-md" aria-hidden>
+      {opportunity.logo && <AvatarImage src={opportunity.logo} alt="" className="rounded-md" />}
+      <AvatarFallback className="rounded-md text-xs font-semibold">{opportunity.mark}</AvatarFallback>
+      {invested && <AvatarBadge className="bg-badge-dot-success ring-card" />}
+    </Avatar>
   )
 }
 
@@ -136,7 +159,7 @@ const SelectMark = ({
           always ? 'opacity-0' : 'group-hover/row:opacity-0 group-has-[:focus-visible]/row:opacity-0',
         )}
       >
-        <OpportunityMark invested={invested} />
+        <OpportunityMark opportunity={opportunity} invested={invested} />
       </span>
       <span
         className={cn(
@@ -157,7 +180,7 @@ const SelectMark = ({
 }
 
 /** A badge only when someone needs to act: unsigned deposits first, then a budget that can't cover the next top-up. */
-const alertFor = (holding?: Holding, operation?: Operation): { label: string; detail: string } | undefined => {
+export const alertFor = (holding?: Holding, operation?: Operation): { label: string; detail: string } | undefined => {
   if (holding && holding.pending > 0)
     return {
       label: OPS.alerts.needsSignatures,
@@ -169,6 +192,28 @@ const alertFor = (holding?: Holding, operation?: Operation): { label: string; de
   if (operation.recurring && left < operation.recurring.amount)
     return { label: OPS.alerts.budgetLow, detail: OPS.budgetLeft(formatCompactUsd(left)) }
   return undefined
+}
+
+const CLASS_STYLE: Record<AssetType, { icon: LucideIcon; variant: 'info' | 'mint' | 'outline' }> = {
+  rwa: { icon: Landmark, variant: 'info' },
+  lending: { icon: HandCoins, variant: 'outline' },
+  staking: { icon: Layers, variant: 'mint' },
+}
+
+export const ClassBadge = ({ type }: { type: AssetType }) => {
+  const { icon: Icon, variant } = CLASS_STYLE[type]
+  const { label, hint } = DEFI_V1_COPY.assetType[type]
+  return (
+    <Tooltip delay={150}>
+      <TooltipTrigger render={<span className="flex w-fit shrink-0" onClick={(event) => event.stopPropagation()} />}>
+        <Badge variant={variant} data-testid={`class-${type}`}>
+          <Icon data-icon="inline-start" />
+          {label}
+        </Badge>
+      </TooltipTrigger>
+      <TooltipContent>{hint}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 /** Paid placement has to be disclosed; the tooltip says what it means. */
@@ -227,7 +272,7 @@ const NameCell = ({
   )
 }
 
-const ExitCell = ({ opportunity }: { opportunity: Opportunity }) => (
+export const ExitCell = ({ opportunity }: { opportunity: Opportunity }) => (
   <Tooltip delay={150}>
     <TooltipTrigger render={<span className="flex min-w-0 items-center gap-1.5" />}>
       <Clock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
@@ -249,7 +294,7 @@ export const ChainLogo = ({ chain }: { chain: string }) => (
   </Avatar>
 )
 
-const NetworkLogos = ({ chains }: { chains: string[] }) => (
+export const NetworkLogos = ({ chains }: { chains: string[] }) => (
   <Tooltip delay={150}>
     <TooltipTrigger render={<span className="flex shrink-0 -space-x-1" />}>
       {chains.map((chain) => (
@@ -262,7 +307,7 @@ const NetworkLogos = ({ chains }: { chains: string[] }) => (
 
 const Empty = () => <span className="text-muted-foreground">—</span>
 
-const PositionCell = ({ holding, safes }: { holding?: Holding; safes?: string[] }) => {
+export const PositionCell = ({ holding, safes }: { holding?: Holding; safes?: string[] }) => {
   if (!holding) return <Empty />
   return (
     <span className="flex min-w-0 flex-col gap-0.5 tabular-nums">
@@ -282,8 +327,9 @@ const PositionCell = ({ holding, safes }: { holding?: Holding; safes?: string[] 
         </span>
       )}
       {holding.pending > 0 && (
-        <span className="truncate text-xs text-muted-foreground">
-          {DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}
+        <span className="flex min-w-0 flex-col items-start text-xs text-muted-foreground">
+          <span className="truncate">{DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}</span>
+          <TransactionsLink />
         </span>
       )}
       {safes && safes.length > 0 && (
@@ -318,7 +364,6 @@ const OpportunityRow = ({
   selection: Selection
 }) => {
   const locked = isLocked(opportunity)
-  const type = DEFI_V1_COPY.assetType[opportunity.type]
   return (
     <TableRow
       className={cn('group/row cursor-pointer', locked && 'opacity-70')}
@@ -330,12 +375,7 @@ const OpportunityRow = ({
       </TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
       <TableCell>
-        <Tooltip delay={150}>
-          <TooltipTrigger render={<span className="flex w-fit" />}>
-            <Tag>{type.label}</Tag>
-          </TooltipTrigger>
-          <TooltipContent>{type.hint}</TooltipContent>
-        </Tooltip>
+        <ClassBadge type={opportunity.type} />
       </TableCell>
       <TableCell>
         <ExitCell opportunity={opportunity} />
