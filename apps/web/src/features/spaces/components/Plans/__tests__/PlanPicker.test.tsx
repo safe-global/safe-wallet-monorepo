@@ -1,6 +1,6 @@
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { PlanLocation } from '@/services/analytics/mixpanel-events'
-import type { PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
+import type { CurrentPlan, PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PlanPicker } from '../PlanPicker'
 
 const option = (seats: number, price: number, cycle: 'm' | 'y' = 'm'): PlanSeatOption => ({
@@ -53,6 +53,33 @@ describe('PlanPicker', () => {
       tier: expect.objectContaining({ id: 'Starter-year' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_2y' }),
     })
+  })
+
+  it('marks only the trial size as current in the trial reminder', async () => {
+    const trial: CurrentPlan = {
+      name: 'Business',
+      price: 1669,
+      currency: 'eur',
+      billingCycle: 'month',
+      isTrialing: true,
+      periodEndsAt: null,
+      seatsLabel: '20 Safe accounts',
+      hasPaymentMethod: false,
+    }
+    const tiers = TIERS.map((plan) =>
+      plan.id === 'Business-month' ? { ...plan, isCurrent: true, currentPriceId: 'price_20m' } : plan,
+    )
+    const { user } = renderWithUserEvent(
+      <PlanPicker tiers={tiers} initialSeats={20} currentPlan={trial} location={PlanLocation.REMINDER_MODAL} />,
+    )
+
+    expect(screen.getByRole('tab', { selected: true, name: '20 Safe accounts' })).toBeInTheDocument()
+    expect(screen.getByTestId('plan-current-badge')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: '5 Safe accounts' }))
+
+    expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Switch to Business 5' })).toBeInTheDocument()
   })
 
   it('shows a member the sizes without any button', () => {

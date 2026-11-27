@@ -4,9 +4,9 @@ import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/public/services/spendingLimitValidation'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import {
   DUPLICATE_TOKEN_ERROR,
   EXISTING_LIMIT_ERROR,
@@ -20,11 +20,13 @@ import {
   type SpendingLimitPolicyFormValues,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 const SPENDER = '0x1234567890123456789012345678901234567890'
+const UNTRUSTED = '0x48f9e38f3070AD8945DFEae3FA70987722E3D89c'
 
 const mockTokens = [
   tokenOptionBuilder()
@@ -51,17 +53,19 @@ const mockTokens = [
     })
     .build(),
   tokenOptionBuilder().with({ address: DAI, symbol: 'DAI', name: 'Dai Stablecoin' }).build(),
+  tokenOptionBuilder().with({ address: UNTRUSTED, symbol: 'NEW', group: 'custom', untrusted: true }).build(),
 ]
 
 // A plain <select> keeps these tests about the row. It still renders `helperText`, since that slot is
 // where the row's balance and token error reach the user.
-jest.mock('../../TokenSelector', () => ({
+jest.mock('@/components/common/TokenSelector', () => ({
   __esModule: true,
   default: ({
     value,
     onChange,
     excludeAddresses = [],
     disabledAddresses = [],
+    extraTokens = [],
     helperText,
     'data-testid': testId = 'limit-token-selector',
   }: {
@@ -69,11 +73,17 @@ jest.mock('../../TokenSelector', () => ({
     onChange: (next: string | undefined) => void
     excludeAddresses?: string[]
     disabledAddresses?: string[]
+    extraTokens?: readonly { address: string }[]
     helperText?: React.ReactNode
     'data-testid'?: string
   }) => (
     <div>
-      <select data-testid={testId} value={value ?? ''} onChange={(event) => onChange(event.target.value || undefined)}>
+      <select
+        data-testid={testId}
+        data-extra-tokens={extraTokens.map((token) => token.address).join(',')}
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value || undefined)}
+      >
         <option value="">none</option>
         {mockTokens
           .filter((token) => !excludeAddresses.includes(token.address))
@@ -92,7 +102,7 @@ jest.mock('@safe-global/utils/utils/formatNumber', () => ({
   ...jest.requireActual('@safe-global/utils/utils/formatNumber'),
   getLocalDecimalSeparator: jest.fn(() => '.'),
 }))
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 jest.mock('../../ExistingSpendingLimitsProvider', () => ({
   useExistingSpendingLimits: jest.fn(() => ({ loading: false })),
@@ -180,6 +190,15 @@ describe('TokenLimitCard', () => {
     await user.selectOptions(screen.getByTestId('limit-token-selector'), USDC)
 
     expect(screen.getByTestId('token-balance')).toHaveTextContent('0 USDC')
+  })
+
+  it('warns instead of showing a balance for a token on no trusted list', async () => {
+    const { user } = renderRows()
+
+    await user.selectOptions(screen.getByTestId('limit-token-selector'), UNTRUSTED)
+
+    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(UNTRUSTED_TOKEN_WARNING)
+    expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
   })
 
   it('shows the fiat equivalent of the entered amount', async () => {
@@ -301,7 +320,7 @@ describe('TokenLimitCard', () => {
       const options = Array.from(screen.getByTestId('limit-token-selector').querySelectorAll('option')).map(
         (option) => option.textContent,
       )
-      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI'])
+      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI', 'NEW'])
       expect(screen.getByRole('option', { name: 'USDC' })).toBeDisabled()
     })
 
@@ -374,6 +393,14 @@ describe('TokenLimitCard', () => {
       renderRows([{ ...createEmptyLimit(), tokenAddress: unlisted.address }], undefined, SPENDER, true)
 
       expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
+    })
+
+    it('hands the tokens the Safe already limits to the picker', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, SPENDER, true)
+
+      expect(screen.getByTestId('limit-token-selector')).toHaveAttribute('data-extra-tokens', USDC)
     })
 
     it('keeps a token the spender already has in the selector so it can be edited', () => {

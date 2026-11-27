@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { _resetOverlayQueue } from '@/services/overlay-queue/store'
+import { useOverlay } from '@/services/overlay-queue/useOverlay'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import CheckoutReturnModals from '../CheckoutReturnModals'
 
@@ -69,9 +72,15 @@ const subscription = (status: string) => ({
   currentPeriodEnd: Date.UTC(2026, 10, 14) / 1000,
 })
 
+const OverlayOnScreen = () => {
+  const [isDue, setIsDue] = useState(true)
+  return useOverlay({ kind: 'guide', isDue }) ? <button onClick={() => setIsDue(false)}>Close overlay</button> : null
+}
+
 describe('CheckoutReturnModals', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    _resetOverlayQueue()
     mockUseSpacePlan.mockReturnValue({ plan: null, refetch })
     mockUseCheckoutReturn.mockReturnValue({
       status: 'complete',
@@ -170,5 +179,20 @@ describe('CheckoutReturnModals', () => {
 
     expect(container).toBeEmptyDOMElement()
     expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('waits while another overlay has the screen, and opens once it closes', () => {
+    const { rerender } = render(<OverlayOnScreen />)
+    rerender(
+      <>
+        <OverlayOnScreen />
+        <CheckoutReturnModals />
+      </>,
+    )
+    expect(screen.queryByTestId('trial-activated-modal')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close overlay' }))
+
+    expect(screen.getByTestId('trial-activated-modal')).toBeInTheDocument()
   })
 })

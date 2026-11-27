@@ -31,11 +31,11 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { ALLOWLIST_ROW_CLASSES } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
 import TokenIcon from '@/components/common/TokenIcon'
-import { tokenOptionLabel, type TokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
+import { tokenOptionLabel, type TokenOption } from '@/utils/tokenOptions'
 
 type TokenGroup = { value: TokenOption['group']; label: string; items: TokenOption[] }
 
-const GROUP_LABELS: Record<TokenOption['group'], string> = { held: HELD_GROUP_LABEL, popular: POPULAR_GROUP_LABEL }
+const GROUP_LABELS: Record<'held' | 'popular', string> = { held: HELD_GROUP_LABEL, popular: POPULAR_GROUP_LABEL }
 
 type TokenDraftRowProps = {
   /** Tokens not on the form yet. */

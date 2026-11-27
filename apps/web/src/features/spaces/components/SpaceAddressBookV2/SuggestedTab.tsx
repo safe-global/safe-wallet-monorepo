@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
-import AddSuggestionsDialog, {
-  type AddedSuggestion,
-} from '@safe-global/views/features/spaces/components/AddressBookV2/AddSuggestionsDialog'
+import NameContactsDialog, {
+  type NamedContact,
+} from '@safe-global/views/features/spaces/components/AddressBookV2/NameContactsDialog'
+import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
+import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
+import { searchSuggestions } from './search'
 import SuggestedContacts, {
   type SuggestionAddLocation,
 } from '@safe-global/views/features/spaces/components/AddressBookV2/SuggestedContacts'
@@ -33,7 +36,7 @@ type SuggestedTabProps = {
 
 type AddDialog = { suggestions: SuggestedContact[]; location: SuggestionAddLocation }
 
-const countRenamed = (suggestions: SuggestedContact[], contacts: AddedSuggestion[]): number =>
+const countRenamed = (suggestions: SuggestedContact[], contacts: NamedContact[]): number =>
   contacts.filter(
     (contact) => contact.name !== suggestions.find((item) => item.address === contact.address)?.suggestedName,
   ).length
@@ -50,6 +53,8 @@ const SuggestedTab = ({
   const [dialog, setDialog] = useState<AddDialog>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string>()
+  const [query, setQuery] = useState('')
+  const visibleSuggestions = useMemo(() => searchSuggestions(suggestions, query), [suggestions, query])
   const addressCellProps = useAddressCellProps()
   const upsertNames = useUpsertWorkspaceSafeNames()
   const bookLabel = useWorkspaceAddressBookLabel()
@@ -80,7 +85,7 @@ const SuggestedTab = ({
     if (!isSubmitting) setDialog(undefined)
   }
 
-  const handleAdd = async (contacts: AddedSuggestion[]) => {
+  const handleAdd = async (contacts: NamedContact[]) => {
     if (!dialog) return
 
     setIsSubmitting(true)
@@ -120,28 +125,36 @@ const SuggestedTab = ({
   )
 
   return (
-    <>
+    <div className="flex flex-col gap-4">
+      {suggestions.length > 0 && (
+        <AddressBookToolbar query={query} onQueryChange={setQuery} searchScope="name, address or Safe" />
+      )}
+
       <TableCard>
-        <SuggestedContacts
-          suggestions={suggestions}
-          canAdd={isAdmin}
-          onAdd={openDialog}
-          renderRowAction={canRequest ? renderRequestAction : undefined}
-          {...addressCellProps}
-        />
+        {suggestions.length > 0 && visibleSuggestions.length === 0 ? (
+          <AddressBookEmptyState kind="no-results" book="suggested" onClear={() => setQuery('')} />
+        ) : (
+          <SuggestedContacts
+            suggestions={visibleSuggestions}
+            canAdd={isAdmin}
+            onAdd={openDialog}
+            renderRowAction={canRequest ? renderRequestAction : undefined}
+            {...addressCellProps}
+          />
+        )}
       </TableCard>
 
       {dialog && (
-        <AddSuggestionsDialog
-          suggestions={dialog.suggestions}
+        <NameContactsDialog
+          contacts={dialog.suggestions}
           validateName={validateContactName}
-          onAdd={handleAdd}
+          onConfirm={handleAdd}
           onClose={closeDialog}
           isSubmitting={isSubmitting}
           error={error}
         />
       )}
-    </>
+    </div>
   )
 }
 

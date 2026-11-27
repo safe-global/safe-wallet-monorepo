@@ -106,16 +106,12 @@ describe('useSpaceQueuePolling', () => {
         return HttpResponse.json(page(queue))
       }),
     )
-    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
+    jest.useFakeTimers({ advanceTimers: false, doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
     mockSpaceId.mockReturnValue(spaceId)
     mockIsActiveMember.mockReturnValue(true)
     mockHasFeature.mockReturnValue(true)
     mockWalletAddress.mockReturnValue(wallet)
     mockIsAuthenticated.mockReturnValue(true)
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('requests the queue of the Space without filters', async () => {
@@ -129,6 +125,8 @@ describe('useSpaceQueuePolling', () => {
   it('requests the queue again at every poll', async () => {
     renderPolling()
     await waitFor(() => expect(requests).toHaveLength(1))
+    // The next poll is scheduled once the first answer reaches the hook
+    await act(() => jest.advanceTimersByTimeAsync(ANIMATION_FRAME_MS))
 
     await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
 

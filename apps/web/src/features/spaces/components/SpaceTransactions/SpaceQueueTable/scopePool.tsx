@@ -1,10 +1,26 @@
-import { memo, useLayoutEffect, useMemo, useSyncExternalStore, type ReactElement, type ReactNode } from 'react'
+import {
+  memo,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactElement,
+  type ReactNode,
+} from 'react'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { SafeScopeContext, useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeScopeContextValue } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
 
-export type ScopeTarget = { scopeKey: string; chainId: string; safeAddress: string }
+export type ScopeTarget = {
+  scopeKey: string
+  chainId: string
+  safeAddress: string
+  /** The nonce the queue lists as next */
+  nextNonce?: number
+}
 
 const noop = () => {}
 
@@ -47,8 +63,19 @@ export const createScopeStore = () => {
 
 export type ScopeStore = ReturnType<typeof createScopeStore>
 
-const PublishScope = ({ scopeKey, store }: { scopeKey: string; store: ScopeStore }): null => {
+const PublishScope = ({ target, store }: { target: ScopeTarget; store: ScopeStore }): null => {
+  const { scopeKey, chainId, safeAddress, nextNonce } = target
   const value = useSafeScopeContext()
+  const safeNonce = value?.scope?.safe?.nonce
+  const isBehindQueue = nextNonce !== undefined && safeNonce !== undefined && nextNonce > safeNonce
+  // Shares the provider's cache entry, which doesn't poll: keep it fresh only while the queue is ahead of it
+  const { refetch } = useSafesGetSafeV1Query(
+    { chainId, safeAddress },
+    { pollingInterval: isBehindQueue ? POLLING_INTERVAL : 0 },
+  )
+  useEffect(() => {
+    if (isBehindQueue) refetch()
+  }, [isBehindQueue, nextNonce, refetch])
   useLayoutEffect(() => {
     if (value) store.publish(scopeKey, value)
   }, [store, scopeKey, value])
@@ -57,16 +84,22 @@ const PublishScope = ({ scopeKey, store }: { scopeKey: string; store: ScopeStore
 }
 
 const sameTargets = (a: ScopeTarget[], b: ScopeTarget[]): boolean =>
-  a.length === b.length && a.every((target, index) => target.scopeKey === b[index].scopeKey)
+  a.length === b.length &&
+  a.every((target, index) => target.scopeKey === b[index].scopeKey && target.nextNonce === b[index].nextNonce)
 
 /** One provider, so one SDK, per Safe and chain however its rows interleave; they render no markup. */
 export const ScopePool = memo(
   function ScopePool({ targets, store }: { targets: ScopeTarget[]; store: ScopeStore }): ReactElement {
     return (
       <>
-        {targets.map(({ scopeKey, chainId, safeAddress }) => (
-          <SafeScopeProvider key={scopeKey} initial={{ chainId, safeAddress }} pollSafeInfo={false}>
-            <PublishScope scopeKey={scopeKey} store={store} />
+        {targets.map((target) => (
+          <SafeScopeProvider
+            key={target.scopeKey}
+            initial={{ chainId: target.chainId, safeAddress: target.safeAddress }}
+            pollSafeInfo={false}
+            armsSdkGuard={false}
+          >
+            <PublishScope target={target} store={store} />
           </SafeScopeProvider>
         ))}
       </>

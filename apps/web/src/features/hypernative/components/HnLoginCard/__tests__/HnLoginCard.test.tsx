@@ -17,6 +17,7 @@ jest.mock('../../../public/hooks/useHypernativeOAuth', () => ({
   useHypernativeOAuth: () => ({
     isAuthenticated: false,
     isTokenExpired: false,
+    isSessionRejected: false,
     initiateLogin: mockInitiateLogin,
   }),
 }))

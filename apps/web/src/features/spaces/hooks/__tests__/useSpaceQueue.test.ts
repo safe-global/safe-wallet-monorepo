@@ -8,7 +8,7 @@ import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/st
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
+import { getPollingInterval, toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
 
 const spaceId = faker.string.uuid()
 const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
@@ -141,6 +141,24 @@ const fetchQueue = async (filters?: SpaceQueueFilters, search?: string) => {
   return result.current
 }
 
+describe('getPollingInterval', () => {
+  const MINUTE = 60_000
+
+  it.each([
+    [0, 15_000],
+    [1, 30_000],
+    [4, 240_000],
+    [5, 5 * MINUTE],
+    [10, 5 * MINUTE],
+  ])('waits %i failed polls into %ims with the default 15s interval', (failures, expected) => {
+    expect(getPollingInterval(failures, 15_000)).toBe(expected)
+  })
+
+  it.each([0, 1, 5])('keeps a configured healthy interval above 5 minutes after %i failed polls', (failures) => {
+    expect(getPollingInterval(failures, 10 * MINUTE)).toBe(10 * MINUTE)
+  })
+})
+
 describe('useSpaceQueue', () => {
   const safeA = faker.finance.ethereumAddress()
   const safeB = faker.finance.ethereumAddress()
@@ -172,6 +190,28 @@ describe('useSpaceQueue', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.queue).toBeUndefined()
+  })
+
+  it('keeps the loaded queue when a refetch of the same query fails', async () => {
+    let status = 200
+    let requests = 0
+    server.use(
+      http.get(queueUrl, () => {
+        requests++
+        return status === 200
+          ? HttpResponse.json(page({ [safeA]: { '1': transactions(1) } }, { count: 1 }))
+          : new HttpResponse(null, { status })
+      }),
+    )
+    const { result } = renderHook(() => useSpaceQueue(spaceId))
+    await waitFor(() => expect(result.current.queue).toBeDefined())
+
+    status = 503
+    txDispatch(TxEvent.SUCCESS, { txId: faker.string.uuid(), nonce: 1, chainId: '1', safeAddress: safeA })
+
+    await waitFor(() => expect(requests).toBe(2))
+    await waitFor(() => expect(result.current.isFetching).toBe(false))
+    expect(result.current.queue?.sections).toHaveLength(1)
   })
 
   const chainId = '1'

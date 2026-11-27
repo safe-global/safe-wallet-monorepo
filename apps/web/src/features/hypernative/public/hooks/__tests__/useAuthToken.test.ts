@@ -4,6 +4,7 @@ import * as cookieStorage from '../../../store/cookieStorage'
 
 // Mock cookieStorage module
 jest.mock('../../../store/cookieStorage', () => ({
+  ...jest.requireActual('../../../store/cookieStorage'),
   getAuthCookieData: jest.fn(),
   setAuthCookie: jest.fn(),
   clearAuthCookie: jest.fn(),
@@ -17,6 +18,8 @@ const mockSetAuthCookie = cookieStorage.setAuthCookie as jest.MockedFunction<typ
 const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction<typeof cookieStorage.clearAuthCookie>
 
 describe('useAuthToken', () => {
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
+
   const originalDateNow = Date.now
 
   beforeEach(() => {
@@ -210,8 +213,6 @@ describe('useAuthToken', () => {
     })
 
     it('should maintain consistent state after clearToken when polling triggers', async () => {
-      jest.useFakeTimers()
-
       mockGetAuthCookieData.mockReturnValue({
         token: 'existing-token',
         tokenType: 'Bearer',
@@ -244,20 +245,10 @@ describe('useAuthToken', () => {
       // This verifies the fix for the oscillation issue
       expect(result.current[0].isAuthenticated).toBe(false)
       expect(result.current[0].isExpired).toBe(false)
-
-      jest.useRealTimers()
     })
   })
 
   describe('polling behavior', () => {
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it('should poll auth state periodically', async () => {
       mockGetAuthCookieData.mockReturnValue(undefined)
 
@@ -390,14 +381,6 @@ describe('useAuthToken', () => {
   })
 
   describe('cleanup', () => {
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it('should cleanup polling interval on unmount', () => {
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
 

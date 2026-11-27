@@ -273,7 +273,7 @@ describe('Plans', () => {
     expect(screen.getByRole('button', { name: 'Upgrade to 2 Safe accounts' })).toBeInTheDocument()
   })
 
-  it('keeps the trial price off the Business card until the user picks a size', () => {
+  it('opens the Business trial card on the trial size and price, and still lets the user pick another size', () => {
     const business = {
       name: 'Business',
       offers: [offer('Business', 'pl_business_5', 299, 'month'), offer('Business', 'pl_business_y', 6990, 'year')],
@@ -287,17 +287,40 @@ describe('Plans', () => {
       />,
     )
 
-    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Custom')
-    expect(screen.queryByText('€499')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
+    const card = screen.getByTestId('current-plan-card')
+    expect(within(card).getByRole('tab', { selected: true })).toHaveAccessibleName('20 Safe accounts')
+    expect(card).toHaveTextContent('€499')
+    expect(card).not.toHaveTextContent('Custom')
+    expect(screen.getByTestId('plan-current-badge')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Add payment method' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: '2 Safe accounts' }))
     expect(screen.getByText('€299')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Switch to Business 2' })).toBeInTheDocument()
+  })
 
-    fireEvent.click(screen.getByRole('tab', { name: '20 Safe accounts' }))
-    expect(screen.getByText('€499')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Add payment method' })).toBeInTheDocument()
+  it('features the Starter card on a Starter trial and keeps Business unpriced until a size is picked', () => {
+    const business = {
+      name: 'Business',
+      offers: [
+        { ...offer('Business', 'pl_business_5', 669, 'month'), seats: 5 },
+        { ...offer('Business', 'pl_business_10', 1099, 'month'), seats: 10 },
+      ],
+    }
+    render(
+      <Plans
+        plan={{ ...trialing(14), name: 'Starter' }}
+        {...meters}
+        tiers={buildPlanTiers([STARTER, business], { subscription: subscription('Starter', 149), seatsQuota: 2 })}
+        currentPlan={current('Starter', 149, true)}
+      />,
+    )
+
+    expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Starter')
+    expect(screen.getByTestId('current-plan-card')).not.toHaveAttribute('data-hover-plan')
+    const businessCard = screen.getAllByTestId('plan-card').find((card) => card.textContent?.includes('Business'))
+    expect(businessCard).toHaveAttribute('data-hover-plan')
+    expect(businessCard).toHaveTextContent('Custom')
   })
 
   it('names each seat option on its tab instead of its payment link id', () => {

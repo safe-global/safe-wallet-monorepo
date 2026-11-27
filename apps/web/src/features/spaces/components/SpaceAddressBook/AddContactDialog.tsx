@@ -40,6 +40,8 @@ export type AddContactItem = {
   tags?: string[]
 }
 
+export type ContactPrefill = { address: string; chainIds: string[] }
+
 /** `lg` in the v2 address book toolbar; the v1 page keeps `action`. */
 export type TriggerSize = 'action' | 'lg'
 
@@ -58,6 +60,9 @@ type AddContactDialogProps = {
   /** Shows the Tags field. */
   workspaceTags?: WorkspaceTag[]
   onTagLimitReached?: () => void
+  prefill?: ContactPrefill
+  /** Makes the dialog triggerless: it opens on mount and the caller unmounts it here. */
+  onClose?: () => void
 }
 
 const AddContactDialog = ({
@@ -74,8 +79,10 @@ const AddContactDialog = ({
   validateCharset = false,
   workspaceTags,
   onTagLimitReached,
+  prefill,
+  onClose,
 }: AddContactDialogProps) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(!!onClose)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs: allNetworks } = useChains()
@@ -88,8 +95,8 @@ const AddContactDialog = ({
 
   const defaultValues = {
     name: '',
-    address: '',
-    networks: allNetworks,
+    address: prefill?.address ?? '',
+    networks: prefill ? allNetworks.filter((chain) => prefill.chainIds.includes(chain.chainId)) : allNetworks,
     tags: [],
   }
 
@@ -105,6 +112,7 @@ const AddContactDialog = ({
     setOpen(false)
     reset(defaultValues)
     setError('')
+    onClose?.()
   }
 
   const handleOpen = () => {
@@ -159,10 +167,12 @@ const AddContactDialog = ({
 
   return (
     <>
-      <Button size={triggerSize} onClick={handleOpen}>
-        <Plus className="size-4 mr-1 text-green-500" />
-        {triggerLabel}
-      </Button>
+      {!onClose && (
+        <Button size={triggerSize} onClick={handleOpen}>
+          <Plus className="size-4 mr-1 text-green-500" />
+          {triggerLabel}
+        </Button>
+      )}
       <ModalDialog open={open} onClose={handleClose} dialogTitle={dialogTitle} hideChainIndicator>
         <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
           <FormProvider {...methods}>

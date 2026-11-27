@@ -1,9 +1,14 @@
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { persistBlacklist, persistTransforms, cgwClientFilter, walletKitPersistConfig } from '../index'
 
 describe('persistConfig', () => {
   it('should not blacklist cgwClient to allow transform filtering', () => {
     expect(persistBlacklist).not.toContain(cgwClient.reducerPath)
+  })
+
+  it('keeps the Hypernative API cache, which holds the Authorization value, off the device', () => {
+    expect(persistBlacklist).toContain(hypernativeApi.reducerPath)
   })
 
   it('should include cgwClientFilter in transforms', () => {

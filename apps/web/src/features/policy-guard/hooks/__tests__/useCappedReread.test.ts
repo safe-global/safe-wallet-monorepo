@@ -17,9 +17,7 @@ const setup = (initialProps: Props) => {
 }
 
 describe('useCappedReread', () => {
-  beforeEach(() => jest.useFakeTimers())
-  afterEach(() => jest.useRealTimers())
-
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
   it('refetches one polling interval after a re-read is needed', () => {
     const { refetch } = setup({ shouldReread: true, readKey: 'a' })
     act(() => jest.advanceTimersByTime(POLLING_INTERVAL - 1))

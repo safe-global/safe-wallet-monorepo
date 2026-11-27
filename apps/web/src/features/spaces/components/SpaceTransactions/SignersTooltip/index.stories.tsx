@@ -4,7 +4,6 @@ import { expect, userEvent, within } from 'storybook/test'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { getFixtureData } from '@/stories/mocks/handlers'
-import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
 import SignersTooltip from '.'
 
 const { safeData } = getFixtureData('efSafe')
@@ -38,14 +37,12 @@ const meta = {
   args: {
     chainId: safeData.chainId,
     txId: 'multisig_0x123_0xabc',
+    safeAddress: safeData.address.value,
+    status: 'waiting',
+    nonce: 12,
+    nextNonce: 12,
     submitted: 2,
     required: 3,
-    children: (
-      <span className="flex items-center gap-1.5 text-sm tabular-nums">
-        <SignatureGauge count={2} threshold={3} />
-        2/3
-      </span>
-    ),
   },
   parameters: { layout: 'centered', ...setup.parameters },
   decorators: [setup.decorator],
@@ -56,25 +53,32 @@ type Story = StoryObj<typeof meta>
 
 const openTooltip = async (header: string) => {
   const screen = within(document.body)
-  await userEvent.hover(screen.getByText(/\/3$/))
+  await userEvent.hover(screen.getByRole('button'))
   await expect(await screen.findByText(header)).toBeInTheDocument()
 }
 
-export const Pending: Story = {
+/** The connected wallet still has to sign: green, the user first in the list */
+export const ReadyToSign: Story = {
+  args: { status: 'sign' },
   parameters: { msw: { handlers: [txDetailsHandler([ana, max]), ...setup.handlers] } },
   play: () => openTooltip('2 of 3 signed · 1 more from 3 signers'),
 }
 
-export const ThresholdMet: Story = {
-  args: {
-    submitted: 3,
-    children: (
-      <span className="flex items-center gap-1.5 text-sm tabular-nums">
-        <SignatureGauge count={3} threshold={3} />
-        3/3
-      </span>
-    ),
-  },
+export const ReadyToExecute: Story = {
+  args: { status: 'execute', submitted: 3 },
   parameters: { msw: { handlers: [txDetailsHandler([ana, max, you]), ...setup.handlers] } },
   play: () => openTooltip('3 of 3 signed · threshold met'),
+}
+
+/** The user signed: amber, waiting on the others */
+export const Signing: Story = {
+  args: { status: 'waiting' },
+  parameters: { msw: { handlers: [txDetailsHandler([ana, you]), ...setup.handlers] } },
+  play: () => openTooltip('2 of 3 signed · 1 more from 3 signers'),
+}
+
+export const Blocked: Story = {
+  args: { status: 'blocked', submitted: 3, nonce: 13 },
+  parameters: { msw: { handlers: [txDetailsHandler([ana, max, you]), ...setup.handlers] } },
+  play: () => openTooltip('Blocked by #12'),
 }

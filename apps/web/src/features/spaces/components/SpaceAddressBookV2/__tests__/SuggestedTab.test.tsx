@@ -91,6 +91,16 @@ const addSelected = async (suggestions: SuggestedContact[]) => {
   return screen.findByRole('dialog')
 }
 
+const SEARCH_LABEL = 'Search contacts by name, address or Safe'
+
+const uniqueSuggestion = () =>
+  suggestionBuilder()
+    .with({
+      suggestedName: `${faker.string.alpha(12)} signer 1`,
+      reason: { kind: 'signer', safes: [faker.string.alpha(12)] },
+    })
+    .build()
+
 describe('SuggestedTab', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -212,5 +222,53 @@ describe('SuggestedTab', () => {
 
     expect(screen.queryByRole('button', { name: `Request ${suggestion.suggestedName}` })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
+  })
+
+  describe('search', () => {
+    it.each([
+      { field: 'suggested name', queryOf: (item: SuggestedContact) => item.suggestedName.slice(0, 8) },
+      { field: 'address', queryOf: (item: SuggestedContact) => item.address.slice(6, 18).toLowerCase() },
+      { field: 'Safe name', queryOf: (item: SuggestedContact) => item.reason.safes[0].toUpperCase() },
+    ])('narrows the list by $field', async ({ queryOf }) => {
+      const [match, other] = [uniqueSuggestion(), uniqueSuggestion()]
+      renderTab({ suggestions: [match, other] })
+
+      await userEvent.type(screen.getByLabelText(SEARCH_LABEL), queryOf(match))
+
+      expect(screen.getByText(match.suggestedName)).toBeInTheDocument()
+      expect(screen.queryByText(other.suggestedName)).not.toBeInTheDocument()
+    })
+
+    it('shows no results and clears the search', async () => {
+      const suggestion = uniqueSuggestion()
+      renderTab({ suggestions: [suggestion] })
+
+      await userEvent.type(screen.getByLabelText(SEARCH_LABEL), 'no such suggestion')
+      const noResults = screen.getByTestId('address-book-no-results')
+
+      await userEvent.click(within(noResults).getByRole('button', { name: 'Clear search' }))
+
+      expect(screen.getByText(suggestion.suggestedName)).toBeInTheDocument()
+    })
+
+    it('unselects a row the search hides', async () => {
+      const [kept, hidden] = [uniqueSuggestion(), uniqueSuggestion()]
+      renderTab({ suggestions: [kept, hidden] })
+      await userEvent.click(screen.getByRole('checkbox', { name: `Select ${kept.suggestedName}` }))
+      await userEvent.click(screen.getByRole('checkbox', { name: `Select ${hidden.suggestedName}` }))
+
+      await userEvent.type(screen.getByLabelText(SEARCH_LABEL), kept.suggestedName)
+      await userEvent.clear(screen.getByLabelText(SEARCH_LABEL))
+
+      expect(screen.getByRole('button', { name: 'Add 1 to Workspace' })).toBeInTheDocument()
+      expect(screen.getByRole('checkbox', { name: `Select ${hidden.suggestedName}` })).not.toBeChecked()
+    })
+
+    it('has no search when there are no suggestions', () => {
+      renderTab({ suggestions: [] })
+
+      expect(screen.queryByLabelText(SEARCH_LABEL)).not.toBeInTheDocument()
+      expect(screen.getByTestId('suggestions-empty')).toBeInTheDocument()
+    })
   })
 })

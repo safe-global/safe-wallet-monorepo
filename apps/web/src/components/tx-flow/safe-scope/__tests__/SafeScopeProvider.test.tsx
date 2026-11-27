@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { SafeScopeProvider } from '../SafeScopeProvider'
+import { TxFlowSafeReporterContext } from '../txFlowSafe'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { hasActiveScope } from '@safe-global/views/components/tx-flow/safe-scope/activeScope'
@@ -321,6 +322,72 @@ describe('SafeScopeProvider', () => {
     expect(hasActiveScope()).toBe(true)
     act(() => result.current.controls.clearScope())
     expect(result.current.scope).toBeUndefined()
+    unmount()
+    expect(hasActiveScope()).toBe(false)
+  })
+
+  describe('telling the topbar which Safe the open flow acts on', () => {
+    const targetA = { chainId: safeA.chainId, safeAddress: safeA.address.value }
+
+    const reportingWrapper = (report: jest.Mock, initial?: typeof targetA) =>
+      function Wrapper({ children }: { children: ReactNode }) {
+        return (
+          <TxFlowSafeReporterContext.Provider value={report}>
+            <SafeScopeProvider initial={initial}>{children}</SafeScopeProvider>
+          </TxFlowSafeReporterContext.Provider>
+        )
+      }
+
+    it('reports its Safe inside the tx modal, follows a switch and clears it on unmount', () => {
+      const report = jest.fn()
+      const { result, unmount } = renderHook(useProbe, { wrapper: reportingWrapper(report, targetA) })
+      expect(report).toHaveBeenLastCalledWith(targetA)
+
+      act(() => result.current.controls.setScope(safeB.chainId, safeB.address.value))
+      expect(report).toHaveBeenLastCalledWith({ chainId: safeB.chainId, safeAddress: safeB.address.value })
+
+      unmount()
+      expect(report).toHaveBeenLastCalledWith(undefined)
+    })
+
+    it('reports no Safe until a policy flow picks one', () => {
+      const report = jest.fn()
+      renderHook(useProbe, { wrapper: reportingWrapper(report) })
+      expect(report).not.toHaveBeenCalledWith(expect.objectContaining({ chainId: expect.any(String) }))
+    })
+
+    it('does not let a nested scope override the flow Safe', () => {
+      const report = jest.fn()
+      const Nested = ({ children }: { children: ReactNode }) => (
+        <TxFlowSafeReporterContext.Provider value={report}>
+          <SafeScopeProvider initial={targetA}>
+            <SafeScopeProvider initial={{ chainId: safeB.chainId, safeAddress: safeB.address.value }}>
+              {children}
+            </SafeScopeProvider>
+          </SafeScopeProvider>
+        </TxFlowSafeReporterContext.Provider>
+      )
+      renderHook(useProbe, { wrapper: Nested })
+      expect(report).toHaveBeenCalledTimes(1)
+      expect(report).toHaveBeenLastCalledWith(targetA)
+    })
+
+    it('reports nothing outside the tx modal', () => {
+      // No reporter in context, e.g. a row of the Workspace queue: nothing to call, nothing thrown
+      expect(() => renderHook(useProbe, { wrapper: wrapperWith(targetA) })).not.toThrow()
+    })
+  })
+
+  it('leaves the active counter alone when armsSdkGuard is off', () => {
+    const target = { chainId: safeA.chainId, safeAddress: safeA.address.value }
+    const { unmount } = renderHook(useProbe, {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <SafeScopeProvider initial={target} armsSdkGuard={false}>
+          {children}
+        </SafeScopeProvider>
+      ),
+    })
+    expect(hasActiveScope()).toBe(false)
     unmount()
     expect(hasActiveScope()).toBe(false)
   })

@@ -11,7 +11,7 @@ import AddressBookToolbar from '@safe-global/views/features/spaces/components/Ad
 import TagFilterDropdown from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagFilterDropdown'
 import EditTagsDialog from '@safe-global/views/features/spaces/components/AddressBookV2/EditTagsDialog'
 import { existingTagIds } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
-import { filterByTags, searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
+import { filterByTags, searchContacts } from './search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { CsvExportDialog } from '@/components/address-book/ExportDialog'
 import Track from '@/components/common/Track'

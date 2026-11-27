@@ -1,6 +1,7 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { balanceOf, emptyBalance } from '../../src/chain/balances'
+import { RELAYER } from '../../src/data/constants'
 import { sponsoredTransactionsUsed } from '../../src/fixtures/email-session'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -10,8 +11,6 @@ import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { seedBusinessWorkspace } from '../../src/seed/workspace'
 
 const AMOUNT = '0.001'
-// The account that the stack's relay mock (environment/infra/mocks/relay-api.ts) sends every relayed transaction from
-const RELAYER = '0x5afe00000000000000000000000000000000beef'
 // FEATURE_SPONSORED_TRANSACTIONS of the Business plan in the billing mock (environment/infra/mocks/billing-api.ts)
 const BUSINESS_PLAN_RELAYS = 50
 
@@ -31,9 +30,9 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const owner = journey.owners.alice.address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     await emptyBalance(journey.env, owner)
 
     const review = new TxReviewPage(safePage)
@@ -54,8 +53,8 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     const workspace = await seedBusinessWorkspace(safePage, { Treasury: safe })
 
     const review = new TxReviewPage(safePage)
@@ -78,8 +77,8 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['bob', 'alice'], threshold: 2 })
+    const recipient = journey.newAddress()
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)

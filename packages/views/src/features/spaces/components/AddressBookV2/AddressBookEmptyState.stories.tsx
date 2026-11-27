@@ -44,3 +44,7 @@ export const EmptyLocalBook: Story = { args: { kind: 'empty', book: 'local' } }
 export const NoResults: Story = { args: { kind: 'no-results', book: 'workspace', onClear: fn() } }
 
 export const NoLocalResults: Story = { args: { kind: 'no-results', book: 'local', onClear: fn() } }
+
+export const NoSuggestedResults: Story = { args: { kind: 'no-results', book: 'suggested', onClear: fn() } }
+
+export const NoPendingResults: Story = { args: { kind: 'no-results', book: 'pending', onClear: fn() } }

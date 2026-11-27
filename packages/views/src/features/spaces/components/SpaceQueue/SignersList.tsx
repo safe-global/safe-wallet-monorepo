@@ -5,6 +5,8 @@ import { cn } from '@safe-global/views/utils/cn'
 import Identicon from '@safe-global/views/components/common/Identicon'
 
 const SKELETON_ROWS = 3
+/** Rows shown before the rest fold into "+N more", so a large Safe doesn't grow the tooltip past the viewport */
+export const MAX_SIGNER_ROWS = 6
 
 export type SignerRow = {
   address: string
@@ -16,6 +18,8 @@ export type SignersListProps = {
   header: string
   isLoading: boolean
   signers: SignerRow[]
+  /** A line under the list, such as why the user can't sign */
+  note?: string
 }
 
 const SignerItem = ({ address, name, signed }: SignerRow): ReactElement => (
@@ -34,7 +38,7 @@ const SignerItem = ({ address, name, signed }: SignerRow): ReactElement => (
   </li>
 )
 
-const SignersList = ({ header, isLoading, signers }: SignersListProps): ReactElement => (
+const SignersList = ({ header, isLoading, signers, note }: SignersListProps): ReactElement => (
   <div className="flex flex-col gap-2 py-1">
     <p className="whitespace-nowrap font-medium">{header}</p>
     {isLoading && (
@@ -49,11 +53,13 @@ const SignersList = ({ header, isLoading, signers }: SignersListProps): ReactEle
     )}
     {signers.length > 0 && (
       <ul className="flex flex-col gap-1.5">
-        {signers.map((signer) => (
+        {signers.slice(0, MAX_SIGNER_ROWS).map((signer) => (
           <SignerItem key={signer.address} {...signer} />
         ))}
       </ul>
     )}
+    {signers.length > MAX_SIGNER_ROWS && <p className="text-background/60">+{signers.length - MAX_SIGNER_ROWS} more</p>}
+    {note && <p className="text-background/60">{note}</p>}
   </div>
 )
 

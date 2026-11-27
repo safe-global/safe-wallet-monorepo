@@ -2,13 +2,16 @@ import type { ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import type { Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import * as useBalances from '@/hooks/useBalances'
 import * as useChainId from '@/hooks/useChainId'
 import * as useChains from '@/hooks/useChains'
-import { balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
+import { erc20TokenBuilder } from '@/tests/builders/balances'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
+import * as useSpendingLimitTokenOptionsHook from '@/hooks/useSpendingLimitTokenOptions'
+import { tokenOptionsResult } from '@/hooks/useSpendingLimitTokenOptions.testData'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
@@ -45,13 +48,17 @@ const existingLimit = (amount = ONE_USDC): SpendingLimitState =>
     .with({ beneficiary: newLimit.beneficiary, token: usdc, amount, resetTimeMin: ONE_WEEK_IN_MINUTES })
     .build()
 
-const givenSafeHolds = (tokens: Erc20Token[]) => {
-  jest.spyOn(useBalances, 'default').mockReturnValue({
-    balances: { items: tokens.map((tokenInfo) => balanceBuilder().with({ tokenInfo }).build()), fiatTotal: '0' },
-    loaded: true,
-    loading: false,
-    error: undefined,
-  })
+const givenTokenOptions = (tokens: Erc20Token[], { untrusted }: { untrusted?: boolean } = {}) => {
+  jest.spyOn(useSpendingLimitTokenOptionsHook, 'default').mockReturnValue(
+    tokenOptionsResult(
+      tokens.map(({ address, symbol, name, decimals, logoUri }) =>
+        tokenOptionBuilder()
+          .with({ address, symbol, name, decimals: decimals ?? 0, logoUri, untrusted })
+          .build(),
+      ),
+      { chainId: MAINNET },
+    ),
+  )
 }
 
 const renderReview = (spendingLimits: SpendingLimitState[] = [], limit: NewSpendingLimitFlowProps = newLimit) => {
@@ -72,7 +79,7 @@ describe('ReviewSpendingLimit', () => {
   beforeEach(() => {
     jest.spyOn(useChainId, 'default').mockReturnValue(MAINNET)
     jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ chainId: MAINNET }).build())
-    givenSafeHolds([usdc])
+    givenTokenOptions([usdc])
     mockCreateNewSpendingLimitTx.mockResolvedValue(builtTx)
   })
 
@@ -89,6 +96,15 @@ describe('ReviewSpendingLimit', () => {
     expect(screen.getByTestId('beneficiary-address')).toHaveTextContent(newLimit.beneficiary)
     expect(screen.getByText('1 day')).toBeInTheDocument()
     expect(screen.queryByTestId('limit-replacement-warning')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('token-untrusted-warning')).not.toBeInTheDocument()
+  })
+
+  it('repeats the not-trusted warning for a token on no trusted list', () => {
+    givenTokenOptions([usdc], { untrusted: true })
+
+    renderReview()
+
+    expect(screen.getByTestId('token-untrusted-warning')).toHaveTextContent(UNTRUSTED_TOKEN_WARNING)
   })
 
   it('warns and shows the old amount and reset time when it replaces an existing limit', () => {
@@ -120,14 +136,17 @@ describe('ReviewSpendingLimit', () => {
     expect(screen.queryByTestId('old-token-amount')).not.toBeInTheDocument()
   })
 
-  it('builds the spending limit transaction', async () => {
+  it('builds the spending limit transaction with the decimals of the picked token', async () => {
     const context = renderReview()
 
     await waitFor(() => expect(context.setSafeTx).toHaveBeenCalledWith(builtTx))
+    const [data, , , , , , decimals] = mockCreateNewSpendingLimitTx.mock.lastCall ?? []
+    expect(data).toEqual(newLimit)
+    expect(decimals).toBe(usdc.decimals)
   })
 
   it('waits for the token decimals before it builds the transaction', () => {
-    givenSafeHolds([])
+    givenTokenOptions([])
 
     renderReview()
 

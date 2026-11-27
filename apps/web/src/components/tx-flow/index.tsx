@@ -16,6 +16,8 @@ import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSu
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
 import { useTopbarElevation } from '@/hooks/useTopbarElevation'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope/types'
+import { TxFlowSafeContext, TxFlowSafeReporterContext } from './safe-scope/txFlowSafe'
 
 const noop = () => {}
 
@@ -34,6 +36,8 @@ export const TxModalContext = createContext<TxModalContextType>({
 export const TxModalProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [txFlow, setFlow] = useState<TxModalContextType['txFlow']>(undefined)
   const [fullWidth, setFullWidth] = useState<boolean>(false)
+  // Reported by the flow's SafeScopeProvider; cleared when it unmounts with the flow
+  const [flowSafe, setFlowSafe] = useState<SafeScopeTarget | undefined>(undefined)
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
   const { setSignerAddress, clearParentSafeNonce } = useWalletContext() ?? {}
@@ -119,10 +123,12 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
 
   return (
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth }}>
-      {children}
+      <TxFlowSafeContext.Provider value={flowSafe}>{children}</TxFlowSafeContext.Provider>
 
       <TxModalDialog open={!!txFlow} onClose={handleModalClose} fullWidth={fullWidth}>
-        <PlainExternalLinkIcons>{txFlow}</PlainExternalLinkIcons>
+        <TxFlowSafeReporterContext.Provider value={setFlowSafe}>
+          <PlainExternalLinkIcons>{txFlow}</PlainExternalLinkIcons>
+        </TxFlowSafeReporterContext.Provider>
       </TxModalDialog>
 
       <AlertDialog

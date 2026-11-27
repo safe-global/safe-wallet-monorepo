@@ -1,5 +1,6 @@
-import { useEffect, useMemo } from 'react'
-import type { SubscriptionOptions } from '@reduxjs/toolkit/query'
+import { useEffect, useMemo, useState } from 'react'
+import { useSelector, useStore } from 'react-redux'
+import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import {
   useSpaceTransactionsGetTransactionQueueV1Query,
   type SpaceQueueCounts,
@@ -7,8 +8,11 @@ import {
   type SpaceQueueSafe,
   type SpaceTransactionsGetTransactionQueueV1ApiArg,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
+import type { RootState } from '@/store'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
+import { selectSpaceQueuePolling, toSpaceQueueKey } from '../public/store/spaceQueuePollingSlice'
 
 export type SpaceQueueItems = SpaceQueuedItemPage['results'][string][string]
 export type SpaceQueueChain = { chainId: string; items: SpaceQueueItems }
@@ -75,7 +79,13 @@ const REFETCH_EVENTS = [
   TxEvent.DELETED,
 ] as const
 
-type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
+export type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
+
+const MAX_POLLING_INTERVAL = 5 * 60_000
+
+/** Doubles the wait per failed poll, up to 5 minutes or the healthy interval when that is configured longer */
+export const getPollingInterval = (failures: number, healthyInterval = POLLING_INTERVAL): number =>
+  Math.min(healthyInterval * 2 ** failures, Math.max(MAX_POLLING_INTERVAL, healthyInterval))
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
@@ -93,17 +103,30 @@ const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search
   } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-/** The Space queue grouped by Safe and chain, refetched after a tx event */
+/** The Space queue grouped by Safe and chain, refetched after a tx event and, with `poll`, polled with backoff */
 export const useSpaceQueue = (
   spaceId: string,
   query: SpaceQueueQuery = {},
-  options: SubscriptionOptions & { skip?: boolean } = {},
+  { skip = false, poll = false }: { skip?: boolean; poll?: boolean } = {},
 ) => {
-  const { data, currentData, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
-    toQueryArgs(spaceId, query),
-    options,
+  const store = useStore<RootState>()
+  const args = toQueryArgs(spaceId, query)
+  const queueKey = toSpaceQueueKey(args)
+  const { data, currentData, isError, isFetching, requestId, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
+    args,
+    { skip },
   )
-  const { skip } = options
+  const failures = useSelector((state: RootState) => selectSpaceQueuePolling(state, queueKey).failures)
+  const isFocused = useSelector((state: RootState) => state[cgwClient.reducerPath].config.focused)
+  const interval = getPollingInterval(failures)
+
+  // A query that failed stays failed while Try again refetches it, so the error view doesn't flash other content
+  const argsKey = JSON.stringify(args)
+  const [failedArgsKey, setFailedArgsKey] = useState<string>()
+  if (isError && !currentData && failedArgsKey !== argsKey) setFailedArgsKey(argsKey)
+  if (currentData && failedArgsKey === argsKey) setFailedArgsKey(undefined)
+  const isRetryingError = !isError && !currentData && !skip && failedArgsKey === argsKey
+  const hasError = isError || isRetryingError
 
   // A second refetch of an entry already loading sends no request, so the page and the poller can both listen
   useEffect(() => {
@@ -112,11 +135,43 @@ export const useSpaceQueue = (
     return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
   }, [skip, refetch])
 
+  // Not RTK Query's pollingInterval: it only ever reschedules sooner, so it can't back off
+  useEffect(() => {
+    if (skip || !poll || isFetching || !isFocused) return
+    const timer = setInterval(() => {
+      // Another view polling the same queue may have just asked for it
+      const { lastStartedAt } = selectSpaceQueuePolling(store.getState(), queueKey)
+      if (Date.now() - lastStartedAt >= interval) refetch()
+    }, interval)
+    return () => clearInterval(timer)
+  }, [skip, poll, queueKey, isFetching, isFocused, interval, refetch, requestId, store])
+
   const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
-  const queue = useMemo(
+  const currentQueue = useMemo(
     () => (currentData ? toSpaceQueue(currentData, isNarrowed) : undefined),
     [currentData, isNarrowed],
   )
-  // The last answer's counts stay while a new filter loads, so the menus keep them
-  return { queue, counts: data?.counts, isError, isFetching, refetch }
+
+  // The last queue loaded, kept with the Space and the query it answered
+  const [lastQueue, setLastQueue] = useState<{ spaceId: string; query: SpaceQueueQuery; queue: SpaceQueue }>()
+  if (currentQueue && lastQueue?.queue !== currentQueue) {
+    setLastQueue({ spaceId, query, queue: currentQueue })
+  }
+  // While a new search or filter loads, the last queue stays on screen instead of a skeleton. Never another Space's
+  const stale = !currentQueue && !skip && !hasError && lastQueue?.spaceId === spaceId ? lastQueue : undefined
+
+  return {
+    queue: currentQueue ?? stale?.queue,
+    /** The query the returned queue answers: an earlier one while `isStale` */
+    queueQuery: stale?.query ?? query,
+    isStale: !!stale,
+    // The last answer's counts stay while a new filter loads, so the menus keep them
+    counts: data?.counts,
+    isError: hasError,
+    /** Try again is refetching a query that failed */
+    isRetryingError,
+    isFetching,
+    isRefreshFailing: failures > 0,
+    refetch,
+  }
 }

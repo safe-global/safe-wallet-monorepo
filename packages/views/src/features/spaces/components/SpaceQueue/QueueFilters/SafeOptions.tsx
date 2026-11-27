@@ -6,6 +6,7 @@ import { DropdownMenuSeparator } from '@safe-global/views/components/ui/dropdown
 import FilterOptionItem, {
   NoFilterOptions,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterOptionItem'
+import SearchableOptions from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SearchableOptions'
 
 export type SafeOptionRow = {
   safeAddress: string
@@ -26,16 +27,24 @@ const SafeOptions = ({ options, onToggle }: SafeOptionsProps): ReactElement => {
 
   return (
     <>
-      {options.map(({ safeAddress, name, count, checked }) => (
-        <FilterOptionItem
-          key={safeAddress}
-          icon={<Identicon address={safeAddress} size={16} />}
-          label={name || shortenAddress(safeAddress)}
-          count={count}
-          checked={checked}
-          onToggle={() => onToggle(safeAddress)}
-        />
-      ))}
+      <SearchableOptions
+        items={options}
+        noun="Safe accounts"
+        getText={({ safeAddress, name }) => `${name || shortenAddress(safeAddress)} ${safeAddress}`}
+      >
+        {(shown) =>
+          shown.map(({ safeAddress, name, count, checked }) => (
+            <FilterOptionItem
+              key={safeAddress}
+              icon={<Identicon address={safeAddress} size={16} />}
+              label={name || shortenAddress(safeAddress)}
+              count={count}
+              checked={checked}
+              onToggle={() => onToggle(safeAddress)}
+            />
+          ))
+        }
+      </SearchableOptions>
       <DropdownMenuSeparator />
       <p className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground">
         <Info className="size-3.5" />

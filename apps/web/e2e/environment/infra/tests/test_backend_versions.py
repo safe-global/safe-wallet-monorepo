@@ -12,6 +12,7 @@ from scripts.backend_versions import (
 CGW = SERVICES["CGW_IMAGE"]
 TXS = SERVICES["TXS_IMAGE"]
 QUEUE = SERVICES["QUEUE_IMAGE"]
+DECODER = SERVICES["DECODER_IMAGE"]
 EVENTS = SERVICES["EVENTS_IMAGE"]
 DIGEST = "sha256:" + "a" * 64
 COMMIT = "6e0e964a7612a5a6708418262c5a518a9b6f27c4"
@@ -83,6 +84,19 @@ class ResolveServiceTests(unittest.TestCase):
         self.assertEqual(image, f"{TXS.repository}:staging@{DIGEST}")
         self.assertIsNone(warning)
 
+    def test_staging_main_sha_services_pin_the_build_that_staging_runs(self):
+        inspect = inspected("d74988997375")
+        read = Mock(return_value={"version": "1.17.0", "buildCommit": COMMIT})
+        image, warning = resolve_service(DECODER, "staging", read, inspect)
+        inspect.assert_called_once_with(f"{DECODER.repository}:main-6e0e964")
+        self.assertEqual(image, f"{DECODER.repository}:main-6e0e964@{DIGEST}")
+        self.assertIsNone(warning)
+
+    def test_production_main_sha_services_use_the_release_tag(self):
+        read = Mock(return_value={"version": "1.17.0", "buildCommit": COMMIT})
+        image, _ = resolve_service(DECODER, "production", read, inspected())
+        self.assertEqual(image, f"{DECODER.repository}:v1.17.0@{DIGEST}")
+
     def test_staging_warns_when_the_staging_tag_holds_another_build(self):
         for build_commit, shown in (("d74988997375", "d749889"), (None, "unknown")):
             with self.subTest(build_commit=build_commit):
@@ -97,6 +111,7 @@ class ResolveServiceTests(unittest.TestCase):
             (CGW, "staging", {}, "`version`"),
             (CGW, "production", {"version": ""}, "`version`"),
             (QUEUE, "staging", {"version": "0.9.0"}, "`buildCommit`"),
+            (DECODER, "staging", {"version": "1.17.0"}, "`buildCommit`"),
         )
         for service, backend, about, missing in cases:
             with self.subTest(service=service.name, about=about):

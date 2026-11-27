@@ -20,11 +20,14 @@ const SignTxButton = ({
   txSummary,
   compact = false,
   dense = false,
+  hint,
 }: {
   txSummary: Transaction
   compact?: boolean
   // The Space queue table's 24px row action, labelled "Sign" as in its design
   dense?: boolean
+  /** Shown in a tooltip while the user can sign */
+  hint?: string
 }): ReactElement => {
   const setTxFlow = useSetScopedTxFlow()
   const wallet = useWallet()
@@ -63,10 +66,16 @@ const SignTxButton = ({
           </span>
         )
 
-        return isOk && !isSignable && isSafeOwner ? (
+        const tooltip =
+          isOk && !isSignable && isSafeOwner
+            ? "You've already signed this transaction"
+            : isOk && !isDisabled
+              ? hint
+              : undefined
+        return tooltip ? (
           <Tooltip>
             <TooltipTrigger render={button} />
-            <TooltipContent>You&apos;ve already signed this transaction</TooltipContent>
+            <TooltipContent>{tooltip}</TooltipContent>
           </Tooltip>
         ) : (
           button

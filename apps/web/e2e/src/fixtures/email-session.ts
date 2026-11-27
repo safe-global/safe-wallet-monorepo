@@ -217,7 +217,7 @@ const offersTrial = async (session: EmailSession, uuid: string): Promise<boolean
 export async function storeSubscription(
   session: EmailSession,
   uuid: string,
-  subscription: { plan?: 'business' | 'starter'; status?: string } = {},
+  subscription: { plan?: 'business' | 'starter'; status?: string; currentPeriodEnd?: number } = {},
 ): Promise<void> {
   const url = billingSubscriptionsUrl(uuid)
   const response = await fetch(url, {
@@ -229,12 +229,31 @@ export async function storeSubscription(
   await expect.poll(() => offersTrial(session, uuid)).toBe(false)
 }
 
+/**
+ * Leaves the Workspace without a plan, as a Workspace from before Safe Pro is, and waits until the gateway offers it
+ * the free access. Call it before the gateway reads the Workspace's plan, which the billing service then announces.
+ */
+export async function clearSubscription(session: EmailSession, uuid: string): Promise<void> {
+  const url = billingSubscriptionsUrl(uuid)
+  const response = await fetch(url, { method: 'DELETE' })
+  if (!response.ok) throw new Error(`DELETE ${url} returned ${response.status}: ${await response.text()}`)
+  await expect.poll(() => offersTrial(session, uuid), { message: `the free access of Workspace ${uuid}` }).toBe(true)
+}
+
 /** The name of the Workspace's plan, as the gateway reports it; null without a subscription. */
 export async function planName(session: EmailSession, uuid: string): Promise<string | null> {
   const subscriptions = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/subscriptions`)
   if (!Array.isArray(subscriptions) || subscriptions.length === 0) return null
   const [{ metadata }] = subscriptions as Array<{ metadata?: { planName?: string } }>
   return metadata?.planName ?? null
+}
+
+/** Whether the Workspace's subscription has a payment method, as the gateway reports it; false without one. */
+export async function hasPaymentMethod(session: EmailSession, uuid: string): Promise<boolean> {
+  const subscriptions = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/subscriptions`)
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) return false
+  const [subscription] = subscriptions as Array<{ hasPaymentMethod?: boolean }>
+  return subscription.hasPaymentMethod === true
 }
 
 /** Sponsored transactions the Workspace spent in the current cycle, as the gateway counts them; null without the meter. */

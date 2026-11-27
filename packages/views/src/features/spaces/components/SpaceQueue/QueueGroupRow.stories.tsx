@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
+import { QUEUE_TABLE_MIN_WIDTH } from './columns'
 import QueueGroupRow, { UP_NEXT_GROUP_LABELS } from './QueueGroupRow'
 
 const ETHEREUM: ChainInfo = {
@@ -17,7 +18,7 @@ const meta = {
   parameters: { layout: 'padded' },
   args: { label: UP_NEXT_GROUP_LABELS.next, count: 4, collapsed: false, onToggle: fn() },
   render: (args) => (
-    <Table className="table-fixed min-w-[1128px]">
+    <Table className={`table-fixed ${QUEUE_TABLE_MIN_WIDTH}`}>
       <TableBody>
         <QueueGroupRow {...args} />
       </TableBody>

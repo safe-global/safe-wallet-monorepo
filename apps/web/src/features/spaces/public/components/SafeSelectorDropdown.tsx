@@ -75,12 +75,13 @@ function SafeSelectorDropdown({
   onItemRename,
   onReorder,
   keepOpen,
+  locked = false,
 }: SafeSelectorDropdownProps) {
-  const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
+  const hasDropdownContent = !locked && (Boolean(header) || Boolean(footer) || isLoading || isError)
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
   const willUseFallbackTrigger =
     items.length > 0 && Boolean(selectedItemId) && !items.some((item) => item.id === selectedItemId)
-  const isDisabled = useIsSafeBarControlDisabled()
+  const isDisabled = useIsSafeBarControlDisabled() || locked
   const {
     dropdownOpen,
     selectedChainId,
@@ -93,7 +94,7 @@ function SafeSelectorDropdown({
     items,
     selectedItemId,
     onItemSelect,
-    forceOpenable: hasDropdownContent || willUseFallbackTrigger,
+    forceOpenable: !locked && (hasDropdownContent || willUseFallbackTrigger),
   })
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])

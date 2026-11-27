@@ -1,4 +1,4 @@
-import { Wallet, parseEther, parseUnits } from 'ethers'
+import { parseEther, parseUnits } from 'ethers'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { balanceOf, tokenBalanceOf } from '../../src/chain/balances'
 import { DrainAccountPage } from '../../src/pages/drain-account.page'
@@ -14,14 +14,16 @@ test.describe('Drain Account', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     await seedTokenBalance(safe, { token: SEPOLIA_USDC, amount: USDC_BALANCE })
 
     const drain = new DrainAccountPage(safePage)
     const review = new TxReviewPage(safePage)
     await drain.open(safe.prefixedAddress)
-    await drain.transferEverythingTo(recipient)
+    await drain.recipientInput.fill(recipient)
+    await expect(drain.recipientInput).toHaveValue(recipient)
+    await drain.transferEverythingButton.click()
     await review.signAndExecute()
 
     await expect.poll(() => balanceOf(journey.env, recipient)).toBe(SEEDED_ETH)
