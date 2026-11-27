@@ -44,8 +44,7 @@ export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCan
     return balances.items
       .filter((b) => BigInt(b.balance) > 0n)
       .filter((b) => {
-        // Native always passes — the fee service accepts it on every chain, and it is returned
-        // with a non-ZERO address on some chains (e.g. POL), where it would otherwise be filtered out.
+        // Some chains return the native token with a non-zero address (POL on Polygon).
         if (isNative(b.tokenInfo.address, b.tokenInfo.type)) return true
         return (gasTokens ?? []).some((gasToken) => sameAddress(gasToken.address, b.tokenInfo.address))
       })
@@ -53,8 +52,7 @@ export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCan
         address: b.tokenInfo.address,
         symbol: b.tokenInfo.symbol,
         logoUri:
-          // Prefer the chain config's native logo — TX Service per-chain currency_logo URL can
-          // fail to load through the IframeIcon sandbox.
+          // The TX Service native logo can fail to load in the IframeIcon sandbox.
           isNative(b.tokenInfo.address, b.tokenInfo.type)
             ? (chain.nativeCurrency.logoUri ?? b.tokenInfo.logoUri)
             : b.tokenInfo.logoUri,
