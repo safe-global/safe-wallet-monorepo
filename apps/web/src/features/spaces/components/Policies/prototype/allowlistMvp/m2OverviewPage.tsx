@@ -1,16 +1,5 @@
-import { useId, useMemo, useState, type ReactElement, type ReactNode } from 'react'
-import {
-  ChevronDown,
-  ChevronRight,
-  ChevronUp,
-  ListFilter,
-  ListTree,
-  Plus,
-  SearchX,
-  Users,
-  X,
-  type LucideIcon,
-} from 'lucide-react'
+import { useMemo, useState, type ReactElement, type ReactNode } from 'react'
+import { ChevronDown, ChevronUp, Loader2, Plus, SearchX, Users, type LucideIcon } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -19,16 +8,12 @@ import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/com
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge, BadgeDot, badgeVariants } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Checkbox } from '@safe-global/views/components/ui/checkbox'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
-import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from '@safe-global/views/components/ui/popover'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -46,7 +31,16 @@ import {
   type SpendingLimitMock,
   type StatusPill,
 } from './m2AccountPanel'
-import { PREFILLED_RECIPIENTS } from './m2SetupFlow'
+import { getAccountTokens, POPULAR_TOKENS, PREFILLED_RECIPIENTS } from './m2SetupFlow'
+import { CollapseAllButton, PolicyToolbar, type FilterSection, type GroupByOption } from './m2PolicyToolbar'
+import Identicon from '@/components/common/Identicon'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+} from '@safe-global/views/components/ui/avatar'
 import {
   getAccountKey,
   getAllowlistSettings,
@@ -678,17 +672,14 @@ export const ROW_STATUS_LABELS: Record<RowStatus, string> = {
   blocked: 'Blocked',
 }
 
-/** The Status filter treats a pending change and the post-execution delay as Pending, as the badges do. */
-const toStatusOption = (status: RowStatus): RowStatus =>
-  status === 'change-pending' || status === 'activating' ? 'pending' : status
-
 export type Person = { name: string; address: string }
 
 /** Who is looking at the panel, the four viewers M1's SpendingLimitDrawer stories cover. */
 export type PanelViewer = 'signer' | 'signer-signed' | 'non-signer' | 'disconnected'
 
 /** What the queued transaction does to the allowlist (M1's PendingPolicyOperation). */
-export type PanelOperation = 'create' | 'update' | 'remove'
+export type PanelOperation =
+  'create' | 'update' | 'update-apply' | 'update-cancel' | 'remove' | 'remove-apply' | 'remove-cancel'
 
 export type PolicyRow = {
   id: string
@@ -713,9 +704,29 @@ export type PolicyRow = {
   spendingLimit?: SpendingLimitMock
   /** Blocked spending limit only: the tokens the allowlist blocks; Payments' come from the prototype's setup instead. */
   blockedTokens?: string[]
+  /** Only there to show a spec 5.7 tag: it doesn't block the create flow. */
+  isExample?: boolean
+  /** A spec 5.7 example: its tag and tooltip replace the ones the status gives. */
+  example?: { tag: StatusTag; tooltip: string; change: SpecChange; stage: SpecStage }
   /** Allowlist rows other than the setup: who the side panel shows it to; the "already signed" signer unless set. */
   viewer?: PanelViewer
+  /** See all side panels: what became of its transaction, shown instead of the pending state. */
+  panelOutcome?: 'executed' | 'failed' | 'replaced' | 'deleted'
+  /** See all side panels: the case this row opens, under the policy name, and the tag it shows. */
+  caseLabel?: string
+  caseGroup?: CaseGroup
+  tag?: StatusTag
 }
+
+/** See all side panels: the five groups the cases are banded in. */
+export const CASE_GROUPS = [
+  'Setup pending',
+  'Active',
+  'Change request',
+  'Change cancellation',
+  'Remove allowlist',
+] as const
+export type CaseGroup = (typeof CASE_GROUPS)[number]
 
 /** The row id of the allowlist the prototype's setup flow creates. */
 export const SETUP_ROW_ID = 'setup-allowlist'
@@ -853,15 +864,268 @@ export const getPolicyRows = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): Po
   ]
 }
 
+// Examples stay on Ethereum: allowlists only run on Ethereum, Polygon and Sepolia.
+const EXAMPLE_ACCOUNTS: { account: M2Account; people: Person[] }[] = [
+  { account: PAYMENTS, people: TRADING_RECIPIENTS },
+  { account: TREASURY, people: OPERATIONS_RECIPIENTS },
+]
+
+/** What each stage waits for, as the tag's tooltip says it. */
+const getExampleTooltip = (stage: SpecStage, required: number): string => {
+  if (stage.endsWith('pending')) return `1 of ${required} signatures`
+  if (stage.endsWith('ready to execute')) return 'Ready to execute'
+  if (stage === 'in delay') return 'Applies in 18h · Oct 13, 20:00'
+  if (stage === 'ready to apply') return 'Apply before Oct 20, 20:00'
+  return "Wasn't applied within 7 days"
+}
+
+/** The change a spec 5.7 tag names, and where it stands; "Guard" is the guard found missing (5.6.10). */
+export type SpecChange = 'Edit' | 'Removal' | 'Guard removal' | 'Guard'
+export type SpecStage =
+  | 'pending'
+  | 'ready to execute'
+  | 'in delay'
+  | 'ready to apply'
+  | 'apply pending'
+  | 'apply ready to execute'
+  | 'expired'
+  | 'cancel pending'
+  | 'cancel ready to execute'
+  | 'missing'
+
+const EXAMPLE_STAGES: { stage: SpecStage; tone: TagTone }[] = [
+  { stage: 'pending', tone: 'waiting' },
+  { stage: 'ready to execute', tone: 'ready' },
+  { stage: 'in delay', tone: 'waiting' },
+  { stage: 'ready to apply', tone: 'ready' },
+  { stage: 'apply pending', tone: 'waiting' },
+  { stage: 'apply ready to execute', tone: 'ready' },
+  { stage: 'expired', tone: 'expired' },
+  { stage: 'cancel pending', tone: 'waiting' },
+  { stage: 'cancel ready to execute', tone: 'ready' },
+]
+
+/** One row per spec 5.7 tag the main rows don't already show, so every tag can be seen in the table. */
+export const getExampleRows = (): PolicyRow[] => {
+  const changes = [
+    ...(['Edit', 'Removal'] as const).flatMap((change) => EXAMPLE_STAGES.map((stage) => ({ change, ...stage }))),
+  ]
+  const setup: PolicyRow[] = [
+    {
+      id: 'example-setup-ready',
+      type: 'allowlist',
+      account: TREASURY,
+      summary: countLabel(OPERATIONS_RECIPIENTS.length, 'recipient'),
+      status: 'pending',
+      signatures: { signed: TREASURY.threshold, required: TREASURY.threshold },
+      people: OPERATIONS_RECIPIENTS,
+      isExample: true,
+    },
+    {
+      id: 'example-setup-processing',
+      type: 'allowlist',
+      account: PAYMENTS,
+      summary: countLabel(TRADING_RECIPIENTS.length, 'recipient'),
+      status: 'activating',
+      statusNote: 'Waiting for the transaction to show up',
+      people: TRADING_RECIPIENTS,
+      isExample: true,
+    },
+  ]
+  return [
+    ...setup,
+    ...changes.map(({ change, stage, tone }, index): PolicyRow => {
+      const { account, people } = EXAMPLE_ACCOUNTS[index % EXAMPLE_ACCOUNTS.length]
+      const signatures = stage.endsWith('pending') ? ` · 1/${account.threshold}` : ''
+      return {
+        id: `example-${change}-${stage}`.toLowerCase().replaceAll(' ', '-'),
+        type: 'allowlist',
+        account,
+        summary: countLabel(people.length, 'recipient'),
+        status: tone === 'expired' ? 'active' : 'change-pending',
+        people,
+        isExample: true,
+        example: {
+          tag: { label: `${change} ${stage}${signatures}`, tone },
+          tooltip: getExampleTooltip(stage, account.threshold),
+          change,
+          stage,
+        },
+      }
+    }),
+    // Spec 5.6.10: the guard was taken off outside Safe{Wallet}, so the allowlist no longer applies.
+    {
+      id: 'example-guard-missing',
+      type: 'allowlist',
+      account: TREASURY,
+      summary: countLabel(OPERATIONS_RECIPIENTS.length, 'recipient'),
+      status: 'active',
+      people: OPERATIONS_RECIPIENTS,
+      isExample: true,
+      example: {
+        tag: { label: 'Not applied', tone: 'failed' },
+        tooltip: 'Removed from this Safe account outside the app',
+        change: 'Guard',
+        stage: 'missing',
+      },
+    },
+  ]
+}
+
+const VIEWER_CASES: { viewer: PanelViewer; label: string }[] = [
+  { viewer: 'signer', label: 'your signature needed' },
+  { viewer: 'signer-signed', label: "you've signed" },
+  { viewer: 'non-signer', label: 'not a signer' },
+  { viewer: 'disconnected', label: 'no wallet' },
+]
+const LOOKING_VIEWERS: { viewer: PanelViewer; label: string }[] = [
+  { viewer: 'signer', label: 'signer' },
+  { viewer: 'non-signer', label: 'not a signer' },
+  { viewer: 'disconnected', label: 'no wallet' },
+]
+const OUTCOMES = ['executed', 'failed', 'replaced', 'deleted'] as const
+type CaseOutcome = (typeof OUTCOMES)[number]
+const OUTCOME_LABEL: Record<CaseOutcome, string> = {
+  executed: 'processing',
+  failed: 'failed',
+  replaced: 'replaced',
+  deleted: 'deleted',
+}
+const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1)
+
+/** See all side panels: one row per side panel case, banded in the five case groups. */
+export const getAllPanelRows = (): PolicyRow[] => {
+  const required = TREASURY.threshold
+  const row = (caseGroup: CaseGroup, caseLabel: string, patch: Partial<PolicyRow>): PolicyRow => ({
+    id: `case-${caseGroup}-${caseLabel}`.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    type: 'allowlist',
+    account: TREASURY,
+    summary: countLabel(OPERATIONS_RECIPIENTS.length, 'recipient'),
+    status: 'active',
+    people: OPERATIONS_RECIPIENTS,
+    isExample: true,
+    caseGroup,
+    caseLabel: capitalize(caseLabel),
+    ...patch,
+  })
+  const failedTag = (prefix: string, outcome: CaseOutcome): StatusTag =>
+    outcome === 'executed'
+      ? { label: 'Processing', tone: 'processing' }
+      : { label: `${prefix} ${OUTCOME_LABEL[outcome]}`, tone: 'failed' }
+  const example = (change: 'Edit' | 'Removal', stage: SpecStage, tone: TagTone) => ({
+    tag: { label: `${change} ${stage}${stage.endsWith('pending') ? ` · 1/${required}` : ''}`, tone },
+    tooltip: getExampleTooltip(stage, required),
+    change,
+    stage,
+  })
+
+  /** A transaction's cases: each viewer while it waits, fully signed, then what became of it once sent. */
+  const transaction = (
+    group: CaseGroup,
+    step: string,
+    change: 'Edit' | 'Removal',
+    pending: SpecStage,
+    ready: SpecStage,
+  ): PolicyRow[] => [
+    ...VIEWER_CASES.map(({ viewer, label }) =>
+      row(group, `${step} · ${label}`, {
+        status: 'change-pending',
+        viewer,
+        example: example(change, pending, 'waiting'),
+      }),
+    ),
+    row(group, `${step} · ready to execute`, { status: 'change-pending', example: example(change, ready, 'ready') }),
+    ...OUTCOMES.map((outcome) =>
+      row(group, `${step} · ${OUTCOME_LABEL[outcome]}`, {
+        status: 'change-pending',
+        panelOutcome: outcome,
+        tag: failedTag(`${change}${step === 'apply' ? ' apply' : step === 'cancellation' ? ' cancel' : ''}`, outcome),
+        example: example(change, pending, 'waiting'),
+      }),
+    ),
+  ]
+  /** A stage with no transaction waiting: only who is looking changes the panel. */
+  const stage = (group: CaseGroup, name: string, change: 'Edit' | 'Removal', spec: SpecStage, tone: TagTone) =>
+    LOOKING_VIEWERS.map(({ viewer, label }) =>
+      row(group, `${name} · ${label}`, {
+        status: tone === 'expired' ? 'active' : 'change-pending',
+        viewer,
+        example: example(change, spec, tone),
+      }),
+    )
+  /** Request, review window, apply and expiry: the same steps for a change and for a removal. */
+  const lifecycle = (group: CaseGroup, change: 'Edit' | 'Removal'): PolicyRow[] => [
+    ...transaction(group, 'request', change, 'pending', 'ready to execute'),
+    ...stage(group, 'in review window', change, 'in delay', 'waiting'),
+    ...stage(group, 'ready to apply', change, 'ready to apply', 'ready'),
+    ...transaction(group, 'apply', change, 'apply pending', 'apply ready to execute'),
+    ...stage(group, 'expired', change, 'expired', 'expired'),
+  ]
+
+  const setupPending: PolicyRow[] = [
+    ...VIEWER_CASES.map(({ viewer, label }) =>
+      row('Setup pending', `waiting for signatures · ${label}`, {
+        status: 'pending',
+        signatures: { signed: 1, required },
+        viewer,
+      }),
+    ),
+    row('Setup pending', 'ready to execute', { status: 'pending', signatures: { signed: required, required } }),
+    ...OUTCOMES.map((outcome) =>
+      row('Setup pending', OUTCOME_LABEL[outcome], {
+        status: outcome === 'executed' ? 'activating' : 'pending',
+        signatures: { signed: required, required },
+        panelOutcome: outcome === 'executed' ? undefined : outcome,
+        tag: failedTag('Setup', outcome),
+      }),
+    ),
+  ]
+  const missing = getExampleRows().find(({ id }) => id === 'example-guard-missing')
+  const active: PolicyRow[] = [
+    ...LOOKING_VIEWERS.map(({ viewer, label }) => row('Active', label, { viewer })),
+    ...(missing ? [{ ...missing, caseGroup: 'Active' as const, caseLabel: 'Not applied' }] : []),
+  ]
+
+  return [
+    ...setupPending,
+    ...active,
+    ...lifecycle('Change request', 'Edit'),
+    ...transaction('Change cancellation', 'cancellation', 'Edit', 'cancel pending', 'cancel ready to execute'),
+    ...lifecycle('Remove allowlist', 'Removal'),
+    ...transaction('Remove allowlist', 'cancellation', 'Removal', 'cancel pending', 'cancel ready to execute'),
+  ]
+}
+
+/** Spec 5.4: rows that need someone to act come first, then ones waiting on time, then settled ones. */
+const ACTION_RANK: Record<TagTone, number> = { ready: 0, waiting: 1, failed: 2, expired: 3, processing: 4, active: 5 }
+
+const getActionRank = (row: PolicyRow): number => {
+  if (row.type === 'allowlist') {
+    const tag = getAllowlistTag(row)
+    // Waiting on signatures is an action; waiting out the delay isn't.
+    if (tag.tone === 'waiting' && !tag.label.includes('pending')) return ACTION_RANK.processing
+    return ACTION_RANK[tag.tone]
+  }
+  if (row.status === 'blocked' || row.status === 'failed') return ACTION_RANK.failed
+  if (row.status === 'pending') return ACTION_RANK.waiting
+  return ACTION_RANK.active
+}
+
+export const sortByAction = (rows: PolicyRow[]): PolicyRow[] =>
+  rows
+    .map((row, index) => ({ row, index }))
+    .sort((a, b) => getActionRank(a.row) - getActionRank(b.row) || a.index - b.index)
+    .map(({ row }) => row)
+
 /** Accounts that already have an allowlist, keyed like getAccountKey: the create flow disables them. */
 export const getAllowlistAccountKeys = (payments: PaymentsSnapshot = DEFAULT_PAYMENTS): string[] =>
   getPolicyRows(payments)
     // A failed setup left nothing on the account, so it can be set up again.
-    .filter(({ type, status }) => type === 'allowlist' && status !== 'failed')
+    .filter(({ type, status, isExample }) => type === 'allowlist' && status !== 'failed' && !isExample)
     .map(({ account }) => getAccountKey(account))
 
-/** M1's PolicyRule markup: icon tile, policy name, muted one-line summary. */
-const PolicyCell = ({ type, summary }: { type: M2PolicyType; summary: string }): ReactElement => {
+/** M1's PolicyRule markup: icon tile and policy name; the Details column says what it covers. */
+const PolicyCell = ({ type, caseLabel }: { type: M2PolicyType; caseLabel?: string }): ReactElement => {
   const { Icon } = POLICY_TYPES[type]
 
   return (
@@ -874,9 +1138,11 @@ const PolicyCell = ({ type, summary }: { type: M2PolicyType; summary: string }):
         <Typography variant="paragraph-bold" className="truncate">
           {POLICY_ROW_LABELS[type]}
         </Typography>
-        <Typography variant="paragraph-small" className="truncate text-muted-foreground">
-          {summary}
-        </Typography>
+        {caseLabel && (
+          <Typography variant="paragraph-small" color="muted" className="max-w-52 truncate" title={caseLabel}>
+            {caseLabel}
+          </Typography>
+        )}
       </div>
     </div>
   )
@@ -889,7 +1155,9 @@ export const getStatusDetail = ({
   appliesAt,
   signatures,
   locked,
+  example,
 }: PolicyRow): string | undefined => {
+  if (example) return example.tooltip
   if (status === 'change-pending' || status === 'activating') return [statusNote, appliesAt].filter(Boolean).join(' · ')
   if (status === 'pending' && signatures) {
     const { signed, required } = signatures
@@ -898,6 +1166,152 @@ export const getStatusDetail = ({
   if (status === 'failed') return 'The transaction failed. Nothing changed on this account.'
   if (status === 'active' && locked) return 'Locked by the allowlist'
   return undefined
+}
+
+/** Spec 5.7's colours: yellow waiting, blue ready, green active, grey expired. Red and processing aren't in the spec. */
+type TagTone = 'waiting' | 'ready' | 'active' | 'expired' | 'processing' | 'failed'
+
+const TAG_BADGES: Record<
+  TagTone,
+  { variant: 'warning' | 'info' | 'success' | 'subtle' | 'destructive'; dot?: string }
+> = {
+  waiting: { variant: 'warning' },
+  ready: { variant: 'info', dot: 'bg-[var(--color-info-main)]' },
+  active: { variant: 'success' },
+  expired: { variant: 'subtle' },
+  processing: { variant: 'subtle' },
+  failed: { variant: 'destructive' },
+}
+
+export type StatusTag = { label: string; tone: TagTone }
+
+/** Spec 5.7's tags: what the change is, then where it stands. */
+export const SPEC_STATUS_TAGS: { group: string; tags: StatusTag[] }[] = [
+  {
+    group: 'Setup',
+    tags: [
+      { label: 'Setup pending · 1/3', tone: 'waiting' },
+      { label: 'Setup ready to execute', tone: 'ready' },
+      { label: 'Processing', tone: 'processing' },
+      { label: 'Active', tone: 'active' },
+    ],
+  },
+  ...['Edit', 'Removal'].map((change) => ({
+    group: change,
+    tags: [
+      { label: `${change} pending · 1/3`, tone: 'waiting' as const },
+      { label: `${change} ready to execute`, tone: 'ready' as const },
+      { label: `${change} in delay`, tone: 'waiting' as const },
+      { label: `${change} ready to apply`, tone: 'ready' as const },
+      { label: `${change} apply pending · 1/3`, tone: 'waiting' as const },
+      { label: `${change} apply ready to execute`, tone: 'ready' as const },
+      { label: `${change} expired`, tone: 'expired' as const },
+      { label: `${change} cancel pending · 1/3`, tone: 'waiting' as const },
+      { label: `${change} cancel ready to execute`, tone: 'ready' as const },
+    ],
+  })),
+]
+
+/** An allowlist row's spec tag; spending limits and proposers keep M1's chips. */
+export const getAllowlistTag = ({ status, signatures, example, tag }: PolicyRow): StatusTag => {
+  if (tag) return tag
+  if (example) return example.tag
+  if (status === 'pending' && signatures) {
+    const { signed, required } = signatures
+    return signed >= required
+      ? { label: 'Setup ready to execute', tone: 'ready' }
+      : { label: `Setup pending · ${signed}/${required}`, tone: 'waiting' }
+  }
+  if (status === 'activating') return { label: 'Processing', tone: 'processing' }
+  if (status === 'change-pending') return { label: 'Edit in delay', tone: 'waiting' }
+  if (status === 'failed') return { label: 'Setup failed', tone: 'failed' }
+  return { label: 'Active', tone: 'active' }
+}
+
+export const StatusTagChip = ({ tag, tooltip }: { tag: StatusTag; tooltip?: string }): ReactElement => {
+  const { variant, dot } = TAG_BADGES[tag.tone]
+  const chip = (
+    <Badge variant={variant} size="status" shape="status" data-m2-new="Spec 5.7 · Status tag" data-m2-new-compact="">
+      {tag.tone === 'processing' ? <Loader2 className="animate-spin" aria-hidden /> : <BadgeDot className={dot} />}
+      {tag.label}
+    </Badge>
+  )
+  if (!tooltip) return chip
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>{chip}</TooltipTrigger>
+      <TooltipContent>{tooltip}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+const STACK_PREVIEW = 3
+
+/** The design system's AvatarGroup at its 24px size: the first three, then +n; hovering lists them all. */
+const Stack = ({
+  items,
+  tooltip,
+}: {
+  items: { key: string; src?: string; fallback: string }[]
+  tooltip: string
+}): ReactElement => (
+  <Tooltip>
+    <TooltipTrigger render={<span className="inline-flex" />}>
+      <AvatarGroup>
+        {items.slice(0, STACK_PREVIEW).map(({ key, src, fallback }) => (
+          <Avatar key={key} size="xs">
+            {src && <AvatarImage src={src} alt="" />}
+            <AvatarFallback>{fallback}</AvatarFallback>
+          </Avatar>
+        ))}
+        {items.length > STACK_PREVIEW && <AvatarGroupCount>+{items.length - STACK_PREVIEW}</AvatarGroupCount>}
+      </AvatarGroup>
+    </TooltipTrigger>
+    <TooltipContent>{tooltip}</TooltipContent>
+  </Tooltip>
+)
+
+const findToken = (account: M2Account, symbol: string) =>
+  [...getAccountTokens(account), ...POPULAR_TOKENS].find((token) => token.symbol === symbol)
+
+const TokenStack = ({ tokens }: { tokens: { symbol: string; logoUri: string }[] }): ReactElement => (
+  <Stack
+    tooltip={tokens.map(({ symbol }) => symbol).join(', ')}
+    items={tokens.map(({ symbol, logoUri }) => ({ key: symbol, src: logoUri, fallback: symbol.charAt(0) }))}
+  />
+)
+
+const PeopleStack = ({ people }: { people: Person[] }): ReactElement => (
+  <Stack
+    tooltip={people.map(({ name }) => name).join(', ')}
+    items={people.map(({ name, address }) => ({ key: address, fallback: name.charAt(0).toUpperCase() }))}
+  />
+)
+
+/** What the policy covers at a glance: tokens, then recipients or the spender; a proposer shows who. */
+const ContextCell = ({ row }: { row: PolicyRow }): ReactElement | null => {
+  if (row.type === 'allowlist') {
+    const { excludedTokens } = getAllowlistSettings(row.account)
+    const tokens = getAccountTokens(row.account).filter(({ symbol }) => !excludedTokens.includes(symbol))
+    return (
+      <div className="flex items-center gap-4" data-m2-new="New · Details column" data-m2-new-compact="">
+        <TokenStack tokens={tokens} />
+        <span className="h-4 w-px bg-border" aria-hidden />
+        <PeopleStack people={row.people} />
+      </div>
+    )
+  }
+  if (row.type === 'spending-limit' && row.spendingLimit) {
+    const tokenInfo = findToken(row.account, row.spendingLimit.token)
+    return (
+      <div className="flex items-center gap-4" data-m2-new="New · Details column" data-m2-new-compact="">
+        {tokenInfo && <TokenStack tokens={[tokenInfo]} />}
+        <span className="h-4 w-px bg-border" aria-hidden />
+        <PeopleStack people={row.people} />
+      </div>
+    )
+  }
+  return <PeopleStack people={row.people} />
 }
 
 /** M1's PolicyStatusChip; M2's statuses are the same Badge with M2's labels. With `tooltip`, hovering shows it. */
@@ -951,11 +1365,13 @@ const spacerColumn = (id: string): DataTableColumn<PolicyRow> => ({
 // Widest content plus the table's cell padding: 16px on the table's outer edges, 8px elsewhere.
 const POLICY_COLUMN_WIDTH = 16 + 224 + 8
 const SAFE_ACCOUNT_COLUMN_WIDTH = 8 + 136 + 8
+// Three 24px tokens and three recipients, overlapping, with the divider between.
+const DETAILS_COLUMN_WIDTH = 8 + 160 + 8
 // Room for the group-by button on both sides of the centred header label.
 const NETWORK_COLUMN_WIDTH = 8 + 120 + 8
-const STATUS_COLUMN_WIDTH = 8 + 128 + 16
+const STATUS_COLUMN_WIDTH = 8 + 176 + 16
 
-/** Policy at the left padding, Status at the right padding, Safe account and Network spaced evenly between them. */
+/** Policy at the left padding, Status at the right padding, Safe account, Network and Details spaced evenly between. */
 const policyRowColumns: DataTableColumn<PolicyRow>[] = [
   {
     id: 'policy',
@@ -963,9 +1379,9 @@ const policyRowColumns: DataTableColumn<PolicyRow>[] = [
     width: 'fit',
     sticky: true,
     minWidth: POLICY_COLUMN_WIDTH,
-    cell: ({ type, summary }) => (
+    cell: ({ type, caseLabel }) => (
       <RowCell>
-        <PolicyCell type={type} summary={summary} />
+        <PolicyCell type={type} caseLabel={caseLabel} />
       </RowCell>
     ),
   },
@@ -1001,7 +1417,20 @@ const policyRowColumns: DataTableColumn<PolicyRow>[] = [
       </RowCell>
     ),
   },
-  spacerColumn('gap-network-status'),
+  spacerColumn('gap-network-details'),
+  {
+    id: 'details',
+    header: 'DETAILS',
+    width: 'fit',
+    minWidth: DETAILS_COLUMN_WIDTH,
+    priority: 'secondary',
+    cell: (row) => (
+      <RowCell>
+        <ContextCell row={row} />
+      </RowCell>
+    ),
+  },
+  spacerColumn('gap-details-status'),
   {
     id: 'status',
     header: 'STATUS',
@@ -1011,81 +1440,106 @@ const policyRowColumns: DataTableColumn<PolicyRow>[] = [
     align: 'end',
     cell: (row) => (
       <RowCell justify="end">
-        <RowStatusChip status={row.status} tooltip={getStatusDetail(row)} />
+        {row.type === 'allowlist' ? (
+          <StatusTagChip tag={getAllowlistTag(row)} tooltip={getStatusDetail(row)} />
+        ) : (
+          <RowStatusChip status={row.status} tooltip={getStatusDetail(row)} />
+        )}
       </RowCell>
     ),
   },
 ]
 
-type Grouping = 'account' | 'network' | 'status'
+type Grouping = 'urgency' | 'type' | 'account' | 'network' | 'case'
 
 const rank = <T,>(order: T[], value: T): number => {
   const index = order.indexOf(value)
   return index === -1 ? order.length : index
 }
 
-const STATUS_GROUP_ORDER: RowStatus[] = ['active', 'pending', 'blocked', 'failed', 'unenforced', 'not-activated']
+/** The queue's Group by options: one list by urgency, or bands. */
+const GROUP_BY_OPTIONS: GroupByOption<Grouping>[] = [
+  { value: 'urgency', label: 'Urgency', hint: 'Policies listed by what needs action first' },
+  { value: 'type', label: 'Policy type', hint: 'Grouped by allowlist, spending limit and proposer' },
+  { value: 'account', label: 'Safe account', hint: 'Grouped by Safe account and network' },
+  { value: 'network', label: 'Network', hint: 'Grouped by network' },
+]
+
+const CASE_GROUP_OPTION: GroupByOption<Grouping> = {
+  value: 'case',
+  label: 'Side panel case',
+  hint: 'Setup pending, active, change request, cancellation and removal',
+}
 
 const GROUPINGS: Record<
-  Grouping,
-  {
-    columnId: string
-    name: string
-    getKey: (row: PolicyRow) => string
-    compare: (a: PolicyRow, b: PolicyRow) => number
-  }
+  Exclude<Grouping, 'urgency'>,
+  { getKey: (row: PolicyRow) => string; compare: (a: PolicyRow, b: PolicyRow) => number }
 > = {
+  type: {
+    getKey: ({ type }) => type,
+    compare: (a, b) => rank(POLICY_ROW_TYPE_ORDER, a.type) - rank(POLICY_ROW_TYPE_ORDER, b.type),
+  },
   account: {
-    columnId: 'appliesTo',
-    name: 'safe account',
     getKey: ({ account }) => getAccountKey(account),
     compare: (a, b) =>
       a.account.name.localeCompare(b.account.name) ||
       rank(NETWORK_OPTIONS, a.account.chainId) - rank(NETWORK_OPTIONS, b.account.chainId),
   },
   network: {
-    columnId: 'network',
-    name: 'network',
     getKey: ({ account }) => account.chainId,
     compare: (a, b) => rank(NETWORK_OPTIONS, a.account.chainId) - rank(NETWORK_OPTIONS, b.account.chainId),
   },
-  status: {
-    columnId: 'status',
-    name: 'status',
-    // Grouped as the Status filter and the badges read them: a pending change is Pending.
-    getKey: ({ status }) => toStatusOption(status),
+  case: {
+    getKey: ({ caseGroup }) => caseGroup ?? '',
     compare: (a, b) =>
-      rank(STATUS_GROUP_ORDER, toStatusOption(a.status)) - rank(STATUS_GROUP_ORDER, toStatusOption(b.status)),
+      rank<string>([...CASE_GROUPS], a.caseGroup ?? '') - rank<string>([...CASE_GROUPS], b.caseGroup ?? ''),
   },
 }
 
-const GROUPING_ORDER: Grouping[] = ['account', 'network', 'status']
-
-type GroupHeadingRow = { kind: 'group'; id: string; grouping: Grouping; first: PolicyRow; count: number }
+type GroupHeadingRow = {
+  kind: 'group'
+  id: string
+  grouping: Exclude<Grouping, 'urgency'>
+  first: PolicyRow
+  count: number
+  collapsed: boolean
+}
 
 type ByPolicyTableRow = { kind: 'policy'; row: PolicyRow } | GroupHeadingRow
 
-const toTableRows = (rows: PolicyRow[], grouping: Grouping | null): ByPolicyTableRow[] => {
-  if (!grouping) return rows.map((row): ByPolicyTableRow => ({ kind: 'policy', row }))
-
+const getGroups = (rows: PolicyRow[], grouping: Exclude<Grouping, 'urgency'>): PolicyRow[][] => {
   const { getKey, compare } = GROUPINGS[grouping]
   const groups = new Map<string, PolicyRow[]>()
   rows.forEach((row) => groups.set(getKey(row), [...(groups.get(getKey(row)) ?? []), row]))
-
-  return [...groups.values()]
-    .sort((a, b) => compare(a[0], b[0]))
-    .flatMap((group): ByPolicyTableRow[] => [
-      { kind: 'group', id: `group:${getKey(group[0])}`, grouping, first: group[0], count: group.length },
-      ...group.map((row): ByPolicyTableRow => ({ kind: 'policy', row })),
-    ])
+  // The case groups follow the lifecycle, not urgency.
+  if (grouping === 'case') return [...groups.values()].sort((a, b) => compare(a[0], b[0]))
+  // Rows arrive by urgency, so a group's first row is its most urgent: groups needing action come first.
+  return [...groups.values()].sort((a, b) => getActionRank(a[0]) - getActionRank(b[0]) || compare(a[0], b[0]))
 }
 
-/** A muted band that doesn't take the rows' hover, pointer or divider: it isn't clickable. */
-const GROUP_ROW_CLASS =
-  'cursor-default! bg-none! [&>td]:bg-muted/60! [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg'
+const getGroupId = (grouping: Exclude<Grouping, 'urgency'>, row: PolicyRow): string =>
+  `group:${GROUPINGS[grouping].getKey(row)}`
 
-/** The group's value as its column shows it: the account with its network, the chain logo, or the status chip. */
-const GroupValue = ({ grouping, row }: { grouping: Grouping; row: PolicyRow }): ReactElement => {
+/** Rows keep their urgency order inside each band; a collapsed band hides its rows. */
+const toTableRows = (rows: PolicyRow[], grouping: Grouping, collapsed: string[]): ByPolicyTableRow[] => {
+  if (grouping === 'urgency') return rows.map((row): ByPolicyTableRow => ({ kind: 'policy', row }))
+
+  return getGroups(rows, grouping).flatMap((group): ByPolicyTableRow[] => {
+    const id = getGroupId(grouping, group[0])
+    const isCollapsed = collapsed.includes(id)
+    return [
+      { kind: 'group', id, grouping, first: group[0], count: group.length, collapsed: isCollapsed },
+      ...(isCollapsed ? [] : group.map((row): ByPolicyTableRow => ({ kind: 'policy', row }))),
+    ]
+  })
+}
+
+/** The queue's band: a light fill that darkens on hover, the whole row toggling the group. */
+const GROUP_ROW_CLASS =
+  'group/band cursor-pointer bg-none! [&>td]:bg-foreground/[0.03]! hover:[&>td]:bg-foreground/[0.06]! [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg'
+
+/** The band's title, as its column shows it: the account with its network, the chain logo, or the policy type. */
+const GroupValue = ({ group: { grouping, first: row } }: { group: GroupHeadingRow }): ReactElement => {
   const networkName = CHAIN_NAMES[row.account.chainId] ?? row.account.chainId
 
   switch (grouping) {
@@ -1109,94 +1563,94 @@ const GroupValue = ({ grouping, row }: { grouping: Grouping; row: PolicyRow }): 
           <Typography variant="paragraph-small-medium">{networkName}</Typography>
         </div>
       )
-    case 'status':
-      return <RowStatusChip status={toStatusOption(row.status)} />
+    case 'case':
+      return <Typography variant="paragraph-small-medium">{row.caseGroup}</Typography>
+    case 'type': {
+      const { Icon } = POLICY_TYPES[row.type]
+      return (
+        <div className="flex items-center gap-2">
+          <Icon className="size-4 text-muted-foreground" aria-hidden />
+          <Typography variant="paragraph-small-medium">{POLICY_ROW_LABELS[row.type]}</Typography>
+        </div>
+      )
+    }
   }
 }
 
+/** The queue's QueueGroupRow: chevron, title and count in the first cell. */
 const GroupRowCell = ({ columnId, group }: { columnId: string; group: GroupHeadingRow }): ReactElement | null => {
-  if (columnId === 'policy') return <GroupValue grouping={group.grouping} row={group.first} />
-  if (columnId !== 'status') return null
+  if (columnId !== 'policy') return null
 
   return (
-    <div className="flex justify-end" data-m2-new="New · Group band row" data-m2-new-compact="">
-      <Typography variant="paragraph-small" color="muted">
-        {group.count} {group.count === 1 ? 'policy' : 'policies'}
-      </Typography>
+    <div className="flex min-h-10 items-center gap-3" data-m2-new="Queue copy · Group band" data-m2-new-compact="">
+      <ChevronDown
+        className={`size-4 shrink-0 text-muted-foreground transition-transform ${group.collapsed ? '-rotate-90' : ''}`}
+        aria-hidden
+      />
+      <GroupValue group={group} />
+      <span className="text-sm text-muted-foreground tabular-nums">{group.count}</span>
     </div>
   )
 }
 
-/** The header label with its group-by toggle beside it, positioned so the label keeps the column's alignment. */
-const GroupByHeader = ({
-  label,
-  name,
-  side,
-  isActive,
-  onToggle,
-}: {
-  label: ReactNode
-  name: string
-  side: 'before' | 'after'
-  isActive: boolean
+/** The column whose values name the groups: collapse-all sits next to its title. */
+const GROUPED_COLUMN: Record<Exclude<Grouping, 'urgency'>, string> = {
+  type: 'policy',
+  account: 'appliesTo',
+  network: 'network',
+  case: 'policy',
+}
+
+const getByPolicyColumns = (collapseAll?: {
+  columnId: string
+  allCollapsed: boolean
+  count: number
   onToggle: () => void
-}): ReactElement => (
-  <span className="relative inline-flex items-center" data-m2-new="New · Group by button" data-m2-new-compact="">
-    {label}
-    <span
-      className={`absolute top-1/2 inline-flex -translate-y-1/2 ${side === 'before' ? 'right-full mr-1' : 'left-full ml-1'}`}
-    >
-      <Button
-        variant={isActive ? 'surface' : 'ghost-muted'}
-        size="icon-xs"
-        aria-pressed={isActive}
-        aria-label={`Group by ${name}`}
-        onClick={onToggle}
-      >
-        <ListTree aria-hidden />
-      </Button>
-    </span>
-  </span>
-)
-
-const getByPolicyColumns = (
-  grouping: Grouping | null,
-  onToggle: (grouping: Grouping) => void,
-): DataTableColumn<ByPolicyTableRow>[] =>
+}): DataTableColumn<ByPolicyTableRow>[] =>
   policyRowColumns.map(
-    ({ id, header, cell, width, sticky, minWidth, priority, align }): DataTableColumn<ByPolicyTableRow> => {
-      const columnGrouping = GROUPING_ORDER.find((option) => GROUPINGS[option].columnId === id)
-
-      return {
-        id,
-        width,
-        sticky,
-        minWidth,
-        priority,
-        align,
-        header: columnGrouping ? (
-          <GroupByHeader
-            label={header}
-            name={GROUPINGS[columnGrouping].name}
-            side={align === 'end' ? 'before' : 'after'}
-            isActive={grouping === columnGrouping}
-            onToggle={() => onToggle(columnGrouping)}
-          />
+    ({ id, header, cell, width, sticky, minWidth, priority, align }): DataTableColumn<ByPolicyTableRow> => ({
+      id,
+      width,
+      sticky,
+      minWidth,
+      priority,
+      align,
+      header:
+        collapseAll && id === collapseAll.columnId ? (
+          <span className="inline-flex items-center gap-1">
+            {header}
+            <CollapseAllButton {...collapseAll} />
+          </span>
         ) : (
           header
         ),
-        cell: (row, context) =>
-          row.kind === 'policy' ? cell(row.row, context) : <GroupRowCell columnId={id} group={row} />,
-      }
-    },
+      cell: (row, context) =>
+        row.kind === 'policy' ? cell(row.row, context) : <GroupRowCell columnId={id} group={row} />,
+    }),
   )
+
+/** What a row asks of the viewer, the Status filter's options, in the table's order. */
+type ActionBucket = 'ready' | 'signatures' | 'attention' | 'expired' | 'waiting' | 'active'
+
+const ACTION_BUCKETS: ActionBucket[] = ['ready', 'signatures', 'attention', 'expired', 'waiting', 'active']
+
+const BUCKET_LABELS: Record<ActionBucket, { menu: string; chip: string; dot: string }> = {
+  ready: { menu: 'Ready', chip: 'Ready to execute or apply', dot: 'bg-[var(--color-info-main)]' },
+  signatures: { menu: 'Needs signatures', chip: 'Needs signatures', dot: 'bg-badge-dot-warning' },
+  attention: { menu: 'Blocked or failed', chip: 'Blocked or failed', dot: 'bg-destructive' },
+  expired: { menu: 'Expired', chip: 'Expired', dot: 'bg-muted-foreground' },
+  waiting: { menu: 'In delay or processing', chip: 'In delay or processing', dot: 'bg-badge-dot-warning' },
+  active: { menu: 'Active', chip: 'Active', dot: 'bg-badge-dot-success' },
+}
+
+const getActionBucket = (row: PolicyRow): ActionBucket => ACTION_BUCKETS[getActionRank(row)]
 
 export type PolicyFilters = {
   query: string
   accounts: string[]
   networks: string[]
   types: M2PolicyType[]
-  statuses: RowStatus[]
+  statuses: ActionBucket[]
 }
 
 const NO_POLICY_FILTERS: PolicyFilters = { query: '', accounts: [], networks: [], types: [], statuses: [] }
@@ -1205,7 +1659,7 @@ const matchesPolicyFilters = (filters: PolicyFilters, row: PolicyRow): boolean =
   (filters.accounts.length === 0 || filters.accounts.includes(row.account.address)) &&
   (filters.networks.length === 0 || filters.networks.includes(row.account.chainId)) &&
   (filters.types.length === 0 || filters.types.includes(row.type)) &&
-  (filters.statuses.length === 0 || filters.statuses.includes(toStatusOption(row.status))) &&
+  (filters.statuses.length === 0 || filters.statuses.includes(getActionBucket(row))) &&
   matchesQuery(filters.query, [
     POLICY_ROW_LABELS[row.type],
     row.account.name,
@@ -1216,143 +1670,6 @@ const matchesPolicyFilters = (filters: PolicyFilters, row: PolicyRow): boolean =
 const unique = <T,>(values: T[]): T[] => [...new Set(values)]
 
 const NO_PILL_FILTERS: Omit<PolicyFilters, 'query'> = { accounts: [], networks: [], types: [], statuses: [] }
-
-type FilterGroup = {
-  label: string
-  options: FilterOption<string>[]
-  selected: string[]
-  onChange: (selected: string[]) => void
-}
-
-/** One filter in the popover: a collapsed row (name, selection count, chevron) that opens to its checkbox list. */
-const FilterSection = ({ label, options, selected, onChange }: FilterGroup): ReactElement => {
-  const [isOpen, setIsOpen] = useState(false)
-  const idPrefix = useId()
-  const Chevron = isOpen ? ChevronDown : ChevronRight
-
-  return (
-    // py-2: the hover fill stops 8px short of the divider lines, as it does of the popover's sides.
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="py-2">
-      {/* -mx-2 puts the hover fill 8px inside the popover's edges while the text stays on its 16px padding. */}
-      <CollapsibleTrigger className="group/filter -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center justify-between gap-2 rounded-md p-2 text-left transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none">
-        <Typography variant="paragraph-small-medium">
-          {selected.length > 0 ? `${label} · ${selected.length}` : label}
-        </Typography>
-        <Chevron
-          className="size-4 shrink-0 text-muted-foreground transition-colors group-hover/filter:text-foreground"
-          aria-hidden
-        />
-      </CollapsibleTrigger>
-
-      <CollapsibleContent>
-        <div className="flex flex-col gap-2 pt-2">
-          {options.map((option) => {
-            const id = `${idPrefix}-${option.value}`
-
-            return (
-              <Field key={option.value} orientation="horizontal">
-                <Checkbox
-                  id={id}
-                  checked={selected.includes(option.value)}
-                  onCheckedChange={() => onChange(toggle(selected, option.value))}
-                />
-                <FieldLabel htmlFor={id}>
-                  {option.icon}
-                  {option.label}
-                </FieldLabel>
-              </Field>
-            )
-          })}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
-  )
-}
-
-/** The Filters button next to search: a count when any are on; the popover applies each change at once. */
-const FiltersPopover = ({ groups, onClearAll }: { groups: FilterGroup[]; onClearAll: () => void }): ReactElement => {
-  const activeCount = groups.reduce((count, { selected }) => count + selected.length, 0)
-
-  return (
-    <Popover>
-      <PopoverTrigger render={<Button variant="outline" className="shrink-0" />}>
-        <ListFilter data-icon="inline-start" />
-        {activeCount > 0 ? `Filters · ${activeCount}` : 'Filters'}
-      </PopoverTrigger>
-
-      {/* pt-2.5 + the 32px header row = 16px above "Filters"; no bottom padding, the last row brings its own 8px. */}
-      <PopoverContent
-        align="end"
-        side="bottom"
-        sideOffset={4}
-        collisionAvoidance={{ side: 'none' }}
-        className="w-64 gap-2 pt-2.5 pb-0"
-        data-m2-new="New · Filters popover"
-      >
-        <div className="flex items-center justify-between gap-2">
-          <PopoverTitle>Filters</PopoverTitle>
-          <Button variant="ghost-muted" size="xs" disabled={activeCount === 0} onClick={onClearAll}>
-            Clear all
-          </Button>
-        </div>
-
-        <div className="flex flex-col divide-y divide-border">
-          {groups.map((group) => (
-            <FilterSection key={group.label} {...group} />
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-/** One removable chip per active filter value, then Clear all; nothing at all when no filter is on. */
-const ActiveFilterChips = ({
-  groups,
-  onClearAll,
-}: {
-  groups: FilterGroup[]
-  onClearAll: () => void
-}): ReactElement | null => {
-  const chips = groups.flatMap(({ options, selected, onChange }) =>
-    options
-      .filter(({ value }) => selected.includes(value))
-      .map(({ value, label }) => ({
-        key: value,
-        label,
-        onRemove: () => onChange(selected.filter((item) => item !== value)),
-      })),
-  )
-
-  if (chips.length === 0) return null
-
-  return (
-    <div
-      className="flex flex-wrap items-center gap-2"
-      aria-label="Active filters"
-      data-m2-new="New · Active filter chips"
-    >
-      {chips.map(({ key, label, onRemove }) => (
-        <Badge
-          key={key}
-          variant="card"
-          size="chip"
-          render={<button type="button" />}
-          onClick={onRemove}
-          aria-label={`Remove ${label} filter`}
-          className="cursor-pointer"
-        >
-          {label}
-          <X className="size-3" aria-hidden />
-        </Badge>
-      ))}
-
-      <Button variant="ghost-muted" size="xs" onClick={onClearAll}>
-        Clear all
-      </Button>
-    </div>
-  )
-}
 
 /** M1's policies page heading (Policies/index.tsx): title, then the intro line with its help link. */
 const ByPolicyHeading = (): ReactElement => (
@@ -1378,96 +1695,147 @@ export type PoliciesByPolicyPageProps = Pick<
   onSelectPolicy?: (row: PolicyRow) => void
   /** Search and filters to start from, e.g. for the All states canvas. */
   initialFilters?: Partial<PolicyFilters>
+  /** See all side panels: one row per side panel case instead of the prototype's own rows. */
+  showAllPanels?: boolean
 }
 
-/** M1's policy list (PoliciesList + PoliciesTable), one row per policy, with the M2 types and the account view's filter pills. */
+/** M1's policy list, one row per policy, with the Workspace queue's toolbar, grouping and collapsible bands. */
 export const PoliciesByPolicyPage = ({
   payments = DEFAULT_PAYMENTS,
   onAddPolicy,
   onSelectAccount,
   onSelectPolicy,
   initialFilters,
+  showAllPanels = false,
 }: PoliciesByPolicyPageProps): ReactElement => {
   const [filters, setFilters] = useState<PolicyFilters>({ ...NO_POLICY_FILTERS, ...initialFilters })
-  const allRows = useMemo(() => getPolicyRows(payments), [payments])
+  const [grouping, setGrouping] = useState<Grouping>(showAllPanels ? 'case' : 'urgency')
+  const [collapsed, setCollapsed] = useState<string[]>([])
+  const allRows = useMemo(
+    () => (showAllPanels ? getAllPanelRows() : sortByAction(getPolicyRows(payments))),
+    [payments, showAllPanels],
+  )
   const rows = useMemo(() => allRows.filter((row) => matchesPolicyFilters(filters, row)), [allRows, filters])
-  const [grouping, setGrouping] = useState<Grouping | null>(null)
-  const tableRows = useMemo(() => toTableRows(rows, grouping), [rows, grouping])
-  const columns = getByPolicyColumns(grouping, (next) => setGrouping((current) => (current === next ? null : next)))
+  const tableRows = useMemo(() => toTableRows(rows, grouping, collapsed), [rows, grouping, collapsed])
+  const groupIds =
+    grouping === 'urgency' ? [] : getGroups(rows, grouping).map((group) => getGroupId(grouping, group[0]))
+  const allCollapsed = groupIds.length > 0 && groupIds.every((id) => collapsed.includes(id))
+  const columns = getByPolicyColumns(
+    groupIds.length > 0 && grouping !== 'urgency'
+      ? {
+          columnId: GROUPED_COLUMN[grouping],
+          allCollapsed,
+          count: groupIds.length,
+          onToggle: () => setCollapsed(allCollapsed ? [] : groupIds),
+        }
+      : undefined,
+  )
 
-  const accountOptions = unique(allRows.map(({ account }) => account.address)).map((address) => ({
-    value: address,
-    label: allRows.find(({ account }) => account.address === address)?.account.name ?? address,
-  }))
-  const networkOptions = unique(allRows.map(({ account }) => account.chainId)).map((chainId) => ({
-    value: chainId,
-    label: CHAIN_NAMES[chainId] ?? chainId,
-    icon: <ChainIndicator chainId={chainId} onlyLogo imageSize={16} />,
-  }))
-  const statusOptions = unique(allRows.map(({ status }) => toStatusOption(status))).map((status) => ({
-    value: status,
-    label: ROW_STATUS_LABELS[status],
-  }))
+  // Counts follow the rows the other filters leave, as the queue's do.
+  const countFor = (key: keyof Omit<PolicyFilters, 'query'>, matches: (row: PolicyRow) => boolean): number =>
+    allRows.filter((row) => matchesPolicyFilters({ ...filters, [key]: [] }, row) && matches(row)).length
+  const toggleFilter =
+    <K extends keyof Omit<PolicyFilters, 'query'>>(key: K) =>
+    (value: string) =>
+      setFilters((current) => ({ ...current, [key]: toggle(current[key] as string[], value) }))
   const selectRow = (row: PolicyRow) => (onSelectPolicy ? onSelectPolicy(row) : onSelectAccount?.(row.account))
-  // Clears the filters only; the search stays.
-  const clearFilters = () => setFilters({ ...filters, ...NO_PILL_FILTERS })
 
-  const filterGroups: FilterGroup[] = [
+  const sections: FilterSection[] = [
     {
-      label: 'Safe account',
-      options: accountOptions,
-      selected: filters.accounts,
-      onChange: (accounts) => setFilters({ ...filters, accounts }),
-    },
-    {
-      label: 'Network',
-      options: networkOptions,
-      selected: filters.networks,
-      onChange: (networks) => setFilters({ ...filters, networks }),
-    },
-    {
-      label: 'Policy type',
-      options: POLICY_ROW_TYPE_ORDER.map((type) => ({ value: type, label: POLICY_ROW_LABELS[type] })),
-      selected: filters.types,
-      onChange: (types) =>
-        setFilters({ ...filters, types: POLICY_ROW_TYPE_ORDER.filter((type) => types.includes(type)) }),
-    },
-    {
+      key: 'statuses',
       label: 'Status',
-      options: statusOptions,
+      chipLabels: Object.fromEntries(ACTION_BUCKETS.map((bucket) => [bucket, BUCKET_LABELS[bucket].chip])),
+      options: ACTION_BUCKETS.map((bucket) => ({
+        value: bucket,
+        label: BUCKET_LABELS[bucket].menu,
+        icon: (
+          <span className="flex size-4 shrink-0 items-center justify-center" aria-hidden>
+            <span className={`size-2 rounded-full ${BUCKET_LABELS[bucket].dot}`} />
+          </span>
+        ),
+        count: countFor('statuses', (row) => getActionBucket(row) === bucket),
+      })),
+      separatorAfter: ['attention'],
       selected: filters.statuses,
-      onChange: (statuses) =>
-        setFilters({
-          ...filters,
-          statuses: statusOptions.map(({ value }) => value).filter((value) => statuses.includes(value)),
-        }),
+      onToggle: toggleFilter('statuses'),
+    },
+    {
+      key: 'types',
+      label: 'Policy type',
+      options: POLICY_ROW_TYPE_ORDER.map((type) => {
+        const { Icon } = POLICY_TYPES[type]
+        return {
+          value: type,
+          label: POLICY_ROW_LABELS[type],
+          icon: <Icon className="size-4 text-muted-foreground" aria-hidden />,
+          count: countFor('types', (row) => row.type === type),
+        }
+      }),
+      selected: filters.types,
+      onToggle: toggleFilter('types'),
+    },
+    {
+      key: 'accounts',
+      label: 'Safe account',
+      options: unique(allRows.map(({ account }) => account.address))
+        .map((address) => ({
+          value: address,
+          label: allRows.find(({ account }) => account.address === address)?.account.name ?? address,
+          icon: <Identicon address={address} size={16} />,
+          count: countFor('accounts', (row) => row.account.address === address),
+        }))
+        .sort((a, b) => b.count - a.count),
+      note: 'Sorted by number of policies',
+      selected: filters.accounts,
+      onToggle: toggleFilter('accounts'),
+    },
+    {
+      key: 'networks',
+      label: 'Network',
+      options: unique(allRows.map(({ account }) => account.chainId)).map((chainId) => ({
+        value: chainId,
+        label: CHAIN_NAMES[chainId] ?? chainId,
+        icon: <ChainIndicator chainId={chainId} onlyLogo imageSize={16} />,
+        count: countFor('networks', (row) => row.account.chainId === chainId),
+      })),
+      selected: filters.networks,
+      onToggle: toggleFilter('networks'),
     },
   ]
 
   return (
     <PolicyPage header={<ByPolicyHeading />}>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <SearchInput
-            variant="surface"
-            value={filters.query}
-            onChange={(event) => setFilters({ ...filters, query: event.target.value })}
-            onClear={() => setFilters({ ...filters, query: '' })}
-            placeholder="Search"
-            aria-label="Search policies"
-            autoComplete="off"
-            className="flex-1"
-          />
-
-          <FiltersPopover groups={filterGroups} onClearAll={clearFilters} />
-
-          <Button onClick={onAddPolicy} className="shrink-0">
-            <Plus className="size-4 text-green-500" aria-hidden />
-            New
-          </Button>
-        </div>
-
-        <ActiveFilterChips groups={filterGroups} onClearAll={clearFilters} />
+        <PolicyToolbar
+          search={
+            <SearchInput
+              variant="surface"
+              value={filters.query}
+              onChange={(event) => setFilters({ ...filters, query: event.target.value })}
+              onClear={() => setFilters({ ...filters, query: '' })}
+              placeholder="Search"
+              aria-label="Search policies"
+              autoComplete="off"
+              className="min-w-48 flex-1"
+            />
+          }
+          groupBy={{
+            options: showAllPanels ? [...GROUP_BY_OPTIONS, CASE_GROUP_OPTION] : GROUP_BY_OPTIONS,
+            value: grouping,
+            onChange: (next) => {
+              setGrouping(next)
+              setCollapsed([])
+            },
+          }}
+          sections={sections}
+          onClear={() => setFilters({ ...filters, ...NO_PILL_FILTERS })}
+          action={
+            <Button onClick={onAddPolicy} className="shrink-0">
+              <Plus className="size-4 text-green-500" aria-hidden />
+              New
+            </Button>
+          }
+        />
 
         {/* A 4px bottom border in place of the card's padding, so the last row's hover ends 4px inside, like the sides. */}
         <TableCard className="pb-0 [&_tbody_tr:last-child_td]:border-b-4">
@@ -1481,9 +1849,10 @@ export const PoliciesByPolicyPage = ({
               getRowClassName={(row) => (row.kind === 'group' ? GROUP_ROW_CLASS : '')}
               onRowClick={(row) => {
                 if (row.kind === 'policy') selectRow(row.row)
+                else setCollapsed((current) => toggle(current, row.id))
               }}
               // Grouped, everything sits on one page so no group is split across pages.
-              pageSize={grouping ? tableRows.length : undefined}
+              pageSize={grouping === 'urgency' ? undefined : tableRows.length}
             />
           )}
         </TableCard>

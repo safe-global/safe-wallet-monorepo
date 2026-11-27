@@ -12,7 +12,7 @@ import {
   type RefObject,
 } from 'react'
 import type { Decorator, Meta, StoryObj } from '@storybook/react'
-import { Check, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Check, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import Notifications from '@/components/common/Notifications'
 import SafeLogo from '@/components/common/SafeLogo'
@@ -21,10 +21,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { Label } from '@safe-global/views/components/ui/label'
@@ -46,6 +43,8 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import { AccountPanel, type AccountDialog, type AccountState } from './m2AccountPanel'
 import {
+  getAllPanelRows,
+  getExampleRows,
   getPolicyRows,
   PoliciesByPolicyPage,
   PoliciesOverviewPage,
@@ -54,6 +53,7 @@ import {
   type PolicyFilters,
   type PolicyRow,
   type SpendingLimitState,
+  type SpecStage,
 } from './m2OverviewPage'
 import { AllowlistIntroDialog } from './m2AllowlistIntro'
 import { PolicyDrawer, type AllowlistPanelScenario } from './m2PolicyDrawers'
@@ -73,15 +73,13 @@ import {
   type SignerId,
 } from './m2Prototype'
 import {
-  ACCOUNT_SETTING_GROUPS,
   CONFIRM_STEP,
+  ALL_HELD_TOKEN_SYMBOLS,
   DEFAULT_CHOICES,
   EXECUTE_STEP,
   findM2Account,
   getActiveDetails,
-  PERMISSIONS_STEP,
   POPULAR_TOKENS,
-  SETTINGS_STEP,
   REVIEW_STEP,
   SETUP_PREVIEW_HANDLERS,
   SetUpPoliciesFlow,
@@ -96,11 +94,33 @@ import {
 const ALLOWLIST_OPTION: AddPolicyOption = {
   id: 'recovery',
   title: 'Allowlist',
-  description: 'Only addresses on your list can receive funds. Everything else is blocked.',
+  description: 'Transfer only tokens you pick to recipients you trust.',
   Icon: ShieldCheck,
 }
 
-const ADD_POLICY_OPTIONS_WITH_ALLOWLIST = [ALLOWLIST_OPTION, ...ADD_POLICY_OPTIONS]
+const SUGGESTION_OPTION = ADD_POLICY_OPTIONS.find(({ id }) => id === 'suggestion')
+
+const ADD_POLICY_OPTIONS_WITH_ALLOWLIST = [
+  ALLOWLIST_OPTION,
+  ...ADD_POLICY_OPTIONS.filter(({ id }) => id !== 'suggestion'),
+]
+
+/** The protected Safe accounts prototype's footer: a quiet line, not a tile, since it's feedback, not a policy. */
+const SuggestPolicyFooter = ({ onSelect }: { onSelect: (id: AddPolicyOption['id']) => void }): ReactElement | null =>
+  SUGGESTION_OPTION ? (
+    <div
+      className="flex items-center justify-between gap-3 border-t border-border pt-4"
+      data-m2-new="Protected Safe accounts prototype · Suggest a policy"
+    >
+      <Typography variant="paragraph-small" color="muted">
+        Missing a policy you need?
+      </Typography>
+      <Button variant="ghost-muted" size="sm" onClick={() => onSelect(SUGGESTION_OPTION.id)}>
+        Suggest one
+        <ArrowRight data-icon="inline-end" />
+      </Button>
+    </div>
+  ) : null
 
 /** M1's AddPolicyDialog markup, kept in one column: M1's goes two-column past three options. */
 const AddPolicyChooser = ({
@@ -124,6 +144,9 @@ const AddPolicyChooser = ({
           <AddPolicyOptionButton key={option.id} {...option} onClick={() => onSelect(option.id)} />
         ))}
       </div>
+      <div className="px-4 pb-4">
+        <SuggestPolicyFooter onSelect={onSelect} />
+      </div>
     </DialogContent>
   </Dialog>
 )
@@ -134,6 +157,8 @@ const TOGGLE_KEY = '.'
 type Screen = 'overview' | 'wizard'
 
 type PrototypeState = {
+  /** See all side panels: the table lists one row per side panel case. */
+  showAllPanels: boolean
   screen: Screen
   /** The account whose panel is open over the overview. */
   panelKey: string | null
@@ -156,6 +181,8 @@ type PrototypeState = {
   wizardStep: number
   choices: SetupChoices
   preflight: Preflight
+  /** Opens the account dropdown on Create, or shows its empty state for a wallet that can't set a policy. */
+  accountPicker?: 'open' | 'no-signer' | 'no-wallet'
   /** Edit changes a live allowlist from its side panel; every other way into the wizard creates one. */
   wizardMode: WizardMode
   /** Edit only: the allowlist before the edit, which Create compares against and Review marks changes from. */
@@ -191,6 +218,7 @@ const INITIAL_STATE: PrototypeState = {
   editRestore: null,
   editFromCreate: false,
   justActivated: false,
+  showAllPanels: false,
   ...WIZARD_DEFAULTS,
 }
 
@@ -274,10 +302,8 @@ const MANY_TOKENS_CHOICES: SetupChoices = {
 }
 
 // A new setup starts with no recipients; later steps keep the prefilled ones so they have something to show.
-const FRESH_CHOICES: SetupChoices = { ...DEFAULT_CHOICES, recipients: [] }
+const FRESH_CHOICES: SetupChoices = { ...DEFAULT_CHOICES, recipients: [], excludedTokens: ALL_HELD_TOKEN_SYMBOLS }
 const CONFLICT_ONE: SetupChoices = { ...DEFAULT_CHOICES, excludedTokens: ['USDC'] }
-const CONFLICT_TWO: SetupChoices = { ...DEFAULT_CHOICES, excludedTokens: ['USDC', 'ETH'] }
-const CONFLICT_ONE_EXEMPT: SetupChoices = { ...CONFLICT_ONE, applyToSpendingLimits: false }
 const BLOCKED_SPENDING_LIMIT_TOKENS = ['USDC']
 
 const PENDING_SETUP: Partial<PrototypeState> = { account: 'waiting', ...SETUP_STARTED }
@@ -332,6 +358,9 @@ const EDIT_TWO_CHANGES: SetupChoices = {
 }
 
 /** The new allowlist's side panel in one of its states; Nadia created and signed the setup, Tom hasn't yet. */
+/** The Edit stages whose buttons change with the viewer; removal reads the same. */
+const VIEWER_STAGES: SpecStage[] = ['pending', 'in delay', 'ready to apply', 'expired']
+
 const allowlistPanel = (
   label: string,
   setup: Partial<PrototypeState>,
@@ -354,14 +383,28 @@ const OTHER_ACCOUNTS: { account: M2Account; state: AccountState }[] = [
   { account: OPERATIONS, state: 'not-set-up' },
 ]
 
+/** The bar's jumps: the prototype's few example policies, or one row per side panel case. */
+const EXAMPLE_POLICIES: Jump = {
+  label: 'Example policies',
+  view: 'by-policy',
+  state: { screen: 'overview', panelKey: null, showAllPanels: false },
+}
+
+const SEE_ALL_PANELS: Jump = {
+  label: 'See all side panels',
+  view: 'by-policy',
+  state: { screen: 'overview', panelKey: null, showAllPanels: true },
+}
+
+const BAR_JUMPS = [EXAMPLE_POLICIES, SEE_ALL_PANELS]
+
+// Still the All states canvas's and the spec review's frames; the bar itself only offers SEE_ALL_PANELS.
 const JUMP_GROUPS: { heading: string; jumps: Jump[] }[] = [
   {
     heading: 'Create allowlist',
     jumps: [
       { label: 'Create', state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES } },
       { label: 'Create · 20 tokens, 20 recipients', state: { ...WIZARD, wizardStep: 0, choices: MANY_TOKENS_CHOICES } },
-      { label: 'Policies', state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } },
-      { label: 'Safe account settings', state: { ...WIZARD, wizardStep: SETTINGS_STEP } },
       { label: 'Review', state: { ...WIZARD, wizardStep: REVIEW_STEP } },
       { label: 'Confirm', state: { ...WIZARD, wizardStep: CONFIRM_STEP } },
       { label: 'Execute', state: { ...WIZARD, wizardStep: EXECUTE_STEP, account: 'ready', ...FULLY_SIGNED } },
@@ -438,6 +481,7 @@ type CanvasFrame = {
 }
 
 export const CANVAS_PARAM = 'm2state'
+const JUMP_FRAME_PREFIX = 'jump:'
 
 const PENDING_TABLE: Partial<PrototypeState> = { ...POLICY_TABLE, account: 'waiting', ...SETUP_STARTED }
 const BY_POLICY = 'by-policy' as const
@@ -550,12 +594,37 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
     ],
   },
   {
+    title: 'Side panels · spec 5.7 states',
+    frames: getExampleRows().map(({ id, example, status }) => ({
+      id: `drawer-${id}`,
+      label: example?.tag.label ?? (status === 'activating' ? 'Processing' : 'Setup ready to execute'),
+      jump: { view: BY_POLICY, state: { ...PENDING_TABLE, policyId: id } },
+    })),
+  },
+  {
+    title: 'Side panels · who is looking (spec 5.6.8)',
+    frames: getExampleRows()
+      .filter(({ example }) => example?.change === 'Edit' && VIEWER_STAGES.includes(example.stage))
+      .flatMap(({ id, example }) =>
+        (['non-signer', 'disconnected'] as const).map((viewer) => ({
+          id: `drawer-${id}-${viewer}`,
+          label: `${example?.tag.label} · ${viewer === 'non-signer' ? 'not a signer' : 'no wallet'}`,
+          jump: { view: BY_POLICY, state: { ...PENDING_TABLE, policyId: id, panelScenario: { viewer } } },
+        })),
+      ),
+  },
+  {
     title: 'Add policy dialog',
     frames: [
       {
         id: 'add-policy',
         label: 'Add policy',
         jump: { view: BY_POLICY, state: { ...POLICY_TABLE, addPolicyOpen: true } },
+      },
+      {
+        id: 'allowlist-intro',
+        label: 'Allowlist intro',
+        jump: { view: BY_POLICY, state: { ...POLICY_TABLE, introOpen: true } },
       },
     ],
   },
@@ -566,6 +635,39 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
         id: 'create-no-account',
         label: 'No account',
         jump: { state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: null } },
+      },
+      {
+        id: 'create-account-dropdown',
+        label: 'Account dropdown: unsupported network and nested Safe',
+        jump: {
+          state: { ...WIZARD, wizardStep: 0, choices: FRESH_CHOICES, setupAccountKey: null, accountPicker: 'open' },
+        },
+      },
+      {
+        id: 'create-no-eligible-account',
+        label: 'No Safe account where the wallet is a signer',
+        jump: {
+          state: {
+            ...WIZARD,
+            wizardStep: 0,
+            choices: FRESH_CHOICES,
+            setupAccountKey: null,
+            accountPicker: 'no-signer',
+          },
+        },
+      },
+      {
+        id: 'create-no-wallet',
+        label: 'No wallet connected',
+        jump: {
+          state: {
+            ...WIZARD,
+            wizardStep: 0,
+            choices: FRESH_CHOICES,
+            setupAccountKey: null,
+            accountPicker: 'no-wallet',
+          },
+        },
       },
       {
         id: 'create-payments',
@@ -605,47 +707,6 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
     ],
   },
   {
-    title: 'Policies',
-    frames: [
-      { id: 'permissions', label: 'Payments', jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP } } },
-      {
-        id: 'permissions-conflict-one',
-        label: 'Policies · Spending limit conflict',
-        jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_ONE } },
-      },
-      {
-        id: 'permissions-conflict-two',
-        label: 'Policies · Spending limit conflict (2)',
-        jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_TWO } },
-      },
-      {
-        id: 'permissions-spending-limits-exempt',
-        label: 'Policies · Spending limits exempt',
-        jump: { state: { ...WIZARD, wizardStep: PERMISSIONS_STEP, choices: CONFLICT_ONE_EXEMPT } },
-      },
-    ],
-  },
-  {
-    title: 'Safe account settings',
-    frames: [
-      { id: 'settings', label: 'All allowed', jump: { state: { ...WIZARD, wizardStep: SETTINGS_STEP } } },
-      {
-        id: 'settings-none',
-        label: 'None allowed',
-        jump: {
-          state: {
-            ...WIZARD,
-            wizardStep: SETTINGS_STEP,
-            choices: {
-              ...DEFAULT_CHOICES,
-              blockedSettings: ACCOUNT_SETTING_GROUPS.flatMap(({ settings }) => settings.map(({ id }) => id)),
-            },
-          },
-        },
-      },
-    ],
-  },
-  {
     title: 'Review, Confirm, Execute',
     frames: [
       { id: 'review', label: 'Review', jump: { state: { ...WIZARD, wizardStep: REVIEW_STEP } } },
@@ -678,6 +739,12 @@ export const CANVAS_ROWS: { title: string; frames: CanvasFrame[] }[] = [
 const getCanvasFrame = (): CanvasFrame | undefined => {
   if (typeof window === 'undefined') return undefined
   const id = new URLSearchParams(window.location.search).get(CANVAS_PARAM)
+  // `jump:<label>` opens any Jump to entry as a frame, for the spec review stories.
+  if (id?.startsWith(JUMP_FRAME_PREFIX)) {
+    const label = id.slice(JUMP_FRAME_PREFIX.length)
+    const jump = JUMP_GROUPS.flatMap(({ jumps }) => jumps).find((entry) => entry.label === label)
+    return jump && { id, label, jump }
+  }
   return CANVAS_ROWS.flatMap(({ frames }) => frames).find((frame) => frame.id === id)
 }
 
@@ -689,8 +756,6 @@ const isMarkNewRequested = (): boolean =>
   typeof window !== 'undefined' && new URLSearchParams(window.location.search).get(MARK_NEW_PARAM) === '1'
 
 type PrototypeHandlers = { jump: (jump: Jump) => void; reset: () => void }
-
-const getJumpKey = (heading: string, { label }: Jump): string => `${heading} · ${label}`
 
 // By account is only reachable as an All states canvas frame; the prototype itself always shows By policy.
 type OverviewView = 'by-account' | 'by-policy'
@@ -738,30 +803,17 @@ const PrototypeBar = ({ onCollapse }: { onCollapse: () => void }): ReactElement 
           <ChevronDown data-icon="inline-end" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
-          {JUMP_GROUPS.map(({ heading, jumps }, index) => (
-            <Fragment key={heading}>
-              {index > 0 && <DropdownMenuSeparator />}
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>{heading}</DropdownMenuLabel>
-                {jumps.map((jump) => {
-                  const key = getJumpKey(heading, jump)
-                  const isCurrent = key === currentJump
-
-                  return (
-                    <DropdownMenuItem
-                      key={jump.label}
-                      onClick={() => {
-                        handlers.current?.jump(jump)
-                        setCurrentJump(key)
-                      }}
-                    >
-                      {jump.label}
-                      {isCurrent && <Check className="ml-auto" aria-label="Showing" />}
-                    </DropdownMenuItem>
-                  )
-                })}
-              </DropdownMenuGroup>
-            </Fragment>
+          {BAR_JUMPS.map((jump) => (
+            <DropdownMenuItem
+              key={jump.label}
+              onClick={() => {
+                handlers.current?.jump(jump)
+                setCurrentJump(jump.label)
+              }}
+            >
+              {jump.label}
+              {currentJump === jump.label && <Check className="ml-auto" aria-label="Showing" />}
+            </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -995,6 +1047,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
           editRestore: null,
           editFromCreate: false,
           justActivated: false,
+          showAllPanels: false,
           ...WIZARD_DEFAULTS,
           ...patch,
         }))
@@ -1147,7 +1200,10 @@ const GuardSetupFlowPrototype = (): ReactElement => {
     update({ screen: 'wizard', panelKey: null, policyId: null, panelScenario: null, addPolicyOpen: false, wizardStep })
   const openPolicy = (row: PolicyRow) =>
     update({ policyId: row.id, panelKey: null, panelScenario: null, dialog: undefined })
-  const openRow = getPolicyRows(payments).find(({ id }) => id === state.policyId)
+  // The table's spec 5.7 example rows open their side panel too.
+  const openRow = [...getPolicyRows(payments), ...getExampleRows(), ...getAllPanelRows()].find(
+    ({ id }) => id === state.policyId,
+  )
   const isSetupRow = openRow?.id === SETUP_ROW_ID
   // Only the allowlist panel's Edit is wired; M1's spending limit and proposer panels keep theirs unset.
   const openAllowlistRow = openRow?.type === 'allowlist' ? openRow : undefined
@@ -1181,9 +1237,10 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         />
       ) : (
         <PoliciesByPolicyPage
-          key={resetId}
+          key={`${resetId}-${state.showAllPanels}`}
           payments={payments}
           initialFilters={canvasFrame?.policyFilters}
+          showAllPanels={state.showAllPanels}
           onAddPolicy={() => update({ addPolicyOpen: true, policyId: null })}
           onSelectAccount={openPanel}
           onSelectPolicy={openPolicy}
@@ -1207,7 +1264,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
         open={state.screen === 'overview' && Boolean(openRow)}
         row={openRow}
         viewerHasSigned={isSetupRow && state.signedBy.includes(viewer)}
-        scenario={isSetupRow ? (state.panelScenario ?? undefined) : undefined}
+        scenario={isSetupRow || openRow?.example ? (state.panelScenario ?? undefined) : undefined}
         spendingLimitBlockedTokens={BLOCKED_SPENDING_LIMIT_TOKENS}
         paymentsExcludedTokens={state.choices.excludedTokens}
         paymentsAppliesToSpendingLimits={state.choices.applyToSpendingLimits}
@@ -1279,6 +1336,7 @@ const GuardSetupFlowPrototype = (): ReactElement => {
             choices={state.choices}
             onChoicesChange={(choices) => update({ choices })}
             preflight={state.preflight}
+            accountPicker={state.accountPicker}
             viewer={viewer}
             onSign={sign}
             onExecute={execute}
@@ -1311,7 +1369,7 @@ const withPrototypeFrame: Decorator = (Story, context) => (
 )
 
 const meta = {
-  title: 'Prototype/Policy engine/1 · Allowlist MVP: one allowlist per Safe account',
+  title: 'Prototype/Policy engine/Allowlist MVP · final design 2026/Full prototype',
   // A plain URL, since the title's · would end up in it.
   id: 'prototype-allowlist-mvp',
   component: GuardSetupFlowPrototype,

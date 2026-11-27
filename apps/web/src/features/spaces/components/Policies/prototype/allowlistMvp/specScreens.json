@@ -1,0 +1,541 @@
+{
+  "spec": "Recipient allowlist: requirements (24 Nov 2026)",
+  "columns": [
+    {
+      "number": 1,
+      "name": "Before setup",
+      "screens": [
+        {
+          "title": "Add policy: choose Allowlist",
+          "status": "designed",
+          "frame": "add-policy",
+          "image": "add-policy",
+          "ref": "4.1",
+          "spec": "Add policy lists Allowlist with “Only addresses on your list can receive funds. Everything else is blocked.”",
+          "notes": [
+            "Allowlist tile copy: “Transfer only tokens you pick to recipients you trust.” (from the protected Safe account banner)"
+          ]
+        },
+        {
+          "title": "Allowlist intro",
+          "status": "designed",
+          "frame": "allowlist-intro",
+          "image": "allowlist-intro",
+          "ref": "4.1, 4.5",
+          "spec": "After picking Allowlist, explain what it does and that everything else is blocked before setup starts.",
+          "notes": [
+            "From the edit-panels prototype (#9420): preview, three explainers, and “Every other action · Blocked” with an “I understand…” checkbox that unlocks Set up allowlist"
+          ]
+        },
+        {
+          "title": "Pick the Safe account",
+          "status": "designed",
+          "frame": "create-no-account",
+          "image": "create-no-account",
+          "ref": "4.2",
+          "spec": "The picker only lists Safe accounts where you're a signer or proposer.",
+          "notes": [
+            "Lists only Safe accounts where the wallet is a signer or proposer, as in production",
+            "Accounts that can't have an allowlist stay in the list, greyed out, with the reason on hover (1.7, 1.8)",
+            "When no account is available, the dropdown says why (1.9, 1.10)"
+          ]
+        },
+        {
+          "title": "Safe account needs an update",
+          "status": "designed",
+          "frame": "create-old-version",
+          "image": "create-old-version",
+          "ref": "3.1",
+          "spec": "Older than 1.5.0: setup stops and offers the update.",
+          "notes": []
+        },
+        {
+          "title": "Another guard is installed",
+          "status": "designed",
+          "frame": "create-other-guard",
+          "image": "create-other-guard",
+          "ref": "Q6",
+          "spec": "Setup stops when an unknown guard is already installed.",
+          "notes": ["Q6 is still open: what to do with an existing guard such as CoW Swap's"]
+        },
+        {
+          "title": "Account already has an allowlist",
+          "status": "designed",
+          "frame": "create-existing-allowlist",
+          "image": "create-existing-allowlist",
+          "ref": "Q17",
+          "spec": "One allowlist per Safe account, so setup sends you to edit the existing one.",
+          "notes": []
+        },
+        {
+          "title": "Network not supported",
+          "status": "designed",
+          "ref": "3.3",
+          "spec": "Only Ethereum, Polygon and Sepolia. Other networks don't offer setup and say why.",
+          "notes": [
+            "Arbitrum and Base rows are greyed out. Hover one for: “Allowlists are only available on Ethereum, Polygon and Sepolia for now.”"
+          ],
+          "frame": "create-account-dropdown",
+          "image": "tip-network"
+        },
+        {
+          "title": "Nested Safe not supported",
+          "status": "designed",
+          "ref": "3.2",
+          "spec": "No nested Safes in this iteration (backlog 16.1).",
+          "notes": [
+            "Grants is greyed out. Hover it for: “Allowlists aren't available yet for Safe accounts that have another Safe account as a signer.”"
+          ],
+          "frame": "create-account-dropdown",
+          "image": "tip-nested"
+        },
+        {
+          "title": "No Safe account where the wallet is a signer",
+          "status": "designed",
+          "frame": "create-no-eligible-account",
+          "image": "create-no-eligible-account",
+          "ref": "4.2",
+          "spec": "The wallet isn't a signer or proposer on any Safe account, so there's nothing to pick. Say why and offer to switch wallet.",
+          "notes": ["Production's message and Switch wallet button, unchanged"]
+        },
+        {
+          "title": "No wallet connected",
+          "status": "designed",
+          "frame": "create-no-wallet",
+          "image": "create-no-wallet",
+          "ref": "4.2",
+          "spec": "No wallet is connected, so the list can't be filtered by signer. Offer to connect one.",
+          "notes": ["Production's message and Connect wallet button, unchanged"]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Set up",
+      "screens": [
+        {
+          "title": "Tokens and recipients",
+          "status": "designed",
+          "frame": "create-treasury",
+          "image": "create-treasury",
+          "ref": "4.3, 4.4",
+          "spec": "Once the Safe has no open approvals, pick tokens (including ones it doesn't hold) and recipients.",
+          "notes": [
+            "Prototype 3's search pickers, shown only after the approvals check passes",
+            "The edit flow still uses the old token and recipient lists"
+          ]
+        },
+        {
+          "title": "Over the rule limit",
+          "status": "skipped",
+          "ref": "4.6",
+          "spec": "Max 100 rules per transaction, 1,023 recipients per token, and it must fit one transaction's gas.",
+          "notes": ["Skipped for now, agreed with engineering"]
+        },
+        {
+          "title": "Open approvals",
+          "status": "designed",
+          "ref": "1.1.1",
+          "spec": "Right after the Safe is picked, list its open approvals. They have to be revoked (on revoke.cash) before tokens and recipients can be chosen.",
+          "notes": [
+            "Moved right after Safe selection, agreed with engineering",
+            "Not designed yet: loading while checking, and “we couldn't confirm the list is complete”"
+          ],
+          "frame": "create-payments",
+          "image": "create-payments"
+        },
+        {
+          "title": "Existing spending limits",
+          "status": "designed",
+          "frame": "create-treasury",
+          "image": "tokens-spending-limits",
+          "ref": "9.1",
+          "spec": "Setup warns about the conflict and explains the outcome.",
+          "notes": [
+            "No separate page any more: in the token list, tokens the Safe has spending limits for come first under “In spending limits”",
+            "Each has an info icon: “This Safe account has a spending limit for this token. Add the token, so the allowlist doesn't block the spending limit.”",
+            "Leave one of those tokens out and a yellow warning shows under the chips: “1 spending limit will be blocked by this allowlist.” (copy from #9420)",
+            "Open the token search on Treasury to see it",
+            "Documentation link (9.1.1) not added yet"
+          ]
+        },
+        {
+          "title": "Safe account settings step",
+          "status": "skipped",
+          "ref": "1.1.3",
+          "spec": "Not in M1: the first setup only creates token, ETH, MultiSend and deny-everything-else rules.",
+          "notes": ["Removed from the flow: setup goes Create, Review, Confirm, Execute"]
+        },
+        {
+          "title": "“Everything else is blocked” confirmation",
+          "status": "designed",
+          "frame": "review",
+          "image": "review",
+          "ref": "4.5",
+          "spec": "Setup states the Safe blocks every other action, and the user confirms before signing. If modules exist (like recovery), say the allowlist blocks them too.",
+          "notes": [
+            "One red warning at the top of Review: what the Safe account can send, with the confirmation checkbox inside it",
+            "Continue scrolls back to the checkbox until it's ticked",
+            "Marked done without the module line (4.5.1)"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Sign and activate",
+      "screens": [
+        {
+          "title": "Review",
+          "status": "designed",
+          "frame": "review",
+          "image": "review",
+          "ref": "S1→S2",
+          "spec": "What the Safe account will be able to send, and the setup transaction.",
+          "notes": [
+            "One warning at the top, with the confirmation in it (see 2.6); the header banner is hidden on this step",
+            "“Every other action · Blocked” is the last row of the summary, its badge lined up with the other values",
+            "“Allowed account changes” removed, along with the settings step"
+          ]
+        },
+        {
+          "title": "Confirm and execute",
+          "status": "designed",
+          "frame": "jump:Execute",
+          "image": "m1-06",
+          "ref": "S2, S3",
+          "spec": "Collect signatures, then execute. Safe Shield checks on the right.",
+          "notes": []
+        },
+        {
+          "title": "Processing",
+          "status": "designed",
+          "ref": "5.8, S4–S7",
+          "spec": "After executing, don't offer Finish until the CGW serves the change. Then the table shows the new status.",
+          "notes": [
+            "The row shows the grey “Processing” tag with a spinner until the change shows up, then moves to its new status",
+            "Hover the tag for what it's waiting for",
+            "Not designed: holding back Finish in the setup flow until the change shows up"
+          ],
+          "frame": "policy-table",
+          "image": "policy-table"
+        },
+        {
+          "title": "Allowlist is now active",
+          "status": "designed",
+          "frame": "jump:Active · just activated",
+          "image": "m1-14",
+          "ref": "5.6.9",
+          "spec": "Confirms once that the Safe only sends allowed tokens to allowed recipients, and that changes take 24 hours.",
+          "notes": []
+        },
+        {
+          "title": "Off-chain signatures stop working",
+          "status": "confirm",
+          "ref": "1.1.2, Q15",
+          "spec": "Setup swaps the fallback handler, so the Safe can't confirm off-chain signatures any more.",
+          "notes": ["Spec only asks for documentation (11.8). Confirm whether setup should also say it"]
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Policies table",
+      "screens": [
+        {
+          "title": "Row content",
+          "status": "designed",
+          "frame": "policy-table",
+          "image": "policy-table",
+          "ref": "5.1",
+          "spec": "Name with recipient count, first three token icons plus a count (hover lists all), Safe name with copy and link, status with a tooltip saying what it waits for.",
+          "notes": [
+            "Columns: Policy, Safe account, Network, Details, Status",
+            "Policy name only: the line under it is gone",
+            "New Details column, built with the design system's AvatarGroup (24px): allowlists show token logos and recipient initials, first three then +n; hover lists them all",
+            "Spending limits show the token and the spender's initials; proposers show the proposer's initials",
+            "Status tooltips say what the policy waits for (signatures, execution or when it applies)",
+            "Not yet: copy button and link next to the Safe name (5.1.4)"
+          ]
+        },
+        {
+          "title": "Filter by allowlist",
+          "status": "designed",
+          "frame": "policy-table-filtered",
+          "image": "filter-menu",
+          "ref": "5.2",
+          "spec": "Filter for recipient allowlists.",
+          "notes": [
+            "The Workspace queue's toolbar, copied from production: Search, Group by, Filter and New",
+            "Filter has a submenu each for Status, Policy type, Safe account and Network, with a count next to every option",
+            "Picked filters show as chips under the toolbar (“Status: Ready to execute or apply”), with Clear",
+            "Group by: Urgency (one list, the default), Policy type, Safe account or Network. Click a group to collapse it; the header has collapse all",
+            "Groups that need action come first"
+          ]
+        },
+        {
+          "title": "Search and empty state",
+          "status": "designed",
+          "frame": "policy-table-empty",
+          "image": "policy-table-empty",
+          "ref": "5.3, 5.5",
+          "spec": "Search by Safe, address, token, network and recipient, with an empty state.",
+          "notes": []
+        },
+        {
+          "title": "Default sort",
+          "status": "designed",
+          "frame": "policy-table",
+          "ref": "5.4",
+          "spec": "Sort by status by default, rows that need action first.",
+          "notes": [
+            "Rows that need someone to act come first: blue “ready” tags, then yellow ones waiting for signatures",
+            "Then blocked and failed, then expired, then rows waiting out the delay or processing, then active ones"
+          ],
+          "image": "policy-table"
+        },
+        {
+          "title": "Status labels and colours",
+          "status": "designed",
+          "frame": "policy-table",
+          "ref": "5.7",
+          "spec": "“Setup pending · n/m”, “Setup ready to execute”, “Processing”, “Edit in delay”, “Edit ready to apply”, “Edit expired”, “Removal …”, “Guard removal …”. Yellow waiting, blue ready, green active, grey expired.",
+          "notes": [
+            "Every tag from the spec, in the product's badge colours: yellow waiting, blue ready, green active, grey expired",
+            "The table has one example row for every tag, on the Ethereum Safes (Payments and Treasury). Those example rows don't open a side panel",
+            "The table uses them for allowlist rows; spending limits and proposers keep their current chips",
+            "Not in the spec, so to confirm: “Setup failed” (red) and the spinner on “Processing”",
+            "Spec 5.1.6 splits the change and its status into two columns; this shows them in one tag"
+          ],
+          "image": "status-tags",
+          "story": "prototype-allowlist-mvp-status-tags--all-tags"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "name": "Side panel: setup pending and active",
+      "screens": [
+        {
+          "title": "Active",
+          "status": "designed",
+          "frame": "drawer-allowlist-active",
+          "image": "drawer-allowlist-active",
+          "ref": "5.6.1–5.6.4",
+          "spec": "Name and status, recipients and tokens with expandable lists, Safe, network, last update and the guard with an explorer link.",
+          "notes": []
+        },
+        {
+          "title": "Setup waiting for signatures",
+          "status": "designed",
+          "frame": "drawer-allowlist-pending",
+          "image": "drawer-allowlist-pending",
+          "ref": "5.6.5",
+          "spec": "What's in force now, signature count, and the action for each viewer: connect, review, copy link or execute.",
+          "notes": [
+            "All viewer variants exist in the full prototype (no wallet, signed, not signed, not a signer, fully signed)"
+          ]
+        },
+        {
+          "title": "Failed, replaced, deleted",
+          "status": "designed",
+          "frame": "jump:Replaced",
+          "image": "m1b-07",
+          "ref": "5.6.5.4",
+          "spec": "Shows what happened to the transaction after it left the queue.",
+          "notes": ["Expired changes have their own panel (6.5)"]
+        },
+        {
+          "title": "Not a signer",
+          "status": "designed",
+          "frame": "jump:Active · not a signer",
+          "image": "m1b-02",
+          "ref": "5.6.8",
+          "spec": "Non-signers get a disabled button with the reason.",
+          "notes": []
+        },
+        {
+          "title": "Guard no longer installed",
+          "status": "designed",
+          "ref": "5.6.10",
+          "spec": "If the guard was removed outside the flow, say the allowlist isn't applied.",
+          "notes": [
+            "Red “Not applied” tag and panel: its guard was removed outside Safe{Wallet}, so transactions aren't checked",
+            "Action: Remove allowlist"
+          ],
+          "frame": "drawer-example-guard-missing",
+          "image": "drawer-example-guard-missing"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "name": "Change request",
+      "screens": [
+        {
+          "title": "Edit and review changes",
+          "status": "designed",
+          "frame": "edit-review",
+          "image": "edit-review",
+          "ref": "6.1, 5.6.5.5",
+          "spec": "Add or remove tokens and recipients. Review marks each one Added or Removed.",
+          "notes": []
+        },
+        {
+          "title": "Change request waiting for signatures",
+          "status": "designed",
+          "frame": "drawer-example-edit-pending",
+          "image": "drawer-example-edit-pending",
+          "ref": "S9–S11",
+          "spec": "Same as setup, labelled “Edit pending · n/m”, with the current rules still in force.",
+          "notes": [
+            "Setup's panel with edit copy: what still applies, the signatures, Review transaction",
+            "Fully signed, every “ready to execute” banner turns blue and positive: “The change is almost ready. Execute the transaction to start the 24-hour wait.”"
+          ]
+        },
+        {
+          "title": "Change request in review window",
+          "status": "designed",
+          "frame": "drawer-example-edit-in-delay",
+          "image": "drawer-example-edit-in-delay",
+          "ref": "5.6.6, S12",
+          "spec": "Requested date, applies-from date and expiry. Apply is disabled and shows the time left.",
+          "notes": ["Says when it applies, and that any signer can cancel before then", "Action: Cancel change"]
+        },
+        {
+          "title": "Change request ready to apply",
+          "status": "designed",
+          "ref": "6.1.2, S13–S15",
+          "spec": "After the delay, offer Apply and say nothing happens automatically. Show signatures needed and the deadline.",
+          "notes": [
+            "Blue banner: the 24 hours are over, applying needs its own transaction, and it expires after 7 days",
+            "Actions: Apply change, Cancel change",
+            "“Apply pending” and “Apply ready to execute” reuse the signatures panel"
+          ],
+          "frame": "drawer-example-edit-ready-to-apply",
+          "image": "drawer-example-edit-ready-to-apply"
+        },
+        {
+          "title": "Change request expired",
+          "status": "designed",
+          "ref": "6.1.4, S16, Q8",
+          "spec": "After 7 days the change expires. Current rules stay; offer to discard.",
+          "notes": ["Grey banner: it wasn't applied in time, so nothing changed", "Action: Edit"],
+          "frame": "drawer-example-edit-expired",
+          "image": "drawer-example-edit-expired"
+        },
+        {
+          "title": "Active with a change waiting",
+          "status": "designed",
+          "frame": "drawer-allowlist-change-pending",
+          "image": "drawer-allowlist-change-pending",
+          "ref": "Q7",
+          "spec": "How the table and panel show an active allowlist with a pending change. The spec asks design for this.",
+          "notes": [
+            "Same panel as 6.3: when it applies, the review window dates, Apply disabled until then, Cancel change",
+            "Cancelling needs a signed transaction (S28–S31); non-signers get the buttons disabled with the reason"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "name": "Change cancellation",
+      "screens": [
+        {
+          "title": "Cancel a change request or removal",
+          "status": "designed",
+          "frame": "drawer-example-edit-cancel-pending",
+          "image": "drawer-example-edit-cancel-pending",
+          "ref": "S28–S31, Q8",
+          "spec": "Cancel during the delay with a signed transaction. Current rules stay.",
+          "notes": [
+            "“Cancel pending” and “Cancel ready to execute” use the signatures panel",
+            "Q8 still open: is cancelling in Milestone 1?"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "name": "Remove allowlist",
+      "screens": [
+        {
+          "title": "Removal waiting for signatures",
+          "status": "designed",
+          "frame": "jump:Pending · removal",
+          "image": "m1-18",
+          "ref": "5.6.7, S17–S19",
+          "spec": "Recipients and tokens shown as removed. The allowlist stays active until the removal applies.",
+          "notes": []
+        },
+        {
+          "title": "Removal in review window, ready, expired",
+          "status": "designed",
+          "ref": "S20–S24",
+          "spec": "Same delay, apply and expiry steps as an edit.",
+          "notes": [
+            "Same stages as edit, with removal copy; the lists read as removed until it’s cancelled or expires",
+            "Open the other removal stages from the “Side panels · spec 5.7 states” row of All states"
+          ],
+          "frame": "drawer-example-removal-in-delay",
+          "image": "drawer-example-removal-in-delay"
+        },
+        {
+          "title": "Guard removal",
+          "status": "skipped",
+          "ref": "5.6.7.1, S25–S27",
+          "spec": "After the rules are removed the guard still blocks everything. Say the Safe can't send anything and offer to remove the guard.",
+          "notes": [
+            "Merged into removal: removing the allowlist is one change with the 24-hour review window, so there’s no separate step"
+          ]
+        },
+        {
+          "title": "Removal pending in the table",
+          "status": "designed",
+          "ref": "7.2.1",
+          "spec": "The table shows removal as pending until the last transaction executes.",
+          "notes": ["Every removal stage has its tag in the table (see 4.5)"],
+          "frame": "policy-table",
+          "image": "policy-table"
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "name": "Using the Safe",
+      "screens": [
+        {
+          "title": "Safe Shield on transfers",
+          "status": "designed",
+          "ref": "8.1",
+          "spec": "Before signing a transfer, Safe Shield says whether the allowlist allows this recipient and token.",
+          "notes": [
+            "From the engineering allowlist demo: “Policy checks passed” first in Safe Shield's Pro checks, or “This account's policies will refuse this transaction.” in red",
+            "Storybook: Allowlist MVP · Safe Shield on transfers",
+            "On a refusal the header turns red: “Blocked by policy”"
+          ],
+          "image": "safe-shield-transfer"
+        },
+        {
+          "title": "New spending limit with an allowlist",
+          "status": "designed",
+          "story": "prototype-spending-limit-flow-allowlist-tokens--token-dropdown-allowlist",
+          "image": "sl-allowlist",
+          "ref": "9.2",
+          "spec": "The spending limit flow warns about the conflict.",
+          "notes": ["Tokens outside the allowlist are disabled with a tooltip", "Add the documentation link (9.2.1)"]
+        },
+        {
+          "title": "Spending limit blocked by the allowlist",
+          "status": "designed",
+          "frame": "drawer-spending-limit-blocked",
+          "image": "drawer-spending-limit-blocked",
+          "ref": "9.x",
+          "spec": "The spending limit panel says the allowlist blocks it.",
+          "notes": []
+        }
+      ]
+    }
+  ]
+}
