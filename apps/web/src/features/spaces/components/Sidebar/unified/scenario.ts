@@ -5,8 +5,8 @@ export type SafeCount = 1 | 3 | 12
 export type Role = 'admin' | 'member'
 export type Viewport = 'desktop' | 'mobile'
 export type Context = 'accounts' | 'workspace'
-/** Today: each side shows its production sidebar. Proposed: one sidebar with a Safe Pro group. */
-export type Layout = 'today' | 'proposed'
+/** Today: the production sidebars and header. Filter: one app bar and one sidebar, filtered by the picked Safe. */
+export type Layout = 'today' | 'filter'
 
 export type Scenario = {
   plan: PlanState
@@ -18,14 +18,14 @@ export type Scenario = {
   layout: Layout
 }
 
-/** Starts in My accounts with Acme on a paid plan, so the demo can switch straight to a Pro workspace. */
+/** Starts in the Pro Workspace, on the Safe filter layout. */
 export const DEFAULT_SCENARIO: Scenario = {
   plan: 'paid',
   safes: 3,
   role: 'admin',
   viewport: 'desktop',
-  context: 'accounts',
-  layout: 'today',
+  context: 'workspace',
+  layout: 'filter',
 }
 
 export const PLAN_OPTIONS: { value: PlanState; label: string }[] = [
@@ -38,8 +38,8 @@ export const PLAN_OPTIONS: { value: PlanState; label: string }[] = [
 ]
 
 /** The switch and the scenario live in localStorage, so the mobile frame (same origin) follows the outer bar. */
-const SWITCH_KEY = 'unifiedSidebarPrototype'
-const SCENARIO_KEY = 'unifiedSidebarPrototype.scenario.v2'
+export const SWITCH_KEY = 'unifiedSidebarPrototype'
+export const SCENARIO_KEY = 'unifiedSidebarPrototype.scenario.v3'
 const CHANGE_EVENT = 'unified-sidebar-prototype-change'
 
 /** `?proto=sidebar` turns the prototype on, `?proto=off` turns it off. */
@@ -94,7 +94,11 @@ export const useIsPrototypeOn = (): boolean =>
 const parseScenario = (raw: string | null): Scenario => {
   if (!raw) return DEFAULT_SCENARIO
   try {
-    return { ...DEFAULT_SCENARIO, ...(JSON.parse(raw) as Partial<Scenario>) }
+    const scenario = { ...DEFAULT_SCENARIO, ...(JSON.parse(raw) as Partial<Scenario>) }
+    const isKnown =
+      (scenario.layout === 'today' || scenario.layout === 'filter') &&
+      PLAN_OPTIONS.some((option) => option.value === scenario.plan)
+    return isKnown ? scenario : DEFAULT_SCENARIO
   } catch {
     return DEFAULT_SCENARIO
   }
@@ -119,4 +123,11 @@ export const useScenario = (): [Scenario, (patch: Partial<Scenario>) => void] =>
     [],
   )
   return [scenario, update]
+}
+
+/** The prototype is on and showing the Safe filter layout: one app bar across the top and the new sidebar. */
+export const useIsShellOn = (): boolean => {
+  const isOn = useIsPrototypeOn()
+  const [scenario] = useScenario()
+  return isOn && scenario.layout === 'filter'
 }

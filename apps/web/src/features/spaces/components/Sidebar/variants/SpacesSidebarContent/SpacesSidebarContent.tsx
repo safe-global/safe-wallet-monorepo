@@ -16,9 +16,9 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 
 type PrototypeOverrides = {
-  header: ReactNode
+  header?: ReactNode
   getLink: (item: SidebarItemConfig) => ResolvedSidebarNavItem['link']
-  isItemActive: (item: SidebarItemConfig) => boolean
+  isItemActive?: (item: SidebarItemConfig, pathname: string) => boolean
 }
 
 export const SpacesSidebarContent = ({
@@ -91,7 +91,11 @@ export const SpacesSidebarContent = ({
     filteredMainNavigation,
     filteredSetupGroup,
     prototype
-      ? { getLink: prototype.getLink, isItemDisabled: () => false, isItemActive: prototype.isItemActive }
+      ? {
+          getLink: prototype.getLink,
+          isItemDisabled: () => false,
+          isItemActive: prototype.isItemActive ?? isItemActive,
+        }
       : { getLink, isItemDisabled, isItemActive },
   )
 

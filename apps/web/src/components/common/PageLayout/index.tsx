@@ -10,7 +10,7 @@ import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import { useLoadFeature } from '@/features/__core__'
 import { BatchingFeature } from '@/features/batching'
-import { SpacesFeature } from '@/features/spaces'
+import { SpacesFeature, UnifiedShellStandIn, useIsUnifiedShell } from '@/features/spaces'
 import { AppRoutes } from '@/config/routes'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
 import { useParentSafe } from '@/hooks/useParentSafe'
@@ -44,7 +44,11 @@ const NO_HEADER_ROUTES = [
 const WELCOME_LIST_ROUTES = [AppRoutes.welcome.accounts, AppRoutes.welcome.spaces]
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
-  const [isSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
+  const [isProductionSidebarRoute, isAnimated] = useIsSidebarRoute(pathname)
+  // Design prototype, off in production builds: one app bar across the top, with the sidebar under it.
+  const isUnifiedShell = useIsUnifiedShell()
+  const isSidebarRoute = isUnifiedShell || isProductionSidebarRoute
+  const isMockWorkspacePage = isUnifiedShell && pathname.startsWith(AppRoutes.spaces.index)
   const [isSidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [isSidebarExpanded, setSidebarExpanded] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
@@ -105,8 +109,9 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           <div
             ref={setTopbarNode}
             className={classnames(css.topbar, {
-              [css.topbarElevated]: isTopbarElevated,
-              [css.topbarAboveOverlay]: isTopbarAboveOverlay,
+              [css.topbarShell]: isUnifiedShell,
+              [css.topbarElevated]: isTopbarElevated && !isUnifiedShell,
+              [css.topbarAboveOverlay]: isTopbarAboveOverlay && !isUnifiedShell,
               // The topbar is absolutely positioned, so it can't inherit `.main`'s sidebar
               // offset — it has to reproduce it. Keep these conditions identical to the
               // `mainNoSidebar` / `mainSidebarCollapsed` ones below or the header drifts out
@@ -115,7 +120,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
               [css.topbarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
             })}
           >
-            <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
+            <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} isSidebarOpen={isSidebarVisible} />
           </div>
         )}
 
@@ -123,7 +128,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
 
-            {isOnboardingRoute ? <div className={css.onboardingMotion}>{children}</div> : children}
+            {isMockWorkspacePage ? (
+              <UnifiedShellStandIn>{children}</UnifiedShellStandIn>
+            ) : isOnboardingRoute ? (
+              <div className={css.onboardingMotion}>{children}</div>
+            ) : (
+              children
+            )}
           </SafeLoadingError>
         </div>
 
@@ -133,8 +144,9 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       </div>
 
       <SelectSafeModal />
-      <SafeWorkspaceSignInDialog />
-      <SafeWorkspaceChooserDialog />
+      {/* The prototype's Workspace is mocked, so nothing asks to sign in to it. */}
+      {!isUnifiedShell && <SafeWorkspaceSignInDialog />}
+      {!isUnifiedShell && <SafeWorkspaceChooserDialog />}
     </>
   )
 }

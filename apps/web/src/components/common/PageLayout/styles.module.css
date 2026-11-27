@@ -216,3 +216,19 @@
     padding: var(--space-2);
   }
 }
+
+/* Design prototype (`?proto=sidebar`, Safe filter layout): one app bar across the whole viewport,
+   above the sidebar (z-index 1150), which starts underneath it. */
+.topbarShell {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1151;
+}
+
+@media (max-width: 899.95px) {
+  .topbarShell {
+    position: sticky;
+  }
+}

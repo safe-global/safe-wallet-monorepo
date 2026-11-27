@@ -60,6 +60,8 @@ export interface HeaderNavigationProps {
   onBatchClick?: () => void
   /** Number of items in the draft batch (shown as badge) */
   batchCount?: number
+  /** Drops the wallet's name, leaving its icon, where the bar has no room for it */
+  isCompact?: boolean
 }
 
 /**
@@ -81,6 +83,7 @@ export function HeaderNavigation({
   showBatch = false,
   onBatchClick,
   batchCount = 0,
+  isCompact = false,
 }: HeaderNavigationProps) {
   const truncatedAddress =
     walletAddress.length > 12 ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : walletAddress
@@ -165,9 +168,11 @@ export function HeaderNavigation({
             ) : (
               <Wallet className="size-5 text-muted-foreground" strokeWidth={ICON_STROKE} />
             )}
-            <span className="text-xs text-muted-foreground font-normal">
-              {isConnected ? walletDisplayName : 'Connect Wallet'}
-            </span>
+            {!isCompact && (
+              <span className="text-xs text-muted-foreground font-normal">
+                {isConnected ? walletDisplayName : 'Connect Wallet'}
+              </span>
+            )}
           </Button>
         </div>
       </Track>

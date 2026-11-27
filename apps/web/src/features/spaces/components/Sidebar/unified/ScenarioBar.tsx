@@ -6,6 +6,9 @@ import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 import { useAppDispatch } from '@/store'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import { getPersonalSafes, hasWorkspace, isInWorkspace, MOCK_SPACE_ID } from './fixtures'
 import { PLAN_OPTIONS, turnPrototypeOff, useScenario, type Scenario } from './scenario'
 
 type Option<T> = { value: T; label: string }
@@ -40,7 +43,11 @@ const Segment = <T extends string | number>({
 
 const LAYOUT_OPTIONS: Option<Scenario['layout']>[] = [
   { value: 'today', label: 'Today' },
-  { value: 'proposed', label: 'Proposed' },
+  { value: 'filter', label: 'Safe filter' },
+]
+const CONTEXT_OPTIONS: Option<Scenario['context']>[] = [
+  { value: 'accounts', label: 'My accounts' },
+  { value: 'workspace', label: 'Pro workspace' },
 ]
 const SAFE_OPTIONS: Option<Scenario['safes']>[] = [
   { value: 1, label: '1' },
@@ -78,6 +85,18 @@ export const ScenarioBar = (): ReactElement | null => {
   const isDarkMode = useDarkMode()
   const [isTopWindow, setIsTopWindow] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
+  const router = useRouter()
+
+  // Each side opens where it starts: the Workspace on All Safes, My accounts on its first Safe.
+  const openContext = (context: Scenario['context']) => {
+    update({ context })
+    void router.push(
+      context === 'workspace' && hasWorkspace(scenario.plan)
+        ? { pathname: AppRoutes.spaces.index, query: { spaceId: MOCK_SPACE_ID } }
+        : // eslint-disable-next-line no-restricted-syntax -- My accounts is outside the Workspace, so the link drops spaceId
+          { pathname: AppRoutes.home, query: { safe: getPersonalSafes(scenario.safes)[0].safe } },
+    )
+  }
 
   useEffect(() => {
     setIsTopWindow(window.self === window.top)
@@ -113,6 +132,12 @@ export const ScenarioBar = (): ReactElement | null => {
             value={scenario.layout}
             onChange={(layout) => update({ layout })}
           />
+          <Segment
+            label="Workspace"
+            options={CONTEXT_OPTIONS}
+            value={isInWorkspace(scenario) ? 'workspace' : 'accounts'}
+            onChange={openContext}
+          />
           <Segment label="Plan" options={PLAN_OPTIONS} value={scenario.plan} onChange={(plan) => update({ plan })} />
           <Segment
             label="Safes"
@@ -128,7 +153,7 @@ export const ScenarioBar = (): ReactElement | null => {
             onChange={(theme) => dispatch(setDarkMode(theme === 'dark'))}
           />
           <Segment
-            label="View"
+            label="Viewport"
             options={VIEWPORT_OPTIONS}
             value={scenario.viewport}
             onChange={(viewport) => update({ viewport })}

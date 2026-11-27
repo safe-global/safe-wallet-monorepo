@@ -103,7 +103,11 @@ jest.mock('@/features/__core__', () => ({
 }))
 
 jest.mock('@/features/batching', () => ({ BatchingFeature: {} }))
-jest.mock('@/features/spaces', () => ({ SpacesFeature: {} }))
+jest.mock('@/features/spaces', () => ({
+  SpacesFeature: {},
+  useIsUnifiedShell: () => false,
+  UnifiedShellStandIn: () => null,
+}))
 
 const STATIC_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
