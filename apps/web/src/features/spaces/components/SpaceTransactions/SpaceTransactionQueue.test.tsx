@@ -44,18 +44,6 @@ jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({
   },
 }))
 
-const mockAlertProps = jest.fn()
-jest.mock('./UnavailableSafesAlert', () => {
-  const { default: UnavailableSafesAlert } = jest.requireActual('./UnavailableSafesAlert')
-  return {
-    __esModule: true,
-    default: (props: { isRetrying?: boolean }) => {
-      mockAlertProps(props)
-      return <UnavailableSafesAlert {...props} />
-    },
-  }
-})
-
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
   default: ({ sections, groupBy }: { sections: SpaceQueueSection[]; groupBy: string }) => (
@@ -101,6 +89,10 @@ const page = (
 })
 
 describe('SpaceTransactionQueue', () => {
+  beforeEach(() =>
+    jest.useFakeTimers({ advanceTimers: false, doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] }),
+  )
+
   const spaceId = faker.string.uuid()
   const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
   const safeA = checksumAddress(faker.finance.ethereumAddress())
@@ -123,7 +115,6 @@ describe('SpaceTransactionQueue', () => {
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     // The Group by pick is saved to localStorage and read back by the next render
     localStorage.clear()
   })
@@ -164,23 +155,15 @@ describe('SpaceTransactionQueue', () => {
     expect(await screen.findByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
   })
 
-  it('tells how many Safes could not be loaded next to the queue of the others', async () => {
+  it('leaves the Safes that could not be loaded to the page header, showing the queue of the others', async () => {
     respondWith(
-      page(
-        { [safeA]: { '137': transactions(1) } },
-        {
-          unavailableSafes: [
-            { chainId: '1', safeAddress: safeA },
-            { chainId: '1', safeAddress: safeB },
-          ],
-        },
-      ),
+      page({ [safeA]: { '137': transactions(1) } }, { unavailableSafes: [{ chainId: '1', safeAddress: safeB }] }),
     )
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('2 Safe accounts not loaded')
-    expect(screen.getByTestId('space-queue-safe')).toBeInTheDocument()
+    expect(await screen.findByTestId('space-queue-safe')).toBeInTheDocument()
+    expect(screen.queryByTestId('unavailable-safes-alert')).not.toBeInTheDocument()
   })
 
   it('shows skeletons while the first queue loads', () => {
@@ -201,13 +184,12 @@ describe('SpaceTransactionQueue', () => {
     expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
   })
 
-  it('shows the empty state with the unavailable Safes when none of them could be loaded', async () => {
+  it('shows the empty state, not a load error, when none of the Safes could be loaded', async () => {
     respondWith(page({}, { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }))
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(await screen.findByTestId('unavailable-safes-alert')).toHaveTextContent('1 Safe account not loaded')
-    expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+    expect(await screen.findByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
     expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
   })
 
@@ -288,7 +270,6 @@ describe('SpaceTransactionQueue', () => {
   })
 
   it('polls the filtered queue it shows', async () => {
-    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
     const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     await screen.findByTestId('space-queue-safe')
@@ -464,7 +445,7 @@ describe('SpaceTransactionQueue', () => {
       respondWith(page({ [safeA]: { '1': transactions(1) } }))
 
       render(<SpaceTransactionQueue spaceId={spaceId} />, {
-        initialReduxState: { spaceQueueView: { groupBy: 'next' } },
+        initialReduxState: { spaceQueueView: { groupBy: 'next', collapseAll: false } },
       })
 
       expect(await screen.findByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'next')
@@ -538,23 +519,6 @@ describe('SpaceTransactionQueue', () => {
       expect(screen.getByTestId('space-queue-body')).not.toHaveClass('opacity-50')
       expect(screen.getByTestId('space-queue-body')).not.toHaveAttribute('inert')
       expect(screen.getByRole('status')).toBeEmptyDOMElement()
-    })
-
-    it('does not spin the Reload of unloaded Safes while a filter loads', async () => {
-      const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
-      const release = respondSlowlyToFilters(
-        page({ [safeA]: { '1': transactions(1) } }, { unavailableSafes }),
-        page({ [safeA]: { '1': transactions(1) } }, { unavailableSafes }),
-      )
-      render(<SpaceTransactionQueue spaceId={spaceId} />)
-      await screen.findByTestId('unavailable-safes-alert')
-      expect(mockAlertProps).toHaveBeenLastCalledWith(expect.objectContaining({ isRetrying: false }))
-
-      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
-      await waitFor(() => expect(screen.getByTestId('space-queue-body')).toHaveAttribute('aria-busy', 'true'))
-
-      expect(mockAlertProps).not.toHaveBeenLastCalledWith(expect.objectContaining({ isRetrying: true }))
-      release()
     })
 
     it('shows the latest query when an earlier one answers after it', async () => {

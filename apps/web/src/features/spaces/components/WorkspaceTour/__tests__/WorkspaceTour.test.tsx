@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker'
 import local from '@/services/local-storage/local'
+import { _resetOverlayQueue } from '@/services/overlay-queue/store'
 import { act, fireEvent, render, renderHook, screen } from '@/tests/test-utils'
+import CheckoutReturnModals from '../../Plans/CheckoutReturnModals'
 import WorkspaceTour from '../index'
 import WorkspaceTourSection from '../WorkspaceTourSection'
 import { useWorkspaceTourOpen } from '../hooks/useWorkspaceTourOpen'
@@ -37,6 +39,13 @@ jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId:
 
 jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockWorkspaceLock() }))
 
+const mockCheckoutReturn = jest.fn()
+jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
+  useCheckoutReturn: () => mockCheckoutReturn(),
+}))
+jest.mock('../../../hooks/billing/useBillingSpaceId', () => ({ useBillingSpaceId: () => mockSpaceId }))
+jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ plan: null, refetch: jest.fn() }) }))
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/users'),
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: mockUserId } }),
@@ -51,8 +60,15 @@ const tourWithSettingsSection = (
   </>
 )
 
-const renderTour = () =>
-  render(tourWithSettingsSection, { routerProps: { pathname: '/spaces', query: { spaceId: mockSpaceId } } })
+const renderTour = (ui = tourWithSettingsSection, query: Record<string, string> = {}) =>
+  render(ui, { routerProps: { pathname: '/spaces', query: { spaceId: mockSpaceId, ...query } } })
+
+const NO_CHECKOUT = { status: 'idle', subscription: undefined, dismiss: jest.fn(), retry: jest.fn() }
+const TRIAL_CHECKOUT = {
+  ...NO_CHECKOUT,
+  status: 'complete',
+  subscription: { status: 'trialing', plan: { id: 'price_1' }, currentPeriodEnd: null },
+}
 
 const markTourSeen = () => local.setItem(getWorkspaceTourSeenKey(mockUserId), true)
 
@@ -70,6 +86,8 @@ describe('WorkspaceTour', () => {
     mockIsSpaceRoute.mockReturnValue(true)
     mockIsActiveMember.mockReturnValue(true)
     mockWorkspaceLock.mockReturnValue(UNLOCKED)
+    mockCheckoutReturn.mockReturnValue(NO_CHECKOUT)
+    _resetOverlayQueue()
     const { result } = renderHook(() => useWorkspaceTourOpen())
     act(() => result.current.close())
   })
@@ -202,5 +220,37 @@ describe('WorkspaceTour', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Take the tour' }))
 
     expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
+  })
+
+  it('waits until the member closes the checkout confirmation, and only then records the visit', () => {
+    mockCheckoutReturn.mockReturnValue(TRIAL_CHECKOUT)
+    const { rerender } = renderTour(
+      <>
+        <WorkspaceTour />
+        <CheckoutReturnModals spaceId={mockSpaceId} />
+      </>,
+    )
+
+    expect(screen.getByText('Your free access is active')).toBeInTheDocument()
+    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+
+    mockCheckoutReturn.mockReturnValue(NO_CHECKOUT)
+    rerender(
+      <>
+        <WorkspaceTour />
+        <CheckoutReturnModals spaceId={mockSpaceId} />
+      </>,
+    )
+
+    expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBe(true)
+  })
+
+  it('waits while the URL still carries a checkout session, before the checkout confirmation has mounted', () => {
+    renderTour(<WorkspaceTour />, { sessionId: faker.string.alphanumeric(16) })
+
+    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
+    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
   })
 })

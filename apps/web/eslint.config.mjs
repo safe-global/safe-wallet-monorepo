@@ -91,6 +91,7 @@ const config = [
 
       parserOptions: {
         project: ['./tsconfig.json'],
+        tsconfigRootDir: import.meta.dirname,
       },
     },
 
@@ -221,6 +222,14 @@ const config = [
         ...designSystemSyntaxRules,
         ...noReexportRules,
         ...featurePublicImportExpressionRules,
+      ],
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'jest',
+          property: 'useRealTimers',
+          message: 'Web tests run on the fake clock. See "Time and timers" in docs/TESTING.md.',
+        },
       ],
     },
   },

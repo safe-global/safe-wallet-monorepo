@@ -45,9 +45,7 @@ export interface FeatureFlags {
   safePro?: boolean
   /** SAFE_PRO_ANNOUNCEMENT - Safe Pro announcement banners and modal (default: false) */
   safeProAnnouncement?: boolean
-  /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
-  workspacesExperimentalFeatures?: boolean
-  /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - shows the Recipient allowlist row in Experimental settings (default: false) */
+  /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - offers the recipient allowlist in Workspace policies (default: false) */
   policyRecipientAllowlist?: boolean
   /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
   spaceAuditLog?: boolean

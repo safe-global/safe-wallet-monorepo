@@ -8,15 +8,24 @@ const CHAINS_ENDPOINT = /\/v[12]\/chains(\/\d+)?(\?.*)?$/
 const isChainsPage = (body: unknown): body is { results: Chain[] } =>
   typeof body === 'object' && body !== null && 'results' in body && Array.isArray(body.results)
 
-/** Makes the relayer of every chain offer only `options` to the wallet in `page`; the gateway keeps its own config. */
-export async function offerGasPaymentOptions(page: Page, options: GasPaymentOption[]): Promise<void> {
-  const withOptions = (chain: Chain): Chain =>
-    chain.relayer ? { ...chain, relayer: { ...chain.relayer, gasPaymentOptions: options } } : chain
-
+/** Rewrites every chain config that the wallet in `page` reads; the gateway keeps its own config. */
+async function rewriteChains(page: Page, rewrite: (chain: Chain) => Chain): Promise<void> {
   await page.route(CHAINS_ENDPOINT, async (route) => {
     const response = await route.fetch()
     const body: unknown = await response.json()
-    const json = isChainsPage(body) ? { ...body, results: body.results.map(withOptions) } : withOptions(body as Chain)
+    const json = isChainsPage(body) ? { ...body, results: body.results.map(rewrite) } : rewrite(body as Chain)
     await route.fulfill({ response, json })
   })
+}
+
+/** Makes the relayer of every chain offer only `options` to the wallet in `page`. */
+export async function offerGasPaymentOptions(page: Page, options: GasPaymentOption[]): Promise<void> {
+  await rewriteChains(page, (chain) =>
+    chain.relayer ? { ...chain, relayer: { ...chain.relayer, gasPaymentOptions: options } } : chain,
+  )
+}
+
+/** Turns on features that staging, and so the isolated stack, does not serve yet, for the wallet in `page` only. */
+export async function enableChainFeatures(page: Page, features: string[]): Promise<void> {
+  await rewriteChains(page, (chain) => ({ ...chain, features: [...new Set([...chain.features, ...features])] }))
 }

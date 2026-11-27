@@ -3,7 +3,8 @@ import { ChevronDown } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { QUEUE_COLUMNS } from './columns'
+import { QUEUE_COLUMNS, QUEUE_ROW_LABEL } from './columns'
+import { BAND_CELL } from './QueueGroupRow'
 
 const SafeBandRow = ({
   safeAddress,
@@ -28,7 +29,7 @@ const SafeBandRow = ({
     onClick={onToggle}
     {...rowProps}
   >
-    <TableCell className="rounded-l-lg bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]">
+    <TableCell data-pin="start" className={`rounded-l-lg ${BAND_CELL}`}>
       <span className="flex justify-center">
         <Button
           size="icon-sm"
@@ -40,11 +41,8 @@ const SafeBandRow = ({
         </Button>
       </span>
     </TableCell>
-    <TableCell
-      colSpan={QUEUE_COLUMNS.length - 1}
-      className="rounded-r-lg bg-foreground/[0.03] py-0! pr-3! transition-colors group-hover/band:bg-foreground/[0.06]"
-    >
-      <div className="flex min-h-11 items-center gap-3 text-sm">
+    <TableCell colSpan={QUEUE_COLUMNS.length - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
+      <div className={`flex min-h-11 items-center gap-3 text-sm ${QUEUE_ROW_LABEL}`}>
         {title}
         {collapsed && summary && (
           <span className="ml-auto truncate text-xs tabular-nums text-muted-foreground">{summary}</span>

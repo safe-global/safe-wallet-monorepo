@@ -8,6 +8,8 @@ export type CollapseAllButtonProps = {
   /** What is collapsed, singular and plural */
   unit?: [string, string]
   onToggle: () => void
+  /** Only the chevrons: the label, though hidden until hover, would push them out of a narrow header */
+  iconOnly?: boolean
 }
 
 /** Shows only its chevrons until the header row, a `group/head`, is hovered or focused. */
@@ -16,17 +18,20 @@ const CollapseAllButton = ({
   count,
   unit = ['Safe', 'Safes'],
   onToggle,
+  iconOnly = false,
 }: CollapseAllButtonProps): ReactElement => (
   <Button
-    size="xs"
+    size={iconOnly ? 'icon-xs' : 'xs'}
     variant="ghost-muted"
     className="normal-case"
     aria-label={allCollapsed ? 'Expand all' : 'Collapse all'}
     onClick={onToggle}
   >
-    <span className="opacity-0 transition-opacity group-hover/head:opacity-100 group-focus-within/head:opacity-100">
-      {allCollapsed ? 'Expand' : 'Collapse'} {count} {count === 1 ? unit[0] : unit[1]}
-    </span>
+    {!iconOnly && (
+      <span className="opacity-0 transition-opacity group-hover/head:opacity-100 group-focus-within/head:opacity-100">
+        {allCollapsed ? 'Expand' : 'Collapse'} {count} {count === 1 ? unit[0] : unit[1]}
+      </span>
+    )}
     {allCollapsed ? <ChevronsUpDown /> : <ChevronsDownUp />}
   </Button>
 )

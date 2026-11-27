@@ -1,13 +1,21 @@
 import type { ReactElement, ReactNode } from 'react'
-import type { TokenInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import type {
+  SettingsChangeTransaction,
+  TokenInfo,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import QueueSummary from '@safe-global/views/features/spaces/components/SpaceQueue/QueueSummary'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import css from '@safe-global/views/components/transactions/TxType/styles.module.css'
 import { Code, GitMerge, Settings, type LucideIcon } from 'lucide-react'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import TokenAmount from '@/components/common/TokenAmount'
 import TxInfo from '@/components/transactions/TxInfo'
-import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
-import { useChain } from '@/hooks/useChains'
+import { TxTypeIcon } from '@/components/transactions/TxType'
+import { useTransactionType } from '@/hooks/useTransactionType'
+import QueueTypeTag from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTypeTag'
+import { useChain, useCurrentChain } from '@/hooks/useChains'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import {
@@ -20,9 +28,26 @@ import {
   isNestedConfirmationTxInfo,
   isOrderTxInfo,
   isSettingsChangeTxInfo,
+  isMultiSendTxInfo,
+  isMultisigExecutionInfo,
+  isStakingTxDepositInfo,
   isStakingTxExitInfo,
+  isStakingTxWithdrawInfo,
+  isTwapOrderTxInfo,
 } from '@/utils/transaction-guards'
-import { getNonce, getQueueTypeLabel, getSettingsSummary, type QueueTypeLabel } from '../utils'
+import {
+  formatQueueAmount,
+  getNonce,
+  getQueueAmount,
+  getQueueTypeLabel,
+  getSettingsSummary,
+  getTypeHint,
+  POLICY_CHANGES,
+  toQueueAmount,
+  WARNING_LABELS,
+  type QueueAmount,
+  type QueueTypeLabel,
+} from '../utils'
 
 const TYPE_ICONS: Record<QueueTypeLabel, LucideIcon> = {
   Settings,
@@ -32,44 +57,59 @@ const TYPE_ICONS: Record<QueueTypeLabel, LucideIcon> = {
 
 const QueueTxType = ({ tx }: { tx: Transaction }): ReactElement => {
   const label = getQueueTypeLabel(tx)
-  if (!label) {
-    return (
-      <>
+  const type = useTransactionType(tx)
+  const Icon = label ? TYPE_ICONS[label] : undefined
+  return (
+    <QueueTypeTag title={label ?? type.text} hint={getTypeHint(tx)}>
+      {Icon ? (
+        <span className={css.txType}>
+          <Icon className="size-4" strokeWidth={ICON_STROKE} />
+        </span>
+      ) : (
         <TxTypeIcon tx={tx} />
-        <TxTypeText tx={tx} />
-      </>
-    )
+      )}
+      <span className="min-w-0 truncate">{label ?? type.text}</span>
+    </QueueTypeTag>
+  )
+}
+
+const WithHint = QueueSummary
+
+const ORDER_CLASSES: Record<string, string> = { market: 'Market order', limit: 'Limit order' }
+
+const getOrderHint = (info: OrderTransactionInfo): string | undefined =>
+  isTwapOrderTxInfo(info) ? 'TWAP order' : ORDER_CLASSES[info.orderClass]
+
+const getSettingsHint = (tx: Transaction, txInfo: SettingsChangeTransaction): string | undefined => {
+  const { settingsInfo } = txInfo
+  if (!settingsInfo) return undefined
+  if (settingsInfo.type === 'ADD_OWNER' || settingsInfo.type === 'REMOVE_OWNER') {
+    return `Threshold ${settingsInfo.threshold} after the change`
   }
-  const Icon = TYPE_ICONS[label]
-  return (
-    <>
-      <span className={css.txType}>
-        <Icon className="size-4" strokeWidth={ICON_STROKE} />
-      </span>
-      {label}
-    </>
-  )
+  if (settingsInfo.type === 'CHANGE_THRESHOLD' && isMultisigExecutionInfo(tx.executionInfo)) {
+    return `Threshold ${tx.executionInfo.confirmationsRequired} → ${settingsInfo.threshold}`
+  }
+  return POLICY_CHANGES.includes(settingsInfo.type) ? WARNING_LABELS.policyChange : undefined
 }
 
-const WithHint = ({ hint, children }: { hint?: string; children: ReactNode }): ReactElement => {
-  if (!hint) return <span className="block min-w-0 truncate">{children}</span>
-  return (
-    <Tooltip delay={150}>
-      <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{children}</TooltipTrigger>
-      <TooltipContent>{hint}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-const Amount = ({ value, token }: { value: string; token: TokenInfo }): ReactElement => (
-  <TokenAmount value={value} decimals={token.decimals} tokenSymbol={token.symbol} logoUri={token.logoUri} />
+// The summary's tooltip says the amount in full, so the amount drops its own
+const Amount = ({ amount }: { amount: QueueAmount }): ReactElement => (
+  <TokenAmount
+    value={amount.value}
+    decimals={amount.decimals}
+    tokenSymbol={amount.rowSymbol ?? amount.symbol}
+    logoUri={amount.logoUri}
+    fallbackSrc={amount.fallbackSrc}
+    noTooltip
+  />
 )
 
 const BridgeSummary = ({ info }: { info: Extract<Transaction['txInfo'], { type: 'SwapAndBridge' }> }): ReactElement => {
   const destination = useChain(info.toChain)
+  const amount = toQueueAmount(info.fromAmount, info.fromToken)
   return (
-    <WithHint hint={`To ${destination?.chainName ?? 'an unknown network'}`}>
-      <Amount value={info.fromAmount} token={info.fromToken} />
+    <WithHint hint={`To ${destination?.chainName ?? 'an unknown network'}`} label={formatQueueAmount(amount)}>
+      <Amount amount={amount} />
     </WithHint>
   )
 }
@@ -87,36 +127,60 @@ const TokenSymbol = ({ token }: { token: TokenInfo }): ReactElement => (
 )
 
 // A sell order fixes the amount sold and a buy order the amount bought; the other side is only a limit
-const OrderSummary = ({ info }: { info: OrderTransactionInfo }): ReactElement =>
-  info.kind === 'buy' ? (
-    <Exchange
-      from={<TokenSymbol token={info.sellToken} />}
-      to={<Amount value={info.buyAmount} token={info.buyToken} />}
-    />
+const OrderSummary = ({ info }: { info: OrderTransactionInfo }): ReactElement => {
+  const bought = toQueueAmount(info.buyAmount, info.buyToken)
+  const sold = toQueueAmount(info.sellAmount, info.sellToken)
+  return info.kind === 'buy' ? (
+    <WithHint hint={getOrderHint(info)} label={`${info.sellToken.symbol} → ${formatQueueAmount(bought)}`}>
+      <Exchange from={<TokenSymbol token={info.sellToken} />} to={<Amount amount={bought} />} />
+    </WithHint>
   ) : (
-    <Exchange
-      from={<Amount value={info.sellAmount} token={info.sellToken} />}
-      to={<TokenSymbol token={info.buyToken} />}
-    />
+    <WithHint hint={getOrderHint(info)} label={`${formatQueueAmount(sold)} → ${info.buyToken.symbol}`}>
+      <Exchange from={<Amount amount={sold} />} to={<TokenSymbol token={info.buyToken} />} />
+    </WithHint>
   )
+}
+
+const getDefaultHint = (txInfo: Transaction['txInfo']): string | undefined => {
+  if (isMultiSendTxInfo(txInfo)) return `${txInfo.actionCount} actions in one transaction`
+  if (isStakingTxDepositInfo(txInfo)) {
+    return `Deposits into ${txInfo.numValidators} validator${maybePlural(txInfo.numValidators)} with Kiln`
+  }
+  if (isStakingTxWithdrawInfo(txInfo)) return 'Claims exited stake from Kiln'
+  return undefined
+}
+
+// What TxInfo shows for the types without an amount, as text
+const getPlainSummary = (txInfo: Transaction['txInfo']): string | undefined => {
+  if (isMultiSendTxInfo(txInfo)) return `${txInfo.actionCount} action${maybePlural(txInfo.actionCount)}`
+  if (!isCustomTxInfo(txInfo)) return undefined
+  // Read the method before the migration guard, which narrows txInfo to never when it returns false
+  const { methodName } = txInfo
+  return isMigrateToL2TxInfo(txInfo) ? 'Migrate base contract' : (methodName ?? undefined)
+}
 
 const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
   const { txInfo } = tx
+  // TxInfo reads the native token from the current chain too
+  const nativeCurrency = useCurrentChain()?.nativeCurrency
 
   if (isSettingsChangeTxInfo(txInfo)) {
-    const { settingsInfo } = txInfo
-    const hint =
-      settingsInfo?.type === 'ADD_OWNER' || settingsInfo?.type === 'REMOVE_OWNER'
-        ? `Threshold ${settingsInfo.threshold} after the change`
-        : undefined
-    return <WithHint hint={hint}>{getSettingsSummary(txInfo)}</WithHint>
+    return <WithHint hint={getSettingsHint(tx, txInfo)}>{getSettingsSummary(txInfo)}</WithHint>
   }
 
   if (isCancellationTxInfo(txInfo)) {
     const nonce = getNonce(tx)
     return (
       <WithHint
-        hint={`An empty transaction at #${nonce}. Executing it cancels everything else at this nonce.`}
+        interactive
+        hint={
+          <>
+            {`Rejects #${nonce}. If this executes, nothing else at #${nonce} can.`}&nbsp;
+            <ExternalLink href={HelpCenterArticle.CANCELLING_TRANSACTIONS}>
+              Learn more about on-chain rejections
+            </ExternalLink>
+          </>
+        }
       >{`Cancels #${nonce}`}</WithHint>
     )
   }
@@ -133,11 +197,12 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
   if (isBridgeOrderTxInfo(txInfo)) return <BridgeSummary info={txInfo} />
 
   if (isLifiSwapTxInfo(txInfo)) {
+    const from = toQueueAmount(txInfo.fromAmount, txInfo.fromToken)
+    const to = toQueueAmount(txInfo.toAmount, txInfo.toToken)
     return (
-      <Exchange
-        from={<Amount value={txInfo.fromAmount} token={txInfo.fromToken} />}
-        to={<Amount value={txInfo.toAmount} token={txInfo.toToken} />}
-      />
+      <WithHint label={`${formatQueueAmount(from)} → ${formatQueueAmount(to)}`}>
+        <Exchange from={<Amount amount={from} />} to={<Amount amount={to} />} />
+      </WithHint>
     )
   }
 
@@ -145,20 +210,31 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
 
   if (isStakingTxExitInfo(txInfo)) {
     return (
-      <span className="block min-w-0 truncate">{`${txInfo.numValidators} validator${maybePlural(txInfo.numValidators)}`}</span>
+      <WithHint hint="Asks Kiln to exit these validators. You claim the ETH once they have exited.">
+        {`${txInfo.numValidators} validator${maybePlural(txInfo.numValidators)}`}
+      </WithHint>
     )
   }
 
   // The gateway leaves the method out when it can't decode the call data
   if (isCustomTxInfo(txInfo) && !txInfo.methodName && !isMigrateToL2TxInfo(txInfo)) {
-    return <span className="block min-w-0 truncate">Unknown method</span>
+    return <WithHint>Unknown method</WithHint>
+  }
+
+  // The type tag already says which way the tokens go, so the amount has no sign
+  const amount = getQueueAmount(txInfo, nativeCurrency)
+  if (amount) {
+    return (
+      <WithHint hint={getDefaultHint(txInfo)} label={formatQueueAmount(amount)}>
+        <Amount amount={amount} />
+      </WithHint>
+    )
   }
 
   return (
-    <span className="block min-w-0 truncate">
-      {/* The type tag already says which way the tokens go */}
+    <WithHint hint={getDefaultHint(txInfo)} label={getPlainSummary(txInfo)}>
       <TxInfo info={txInfo} omitSign />
-    </span>
+    </WithHint>
   )
 }
 

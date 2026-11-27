@@ -15,9 +15,18 @@ export class WorkspacePage {
   readonly skipInviteButton: Locator
   readonly surveyOptions: Locator
   readonly finishSurveyButton: Locator
-  readonly checkoutStartTrialButton: Locator
+  readonly completeCheckoutButton: Locator
   readonly checkoutBackLink: Locator
   readonly trialActivatedDialog: Locator
+  readonly subscriptionActivatedDialog: Locator
+  readonly claimTrialModal: Locator
+  readonly claimTrialButton: Locator
+  readonly planChooserModal: Locator
+  readonly memberClaimNotice: Locator
+  readonly confirmPlanChangeButton: Locator
+  readonly trialEndingModal: Locator
+  readonly portalAddCardButton: Locator
+  readonly managePlanButton: Locator
   readonly currentPlanName: Locator
   readonly selectorButton: Locator
   readonly selectorMenu: Locator
@@ -36,9 +45,21 @@ export class WorkspacePage {
     this.skipInviteButton = page.getByTestId('invite-members-skip-button')
     this.surveyOptions = page.getByTestId('survey-option-card')
     this.finishSurveyButton = page.getByTestId('survey-finish-button')
-    this.checkoutStartTrialButton = page.getByRole('button', { name: 'Start trial' })
+    // The local checkout labels its submit button "Start trial" for paid links too.
+    this.completeCheckoutButton = page.getByRole('button', { name: 'Start trial' })
     this.checkoutBackLink = page.getByRole('link', { name: 'Back' })
     this.trialActivatedDialog = page.getByRole('dialog', { name: /^Your free access is active/ })
+    this.subscriptionActivatedDialog = page.getByRole('dialog', { name: /^Your paid subscription is active/ })
+    this.claimTrialModal = page.getByTestId('claim-trial-modal')
+    this.claimTrialButton = this.claimTrialModal.getByRole('button', { name: 'Start free trial' })
+    this.planChooserModal = page.getByRole('dialog', {
+      name: /^Your Safe Pro free access ended|^Your Workspace has no active plan/,
+    })
+    this.memberClaimNotice = page.getByRole('dialog', { name: /^Start your \d+-day free access to Safe Pro/ })
+    this.confirmPlanChangeButton = page.getByRole('button', { name: 'Confirm change' })
+    this.trialEndingModal = page.getByRole('dialog', { name: /^Your free access will end/ })
+    this.portalAddCardButton = page.getByRole('button', { name: 'Add card' })
+    this.managePlanButton = page.getByRole('button', { name: 'Manage plan' })
     this.currentPlanName = page.getByTestId('current-plan-card').getByRole('heading', { level: 4 })
     this.selectorButton = page.getByTestId('space-selector-button')
     this.selectorMenu = page.getByTestId('space-selector-menu')
@@ -59,6 +80,26 @@ export class WorkspacePage {
 
   trialSizeTab(seats: number): Locator {
     return this.page.getByRole('tab', { name: `${seats} Safes` })
+  }
+
+  /** The size tab of the paid plans, in the plan chooser of a locked Workspace */
+  planSizeTab(seats: number): Locator {
+    return this.page.getByRole('tab', { name: `${seats} Safe accounts` })
+  }
+
+  /** Starts the checkout of a paid plan from the plan chooser of a locked Workspace */
+  choosePlanButton(plan: string): Locator {
+    return this.page.getByRole('button', { name: `Continue with ${plan}` })
+  }
+
+  /** Changes the current plan on the Plans page */
+  switchPlanButton(plan: string): Locator {
+    return this.page.getByRole('button', { name: `Switch to ${plan}` })
+  }
+
+  /** The confirmation of a plan change made during the free access, which the local billing service always gives */
+  planSwitchedDialog(plan: string): Locator {
+    return this.page.getByRole('dialog', { name: new RegExp(`^You're on ${plan}`) })
   }
 
   /** From the first wizard step: name the Workspace, pick the trial for `seats` Safes and skip every optional step */

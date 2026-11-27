@@ -62,6 +62,8 @@ After the release that contains the change, reconcile shows an `ADD`. For a
 Changing `enabled` back to `false` makes reconcile offer to remove the row.
 
 On release, an operator reconciles flags via the Config Service admin "Reconcile
-flags" view. `defaultChains` is currently seeded empty for every flag; run the
-Config Service `export_remote_config --service WALLET_WEB` command against
-production and commit the result to make the seed authoritative.
+flags" view. `scope`, `enabled` and `defaultChains` of every released flag match
+production. To refresh them, run the Config Service `export_remote_config --service
+WALLET_WEB` (or `MOBILE`) command against production and copy those three fields.
+Keep the descriptions in this file, and keep the flags that production does not
+have yet.

@@ -1,7 +1,10 @@
 import { type Locator, type Page } from '@playwright/test'
 
+const DEFAULT_TAB = 'Workspace contacts'
+
 export class WorkspaceAddressBookPage {
   readonly importButton: Locator
+  private openedTab = DEFAULT_TAB
 
   constructor(private readonly page: Page) {
     this.importButton = page.getByRole('button', { name: 'Import', exact: true })
@@ -9,18 +12,24 @@ export class WorkspaceAddressBookPage {
 
   async goto(workspaceId: string): Promise<void> {
     await this.page.goto(`/spaces/address-book?spaceId=${workspaceId}`)
+    this.openedTab = DEFAULT_TAB
   }
 
-  tab(label: string): Locator {
-    return this.page.getByRole('tab', { name: new RegExp(`^${label}`) })
+  async openTab(label: string): Promise<void> {
+    await this.page.getByRole('tab', { name: new RegExp(`^${label}`) }).click()
+    this.openedTab = label
   }
 
+  /** A row of the opened tab: during a tab switch, the panel of the previous tab can still show its rows */
   row(text: string): Locator {
-    return this.page.getByRole('row').filter({ hasText: text })
+    return this.page
+      .getByRole('tabpanel', { name: new RegExp(`^${this.openedTab}`) })
+      .getByRole('row')
+      .filter({ hasText: text })
   }
 
   rowMenuButton(name: string): Locator {
-    return this.page.getByRole('button', { name: `Actions for ${name}` })
+    return this.row(name).getByRole('button', { name: `Actions for ${name}` })
   }
 
   menuItem(name: string): Locator {
@@ -48,6 +57,7 @@ export class WorkspaceAddressBookPage {
 
   async addLocalContactToWorkspace(name: string): Promise<void> {
     await this.row(name).getByRole('button', { name: 'Add to Workspace' }).click()
+    await this.page.getByRole('dialog').getByRole('button', { name: 'Add 1 contact' }).click()
   }
 
   async addTag(contactName: string, tagName: string): Promise<void> {

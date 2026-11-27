@@ -1,4 +1,4 @@
-import { formatDate, getCountdown, getDetailedPeriod, getPeriod, parseTimestamp } from '../date'
+import { formatDate, formatShortTimeAgo, getCountdown, getDetailedPeriod, getPeriod, parseTimestamp } from '../date'
 
 describe('formatDate', () => {
   it('formats a timestamp as an abbreviated date', () => {
@@ -82,5 +82,56 @@ describe('getDetailedPeriod', () => {
     [45, '45 seconds'],
   ])('formats %d seconds as "%s"', (seconds, expected) => {
     expect(getDetailedPeriod(seconds)).toBe(expected)
+  })
+})
+
+describe('formatShortTimeAgo', () => {
+  const now = new Date('2026-06-15T12:00:00.000Z').getTime()
+  const MINUTE = 60_000
+  const HOUR = 60 * MINUTE
+  const DAY = 24 * HOUR
+  const ago = (ms: number) => formatShortTimeAgo(now - ms, now)
+
+  it.each([
+    ['Just now', 0],
+    ['Just now', 59_999],
+    ['1m ago', MINUTE],
+    ['59m ago', HOUR - 1],
+    ['1h ago', HOUR],
+    ['23h ago', DAY - 1],
+    ['1d ago', DAY],
+    ['3d ago', 3 * DAY],
+    ['30d ago', 30 * DAY + HOUR],
+  ])('shows %s for %i ms ago', (expected, ms) => {
+    expect(ago(ms)).toBe(expected)
+  })
+
+  it.each([
+    ['1mo ago', '2026-05-15T12:00:00.000Z'],
+    ['11mo ago', '2025-06-16T12:00:00.000Z'],
+    ['1y ago', '2025-06-15T12:00:00.000Z'],
+    ['3y ago', '2023-01-01T00:00:00.000Z'],
+  ])('shows %s for %s', (expected, date) => {
+    expect(formatShortTimeAgo(new Date(date).getTime(), now)).toBe(expected)
+  })
+
+  it('never shows 12mo ago at month end', () => {
+    const feb28 = new Date(2026, 1, 28).getTime()
+    expect(formatShortTimeAgo(new Date(2025, 1, 28, 23).getTime(), feb28)).toBe('1y ago')
+    expect(formatShortTimeAgo(new Date(2025, 2, 1).getTime(), feb28)).toBe('11mo ago')
+    expect(formatShortTimeAgo(new Date(2025, 1, 27, 23).getTime(), feb28)).toBe('1y ago')
+  })
+
+  it('reads a time in the future as Just now', () => {
+    expect(formatShortTimeAgo(now + HOUR, now)).toBe('Just now')
+  })
+
+  it('defaults to the current time', () => {
+    jest.useFakeTimers({ now })
+    try {
+      expect(formatShortTimeAgo(now - 2 * HOUR)).toBe('2h ago')
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })

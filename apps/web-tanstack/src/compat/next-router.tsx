@@ -19,6 +19,9 @@ type TransitionOptions = { shallow?: boolean; locale?: string | false; scroll?: 
  */
 type NextHistoryStateLike = { url: string; as: string; options?: TransitionOptions }
 
+/** Next calls its `routeChange*` listeners with the destination URL and whether the change is shallow */
+type RouteChangeHandler = (url: string, options: { shallow: boolean }) => void
+
 export interface NextRouterLike {
   pathname: string
   asPath: string
@@ -36,8 +39,8 @@ export interface NextRouterLike {
   prefetch: (url: Url, as?: Url, options?: TransitionOptions) => Promise<void>
   beforePopState: (cb: (state: NextHistoryStateLike) => boolean) => void
   events: {
-    on: (event: string, handler: (...args: unknown[]) => void) => void
-    off: (event: string, handler: (...args: unknown[]) => void) => void
+    on: (event: string, handler: RouteChangeHandler) => void
+    off: (event: string, handler: RouteChangeHandler) => void
     emit: (event: string, ...args: unknown[]) => void
   }
 }

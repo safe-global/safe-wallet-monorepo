@@ -167,6 +167,7 @@ class Command(BaseCommand):
         self.stdout.write(f"  RPC URL: {rpc_url}")
         self.stdout.write(f"  TXS URL: {txs_url}")
         chain = self._setup_chain(chain_id, chain_defaults(chain_id, chain_name, rpc_url, txs_url))
+        self._clear_gas_price(chain)
         self._setup_gas_price(chain)
         self._setup_gas_tokens(chain)
         self._setup_features(chain)
@@ -193,13 +194,10 @@ class Command(BaseCommand):
         self.stdout.write(f"  {'Created' if created else 'Updated'} Chain {chain_id}")
         return chain
 
-    def _setup_gas_price(self, chain: Chain):
-        _, created = GasPrice.objects.update_or_create(
-            chain=chain,
-            oracle_uri=None,
-            defaults={"fixed_wei_value": 1_000_000_000, "rank": 1},
-        )
-        self.stdout.write(f"  {'Created' if created else 'Updated'} GasPrice for chain {chain.id}")
+    def _clear_gas_price(self, chain: Chain):
+        # As on production Sepolia: with no gas price config, the app reads the fee pair from the RPC.
+        deleted, _ = GasPrice.objects.filter(chain=chain).delete()
+        self.stdout.write(f"  Removed {deleted} GasPrice rows for chain {chain.id}")
 
     def _setup_gas_tokens(self, chain: Chain):
         tokens = GAS_TOKENS.get(chain.id, [])

@@ -101,8 +101,7 @@ describe('AppsPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Close Transaction Builder preview' }))
 
-      // vaul keeps the drawer mounted for an exit animation that jsdom never finishes
-      await waitFor(() => expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'closed'))
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     })
   })
 
@@ -369,6 +368,8 @@ describe('AppsPage', () => {
 
     it('Shows an error label if the app doesnt support Safe App functionality', async () => {
       const INVALID_SAFE_APP_URL = 'https://google.com'
+      // MSW lets unmatched .json requests through to the network, so the manifest needs its own handler
+      server.use(http.get(`${INVALID_SAFE_APP_URL}/manifest.json`, () => new HttpResponse(null, { status: 404 })))
       render(<CustomSafeAppsPage />, {
         routerProps: {
           pathname: '/apps/custom',

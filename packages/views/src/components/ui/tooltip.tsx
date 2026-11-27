@@ -1,3 +1,4 @@
+import { createContext, useContext, type ReactNode } from 'react'
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'
 
 import { cn } from '@safe-global/views/utils/cn'
@@ -21,16 +22,25 @@ import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvi
  * @remarks
  * Key Props:
  * - TooltipProvider: `delay`
- * - TooltipContent: `side`, `sideOffset`, `align`, `alignOffset`
+ * - TooltipDelay: `delay` for every tooltip inside it that doesn't set its own
+ * - TooltipContent: `side`, `sideOffset`, `align`, `alignOffset`, `anchor` (position against an element other than the trigger)
  * - Root / Trigger: see Base UI
  */
 
-function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
-  return <TooltipPrimitive.Provider data-slot="tooltip-provider" delay={delay} {...props} />
+const TooltipDelayContext = createContext<number | undefined>(undefined)
+
+/** Hover open delay for every tooltip inside it, however deep, that doesn't pass its own `delay` */
+function TooltipDelay({ delay, children }: { delay: number; children: ReactNode }) {
+  return <TooltipDelayContext.Provider value={delay}>{children}</TooltipDelayContext.Provider>
+}
+
+function TooltipProvider({ delay, ...props }: TooltipPrimitive.Provider.Props) {
+  const inheritedDelay = useContext(TooltipDelayContext)
+  return <TooltipPrimitive.Provider data-slot="tooltip-provider" delay={delay ?? inheritedDelay ?? 0} {...props} />
 }
 
 type TooltipDelayProps = {
-  /** Hover open delay in ms (forwarded to the provider). Defaults to 0. */
+  /** Hover open delay in ms (forwarded to the provider). Defaults to the enclosing `TooltipDelay`'s, else 0. */
   delay?: number
   /** Close delay in ms (forwarded to the provider). */
   closeDelay?: number
@@ -72,16 +82,18 @@ function TooltipContent({
   sideOffset = 8,
   align = 'center',
   alignOffset = 0,
+  anchor,
   children,
   ...props
 }: TooltipPrimitive.Popup.Props &
-  Pick<TooltipPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'side' | 'sideOffset'>) {
+  Pick<TooltipPrimitive.Positioner.Props, 'align' | 'alignOffset' | 'anchor' | 'side' | 'sideOffset'>) {
   const portalContainer = usePortalContainer()
   return (
     <TooltipPrimitive.Portal container={portalContainer}>
       <TooltipPrimitive.Positioner
         align={align}
         alignOffset={alignOffset}
+        anchor={anchor}
         side={side}
         sideOffset={sideOffset}
         className="isolate z-[var(--z-overlay)]"
@@ -110,4 +122,4 @@ function TooltipContent({
   )
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, TooltipDelay }

@@ -1,10 +1,10 @@
 import { renderHook } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import useSpendingLimitTokenOptions from '../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../../SpendingLimitFlow/utils/tokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
+import type { TokenOption } from '@/utils/tokenOptions'
 import useHeldTokenAddresses from '../useHeldTokenAddresses'
 
-jest.mock('../../../SpendingLimitFlow/hooks/useSpendingLimitTokenOptions')
+jest.mock('@/hooks/useSpendingLimitTokenOptions')
 
 const mockOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 

@@ -4,9 +4,9 @@ import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/public/services/spendingLimitValidation'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import {
   DUPLICATE_TOKEN_ERROR,
   EXISTING_LIMIT_ERROR,
@@ -58,13 +58,14 @@ const mockTokens = [
 
 // A plain <select> keeps these tests about the row. It still renders `helperText`, since that slot is
 // where the row's balance and token error reach the user.
-jest.mock('../../TokenSelector', () => ({
+jest.mock('@/components/common/TokenSelector', () => ({
   __esModule: true,
   default: ({
     value,
     onChange,
     excludeAddresses = [],
     disabledAddresses = [],
+    extraTokens = [],
     helperText,
     'data-testid': testId = 'limit-token-selector',
   }: {
@@ -72,11 +73,17 @@ jest.mock('../../TokenSelector', () => ({
     onChange: (next: string | undefined) => void
     excludeAddresses?: string[]
     disabledAddresses?: string[]
+    extraTokens?: readonly { address: string }[]
     helperText?: React.ReactNode
     'data-testid'?: string
   }) => (
     <div>
-      <select data-testid={testId} value={value ?? ''} onChange={(event) => onChange(event.target.value || undefined)}>
+      <select
+        data-testid={testId}
+        data-extra-tokens={extraTokens.map((token) => token.address).join(',')}
+        value={value ?? ''}
+        onChange={(event) => onChange(event.target.value || undefined)}
+      >
         <option value="">none</option>
         {mockTokens
           .filter((token) => !excludeAddresses.includes(token.address))
@@ -95,7 +102,7 @@ jest.mock('@safe-global/utils/utils/formatNumber', () => ({
   ...jest.requireActual('@safe-global/utils/utils/formatNumber'),
   getLocalDecimalSeparator: jest.fn(() => '.'),
 }))
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 jest.mock('../../ExistingSpendingLimitsProvider', () => ({
   useExistingSpendingLimits: jest.fn(() => ({ loading: false })),
@@ -386,6 +393,14 @@ describe('TokenLimitCard', () => {
       renderRows([{ ...createEmptyLimit(), tokenAddress: unlisted.address }], undefined, SPENDER, true)
 
       expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
+    })
+
+    it('hands the tokens the Safe already limits to the picker', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, SPENDER, true)
+
+      expect(screen.getByTestId('limit-token-selector')).toHaveAttribute('data-extra-tokens', USDC)
     })
 
     it('keeps a token the spender already has in the selector so it can be edited', () => {

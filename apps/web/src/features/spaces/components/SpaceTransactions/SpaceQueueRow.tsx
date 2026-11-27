@@ -1,60 +1,120 @@
-import type { ComponentProps, ReactElement } from 'react'
+import { useCallback, useEffect, useRef, type ComponentProps, type ReactElement, type ReactNode } from 'react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
+import {
+  QueueProposerMark,
+  QueueWarningMarker,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueRowMarks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
-import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import StatusLabel from '@/features/swap/public/components/StatusLabel'
 import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
-import { useHasFeature } from '@/hooks/useChains'
-import useIsPending from '@/hooks/useIsPending'
-import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { isImitation, isTrustedTx } from '@/utils/transactions'
+import useChains, { useHasFeature } from '@/hooks/useChains'
+import { useAppSelector } from '@/store'
+import { selectPendingTxById } from '@/store/pendingTxsSlice'
+import { isBridgeOrderTxInfo, isMultisigExecutionInfo } from '@/utils/transaction-guards'
+import QueuePartyAvatar from '@safe-global/views/features/spaces/components/SpaceQueue/QueuePartyAvatar'
+import QueueProposedTime from '@safe-global/views/features/spaces/components/SpaceQueue/QueueProposedTime'
+import QueueParty from '@safe-global/views/features/spaces/components/SpaceQueue/QueuePartyCard'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import PartyCard from './QueueParty/PartyCard'
 import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
+import BlockedByButton from '@safe-global/views/features/spaces/components/SpaceQueue/BlockedByButton'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
-import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
-import StatusChip from '@safe-global/views/features/spaces/components/SpaceQueue/StatusChip'
+import QueueNonce from '@safe-global/views/features/spaces/components/SpaceQueue/QueueNonce'
+import { QueueTriggerHint } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueHint'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import { QUEUE_COLUMNS, QUEUE_PINNED_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
-import { getCounterparty, getNonce } from './utils'
+import { cn } from '@safe-global/views/utils/cn'
+import { useQueueGoTo, useRowHighlight, type HighlightPhase } from './SpaceQueueTable/queueNavigation'
+import {
+  getBlockedBy,
+  getBlockedByHint,
+  getCounterparty,
+  getNonce,
+  getNonceHint,
+  getQueueWarnings,
+  getSignHint,
+} from './utils'
+import { NonceTakenAction, PendingRowAction, useIsNonceExecutingElsewhere } from './PendingRowAction'
 
-const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: string }): ReactElement | null => {
+/** The other party's avatar and name; hovering or focusing it shows its party card */
+const CounterpartyParty = ({ party, chainId }: { party: AddressInfo; chainId: string }): ReactElement => {
+  const contact = useAddressBookItem(party.value, chainId)
+  const name = contact?.name || party.name || undefined
+  return (
+    <QueueParty
+      trigger={
+        <span
+          data-testid="counterparty-party"
+          tabIndex={0}
+          className="flex min-w-0 items-center gap-1.5 rounded-sm outline-hidden focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50"
+        />
+      }
+      card={
+        <PartyCard
+          address={party.value}
+          chainId={chainId}
+          name={name}
+          avatar={<QueuePartyAvatar address={party.value} logoUri={party.logoUri} size={32} />}
+        />
+      }
+    >
+      {/* Grayscale only tints the avatar: the name is already a neutral colour */}
+      <span className="flex shrink-0 grayscale group-hover/transaction:grayscale-0">
+        <QueuePartyAvatar address={party.value} logoUri={party.logoUri} size={20} />
+      </span>
+      {/* Unnamed, the short address is monospaced like any other address */}
+      <span className={cn('min-w-0 truncate', !name && 'font-mono text-xs')}>
+        {name ?? shortenAddress(party.value)}
+      </span>
+    </QueueParty>
+  )
+}
+
+export const Counterparty = ({
+  txInfo,
+  chainId,
+}: {
+  txInfo: TransactionInfo
+  chainId: string
+}): ReactElement | null => {
   const counterparty = getCounterparty(txInfo)
   if (!counterparty) return null
   return (
     <span className="flex min-w-0 items-center gap-2 text-sm">
-      {/* Fixed width so the names line up whichever word the pill says */}
-      <span className="flex w-12 shrink-0 justify-center rounded-md bg-muted py-1 capitalize group-hover/transaction:bg-card">
+      {/* A plain word in the sentence. Fixed width, the widest being "from", so the names line up whichever it is */}
+      <span
+        data-testid="counterparty-join"
+        className="w-8 shrink-0 text-muted-foreground group-hover/transaction:text-foreground"
+      >
         {counterparty.join}
       </span>
-      {/* Grayscale only tints the avatar: the name is already a neutral colour */}
-      <span className="min-w-0 truncate grayscale group-hover/transaction:grayscale-0">
-        {'protocol' in counterparty ? (
-          counterparty.protocol
-        ) : (
-          <EthHashInfo
-            address={counterparty.party.value}
-            name={counterparty.party.name}
-            customAvatar={counterparty.party.logoUri}
-            chainId={chainId}
-            onlyName
-            shortAddress
-            showPrefix={false}
-            showCopyButton={false}
-            hasExplorer={false}
-            avatarSize={20}
-          />
-        )}
-      </span>
+      {'protocol' in counterparty ? (
+        <span className="min-w-0 truncate">{counterparty.protocol}</span>
+      ) : (
+        <CounterpartyParty party={counterparty.party} chainId={chainId} />
+      )}
     </span>
   )
+}
+
+// The same basis on every row, so the summary and counterparty shrink alike and line up down the table
+const DetailsSlot = ({ className, children }: { className: string; children?: ReactNode }): ReactElement => (
+  <span className={`flex min-w-0 items-center ${className}`}>{children}</span>
+)
+
+// Painted on the cells like the hover pill, so it sits inside the row's insets with the same rounded ends
+const HIGHLIGHT_CLASSES: Record<HighlightPhase, string> = {
+  on: '[&>td]:bg-accent [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg',
+  fading:
+    '[&>td]:transition-colors [&>td]:duration-700 motion-reduce:[&>td]:transition-none [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg',
 }
 
 type SpaceQueueRowProps = {
@@ -62,12 +122,17 @@ type SpaceQueueRowProps = {
   chainId: string
   status: QueueStatus
   nextNonce?: number
+  /** Where the Safe's next nonce stands for the user: what a blocked row waits on */
+  nextStatus?: QueueStatus
   conflict?: ConflictOption
   /** False when a rejection already holds this nonce */
   canReject?: boolean
-  /** Set where rows of several Safes share a list, to name the row's Safe */
-  safeAddress?: string
+  /** The user signed another option at this nonce */
+  signedOther?: boolean
+  safeAddress: string
   rowProps?: ComponentProps<'tr'>
+  /** Phones: one cell beside the nonce */
+  compact?: boolean
 }
 
 const SpaceQueueRow = ({
@@ -75,85 +140,172 @@ const SpaceQueueRow = ({
   chainId,
   status,
   nextNonce,
+  nextStatus,
   conflict,
   canReject = true,
+  signedOther,
   safeAddress,
   rowProps,
+  compact = false,
 }: SpaceQueueRowProps): ReactElement => {
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
-  const isPending = useIsPending(tx.id)
+  const pendingTx = useAppSelector((state) => selectPendingTxById(state, tx.id))
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
 
   const nonce = getNonce(tx)
+  const nonceTaken = useIsNonceExecutingElsewhere(tx.id, chainId, safeAddress, nonce)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
-  const showWarning = isImitation(tx) || (hasDefaultTokenlist && !isTrustedTx(tx))
+  const { configs } = useChains()
+  const bridgeTo = isBridgeOrderTxInfo(tx.txInfo) ? tx.txInfo.toChain : undefined
+  const warnings = getQueueWarnings({
+    tx,
+    safeAddress,
+    checksTokens: !!hasDefaultTokenlist,
+    expired: expiredSwap,
+    unknownNetwork: !!bridgeTo && configs.length > 0 && !configs.some((chain) => chain.chainId === bridgeTo),
+  })
+  const proposedOnly = executionInfo?.confirmationsSubmitted === 0
+  const goTo = useQueueGoTo()
+  const blockedBy = pendingTx ? undefined : getBlockedBy(status, nonce, nextNonce)
+
+  const { phase, seq, takeFocus } = useRowHighlight(tx.id)
+  const rowRef = useRef<HTMLTableRowElement | null>(null)
+  const measureRef = rowProps?.ref
+  const setRowRef = useCallback(
+    (element: HTMLTableRowElement | null) => {
+      rowRef.current = element
+      if (typeof measureRef === 'function') measureRef(element)
+      else if (measureRef) measureRef.current = element
+    },
+    [measureRef],
+  )
+  useEffect(() => {
+    if (seq !== undefined && takeFocus()) rowRef.current?.focus({ preventScroll: true })
+  }, [seq, takeFocus])
+
+  const gauge = executionInfo && (
+    <SignersTooltip
+      chainId={chainId}
+      txId={tx.id}
+      safeAddress={safeAddress}
+      status={status}
+      nonce={nonce}
+      nextNonce={nextNonce}
+      submitted={executionInfo.confirmationsSubmitted}
+      required={executionInfo.confirmationsRequired}
+    />
+  )
+
+  const action = (
+    <div className="flex items-center justify-end gap-1">
+      {/* The status is in the gauge: what the gauge can't show takes the place of the button */}
+      {pendingTx ? (
+        <PendingRowAction txId={tx.id} pendingTx={pendingTx} />
+      ) : expiredSwap ? (
+        <QueueTriggerHint hint="This order expired. Reject or delete it to free the nonce.">
+          <StatusLabel status="expired" />
+        </QueueTriggerHint>
+      ) : nonceTaken && nonce !== undefined ? (
+        <NonceTakenAction tx={tx} nonce={nonce} />
+      ) : blockedBy !== undefined ? (
+        <BlockedByButton
+          nonce={blockedBy}
+          hint={getBlockedByHint(blockedBy, nextStatus)}
+          onClick={() => goTo?.({ safeAddress, chainId, nonce: blockedBy, status: nextStatus })}
+        />
+      ) : (
+        <QueueActions tx={tx} dense signHint={getSignHint({ tx, status, nextNonce, signedOther })} />
+      )}
+      <RowActionsMenu tx={tx} canReject={canReject} nonceTaken={nonceTaken} />
+    </div>
+  )
 
   return (
-    <TableRow data-testid="space-queue-row" className="group/transaction h-14" {...rowProps}>
-      <TableCell className="relative py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground">
-        {conflict ? <ConflictBracket {...conflict} nonce={nonce} /> : nonce}
-      </TableCell>
-
-      <TableCell className="py-2">
-        <div className="flex min-h-10 min-w-0 items-center gap-2">
-          {safeAddress && <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />}
-          {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
-          <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card">
-            <QueueTxDetails.Type tx={tx} />
-          </span>
-          <span className="min-w-0 text-sm">
-            <QueueTxDetails.Summary tx={tx} />
-          </span>
-        </div>
-      </TableCell>
-
-      <TableCell className="py-2">
-        <Counterparty txInfo={tx.txInfo} chainId={chainId} />
-      </TableCell>
-
-      <TableCell className="text-sm">
-        <Tooltip delay={150}>
-          <TooltipTrigger className="truncate">{formatTimeInWords(tx.timestamp)}</TooltipTrigger>
-          <TooltipContent>{formatDateTime(tx.timestamp)}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-
-      <TableCell className="py-1">
-        {executionInfo && (
-          <SignersTooltip
-            chainId={chainId}
-            txId={tx.id}
-            submitted={executionInfo.confirmationsSubmitted}
-            required={executionInfo.confirmationsRequired}
-          >
-            <span className="flex w-fit items-center gap-1.5 text-sm tabular-nums">
-              <SignatureGauge
-                count={executionInfo.confirmationsSubmitted}
-                threshold={executionInfo.confirmationsRequired}
-              />
-              {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
-            </span>
-          </SignersTooltip>
-        )}
-      </TableCell>
-
-      <TableCell>
-        {expiredSwap ? (
-          <StatusLabel status="expired" />
-        ) : isPending ? (
-          <TxStatusLabel tx={tx} />
+    <TableRow
+      data-testid="space-queue-row"
+      {...rowProps}
+      ref={setRowRef}
+      tabIndex={-1}
+      data-highlighted={phase}
+      data-no-hover={phase === 'on' ? '' : undefined}
+      className={cn(
+        'group/transaction outline-hidden focus-visible:outline-solid focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring',
+        !compact && 'h-14',
+        phase && HIGHLIGHT_CLASSES[phase],
+      )}
+    >
+      <TableCell
+        data-pin={QUEUE_PINNED_COLUMNS.Nonce}
+        className="relative py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground"
+      >
+        {conflict ? (
+          <ConflictBracket {...conflict} nonce={nonce} />
         ) : (
-          <StatusChip status={status} nextNonce={nextNonce} />
+          <QueueNonce nonce={nonce} {...getNonceHint(status, nonce, nextNonce)} />
         )}
       </TableCell>
 
-      <TableCell>
-        <div className="flex items-center justify-end gap-1">
-          {!expiredSwap && <QueueActions tx={tx} dense />}
-          <RowActionsMenu tx={tx} canReject={canReject} />
-        </div>
-      </TableCell>
+      {compact ? (
+        <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="py-2">
+          <span className="flex min-w-0 flex-col gap-1.5">
+            <span className="flex min-w-0 items-center gap-2 text-sm">
+              <span className="flex min-w-0 max-w-[50%] shrink-0">
+                <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />
+              </span>
+              <span className="min-w-0 truncate">
+                <QueueTxDetails.Summary tx={tx} />
+              </span>
+              {warnings.length > 0 && <QueueWarningMarker warnings={warnings} />}
+            </span>
+            {/* Wraps under the gauge sooner than overflow: the action has to stay in view */}
+            <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              {gauge}
+              <span className="ml-auto">{action}</span>
+            </span>
+          </span>
+        </TableCell>
+      ) : (
+        <>
+          <TableCell className="py-2">
+            <span className="flex min-w-0">
+              <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />
+            </span>
+          </TableCell>
+
+          <TableCell className="py-2">
+            <span className="flex min-w-0">
+              <QueueTxDetails.Type tx={tx} />
+            </span>
+          </TableCell>
+
+          <TableCell className="py-2">
+            <span className="flex min-h-10 min-w-0 items-center gap-3">
+              <DetailsSlot className="shrink basis-40 gap-1.5 text-sm">
+                <span className="min-w-0 truncate">
+                  <QueueTxDetails.Summary tx={tx} />
+                </span>
+                {warnings.length > 0 && <QueueWarningMarker warnings={warnings} />}
+              </DetailsSlot>
+              <DetailsSlot className="shrink basis-44">
+                <Counterparty txInfo={tx.txInfo} chainId={chainId} />
+              </DetailsSlot>
+              <DetailsSlot className="shrink-0 gap-1.5 text-sm text-muted-foreground group-hover/transaction:text-foreground">
+                <span className="flex w-16 min-w-0">
+                  <QueueProposedTime timestamp={tx.timestamp} />
+                </span>
+                {proposedOnly && executionInfo && <QueueProposerMark threshold={executionInfo.confirmationsRequired} />}
+              </DetailsSlot>
+            </span>
+          </TableCell>
+
+          <TableCell className="py-1">
+            <span className="flex min-w-0 items-center">{gauge}</span>
+          </TableCell>
+
+          <TableCell data-pin={QUEUE_PINNED_COLUMNS.Action}>{action}</TableCell>
+        </>
+      )}
     </TableRow>
   )
 }

@@ -1,4 +1,5 @@
 import ActionsTray from '@/features/actions-tray/public/components/ActionsTray'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { TotalValueElement } from '@safe-global/views/features/spaces/components/TotalValueElement'
 
 /**
@@ -29,4 +30,17 @@ const DashboardHeader = ({ value, loading, noAssets }: DashboardHeaderProps) => 
   )
 }
 
-export { DashboardHeader }
+/** Same size as DashboardHeader. bg-border: the default muted fill matches the page background and does not show */
+const DashboardHeaderSkeleton = () => {
+  return (
+    <div className="mb-10 flex flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-4 w-20 bg-border" />
+        <Skeleton className="h-[30px] w-[200px] bg-border" />
+      </div>
+      <Skeleton className="h-9 w-[400px] bg-border" />
+    </div>
+  )
+}
+
+export { DashboardHeader, DashboardHeaderSkeleton }

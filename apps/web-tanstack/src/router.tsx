@@ -51,7 +51,6 @@ import { Route as SpacesPlansRoute } from './routes/spaces/plans'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
 import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
 import { Route as SpacesSettingsAccountRoute } from './routes/spaces/settings/account'
-import { Route as SpacesSettingsExperimentalRoute } from './routes/spaces/settings/experimental'
 import { Route as SpacesSettingsGeneralRoute } from './routes/spaces/settings/general'
 
 // Group D — /apps/*, /new-safe/*, /balances/*, /welcome/*
@@ -127,7 +126,6 @@ const routeTree = RootRoute.addChildren([
   SpacesSettingsGeneralRoute,
   SpacesSettingsAboutRoute,
   SpacesSettingsAccountRoute,
-  SpacesSettingsExperimentalRoute,
   // Group D
   AppsIndexRoute,
   AppsBookmarkedRoute,

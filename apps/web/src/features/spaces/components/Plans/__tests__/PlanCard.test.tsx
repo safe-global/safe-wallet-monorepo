@@ -89,6 +89,30 @@ describe('PlanCard', () => {
     expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
   })
 
+  it.each([
+    ['a paid plan', businessPlan()],
+    ['a trial', businessPlan({ isTrialing: true, seatsLabel: '10 Safe accounts' })],
+  ])('marks only the size in force as current on %s', async (_, currentPlan) => {
+    const Picker = () => {
+      const [seatsLabel, setSeatsLabel] = useState<string>()
+      return (
+        <PlanCard
+          location={PlanLocation.PLANS_PAGE}
+          tier={currentTier('price_b10m')}
+          currentPlan={currentPlan}
+          seatsLabel={seatsLabel}
+          onSeatsChange={setSeatsLabel}
+        />
+      )
+    }
+    const { user } = renderWithUserEvent(<Picker />)
+    expect(screen.getByTestId('plan-current-badge')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: '5 Safe accounts' }))
+
+    expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
+  })
+
   it('opens the other billing cycle on the Safe count of the plan in force', () => {
     const yearly: PlanTier = {
       ...BUSINESS,
@@ -110,15 +134,77 @@ describe('PlanCard', () => {
   describe('without a paid plan', () => {
     const trial = businessPlan({ isTrialing: true, price: 669, seatsLabel: '5 Safe accounts' })
 
-    it('shows a custom price and only sales until a size is picked, then the price and a switch', async () => {
+    it('opens the trial plan on its own size and price, marked as current and featured', () => {
+      render(<PlanCard location={PlanLocation.PLANS_PAGE} tier={currentTier('price_b5m')} currentPlan={trial} />)
+
+      expect(selectedSize()).toHaveAccessibleName('5 Safe accounts')
+      expect(screen.getByText('€669')).toBeInTheDocument()
+      expect(screen.queryByText('Custom')).not.toBeInTheDocument()
+      expect(screen.getByTestId('plan-current-badge')).toHaveTextContent('Current')
+      expect(screen.getByTestId('current-plan-card')).not.toHaveAttribute('data-hover-plan')
+      expect(screen.getByRole('button', { name: 'Add payment method' })).toBeInTheDocument()
+    })
+
+    it('opens the trial plan on the other billing cycle on the trial size', () => {
+      const yearly: PlanTier = {
+        ...BUSINESS,
+        id: 'Business-year',
+        billingCycle: 'year',
+        options: [option(5, 719_000), option(20, 1_799_000)],
+      }
+      render(
+        <PlanCard
+          location={PlanLocation.PLANS_PAGE}
+          tier={yearly}
+          currentPlan={businessPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' })}
+        />,
+      )
+
+      expect(selectedSize()).toHaveAccessibleName('20 Safe accounts')
+      expect(screen.getByText('€17,990')).toBeInTheDocument()
+      expect(screen.getByTestId('plan-card')).not.toHaveAttribute('data-hover-plan')
+    })
+
+    it.each([
+      ['the trial size is not sold on that cycle', '20 Safe accounts'],
+      ['the trial size is not known yet', undefined],
+    ])('keeps the trial plan on the other billing cycle unpicked when %s', (_, seatsLabel) => {
+      const yearly: PlanTier = {
+        ...BUSINESS,
+        id: 'Business-year',
+        billingCycle: 'year',
+        options: [option(5, 719_000), option(10, 1_199_000)],
+      }
+      render(
+        <PlanCard
+          location={PlanLocation.PLANS_PAGE}
+          tier={yearly}
+          currentPlan={businessPlan({ isTrialing: true, seatsLabel })}
+        />,
+      )
+
+      expect(screen.queryByRole('tab', { selected: true })).not.toBeInTheDocument()
+      expect(screen.getByText('Custom')).toBeInTheDocument()
+      expect(screen.queryByText('€7,190')).not.toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Talk to sales' })).toBeInTheDocument()
+      expect(screen.getByTestId('plan-card')).not.toHaveAttribute('data-hover-plan')
+    })
+
+    it('shows another plan with a custom price and only sales until a size is picked, then the price and a switch', async () => {
       const onCta = jest.fn()
+      const starterTrial = businessPlan({
+        name: 'Starter',
+        isTrialing: true,
+        price: 189,
+        seatsLabel: '2 Safe accounts',
+      })
       const Picker = () => {
         const [seatsLabel, setSeatsLabel] = useState<string>()
         return (
           <PlanCard
             location={PlanLocation.PLANS_PAGE}
-            tier={currentTier('price_b5m')}
-            currentPlan={trial}
+            tier={{ ...BUSINESS, options: [option(5, 66_900), option(10, 109_900), option(20, 166_900)] }}
+            currentPlan={starterTrial}
             seatsLabel={seatsLabel}
             onSeatsChange={setSeatsLabel}
             onCta={onCta}
@@ -131,6 +217,7 @@ describe('PlanCard', () => {
       expect(screen.queryByText('€669')).not.toBeInTheDocument()
       expect(screen.queryByRole('tab', { selected: true })).not.toBeInTheDocument()
       expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
+      expect(screen.getByTestId('plan-card')).toHaveAttribute('data-hover-plan')
       expect(within(screen.getByTestId('plan-ctas')).getAllByRole('link')).toHaveLength(1)
       expect(screen.getByRole('link', { name: 'Talk to sales' })).toBeInTheDocument()
 

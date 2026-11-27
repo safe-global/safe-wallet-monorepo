@@ -4,6 +4,7 @@ import '@testing-library/jest-dom'
 import { configure } from '@testing-library/react'
 import { server } from '@/tests/server'
 import { faker } from '@faker-js/faker'
+import { FAKE_CLOCK_START } from './jest.clock.cjs'
 
 // Seed faker for deterministic test data
 faker.seed(123)
@@ -68,6 +69,21 @@ globalThis.BroadcastChannel = class BroadcastChannel {
   close() {}
 }
 
+// jsdom checks a cookie's expires date against the real date, so a cookie that expires on the fake clock is dropped at once
+if (typeof Document !== 'undefined') {
+  const cookieProperty = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
+  Object.defineProperty(Document.prototype, 'cookie', {
+    ...cookieProperty,
+    set(value) {
+      const withMaxAge = value.replace(
+        /;\s*expires=([^;]*)/i,
+        (_, date) => `; max-age=${Math.round((Date.parse(date) - Date.now()) / 1000)}`,
+      )
+      cookieProperty.set.call(this, withMaxAge)
+    },
+  })
+}
+
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())
@@ -126,6 +142,12 @@ Object.defineProperty = (obj, prop, desc) => {
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' })
+})
+
+// Jest installs the fake clock once per file, so each test puts it back and resets it to the configured start
+beforeEach(() => {
+  if (!Object.prototype.hasOwnProperty.call(setTimeout, 'clock')) jest.useFakeTimers()
+  jest.setSystemTime(FAKE_CLOCK_START)
 })
 
 afterEach(() => server.resetHandlers())

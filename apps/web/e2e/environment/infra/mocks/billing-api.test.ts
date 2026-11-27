@@ -10,6 +10,7 @@ const BUSINESS_PRICE = PLANS.business.price.id
 const STARTER_PRICE = PLANS.starter.price.id
 const SPACE_UUID = '1f0e2d3c-4b5a-6978-8a9b-0c1d2e3f4a5b'
 const CUSTOMER = SPACE_UUID.replaceAll('-', '')
+const PORTAL_RETURN_URL = 'http://localhost:3080/spaces/plans?spaceId=1&tab=billing'
 const COMPOSE = readFileSync(new URL('../docker-compose.test.yml', import.meta.url), 'utf8')
 
 type Payload = Record<string, unknown>
@@ -49,6 +50,13 @@ async function subscriptionsOf(billing: Billing, customer = CUSTOMER, query = ''
 
 function store(billing: Billing, overrides: unknown): Promise<[number, Payload]> {
   return call(billing, 'POST', `/__test/customers/${SPACE_UUID}/subscriptions`, overrides)
+}
+
+/** Opens a portal session through the gateway's call and answers the path of its page on the mock */
+async function openPortal(billing: Billing, returnUrl: string): Promise<string> {
+  const query = `returnUrl=${encodeURIComponent(returnUrl)}`
+  const { body } = await send(billing, 'GET', `/api/v1/customers/${SPACE_UUID}/session-url`, undefined, query)
+  return body.slice(body.indexOf('/portal/'))
 }
 
 function decodeSegment(segment: string): Payload {
@@ -138,8 +146,8 @@ describe('billing API', () => {
     const offers = links.map((link) => [link.metadata.planName, link.trialPeriodDays, link.metadata.gracePeriod])
     const expected = ['Business', 'Starter'].flatMap((name) => [
       [name, null, undefined],
-      [name, 30, 'true'],
-      [name, 30, 'false'],
+      [name, 14, 'true'],
+      [name, 14, 'false'],
     ])
     assert.deepEqual(offers, expected)
     for (const link of links) {
@@ -178,7 +186,7 @@ describe('billing API', () => {
     assert.equal(page.headers['Content-Type'], 'text/html; charset=utf-8')
     for (const line of [
       'Plan: Business',
-      '30 days free',
+      '14 days free',
       `Workspace: ${CUSTOMER}`,
       'Returns to: https://wallet.test/welcome/select-safes',
     ]) {
@@ -324,9 +332,87 @@ describe('billing API', () => {
 
   it('rejects calls it cannot answer', async () => {
     const { billing } = recordingBilling()
-    const [status, payload] = await call(billing, 'GET', `/api/v1/customers/${CUSTOMER}/session-url`)
+    const [status, payload] = await call(billing, 'GET', `/api/v1/customers/${CUSTOMER}/invoices`)
     assert.equal(status, 404)
-    assert.match(String(payload.message), /session-url/)
+    assert.match(String(payload.message), /invoices/)
+  })
+
+  it('lets a test set the end of the current period', async () => {
+    const { billing, announced } = recordingBilling()
+    const [, stored] = await store(billing, { plan: 'starter', currentPeriodEnd: 1767484800 })
+    assert.equal(stored.currentPeriodEnd, 1767484800)
+    assert.equal(announced[0].currentPeriodEnd, 1767484800)
+  })
+
+  it('answers a portal session with the bare URL of its local page', async () => {
+    const { billing } = recordingBilling('http://localhost:8010/billing')
+    const reply = await send(
+      billing,
+      'GET',
+      `/api/v1/customers/${SPACE_UUID}/session-url`,
+      undefined,
+      `returnUrl=${encodeURIComponent(PORTAL_RETURN_URL)}`,
+    )
+    assert.equal(reply.status, 200)
+    assert.equal(reply.headers['Content-Type'], 'text/plain')
+    assert.equal(reply.body, 'http://localhost:8010/billing/portal/bps_e2e_1')
+    assert.equal((await send(billing, 'GET', `/api/v1/customers/${CUSTOMER}/session-url`)).status, 400)
+  })
+
+  it('opens a local portal page for the Workspace, with its Add card form and a Back link', async () => {
+    const { billing } = recordingBilling()
+    const page = await send(billing, 'GET', await openPortal(billing, PORTAL_RETURN_URL))
+    assert.equal(page.status, 200)
+    for (const line of [
+      'Local billing portal',
+      `Workspace: ${CUSTOMER}`,
+      'action="bps_e2e_1/payment-method"',
+      `href="${PORTAL_RETURN_URL.replaceAll('&', '&amp;')}"`,
+    ]) {
+      assert.ok(page.body.includes(line), `the portal page lacks ${line}`)
+    }
+  })
+
+  it('escapes the return URL on the portal page', async () => {
+    const { billing } = recordingBilling()
+    const page = await send(billing, 'GET', await openPortal(billing, 'https://wallet.test/"><script>'))
+    assert.doesNotMatch(page.body, /<script/i)
+  })
+
+  it('gives the subscription a payment method on Add card, announces it and returns to the session URL', async () => {
+    const { billing, announced, eventTypes } = recordingBilling()
+    await store(billing, { plan: 'starter' })
+
+    const reply = await send(
+      billing,
+      'POST',
+      `${await openPortal(billing, PORTAL_RETURN_URL)}/payment-method`,
+      undefined,
+      `returnUrl=${encodeURIComponent('https://elsewhere.test/')}`,
+    )
+
+    assert.equal(reply.status, 303)
+    assert.equal(reply.headers.Location, PORTAL_RETURN_URL)
+    const [subscription] = await subscriptionsOf(billing)
+    assert.equal(subscription.hasPaymentMethod, true)
+    assert.equal(subscription.plan.id, STARTER_PRICE)
+    assert.deepEqual(eventTypes, ['customer.subscription.created', 'customer.subscription.updated'])
+    assert.equal(announced[1].hasPaymentMethod, true)
+  })
+
+  it('refuses Add card for a Workspace without a subscription', async () => {
+    const { billing, announced } = recordingBilling()
+    const reply = await send(billing, 'POST', `${await openPortal(billing, PORTAL_RETURN_URL)}/payment-method`)
+    assert.equal(reply.status, 404)
+    assert.deepEqual(announced, [])
+  })
+
+  it('refuses a portal session it did not open', async () => {
+    const { billing, announced } = recordingBilling()
+    await store(billing, { plan: 'starter' })
+    assert.equal((await send(billing, 'GET', '/portal/bps_unknown')).status, 404)
+    assert.equal((await send(billing, 'POST', '/portal/bps_unknown/payment-method')).status, 404)
+    assert.equal(announced.length, 1)
   })
 
   it('carries a complete wallet_web snapshot in the event', async () => {

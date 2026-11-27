@@ -264,8 +264,21 @@ export const buildPlanTiers = (
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
+/** The plan the Workspace is on, paid or on trial, on either billing cycle. */
+export const isOnPlan = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
+  currentPlan !== undefined && (Boolean(tier.isCurrent) || currentPlan.name === tier.name)
+
+const hasCurrentSize = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
+  tier.options.some((option) => option.priceId === tier.currentPriceId || option.label === currentPlan?.seatsLabel)
+
+/** Without a paid plan in force, a plan sold in several sizes waits for a pick unless it offers the size in force. */
+export const opensOnSize = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
+  !isUnpaid(currentPlan) ||
+  tier.options.length < 2 ||
+  (isOnPlan(tier, currentPlan) && hasCurrentSize(tier, currentPlan))
+
 export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
-  const isCurrentPlan = tier.isCurrent || currentPlan?.name === tier.name
+  const isCurrentPlan = isOnPlan(tier, currentPlan)
   return (
     tier.options.find((candidate) => candidate.label === seatsLabel) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??

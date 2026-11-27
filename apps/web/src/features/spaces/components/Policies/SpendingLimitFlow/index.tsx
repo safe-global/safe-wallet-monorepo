@@ -11,7 +11,7 @@ import { TxFlowType } from '@/services/analytics/types'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { ExistingSpendingLimitsProvider } from './ExistingSpendingLimitsProvider'
-import { CustomTokensProvider } from './CustomTokensProvider'
+import { CustomTokensProvider } from '@/components/common/CustomTokensProvider'
 import CreateSpendingLimitPolicy from './CreateStep'
 import ReviewSpendingLimitPolicy from './ReviewStep'
 import {

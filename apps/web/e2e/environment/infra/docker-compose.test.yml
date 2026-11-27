@@ -755,7 +755,7 @@ services:
       test:
         - CMD-SHELL
         - test -f /var/lib/rabbitmq/.erlang.cookie && rabbitmq-diagnostics -q
-          ping
+          check_port_connectivity
       interval: 5s
       timeout: 10s
       retries: 12

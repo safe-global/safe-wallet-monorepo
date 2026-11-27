@@ -59,9 +59,6 @@ jobs:
     if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
-      checks: write
-      pull-requests: read
-      statuses: write
     runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
@@ -69,18 +66,7 @@ jobs:
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
-      - name: Run ESLint with suggestions (PR only)
-        if: github.event_name == 'pull_request'
-        uses: CatChen/eslint-suggestion-action@v4.1.39
-        with:
-          request-changes: true
-          fail-check: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          directory: './'
-          targets: '/apps/web/src'
-          config-path: './apps/web/eslint.config.mjs'
-      - name: Run ESLint (push only)
-        if: github.event_name == 'push'
+      - name: Run ESLint
         run: yarn turbo run lint --filter=@safe-global/web
       - name: Run ESLint (packages/views)
         run: yarn turbo run lint --filter=@safe-global/views

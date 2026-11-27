@@ -5,14 +5,14 @@
     {
       "key": "ERC721",
       "description": "ERC-721 NFT / collectibles support.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "SAFE_APPS",
       "description": "Safe Apps marketplace and iframe integration.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -21,12 +21,29 @@
       "description": "ENS / domain name lookup for addresses.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "999",
+        "4217",
+        "4326",
+        "5003",
+        "5042",
+        "9745",
+        "10143",
+        "16661",
+        "20994",
+        "25363",
+        "42431",
+        "80069",
+        "102030",
+        "5042002",
+        "11155111"
+      ]
     },
     {
       "key": "SPENDING_LIMIT",
       "description": "Allowance / spending-limit module support.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -35,26 +52,108 @@
       "description": "EIP-1559 fee estimation for transactions.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "204",
+        "324",
+        "480",
+        "677",
+        "999",
+        "1001",
+        "1874",
+        "1875",
+        "2818",
+        "3338",
+        "4217",
+        "4221",
+        "4326",
+        "4663",
+        "5000",
+        "5003",
+        "5042",
+        "8217",
+        "8453",
+        "9745",
+        "10143",
+        "10200",
+        "16661",
+        "20994",
+        "25363",
+        "42220",
+        "42431",
+        "43111",
+        "43114",
+        "57073",
+        "59144",
+        "80069",
+        "80094",
+        "84532",
+        "102030",
+        "747474",
+        "936485",
+        "5042002",
+        "11142220",
+        "11155111",
+        "42424242"
+      ]
     },
     {
       "key": "TX_SIMULATION",
       "description": "Transaction simulation via Tenderly.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "324",
+        "988",
+        "2818",
+        "3338",
+        "4326",
+        "4663",
+        "5000",
+        "5003",
+        "8453",
+        "9745",
+        "10143",
+        "42161",
+        "42220",
+        "43114",
+        "57073",
+        "59144",
+        "80069",
+        "80094",
+        "84532",
+        "534352",
+        "747474",
+        "11142220",
+        "11155111",
+        "1313161554"
+      ]
     },
     {
       "key": "DEFAULT_TOKENLIST",
       "description": "Curated default token list for the chain.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "EIP1271",
       "description": "EIP-1271 smart-contract signature verification.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -63,19 +162,42 @@
       "description": "Blockaid transaction risk scanning.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "324",
+        "480",
+        "999",
+        "4217",
+        "4326",
+        "8453",
+        "10143",
+        "42161",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "84532",
+        "747474",
+        "11155111"
+      ]
     },
     {
       "key": "PUSH_NOTIFICATIONS",
       "description": "Push notifications for Safe activity.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "NATIVE_WALLETCONNECT",
       "description": "Native WalletConnect integration (connect a Safe as a wallet).",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -84,26 +206,26 @@
       "description": "Account recovery via the Zodiac Delay module.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "10", "100", "137", "8453", "42161", "11155111"]
     },
     {
       "key": "COUNTERFACTUAL",
       "description": "Counterfactual (undeployed) Safe support.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "DELETE_TX",
       "description": "Delete a queued transaction.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "SPEED_UP_TX",
       "description": "Speed up a pending transaction.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -112,7 +234,42 @@
       "description": "Native token swaps.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "204",
+        "324",
+        "480",
+        "999",
+        "2818",
+        "4217",
+        "4326",
+        "4663",
+        "5000",
+        "8217",
+        "8453",
+        "9745",
+        "10200",
+        "42161",
+        "42220",
+        "43111",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "84532",
+        "534352",
+        "747474",
+        "11155111",
+        "1313161554"
+      ]
     },
     {
       "key": "NATIVE_SWAPS_USE_COW_STAGING_SERVER",
@@ -126,34 +283,53 @@
       "description": "Enable swap fees on native swaps.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "50",
+        "56",
+        "100",
+        "137",
+        "143",
+        "204",
+        "999",
+        "4217",
+        "4663",
+        "8217",
+        "8453",
+        "9745",
+        "42161",
+        "43114",
+        "57073",
+        "59144",
+        "11155111"
+      ]
     },
     {
       "key": "NATIVE_SWAPS_COW",
       "description": "Use the CoW protocol for native swaps.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "56", "100", "137", "8453", "9745", "42161", "43114", "57073", "59144", "11155111"]
     },
     {
       "key": "ZODIAC_ROLES",
       "description": "Zodiac Roles modifier support.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "10", "100", "137", "988", "999", "4326", "8453", "10143", "42161", "43114", "11155111"]
     },
     {
       "key": "STAKING",
       "description": "Native staking (Kiln) widget.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1"]
     },
     {
       "key": "STAKING_PROMO",
       "description": "Staking promotion banner.",
       "scope": "PER_CHAIN",
-      "enabled": false,
+      "enabled": true,
       "defaultChains": []
     },
     {
@@ -161,19 +337,130 @@
       "description": "Create the same Safe across multiple chains.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "196",
+        "204",
+        "480",
+        "677",
+        "988",
+        "999",
+        "1001",
+        "1672",
+        "1874",
+        "1875",
+        "2818",
+        "3338",
+        "4217",
+        "4326",
+        "4663",
+        "5000",
+        "5003",
+        "5042",
+        "8217",
+        "8453",
+        "9745",
+        "10143",
+        "10200",
+        "16661",
+        "20994",
+        "25363",
+        "36900",
+        "42161",
+        "42220",
+        "42431",
+        "43111",
+        "43114",
+        "57073",
+        "59144",
+        "80069",
+        "80094",
+        "84532",
+        "102030",
+        "534352",
+        "747474",
+        "936485",
+        "5042002",
+        "11155111",
+        "42424242",
+        "1313161554"
+      ]
     },
     {
       "key": "MULTI_CHAIN_SAFE_ADD_NETWORK",
       "description": "Add a network to an existing multi-chain Safe.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "196",
+        "204",
+        "324",
+        "480",
+        "677",
+        "988",
+        "999",
+        "1001",
+        "1672",
+        "1874",
+        "1875",
+        "2818",
+        "3338",
+        "4217",
+        "4326",
+        "4663",
+        "5000",
+        "5003",
+        "5042",
+        "8217",
+        "8453",
+        "9745",
+        "10143",
+        "10200",
+        "16661",
+        "20994",
+        "25363",
+        "36900",
+        "42161",
+        "42220",
+        "42431",
+        "43111",
+        "43114",
+        "57073",
+        "59144",
+        "80069",
+        "80094",
+        "84532",
+        "102030",
+        "534352",
+        "747474",
+        "936485",
+        "5042002",
+        "11155111",
+        "42424242",
+        "1313161554"
+      ]
     },
     {
       "key": "PROPOSERS",
       "description": "Transaction proposers (delegate proposing).",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -181,7 +468,7 @@
       "key": "TARGETED_SURVEY",
       "description": "Targeted in-app user surveys.",
       "scope": "PER_CHAIN",
-      "enabled": false,
+      "enabled": true,
       "defaultChains": []
     },
     {
@@ -189,7 +476,36 @@
       "description": "Cross-chain bridging widget.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "204",
+        "324",
+        "480",
+        "999",
+        "2818",
+        "4217",
+        "4663",
+        "5000",
+        "8217",
+        "8453",
+        "9745",
+        "42161",
+        "42220",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "534352",
+        "1313161554"
+      ]
     },
     {
       "key": "RENEW_NOTIFICATIONS_TOKEN",
@@ -201,35 +517,35 @@
     {
       "key": "TX_NOTES",
       "description": "Free-text notes on transactions.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "NESTED_SAFES",
       "description": "Nested Safe (Safe-owns-Safe) support.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "MASS_PAYOUTS",
       "description": "Batch / mass payout flow.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "PRIVATE_ADDRESS_BOOK",
       "description": "Client-side encrypted private address book.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "SECURITY_HUB",
       "description": "Security hub dashboard.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -238,19 +554,19 @@
       "description": "Earn (DeFi yield) integration.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "8453", "747474"]
     },
     {
       "key": "EARN_PROMO",
       "description": "Earn promotion banner.",
       "scope": "PER_CHAIN",
-      "enabled": false,
+      "enabled": true,
       "defaultChains": []
     },
     {
       "key": "MIXPANEL",
       "description": "Mixpanel product analytics.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -259,14 +575,73 @@
       "description": "DeFi positions display.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "324",
+        "480",
+        "999",
+        "4217",
+        "4326",
+        "4663",
+        "5000",
+        "8217",
+        "8453",
+        "9745",
+        "16661",
+        "42161",
+        "42220",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "534352",
+        "747474",
+        "1313161554"
+      ]
     },
     {
       "key": "PORTFOLIO_ENDPOINT",
       "description": "Use the Zerion-backed CGW portfolio endpoint for Safe balances.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "50",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "324",
+        "480",
+        "999",
+        "4326",
+        "4663",
+        "5000",
+        "8453",
+        "9745",
+        "42161",
+        "42220",
+        "42431",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "534352",
+        "747474",
+        "5042002",
+        "1313161554"
+      ]
     },
     {
       "key": "PORTFOLIO_SUMMARIES",
@@ -280,12 +655,12 @@
       "description": "Version 2 of the CoW native-swap fee handling.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "56", "100", "137", "2818", "8453", "9745", "42161", "43114", "57073", "59144", "11155111"]
     },
     {
       "key": "CSV_TX_EXPORT",
       "description": "Export transaction history as CSV.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -293,7 +668,7 @@
       "key": "NO_FEE_NOVEMBER",
       "description": "No-fee November promotional campaign.",
       "scope": "PER_CHAIN",
-      "enabled": false,
+      "enabled": true,
       "defaultChains": []
     },
     {
@@ -301,7 +676,33 @@
       "description": "Hypernative transaction screening.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": [
+        "1",
+        "10",
+        "56",
+        "100",
+        "130",
+        "137",
+        "143",
+        "146",
+        "196",
+        "324",
+        "999",
+        "4217",
+        "5000",
+        "8453",
+        "9745",
+        "42161",
+        "42220",
+        "43111",
+        "43114",
+        "57073",
+        "59144",
+        "80094",
+        "534352",
+        "747474",
+        "11155111"
+      ]
     },
     {
       "key": "HYPERNATIVE_RELAX_GUARD_CHECK",
@@ -313,7 +714,7 @@
     {
       "key": "HYPERNATIVE_QUEUE_SCAN",
       "description": "Hypernative queued-transaction scanning.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -322,26 +723,26 @@
       "description": "EURCV stablecoin boost campaign.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "10200"]
     },
     {
       "key": "BATCHING",
       "description": "Transaction batching.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "OIDC_AUTH",
       "description": "OIDC-based social login.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "SWITCH_AUTHENTICATOR",
       "description": "Switch the 2FA authenticator app for an OIDC login.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -350,19 +751,19 @@
       "description": "Hide the native token from balances (stablecoin-fee chains).",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["988", "4217", "42431"]
     },
     {
       "key": "TEMPO_GAS_TOKEN",
       "description": "Tempo gas-token support.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["4217", "42431"]
     },
     {
       "key": "SUPPORT_CHAT",
       "description": "In-app support chat.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -371,19 +772,19 @@
       "description": "Safe-token staking.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "11155111"]
     },
     {
       "key": "SPACE_ONBOARDING_SURVEY",
       "description": "Onboarding survey for Spaces.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "SPACE_AUDIT_LOG",
       "description": "Audit log for Spaces.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -395,23 +796,16 @@
       "defaultChains": []
     },
     {
-      "key": "WORKSPACES_EXPERIMENTAL_FEATURES",
-      "description": "Experimental settings page for Workspaces.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
-      "defaultChains": []
-    },
-    {
       "key": "WORKSPACES_ADDRESS_BOOK_V2",
       "description": "Version 2 of the Workspace address book.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
+      "scope": "GLOBAL",
+      "enabled": true,
       "defaultChains": []
     },
     {
       "key": "ADDRESS_POISONING_PROTECTION",
       "description": "Detect look-alike (address poisoning) recipients.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -420,40 +814,40 @@
       "description": "Safenet transaction checks and risk warnings.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "100", "42161"]
     },
     {
       "key": "SAFE_PRO_ANNOUNCEMENT",
       "description": "Safe Pro announcement modal and banners.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "SAFE_PRO",
       "description": "Safe Pro paid plan.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "POLICIES",
       "description": "Workspace policies page.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "PROPOSER_GATING",
       "description": "Gate proposers behind the Safe Pro plan.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "SPENDING_LIMIT_GATING",
       "description": "Gate spending limits behind the Safe Pro plan.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -462,7 +856,7 @@
       "description": "Spending-limit policies indexed by the policy indexer.",
       "scope": "PER_CHAIN",
       "enabled": true,
-      "defaultChains": []
+      "defaultChains": ["1", "10", "56", "100", "137", "143", "4663", "8453", "42161", "11155111"]
     },
     {
       "key": "WC_SAFE_APP_SUGGESTION",
@@ -474,14 +868,14 @@
     {
       "key": "TWO_FACTOR_AWARENESS_BANNER",
       "description": "2FA awareness card in the Workspace sidebar.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
     {
       "key": "QUEUE_SERVICE",
       "description": "Use the Safe Queue Service instead of the Transaction Service.",
-      "scope": "PER_CHAIN",
+      "scope": "GLOBAL",
       "enabled": true,
       "defaultChains": []
     },
@@ -502,8 +896,8 @@
     {
       "key": "WORKSPACE_ONBOARDING_V2",
       "description": "New workspace setup wizard in the onboarding.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
+      "scope": "GLOBAL",
+      "enabled": true,
       "defaultChains": []
     }
   ]
