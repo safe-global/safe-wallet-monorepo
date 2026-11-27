@@ -60,9 +60,7 @@ const addressBookHandler = (contacts: typeof WORKSPACE_CONTACTS) =>
 const noSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: {} }))
 
 const forgetTourVisits = () => {
-  Object.keys(window.localStorage)
-    .filter((key) => key.includes(WORKSPACE_TOUR_SEEN_KEY))
-    .forEach((key) => window.localStorage.removeItem(key))
+  local.removeItem(WORKSPACE_TOUR_SEEN_KEY)
   local.setItem('safeProAnnouncementSeen', true)
   local.setItem('safeProSidebarBannerDismissed', true)
   return {}

@@ -68,11 +68,8 @@ export async function seedLocalStorage(page: Page): Promise<void> {
   )
 }
 
-/** The workspace tour's seen flag is keyed by the CGW user id, so it can't be pre-seeded; skip it when it opens. */
-export async function dismissWorkspaceTour(page: Page): Promise<void> {
-  await page.addLocatorHandler(page.getByTestId('workspace-tour-welcome'), async () => {
-    await page.getByRole('button', { name: 'Skip for now' }).click()
-  })
+async function markWorkspaceTourSeen(page: Page): Promise<void> {
+  await page.addInitScript((key) => window.localStorage.setItem(key, 'true'), LS_KEYS.workspaceTourSeen)
 }
 
 // ---------------------------------------------------------------------------
@@ -189,6 +186,8 @@ type SafeFixtures = {
   safeApiClient: SafeApiClient
   /** Wallet page object — connect a private-key wallet and SiWE login */
   walletPage: WalletPage
+  /** Lets the workspace tour open; by default every user has seen it */
+  showWorkspaceTour: boolean
   /** The four owners of the spec's scenarios: Alice, Bob, Carol and Dave */
   owners: Owners
   /** The Safes that the spec's scenarios deployed, by the names they return */
@@ -203,7 +202,9 @@ const SPEC_DATA_TIMEOUT_MS = 600_000
 // ---------------------------------------------------------------------------
 export const test = base.extend<SafeFixtures>({
   // Not `use`: the React hooks lint rule takes that name for a hook.
-  safePage: async ({ page }, provide, testInfo) => {
+  showWorkspaceTour: [false, { option: true }],
+
+  safePage: async ({ page, showWorkspaceTour }, provide, testInfo) => {
     // Start collecting failure evidence before the test runs
     const consoleErrors = collectConsoleErrors(page)
     const consoleWarnings = collectConsoleWarnings(page)
@@ -211,7 +212,9 @@ export const test = base.extend<SafeFixtures>({
 
     // Seed localStorage via addInitScript — runs before page scripts, no extra navigation
     await seedLocalStorage(page)
-    await dismissWorkspaceTour(page)
+    if (!showWorkspaceTour) {
+      await markWorkspaceTourSeen(page)
+    }
     await provide(page)
 
     // After test: attach evidence if it failed

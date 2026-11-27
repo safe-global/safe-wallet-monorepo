@@ -138,4 +138,5 @@ export const LS_KEYS = {
   safeLabsTerms: `${LS_NAMESPACE}safeLabsTerms`,
   tokenList: `${LS_NAMESPACE}tokenList`,
   stakingPromoBannerHidden: `${LS_NAMESPACE}hideStakingPromoBanner_v2`,
+  workspaceTourSeen: `${LS_NAMESPACE}workspaceTourSeen`,
 } as const
