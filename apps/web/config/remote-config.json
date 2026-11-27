@@ -647,7 +647,7 @@
       "key": "PORTFOLIO_SUMMARIES",
       "description": "Portfolio summary of each Safe, shown as its total balance on every screen.",
       "scope": "PER_CHAIN",
-      "enabled": false,
+      "enabled": true,
       "defaultChains": []
     },
     {
