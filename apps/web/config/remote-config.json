@@ -791,8 +791,8 @@
     {
       "key": "SPACE_TRANSACTIONS",
       "description": "Pending transactions across all Safes in a Workspace.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
+      "scope": "GLOBAL",
+      "enabled": true,
       "defaultChains": []
     },
     {

@@ -1,13 +1,20 @@
 import { buildContractSignature, buildSignatureBytes } from '@safe-global/protocol-kit'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SigningMethod } from '@safe-global/types-kit'
-import { parseEther } from 'ethers'
 import { confirmInQueue } from '../../environment/scenarios/gateway.mjs'
 import { waitUntil } from '../../environment/scenarios/indexing.mjs'
 import { openSafe } from '../../environment/scenarios/safe.mjs'
 import { confirmationsOf, transactionsIn } from '../api/transaction-items'
 import type { Journey } from '../fixtures/journey.fixture'
-import { seedQueuedTransfer, seedSafe, type QueuedTransaction, type SeededSafe } from './safe'
+import type { MetaTransactionData } from '@safe-global/types-kit'
+import {
+  ethTransfer,
+  seedQueuedTransaction,
+  seedQueuedTransfer,
+  seedSafe,
+  type QueuedTransaction,
+  type SeededSafe,
+} from './safe'
 
 const hasConfirmations = (queue: QueuedItemPage, txId: string, count: number): boolean =>
   transactionsIn(queue).some((tx) => tx.id === txId && confirmationsOf(tx) === count)
@@ -18,9 +25,21 @@ export async function seedSignedTransfer(
   safe: SeededSafe,
   transfer: { nonce: number; recipient: string; amount: string },
 ): Promise<QueuedTransaction> {
-  const queued = await seedQueuedTransfer(safe, transfer)
+  return confirmAsBob(journey, safe, await seedQueuedTransfer(safe, transfer))
+}
+
+/** Proposes `transactions` signed by the context signer and Bob, and waits until the CGW queue shows both signatures. */
+export async function seedSignedTransaction(
+  journey: Journey,
+  safe: SeededSafe,
+  transaction: { nonce: number; transactions: MetaTransactionData[] },
+): Promise<QueuedTransaction> {
+  return confirmAsBob(journey, safe, await seedQueuedTransaction(safe, transaction))
+}
+
+async function confirmAsBob(journey: Journey, safe: SeededSafe, queued: QueuedTransaction): Promise<QueuedTransaction> {
   const { context } = safe
-  const bob = await openSafe(journey.env, journey.owners.bob, safe.address)
+  const bob = await openSafe(context.env, journey.owners.bob, safe.address)
   const signature = await bob.safe.signHash(queued.safeTxHash)
   await confirmInQueue(context, queued.safeTxHash, signature.data)
   await waitUntil(context.env, `${context.path}/transactions/queued`, (queue: QueuedItemPage) =>
@@ -44,7 +63,7 @@ export async function seedTransferWithContractSignature(
   const queued = await seedQueuedTransfer(safe, { nonce: 0, ...transfer })
 
   const transaction = await safe.context.safe.createTransaction({
-    transactions: [{ to: transfer.recipient, value: parseEther(transfer.amount).toString(), data: '0x' }],
+    transactions: [ethTransfer(transfer.recipient, transfer.amount)],
     options: { nonce: 0 },
   })
   const signedByParentOwner = await parent.context.safe.signTransaction(

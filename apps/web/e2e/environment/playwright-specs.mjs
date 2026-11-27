@@ -51,6 +51,7 @@ export const playwrightSpecs = {
   'e2e/sign-offchain-message.spec.ts': {},
   'e2e/spending-limit.spec.ts': { flags: ['SPENDING_LIMIT'] },
   'e2e/workspace-safe-spending-limit.spec.ts': { flags: ['SPENDING_LIMIT'] },
+  'e2e/workspace-pending-transactions.spec.ts': { chains: [1, 137], flags: ['SPACE_TRANSACTIONS'] },
   'e2e/tx-history-filter.spec.ts': {},
   'e2e/portfolio.spec.ts': {
     scenarios: ['prepareZerionPortfolioScenario'],

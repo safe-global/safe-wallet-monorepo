@@ -113,6 +113,7 @@ export const ROUTES = {
   home: '/home',
   welcomeSpaces: '/welcome/spaces',
   spacesPolicies: '/spaces/policies',
+  spacesTransactions: '/spaces/transactions',
   welcomeAccounts: '/welcome/accounts',
   balances: '/balances',
   balancesNfts: '/balances/nfts',

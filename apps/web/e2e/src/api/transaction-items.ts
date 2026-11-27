@@ -2,6 +2,7 @@ import { Interface } from 'ethers'
 import type {
   QueuedItemPage,
   Transaction,
+  TransactionDetails,
   TransactionItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -18,6 +19,13 @@ export function nonceOf(transaction: Transaction): number | undefined {
 /** The confirmations a multisig transaction has; undefined for module transactions and incoming transfers. */
 export function confirmationsOf(transaction: Transaction): number | undefined {
   return transaction.executionInfo?.type === 'MULTISIG' ? transaction.executionInfo.confirmationsSubmitted : undefined
+}
+
+/** The delegate that proposed a multisig transaction; anything but a multisig transaction throws, naming what it got. */
+export function proposedByDelegateOf(details: TransactionDetails | null): string | undefined {
+  const execution = details?.detailedExecutionInfo
+  if (execution?.type !== 'MULTISIG') throw new Error(`Expected a multisig transaction, got ${execution?.type}`)
+  return execution.proposedByDelegate?.value
 }
 
 /** The safeTxHash of a multisig transaction, from its CGW ID `multisig_<safe>_<safeTxHash>`. */
@@ -54,4 +62,18 @@ export function erc20TransfersIn(
         ]
       : [],
   )
+}
+
+/** The nonces of the on-chain rejections on a history page. */
+export function rejectionNonces(history: TransactionItemPage): Array<number | undefined> {
+  return transactionsIn(history)
+    .filter((tx) => tx.txInfo.type === 'Custom' && tx.txInfo.isCancellation)
+    .map(nonceOf)
+}
+
+/** The recipient of each transfer executed at `nonce` on a history page, or the type of any other transaction there. */
+export function recipientsAtNonce(history: TransactionItemPage, nonce: number): string[] {
+  return transactionsIn(history)
+    .filter((tx) => nonceOf(tx) === nonce)
+    .map((tx) => (tx.txInfo.type === 'Transfer' ? tx.txInfo.recipient.value : tx.txInfo.type))
 }

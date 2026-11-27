@@ -1,17 +1,10 @@
-import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
+import { rejectionNonces } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { ROUTES } from '../../src/data/constants'
-
-function rejectionNonces(history: TransactionItemPage): Array<number | undefined> {
-  return transactionsIn(history)
-    .filter((tx) => tx.txInfo.type === 'Custom' && tx.txInfo.isCancellation)
-    .map(nonceOf)
-}
 
 test.describe('Reject a queued transaction', { tag: '@e2e' }, () => {
   test('should execute an on-chain rejection at the nonce of the transfer when an owner rejects it', async ({

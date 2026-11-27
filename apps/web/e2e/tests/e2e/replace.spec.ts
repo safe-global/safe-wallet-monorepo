@@ -1,6 +1,5 @@
 import { parseEther } from 'ethers'
-import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
+import { recipientsAtNonce } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
@@ -10,12 +9,6 @@ import { TxReviewPage } from '../../src/pages/tx-review.page'
 
 const AMOUNT = '0.001'
 const REPLACEMENT_AMOUNT = '0.002'
-
-function recipientsAtNonce(history: TransactionItemPage, nonce: number): string[] {
-  return transactionsIn(history)
-    .filter((tx) => nonceOf(tx) === nonce)
-    .map((tx) => (tx.txInfo.type === 'Transfer' ? tx.txInfo.recipient.value : tx.txInfo.type))
-}
 
 test.describe('Replace a queued transaction', { tag: '@e2e' }, () => {
   test('should execute the replacement at the nonce of the original when an owner replaces it', async ({
