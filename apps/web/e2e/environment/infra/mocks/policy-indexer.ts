@@ -9,7 +9,7 @@
  * Register a Safe's state with `node policy-indexer.ts register <chainId> <address>` and the state as JSON on stdin:
  * `{ "GuardPolicyBinding": [Binding, …], "ConfigurationRoot": [Root, …] }`. It replaces what the Safe had.
  */
-import { isMain, isRecord, json, localRequest, readText, serve } from './http.ts'
+import { isMain, isRecord, json, localRequest, readText, safeKey, serve } from './http.ts'
 import type { MockRequest, Reply } from './http.ts'
 
 const PORT = 8094
@@ -48,13 +48,15 @@ type Variables = { guardPolicyBindings?: unknown; guardPolicyKinds?: unknown; ro
 
 class InvalidState extends Error {}
 
-const safeKey = (chainId: number, safe: string): string => `${chainId}:${safe.toLowerCase()}`
-
 function rowsOf(value: unknown, field: string, chainId: number, safe: string): Record<string, unknown>[] {
   if (value === undefined) return []
   if (!Array.isArray(value) || !value.every(isRecord)) throw new InvalidState(`${field} must be a list of rows`)
   for (const row of value) {
-    if (row.chainId !== chainId || typeof row.safe !== 'string' || row.safe.toLowerCase() !== safe.toLowerCase()) {
+    if (
+      typeof row.chainId !== 'number' ||
+      typeof row.safe !== 'string' ||
+      safeKey(row.chainId, row.safe) !== safeKey(chainId, safe)
+    ) {
       throw new InvalidState(`Every ${field} row must name chain ${chainId} and Safe ${safe}`)
     }
   }
