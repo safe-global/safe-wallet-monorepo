@@ -69,3 +69,22 @@ export const PRO_GROUP_KEYS: ProItemKey[] = ['policies', 'activity', 'security',
 export const getProItem = (key: string | undefined): ProItem | undefined => PRO_ITEMS.find((item) => item.key === key)
 
 export const PREVIEW_ROUTE = '/prototypes/pro-preview'
+
+/** Today's Workspace sidebar items, keyed by their production route, as the preview page names them. */
+export const WORKSPACE_PAGES: Record<string, { key: string; label: string }> = {
+  [AppRoutes.spaces.index]: { key: 'dashboard', label: 'Dashboard' },
+  [AppRoutes.spaces.transactions]: { key: 'transactions', label: 'Transactions' },
+  [AppRoutes.spaces.safeAccounts]: { key: 'safe-accounts', label: 'Safe accounts' },
+  [AppRoutes.spaces.addressBook]: { key: 'address-book', label: 'Address book' },
+  [AppRoutes.spaces.policies]: { key: 'policies', label: 'Policies' },
+  [AppRoutes.spaces.activity]: { key: 'activity', label: 'Activity' },
+  [AppRoutes.spaces.members]: { key: 'members', label: 'Team' },
+  [AppRoutes.spaces.security]: { key: 'security', label: 'Security hub' },
+  [AppRoutes.spaces.settings]: { key: 'settings', label: 'Settings' },
+  [AppRoutes.spaces.plans]: { key: 'plan', label: 'Plans' },
+}
+
+export const getWorkspacePage = (key: string | undefined): { route: string; label: string } | undefined => {
+  const entry = Object.entries(WORKSPACE_PAGES).find(([, page]) => page.key === key)
+  return entry && { route: entry[0], label: entry[1].label }
+}

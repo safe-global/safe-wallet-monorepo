@@ -6,7 +6,7 @@ import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getMockSafes, getActiveSummary, getSafeName, REASSURANCE, TRIAL_CTA } from './fixtures'
-import { getProItem } from './proItems'
+import { getProItem, getWorkspacePage } from './proItems'
 import { useIsPrototypeOn, useScenario } from './scenario'
 
 const PLAN_ROWS = [
@@ -23,12 +23,24 @@ export const ProPreview = (): ReactElement => {
   const [scenario, update] = useScenario()
   const [isRequested, setIsRequested] = useState(false)
   const safe = useSafeQueryParam() || undefined
-  const item = getProItem(typeof query.feature === 'string' ? query.feature : undefined)
+  const feature = typeof query.feature === 'string' ? query.feature : undefined
+  const item = getProItem(feature)
+  const workspacePage = getWorkspacePage(feature)
 
   if (!isOn) {
     return (
       <main className="p-8">
         This design prototype opens with <code>?proto=sidebar</code> in preview builds only.
+      </main>
+    )
+  }
+  if (!item && workspacePage) {
+    return (
+      <main className="mx-auto flex max-w-3xl flex-col gap-2 p-6 md:p-10" data-testid="unified-workspace-page">
+        <h1 className="text-2xl font-bold">{workspacePage.label}</h1>
+        <p className="text-muted-foreground">
+          In the app this opens <code>{workspacePage.route}</code>, which needs sign-in, so the prototype stops here.
+        </p>
       </main>
     )
   }

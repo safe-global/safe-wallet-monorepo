@@ -1,19 +1,29 @@
 import type { ReactElement } from 'react'
+import { useRouter } from 'next/router'
 import { motion } from 'motion/react'
 import { SidebarGroup, SidebarMenu, SidebarMenuItem } from '@safe-global/views/components/ui/sidebar'
 import { itemVariants } from '@safe-global/views/features/spaces/components/Sidebar/constants'
-import type { SidebarVariantContentProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
+import type {
+  ResolvedSidebarNavItem,
+  SidebarVariantContentProps,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import css from '../styles.module.css'
 import { SafeSidebarContent } from '../variants/SafeSidebarContent'
-import { getActiveSummary, getMockSafes, getSafeName } from './fixtures'
+import { SpacesSidebarContent } from '../variants/SpacesSidebarContent'
+import { getActiveSummary, getMockSafes, getSafeName, isInWorkspace } from './fixtures'
 import { ProGroup } from './ProGroup'
+import { PREVIEW_ROUTE, WORKSPACE_PAGES } from './proItems'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { useScenario } from './scenario'
 
-/** Today's Safe sidebar with the workspace switcher on top and one Safe Pro group after Defi. */
+/**
+ * Today: My accounts shows the production Safe sidebar and Acme the production Workspace sidebar.
+ * Proposed: the Safe sidebar for both, with one Safe Pro group after Defi.
+ */
 export const UnifiedSidebarContent = (props: SidebarVariantContentProps): ReactElement => {
   const [scenario] = useScenario()
+  const { pathname, query } = useRouter()
   const safe = useSafeQueryParam() || undefined
   const summary = getActiveSummary(scenario)
   const safeName = getSafeName(safe)
@@ -30,6 +40,26 @@ export const UnifiedSidebarContent = (props: SidebarVariantContentProps): ReactE
       </SidebarGroup>
     </motion.div>
   )
+
+  if (scenario.layout === 'today') {
+    if (!isInWorkspace(scenario)) return <SafeSidebarContent {...props} header={header} />
+
+    return (
+      <SpacesSidebarContent
+        {...props}
+        prototype={{
+          header,
+          // The real Workspace pages need sign-in, so each item opens a stub that names its route.
+          getLink: (item) =>
+            ({
+              pathname: PREVIEW_ROUTE,
+              query: { ...(safe ? { safe } : {}), feature: WORKSPACE_PAGES[item.href]?.key },
+            }) as ResolvedSidebarNavItem['link'],
+          isItemActive: (item) => pathname === PREVIEW_ROUTE && query.feature === WORKSPACE_PAGES[item.href]?.key,
+        }}
+      />
+    )
+  }
 
   const after = (
     <motion.div variants={itemVariants}>

@@ -5,6 +5,8 @@ export type SafeCount = 1 | 3 | 12
 export type Role = 'admin' | 'member'
 export type Viewport = 'desktop' | 'mobile'
 export type Context = 'accounts' | 'workspace'
+/** Today: each side shows its production sidebar. Proposed: one sidebar with a Safe Pro group. */
+export type Layout = 'today' | 'proposed'
 
 export type Scenario = {
   plan: PlanState
@@ -13,6 +15,7 @@ export type Scenario = {
   viewport: Viewport
   /** Which side of the workspace switcher is open. */
   context: Context
+  layout: Layout
 }
 
 /** Starts in My accounts with Acme on a paid plan, so the demo can switch straight to a Pro workspace. */
@@ -22,6 +25,7 @@ export const DEFAULT_SCENARIO: Scenario = {
   role: 'admin',
   viewport: 'desktop',
   context: 'accounts',
+  layout: 'today',
 }
 
 export const PLAN_OPTIONS: { value: PlanState; label: string }[] = [
@@ -35,7 +39,7 @@ export const PLAN_OPTIONS: { value: PlanState; label: string }[] = [
 
 /** The switch and the scenario live in localStorage, so the mobile frame (same origin) follows the outer bar. */
 const SWITCH_KEY = 'unifiedSidebarPrototype'
-const SCENARIO_KEY = 'unifiedSidebarPrototype.scenario'
+const SCENARIO_KEY = 'unifiedSidebarPrototype.scenario.v2'
 const CHANGE_EVENT = 'unified-sidebar-prototype-change'
 
 /** `?proto=sidebar` turns the prototype on, `?proto=off` turns it off. */

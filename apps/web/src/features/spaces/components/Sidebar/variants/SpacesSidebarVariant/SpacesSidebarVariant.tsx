@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { motion } from 'motion/react'
 import {
   SidebarContent,
@@ -24,6 +24,8 @@ interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   mainNavItems: ResolvedSidebarNavItem[] | null
   setupGroup: ResolvedSidebarGroup | null
   isLoading?: boolean
+  /** Replaces the space selector. */
+  header?: ReactNode
 }
 
 const SPACES_MAIN_NAV_SKELETON_COUNT = 3
@@ -35,6 +37,7 @@ export const SpacesSidebarVariant = ({
   mainNavItems,
   setupGroup,
   isLoading = false,
+  header,
 }: SpacesSidebarVariantProps): ReactElement => {
   const displayMainNavItems = mainNavItems || Array(SPACES_MAIN_NAV_SKELETON_COUNT).fill(null)
   const displaySetupItems = setupGroup?.items || Array(SPACES_SETUP_GROUP_SKELETON_COUNT).fill(null)
@@ -42,15 +45,17 @@ export const SpacesSidebarVariant = ({
   return (
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        <motion.div variants={itemVariants} className="mb-6 group-data-[collapsible=icon]:mb-4">
-          <SidebarGroup className={css.sidebarGroup}>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SpaceSelectorDropdown selectedSpace={selectedSpace} spaces={spaces} />
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        </motion.div>
+        {header ?? (
+          <motion.div variants={itemVariants} className="mb-6 group-data-[collapsible=icon]:mb-4">
+            <SidebarGroup className={css.sidebarGroup}>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SpaceSelectorDropdown selectedSpace={selectedSpace} spaces={spaces} />
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          </motion.div>
+        )}
 
         {/* Main Navigation */}
         <motion.div variants={itemVariants}>

@@ -38,6 +38,10 @@ const Segment = <T extends string | number>({
   </div>
 )
 
+const LAYOUT_OPTIONS: Option<Scenario['layout']>[] = [
+  { value: 'today', label: 'Today' },
+  { value: 'proposed', label: 'Proposed' },
+]
 const SAFE_OPTIONS: Option<Scenario['safes']>[] = [
   { value: 1, label: '1' },
   { value: 3, label: '3' },
@@ -103,6 +107,12 @@ export const ScenarioBar = (): ReactElement | null => {
           className="fixed bottom-3 left-1/2 z-[var(--z-overlay)] flex max-w-[calc(100vw-2rem)] -translate-x-1/2 flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
           data-testid="unified-scenario-bar"
         >
+          <Segment
+            label="Layout"
+            options={LAYOUT_OPTIONS}
+            value={scenario.layout}
+            onChange={(layout) => update({ layout })}
+          />
           <Segment label="Plan" options={PLAN_OPTIONS} value={scenario.plan} onChange={(plan) => update({ plan })} />
           <Segment
             label="Safes"

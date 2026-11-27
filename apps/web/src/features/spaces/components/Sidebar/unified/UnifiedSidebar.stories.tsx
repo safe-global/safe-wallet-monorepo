@@ -12,7 +12,7 @@ import { DEFAULT_SCENARIO, PLAN_OPTIONS, type Scenario } from './scenario'
 
 // Same keys as scenario.ts. Stories write them directly so each story opens in its own state.
 const SWITCH_KEY = 'unifiedSidebarPrototype'
-const SCENARIO_KEY = 'unifiedSidebarPrototype.scenario'
+const SCENARIO_KEY = 'unifiedSidebarPrototype.scenario.v2'
 
 // Treasury, the first mock Safe in fixtures.ts.
 const SAFE = 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415'
@@ -50,7 +50,7 @@ const storyState = {
   },
 } as unknown as Partial<RootState>
 
-type Args = Pick<Scenario, 'plan' | 'safes' | 'role' | 'context'>
+type Args = Pick<Scenario, 'layout' | 'plan' | 'safes' | 'role' | 'context'>
 
 const UnifiedSidebarStory = (args: Args) => {
   const scenario: Scenario = { ...DEFAULT_SCENARIO, ...args, viewport: 'desktop' }
@@ -79,12 +79,14 @@ const meta = {
   title: 'Prototypes/Unified sidebar',
   component: UnifiedSidebarStory,
   args: {
+    layout: DEFAULT_SCENARIO.layout,
     plan: DEFAULT_SCENARIO.plan,
     safes: DEFAULT_SCENARIO.safes,
     role: DEFAULT_SCENARIO.role,
     context: DEFAULT_SCENARIO.context,
   },
   argTypes: {
+    layout: { control: 'inline-radio', options: ['today', 'proposed'] },
     plan: {
       control: { type: 'select', labels: Object.fromEntries(PLAN_OPTIONS.map((o) => [o.value, o.label])) },
       options: PLAN_OPTIONS.map((o) => o.value),
@@ -107,7 +109,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /** A free user with no Workspace: Safe Pro items are locked and the switcher offers the trial. */
-export const Free: Story = { args: { plan: 'free', context: 'accounts' } }
+export const Free: Story = { args: { layout: 'proposed', plan: 'free', context: 'accounts' } }
+
+/** Today's production Workspace sidebar under the new switcher, to compare with the proposed one. */
+export const TodayWorkspace: Story = { args: { layout: 'today', plan: 'paid', context: 'workspace' } }
 
 /** Same person inside the free "My accounts" side while their Workspace is on Pro. */
 export const MyAccountsWithProWorkspace: Story = { args: { plan: 'paid', context: 'accounts' } }

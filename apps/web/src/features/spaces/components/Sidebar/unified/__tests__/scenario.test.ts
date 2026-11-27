@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react'
 import { DEFAULT_SCENARIO, syncSwitchFromUrl, turnPrototypeOff, useIsPrototypeOn, useScenario } from '../scenario'
 import { getActiveSummary, getPlanSummary, getSafeName } from '../fixtures'
 import { useUnifiedSidebarSafes } from '../useUnifiedSidebarSafes'
+import { getWorkspacePage } from '../proItems'
 
 describe('unified sidebar prototype switch', () => {
   beforeEach(() => localStorage.clear())
@@ -49,7 +50,7 @@ describe('useScenario', () => {
   })
 
   it('falls back to the default on unreadable storage', () => {
-    localStorage.setItem('unifiedSidebarPrototype.scenario', '{not json')
+    localStorage.setItem('unifiedSidebarPrototype.scenario.v2', '{not json')
     const { result } = renderHook(() => useScenario())
     expect(result.current[0]).toEqual(DEFAULT_SCENARIO)
   })
@@ -119,5 +120,12 @@ describe('useUnifiedSidebarSafes', () => {
     act(() => result.current[1]({ context: 'accounts' }))
     expect(result.current[0]).toMatchObject({ isWorkspace: false })
     expect(result.current[0]?.safes.map((s) => s.name)).toEqual(['Treasury', 'Savings', 'Cold storage'])
+  })
+})
+
+describe('getWorkspacePage', () => {
+  it('maps a preview key back to its production Workspace route', () => {
+    expect(getWorkspacePage('members')).toEqual({ route: '/spaces/members', label: 'Team' })
+    expect(getWorkspacePage('nope')).toBeUndefined()
   })
 })

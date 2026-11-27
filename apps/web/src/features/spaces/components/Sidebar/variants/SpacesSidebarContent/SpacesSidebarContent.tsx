@@ -1,9 +1,10 @@
-import { type ReactElement, useMemo } from 'react'
+import { type ReactElement, type ReactNode, useMemo } from 'react'
 import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
 import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type {
+  ResolvedSidebarNavItem,
   SidebarItemConfig,
   SidebarVariantContentProps,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
@@ -14,12 +15,19 @@ import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcemen
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 
+type PrototypeOverrides = {
+  header: ReactNode
+  getLink: (item: SidebarItemConfig) => ResolvedSidebarNavItem['link']
+  isItemActive: (item: SidebarItemConfig) => boolean
+}
+
 export const SpacesSidebarContent = ({
   selectedSpace,
   spaces,
   spaceInitial,
   isLoading = false,
-}: SidebarVariantContentProps): ReactElement => {
+  prototype,
+}: SidebarVariantContentProps & { prototype?: PrototypeOverrides }): ReactElement => {
   const spaceId = useCurrentSpaceId()
   const isActiveMember = useIsActiveMember(selectedSpace?.uuid)
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
@@ -79,11 +87,13 @@ export const SpacesSidebarContent = ({
     [gatedOffHrefs],
   )
 
-  const { mainNavItems, setupGroup } = useResolvedSidebarNav(filteredMainNavigation, filteredSetupGroup, {
-    getLink,
-    isItemDisabled,
-    isItemActive,
-  })
+  const { mainNavItems, setupGroup } = useResolvedSidebarNav(
+    filteredMainNavigation,
+    filteredSetupGroup,
+    prototype
+      ? { getLink: prototype.getLink, isItemDisabled: () => false, isItemActive: prototype.isItemActive }
+      : { getLink, isItemDisabled, isItemActive },
+  )
 
   return (
     <SpacesSidebarVariant
@@ -93,6 +103,7 @@ export const SpacesSidebarContent = ({
       spaces={spaces}
       spaceInitial={spaceInitial}
       isLoading={isLoading}
+      header={prototype?.header}
     />
   )
 }
