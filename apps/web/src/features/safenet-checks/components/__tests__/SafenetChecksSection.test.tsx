@@ -3,6 +3,7 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import {
+  AttestationVerificationStatus,
   CheckStatus,
   type Hex,
   type PublicCheckStatus,
@@ -15,7 +16,13 @@ import {
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { SafenetChecksSection } from '../SafenetChecksSection'
-import { MixpanelEventParams, SafenetCheckResult, SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import {
+  MixpanelEventParams,
+  SafenetCheckLocation,
+  SafenetCheckResult,
+  SafenetSignerRole,
+  SafenetUnavailableReason,
+} from '@/services/analytics/mixpanel-events'
 import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
 import { trackEvent } from '@/services/analytics'
 
@@ -289,6 +296,7 @@ describe('SafenetChecksSection Mixpanel tracking', () => {
       [MixpanelEventParams.RULES_FLAGGED]: ['R-4.4', 'R-4.5'],
       [MixpanelEventParams.SENTINELS_FLAGGED]: '2 of 3',
       [MixpanelEventParams.SIGNER_ROLE]: SafenetSignerRole.CO_SIGNER,
+      [MixpanelEventParams.LOCATION]: SafenetCheckLocation.SIGNING_FLOW,
     })
   })
 
@@ -309,10 +317,11 @@ describe('SafenetChecksSection Mixpanel tracking', () => {
       [MixpanelEventParams.RULES_FLAGGED]: [],
       [MixpanelEventParams.SENTINELS_FLAGGED]: '1 of 1',
       [MixpanelEventParams.SIGNER_ROLE]: role,
+      [MixpanelEventParams.LOCATION]: SafenetCheckLocation.SIGNING_FLOW,
     })
   })
 
-  it('tracks a failed read as unavailable, without a snapshot', () => {
+  it('tracks a failed read as unavailable with its reason, without a snapshot', () => {
     const hash = newHash()
     mockUseSafenetCheck.mockReturnValue(buildCheckView({ unavailableReason: 'READ_FAILED' }))
     renderInFlow(flowOf(hash))
@@ -323,7 +332,51 @@ describe('SafenetChecksSection Mixpanel tracking', () => {
       [MixpanelEventParams.RULES_FLAGGED]: [],
       [MixpanelEventParams.SENTINELS_FLAGGED]: '0 of 0',
       [MixpanelEventParams.SIGNER_ROLE]: SafenetSignerRole.CO_SIGNER,
+      [MixpanelEventParams.LOCATION]: SafenetCheckLocation.SIGNING_FLOW,
+      [MixpanelEventParams.FAILURE_REASON]: SafenetUnavailableReason.READ_FAILED,
     })
+  })
+
+  it('tracks a check missing from a heuristic read window as not found', () => {
+    const hash = newHash()
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        snapshot: buildSnapshot({ safeTxHash: hash, status: CheckStatus.UNAVAILABLE, windowCoverage: 'heuristic' }),
+        status: CheckStatus.UNAVAILABLE,
+        publicStatus: CheckStatus.UNAVAILABLE,
+        unavailableReason: 'WINDOW_UNCERTAIN',
+      }),
+    )
+    renderInFlow(flowOf(hash))
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFENET_EVENTS.CHECKED,
+      expect.objectContaining({
+        [MixpanelEventParams.RESULT]: SafenetCheckResult.UNAVAILABLE,
+        [MixpanelEventParams.FAILURE_REASON]: SafenetUnavailableReason.NOT_FOUND,
+      }),
+    )
+  })
+
+  it('tracks a timed-out check whose attestation failed verification as signature invalid', () => {
+    const hash = newHash()
+    const attestation = { status: AttestationVerificationStatus.INVALID, signatureId: null, message: null }
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({
+        snapshot: buildSnapshot({ safeTxHash: hash, status: CheckStatus.VERIFICATION_FAILED, attestation }),
+        status: CheckStatus.VERIFICATION_FAILED,
+        publicStatus: CheckStatus.TIMED_OUT,
+      }),
+    )
+    renderInFlow(flowOf(hash))
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFENET_EVENTS.CHECKED,
+      expect.objectContaining({
+        [MixpanelEventParams.RESULT]: SafenetCheckResult.UNAVAILABLE,
+        [MixpanelEventParams.FAILURE_REASON]: SafenetUnavailableReason.SIGNATURE_INVALID,
+      }),
+    )
   })
 
   it('tracks nothing while the check is in progress', () => {

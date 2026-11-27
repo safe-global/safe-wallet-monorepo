@@ -24,6 +24,7 @@ import { formatFlaggedCount, rejectionSeverity, summariseRejection, type Rejecti
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
 import { flowSignerRole } from '../safenetSignerRole'
 import { useTrackSafenetChecked } from '../useTrackSafenetChecked'
+import { SafenetCheckLocation } from '@/services/analytics/mixpanel-events'
 import {
   SAFENET_ATTESTATION_LINK_LABEL,
   SAFENET_EXPLORER_LINK_LABEL,
@@ -374,9 +375,11 @@ export const SafenetChecksSection = ({ locked = false }: { locked?: boolean }): 
     identity: { chainId: safe.chainId, safeAddress, safeTxHash },
     publicStatus,
     unavailableReason,
+    attestationStatus: snapshot?.attestation.status,
     events: snapshot?.events,
     snapshotTxHash: snapshot?.safeTxHash,
     signerRole: flowSignerRole({ willExecute, onlyExecute, isCreation }),
+    location: SafenetCheckLocation.SIGNING_FLOW,
     isShown: !!resolvePresentation(publicStatus, unavailableReason, !!snapshot),
   })
 
