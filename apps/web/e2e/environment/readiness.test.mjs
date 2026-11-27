@@ -9,7 +9,7 @@ const manifest = {
   decoderUrl: 'http://localhost:8000/decoder',
   rpcUrl: 'http://localhost:8545',
   chainId: 11155111,
-  forkBlock: 10008682,
+  forkBlock: 12020132,
   forkBlockHash: `0x${'a'.repeat(64)}`,
 }
 const rpcResponse = [
@@ -22,7 +22,7 @@ const server = setupServer(
   http.post(manifest.rpcUrl, async ({ request }) => {
     assert.deepEqual(await request.json(), [
       { jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] },
-      { jsonrpc: '2.0', id: 2, method: 'eth_getBlockByNumber', params: ['0x98b86a', false] },
+      { jsonrpc: '2.0', id: 2, method: 'eth_getBlockByNumber', params: ['0xb769a4', false] },
     ])
     return HttpResponse.json(rpcResponse)
   }),
