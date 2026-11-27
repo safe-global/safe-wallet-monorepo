@@ -168,7 +168,6 @@ class Command(BaseCommand):
         self.stdout.write(f"  TXS URL: {txs_url}")
         chain = self._setup_chain(chain_id, chain_defaults(chain_id, chain_name, rpc_url, txs_url))
         self._clear_gas_price(chain)
-        self._setup_gas_price(chain)
         self._setup_gas_tokens(chain)
         self._setup_features(chain)
         self._setup_wallets(chain)
