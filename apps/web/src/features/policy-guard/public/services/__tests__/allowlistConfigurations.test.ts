@@ -1,4 +1,4 @@
-import { AbiCoder } from 'ethers'
+import { AbiCoder, getAddress } from 'ethers'
 // eslint-disable-next-line no-restricted-imports -- asserts the review step classifies every output
 import { getRuleKind } from '@/features/spaces/components/Policies/RecipientAllowlistFlow/ReviewStep/ruleKind'
 import { OperationType } from '@safe-global/types-kit'
@@ -70,6 +70,49 @@ describe('allowlistConfigurations', () => {
     ])
 
     expect(configurations.map((c) => c.target)).toEqual([TOKEN, BOB, TOKEN_2])
+  })
+
+  it('binds a native recipient listed twice in different cases once', () => {
+    const configurations = buildAllowlistConfigurations(CHAIN_ID, [
+      { tokenAddress: ZERO_ADDRESS, recipients: [ALICE, ALICE.toLowerCase()] },
+    ])
+
+    expect(configurations.map((c) => c.target)).toEqual([ALICE])
+  })
+
+  it('merges rules for the same token in different cases into one configuration with every recipient', () => {
+    const token = getAddress('0xabcdef0000000000000000000000000000000001')
+
+    const configurations = buildAllowlistConfigurations(CHAIN_ID, [
+      { tokenAddress: token, recipients: [ALICE] },
+      { tokenAddress: token.toLowerCase(), recipients: [BOB] },
+    ])
+
+    expect(configurations).toHaveLength(1)
+    expect(configurations[0].target).toBe(token)
+    expect(decodeErc20TransferPolicyData(configurations[0].data)).toEqual([ALICE, BOB])
+  })
+
+  it('encodes an ERC-20 recipient listed twice in different cases once', () => {
+    const [configuration] = buildAllowlistConfigurations(CHAIN_ID, [
+      { tokenAddress: TOKEN, recipients: [ALICE, ALICE.toLowerCase()] },
+    ])
+
+    expect(decodeErc20TransferPolicyData(configuration.data)).toEqual([ALICE])
+  })
+
+  it('counts configurations against the maximum after merging duplicates', () => {
+    const recipients = Array.from(
+      { length: MAX_POLICY_CONFIGURATIONS },
+      (_, i) => `0x${(i + 1).toString(16).padStart(40, '0')}`,
+    )
+
+    expect(
+      buildAllowlistConfigurations(CHAIN_ID, [
+        { tokenAddress: ZERO_ADDRESS, recipients },
+        { tokenAddress: ZERO_ADDRESS, recipients },
+      ]),
+    ).toHaveLength(MAX_POLICY_CONFIGURATIONS)
   })
 
   it('throws when a native rule is on a chain without the native policy', () => {

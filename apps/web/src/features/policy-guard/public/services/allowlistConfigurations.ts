@@ -105,6 +105,26 @@ export const buildAllowlistRemovalConfigurations = ({
   return configurations
 }
 
+const uniqueTokens = (rules: AllowlistRule[]): string[] => [
+  ...new Map(rules.map(({ tokenAddress }) => [tokenAddress.toLowerCase(), tokenAddress])).values(),
+]
+
+const uniqueRecipients = (rules: AllowlistRule[], tokenAddress: string): string[] => {
+  const recipients = new Map<string, string>()
+  for (const rule of rules) {
+    if (!sameAddress(rule.tokenAddress, tokenAddress)) continue
+    for (const recipient of rule.recipients) recipients.set(recipient.toLowerCase(), recipient)
+  }
+  return [...recipients.values()]
+}
+
+/** One checksummed rule per token, compared case-insensitively, with the union of its recipients. */
+const mergeRules = (rules: AllowlistRule[]): AllowlistRule[] =>
+  uniqueTokens(rules).map((tokenAddress) => ({
+    tokenAddress: getAddress(tokenAddress),
+    recipients: uniqueRecipients(rules, tokenAddress).map((recipient) => getAddress(recipient)),
+  }))
+
 export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRule[]): PolicyConfiguration[] => {
   if (rules.length === 0 || rules.some(({ recipients }) => recipients.length === 0)) {
     throw new Error(EMPTY_ALLOWLIST_ERROR)
@@ -114,7 +134,7 @@ export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRu
     throw new Error(ZERO_ADDRESS_RECIPIENT_ERROR)
   }
 
-  const configurations = rules.flatMap(({ tokenAddress, recipients }): PolicyConfiguration[] => {
+  const configurations = mergeRules(rules).flatMap(({ tokenAddress, recipients }): PolicyConfiguration[] => {
     if (sameAddress(tokenAddress, ZERO_ADDRESS)) {
       const policy = requirePolicy(chainId, 'NativeTransferPolicy')
 
@@ -127,15 +147,7 @@ export const buildAllowlistConfigurations = (chainId: string, rules: AllowlistRu
       }))
     }
 
-    return [
-      {
-        target: tokenAddress,
-        selector: ERC20_TRANSFER_SELECTOR,
-        operation: OperationType.Call,
-        policy: requirePolicy(chainId, 'ERC20TransferPolicy'),
-        data: encodeErc20TransferPolicyData(recipients),
-      },
-    ]
+    return [erc20TransferConfiguration(chainId, tokenAddress, recipients, PERMISSION_ALWAYS)]
   })
 
   if (configurations.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
@@ -159,15 +171,6 @@ const erc20TransferConfiguration = (
   ),
 })
 
-const uniqueRecipients = (rules: AllowlistRule[], tokenAddress: string): string[] => {
-  const recipients = new Map<string, string>()
-  for (const rule of rules) {
-    if (!sameAddress(rule.tokenAddress, tokenAddress)) continue
-    for (const recipient of rule.recipients) recipients.set(recipient.toLowerCase(), recipient)
-  }
-  return [...recipients.values()]
-}
-
 /** Builds only the configurations that turn the baseline's token-recipient pairs into the desired ones. */
 export const buildAllowlistChangeConfigurations = (
   chainId: string,
@@ -181,10 +184,7 @@ export const buildAllowlistChangeConfigurations = (
   const baselineKeys = getAllowlistPairKeys(baseline)
   const desiredKeys = getAllowlistPairKeys(desired)
   const isNative = (tokenAddress: string) => sameAddress(tokenAddress, ZERO_ADDRESS)
-  const tokens = (rules: AllowlistRule[]) => [
-    ...new Map(rules.map(({ tokenAddress }) => [tokenAddress.toLowerCase(), tokenAddress])).values(),
-  ]
-  const desiredTokens = tokens(desired).filter((token) => uniqueRecipients(desired, token).length > 0)
+  const desiredTokens = uniqueTokens(desired).filter((token) => uniqueRecipients(desired, token).length > 0)
   const desiredTokenKeys = new Set(desiredTokens.map((token) => token.toLowerCase()))
 
   const erc20Changes = desiredTokens
@@ -200,7 +200,7 @@ export const buildAllowlistChangeConfigurations = (
       ]
     })
 
-  const removedTokens = tokens(baseline).filter(
+  const removedTokens = uniqueTokens(baseline).filter(
     (token) => !isNative(token) && !desiredTokenKeys.has(token.toLowerCase()),
   )
   const tokenRemovals = removedTokens.flatMap((token): PolicyConfiguration[] => {
