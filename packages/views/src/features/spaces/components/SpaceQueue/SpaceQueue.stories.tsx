@@ -155,7 +155,7 @@ const OptionRow = ({
     <TableCell className="relative py-2 text-center text-sm">
       <ConflictBracket option={option} size={size} nonce={nonce} />
     </TableCell>
-    <TableCell colSpan={5} className="py-2 text-sm">
+    <TableCell colSpan={6} className="py-2 text-sm">
       Option {option} of {size}
       {fill ? ` (${fill})` : ''}
     </TableCell>

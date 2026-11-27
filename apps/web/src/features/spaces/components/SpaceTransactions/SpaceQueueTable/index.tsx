@@ -17,7 +17,11 @@ import QueueGroupRow, {
 import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
 import QueueSkeletonRow from '@safe-global/views/features/spaces/components/SpaceQueue/QueueSkeletonRow'
 import QueueTableHeader from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTableHeader'
-import { QUEUE_TABLE_MIN_WIDTH } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import {
+  getQueueNoteDisplay,
+  QUEUE_TABLE_MIN_WIDTH,
+  type QueueNoteDisplay,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { QUEUE_TOOLTIP_DELAY } from '@safe-global/views/features/spaces/components/SpaceQueue/tooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -99,10 +103,12 @@ const ScopedRow = ({
   item,
   rowProps,
   compact,
+  noteDisplay,
 }: {
   item: ScopedItem
   rowProps: RowProps
   compact: boolean
+  noteDisplay: QueueNoteDisplay
 }): ReactElement =>
   item.kind === 'conflict' ? (
     <ConflictHeaderRow
@@ -124,6 +130,7 @@ const ScopedRow = ({
       safeAddress={item.safeAddress}
       rowProps={rowProps}
       compact={compact}
+      noteDisplay={noteDisplay}
     />
   )
 
@@ -133,6 +140,7 @@ type VirtualRowProps = {
   scopeStore: ScopeStore
   measureRef: (element: Element | null) => void
   compact: boolean
+  noteDisplay: QueueNoteDisplay
   chainConfigs: Chain[]
   onToggleSafe: (safeAddress: string) => void
   onToggleChain: (scopeKey: string) => void
@@ -147,6 +155,7 @@ const VirtualRow = memo(function VirtualRow({
   scopeStore,
   measureRef,
   compact,
+  noteDisplay,
   chainConfigs,
   onToggleSafe,
   onToggleChain,
@@ -157,7 +166,7 @@ const VirtualRow = memo(function VirtualRow({
   if (isScoped(item)) {
     return (
       <PooledScope target={toTarget(item)} store={scopeStore}>
-        <ScopedRow item={item} rowProps={rowProps} compact={compact} />
+        <ScopedRow item={item} rowProps={rowProps} compact={compact} noteDisplay={noteDisplay} />
       </PooledScope>
     )
   }
@@ -282,11 +291,16 @@ const SpaceQueueTable = ({
   // Pins the Nonce and Action cells only while the table is wider than its panel
   const panelRef = useRef<HTMLDivElement>(null)
   const [scrollsX, setScrollsX] = useState(false)
+  const [panelNoteDisplay, setPanelNoteDisplay] = useState<QueueNoteDisplay>('inline')
+  const noteDisplay = compact ? 'inline' : panelNoteDisplay
   useLayoutEffect(() => {
     const panel = panelRef.current
     const table = panel?.querySelector('table')
     if (!panel || !table) return
-    const update = () => setScrollsX(panel.scrollWidth > panel.clientWidth)
+    const update = () => {
+      setScrollsX(panel.scrollWidth > panel.clientWidth)
+      setPanelNoteDisplay(getQueueNoteDisplay(panel.clientWidth))
+    }
     update()
     const observer = new ResizeObserver(update)
     observer.observe(panel)
@@ -401,6 +415,7 @@ const SpaceQueueTable = ({
                 >
                   <QueueTableHeader
                     compact={compact}
+                    note={noteDisplay}
                     collapseAll={
                       collapseUnit && collapsibleIds.length > 0
                         ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }
@@ -419,6 +434,7 @@ const SpaceQueueTable = ({
                           scopeStore={scopeStore}
                           measureRef={virtualizer.measureElement}
                           compact={compact}
+                          noteDisplay={noteDisplay}
                           chainConfigs={configs}
                           onToggleSafe={onToggleSafe}
                           onToggleChain={onToggleChain}

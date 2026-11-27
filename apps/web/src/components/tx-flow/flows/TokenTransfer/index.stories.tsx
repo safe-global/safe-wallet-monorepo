@@ -7,6 +7,7 @@ import { createMockStory } from '@/stories/mocks/createMockStory'
 import { getFixtureData } from '@/stories/mocks/handlers'
 import { newRecipientAnalysisHandler } from '@/stories/mocks/handlers'
 import TokenTransferFlow from './index'
+import { withPrivateNotes } from '@/features/tx-notes/public/services/privateNotesStoryData'
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', shadcn: true })
 
@@ -51,3 +52,28 @@ export const FilledWithMaxEther: Story = {
     await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
   },
 }
+
+// Prototype: private notes on the Review step. These open on the form: retype the amount, then press Next. A scripted
+// amount does not validate the form here, so there is no play function. Each state alone: Features/TxNotes/TxNoteInput.
+const REVIEW_ARGS = { recipients: [{ recipient: RECIPIENT, tokenAddress: ZERO_ADDRESS, amount: '1' }] }
+
+const reviewStory = (...decorators: NonNullable<Story['decorators']>[]): Story => ({
+  args: REVIEW_ARGS,
+  decorators: decorators.flat(),
+  tags: ['skip-visual-test'],
+})
+
+/** Signed in to a Workspace on Pro: the proposer can leave a private note */
+export const ReviewPrivateNote: Story = reviewStory()
+
+/** Two signers of the Safe are not members of the Workspace */
+export const ReviewPrivateNoteOutsideSigners: Story = reviewStory(withPrivateNotes({ outsideSigners: 2 }))
+
+/** Wallet connected, not signed in to the Workspace */
+export const ReviewPrivateNoteSignedOut: Story = reviewStory(withPrivateNotes({ access: 'signedOut' }))
+
+/** The Workspace's plan has no private notes */
+export const ReviewPrivateNoteLocked: Story = reviewStory(withPrivateNotes({ access: 'lockedPlan' }))
+
+/** The Safe is in no Workspace */
+export const ReviewPrivateNoteNoWorkspace: Story = reviewStory(withPrivateNotes({ access: 'noWorkspace' }))

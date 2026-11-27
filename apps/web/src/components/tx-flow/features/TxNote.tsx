@@ -1,30 +1,25 @@
 import type { ReactElement } from 'react'
 import { useCallback, useContext } from 'react'
-import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import TxNoteForm from '@/features/tx-notes/public/components/TxNoteForm'
-import { encodeTxNote } from '@/features/tx-notes/public/utils/encodeTxNote'
+import { usePrivateNote } from '@/features/tx-notes/public/services/privateNotesPrototype'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { withSlot } from '@/components/tx-flow/slots/withSlot'
 
 const TxNote = (): ReactElement => {
-  const { txOrigin, setTxOrigin } = useContext(SafeTxContext)
   const { txDetails, isCreation } = useContext(TxFlowContext)
 
-  const onNoteChange = useCallback(
-    (note: string) => {
-      setTxOrigin(encodeTxNote(note, txOrigin))
-    },
-    [setTxOrigin, txOrigin],
-  )
+  // Prototype: a private note is saved to the Workspace, never to the transaction's public origin
+  const onNoteChange = useCallback(() => {}, [])
 
   return <TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />
 }
 
 const useShouldRegisterSlot = () => {
   const { txDetails, isCreation } = useContext(TxFlowContext)
+  const privateNote = usePrivateNote(txDetails?.txId)
 
-  return isCreation || !!txDetails?.note
+  return isCreation || !!txDetails?.note || !!privateNote
 }
 
 const TxNoteSlot = withSlot({

@@ -3,6 +3,11 @@ import { delay, http, HttpResponse } from 'msw'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpaceTransactionsPage from './Page'
 import { QUEUE_SECTIONS, SPACE_QUEUE_URL, TX_DETAILS_HANDLER, toQueuePage } from './SpaceTransactionQueue.storyData'
+import {
+  HIDDEN_STORY_NOTE,
+  STORY_NOTES,
+  withPrivateNotes,
+} from '@/features/tx-notes/public/services/privateNotesStoryData'
 
 const SPACE_ID = '1'
 
@@ -55,4 +60,46 @@ export const UpdatingResults: Story = {
     await userEvent.type(canvas.getByRole('textbox', { name: 'Search transactions' }), 'treasury')
     await canvas.findByText('Updating results…', {}, { timeout: 3000 })
   },
+}
+
+// Prototype: private notes, by the table's width. Under 1050px a note's icon sits in Details; from 1050px it has a Note
+// column; from 1880px the column shows the note's text. The note is always in the icon's tooltip.
+const QUEUE_NOTES = () => ({
+  'a-1-56': STORY_NOTES.invoice(),
+  'a-1-57a': STORY_NOTES.pressure(),
+  'b-1-4': STORY_NOTES.long(),
+})
+
+/** Three of five transactions carry a note */
+export const PrivateNotes: Story = { decorators: [withPrivateNotes(() => ({ notes: QUEUE_NOTES() }))] }
+
+/** The first note's tooltip, opened by hovering its icon */
+export const PrivateNoteOpen: Story = {
+  decorators: [withPrivateNotes(() => ({ notes: QUEUE_NOTES() }))],
+  play: async ({ canvasElement }) => {
+    const { userEvent, within } = await import('storybook/test')
+    const canvas = within(canvasElement)
+    const [note] = await canvas.findAllByTestId('queue-note', {}, { timeout: 10000 })
+    await userEvent.hover(note)
+    await within(document.body).findByText('Private note · off-chain', {}, { timeout: 3000 })
+  },
+}
+
+/**
+ * Extra-wide: from a 1880px panel the Note column widens and shows the note's text, cut at two lines.
+ * Needs a window about 1950px wide; narrower, it looks like PrivateNotes.
+ */
+export const PrivateNotesExtraWide: Story = {
+  decorators: [withPrivateNotes(() => ({ notes: QUEUE_NOTES() }))],
+  parameters: { viewport: { defaultViewport: 'responsive' } },
+  tags: ['skip-visual-test'],
+}
+
+/** After a downgrade or the end of a trial: the notes are kept, members cannot read them */
+export const PrivateNotesHidden: Story = {
+  decorators: [
+    withPrivateNotes({
+      notes: { 'a-1-56': HIDDEN_STORY_NOTE, 'a-1-57a': HIDDEN_STORY_NOTE, 'b-1-4': HIDDEN_STORY_NOTE },
+    }),
+  ],
 }

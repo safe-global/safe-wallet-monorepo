@@ -1,12 +1,27 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { AppRoutes } from '@/config/routes'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSectionTitle'
+import PrivateNote from '../PrivateNote'
+import { HIDDEN_NOTE, usePrivateNote } from '../../public/services/privateNotesPrototype'
 
+/** The transaction's note: the Workspace's private note, or the public note written before private notes */
 export default function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
+  const privateNote = usePrivateNote(txDetails?.txId)
+
+  if (privateNote === HIDDEN_NOTE) return <PrivateNote variant="hidden" upgradeHref={AppRoutes.spaces.plans} />
+
+  if (privateNote) {
+    return (
+      <PrivateNote
+        variant="private"
+        text={privateNote.text}
+        author={privateNote.author}
+        createdAt={privateNote.createdAt}
+      />
+    )
+  }
+
   const note = txDetails?.note
   if (!note) return null
 
@@ -14,36 +29,16 @@ export default function TxNote({ txDetails }: { txDetails: TransactionDetails | 
     isMultisigDetailedExecutionInfo(txDetails?.detailedExecutionInfo) && txDetails?.detailedExecutionInfo.proposer
 
   return (
-    <div>
-      <TxSectionTitle className="gap-0">
-        Note
-        <Tooltip>
-          <TooltipTrigger
-            data-testid="tx-note-tooltip"
-            render={<span className="inline-flex h-[1em] text-muted-foreground" />}
-          >
-            <InfoIcon height="100%" />
-          </TooltipTrigger>
-          <TooltipContent>
-            <div data-testid="note-creator" className="flex flex-row gap-2">
-              <span>By </span>
-              {creator ? (
-                <EthHashInfo avatarSize={20} address={creator.value} showName onlyName />
-              ) : (
-                <span>transaction creator</span>
-              )}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TxSectionTitle>
-
-      <Typography
-        data-testid="tx-note"
-        variant="paragraph"
-        className="mt-2 rounded-lg bg-[var(--color-background-main)] p-4"
-      >
-        {note}
-      </Typography>
-    </div>
+    <PrivateNote
+      variant="public"
+      text={note}
+      author={
+        creator ? (
+          <EthHashInfo avatarSize={16} address={creator.value} showName onlyName showCopyButton={false} />
+        ) : (
+          'transaction creator'
+        )
+      }
+    />
   )
 }
