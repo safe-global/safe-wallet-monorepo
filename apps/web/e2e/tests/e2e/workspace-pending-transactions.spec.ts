@@ -353,7 +353,14 @@ async function seedPendingWorkspace(journey: Journey, page: Page): Promise<Pendi
   return { id, session, recipient, ...sepolia }
 }
 
-const rowsWithout = (rows: string[], text: string): string[] => rows.filter((row) => !row.includes(text)).sort()
+/** The `rowStates` of every row but those of the Safe `safeName`, or only its row at `nonce` when given */
+const otherRows = (rows: string[], safeName: string, nonce?: number): string[] =>
+  rows
+    .filter((row) => {
+      const [rowNonce, rowSafe] = row.split(' | ')
+      return rowSafe !== safeName || (nonce !== undefined && rowNonce !== String(nonce))
+    })
+    .sort()
 
 /** The IDs of the transactions in the Workspace queue that CGW serves its members */
 async function workspaceQueueTxIds({ id, session }: PendingWorkspace): Promise<string[]> {
@@ -416,7 +423,7 @@ test.describe('Workspace pending queue across networks', { tag: '@e2e' }, () => 
     const transfer = queue.rows.filter({ hasText: ETH.treasury })
     await expect(queue.rows).toHaveCount(9)
     await expect(queue.signatures(transfer)).toHaveAccessibleName('Ready to sign. 1 of 3 signatures')
-    const othersBefore = rowsWithout(await queue.rowStates(), ETH.treasury)
+    const othersBefore = otherRows(await queue.rowStates(), 'Treasury', 0)
     await queue.sign(transfer)
     await review.sign()
 
@@ -425,7 +432,7 @@ test.describe('Workspace pending queue across networks', { tag: '@e2e' }, () => 
       .toEqual([2, 1])
     await expect(queue.signatures(transfer)).toHaveAccessibleName('Waiting on others. 2 of 3 signatures')
     await expect(queue.rows).toHaveCount(9)
-    await expect.poll(async () => rowsWithout(await queue.rowStates(), ETH.treasury)).toEqual(othersBefore)
+    await expect.poll(async () => otherRows(await queue.rowStates(), 'Treasury', 0)).toEqual(othersBefore)
   })
 
   test('should drop an executed transaction and unblock the next one of its Safe in a queue of Safes on several networks', async ({
@@ -443,8 +450,8 @@ test.describe('Workspace pending queue across networks', { tag: '@e2e' }, () => 
     await expect(queue.rows).toHaveCount(9)
     await expect(queue.signatures(transfer)).toHaveAccessibleName('Ready to execute. 2 of 2 signatures')
     await expect(queue.signatures(batch)).toHaveAccessibleName(/^Blocked/)
-    await expect(batch.getByTestId('execute-tx-btn')).toBeDisabled()
-    const othersBefore = rowsWithout(await queue.rowStates(), 'Payroll')
+    await expect(batch.getByRole('button', { name: 'Blocked by #0' })).toBeVisible()
+    const othersBefore = otherRows(await queue.rowStates(), 'Payroll')
     await queue.execute(transfer)
     await review.continueAndExecute()
     await review.waitForExecution()
@@ -456,6 +463,6 @@ test.describe('Workspace pending queue across networks', { tag: '@e2e' }, () => 
     await expect(transfer).toHaveCount(0)
     await expect(queue.signatures(batch)).toHaveAccessibleName('Ready to execute. 2 of 2 signatures')
     await expect(batch.getByTestId('execute-tx-btn')).toBeEnabled()
-    await expect.poll(async () => rowsWithout(await queue.rowStates(), 'Payroll')).toEqual(othersBefore)
+    await expect.poll(async () => otherRows(await queue.rowStates(), 'Payroll')).toEqual(othersBefore)
   })
 })
