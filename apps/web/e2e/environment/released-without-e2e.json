@@ -19,6 +19,7 @@
   "NO_FEE_NOVEMBER": "Enabled in production on no chain; no spec covers it yet.",
   "OIDC_AUTH": "Released before E2E coverage was required; no spec covers it yet.",
   "POLICY_INDEXER_SPENDING_LIMIT": "Released before E2E coverage was required; no spec covers it yet.",
+  "PORTFOLIO_SUMMARIES": "Enabled in production on no chain; no spec covers it yet.",
   "PRIVATE_ADDRESS_BOOK": "Released before E2E coverage was required; no spec covers it yet.",
   "PROPOSER_GATING": "Released before E2E coverage was required; no spec covers it yet.",
   "PUSH_NOTIFICATIONS": "Released before E2E coverage was required; no spec covers it yet.",
