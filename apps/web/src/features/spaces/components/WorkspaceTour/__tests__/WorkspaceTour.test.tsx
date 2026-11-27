@@ -6,7 +6,7 @@ import CheckoutReturnModals from '../../Plans/CheckoutReturnModals'
 import WorkspaceTour from '../index'
 import WorkspaceTourSection from '../WorkspaceTourSection'
 import { useWorkspaceTourOpen } from '../hooks/useWorkspaceTourOpen'
-import { getWorkspaceTourSeenKey } from '../hooks/useWorkspaceTourVisit'
+import { WORKSPACE_TOUR_SEEN_KEY } from '../hooks/useWorkspaceTourVisit'
 
 const mockIsTourFlagOn = jest.fn()
 const mockIsBelowMd = jest.fn()
@@ -27,7 +27,6 @@ jest.mock('@/hooks/useMediaQuery', () => ({
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({ useIsSpaceRoute: () => mockIsSpaceRoute() }))
 
-const mockUserId = faker.number.int({ min: 1, max: 1000 })
 const mockSpaceId = faker.string.numeric(3)
 
 jest.mock('../../../public/hooks/useSpaceMembers', () => ({
@@ -45,11 +44,6 @@ jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
 }))
 jest.mock('../../../hooks/billing/useBillingSpaceId', () => ({ useBillingSpaceId: () => mockSpaceId }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => ({ plan: null, refetch: jest.fn() }) }))
-
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
-  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/users'),
-  useUsersGetWithWalletsV1Query: () => ({ currentData: { id: mockUserId } }),
-}))
 
 const UNLOCKED = { isResolving: false, isError: false, isLocked: false }
 
@@ -70,7 +64,7 @@ const TRIAL_CHECKOUT = {
   subscription: { status: 'trialing', plan: { id: 'price_1' }, currentPeriodEnd: null },
 }
 
-const markTourSeen = () => local.setItem(getWorkspaceTourSeenKey(mockUserId), true)
+const markTourSeen = () => local.setItem(WORKSPACE_TOUR_SEEN_KEY, true)
 
 const addSpaceSelector = () => {
   const button = document.createElement('button')
@@ -113,7 +107,7 @@ describe('WorkspaceTour', () => {
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Take the tour' })).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBeNull()
   })
 
   it('stays hidden and leaves the visit unrecorded for a member who is not active', () => {
@@ -122,7 +116,7 @@ describe('WorkspaceTour', () => {
     renderTour()
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBeNull()
   })
 
   it('stays hidden and leaves the visit unrecorded outside workspace pages', () => {
@@ -131,7 +125,7 @@ describe('WorkspaceTour', () => {
     renderTour()
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBeNull()
   })
 
   it('stays hidden and leaves the visit unrecorded while the workspace plan is still loading', () => {
@@ -140,7 +134,7 @@ describe('WorkspaceTour', () => {
     renderTour()
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBeNull()
   })
 
   it('stays hidden, hides its Settings button and leaves the visit unrecorded when free access ended without a plan', () => {
@@ -150,7 +144,7 @@ describe('WorkspaceTour', () => {
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Take the tour' })).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBeNull()
   })
 
   it('hides the tour and its Settings button below the breakpoint where the sidebar becomes a drawer', () => {
@@ -233,7 +227,7 @@ describe('WorkspaceTour', () => {
 
     expect(screen.getByText('Your free access is active')).toBeInTheDocument()
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBeNull()
 
     mockCheckoutReturn.mockReturnValue(NO_CHECKOUT)
     rerender(
@@ -244,13 +238,13 @@ describe('WorkspaceTour', () => {
     )
 
     expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBe(true)
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBe(true)
   })
 
   it('waits while the URL still carries a checkout session, before the checkout confirmation has mounted', () => {
     renderTour(<WorkspaceTour />, { sessionId: faker.string.alphanumeric(16) })
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId))).toBeNull()
+    expect(local.getItem(WORKSPACE_TOUR_SEEN_KEY)).toBeNull()
   })
 })

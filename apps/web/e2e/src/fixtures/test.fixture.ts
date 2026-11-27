@@ -68,15 +68,8 @@ export async function seedLocalStorage(page: Page): Promise<void> {
   )
 }
 
-/** The tour's seen flag is keyed by the CGW user id, unknown before sign-in, so every user reads it as seen. */
 async function markWorkspaceTourSeen(page: Page): Promise<void> {
-  await page.addInitScript((seenPrefix) => {
-    const getItem = Storage.prototype.getItem
-    Storage.prototype.getItem = function (key: string) {
-      const value = getItem.call(this, key)
-      return value === null && key.startsWith(seenPrefix) ? 'true' : value
-    }
-  }, LS_KEYS.workspaceTourSeenPrefix)
+  await page.addInitScript((key) => window.localStorage.setItem(key, 'true'), LS_KEYS.workspaceTourSeen)
 }
 
 // ---------------------------------------------------------------------------
