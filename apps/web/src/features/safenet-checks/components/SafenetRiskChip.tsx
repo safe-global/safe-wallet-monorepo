@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
+import { useSafenetDisplayStatus } from '../public/hooks/useSafenetDisplayStatus'
 import { isWarningRisk, summariseRejection } from '../summariseRejection'
 import { SafenetStatusChip } from './SafenetStatusChip'
 

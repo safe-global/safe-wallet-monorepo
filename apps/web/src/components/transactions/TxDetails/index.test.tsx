@@ -21,6 +21,10 @@ jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   useSafenetCheck: jest.fn(),
 }))
 
+beforeEach(() => {
+  jest.mocked(useSafenetCheck).mockReturnValue(buildCheckView())
+})
+
 const renderDetails = (safenetEnabled: boolean) => {
   const execution = multisigExecutionDetailsBuilder().build()
   jest.mocked(useSafenetCheck).mockReturnValue(
