@@ -24,8 +24,3 @@ export async function offerGasPaymentOptions(page: Page, options: GasPaymentOpti
     chain.relayer ? { ...chain, relayer: { ...chain.relayer, gasPaymentOptions: options } } : chain,
   )
 }
-
-/** Turns on features that staging, and so the isolated stack, does not serve yet, for the wallet in `page` only. */
-export async function enableChainFeatures(page: Page, features: string[]): Promise<void> {
-  await rewriteChains(page, (chain) => ({ ...chain, features: [...new Set([...chain.features, ...features])] }))
-}

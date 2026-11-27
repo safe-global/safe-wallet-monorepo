@@ -889,8 +889,8 @@
     {
       "key": "WORKSPACE_TOUR",
       "description": "First-visit tour of the workspace for active members.",
-      "scope": "PER_CHAIN",
-      "enabled": false,
+      "scope": "GLOBAL",
+      "enabled": true,
       "defaultChains": []
     },
     {
