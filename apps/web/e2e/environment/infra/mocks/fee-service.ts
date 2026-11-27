@@ -14,7 +14,10 @@ export const FEE_COLLECTOR = '0x53b3BDD8dB8352D9aB7bF39A527F9C24fC404DcD'
 export const SAFE_TX_GAS = '60000'
 export const BASE_GAS = '50000'
 export const GAS_PRICE = '2000000000'
+export const ERC20_GAS_PRICE = '1'
 export const RELAY_COST_FIAT = '0.42'
+
+const NATIVE_TOKEN = '0x0000000000000000000000000000000000000000'
 
 const RELAY_FEES = /^\/v1\/chains\/(\d+)\/safes\/(0x[0-9a-fA-F]{40})\/transactions\/relay\/fees$/
 const CAN_RELAY = /^\/v1\/chains\/\d+\/transactions\/0x[0-9a-fA-F]{64}\/can-relay$/
@@ -32,7 +35,7 @@ function relayFees(chainId: string, safeAddress: string, body: string): Reply {
       safeAddress,
       safeTxGas: SAFE_TX_GAS,
       baseGas: BASE_GAS,
-      gasPrice: GAS_PRICE,
+      gasPrice: request.gasToken === NATIVE_TOKEN ? GAS_PRICE : ERC20_GAS_PRICE,
       gasToken: request.gasToken,
       refundReceiver: FEE_COLLECTOR,
       numberSignatures: request.numberSignatures,

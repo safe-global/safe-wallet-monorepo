@@ -214,6 +214,7 @@ describe('useFeesPreview', () => {
     jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
+      hasGasTokenList: true,
     })
     jest.spyOn(useGasLimitModule, 'default').mockReturnValue({ gasLimit: BigInt(21000), gasLimitLoading: false })
     jest
@@ -356,6 +357,7 @@ describe('useFeesPreview', () => {
     const spy = jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
+      hasGasTokenList: true,
     })
     jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
 
@@ -372,6 +374,7 @@ describe('useFeesPreview', () => {
     spy.mockReturnValue({
       candidates: [candidateEth],
       defaultAddress: ETH_ADDRESS,
+      hasGasTokenList: true,
     })
     rerender()
 
@@ -385,6 +388,7 @@ describe('useFeesPreview', () => {
     const spy = jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
+      hasGasTokenList: true,
     })
     jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
 
@@ -398,7 +402,7 @@ describe('useFeesPreview', () => {
     expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
 
     // Empty candidates window — user navigated Back, balances not yet repopulated
-    spy.mockReturnValue({ candidates: [], defaultAddress: undefined })
+    spy.mockReturnValue({ candidates: [], defaultAddress: undefined, hasGasTokenList: true })
     rerender()
     expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
 
@@ -406,8 +410,32 @@ describe('useFeesPreview', () => {
     spy.mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
+      hasGasTokenList: true,
     })
     rerender()
+    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+  })
+
+  it('keeps the user selection while the gas tokens list is missing', () => {
+    const spy = jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
+      candidates: [candidateEth, candidateWeth],
+      defaultAddress: ETH_ADDRESS,
+      hasGasTokenList: true,
+    })
+    jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result, rerender } = renderHook(() => useFeesPreview({ isPayFromSafe: true }), {
+      wrapper: withSafeTx(nativeSafeTx),
+    })
+
+    act(() => {
+      result.current.onGasTokenChange?.(WETH_ADDRESS)
+    })
+
+    // The gas tokens request failed on a refetch: WETH is gone from candidates, but not because it can't pay
+    spy.mockReturnValue({ candidates: [candidateEth], defaultAddress: ETH_ADDRESS, hasGasTokenList: false })
+    rerender()
+
     expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
   })
 
@@ -415,6 +443,7 @@ describe('useFeesPreview', () => {
     jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [],
       defaultAddress: undefined,
+      hasGasTokenList: true,
     })
     jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
 
@@ -467,6 +496,7 @@ describe('useFeesPreview', () => {
     jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [],
       defaultAddress: undefined,
+      hasGasTokenList: true,
     })
     const previewSpy = jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
 
@@ -658,6 +688,28 @@ describe('useFeesPreview', () => {
       expect(result.current.availableGasTokens).toEqual([
         expect.objectContaining({ address: ETH_ADDRESS, symbol: 'ETH', logoUri: 'https://eth.logo' }),
       ])
+    })
+
+    it('locks the fee params of a proposal the Safe pays for, even without signatures', () => {
+      const previewSpy = jest
+        .spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery')
+        .mockReturnValue(mockSuccessfulPreview)
+      const proposedWethGasSafeTx = buildSafeTx({
+        to: mockSafe.address.value,
+        value: '100000000000000',
+        data: '0x',
+        gasToken: WETH_ADDRESS,
+        ...SAFE_PAYS,
+      })
+
+      const { result } = renderHook(() => useFeesPreview({ isPayFromSafe: true }), {
+        wrapper: withSafeTx(proposedWethGasSafeTx),
+      })
+
+      expect(result.current.isConfirmation).toBe(true)
+      expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+      expect(result.current.gasFee.currency).toBe('WETH')
+      expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
     })
 
     it('skips the CGW preview query — confirmers derive fees from the signed payload', () => {

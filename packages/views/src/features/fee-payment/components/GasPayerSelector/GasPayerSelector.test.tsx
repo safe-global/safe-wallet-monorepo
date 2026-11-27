@@ -64,7 +64,7 @@ describe('GasPayerSelector view', () => {
   it.each([
     ['SET_AT_SIGNING', "Set at signing and can't be changed."],
     ['SPONSORED', 'Covered by your Pro plan.'],
-    ['NATIVE_ONLY', 'Fees are paid in ETH for now. More tokens are coming soon.'],
+    ['ONLY_TOKEN', 'ETH is the only token in this Safe account that can pay fees.'],
     [undefined, 'Fees will be paid from the connected signer wallet when executing this transaction.'],
   ] as const)('explains a fee token locked for %s', (lockedReason, text) => {
     renderCard({ view: view({ gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason } }) })

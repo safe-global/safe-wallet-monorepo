@@ -22,6 +22,8 @@ export class TxReviewPage {
   readonly safeAccountOption: Locator
   /** The payer that the fee card shows without a choice, e.g. "Safe account" once the signed payload carries the fees */
   readonly lockedFeePayer: Locator
+  /** The token the fees are paid in: a menu while the Safe account pays and holds more than one gas token */
+  readonly feesTokenSelector: Locator
   readonly gasFeeRow: Locator
   /** Opens the gas settings in the fee card: editable while the connected wallet pays, read-only otherwise */
   readonly gasSettingsToggle: Locator
@@ -74,6 +76,7 @@ export class TxReviewPage {
     this.sponsoredOption = page.getByTestId('fee-payer-sponsored')
     this.safeAccountOption = page.getByTestId('fee-payer-safe')
     this.lockedFeePayer = page.getByTestId('fee-payer-locked')
+    this.feesTokenSelector = page.getByTestId('gas-token-selector')
     this.gasFeeRow = page.getByTestId('gas-fee-row')
     this.gasSettingsToggle = page.getByTestId('gas-fee-details-toggle')
     this.maxPriorityFeeInput = page.getByTestId('gas-param-maxPriorityFeePerGas')
@@ -117,6 +120,12 @@ export class TxReviewPage {
   async sign(): Promise<void> {
     await this.continueButton.click()
     await this.signButton.click()
+  }
+
+  /** Pick the token that the Safe pays the fees in, by its symbol, in the fee card of the review */
+  async payFeesIn(symbol: string): Promise<void> {
+    await this.feesTokenSelector.click()
+    await this.page.getByRole('menuitem', { name: new RegExp(`^${symbol}\\b`) }).click()
   }
 
   /** Pick the Safe account as the payer of the fees in the fee card of the review */

@@ -79,7 +79,7 @@ export const useGasPayerSelection = ({
       : 'PRO_SPONSORED_LEFT'
 
   // The Safe can be asked to pay only on an unsigned payload, and only with a gas token it holds.
-  const { candidates } = useGasTokenCandidates(
+  const { candidates, hasGasTokenList } = useGasTokenCandidates(
     isUnsigned
       ? { to: safeTx.data.to, value: safeTx.data.value, data: safeTx.data.data, operation: safeTx.data.operation }
       : undefined,
@@ -158,7 +158,8 @@ export const useGasPayerSelection = ({
           tokens,
           selected: fees.selectedGasToken ?? nativeToken?.address ?? ZERO_ADDRESS,
           locked: isLocked,
-          lockedReason: isLocked ? 'SET_AT_SIGNING' : 'NATIVE_ONLY',
+          // Without the gas tokens list we can't tell the native token is the only one that pays.
+          lockedReason: isLocked ? 'SET_AT_SIGNING' : hasGasTokenList ? 'ONLY_TOKEN' : undefined,
         }
       : {
           tokens: nativeToken ? [nativeToken] : [],
@@ -202,6 +203,7 @@ export const useGasPayerSelection = ({
   }, [
     safeTx,
     isLocked,
+    hasGasTokenList,
     step,
     planState,
     offersSafeToggle,

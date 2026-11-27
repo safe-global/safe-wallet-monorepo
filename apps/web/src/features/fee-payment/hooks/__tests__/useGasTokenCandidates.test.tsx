@@ -1,4 +1,5 @@
 import { OperationType } from '@safe-global/types-kit'
+import { skipToken } from '@reduxjs/toolkit/query'
 
 import { renderHook } from '@/tests/test-utils'
 import { useGasTokenCandidates } from '../useGasTokenCandidates'
@@ -6,48 +7,25 @@ import type { FeePreviewTx } from '../../public/hooks/useResolvedGasToken'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as useTrustedTokenBalancesModule from '@/hooks/loadables/useTrustedTokenBalances'
+import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
-// The allowlist cases below describe phase 2; phase 1 (native only) has its own case at the end.
-jest.mock('../../public/constants', () => ({
-  ...jest.requireActual('../../public/constants'),
-  NATIVE_GAS_TOKEN_ONLY: false,
-}))
-
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
-// Mainnet allowlisted addresses (per PLA-1412)
+// Mainnet gas tokens, as the Config Service serves them (checksummed)
 const USDC_MAINNET = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const USDT_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 const DAI_MAINNET = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
-const WETH_MAINNET = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-const PYUSD_MAINNET = '0x6c3ea9036406852006290770BEdFcAbA0e23A0e8'
-// Arbitrum bridged USDC.e — explicitly excluded
-const USDC_E_ARBITRUM = '0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8'
-const USDC_NATIVE_ARBITRUM = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
-// Random non-allowlisted token
-const RANDOM_TOKEN = '0x5aFE3855358E112B5647B952709E6165e1c1eEEe'
+// Held by the Safe but not a gas token
+const UNLISTED_TOKEN = '0x1111111111111111111111111111111111111111'
 
 const mainnetChain = chainBuilder()
   .with({ chainId: '1', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'eth.logo' } })
   .build()
 
-const arbitrumChain = chainBuilder()
-  .with({ chainId: '42161', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'eth.logo' } })
-  .build()
-
 const polygonChain = chainBuilder()
   .with({ chainId: '137', nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18, logoUri: 'pol.logo' } })
   .build()
-
-// Optimism is intentionally not in the allowlist — used to verify the "native only" fallback.
-const optimismChain = chainBuilder()
-  .with({ chainId: '10', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'op.logo' } })
-  .build()
-
-const POLYGON_USDC = '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'
-const POLYGON_DAI = '0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063'
-const POLYGON_USDC_E = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
 
 const mockSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
 
@@ -82,6 +60,11 @@ const tokenBalance = (overrides: {
 const mockBalances = (items: unknown[]): ReturnType<typeof useTrustedTokenBalancesModule.useTrustedTokenBalances> =>
   [{ fiatTotal: '0', items: items as never }, undefined, false] as never
 
+const mockGasTokens = (tokens: Array<{ address: string; symbol: string }> | undefined) =>
+  jest
+    .spyOn(gatewayApi, 'useGetGasTokensQuery')
+    .mockReturnValue({ data: tokens } as unknown as ReturnType<typeof gatewayApi.useGetGasTokensQuery>)
+
 describe('useGasTokenCandidates', () => {
   beforeEach(() => {
     jest.resetAllMocks()
@@ -92,6 +75,11 @@ describe('useGasTokenCandidates', () => {
       safeLoaded: true,
       safeLoading: false,
     })
+    mockGasTokens([
+      { address: USDC_MAINNET, symbol: 'USDC' },
+      { address: USDT_MAINNET, symbol: 'USDT' },
+      { address: DAI_MAINNET, symbol: 'DAI' },
+    ])
   })
 
   it('returns empty candidates when tx is undefined', () => {
@@ -108,7 +96,7 @@ describe('useGasTokenCandidates', () => {
   it('returns empty candidates when Safe holds no tokens', () => {
     jest.spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances').mockReturnValue(mockBalances([]))
 
-    const { result } = renderHook(() => useGasTokenCandidates(tx, { nativeOnly: true }))
+    const { result } = renderHook(() => useGasTokenCandidates(tx))
 
     expect(result.current.candidates).toEqual([])
   })
@@ -128,14 +116,14 @@ describe('useGasTokenCandidates', () => {
     expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH'])
   })
 
-  it('excludes ERC-20 tokens not in the chain allowlist', () => {
+  it('excludes a held ERC-20 the fee service does not accept', () => {
     jest
       .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
       .mockReturnValue(
         mockBalances([
           tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' }),
           tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6 }),
-          tokenBalance({ address: RANDOM_TOKEN, symbol: 'RANDOM' }),
+          tokenBalance({ address: UNLISTED_TOKEN, symbol: 'UNLISTED' }),
         ]),
       )
 
@@ -144,77 +132,81 @@ describe('useGasTokenCandidates', () => {
     expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH', 'USDC'])
   })
 
-  it('orders candidates by allowlist priority (native → USDC → USDT → DAI → WETH → PYUSD)', () => {
+  it('matches a gas token whatever the casing the balances use', () => {
+    jest
+      .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
+      .mockReturnValue(
+        mockBalances([tokenBalance({ address: USDC_MAINNET.toLowerCase(), symbol: 'USDC', decimals: 6 })]),
+      )
+
+    const { result } = renderHook(() => useGasTokenCandidates(tx))
+
+    expect(result.current.candidates.map((c) => c.symbol)).toEqual(['USDC'])
+  })
+
+  it('puts the native token first, then the rest by fiat value', () => {
     jest.spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances').mockReturnValue(
       mockBalances([
-        // Intentionally shuffled — order should come from the allowlist, not the input.
-        tokenBalance({ address: PYUSD_MAINNET, symbol: 'PYUSD', decimals: 6 }),
-        tokenBalance({ address: WETH_MAINNET, symbol: 'WETH' }),
-        tokenBalance({ address: DAI_MAINNET, symbol: 'DAI' }),
-        tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' }),
-        tokenBalance({ address: USDT_MAINNET, symbol: 'USDT', decimals: 6 }),
-        tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6 }),
+        tokenBalance({ address: DAI_MAINNET, symbol: 'DAI', fiatBalance: '40' }),
+        tokenBalance({ address: USDT_MAINNET, symbol: 'USDT', decimals: 6, fiatBalance: '900' }),
+        // Worth the least, but the native token still leads
+        tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN', fiatBalance: '3' }),
+        tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6, fiatBalance: '120' }),
       ]),
     )
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
-    expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH', 'USDC', 'USDT', 'DAI', 'WETH', 'PYUSD'])
+    expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH', 'USDT', 'USDC', 'DAI'])
     expect(result.current.defaultAddress).toBe(ETH_ADDRESS)
   })
 
-  it('explicitly excludes bridged USDC.e on Arbitrum (only native USDC allowlisted)', () => {
-    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(arbitrumChain)
+  it('surfaces only the native token on a chain with no gas tokens', () => {
+    mockGasTokens([])
     jest
       .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
       .mockReturnValue(
         mockBalances([
           tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' }),
-          tokenBalance({ address: USDC_NATIVE_ARBITRUM, symbol: 'USDC', decimals: 6 }),
-          tokenBalance({ address: USDC_E_ARBITRUM, symbol: 'USDC.e', decimals: 6 }),
+          tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6 }),
         ]),
       )
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
-    const addresses = result.current.candidates.map((c) => c.address.toLowerCase())
-    expect(addresses).toContain(USDC_NATIVE_ARBITRUM.toLowerCase())
-    expect(addresses).not.toContain(USDC_E_ARBITRUM.toLowerCase())
+    expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH'])
+    expect(result.current.hasGasTokenList).toBe(true)
   })
 
-  it('on chains absent from the allowlist, surfaces only the native gas token', () => {
-    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(optimismChain)
-    jest.spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances').mockReturnValue(
-      mockBalances([
-        tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' }),
-        // ERC-20 with a balance — must be filtered out because Optimism has no allowlist entry.
-        tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6 }),
-      ]),
-    )
+  it('offers the native token while the gas token list is loading or failed', () => {
+    mockGasTokens(undefined)
+    jest
+      .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
+      .mockReturnValue(
+        mockBalances([
+          tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' }),
+          tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6 }),
+        ]),
+      )
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
     expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH'])
-    expect(result.current.defaultAddress).toBe(ETH_ADDRESS)
+    // Missing (loading or failed), so nobody should claim the native token is the only one that pays
+    expect(result.current.hasGasTokenList).toBe(false)
   })
 
-  it('Polygon allowlist surfaces POL + USDC + DAI and excludes bridged USDC.e', () => {
-    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(polygonChain)
-    jest.spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances').mockReturnValue(
-      mockBalances([
-        tokenBalance({ address: ETH_ADDRESS, symbol: 'POL', type: 'NATIVE_TOKEN' }),
-        tokenBalance({ address: POLYGON_USDC, symbol: 'USDC', decimals: 6 }),
-        tokenBalance({ address: POLYGON_DAI, symbol: 'DAI' }),
-        // Bridged — must be excluded
-        tokenBalance({ address: POLYGON_USDC_E, symbol: 'USDC.e', decimals: 6 }),
-      ]),
-    )
+  it('skips the gas token request until the chain is known', () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(undefined)
+    const query = mockGasTokens([])
+    jest
+      .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
+      .mockReturnValue(mockBalances([tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' })]))
 
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
-    expect(result.current.candidates.map((c) => c.symbol)).toEqual(['POL', 'USDC', 'DAI'])
-    const addresses = result.current.candidates.map((c) => c.address.toLowerCase())
-    expect(addresses).not.toContain(POLYGON_USDC_E.toLowerCase())
+    expect(query.mock.calls.at(-1)?.[0]).toBe(skipToken)
+    expect(result.current.candidates).toEqual([])
   })
 
   it('keeps the native token even when its address is non-ZERO (e.g. Polygon POL precompile)', () => {
@@ -222,6 +214,7 @@ describe('useGasTokenCandidates', () => {
     // (Polygon's precompile is 0x…1010). The filter must trust `type` and not require ZERO_ADDRESS.
     const POLYGON_NATIVE_PRECOMPILE = '0x0000000000000000000000000000000000001010'
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(polygonChain)
+    mockGasTokens([])
     jest
       .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
       .mockReturnValue(
@@ -242,23 +235,6 @@ describe('useGasTokenCandidates', () => {
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
     expect(result.current.candidates[0].logoUri).toBe('eth.logo') // from mainnetChain.nativeCurrency.logoUri
-  })
-
-  it('surfaces only the native gas token when nativeOnly is on (phase 1, NATIVE_GAS_TOKEN_ONLY)', () => {
-    jest
-      .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
-      .mockReturnValue(
-        mockBalances([
-          tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6 }),
-          tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' }),
-          tokenBalance({ address: DAI_MAINNET, symbol: 'DAI' }),
-        ]),
-      )
-
-    const { result } = renderHook(() => useGasTokenCandidates(tx, { nativeOnly: true }))
-
-    expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH'])
-    expect(result.current.defaultAddress).toBe(ETH_ADDRESS)
   })
 
   it('resolves candidates synchronously (no /fees/preview probes)', () => {

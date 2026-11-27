@@ -9,7 +9,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 from PIL import Image
 
-from chains.models import Chain, Feature, GasPrice, Service, Wallet
+from chains.models import Chain, Feature, GasPrice, GasToken, Service, Wallet
 from safe_apps.models import SafeApp
 
 
@@ -26,6 +26,12 @@ def create_placeholder_image(color: str = "#B8AAF8") -> ContentFile:
 # SECURITY_HUB is off because it stalls transaction signing in the local stack.
 FEATURES_FILE = Path(__file__).resolve().parent.parent / "test-chain-features.json"
 DEFAULT_FEATURES = json.loads(FEATURES_FILE.read_text())["on"]
+
+# The ERC-20s that pay the gas of Pay from Safe, per forked chain; the fee service mock prices them.
+# Sepolia: Circle's USDC, which the journeys seed with `seedTokenBalance`.
+GAS_TOKENS = {
+    11155111: [("0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", "USDC")],
+}
 
 DEFAULT_WALLETS = [
     "coinbase",
@@ -162,6 +168,7 @@ class Command(BaseCommand):
         self.stdout.write(f"  TXS URL: {txs_url}")
         chain = self._setup_chain(chain_id, chain_defaults(chain_id, chain_name, rpc_url, txs_url))
         self._clear_gas_price(chain)
+        self._setup_gas_tokens(chain)
         self._setup_features(chain)
         self._setup_wallets(chain)
         self._setup_safe_apps(chain)
@@ -190,6 +197,13 @@ class Command(BaseCommand):
         # As on production Sepolia: with no gas price config, the app reads the fee pair from the RPC.
         deleted, _ = GasPrice.objects.filter(chain=chain).delete()
         self.stdout.write(f"  Removed {deleted} GasPrice rows for chain {chain.id}")
+
+    def _setup_gas_tokens(self, chain: Chain):
+        tokens = GAS_TOKENS.get(chain.id, [])
+        for address, symbol in tokens:
+            token, _ = GasToken.objects.update_or_create(address=address, defaults={"symbol": symbol})
+            token.chains.add(chain)
+        self.stdout.write(f"  Listed {len(tokens)} gas tokens for chain {chain.id}")
 
     def _setup_features(self, chain: Chain):
         """Enable exactly the default features plus TEST_CHAIN_EXTRA_FEATURES for the chain."""

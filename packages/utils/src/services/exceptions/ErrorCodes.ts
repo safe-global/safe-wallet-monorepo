@@ -57,6 +57,7 @@ enum ErrorCodes {
   _657 = '657: Error reading the policy guard delay',
   _658 = '658: Error loading the policy guard delay reader',
   _659 = '659: Error reading the requests a policy guard holds',
+  _660 = '660: Error fetching the Pay from Safe gas tokens',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',

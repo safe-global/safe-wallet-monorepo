@@ -96,10 +96,10 @@ export const useFeesPreview = ({
       }
     : undefined
 
-  // Once the first signer has signed, gas params are baked into the payload — later signers
-  // render what's locked in. The isPaidFromSafe guard excludes Signer-pays / pre-Pay-from-Safe queued txs.
-  const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
-  const isConfirmation = lockedGasToken !== undefined && !!safeTx && isPaidFromSafe(safeTx.data)
+  // A payload that already carries Safe-pays fee params (signed, or proposed without signatures)
+  // renders what's locked in: re-quoting would show a fee the signature doesn't commit to.
+  const lockedGasToken = safeTx && isPaidFromSafe(safeTx.data) ? safeTx.data.gasToken : undefined
+  const isConfirmation = lockedGasToken !== undefined
 
   // Signed payload that never went through Safe-pays setup — pre-M2 queue items, or post-M2
   // Signer-pays multi-sig after the first signature. The hook can't tell these apart from the
@@ -107,7 +107,7 @@ export const useFeesPreview = ({
   // the UI for confirmers regardless of how the tx got there.
   const isLegacySigned = !!safeTx && safeTx.signatures.size > 0 && !isPaidFromSafe(safeTx.data)
 
-  const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
+  const { candidates, defaultAddress, hasGasTokenList } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
   const lockedCandidate = useMemo<GasTokenCandidate | undefined>(() => {
     if (!lockedGasToken) return undefined
@@ -136,13 +136,14 @@ export const useFeesPreview = ({
   // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
   // Skip while the candidates list is empty — that's the transient remount window (Back/Forward
   // between flow steps) where balances haven't repopulated yet, not a real "token unavailable".
+  // Same while the gas tokens list is missing: an ERC-20 drops out of candidates without being unavailable.
   useEffect(() => {
     if (!feeGasToken) return
-    if (candidates.length === 0) return
+    if (candidates.length === 0 || !hasGasTokenList) return
     if (!candidates.some((c) => sameAddress(c.address, feeGasToken))) {
       setFeeGasToken(undefined)
     }
-  }, [feeGasToken, candidates, setFeeGasToken])
+  }, [feeGasToken, candidates, hasGasTokenList, setFeeGasToken])
 
   const availableGasTokens = isConfirmation && lockedCandidate ? [lockedCandidate] : candidates
   const selectedAddress = lockedGasToken ?? feeGasToken ?? defaultAddress ?? ZERO_ADDRESS

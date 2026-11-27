@@ -48,10 +48,12 @@ jest.mock('../useFeesPreview', () => ({
 }))
 
 // The Safe's gas token candidates follow the tokens the fees mock offers.
+let mockHasGasTokenList = true
 jest.mock('../../../hooks/useGasTokenCandidates', () => ({
   useGasTokenCandidates: (tx: unknown) => ({
     candidates: tx ? (mockUseFeesPreview().availableGasTokens ?? []) : [],
     defaultAddress: undefined,
+    hasGasTokenList: mockHasGasTokenList,
   }),
 }))
 
@@ -95,6 +97,7 @@ const persisted = () => getStoreInstance().getState()[feePaymentSourcePreference
 describe('useGasPayerSelection', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockHasGasTokenList = true
     // The preference slice is persisted to localStorage, which would carry picks across tests
     localStorage.clear()
     gasPaymentOptions = ['PAY_FROM_SAFE', 'SUBSCRIPTION', 'FREE_DAILY_LIMIT']
@@ -190,6 +193,21 @@ describe('useGasPayerSelection', () => {
     const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
     expect(result.current.view?.gasFee).toEqual({ amount: '1.5', currency: 'USDC', fiatAmount: '$1.50' })
+  })
+
+  it('says the token is the only one that can pay fees once the gas tokens list is known', () => {
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
+
+    expect(result.current.view?.gasToken.lockedReason).toBe('ONLY_TOKEN')
+  })
+
+  it("doesn't say the token is the only one that can pay fees without the gas tokens list", () => {
+    mockHasGasTokenList = false
+
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
+
+    expect(result.current.isPayFromSafe).toBe(true)
+    expect(result.current.view?.gasToken.lockedReason).toBeUndefined()
   })
 
   it('falls back to Signer wallet without forgetting Safe account while the Safe cannot pay', () => {
