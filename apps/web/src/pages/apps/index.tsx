@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { useCallback, useEffect, useMemo } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo } from 'react'
 import debounce from 'lodash/debounce'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
@@ -16,13 +16,33 @@ import { SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { useAppsV1 } from '@/features/earn/public/hooks/useAppsV1'
+
+const AppsV1View = lazy(() => import('@/features/earn/public/components/AppsV1View'))
 
 const SafeApps = () => {
   const router = useRouter()
   const safeLinkQuery = useSafeLinkQuery()
-  const { remoteSafeApps, remoteSafeAppsLoading, pinnedSafeApps, pinnedSafeAppIds } = useSafeApps()
-  const { filteredApps, query, setQuery, setSelectedCategories, setOptimizedWithBatchFilter, selectedCategories } =
-    useSafeAppsFilters(remoteSafeApps)
+  const appsV1 = useAppsV1()
+  const {
+    remoteSafeApps,
+    remoteSafeAppsLoading,
+    pinnedSafeApps,
+    pinnedSafeAppIds,
+    customSafeApps,
+    addCustomApp,
+    togglePin,
+    removeCustomApp,
+  } = useSafeApps()
+  const {
+    filteredApps,
+    query,
+    setQuery,
+    setSelectedCategories,
+    setOptimizedWithBatchFilter,
+    optimizedWithBatchFilter,
+    selectedCategories,
+  } = useSafeAppsFilters(remoteSafeApps)
   const isFiltered = filteredApps.length !== remoteSafeApps.length
   const isSafeAppsEnabled = useHasFeature(FEATURES.SAFE_APPS)
 
@@ -57,6 +77,28 @@ const SafeApps = () => {
         <Typography align="center" className="my-6">
           Safe Apps are not available on this network.
         </Typography>
+      ) : appsV1 ? (
+        <main>
+          <Suspense>
+            <AppsV1View
+              key={appsV1.view}
+              config={appsV1}
+              allApps={remoteSafeApps}
+              filteredApps={filteredApps}
+              customApps={[...customSafeApps, ...(appsV1.customApps ?? [])]}
+              query={query}
+              onQuery={onChangeQuery}
+              selectedCategories={selectedCategories}
+              onCategories={setSelectedCategories}
+              batchOnly={optimizedWithBatchFilter}
+              onBatchOnly={setOptimizedWithBatchFilter}
+              pinnedIds={pinnedSafeAppIds}
+              onTogglePin={(appId) => togglePin(appId, SAFE_APPS_LABELS.apps_all)}
+              onAddCustom={addCustomApp}
+              onRemoveCustom={(app) => removeCustomApp(app.id)}
+            />
+          </Suspense>
+        </main>
       ) : (
         <>
           <SafeAppsHeader />

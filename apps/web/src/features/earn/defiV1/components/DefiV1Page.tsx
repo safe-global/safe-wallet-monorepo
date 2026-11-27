@@ -70,7 +70,7 @@ const toPositions = (list: typeof EXISTING_POSITIONS, safe?: string): Position[]
       : []
   })
 
-const initialPositions = ({ scope }: DefiV1Config): Position[] => {
+export const initialPositions = ({ scope }: Pick<DefiV1Config, 'scope'>): Position[] => {
   if (scope === 'workspace') return WORKSPACE_SAFES.flatMap((safe) => toPositions(safe.positions, safe.name))
   return toPositions(EXISTING_POSITIONS)
 }
