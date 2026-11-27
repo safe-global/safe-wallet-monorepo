@@ -71,5 +71,6 @@ export const rebuildDraftWithApproval = async ({
     safeAddress: draft.safeAddress,
     safe,
     dispatch,
+    declared: draft.declared,
   })
 }

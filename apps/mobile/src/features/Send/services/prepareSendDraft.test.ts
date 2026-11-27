@@ -127,6 +127,7 @@ describe('prepareSendDraft', () => {
     expect(draft.safeAddress).toBe(safeAddress)
     expect(draft.txDetails.txId).toBe(safeTxHashReturned)
     expect(draft.txDetails.txStatus).toBe('AWAITING_CONFIRMATIONS')
+    expect(draft.declared).toEqual({ channel: 'NATIVE_TRANSFER' })
   })
 
   it('throws and does not store a draft when /preview fails', async () => {

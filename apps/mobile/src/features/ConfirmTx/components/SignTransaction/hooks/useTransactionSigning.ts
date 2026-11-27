@@ -145,6 +145,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
           signedTx: prebuiltSafeTx,
           safeTxHash: signedTx.safeTransactionHash,
           dispatch,
+          declared: draft.declared,
         })
       } else {
         await addConfirmation({

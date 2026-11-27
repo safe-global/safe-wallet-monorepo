@@ -39,6 +39,7 @@ const buildDraft = (buildParams: Partial<DraftTx['buildParams']>): DraftTx => {
     buildParams: { to: tokenAddress, value: '0', data: '0x', nonce: 0, ...buildParams },
     safeTxHash,
     txDetails: { txId: safeTxHash } as TransactionDetails,
+    declared: { channel: 'NATIVE_TRANSFER' },
   }
 }
 
