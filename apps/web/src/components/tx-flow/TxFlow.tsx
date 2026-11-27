@@ -9,6 +9,7 @@ import ReviewTransaction, { type ReviewTransactionProps } from '../tx/ReviewTran
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteTxStep } from '../tx/ExecuteTxStep'
 import TxNote from '@/components/tx-flow/features/TxNote'
+import { usePrivateNotesPrototype } from '@/features/tx-notes/public/services/privateNotesPrototype'
 import SignerSelect from '@/components/tx-flow/features/SignerSelect'
 import BalanceChanges from '@/components/tx-flow/features/BalanceChanges'
 import FeeCard from '@/components/tx-flow/features/FeeCard'
@@ -79,20 +80,24 @@ export const TxFlow = <T extends unknown>({
 
   const trackTimeSpent = useTrackTimeSpent()
 
+  const { commitDraft: saveNote } = usePrivateNotesPrototype()
+
   const handleFlowSubmit = useCallback<SubmitCallback>(
     (props) => {
+      if (props?.txId) saveNote(props.txId)
       onSubmit?.({ ...props, data })
       trackTimeSpent()
     },
-    [onSubmit, data, trackTimeSpent],
+    [onSubmit, data, trackTimeSpent, saveNote],
   )
 
   const handleContinueToExecute = useCallback(
     (txId: string) => {
+      saveNote(txId)
       setSignedTxId(txId)
       nextStep()
     },
-    [nextStep],
+    [nextStep, saveNote],
   )
 
   return (

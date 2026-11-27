@@ -55,6 +55,7 @@ import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
 import { HnQueueAssessmentProvider } from '@/features/hypernative/public/components/HnQueueAssessmentProvider'
+import PrivateNotesAppProvider from '@/features/tx-notes/public/components/PrivateNotesAppProvider'
 import { useHypernativeTokenRefresh } from '@/features/hypernative/public/hooks/useHypernativeTokenRefresh'
 import { useOidcLoginCallback } from '@/features/oidc-auth/public/hooks/useOidcLoginCallback'
 import { useStepUpRecovery } from '@/features/oidc-auth/public/hooks/useStepUpRecovery'
@@ -130,7 +131,9 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
         <GeoblockingProvider>
           <TxModalProvider>
             <AddressBookSourceProvider>
-              <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+              <HnQueueAssessmentProvider>
+                <PrivateNotesAppProvider>{children}</PrivateNotesAppProvider>
+              </HnQueueAssessmentProvider>
             </AddressBookSourceProvider>
           </TxModalProvider>
         </GeoblockingProvider>

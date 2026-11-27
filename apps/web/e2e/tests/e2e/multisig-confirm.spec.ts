@@ -9,6 +9,7 @@ import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 
 const AMOUNT = '0.001'
+const NOTE = 'Monthly payroll, batch 2'
 
 test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () => {
   test('should execute a transfer when a second owner confirms the signature of the first', async ({
@@ -26,6 +27,7 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     await sendTokens.open()
     await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
     await sendTokens.nextButton.click()
+    await review.addNote(NOTE)
     await review.sign()
 
     await expect(review.viewTransactionLink).toHaveAttribute(
@@ -36,6 +38,7 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
 
     await safePage.goto(transactionPage)
+    await expect(safePage.getByText(NOTE)).toBeVisible()
     await expect(queue.transactions).toContainText(AMOUNT)
 
     await journey.connectAs('bob')

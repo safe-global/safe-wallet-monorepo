@@ -34,6 +34,10 @@ export type PrivateNotesPrototype = {
   outsideSigners: number
   /** Notes by transaction id */
   notes: Record<string, PrivateNoteEntry>
+  /** Keeps the note being written on the Review step until its transaction has an id */
+  setDraft: (text: string) => void
+  /** Attaches the note being written to the transaction it was written for */
+  commitDraft: (txId: string) => void
 }
 
 const DEFAULTS: PrivateNotesPrototype = {
@@ -42,6 +46,8 @@ const DEFAULTS: PrivateNotesPrototype = {
   planName: 'Free',
   outsideSigners: 0,
   notes: {},
+  setDraft: () => {},
+  commitDraft: () => {},
 }
 
 const PrivateNotesPrototypeContext = createContext<PrivateNotesPrototype>(DEFAULTS)
