@@ -14,6 +14,11 @@ const mockUseResolvedSidebarNav = jest.fn()
 const mockUseHasFeature = jest.fn()
 const mockUseIsSafeProAnnouncementEnabled = jest.fn<boolean, []>()
 const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
+const mockUseDefiV1 = jest.fn()
+
+jest.mock('@/features/earn/public/hooks/useDefiV1', () => ({
+  useDefiV1: () => mockUseDefiV1(),
+}))
 
 jest.mock('../../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
@@ -150,6 +155,31 @@ describe('SpacesSidebarContent', () => {
     mockUseHasFeature.mockReturnValue(true)
     mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
     mockUseIsSafeProEnabled.mockReturnValue(false)
+    mockUseDefiV1.mockReturnValue(null)
+  })
+
+  it('adds Treasury after Home in the DeFi prototype, active on its workspace view', () => {
+    mockUseDefiV1.mockReturnValue({ scope: 'workspace' })
+
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+    const [mainNav, , options] = mockUseResolvedSidebarNav.mock.calls[0]
+    expect(mainNav.map((i: { label: string }) => i.label)).toEqual([
+      'Home',
+      'Treasury',
+      'Transactions',
+      'Policies',
+      'Activity',
+    ])
+    expect(options.isItemActive({ href: '/spaces/treasury' }, '/spaces')).toBe(true)
+    expect(options.isItemActive({ href: '/spaces' }, '/spaces')).toBe(false)
+  })
+
+  it('leaves Treasury out without the DeFi prototype', () => {
+    render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+    const [mainNav] = mockUseResolvedSidebarNav.mock.calls[0]
+    expect(mainNav.map((i: { label: string }) => i.label)).not.toContain('Treasury')
   })
 
   it('renders SpacesSidebarVariant with resolved navigation', () => {

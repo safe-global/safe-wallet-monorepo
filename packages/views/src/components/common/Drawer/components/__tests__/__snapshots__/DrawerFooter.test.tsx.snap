@@ -2,7 +2,7 @@
 
 exports[`DrawerFooter matches the snapshot 1`] = `
 <div
-  class="px-6 pb-6"
+  class="flex flex-col gap-2 border-t border-border px-6 pt-4 pb-6"
 >
   <button>
     Footer action

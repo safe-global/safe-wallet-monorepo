@@ -28,6 +28,8 @@ import HnPendingBanner from '@/features/hypernative/public/components/HnPendingB
 import StakingPromoBanner from '@/features/stake/public/components/StakingPromoBanner'
 import NonPinnedWarning from '@/features/myAccounts/public/components/NonPinnedWarning'
 import PositionsWidget from '@/features/positions/public/components/PositionsWidget'
+import IdleCashNudge from '@/features/earn/public/components/IdleCashNudge'
+import { useDefiV1 } from '@/features/earn/public/hooks/useDefiV1'
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
@@ -41,11 +43,15 @@ const Dashboard = (): ReactElement => {
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
 
+  const defiV1 = useDefiV1()
+
   return (
     <>
       <div className={css.dashboardGrid}>
         <div className={css.leftCol}>
           <Overview />
+
+          {defiV1?.nudge === 'home' && <IdleCashNudge config={defiV1} placement="home" />}
 
           {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
 

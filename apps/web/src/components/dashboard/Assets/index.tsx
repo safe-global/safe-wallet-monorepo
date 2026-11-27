@@ -17,6 +17,8 @@ import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/F
 import { isEligibleEarnToken } from '@/features/earn/public/utils'
 import { useIsEarnPromoEnabled } from '@/features/earn/public/hooks/useIsEarnFeatureEnabled'
 import EarnButton from '@/features/earn/public/components/EarnButton'
+import IdleCashNudge from '@/features/earn/public/components/IdleCashNudge'
+import { useDefiV1 } from '@/features/earn/public/hooks/useDefiV1'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
 import useIsStakingPromoEnabled from '@/features/stake/public/hooks/useIsStakingBannerEnabled'
 import useChainId from '@/hooks/useChainId'
@@ -143,6 +145,7 @@ const AssetsWidget = () => {
   const safeLinkQuery = useSafeLinkQuery()
   const { loading, balances } = useBalances()
   const visibleAssets = useVisibleAssets()
+  const defiV1 = useDefiV1()
 
   const items = useMemo(() => {
     return visibleAssets.filter(isNonZeroBalance).slice(0, MAX_ASSETS)
@@ -163,6 +166,7 @@ const AssetsWidget = () => {
   return (
     <WidgetCard title="Top assets" viewAllUrl={items.length > 0 ? viewAllUrl : undefined} testId="assets-widget">
       <div>{items.length > 0 ? <AssetList items={items} /> : <NoAssets />}</div>
+      {defiV1?.nudge === 'assets' && <IdleCashNudge config={defiV1} placement="assets" />}
     </WidgetCard>
   )
 }
