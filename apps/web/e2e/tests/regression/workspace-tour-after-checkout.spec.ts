@@ -5,12 +5,12 @@ import { clearSubscription, createWorkspace, signInWithEmail, uniqueEmail } from
 import { WorkspacePage } from '../../src/pages/workspace.page'
 
 test.describe('Workspace tour after a checkout', { tag: '@regression' }, () => {
+  test.use({ showWorkspaceTour: true })
+
   test('should start the tour only after the admin closes the free access confirmation', async ({
     safePage,
   }, testInfo) => {
     const tourWelcome = safePage.getByTestId('workspace-tour-welcome')
-    // The fixture skips the tour whenever it opens; this test checks when it opens
-    await safePage.removeLocatorHandler(tourWelcome)
     const user = await signInWithEmail(safePage, uniqueEmail('tour-after-checkout'))
     const workspaceId = (await createWorkspace(user, `Tour ${testInfo.testId.slice(0, 8)}`)).uuid
     await clearSubscription(user, workspaceId)
