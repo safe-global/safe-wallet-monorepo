@@ -153,7 +153,7 @@ x-queue: &queue
   environment:
     DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/queue
     RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
-    CONFIG_SERVICE_URL: http://nginx:8000/cfg
+    CONFIG_SERVICE_URL: http://nginx:8000/cfg/internal
     # Queued data is written only to the Queue Service; the worker still applies executions from the TXS events.
     ENABLE_MIGRATION_EVENT_PROCESSING: 'false'
 volumes:
