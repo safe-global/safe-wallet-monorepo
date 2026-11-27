@@ -12,7 +12,7 @@ import { addListener } from '@reduxjs/toolkit'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { RecoveryEvent, recoverySubscribe } from '../../services/recoveryEvents'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { RecoveryState } from '../../services/recovery-state'
+import type { RecoveryState } from '../../public/types'
 import { useIntervalCounter } from '@safe-global/utils/hooks/useIntervalCounter'
 
 const REFRESH_DELAY = 5 * 60 * 1_000 // 5 minutes

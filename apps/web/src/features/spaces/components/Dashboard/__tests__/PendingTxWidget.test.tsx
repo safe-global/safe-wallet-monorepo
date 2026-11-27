@@ -11,12 +11,8 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }))
 
-jest.mock('@/features/transactions/utils', () => ({
+jest.mock('@/features/transactions/public/utils', () => ({
   getTxStatus: () => 'Awaiting confirmations',
-}))
-
-jest.mock('@safe-global/utils/utils/date', () => ({
-  formatTimeInWords: () => '2 hours ago',
 }))
 
 jest.mock('@/components/transactions/TxType', () => ({
@@ -139,11 +135,71 @@ describe('PendingTxWidget – onItemClick callback', () => {
     expect(getTxRows()).toHaveLength(0)
   })
 
-  it('never renders a "View all" action', () => {
+  it('does not render a "View all" action without onViewAll', () => {
     const tx = createMockTx('tx-1', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID)
 
     render(<PendingTxWidget transactions={[tx]} />)
 
     expect(screen.queryByText('View all')).not.toBeInTheDocument()
+  })
+})
+
+describe('PendingTxWidget – View all', () => {
+  const txs = [
+    createMockTx('tx-1', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID),
+    createMockTx('tx-2', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID),
+  ]
+
+  it('shows the transactions not displayed as a +N count next to "View all"', () => {
+    render(<PendingTxWidget transactions={txs} totalCount={9} onViewAll={jest.fn()} />)
+
+    expect(screen.getByText('View all')).toBeInTheDocument()
+    expect(screen.getByText('+7')).toBeInTheDocument()
+  })
+
+  it('keeps "View all" without a count when every pending transaction is displayed', () => {
+    render(<PendingTxWidget transactions={txs} totalCount={2} onViewAll={jest.fn()} />)
+
+    expect(screen.getByText('View all')).toBeInTheDocument()
+    expect(screen.queryByText(/^\+\d+$/)).not.toBeInTheDocument()
+  })
+
+  it('calls onViewAll once when "View all" is clicked', () => {
+    const onViewAll = jest.fn()
+    render(<PendingTxWidget transactions={txs} totalCount={9} onViewAll={onViewAll} />)
+
+    fireEvent.click(screen.getByTestId('widget-view-all'))
+
+    expect(onViewAll).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not render "View all" while loading', () => {
+    render(<PendingTxWidget transactions={[]} loading onViewAll={jest.fn()} />)
+
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
+  })
+
+  it('does not render "View all" in the empty state', () => {
+    render(<PendingTxWidget transactions={[]} totalCount={0} onViewAll={jest.fn()} />)
+
+    expect(screen.getByText('No pending transactions')).toBeInTheDocument()
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
+  })
+
+  it('does not render "View all" in the error state', () => {
+    render(<PendingTxWidget transactions={[]} error="boom" onViewAll={jest.fn()} />)
+
+    expect(screen.queryByText('View all')).not.toBeInTheDocument()
+  })
+})
+
+describe('PendingTxWidget – proposed time', () => {
+  it('shows the same short time as the queue table', () => {
+    jest.setSystemTime(1705852800000 + 5 * 60 * 60 * 1000)
+
+    render(<PendingTxWidget transactions={[createMockTx('tx-1', MOCK_SAFE_ADDRESS, MOCK_CHAIN_ID)]} />)
+
+    expect(screen.getByText('5h ago')).toBeInTheDocument()
+    expect(screen.queryByText(/about|hours/)).not.toBeInTheDocument()
   })
 })

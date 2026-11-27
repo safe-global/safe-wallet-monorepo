@@ -1,1 +1,0 @@
-export { WhatsNewDrawer } from './WhatsNewDrawer'

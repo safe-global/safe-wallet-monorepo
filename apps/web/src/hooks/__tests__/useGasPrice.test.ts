@@ -4,7 +4,7 @@ import { useCurrentChain } from '../useChains'
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 // mock useWeb3Readonly
-jest.mock('../wallets/web3', () => {
+jest.mock('@/hooks/wallets/web3ReadOnly', () => {
   const provider = {
     getFeeData: jest.fn(() =>
       Promise.resolve({
@@ -49,7 +49,7 @@ jest.mock('@/hooks/useChains', () => {
 
 describe('useGasPrice', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })

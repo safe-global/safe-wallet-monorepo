@@ -1,11 +1,13 @@
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useCurrentSpaceId, useIsAdmin, useSpaceMembersByStatus } from '@/features/spaces'
-import { WorkspaceTwoFactorSection } from '@/features/oidc-auth'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
+import { useIsAdmin, useSpaceMembersByStatus } from '../../../public/hooks/useSpaceMembers'
+import WorkspaceTwoFactorSection from '@/features/oidc-auth/public/components/WorkspaceTwoFactorSection'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import IdentitySection from '../sections/IdentitySection'
 import AppearanceSection from '../sections/AppearanceSection'
 import DangerZoneSection from '../sections/DangerZoneSection'
+import WorkspaceTourSection from '../../WorkspaceTour/WorkspaceTourSection'
 
 const GeneralPage = () => {
   const spaceId = useCurrentSpaceId()
@@ -19,6 +21,7 @@ const GeneralPage = () => {
       <IdentitySection space={space} />
       <WorkspaceTwoFactorSection members={activeMembers} spaceId={spaceId ?? undefined} isAdmin={isAdmin} />
       <AppearanceSection />
+      <WorkspaceTourSection />
       <DangerZoneSection space={space} />
     </div>
   )

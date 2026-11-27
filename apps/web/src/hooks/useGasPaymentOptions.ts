@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getGasPaymentOptions } from '@safe-global/utils/utils/gasPaymentOptions'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
-import { useSafeSponsoredTxs } from '@/features/spaces'
-import { useGasTooHigh, useIsNoFeeCampaignEnabled, useNoFeeCampaignEligibility } from '@/features/no-fee-campaign'
+import { useSafeSponsoredTxs } from '@/features/spaces/public/hooks/useSafeSponsoredTxs'
+import { useGasTooHigh } from '@/features/no-fee-campaign/public/hooks/useGasTooHigh'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/hooks/useIsNoFeeCampaignEnabled'
+import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/public/hooks/useNoFeeCampaignEligibility'
 import { selectSponsoredOffer, type SponsoredOffer, type SponsoredOption } from '@/utils/gasPayment'
 
 export type GasPaymentOptions = {
@@ -37,7 +39,7 @@ export const useGasPaymentOptions = ({
     () => getGasPaymentOptions(chain).filter((option) => !isBatch || option !== 'NO_FEE_CAMPAIGN'),
     [chain, isBatch],
   )
-  const isRefundTx = !!safeTx && isGtfSafePaid(safeTx.data)
+  const isRefundTx = !!safeTx && isPaidFromSafe(safeTx.data)
   const canWalletRelay = isBatch || walletCanRelay === true
   const isCampaignEligible = !!isCampaignEnabled && !!campaign.isEligible && !campaign.blockedAddress
 

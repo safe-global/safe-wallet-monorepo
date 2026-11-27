@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import Apps from '@/pages/apps'
 
 /**
@@ -35,7 +35,9 @@ export const Default: Story = {}
 export const SearchResults: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.type(await canvas.findByLabelText('Search Safe App by name'), 'Transaction Builder')
-    await waitFor(() => expect(canvas.queryByText(/Featured apps/)).not.toBeInTheDocument())
+    // Typed before the apps load, the query got lost when the list rendered
+    await canvas.findByText(/Featured apps/, undefined, { timeout: 10_000 })
+    await userEvent.type(canvas.getByLabelText('Search Safe App by name'), 'Transaction Builder')
+    await waitFor(() => expect(canvas.queryByText(/Featured apps/)).not.toBeInTheDocument(), { timeout: 5_000 })
   },
 }

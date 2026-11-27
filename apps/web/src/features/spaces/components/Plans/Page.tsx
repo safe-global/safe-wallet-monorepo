@@ -5,17 +5,15 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { cn } from '@safe-global/views/utils/cn'
-import { useLoadFeature } from '@/features/__core__'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuthState from '../AuthState'
 import Plans from './index'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { takePlansEntry } from './planSelection'
-import { buildPlanTiers, pickSeatOption, toCurrentPlan } from './planTiers'
-import { useIsAdmin } from '../../hooks/useSpaceMembers'
+import { takePlansEntry } from '../../public/services/planSelection'
+import { buildPlanTiers, opensOnSize, pickSeatOption, toCurrentPlan } from './planTiers'
+import { useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
@@ -23,6 +21,7 @@ import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
 import type { CurrentPlan, PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
+import SafeProAnnouncement from '@/features/safe-pro-announcement/public/components/SafeProAnnouncement'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">
@@ -31,16 +30,16 @@ const PlansSkeleton = () => (
   </div>
 )
 
-/** The seats the recommended card opens on, the same option its card picks first. */
+/** The seats the recommended card opens on; none when it waits for the user to pick a size. */
 const defaultSeats = (tiers: PlanTier[], currentPlan: CurrentPlan | undefined): number | undefined => {
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN && candidate.billingCycle !== 'year')
-  return (tier && pickSeatOption(tier, currentPlan)?.seats) ?? undefined
+  if (!tier || !opensOnSize(tier, currentPlan)) return undefined
+  return pickSeatOption(tier, currentPlan)?.seats ?? undefined
 }
 
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useIsSafeProEnabled()
-  const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
   const {
     plan,
     seats,

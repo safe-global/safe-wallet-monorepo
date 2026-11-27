@@ -55,13 +55,11 @@ export const AppRoutes = {
     settingsGeneral: '/spaces/settings/general',
     settingsAccount: '/spaces/settings/account',
     settingsAbout: '/spaces/settings/about',
-    settingsExperimental: '/spaces/settings/experimental',
     safeAccounts: '/spaces/safe-accounts',
     members: '/spaces/members',
     plans: '/spaces/plans',
     index: '/spaces',
     addressBook: '/spaces/address-book',
-    createSpace: '/spaces/create-space',
     transactions: '/spaces/transactions',
     security: '/spaces/security',
     activity: '/spaces/activity',
@@ -82,6 +80,7 @@ export const AppRoutes = {
 
     // Onboarding routes
     createSpace: '/welcome/create-space',
+    plan: '/welcome/plan',
     selectSafes: '/welcome/select-safes',
     inviteMembers: '/welcome/invite-members',
     survey: '/welcome/survey',

@@ -7,7 +7,7 @@ import {
   type SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
+import { findTokenOption, type TokenOption } from '@/utils/tokenOptions'
 import type {
   LimitSummaryToken,
   SpendingLimitSummaryModel,
@@ -37,7 +37,13 @@ export const resolveSafe = (safeId: string, accounts: readonly SafeAccountEntry[
 const resolveToken = (tokenAddress: string, tokens: readonly TokenOption[]): LimitSummaryToken => {
   const match = findTokenOption(tokens, tokenAddress)
   return match
-    ? { address: match.address, symbol: match.symbol, decimals: match.decimals, logoUri: match.logoUri }
+    ? {
+        address: match.address,
+        symbol: match.symbol,
+        decimals: match.decimals,
+        logoUri: match.logoUri,
+        untrusted: match.untrusted,
+      }
     : { address: tokenAddress, symbol: shortenAddress(tokenAddress) }
 }
 

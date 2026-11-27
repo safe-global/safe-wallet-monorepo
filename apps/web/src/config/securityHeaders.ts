@@ -1,7 +1,5 @@
 import { IS_PRODUCTION } from './constants'
 
-const isCypress = Boolean(typeof window !== 'undefined' && window.Cypress)
-
 /**
  * CSP Header notes:
  * For safe apps we have to allow img-src * and frame-src *
@@ -17,8 +15,8 @@ export const ContentSecurityPolicy = `
  default-src 'self';
  connect-src 'self' *;
  script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://assets.calendly.com https://challenges.cloudflare.com https://*.hsforms.com https://*.hsforms.net https://*.hubspot.com https://*.hs-scripts.com ${
-   !IS_PRODUCTION || isCypress
-     ? "'unsafe-eval'" // Dev server and cypress need unsafe-eval
+   !IS_PRODUCTION
+     ? "'unsafe-eval'" // The dev server needs unsafe-eval
      : "'wasm-unsafe-eval'"
  };
  frame-src http: https:;

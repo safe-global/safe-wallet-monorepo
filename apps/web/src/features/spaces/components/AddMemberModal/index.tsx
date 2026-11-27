@@ -10,7 +10,8 @@ import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, MemberRole } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import { MemberRole } from '../../memberRole'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -29,7 +30,7 @@ import {
 } from './utils'
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 export const RoleMenuItem = ({
   role,

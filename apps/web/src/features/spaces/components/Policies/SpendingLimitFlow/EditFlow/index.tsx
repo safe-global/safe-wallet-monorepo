@@ -4,10 +4,11 @@ import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProv
 import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import type { PolicySafe } from '@safe-global/views/features/spaces/components/Policies/types'
 import CreateSpendingLimitPolicy from '../CreateStep'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
+import { CustomTokensProvider } from '@/components/common/CustomTokensProvider'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
 import { toSpendingLimitFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
 import {
@@ -46,7 +47,9 @@ const EditSpendingLimitFlow = ({ safe }: { safe: PolicySafe }): ReactElement => 
   <SafeScopeProvider initial={{ chainId: safe.chainId, safeAddress: safe.address }}>
     <ExistingSpendingLimitsProvider>
       <EditModeProvider>
-        <EditFlowBody safe={safe} />
+        <CustomTokensProvider>
+          <EditFlowBody safe={safe} />
+        </CustomTokensProvider>
       </EditModeProvider>
     </ExistingSpendingLimitsProvider>
   </SafeScopeProvider>

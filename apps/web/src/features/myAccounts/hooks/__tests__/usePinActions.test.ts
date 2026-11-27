@@ -4,6 +4,7 @@ import { safeItemBuilder } from '@/tests/builders/safeItem'
 import type { RootState } from '@/store'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import * as analytics from '@/services/analytics'
+import * as overview from '@/services/analytics/events/overview'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -48,7 +49,7 @@ describe('usePinActions', () => {
 
       expect(mockTrackEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          label: analytics.PIN_SAFE_LABELS.pin,
+          label: overview.PIN_SAFE_LABELS.pin,
         }),
       )
     })
@@ -73,7 +74,7 @@ describe('usePinActions', () => {
 
       expect(mockTrackEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          label: analytics.PIN_SAFE_LABELS.pin,
+          label: overview.PIN_SAFE_LABELS.pin,
         }),
       )
     })
@@ -125,7 +126,7 @@ describe('usePinActions', () => {
 
       expect(mockTrackEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          label: analytics.PIN_SAFE_LABELS.unpin,
+          label: overview.PIN_SAFE_LABELS.unpin,
         }),
       )
     })
@@ -167,7 +168,7 @@ describe('usePinActions', () => {
 
       expect(mockTrackEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          label: analytics.PIN_SAFE_LABELS.pin,
+          label: overview.PIN_SAFE_LABELS.pin,
         }),
       )
     })

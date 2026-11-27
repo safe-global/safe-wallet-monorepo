@@ -9,7 +9,13 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_ORDER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import {
+  ENTERPRISE_TIER,
+  PLAN_ORDER,
+  trialFeatures,
+  type TrialFeature,
+  type TrialPlanName,
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -18,6 +24,7 @@ import type {
   PlanSeatOption,
   PlanSummary,
   PlanTier,
+  TrialSize,
 } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const CYCLES = ['month', 'year'] as const
@@ -100,6 +107,13 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
   pick.tier.billingCycle !== current.billingCycle &&
   pick.option.label === current.seatsLabel
 
+/** No paid plan is in force: a trial, or no plan at all. */
+export const isUnpaid = (current: CurrentPlan | undefined): boolean => !current || current.isTrialing
+
+/** "Business 5" for a plan sold in several sizes, "Starter" for a plan with one size. */
+const sizedPlanName = (pick: PlanPick): string =>
+  pick.tier.options.length > 1 && pick.option.seats ? `${pick.tier.name} ${pick.option.seats}` : pick.tier.name
+
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
     const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
@@ -111,18 +125,21 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
         ? { kind: 'billing', label: 'Add payment method' }
         : { kind: 'current', label: 'Current plan' }
     }
+  }
+  if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
+  if (!current) return { kind: 'subscribe', label: `Continue with ${sizedPlanName(pick)}` }
+
+  const direction = getChangeDirection(current, pick)
+  // Nothing is paid during a trial, so every move off it is a switch to a named size.
+  if (current.isTrialing) return { kind: 'change', direction, label: `Switch to ${sizedPlanName(pick)}` }
+  if (pick.tier.isCurrent) {
     // Another seat size of the same plan: a change, worded by seats rather than by plan name.
-    const direction = getChangeDirection(current, pick)
     return {
       kind: 'change',
       direction,
       label: direction === 'upgrade' ? `Upgrade to ${pick.option.label}` : `Switch to ${pick.option.label}`,
     }
   }
-  if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
-  if (!current) return { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
-
-  const direction = getChangeDirection(current, pick)
   if (isCycleSwitch(pick, current)) {
     return {
       kind: 'change',
@@ -247,14 +264,44 @@ export const buildPlanTiers = (
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
+/** The plan the Workspace is on, paid or on trial, on either billing cycle. */
+export const isOnPlan = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
+  currentPlan !== undefined && (Boolean(tier.isCurrent) || currentPlan.name === tier.name)
+
+const hasCurrentSize = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
+  tier.options.some((option) => option.priceId === tier.currentPriceId || option.label === currentPlan?.seatsLabel)
+
+/** Without a paid plan in force, a plan sold in several sizes waits for a pick unless it offers the size in force. */
+export const opensOnSize = (tier: PlanTier, currentPlan: CurrentPlan | undefined): boolean =>
+  !isUnpaid(currentPlan) ||
+  tier.options.length < 2 ||
+  (isOnPlan(tier, currentPlan) && hasCurrentSize(tier, currentPlan))
+
 export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
-  const isCurrentPlan = tier.isCurrent || currentPlan?.name === tier.name
+  const isCurrentPlan = isOnPlan(tier, currentPlan)
   return (
     tier.options.find((candidate) => candidate.label === seatsLabel) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
     tier.options.find((candidate) => isCurrentPlan && candidate.label === currentPlan?.seatsLabel) ??
     tier.options[0]
   )
+}
+
+/** Every size of every plan on the cycle, smallest first; a size two plans share goes to the first plan in order. */
+export const getPlanSizes = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanPick[] => {
+  const byLabel = new Map<string, PlanPick>()
+  for (const tier of getVisibleTiers(tiers, cycle)) {
+    for (const option of tier.options) {
+      if (!byLabel.has(option.label)) byLabel.set(option.label, { tier, option })
+    }
+  }
+  return [...byLabel.values()].sort((a, b) => bySeats(a.option, b.option))
+}
+
+/** The smallest size that holds the given Safes, the largest when none does, the smallest when the count is unknown. */
+export const getFittingSize = (sizes: PlanPick[], seats: number | undefined): PlanPick | undefined => {
+  if (seats === undefined) return sizes[0]
+  return sizes.find(({ option }) => option.seats == null || option.seats >= seats) ?? sizes.at(-1)
 }
 
 export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
@@ -269,6 +316,36 @@ export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))
+
+const TRIAL_PLAN_NAMES: readonly string[] = ['Starter', 'Business'] satisfies TrialPlanName[]
+
+const isTrialPlanName = (planName: string): planName is TrialPlanName => TRIAL_PLAN_NAMES.includes(planName)
+
+/** What a trial of the plan includes; nothing for a plan the catalog does not describe, so no feature is promised. */
+export const trialFeaturesOf = (planName: string): TrialFeature[] =>
+  isTrialPlanName(planName) ? trialFeatures(planName) : []
+
+/** Every monthly trial option with a link and a seat count, smallest first, so Starter leads. */
+export const trialSizes = (trialPlans: PlanGroup[]): TrialSize[] =>
+  _offersToTiers(trialPlans)
+    .filter((tier) => tier.billingCycle === 'month')
+    .flatMap((tier) =>
+      tier.options.flatMap((option) =>
+        option.paymentLinkId && typeof option.seats === 'number'
+          ? [
+              {
+                paymentLinkId: option.paymentLinkId,
+                seats: option.seats,
+                planName: tier.name,
+                subtitle: tier.copy?.subtitle,
+                monthlyPrice: option.price,
+                currency: tier.currency,
+              },
+            ]
+          : [],
+      ),
+    )
+    .sort((a, b) => a.seats - b.seats)
 
 export const getCatalogTiers = (tiers: PlanTier[]): PlanTier[] => {
   const hasCurrentEnterprise = tiers.some((tier) => tier.isCurrent && tier.name === ENTERPRISE_TIER.name)
@@ -309,4 +386,13 @@ export const getCardSaving = (
   if (twelveMonths == null || yearly == null || yearly >= twelveMonths) return undefined
   const saved = twelveMonths - yearly
   return { amount: formatPlanPrice(saved, tier.currency), percent: percentFormat.format(saved / twelveMonths) }
+}
+
+/** The largest yearly saving of any size, as a percentage, for a monthly card that has no size picked yet. */
+export const getBestYearlySaving = (tier: PlanTier, counterpartTier: PlanTier | undefined): string | undefined => {
+  const ratios = tier.options.flatMap((option) => {
+    const yearly = counterpartTier?.options.find((candidate) => candidate.label === option.label)?.price
+    return option.price && yearly != null && yearly < option.price * 12 ? [1 - yearly / (option.price * 12)] : []
+  })
+  return ratios.length > 0 ? percentFormat.format(Math.max(...ratios)) : undefined
 }

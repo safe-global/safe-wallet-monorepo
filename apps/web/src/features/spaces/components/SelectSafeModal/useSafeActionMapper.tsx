@@ -1,13 +1,15 @@
 import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { TxModalContext } from '@/components/tx-flow'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { NewTxFlow } from '@/components/tx-flow/flows/NewTxFlow'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
-import { ESafeAction } from '@/features/spaces/store'
+import { ESafeAction } from '../../public/store/safeActionsModalSlice'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
+import { useUrlSafeTxFlow } from '../SpaceTransactions/UrlSafeTxFlowOpener'
 
 type SafeActionHandler = (safe: SafeItem) => Promise<void>
 
@@ -26,6 +28,7 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
   const { setTxFlow } = useContext(TxModalContext)
   const { configs: chains } = useChains()
   const { link: txBuilderLink } = useTxBuilderApp()
+  const openUrlSafeTxFlow = useUrlSafeTxFlow()
 
   const getShortName = useCallback(
     (chainId: string) => chains.find((c) => c.chainId === chainId)?.shortName ?? '',
@@ -88,8 +91,23 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
           query: { ...(txBuilderLink.query as Record<string, string>), safe: safeParam },
         })
       },
+
+      [ESafeAction.NewTransaction]: async (safe) => {
+        // No onClose: the opener clears the URL Safe once no flow is open, so swapping steps keeps it
+        openUrlSafeTxFlow({ chainId: safe.chainId, safeAddress: safe.address }, <NewTxFlow />, undefined, false)
+      },
     }),
-    [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, resetActiveSafe, txBuilderLink, spaceId],
+    [
+      router,
+      setTxFlow,
+      getSafeQueryParam,
+      navigateToSafe,
+      onReceiveComplete,
+      resetActiveSafe,
+      txBuilderLink,
+      spaceId,
+      openUrlSafeTxFlow,
+    ],
   )
 
   return { actionMapper, resetActiveSafe }

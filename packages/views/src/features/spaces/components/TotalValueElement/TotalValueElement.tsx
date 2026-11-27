@@ -21,7 +21,7 @@ const TotalValueElement = ({ value, loading }: TotalValueElementProps) => {
         Total value
       </Typography>
       {loading ? (
-        <Skeleton className="h-[30px] w-48" />
+        <Skeleton className="h-[30px] w-48 bg-border" />
       ) : (
         <Typography
           variant="h2"

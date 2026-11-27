@@ -4,6 +4,7 @@ import { SWAP_EVENTS } from '../events/swaps'
 import { SPACE_EVENTS } from '../events/spaces'
 import { ADDRESS_POISONING_EVENTS } from '../events/addressPoisoning'
 import { SAFENET_EVENTS } from '../events/safenet'
+import { WALLETCONNECT_EVENTS } from '../events/walletconnect'
 
 describe('GA to Mixpanel Mapping', () => {
   describe('GA_TO_MIXPANEL_MAPPING', () => {
@@ -26,6 +27,7 @@ describe('GA to Mixpanel Mapping', () => {
     })
 
     it.each([
+      [SPACE_EVENTS.TRANSACTIONS_HISTORY_TAB_OPENED.action, MixpanelEvent.WORKSPACE_TRANSACTIONS_HISTORY_TAB_OPENED],
       [SPACE_EVENTS.DELETE_SPACE.action, MixpanelEvent.WORKSPACE_DELETED],
       [SPACE_EVENTS.LEAVE_SPACE.action, MixpanelEvent.WORKSPACE_LEFT],
       [SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_RENEWED.action, MixpanelEvent.WORKSPACE_MEMBER_INVITE_RENEWED],
@@ -47,6 +49,7 @@ describe('GA to Mixpanel Mapping', () => {
       [SPACE_EVENTS.LOCAL_CONTACT_ADDED.action, MixpanelEvent.WORKSPACE_LOCAL_CONTACT_ADDED],
       [SAFENET_EVENTS.SUBMITTED.action, MixpanelEvent.TRANSACTION_SAFENET_SUBMITTED],
       [SAFENET_EVENTS.CHECKED.action, MixpanelEvent.TRANSACTION_SAFENET_CHECKED],
+      [SPACE_EVENTS.SUGGESTED_CONTACTS_ADDED.action, MixpanelEvent.WORKSPACE_SUGGESTED_CONTACTS_ADDED],
     ])('should map "%s" to "%s"', (action, mixpanelEvent) => {
       expect(GA_TO_MIXPANEL_MAPPING[action]).toBe(mixpanelEvent)
     })
@@ -63,6 +66,21 @@ describe('GA to Mixpanel Mapping', () => {
       Object.values(GA_TO_MIXPANEL_MAPPING).forEach((mixpanelEvent) => {
         expect(knownEvents).toContain(mixpanelEvent)
       })
+    })
+
+    it('should map the WalletConnect Safe App suggestion events', () => {
+      expect(GA_TO_MIXPANEL_MAPPING[WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED.action]).toBe(
+        MixpanelEvent.WC_SAFE_APP_SUGGESTED,
+      )
+      expect(GA_TO_MIXPANEL_MAPPING[WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT.action]).toBe(
+        MixpanelEvent.WC_SAFE_APP_SUGGESTION_RESULT,
+      )
+    })
+
+    it('should map the Pending widget "View all" click', () => {
+      expect(GA_TO_MIXPANEL_MAPPING[SPACE_EVENTS.PENDING_TX_WIDGET_VIEW_ALL_CLICKED.action]).toBe(
+        MixpanelEvent.PENDING_TX_WIDGET_VIEW_ALL_CLICKED,
+      )
     })
   })
 

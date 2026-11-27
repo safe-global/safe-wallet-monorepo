@@ -1,7 +1,9 @@
 import { render, screen } from '@/tests/test-utils'
-import { mockSafeInfo } from '@/tests/mocks/hooks'
+import { mockChainId, mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 import { addressExBuilder } from '@/tests/builders/safe'
+import { spaceAddressBookItemBuilder } from '@/tests/builders/space'
+import useGetSpaceAddressBook from '@/features/spaces/public/hooks/useGetSpaceAddressBook'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { OwnerList } from '.'
 
@@ -12,10 +14,17 @@ jest.mock('@/hooks/useProposers')
 jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
+jest.mock('@/hooks/useChainId')
+jest.mock('@/features/spaces/public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useGetSpaceAddressBook'),
+  __esModule: true,
+  default: jest.fn(() => []),
+}))
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 const { REPLACE_OWNER, REMOVE_OWNER } = SETTINGS_EVENTS.SETUP
@@ -34,15 +43,19 @@ const renderOwnerList = async () => {
   await screen.findByTestId('manage-signers-btn')
 }
 
-const mockSafeWithOwners = (ownerCount: number) =>
-  mockSafeInfo({
+const mockSafeWithOwners = (ownerCount: number) => {
+  const safe = mockSafeInfo({
     deployed: true,
     owners: Array.from({ length: ownerCount }, () => addressExBuilder().build()),
   })
+  mockChainId(safe.chainId)
+  return safe
+}
 
 describe('OwnerList', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
     mockSafeWithOwners(2)
   })
 
@@ -93,4 +106,21 @@ describe('OwnerList', () => {
       expect(screen.getAllByRole('button', { name: 'Remove signer' })).toHaveLength(2)
     },
   )
+
+  it('lets only a signer without a Workspace name be renamed here', async () => {
+    mockRole('owner')
+    const safe = mockSafeWithOwners(2)
+    const [named] = safe.owners
+    const workspaceContact = spaceAddressBookItemBuilder()
+      .with({ address: named.value, chainIds: [safe.chainId] })
+      .build()
+    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([workspaceContact])
+
+    await renderOwnerList()
+
+    expect(screen.getByText(workspaceContact.name)).toBeInTheDocument()
+    const [namedEdit, unnamedEdit] = screen.getAllByRole('button', { name: 'Edit signer' })
+    expect(namedEdit).toBeDisabled()
+    expect(unnamedEdit).toBeEnabled()
+  })
 })

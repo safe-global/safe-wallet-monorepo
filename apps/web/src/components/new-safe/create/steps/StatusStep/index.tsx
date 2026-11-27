@@ -6,13 +6,14 @@ import StatusMessage from '@/components/new-safe/create/steps/StatusStep/StatusM
 import useUndeployedSafe from '@/components/new-safe/create/steps/StatusStep/useUndeployedSafe'
 import { lightPalette } from '@safe-global/theme/palettes'
 import { AppRoutes } from '@/config/routes'
-import { safeCreationPendingStatuses } from '@/features/counterfactual'
-import { SafeCreationEvent, safeCreationSubscribe, isPredictedSafeProps } from '@/features/counterfactual/services'
+import { safeCreationPendingStatuses } from '@/features/counterfactual/public/utils/safeCreationPendingStatuses'
+import { SafeCreationEvent, safeCreationSubscribe } from '@/features/counterfactual/public/services/safeCreationEvents'
+import { isPredictedSafeProps } from '@/features/counterfactual/public/utils/typeGuards'
 import { useCurrentChain } from '@/hooks/useChains'
 import Rocket from '@/public/images/common/rocket.svg'
-import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import { useAddNewSafeToUrlSpace } from '@/features/spaces'
-import { getNewSafeHomeUrl } from '../ReviewStep/utils'
+import { CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
+import { trackEvent } from '@/services/analytics'
+import { useAddNewSafeToUrlSpace } from '@/features/spaces/public/hooks/useAddNewSafeToUrlSpace'
 import { Alert, AlertTitle, AlertDescription } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import Link from 'next/link'
@@ -50,9 +51,7 @@ export const CreateSafeStatus = ({ setProgressColor, setStep, setStepData }: Ste
     if (!chain || !safeAddress || status !== SafeCreationEvent.SUCCESS || hasRedirected.current) return
     hasRedirected.current = true
 
-    const getStepUpReturnUrl = (spaceId: string) => getNewSafeHomeUrl(chain.shortName, safeAddress, spaceId)
-    addNewSafeToUrlSpace(chain.chainId, safeAddress, getStepUpReturnUrl).then(({ spaceId, isStepUpPending }) => {
-      if (isStepUpPending) return
+    addNewSafeToUrlSpace(chain.chainId, safeAddress).then((spaceId) => {
       const redirect = getRedirect(chain.shortName, safeAddress, spaceId, router.query?.safeViewRedirectURL)
       if (typeof redirect !== 'string' || redirect.startsWith('/')) {
         router.push(redirect)

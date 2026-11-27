@@ -9,7 +9,10 @@ import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
+import { useSafeProFlag } from '@/hooks/useIsSafeProEnabled'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
+import { buildCurrentNextUrl } from '@/utils/nextUrl'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -17,8 +20,10 @@ import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.plan,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.survey,
 ]
 
 const guardRules: GuardRule[] = [
@@ -28,6 +33,13 @@ const guardRules: GuardRule[] = [
   {
     match: ({ isStoreHydrated }) => !isStoreHydrated,
     action: () => allow(),
+  },
+
+  // The plan step exists only in the onboarding wizard
+  {
+    match: ({ pathname, isPlanStepEnabled }) =>
+      isPlanStepEnabled === false && pathname.startsWith(AppRoutes.welcome.plan),
+    action: () => redirect(AppRoutes.welcome.createSpace),
   },
 
   // Public and welcome routes are always accessible
@@ -41,12 +53,13 @@ const guardRules: GuardRule[] = [
     match: ({ isSiweAuthenticated }) => {
       return !isSiweAuthenticated
     },
-    action: ({ isSpacesPath, query }) => {
+    action: ({ isSpacesPath, query, currentUrl }) => {
       const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
       // Keep the Workspace too, so that the welcome page opens it after sign-in
       const params = new URLSearchParams()
       if (typeof query.safe === 'string') params.set('safe', query.safe)
       if (typeof query.spaceId === 'string') params.set('spaceId', query.spaceId)
+      if (isSpacesPath) params.set('next', currentUrl)
       const search = params.toString()
       return redirect(search ? `${target}?${search}` : target)
     },
@@ -62,19 +75,6 @@ const guardRules: GuardRule[] = [
     action: ({ query }) => {
       const safe = typeof query.safe === 'string' ? query.safe : undefined
       const target = AppRoutes.welcome.createSpace
-      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
-    },
-  },
-
-  // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page
-  {
-    match: ({ hasSpaces, isOnboardingRoute, query }) => {
-      const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
-      return shouldRedirect
-    },
-    action: ({ query }) => {
-      const safe = typeof query.safe === 'string' ? query.safe : undefined
-      const target = AppRoutes.spaces.createSpace
       return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
     },
   },
@@ -101,7 +101,16 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
+  const isSpacesPath = pathname.startsWith('/spaces')
+  // Signed out only: otherwise any query change would re-run the guard and refetch spaces (#9482)
+  const currentUrl = !isSiweAuthenticated && isSpacesPath ? buildCurrentNextUrl(pathname, query) : ''
   const isSpaceRoute = useIsSpaceRoute()
+  const isWorkspaceWizardEnabled = useIsWorkspaceWizardEnabled()
+  const isSafePro = useSafeProFlag()
+  const isPlanStepEnabled =
+    isWorkspaceWizardEnabled === undefined || isSafePro === undefined
+      ? undefined
+      : isWorkspaceWizardEnabled && isSafePro
 
   const [fetchSpaces] = useLazySpacesGetV1Query()
 
@@ -135,13 +144,13 @@ export const useFlowActivationGuard: UseGuard = () => {
       }
     }
 
-    const isSpacesPath = pathname.startsWith('/spaces')
     const isOnboardingRoute = ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
 
     return evaluateGuard(
       {
         pathname,
         query: guardQuery,
+        currentUrl,
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
@@ -150,12 +159,16 @@ export const useFlowActivationGuard: UseGuard = () => {
         isSiweAuthenticated,
         hasSpaces,
         isPartOfSpaceUrl,
+        isPlanStepEnabled,
       },
       guardRules,
     )
   }, [
+    isPlanStepEnabled,
     pathname,
+    isSpacesPath,
     guardQuery,
+    currentUrl,
     spaceId,
     isReady,
     isWalletReady,

@@ -13,8 +13,12 @@ import {
   mockPolygonSpendingLimitPolicy,
   mockProposerPolicy,
   mockUnenforcedPolicy,
-} from '../../mocks/policies'
-import { mockActiveAllowlist, mockAllowlistChangePending, mockFailedAllowlist } from '../../mocks/allowlistPolicies'
+} from '../../../../public/utils/policies'
+import {
+  mockActiveAllowlist,
+  mockAllowlistChangePending,
+  mockFailedAllowlist,
+} from '../../../../public/utils/allowlistPolicies'
 import PoliciesTable from '../index'
 
 const mockResolveSafeName = jest.fn()
@@ -32,11 +36,8 @@ jest.mock('@/hooks/useChains', () => ({
 
 describe('PoliciesTable', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     mockResolveSafeName.mockReturnValue('')
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('should, when the Safe has a name in the space, show it in the Safe Account column', () => {
@@ -139,7 +140,6 @@ describe('PoliciesTable', () => {
   })
 
   it('should, when hovering a pending status, say how many signatures are in', async () => {
-    jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 

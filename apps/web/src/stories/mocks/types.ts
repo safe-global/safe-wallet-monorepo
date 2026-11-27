@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'msw'
 import type { Decorator } from '@storybook/react'
-import type { WalletContextType } from '@/components/common/WalletProvider'
+import type { WalletContextType } from '@/components/common/WalletProvider/WalletContext'
 import type { FixtureScenario } from '../../../../../config/test/msw/fixtures'
 
 /**
@@ -33,8 +33,6 @@ export interface FeatureFlags {
   hypernative?: boolean
   /** EARN - staking/yield features (default: false) */
   earn?: boolean
-  /** SPACES - collaborative spaces (default: false) */
-  spaces?: boolean
   /** OIDC_AUTH - OIDC-based login for email and Google (default: false) */
   oidcAuth?: boolean
   /** SWITCH_AUTHENTICATOR - 2FA management surfaces (default: false) */
@@ -45,14 +43,14 @@ export interface FeatureFlags {
   safeStaking?: boolean
   /** SAFE_PRO - Safe Pro plans and billing (default: false) */
   safePro?: boolean
-  /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
-  workspacesExperimentalFeatures?: boolean
-  /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - shows the Recipient allowlist row in Experimental settings (default: false) */
+  /** SAFE_PRO_ANNOUNCEMENT - Safe Pro announcement banners and modal (default: false) */
+  safeProAnnouncement?: boolean
+  /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - offers the recipient allowlist in Workspace policies (default: false) */
   policyRecipientAllowlist?: boolean
   /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
   spaceAuditLog?: boolean
-  /** MY_ACCOUNTS - the accounts list widgets, e.g. on the Workspace dashboard (default: false) */
-  myAccounts?: boolean
+  /** SPACE_ONBOARDING_SURVEY on Sepolia, the default chain the onboarding reads it from (default: false) */
+  spaceOnboardingSurvey?: boolean
 }
 
 /**
@@ -99,6 +97,12 @@ export interface MockStoryConfig {
    * @default 'none'
    */
   layout?: LayoutType
+
+  /**
+   * Signs the user in to the gateway and serves the Workspace mocks
+   * @default false
+   */
+  authenticated?: boolean
 
   /**
    * Redux store state overrides

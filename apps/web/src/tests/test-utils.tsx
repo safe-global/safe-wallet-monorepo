@@ -3,7 +3,7 @@ import { act, render, renderHook, within } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3 from '@/hooks/wallets/web3ReadOnly'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { Provider } from 'react-redux'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -131,13 +131,23 @@ export const renderWithUserEvent = (
   options?: {
     routerProps?: Partial<NextRouter>
     initialReduxState?: Partial<RootState>
+    advanceTimers?: (delay: number) => Promise<void> | void
   },
 ) => {
+  const { advanceTimers, ...renderOptions } = options ?? {}
+
   return {
-    user: userEvent.setup(),
-    ...customRender(ui, options),
+    user: userEvent.setup(advanceTimers ? { advanceTimers } : {}),
+    ...customRender(ui, renderOptions),
   }
 }
+
+export const renderOnFakeClock = (
+  ui: React.ReactElement,
+  options?: Omit<NonNullable<Parameters<typeof renderWithUserEvent>[1]>, 'advanceTimers'>,
+) => renderWithUserEvent(ui, { ...options, advanceTimers: jest.advanceTimersByTimeAsync })
+
+export const advanceClock = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms))
 
 export const mockWeb3Provider = (
   callImplementations: MockCallImplementation[],
@@ -164,7 +174,7 @@ export const getFieldValue = (container: HTMLElement, title: string): HTMLElemen
   return valueCell
 }
 
-// re-export everything
+// eslint-disable-next-line no-restricted-syntax -- tests import Testing Library and these wrappers from one module
 export * from '@testing-library/react'
 
 // override render method

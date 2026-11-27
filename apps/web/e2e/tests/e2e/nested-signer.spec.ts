@@ -1,13 +1,11 @@
 /**
  * A parent Safe signs for its child Safe inside Safe{Wallet}, without WalletConnect. The connected wallet is
- * OWNER_4, an owner of the parent only. On the child's review it picks the parent as the signer: the app then
+ * Alice, an owner of the parent only. On the child's review it picks the parent as the signer: the app then
  * proposes an `approveHash` transaction in the parent, which carries the child transaction to the Queue Service.
  */
-import { Wallet, parseEther } from 'ethers'
-import type { Page } from '@playwright/test'
-import { HomePage } from '../../src/pages/home.page'
+import { parseEther } from 'ethers'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { seedNestedSafe, seedQueuedTransfer, type SeededSafe } from '../../src/seed/safe'
+import { seedNestedSafe, seedQueuedTransfer } from '../../src/seed/safe'
 import { approveHashData, confirmationsOf, safeTxHashOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { isApprovedHash } from '../../src/chain/signatures'
@@ -19,30 +17,22 @@ import { TxReviewPage } from '../../src/pages/tx-review.page'
 const AMOUNT = '0.01'
 
 /** Open the child Safe and fill a transfer up to its review */
-async function reviewTransfer(page: Page, child: SeededSafe, recipient: string): Promise<void> {
-  await new HomePage(page).goto(child.prefixedAddress)
-  const sendTokens = new SendTokensPage(page)
-  await sendTokens.open()
-  await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
-  await sendTokens.nextButton.click()
-}
-
 test.describe('In-app nested signer', { tag: '@e2e' }, () => {
   test('should execute a transfer of the child Safe once the parent Safe executes its approval', async ({
     safePage,
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
     const { parent, child } = await seedNestedSafe(journey, {
-      parent: { owners: ['owner4'], threshold: 1 },
+      parent: { owners: ['alice'], threshold: 1 },
       child: { owners: ['parent'], threshold: 1 },
     })
+    const recipient = journey.newAddress()
     const review = new TxReviewPage(safePage)
     const success = new NestedTxSuccessPage(safePage)
     const queue = new TxQueuePage(safePage)
 
-    await reviewTransfer(safePage, child, recipient)
+    await new SendTokensPage(safePage).reviewTransfer(child, { recipient, amount: AMOUNT })
     await review.waitForSigner(parent.address)
     await review.sign()
 
@@ -86,12 +76,15 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const { parent, child } = await seedNestedSafe(journey, {
-      parent: { owners: ['owner4'], threshold: 1 },
+      parent: { owners: ['alice'], threshold: 1 },
       child: { owners: ['parent'], threshold: 1 },
     })
     const review = new TxReviewPage(safePage)
 
-    await reviewTransfer(safePage, child, Wallet.createRandom().address)
+    await new SendTokensPage(safePage).reviewTransfer(child, {
+      recipient: journey.newAddress(),
+      amount: AMOUNT,
+    })
     await review.waitForSigner(parent.address)
     await review.discard()
 
@@ -106,12 +99,12 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
-    const { owner4 } = journey.owners
+    const { alice } = journey.owners
     const { parent, child } = await seedNestedSafe(journey, {
-      parent: { owners: ['owner4'], threshold: 1 },
-      child: { owners: ['owner4', 'parent'], threshold: 2 },
+      parent: { owners: ['alice'], threshold: 1 },
+      child: { owners: ['alice', 'parent'], threshold: 2 },
     })
+    const recipient = journey.newAddress()
     const seeded = await seedQueuedTransfer(child, { nonce: 0, recipient, amount: AMOUNT })
     const review = new TxReviewPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -120,7 +113,7 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     await queue.confirm(0)
     await review.waitForSigner(parent.address)
     await review.signerSelect.click()
-    await expect(review.signerOption(owner4.address)).toContainText('Already signed')
+    await expect(review.signerOption(alice.address)).toContainText('Already signed')
     await safePage.keyboard.press('Escape')
     await review.sign()
 
@@ -153,13 +146,16 @@ test.describe('In-app nested signer', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const { parent, child } = await seedNestedSafe(journey, {
-      parent: { owners: ['owner4'], threshold: 1 },
-      child: { owners: ['owner4', 'parent'], threshold: 2 },
+      parent: { owners: ['alice'], threshold: 1 },
+      child: { owners: ['alice', 'parent'], threshold: 2 },
     })
     const review = new TxReviewPage(safePage)
 
-    await reviewTransfer(safePage, child, Wallet.createRandom().address)
-    await review.waitForSigner(journey.owners.owner4.address)
+    await new SendTokensPage(safePage).reviewTransfer(child, {
+      recipient: journey.newAddress(),
+      amount: AMOUNT,
+    })
+    await review.waitForSigner(journey.owners.alice.address)
     await review.chooseSigner(parent.address)
     await review.waitForSigner(parent.address)
     await review.sign()

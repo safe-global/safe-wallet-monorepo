@@ -19,16 +19,6 @@ jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/useChains')
 jest.mock('@/hooks/useDarkMode')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(() => ({
-    $isReady: true,
-    $isDisabled: false,
-    HypernativeTooltip: ({ children }: { children: React.ReactNode }) => (
-      <span style={{ display: 'flex' }}>{children}</span>
-    ),
-  })),
-}))
 
 describe('EthHashInfo', () => {
   beforeEach(() => {
@@ -45,6 +35,7 @@ describe('EthHashInfo', () => {
     jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockImplementation(() => ({
       name: 'Address book name',
       chainIds: [MOCK_CHAIN_ID],
+      tagIds: [],
       address: MOCK_SAFE_ADDRESS,
       createdBy: '0x123',
       createdByUserId: 0,

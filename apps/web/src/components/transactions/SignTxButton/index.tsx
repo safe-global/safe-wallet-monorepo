@@ -1,8 +1,8 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useIsExpiredSwap } from '@/features/swap'
+import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import type { SyntheticEvent } from 'react'
-import { useContext, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 
@@ -12,12 +12,24 @@ import Track from '@/components/common/Track'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { TxModalContext } from '@/components/tx-flow'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
+import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
+import { ConfirmTxFlow } from '@/components/tx-flow/flows/ConfirmTxFlow'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 
-const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; compact?: boolean }): ReactElement => {
-  const { setTxFlow } = useContext(TxModalContext)
+const SignTxButton = ({
+  txSummary,
+  compact = false,
+  dense = false,
+  hint,
+}: {
+  txSummary: Transaction
+  compact?: boolean
+  // The Space queue table's 24px row action, labelled "Sign" as in its design
+  dense?: boolean
+  /** Shown in a tooltip while the user can sign */
+  hint?: string
+}): ReactElement => {
+  const setTxFlow = useSetScopedTxFlow()
   const wallet = useWallet()
   const nestedOwners = useNestedSafeOwners()
   const isSafeOwner = useIsSafeOwner()
@@ -41,22 +53,29 @@ const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; 
             <Track {...TX_LIST_EVENTS.CONFIRM}>
               <Button
                 onClick={onClick}
-                variant={compact ? 'outline' : 'default'}
+                variant={dense ? 'row-hover-primary' : compact ? 'outline' : 'default'}
                 disabled={!isOk || isDisabled}
                 // Matches ExecuteTxButton — both sit in the same queue row slot, so a different height
                 // here would make Confirm and Execute rows inconsistent.
-                size={compact ? 'default' : 'action'}
+                size={dense ? '2xs' : compact ? 'default' : 'action'}
+                className={dense ? 'w-20' : undefined}
               >
-                Confirm
+                {dense ? 'Sign' : 'Confirm'}
               </Button>
             </Track>
           </span>
         )
 
-        return isOk && !isSignable && isSafeOwner ? (
+        const tooltip =
+          isOk && !isSignable && isSafeOwner
+            ? "You've already signed this transaction"
+            : isOk && !isDisabled
+              ? hint
+              : undefined
+        return tooltip ? (
           <Tooltip>
             <TooltipTrigger render={button} />
-            <TooltipContent>You&apos;ve already signed this transaction</TooltipContent>
+            <TooltipContent>{tooltip}</TooltipContent>
           </Tooltip>
         ) : (
           button

@@ -2,10 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { createMockStory, createNonOwnerWallet } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createNonOwnerWallet } from '@/stories/mocks/wallets'
 import { buildDelegationOrigin } from '../services/delegationMessages'
 import { getCurrentTotp } from '../utils/totp'
-import PendingDelegationsList from './PendingDelegationsList'
+import PendingDelegationsList from '../public/components/PendingDelegationsList'
+import { mockNow } from '@/stories/mocks/now'
 
 const efSafe = safeFixtures.efSafe
 const parentSafeAddress = efSafe.owners[1].value
@@ -33,8 +35,8 @@ const delegationMessage = (
     primaryType: 'Delegate',
     message: { delegateAddress, totp: getCurrentTotp() },
   },
-  creationTimestamp: Date.now(),
-  modifiedTimestamp: Date.now(),
+  creationTimestamp: mockNow(),
+  modifiedTimestamp: mockNow(),
   confirmationsSubmitted,
   confirmationsRequired: 2,
   proposedBy: parentSigner,

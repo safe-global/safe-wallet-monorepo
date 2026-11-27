@@ -1,7 +1,7 @@
 import { isAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import type { MemberRole } from '../../hooks/useSpaceMembers'
+import type { MemberRole } from '../../memberRole'
 import type { EmailInviteUserDto, WalletInviteUserDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export type MemberField = {

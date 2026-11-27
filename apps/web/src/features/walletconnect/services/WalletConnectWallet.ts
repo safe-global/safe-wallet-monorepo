@@ -7,7 +7,7 @@ import { type JsonRpcResponse } from '@walletconnect/jsonrpc-utils'
 import uniq from 'lodash/uniq'
 
 import { IS_PRODUCTION, LS_NAMESPACE, WC_PROJECT_ID } from '@/config/constants'
-import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../constants'
+import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../public/constants'
 import { getEip155ChainId, stripEip155Prefix } from './utils'
 import { invariant } from '@safe-global/utils/utils/helpers'
 
@@ -173,7 +173,7 @@ class WalletConnectWallet {
   public async updateSessions(chainId: string, safeAddress: string) {
     // If updating sessions disconnects multiple due to an unsupported chain,
     // we need to wait for the previous session to disconnect before the next
-    for await (const session of this.getActiveSessions()) {
+    for (const session of this.getActiveSessions()) {
       await this.updateSession(session, chainId, safeAddress)
     }
   }

@@ -82,7 +82,7 @@ describe('AddToSpacePopupModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /Create a Workspace/i }))
 
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: AppRoutes.spaces.createSpace,
+      pathname: AppRoutes.welcome.createSpace,
       query: { safe: '1:0xdeadbeef' },
     })
   })

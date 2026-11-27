@@ -1,10 +1,7 @@
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
-import {
-  getBrowserPermissionDisplayValues,
-  getSafePermissionDisplayValues,
-  useBrowserPermissions,
-  useSafePermissions,
-} from '@/hooks/safe-apps/permissions'
+import { getBrowserPermissionDisplayValues, getSafePermissionDisplayValues } from '@/hooks/safe-apps/permissions'
+import { useBrowserPermissions } from '@/hooks/safe-apps/permissions/useBrowserPermissions'
+import { useSafePermissions } from '@/hooks/safe-apps/permissions/useSafePermissions'
 import type { ReactElement } from 'react'
 import { useCallback, useMemo } from 'react'
 import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'
@@ -159,6 +156,7 @@ const SafeAppsPermissions = (): ReactElement => {
             <Link
               href="#"
               className="flex items-center text-destructive"
+              aria-label="Remove permissions"
               onClick={(event) => handleRemoveApp(event, domain)}
             >
               <DeleteIcon className="size-4" />

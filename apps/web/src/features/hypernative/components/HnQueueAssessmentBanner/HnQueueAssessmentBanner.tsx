@@ -5,13 +5,14 @@ import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shi
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
+import { useHypernativeOAuth } from '../../public/hooks/useHypernativeOAuth'
 import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
 import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
+import { HN_RECONNECT_LABEL, HN_RECONNECT_MESSAGE } from '../../public/constants'
 import LockIcon from '@safe-global/views/assets/images/common/lock-small.svg'
-// eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { SeverityIcon } from '@/features/safe-shield/public/components/SeverityIcon'
+import { trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
@@ -44,7 +45,7 @@ export const HnQueueAssessmentBanner = ({
   assessment,
   isAuthenticated,
 }: HnQueueAssessmentBannerProps): ReactElement | null => {
-  const { initiateLogin } = useHypernativeOAuth()
+  const { initiateLogin, isSessionRejected } = useHypernativeOAuth()
   const severity = useHnAssessmentSeverity(assessment)
   const assessmentUrl = useAssessmentUrl(safeTxHash)
 
@@ -63,14 +64,16 @@ export const HnQueueAssessmentBanner = ({
         <LockIcon />
         <AlertDescription>
           <div className="flex flex-col gap-2">
-            <Typography variant="paragraph-small">Log in to Hypernative to view security scan result.</Typography>
+            <Typography variant="paragraph-small">
+              {isSessionRejected ? HN_RECONNECT_MESSAGE : 'Log in to Hypernative to view security scan result.'}
+            </Typography>
             <ExternalLink
               onClick={handleLogin}
               href="#"
               noIcon={false}
               className="inline-flex self-start hover:text-[var(--color-primary-light)]!"
             >
-              Log in
+              {isSessionRejected ? HN_RECONNECT_LABEL : 'Log in'}
             </ExternalLink>
           </div>
         </AlertDescription>

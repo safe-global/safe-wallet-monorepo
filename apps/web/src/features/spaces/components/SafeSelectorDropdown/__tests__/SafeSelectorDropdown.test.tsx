@@ -8,7 +8,7 @@ import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import useChains from '@/hooks/useChains'
-import SafeSelectorDropdown from '../index'
+import SafeSelectorDropdown from '../../../public/components/SafeSelectorDropdown'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 /**
@@ -560,6 +560,38 @@ describe('SafeSelectorDropdown', () => {
       expect(trigger.className).not.toMatch(/cursor-not-allowed/)
       expect(trigger.className).not.toMatch(/opacity-50/)
       expect(trigger.getAttribute('aria-disabled')).toBeNull()
+    })
+  })
+
+  describe('locked to one Safe', () => {
+    it('keeps the Select closed and explains why, even with no tx flow open', async () => {
+      const user = userEvent.setup()
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} locked />)
+
+      await user.click(screen.getByTestId('open-safes-icon'))
+
+      expect(screen.getByTestId('mock-select-root').getAttribute('data-mock-open')).toBe('false')
+      expect(screen.getByTestId('open-safes-icon').getAttribute('aria-disabled')).toBe('true')
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
+    })
+
+    it('stays closed when given dropdown content that would otherwise make it openable', async () => {
+      const user = userEvent.setup()
+      const itemA = createItem()
+      render(
+        <SafeSelectorDropdown
+          items={[itemA]}
+          selectedItemId={itemA.id}
+          header={<div data-testid="dropdown-header" />}
+          isLoading
+          locked
+        />,
+      )
+
+      await user.click(screen.getByTestId('open-safes-icon'))
+
+      expect(screen.getByTestId('mock-select-root').getAttribute('data-mock-open')).toBe('false')
     })
   })
 

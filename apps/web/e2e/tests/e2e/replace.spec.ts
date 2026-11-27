@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
@@ -23,8 +23,8 @@ test.describe('Replace a queued transaction', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const [recipient, newRecipient] = [Wallet.createRandom().address, Wallet.createRandom().address]
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const [recipient, newRecipient] = [journey.newAddress(), journey.newAddress()]
     const original = await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)

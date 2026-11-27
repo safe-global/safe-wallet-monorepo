@@ -1,7 +1,8 @@
 import { act, render, screen, waitFor, within } from '@/tests/test-utils'
 import { userEvent } from '@testing-library/user-event'
 import TxNonce from '../index'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext as initialTxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
@@ -36,10 +37,8 @@ const defaultSafeTxContext: SafeTxContextParams = {
   txOrigin: undefined,
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: jest.fn(),
-  gtfSelectedGasToken: undefined,
-  setGtfSelectedGasToken: jest.fn(),
+  feeGasToken: undefined,
+  setFeeGasToken: jest.fn(),
 }
 
 const renderTxNonce = (

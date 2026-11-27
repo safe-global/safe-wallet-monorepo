@@ -1,24 +1,20 @@
 import { useCallback, useMemo } from 'react'
-import { skipToken } from '@reduxjs/toolkit/query'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
-import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/store/api/gateway'
-import { selectUndeployedSafes } from '@/store/slices'
-import { selectCurrency } from '@/store/settingsSlice'
-import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
+import { useSpaceSafes } from '../../../../public/hooks/useSpaceSafes'
+import { safeKey, useSafeRoleQueries } from '../../../../hooks/useSafeRoleQueries'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '../../../../public/types'
 import type {
   SafeAccountEligibility,
   SafeAccountEntry,
   SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-
-const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
 const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountEligibility => {
   if (isSigner && isProposer) return 'signer-and-proposer'
@@ -43,48 +39,30 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
     isUninitialized: isSpaceSafesUninitialized,
   } = useSpaceSafes()
   const { address: wallet = '' } = useWallet() || {}
-  const currency = useAppSelector(selectCurrency)
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
-  const { configs: chains, loading: isChainsLoading } = useChains()
+  const { configs: chains } = useChains()
 
   const safeItems = useMemo(() => flattenSafeItems(allSafes), [allSafes])
 
-  // Same args as `useSpaceSafeOverviews`, so this shares its cache entry instead of costing a request.
-  const overviewSafes = useMemo(() => safeItems.map(({ chainId, address }) => ({ chainId, address })), [safeItems])
-  const overviewsQuery = useGetMultipleSafeOverviewsQuery(
-    overviewSafes.length > 0 ? { safes: overviewSafes, currency } : skipToken,
-  )
-
-  // One delegates request per distinct chain the Space actually uses, not one per Safe.
-  const proposerChains = useMemo(() => {
-    const spaceChainIds = new Set(safeItems.map((item) => item.chainId))
-    return chains.filter((chain) => spaceChainIds.has(chain.chainId))
-  }, [chains, safeItems])
-  const proposerSafesQuery = useGetProposerSafesQuery(
-    wallet && !signersOnly && proposerChains.length > 0 ? { chains: proposerChains, delegate: wallet } : skipToken,
-  )
+  const {
+    overviews,
+    proposerSafes,
+    isOverviewsResolved,
+    isProposerResolved,
+    isOverviewsError,
+    refetch: refetchRoles,
+  } = useSafeRoleQueries(safeItems, { skipProposers: signersOnly })
 
   // A delegates failure only under-reports proposer access, so it degrades instead of failing the field.
-  const isError = isSafesError || overviewsQuery.isError
-
-  // `currentData`: `data` still holds the previous args' result while a new key is in flight.
-  const overviews = overviewsQuery.currentData
-  const proposerSafes = proposerSafesQuery.currentData
-
-  const isOverviewsResolved = overviewSafes.length === 0 || overviews !== undefined || overviewsQuery.isError
-  // A skipped query only means "no proposer Safes" once the chain configs it is built from have loaded.
-  const isProposerStatusResolved =
-    proposerSafes !== undefined ||
-    proposerSafesQuery.isError ||
-    (proposerSafesQuery.isUninitialized && (signersOnly || !isChainsLoading))
+  const isError = isSafesError || isOverviewsError
 
   // `isReadOnly` is fail-closed until the overviews land, so stay loading rather than flash an empty list.
-  const isLoading = !!wallet && (isSafesLoading || (!isError && (!isOverviewsResolved || !isProposerStatusResolved)))
+  const isLoading = !!wallet && (isSafesLoading || (!isError && (!isOverviewsResolved || !isProposerResolved)))
 
   const overviewsByKey = useMemo(() => {
     const map = new Map<string, SafeOverview>()
     for (const overview of overviews ?? []) {
-      map.set(overviewKey(overview.chainId, overview.address.value), overview)
+      map.set(safeKey(overview.chainId, overview.address.value), overview)
     }
     return map
   }, [overviews])
@@ -109,7 +87,7 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
 
       if (!isSigner && !isProposer) return []
 
-      const overview = overviewsByKey.get(overviewKey(item.chainId, item.address))
+      const overview = overviewsByKey.get(safeKey(item.chainId, item.address))
 
       return [
         {
@@ -130,23 +108,10 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
     return groupSafeAccounts(options)
   }, [wallet, isLoading, safeItems, signersOnly, proposerSafes, overviewsByKey, chainsById, undeployedSafes])
 
-  // Destructured for stable deps: the whole query objects would hand consumers a new `onRetry` per render.
-  const { refetch: refetchOverviews, isUninitialized: isOverviewsUninitialized } = overviewsQuery
-  const { refetch: refetchProposerSafes, isUninitialized: isProposerSafesUninitialized } = proposerSafesQuery
-
-  // All three skip in normal states, and `refetch()` throws on a query that never started.
   const refetch = useCallback(() => {
     if (!isSpaceSafesUninitialized) refetchSpaceSafes()
-    if (!isOverviewsUninitialized) refetchOverviews()
-    if (!isProposerSafesUninitialized) refetchProposerSafes()
-  }, [
-    isSpaceSafesUninitialized,
-    refetchSpaceSafes,
-    refetchOverviews,
-    isOverviewsUninitialized,
-    refetchProposerSafes,
-    isProposerSafesUninitialized,
-  ])
+    refetchRoles()
+  }, [isSpaceSafesUninitialized, refetchSpaceSafes, refetchRoles])
 
   return { accounts, isLoading, isError, hasWallet: !!wallet, signersOnly, refetch }
 }

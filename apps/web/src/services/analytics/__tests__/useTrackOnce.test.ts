@@ -2,7 +2,9 @@ import { renderHook } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { useTrackOnce } from '../useTrackOnce'
 
-jest.mock('@/services/analytics', () => ({ trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  trackEvent: jest.fn(),
+}))
 
 const EVENT = { category: 'test', action: 'Viewed' }
 

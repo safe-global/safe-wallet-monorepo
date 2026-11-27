@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
@@ -6,13 +6,15 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { SafeProNoticeModal } from '@safe-global/views/features/spaces/components/SafeProModals'
+import { SafeProNoticeModal, SafeProPendingModal } from '@safe-global/views/features/spaces/components/SafeProModals'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
-import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
+import { useCurrentMembership, useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
-import { claimCopy } from './ClaimTrialModal'
+import { claimTitle } from './ClaimTrialModal'
 import ClaimTrialModal from './ClaimTrialModal'
 import PlanChooserModal, { chooserCopy } from './PlanChooserModal'
+import { useEnabledWizardSteps } from '../WorkspaceWizard/hooks/useEnabledWizardSteps'
+import { finishSetupRoute } from '../WorkspaceWizard/steps'
 
 export const _memberCopy = (
   reason: WorkspaceLockReason,
@@ -20,9 +22,9 @@ export const _memberCopy = (
   endedAt: number | null,
   spaceName: string,
 ): { title: string; body: string } => {
-  if (reason === 'trial-offered') {
+  if (reason === 'trial-offered' || reason === 'setup-pending') {
     return {
-      title: claimCopy(trialPeriodDays).title,
+      title: claimTitle(trialPeriodDays),
       body: `${spaceName} is locked until an admin claims free access. Your Safe accounts remain available in My accounts.`,
     }
   }
@@ -57,7 +59,7 @@ const MemberLockedNotice = ({
   body: string
   onBack: () => void
 }) => {
-  const isPlanLock = reason !== 'trial-offered'
+  const isPlanLock = reason === 'payment-failed' || reason === 'lapsed'
   useTrackOnce(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, undefined, isPlanLock)
 
   return (
@@ -70,6 +72,20 @@ const MemberLockedNotice = ({
       secondaryActionHref={reason === 'lapsed' ? AppRoutes.welcome.spaces : undefined}
     />
   )
+}
+
+/** A Workspace whose onboarding stopped at the checkout opens its last step, with the setup it saved. */
+const FinishSetupRedirect = ({ spaceId }: { spaceId: string }) => {
+  const router = useRouter()
+  const steps = useEnabledWizardSteps()
+
+  useEffect(() => {
+    // Only once the flags are known: the last step depends on them.
+    if (steps) void router.replace(finishSetupRoute(steps, spaceId))
+  }, [steps, router, spaceId])
+
+  // Covers the Workspace pages, as every other lock reason does, until the redirect lands.
+  return <SafeProPendingModal title="Opening your Workspace setup" body="This usually takes a few seconds." />
 }
 
 /** Mounted on every Workspace page; none of the modals it shows can be dismissed. */
@@ -109,6 +125,8 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
     const { title, body } = _memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
     return <MemberLockedNotice reason={reason} title={highlightSafePro(title)} body={body} onBack={goBack} />
   }
+
+  if (reason === 'setup-pending') return <FinishSetupRedirect spaceId={spaceId} />
 
   if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />
 

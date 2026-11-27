@@ -1,6 +1,5 @@
-import type { NextPage } from 'next'
-import { SpacesLogin } from '@/features/spaces'
+import SpacesLogin from '@/features/spaces/public/components/SpacesLogin'
 
-const Spaces: NextPage = () => <SpacesLogin />
+const Spaces = () => <SpacesLogin />
 
 export default Spaces

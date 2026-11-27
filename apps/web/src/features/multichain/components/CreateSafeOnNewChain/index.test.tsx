@@ -1,22 +1,50 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { getStoreInstance } from '@/store'
 import * as useChains from '@/hooks/useChains'
+import * as transactions from '@/utils/transactions'
 import { chainBuilder } from '@/tests/builders/chains'
-import { CreateSafeOnSpecificChain } from './index'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { CreateSafeOnNewChain, CreateSafeOnSpecificChain } from './index'
+import { persistCounterfactualSafe } from '@/features/counterfactual/public/services/persistCounterfactualSafe'
+import { useIsAdmin } from '@/features/spaces/public/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLimit'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { predictAddressBasedOnReplayData } from '../../utils'
+import { predictAddressBasedOnReplayData } from '../../public/utils/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import {
+  PendingSafeStatus,
+  type ReplayedSafeProps,
+  type UndeployedSafe,
+} from '@safe-global/utils/features/counterfactual/store/types'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { NextRouter } from 'next/router'
+import { useState } from 'react'
 
-jest.mock('@/features/counterfactual/services', () => ({
+jest.mock('@/features/counterfactual/public/services/persistCounterfactualSafe', () => ({
   persistCounterfactualSafe: jest.fn(),
 }))
 
-jest.mock('../../utils', () => ({
+jest.mock('../../public/utils/utils', () => ({
+  get isMultiChainSafeItem() {
+    return jest.requireActual('../../public/utils/utils').isMultiChainSafeItem
+  },
+  get getSafeSetups() {
+    return jest.requireActual('../../public/utils/utils').getSafeSetups
+  },
+  get getSharedSetup() {
+    return jest.requireActual('../../public/utils/utils').getSharedSetup
+  },
+  get getDeviatingSetups() {
+    return jest.requireActual('../../public/utils/utils').getDeviatingSetups
+  },
+  get predictSafeAddress() {
+    return jest.requireActual('../../public/utils/utils').predictSafeAddress
+  },
+  get hasMultiChainCreationFeatures() {
+    return jest.requireActual('../../public/utils/utils').hasMultiChainCreationFeatures
+  },
   predictAddressBasedOnReplayData: jest.fn(),
   hasMultiChainAddNetworkFeature: jest.fn(() => true),
 }))
@@ -26,15 +54,15 @@ jest.mock('@/hooks/wallets/web3', () => ({
 }))
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
+jest.mock('@/features/spaces/public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
+jest.mock('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'),
   useSpaceSafeCount: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+jest.mock('@/features/spaces/public/hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: jest.fn(),
 }))
 
@@ -257,5 +285,90 @@ describe('CreateSafeOnSpecificChain', () => {
     fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
     await waitFor(() => expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null })))
+  })
+})
+
+describe('CreateSafeOnNewChain', () => {
+  const deployedChain = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }).build()
+
+  const undeployedSafe: UndeployedSafe = {
+    props: {
+      factoryAddress: '0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67',
+      masterCopy: '0x29fcB43b46531BcA003ddC8FCB67FFE91900C762',
+      saltNonce: '0',
+      safeVersion: '1.4.1',
+      safeAccountConfig: {
+        owners: ['0x0000000000000000000000000000000000000abc'],
+        threshold: 1,
+        to: ZERO_ADDRESS,
+        data: '0x',
+        fallbackHandler: '0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99',
+        payment: 0,
+        paymentToken: ZERO_ADDRESS,
+        paymentReceiver: ZERO_ADDRESS,
+      },
+    },
+    status: { status: PendingSafeStatus.AWAITING_EXECUTION, type: PayMethod.PayLater },
+  }
+
+  const PollingParent = () => {
+    const [, setPolls] = useState(0)
+    return (
+      <>
+        <button onClick={() => setPolls((polls) => polls + 1)}>Poll</button>
+        <CreateSafeOnNewChain
+          safeAddress={SAFE_ADDRESS}
+          deployedChainIds={[deployedChain.chainId]}
+          defaultChainId={chain.chainId}
+          currentName="My Safe"
+          open
+          onClose={jest.fn()}
+        />
+      </>
+    )
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: [deployedChain, chain] })
+    jest.spyOn(useChains, 'useChain').mockReturnValue(chain)
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseSpaceSafeCount.mockReturnValue(undefined)
+    mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
+    mockUseSpaceSafes.mockReturnValue({ currentData: undefined })
+  })
+
+  it('keeps the chosen network and Add network when the parent renders an equal list of deployed networks', async () => {
+    render(<PollingParent />, {
+      initialReduxState: { undeployedSafes: { [deployedChain.chainId]: { [SAFE_ADDRESS]: undeployedSafe } } },
+    })
+    await waitFor(() => expect(screen.getByTestId('modal-add-network-btn')).toBeEnabled())
+    expect(screen.getByTestId('added-network')).toHaveTextContent('Gnosis Chain')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Poll', hidden: true }))
+
+    expect(screen.getByTestId('added-network')).toHaveTextContent('Gnosis Chain')
+    expect(screen.getByTestId('modal-add-network-btn')).toBeEnabled()
+  })
+
+  it('offers Cancel and a disabled Add network instead of Got it while the creation data loads', async () => {
+    const pendingCreation = new Promise<never>(() => {})
+    const getCreation = jest.spyOn(transactions, 'getCreationTransaction').mockReturnValue(pendingCreation)
+
+    render(
+      <CreateSafeOnNewChain
+        safeAddress={SAFE_ADDRESS}
+        deployedChainIds={[deployedChain.chainId]}
+        currentName="My Safe"
+        open
+        onClose={jest.fn()}
+      />,
+    )
+
+    expect(await screen.findByText('Loading Safe data')).toBeVisible()
+    expect(screen.queryByRole('button', { name: 'Got it' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeEnabled()
+    expect(screen.getByTestId('modal-add-network-btn')).toBeDisabled()
+    getCreation.mockRestore()
   })
 })

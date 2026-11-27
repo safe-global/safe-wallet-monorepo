@@ -85,7 +85,7 @@ Every testable page should have a stable, bookmarkable URL. Tests navigate direc
 
 ## 6. Feature Flags Come From the Chain Config
 
-Feature flags come from the chain config that CGW serves (`useHasFeature`). The isolated stack enables the features in [`setup_test_chain.py`](../environment/infra/scripts/cfg_management/commands/setup_test_chain.py); a flag that a Playwright spec needs goes in its `DEFAULT_FEATURES`. Test the state with the flag off in Jest, with `useHasFeature` mocked.
+Feature flags come from the chain config that CGW serves (`useHasFeature`). The isolated stack enables the flags listed under `on` in [`test-chain-features.json`](../environment/infra/scripts/cfg_management/test-chain-features.json); a flag that a Playwright spec needs goes there. Every flag declared in [`apps/web/config/remote-config.json`](../../config/remote-config.json) must be under `on` or under `off`; `config/remote-config.test.ts` fails otherwise. List the flag in `flags` of each spec that covers its feature in [`playwright-specs.mjs`](../environment/playwright-specs.mjs), and keep it `on` in the stack: a flag with `"enabled": true` needs such a spec, or a reason in [`released-without-e2e.json`](../environment/released-without-e2e.json). Test the state with the flag off in Jest, with `useHasFeature` mocked.
 
 ## 7. Setup Through the SDK and the Local APIs
 
@@ -101,7 +101,7 @@ Test-only API routes are not needed.
 Before refactoring a component's DOM structure:
 
 - Search for `data-testid` attributes on the elements you're changing
-- Search for the component's visible text strings in `e2e/tests/` and, until it is deleted, `cypress/e2e/`
+- Search for the component's visible text strings in `e2e/tests/`
 - If you find matches, update the test locators in the same PR
 
 Broken selectors = broken CI = blocked merges.

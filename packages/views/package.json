@@ -10,7 +10,7 @@
     "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
   },
   "dependencies": {
-    "@base-ui/react": "^1.1.0",
+    "@base-ui/react": "^1.2.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@safe-global/protocol-kit": "^8.0.11",
     "@safe-global/store": "workspace:^",
@@ -28,8 +28,8 @@
     "react-dropzone": "^14.2.3",
     "react-resizable-panels": "^4.5.3",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.4.0",
-    "vaul": "^1.1.2"
+    "tabbable": "^6.4.0",
+    "tailwind-merge": "^3.4.0"
   },
   "peerDependencies": {
     "next": "*",
@@ -39,10 +39,17 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
-    "@shadcn/lint": "^0.2.3",
+    "@shadcn/lint": "^0.2.5",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.72.0"
+    "typescript-eslint": "^8.72.1"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    }
   }
 }

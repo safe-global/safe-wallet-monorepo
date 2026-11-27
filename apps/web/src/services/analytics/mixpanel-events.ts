@@ -61,12 +61,14 @@ export enum MixpanelEvent {
   WORKSPACE_SAFE_UNLINKED = 'Workspace Safe Unlinked',
   ACCOUNTS_WIDGET_CLICKED = 'Accounts Widget Clicked',
   PENDING_TX_WIDGET_CLICKED = 'Pending TX Widget Clicked',
+  PENDING_TX_WIDGET_VIEW_ALL_CLICKED = 'Pending TX Widget View All Clicked',
   WALLET_SWITCHED = 'Wallet Switched',
   WALLET_DISCONNECTED = 'Wallet Disconnected',
   WORKSPACE_CREATE_STARTED = 'Workspace Create Started',
   WORKSPACE_SWITCHED = 'Workspace Switched',
   ADDRESS_BOOK_ENTRY_CREATED = 'Address Book Entry Created',
   WORKSPACE_TRANSACTION_INITIATED = 'Workspace Transaction Initiated',
+  WORKSPACE_TRANSACTIONS_HISTORY_TAB_OPENED = 'Workspace Transactions History Tab Opened',
   ONBOARDING_WIZARD = 'Onboarding Wizard',
   USE_OLD_UI = 'Use Old UI',
   ERROR_SURFACED = 'Error Surfaced',
@@ -85,6 +87,13 @@ export enum MixpanelEvent {
   WORKSPACE_ADDRESS_REQUEST_APPROVED = 'Workspace Address Request Approved',
   WORKSPACE_ADDRESS_REQUEST_REJECTED = 'Workspace Address Request Rejected',
   WORKSPACE_LOCAL_CONTACT_ADDED = 'Workspace Local Contact Added',
+  WORKSPACE_CONTACT_TAGS_UPDATED = 'Workspace Contact Tags Updated',
+  WORKSPACE_TAG_CREATED = 'Workspace Tag Created',
+  WORKSPACE_TAG_RENAMED = 'Workspace Tag Renamed',
+  WORKSPACE_TAG_DELETED = 'Workspace Tag Deleted',
+  WORKSPACE_CONTACTS_FILTERED = 'Workspace Contacts Filtered',
+  WORKSPACE_TAG_LIMIT_REACHED = 'Workspace Tag Limit Reached',
+  WORKSPACE_SUGGESTED_CONTACTS_ADDED = 'Workspace Suggested Contacts Added',
   SECURITY_HUB_VIEWED = 'Security Hub Viewed',
   SECURITY_REPORT_OPENED = 'Security Report Opened',
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
@@ -115,6 +124,8 @@ export enum MixpanelEvent {
   LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
   LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
   LOOKALIKE_ADDRESS_WARNING_DISMISSED = 'Look-alike Address Warning Dismissed',
+  WC_SAFE_APP_SUGGESTED = 'WC Safe App Suggested',
+  WC_SAFE_APP_SUGGESTION_RESULT = 'WC Safe App Suggestion Result',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -272,6 +283,9 @@ export enum MixpanelEventParams {
   ERROR_OCCURRENCES = 'Error Occurrences',
   ACCOUNT_COUNT = 'Account Count',
   ENTRY_COUNT = 'Entry Count',
+  UPDATED_COUNT = 'Updated Count',
+  WITH_TAGS = 'With Tags',
+  RENAMED_COUNT = 'Renamed Count',
   MEMBER_ROLE = 'Member Role',
   POLICY_TYPE = 'Policy Type',
   IS_AVAILABLE = 'Is Available',
@@ -300,6 +314,11 @@ export enum MixpanelEventParams {
   FROM_SEATS = 'From Seats',
   TO_SEATS = 'To Seats',
   TO_PLAN = 'To Plan',
+  TAGS_ADDED = 'Tags Added',
+  TAGS_REMOVED = 'Tags Removed',
+  MERGED = 'Merged',
+  CONTACT_COUNT = 'Contact Count',
+  TAG_COUNT = 'Tag Count',
   AMOUNT_DUE = 'Amount Due',
   OUTCOME = 'Outcome',
   FEATURE = 'Feature',
@@ -311,6 +330,8 @@ export enum MixpanelEventParams {
   SENTINELS_FLAGGED = 'Sentinels Flagged',
   SIGNER_ROLE = 'Signer Role',
   SAFE_TX_HASH = 'Safe Tx Hash',
+  SAFE_APP_AVAILABLE = 'Safe App Available',
+  REMEMBER_CHOICE = 'Remember Choice',
 }
 
 export enum AuthLoginMethod {
@@ -322,6 +343,7 @@ export enum AuthLoginMethod {
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
+  WC_PROPOSAL = 'WalletConnect Proposal',
 }
 
 export const ADDRESS_PROPERTIES = new Set([

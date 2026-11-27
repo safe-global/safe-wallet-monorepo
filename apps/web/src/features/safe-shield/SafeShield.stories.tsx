@@ -11,7 +11,8 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { safeFixtures } from '../../../../../config/test/msw/fixtures'
 import { createSafeInfoState } from '@/stories/mocks/defaults'
@@ -262,6 +263,7 @@ export const HypernativeGuardActive: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },
@@ -286,6 +288,7 @@ export const HypernativeNotLoggedIn: Story = {
     hypernativeAuth: {
       isAuthenticated: false,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {
         console.log('Initiate login clicked')
       },
@@ -316,6 +319,7 @@ export const HypernativeMaliciousThreat: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },
@@ -364,9 +368,7 @@ const overflowSafeTxContextValue: SafeTxContextParams = {
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: () => {},
-  setGtfSelectedGasToken: () => {},
+  setFeeGasToken: () => {},
 }
 
 const overflowStore = makeStore({
@@ -379,6 +381,7 @@ export const OverflowFindings: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },
@@ -413,6 +416,7 @@ export const HypernativeCustomCheckFailed: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },

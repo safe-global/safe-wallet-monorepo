@@ -11,8 +11,8 @@ import {
 } from '@safe-global/views/components/ui/empty'
 
 type AddressBookEmptyStateProps =
-  | { kind: 'no-results'; onClearSearch: () => void }
-  | { kind: 'empty'; book: 'workspace' | 'local'; actions?: ReactNode }
+  | { kind: 'no-results'; book: keyof typeof NO_RESULTS; onClear: () => void }
+  | { kind: 'empty'; book: keyof typeof EMPTY_BOOK; actions?: ReactNode }
 
 const EMPTY_BOOK = {
   workspace: {
@@ -28,8 +28,17 @@ const EMPTY_BOOK = {
   },
 }
 
+// Workspace contacts also have tags and the Filters dropdown
+const NO_RESULTS = {
+  workspace: { description: 'Try another name, address or tag, or clear the filters.', clearLabel: 'Clear filters' },
+  local: { description: 'Try another name or address.', clearLabel: 'Clear search' },
+  suggested: { description: 'Try another name, address or Safe.', clearLabel: 'Clear search' },
+  pending: { description: 'Try another name, address or member.', clearLabel: 'Clear search' },
+}
+
 const AddressBookEmptyState = (props: AddressBookEmptyStateProps) => {
   if (props.kind === 'no-results') {
+    const { description, clearLabel } = NO_RESULTS[props.book]
     return (
       <Empty data-testid="address-book-no-results">
         <EmptyHeader>
@@ -37,11 +46,11 @@ const AddressBookEmptyState = (props: AddressBookEmptyStateProps) => {
             <SearchX />
           </EmptyMedia>
           <EmptyTitle>No contacts match</EmptyTitle>
-          <EmptyDescription>Try another name or address.</EmptyDescription>
+          <EmptyDescription>{description}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button variant="outline" size="sm" onClick={props.onClearSearch}>
-            Clear search
+          <Button variant="outline" size="sm" onClick={props.onClear}>
+            {clearLabel}
           </Button>
         </EmptyContent>
       </Empty>

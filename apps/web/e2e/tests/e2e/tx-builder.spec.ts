@@ -1,8 +1,8 @@
-import { Wallet } from 'ethers'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { TxBuilderPage } from '../../src/pages/tx-builder.page'
+import { TX_BUILDER_URL, TxBuilderPage } from '../../src/pages/tx-builder.page'
+import { nextDeclaredAttribution } from '../../src/api/proposal-request'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { BASIC_TYPES_TEST_CONTRACT, seedTransactionBuilderContracts } from '../../src/seed/safe-apps'
 import { seedSafe } from '../../src/seed/safe'
@@ -31,9 +31,9 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const newValue = Wallet.createRandom().address
     await seedTransactionBuilderContracts(journey)
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const newValue = journey.newAddress()
 
     const builder = new TxBuilderPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -44,5 +44,51 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     await expect
       .poll(() => executedCall(safeApiClient, safe.address, 0))
       .toEqual({ to: BASIC_TYPES_TEST_CONTRACT, method: 'testAddressValue', argument: newValue })
+  })
+
+  test('should declare Transaction Builder as a listed Safe App when the owner proposes its call', async ({
+    safePage,
+    journey,
+  }) => {
+    await seedTransactionBuilderContracts(journey)
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+
+    const builder = new TxBuilderPage(safePage)
+    const proposal = nextDeclaredAttribution(safePage, safe.address)
+    await builder.open(safe.prefixedAddress)
+    await builder.sendCall({
+      contract: BASIC_TYPES_TEST_CONTRACT,
+      method: 'testAddressValue',
+      argument: journey.newAddress(),
+    })
+    await new TxReviewPage(safePage).sign()
+
+    expect(await proposal).toEqual({
+      channel: 'SAFE_APP',
+      appName: 'Transaction Builder',
+      appUrl: TX_BUILDER_URL,
+      appId: expect.any(Number),
+    })
+  })
+
+  test('should ask a new user for address book access and continue to the review when the user accepts', async ({
+    safePage,
+    journey,
+  }) => {
+    await seedTransactionBuilderContracts(journey)
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+
+    const builder = new TxBuilderPage(safePage)
+    const review = new TxReviewPage(safePage)
+    await builder.openWithoutPermissions(safe.prefixedAddress)
+    await builder.clickAddressField()
+
+    await expect(builder.permissionsPrompt).toContainText('Access to your address book')
+    await builder.acceptPermissionsRequest()
+    await expect(builder.permissionsPrompt).toBeHidden()
+
+    const newValue = journey.newAddress()
+    await builder.sendCall({ contract: BASIC_TYPES_TEST_CONTRACT, method: 'testAddressValue', argument: newValue })
+    await expect(review.continueButton).toBeVisible()
   })
 })

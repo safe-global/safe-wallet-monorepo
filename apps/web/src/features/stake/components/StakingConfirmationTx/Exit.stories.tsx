@@ -6,7 +6,7 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 const ETH_TOKEN: NativeStakingValidatorsExitTransactionInfo['tokenInfo'] = {
   address: '0x0000000000000000000000000000000000000000',
   decimals: 18,
-  logoUri: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+  logoUri: 'mock-assets/assets.coingecko.com/coins/images/279/small/ethereum.webp',
   name: 'Ether',
   symbol: 'ETH',
   trusted: true,

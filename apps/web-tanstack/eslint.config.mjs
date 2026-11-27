@@ -6,6 +6,11 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import react from 'eslint-plugin-react'
 import prettier from 'eslint-config-prettier'
 import js from '@eslint/js'
+import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
+import {
+  featurePublicImportExpressionRules,
+  featurePublicImportPatterns,
+} from '../../config/eslint/feature-public-imports.mjs'
 
 // Mirrors apps/web/eslint.config.mjs rule-by-rule, minus the framework
 // extends (`next`, `plugin:storybook/recommended`) which aren't applicable
@@ -13,7 +18,7 @@ import js from '@eslint/js'
 // @/* gets the same quality bar in both workspaces.
 export default [
   {
-    ignores: ['**/node_modules/', '**/dist/', '**/cypress/', '**/cypress.config.js'],
+    ignores: ['**/node_modules/', '**/dist/'],
   },
   js.configs.recommended,
   prettier,
@@ -55,51 +60,12 @@ export default [
       'no-constant-condition': 'warn',
       'react-hooks/exhaustive-deps': ['warn', { additionalHooks: 'useAsync' }],
       'no-only-tests/no-only-tests': 'error',
+      'no-restricted-imports': ['error', { patterns: featurePublicImportPatterns }],
+      'no-restricted-syntax': ['error', ...featurePublicImportExpressionRules],
       'object-shorthand': ['error', 'properties'],
       'jsx-quotes': ['error', 'prefer-double'],
       'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],
-
-      // Feature architecture — same patterns as apps/web. Reused @/features/*
-      // code resolves through the @/* alias in tsconfig, so the same import
-      // restrictions apply.
-      'no-restricted-imports': [
-        'warn',
-        {
-          patterns: [
-            {
-              group: ['@/features/*/components', '@/features/*/components/**'],
-              message:
-                'Do not import components directly. Use useLoadFeature() to access lazy-loaded components. See docs/feature-architecture.md',
-            },
-            {
-              group: ['@/features/*/hooks', '@/features/*/hooks/**'],
-              message: 'Import hooks from the feature barrel (@/features/myfeature) not from hooks folder directly.',
-            },
-            {
-              group: ['@/features/*/services/*', '!@/features/*/services/index'],
-              message:
-                'Import from @/features/myfeature/services (barrel) for lightweight utils, or use useLoadFeature() for heavy services.',
-            },
-            {
-              group: ['@/features/*/store/*', '!@/features/*/store/index'],
-              message: 'Import from @/features/myfeature/store (barrel) not from internal store files.',
-            },
-            {
-              group: ['@/features/*/handle'],
-              message: 'Import from feature index file only. The handle is internal - use @/features/{name} instead.',
-            },
-            {
-              group: [
-                '../features/*/components',
-                '../features/*/components/**',
-                '../../features/*/components',
-                '../../features/*/components/**',
-              ],
-              message: 'Do not import components directly. Use useLoadFeature() instead.',
-            },
-          ],
-        },
-      ],
     },
   },
+  noExplicitAny,
 ]

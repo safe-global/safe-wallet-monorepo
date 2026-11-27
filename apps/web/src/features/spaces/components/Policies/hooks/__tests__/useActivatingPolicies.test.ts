@@ -1,5 +1,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { MOCK_SAFES, asActivePolicy, mockPendingPolicy, mockSpendingLimitPolicy } from '../../mocks/policies'
+import {
+  MOCK_SAFES,
+  asActivePolicy,
+  mockPendingPolicy,
+  mockSpendingLimitPolicy,
+} from '../../../../public/utils/policies'
 import type { PendingSpendingLimitPolicy, Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { useActivatingPolicies } from '../useActivatingPolicies'
 
@@ -32,11 +37,9 @@ const setup = (refetchActive = jest.fn()) => {
 describe('useActivatingPolicies', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockGetTransaction.mockResolvedValue({ data: { txStatus: 'SUCCESS' } })
   })
-
-  afterEach(() => jest.useRealTimers())
 
   it('should, when a pending row leaves the queue because it executed, hold it as activating', async () => {
     const { result, rerender, initialProps } = setup()

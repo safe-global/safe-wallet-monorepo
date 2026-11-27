@@ -12,8 +12,6 @@ import SponsoredBy from '../SponsoredBy'
 import RemainingRelays from '../RemainingRelays'
 import SponsoredTxsCounter from '../SponsoredTxsCounter'
 import { Info } from 'lucide-react'
-import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
-import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
@@ -23,16 +21,12 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { SponsoredOffer } from '@/utils/gasPayment'
+import GasTooHighBanner from '@/features/no-fee-campaign/public/components/GasTooHighBanner'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const enum ExecutionMethod {
   RELAY = 'RELAY',
   WALLET = 'WALLET',
-}
-
-// Wrapper component to load GasTooHighBanner (follows React naming conventions)
-const GasTooHighBannerLoader = () => {
-  const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
-  return <GasTooHighBanner />
 }
 
 const CampaignLabel = ({ offer }: { offer: Extract<SponsoredOffer, { option: 'NO_FEE_CAMPAIGN' }> }) => {
@@ -142,7 +136,8 @@ const SponsoredStrip = ({
     case 'NO_FEE_CAMPAIGN':
       return isRelay ? (
         <Typography variant="paragraph-small" className={css.transactionCounter}>
-          <span className={css.counterNumber}>{offer.remaining}</span> free transactions left
+          <span className={css.counterNumber}>{offer.remaining}</span>
+          {` sponsored transaction${maybePlural(offer.remaining)} left`}
         </Typography>
       ) : (
         balance
@@ -244,7 +239,7 @@ export const _ExecutionMethodSelector = ({
 
         {offer.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && (
           <div className={css.gasBannerWrapper}>
-            <GasTooHighBannerLoader />
+            <GasTooHighBanner />
           </div>
         )}
       </div>

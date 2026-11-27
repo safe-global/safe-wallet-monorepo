@@ -13,8 +13,8 @@ import type { ChangeThresholdFlowProps } from '@/components/tx-flow/flows/Change
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@safe-global/views/components/tx-flow/common/constants'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { createUpdateThresholdTx } from '@/services/tx/tx-sender'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { createUpdateThresholdTx } from '@/services/tx/tx-sender/create'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
 export const ChooseThreshold = () => {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { expect, userEvent, waitFor, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { spaceWithSafesHandler } from '@/stories/mocks/handlers'
 import SpaceDashboard from '@/pages/spaces'
 
@@ -15,7 +15,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces',
-  features: { spaces: true, myAccounts: true },
+  authenticated: true,
   query: { spaceId: '1' },
   shadcn: true,
 })

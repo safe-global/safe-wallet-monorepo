@@ -1,17 +1,15 @@
 import { useState } from 'react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Clock, Plus } from 'lucide-react'
-import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { Badge } from '@safe-global/views/components/ui/badge'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import DialogActions from '@/components/common/DialogActions'
-import ModalDialog from '@/components/common/ModalDialog'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import {
+  useAddOrRequestWorkspaceContact,
+  type WorkspaceContactLocation,
+} from '../../hooks/useAddOrRequestWorkspaceContact'
+import NameContactsDialog from '@safe-global/views/features/spaces/components/AddressBookV2/NameContactsDialog'
 import useChains from '@/hooks/useChains'
-import { useAddOrRequestWorkspaceContact } from '../../hooks/useAddOrRequestWorkspaceContact'
+import { toChainInfos } from '../../utils'
 import { validateContactName } from './utils'
 
 type RequestToAddButtonProps = {
@@ -20,24 +18,31 @@ type RequestToAddButtonProps = {
   chainIds: string[]
   alreadyRequested?: boolean
   isCompact?: boolean
+  location?: WorkspaceContactLocation
 }
 
-const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
-  const chains = useChains()
-  const addOrRequestContact = useAddOrRequestWorkspaceContact()
+const RequestToAddButton = ({
+  address,
+  name,
+  chainIds,
+  alreadyRequested,
+  isCompact,
+  location,
+}: RequestToAddButtonProps) => {
+  const addOrRequestContact = useAddOrRequestWorkspaceContact({ location })
+  const { configs } = useChains()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [requested, setRequested] = useState(false)
   const [open, setOpen] = useState(false)
 
   const isDone = alreadyRequested || requested
-  const nameError = validateContactName(name)
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (requestedName: string) => {
     if (isDone) return
 
     setIsSubmitting(true)
     try {
-      const result = await addOrRequestContact({ address, name, chainIds })
+      const result = await addOrRequestContact({ address, name: requestedName, chainIds })
       if (result === 'requested' || result === 'pending') {
         setRequested(true)
         setOpen(false)
@@ -67,81 +72,34 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompa
       size={isCompact ? 'icon-sm' : 'sm'}
       aria-label={isCompact ? 'Request to add' : undefined}
       onClick={() => setOpen(true)}
-      disabled={!!nameError}
     >
       {isCompact ? <Plus className="size-4" /> : 'Request to add'}
     </Button>
   )
 
-  const trigger = isCompact ? (
-    <Tooltip>
-      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>Request to add</TooltipContent>
-    </Tooltip>
-  ) : (
-    button
-  )
-
   return (
     <>
-      {nameError ? <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip> : trigger}
+      {isCompact ? (
+        <Tooltip>
+          <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
+          <TooltipContent>Request to add</TooltipContent>
+        </Tooltip>
+      ) : (
+        button
+      )}
 
-      <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
-        <div className="px-6 py-4">
-          <div className="flex flex-col gap-4">
-            <Typography variant="paragraph-small" color="muted">
-              An admin has to approve the request before the contact appears in the Workspace address book.
-            </Typography>
-
-            <div className="flex flex-col gap-1">
-              <Typography variant="paragraph-small" color="muted">
-                Name
-              </Typography>
-              <Typography>{name}</Typography>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <Typography variant="paragraph-small" color="muted">
-                Address
-              </Typography>
-              <EthHashInfo address={address} shortAddress={false} showPrefix={false} showName={false} avatarSize={24} />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Typography variant="paragraph-small" color="muted">
-                Networks
-              </Typography>
-              {chains.configs.length === chainIds.length ? (
-                <Typography>All networks</Typography>
-              ) : (
-                <NetworkLogosTooltip
-                  networks={chainIds.map((chainId) => ({ chainId }))}
-                  maxVisible={6}
-                  triggerRender={<span className="inline-flex" />}
-                />
-              )}
-            </div>
-
-            {nameError && (
-              <Alert variant="warning" outlined={false}>
-                <AlertSeverityIcon variant="warning" />
-                <AlertDescription>Rename this contact to share it with the Workspace. {nameError}.</AlertDescription>
-              </Alert>
-            )}
-          </div>
-        </div>
-
-        <DialogActions
-          className="px-6 pt-0 pb-6"
-          onCancel={() => setOpen(false)}
-          cancelTestId="cancel-btn"
+      {open && (
+        <NameContactsDialog
+          contacts={[{ address, chains: toChainInfos(chainIds, configs), suggestedName: name }]}
+          validateName={validateContactName}
+          onConfirm={([contact]) => handleConfirm(contact.name)}
+          onClose={() => setOpen(false)}
+          isSubmitting={isSubmitting}
+          title="Request to add contact"
+          description="An admin has to approve the request before the contact appears in the Workspace address book. Leave the name empty to keep it."
           confirmLabel="Request to add"
-          onConfirm={handleConfirm}
-          confirmTestId="confirm-request-btn"
-          confirmDisabled={!!nameError || isSubmitting}
-          confirmLoading={isSubmitting}
         />
-      </ModalDialog>
+      )}
     </>
   )
 }

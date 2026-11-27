@@ -1,8 +1,8 @@
 import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
+import { tokenOptionBuilder } from '@/utils/tokenOptions.testData'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import {
@@ -83,7 +83,7 @@ jest.mock('@/components/common/AddressBookInput', () => {
   return { __esModule: true, default: MockAddressBookInput }
 })
 
-jest.mock('../../TokenSelector', () => ({
+jest.mock('@/components/common/TokenSelector', () => ({
   __esModule: true,
   default: ({
     value,
@@ -114,7 +114,7 @@ jest.mock('../../TokenSelector', () => ({
   ),
 }))
 
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 jest.mock('../../ExistingSpendingLimitsProvider', () => ({
   useExistingSpendingLimits: jest.fn(() => ({ loading: false })),

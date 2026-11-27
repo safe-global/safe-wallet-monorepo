@@ -2,11 +2,11 @@
  * A Safe signs for its child Safe over WalletConnect: Safe{Wallet} on the child (wallet A) connects its signer to
  * Safe{Wallet} on the parent (wallet B) through the hosted relay.
  *
- * Wallet B is `safePage`, connected as OWNER_4, the parent's owner. Wallet A is a second browser context that
+ * Wallet B is `safePage`, connected as Alice, the parent's owner. Wallet A is a second browser context that
  * connects no private key: it pairs through the onboard WalletConnect module.
  */
 import type { Page } from '@playwright/test'
-import { Wallet, hashMessage, parseEther } from 'ethers'
+import { hashMessage, parseEther } from 'ethers'
 import { HomePage } from '../../src/pages/home.page'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedLocalStorage } from '../../src/fixtures/test.fixture'
@@ -40,7 +40,7 @@ type NestedSignerFixtures = {
 
 const test = base.extend<NestedSignerFixtures>({
   nestedSafes: [
-    { parent: { owners: ['owner4'], threshold: 1 }, child: { owners: ['parent'], threshold: 1 } },
+    { parent: { owners: ['alice'], threshold: 1 }, child: { owners: ['parent'], threshold: 1 } },
     { option: true },
   ],
   childPage: async ({ browser }, provide, testInfo) => {
@@ -121,7 +121,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     journey,
     pairing,
   }) => {
-    const recipient = Wallet.createRandom().address
+    const recipient = journey.newAddress()
     const parentReview = new TxReviewPage(safePage)
     const childReview = new TxReviewPage(childPage)
 
@@ -140,7 +140,8 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     await queue.goto(pairing.child.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toContainText('1/1')
     await queue.execute(0)
-    await childReview.continueAndExecute()
+    // The relay would execute the child by itself: the parent gets the request only if its wallet executes
+    await childReview.continueAndExecuteDecliningSponsor()
     await parentReview.signAndExecute()
 
     await expect.poll(() => safeApiClient.getNonce(pairing.child.address)).toBe(1)
@@ -152,10 +153,11 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     childPage,
     safeApiClient,
     pairing,
+    journey,
   }) => {
     const send = new SendTokensPage(childPage)
     await send.open()
-    await send.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
+    await send.fillTransfer({ recipient: journey.newAddress(), amount: AMOUNT })
     await send.nextButton.click()
     await new TxReviewPage(childPage).sign()
     await new TxReviewPage(safePage).discard()
@@ -164,11 +166,11 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     expect(await safeApiClient.getQueued(pairing.child.address)).toEqual([])
   })
 
-  test.describe('with a 2/2 child Safe that OWNER_4 and the parent own', () => {
+  test.describe('with a 2/2 child Safe that Alice and the parent own', () => {
     test.use({
       nestedSafes: {
-        parent: { owners: ['owner4'], threshold: 1 },
-        child: { owners: ['owner4', 'parent'], threshold: 2 },
+        parent: { owners: ['alice'], threshold: 1 },
+        child: { owners: ['alice', 'parent'], threshold: 2 },
       },
     })
 
@@ -181,7 +183,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     }) => {
       const queued = await seedQueuedTransfer(pairing.child, {
         nonce: 0,
-        recipient: Wallet.createRandom().address,
+        recipient: journey.newAddress(),
         amount: AMOUNT,
       })
       const parentReview = new TxReviewPage(safePage)
@@ -204,7 +206,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
   test.describe('with a 2/2 parent Safe', () => {
     test.use({
       nestedSafes: {
-        parent: { owners: ['owner4', 'owner1'], threshold: 2 },
+        parent: { owners: ['alice', 'bob'], threshold: 2 },
         child: { owners: ['parent'], threshold: 1 },
       },
     })
@@ -214,10 +216,11 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       childPage,
       safeApiClient,
       pairing,
+      journey,
     }) => {
       const send = new SendTokensPage(childPage)
       await send.open()
-      await send.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
+      await send.fillTransfer({ recipient: journey.newAddress(), amount: AMOUNT })
       await send.nextButton.click()
       await new TxReviewPage(childPage).sign()
       await new TxReviewPage(safePage).sign()
@@ -240,7 +243,7 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
     // Below 1.5.0 a Safe asks a contract owner about the message preimage, so only 1.5.0 children can work
     test.use({
       nestedSafes: {
-        parent: { owners: ['owner4'], threshold: 1 },
+        parent: { owners: ['alice'], threshold: 1 },
         child: { owners: ['parent'], threshold: 1, safeVersion: '1.5.0' },
       },
     })
@@ -266,15 +269,15 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       expect(await isValidSafeSignature(journey.env, { safeAddress, hash: hashMessage(message), signature })).toBe(true)
     })
 
-    test.describe('and a 2/2 child of OWNER_4 and the parent', () => {
+    test.describe('and a 2/2 child of Alice and the parent', () => {
       test.use({
         nestedSafes: {
-          parent: { owners: ['owner4'], threshold: 1 },
-          child: { owners: ['owner4', 'parent'], threshold: 2, safeVersion: '1.5.0' },
+          parent: { owners: ['alice'], threshold: 1 },
+          child: { owners: ['alice', 'parent'], threshold: 2, safeVersion: '1.5.0' },
         },
       })
 
-      test('should combine the contract signature of the parent with the signature of OWNER_4', async ({
+      test('should combine the contract signature of the parent with the signature of Alice', async ({
         safePage,
         childPage,
         journey,
@@ -286,8 +289,8 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
         const childReview = new TxReviewPage(childPage)
         await childReview.signMessageButton.click()
         await new TxReviewPage(safePage).signMessage()
-        // The parent's signature proposes the message at 1/2; OWNER_4 adds the second one
-        await confirmPendingMessage(journey.env, pairing.child.address, journey.owners.owner4)
+        // The parent's signature proposes the message at 1/2; Alice adds the second one
+        await confirmPendingMessage(journey.env, pairing.child.address, journey.owners.alice)
         await childReview.signedMessageContinueButton.click()
 
         const { result: signature } = (await response) as { result: string }
@@ -298,10 +301,10 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
       })
     })
 
-    test.describe('and a 2/2 parent of OWNER_4 and OWNER_1', () => {
+    test.describe('and a 2/2 parent of Alice and Bob', () => {
       test.use({
         nestedSafes: {
-          parent: { owners: ['owner4', 'owner1'], threshold: 2 },
+          parent: { owners: ['alice', 'bob'], threshold: 2 },
           child: { owners: ['parent'], threshold: 1, safeVersion: '1.5.0' },
         },
       })
@@ -319,8 +322,8 @@ test.describe('WalletConnect nested signer', { tag: ['@e2e', '@walletconnect'] }
         const parentReview = new TxReviewPage(safePage)
         await childReview.signMessageButton.click()
         await parentReview.signMessageButton.click()
-        // OWNER_4 signed the parent's message at 1/2; OWNER_1 adds the second one, then wallet B answers wallet A
-        await confirmPendingMessage(journey.env, pairing.parent.address, journey.owners.owner1)
+        // Alice signed the parent's message at 1/2; Bob adds the second one, then wallet B answers wallet A
+        await confirmPendingMessage(journey.env, pairing.parent.address, journey.owners.bob)
         await parentReview.signedMessageContinueButton.click()
         await childReview.signedMessageContinueButton.click()
 

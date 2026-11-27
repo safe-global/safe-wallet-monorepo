@@ -1,29 +1,54 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import type { ChainInfo } from '@safe-global/views/features/spaces/types'
+import type {
+  AddressBookRequestItemDto,
+  SpaceAddressBookItemDto,
+  SpaceAddressBookTagDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type {
+  AddressBookContact,
+  ContactTag,
+  PendingRequest,
+} from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { AddressBookState } from '@/store/addressBookSlice'
-
-const toChainInfos = (chainIds: string[], configs: Chain[]): ChainInfo[] =>
-  chainIds.map((chainId) => {
-    const chain = configs.find((config) => config.chainId === chainId)
-    return chain
-      ? { chainId, chainName: chain.chainName, chainLogoUri: chain.chainLogoUri ?? null, shortName: chain.shortName }
-      : { chainId, chainName: chainId, chainLogoUri: null, shortName: chainId }
-  })
+import { toChainInfos } from '../../utils'
 
 export const toWorkspaceContacts = (
   items: SpaceAddressBookItemDto[],
+  tags: SpaceAddressBookTagDto[],
   configs: Chain[],
   resolveMemberName: (userId: number | undefined) => string | undefined,
-): AddressBookContact[] =>
-  items.map((item) => ({
+): AddressBookContact[] => {
+  const tagById = new Map(tags.map(({ id, name, color }): [number, ContactTag] => [id, { id, name, color }]))
+  return items.map((item) => ({
     address: item.address,
     name: item.name,
     chains: toChainInfos(item.chainIds, configs),
     addedBy: resolveMemberName(item.createdByUserId) || item.createdBy || undefined,
+    tags: item.tagIds.flatMap((id) => tagById.get(id) ?? []),
   }))
+}
+
+export const toPendingRequests = (
+  requests: AddressBookRequestItemDto[],
+  workspaceItems: SpaceAddressBookItemDto[],
+  configs: Chain[],
+  resolveMemberName: (userId: number | undefined) => string | undefined,
+): PendingRequest[] => {
+  const workspaceAddresses = new Set(workspaceItems.map((item) => item.address.toLowerCase()))
+  return requests.map((request) => ({
+    id: request.id,
+    address: request.address,
+    name: request.name,
+    chains: toChainInfos(request.chainIds, configs),
+    requestedBy: resolveMemberName(request.requestedByUserId) || request.requestedBy || undefined,
+    isInWorkspace: workspaceAddresses.has(request.address.toLowerCase()),
+  }))
+}
+
+/** The names of the given tags, in that order; an id the workspace no longer has is left out. */
+export const tagNamesOf = (tagIds: number[], tags: SpaceAddressBookTagDto[]): string[] =>
+  tagIds.flatMap((id) => tags.find((tag) => tag.id === id)?.name ?? [])
 
 /** This browser's contacts, one per address across chains; those the workspace already has go last. */
 export const toLocalContacts = (

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { faker } from '@faker-js/faker'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { safenetChainsHandler } from '@/stories/pages/safenet/safenetChainMocks'
 import { SafenetDetailsCardView } from './SafenetDetailsCard'
 import {
@@ -14,7 +14,7 @@ import {
   openDisputeSnapshot,
   rejectedSnapshot,
   timedOutDisputeSnapshot,
-} from './storyExamples'
+} from './safenetChecks.storyData'
 
 faker.seed(456)
 

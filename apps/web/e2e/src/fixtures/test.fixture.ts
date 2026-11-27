@@ -13,13 +13,12 @@
  */
 import { test as base, expect, type Page, type TestInfo } from '@playwright/test'
 import { SafeApiClient } from '../api/safe-api-client'
-import { LS_KEYS, SAFES, STAGING_CGW_URL } from '../data/constants'
+import { LS_KEYS } from '../data/constants'
 import { WalletPage } from '../pages/wallet.page'
-import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
-import { isIsolated, isolatedSpecData, type Safes } from './isolated-data'
+import { specData, type Owners, type Safes } from './spec-data'
 import { version as TERMS_VERSION } from '@/markdown/terms/version'
 
-// Cookie consent state — mirrors Cypress localstorage_data.js.
+// Cookie consent state.
 // `hasAcceptedTerms` only treats consent as valid when `termsVersion` matches
 // the app's current terms version, so seeding `undefined` left the banner open.
 // Seed the real version so the banner stays suppressed.
@@ -35,17 +34,19 @@ const COOKIE_STATE = JSON.stringify({
  * Seeds localStorage with required consent/dismissal values via addInitScript.
  * This runs before page scripts on every navigation — no extra goto() needed.
  * Prevents popups and modals from blocking test flows.
- * Mirrors: cypress/support/e2e.js beforeEach()
  */
 export async function seedLocalStorage(page: Page): Promise<void> {
   await page.addInitScript(
-    ({ cookiesKey, safeLabsKey, outreachKey, cookieState }) => {
+    ({ cookiesKey, safeLabsKey, outreachKey, stakingBannerKey, cookieState }) => {
       // Cookie + terms consent
       window.localStorage.setItem(cookiesKey, cookieState)
       window.localStorage.setItem(safeLabsKey, 'true')
 
       // Suppress outreach popup
       window.sessionStorage.setItem(outreachKey, String(Date.now()))
+
+      // The staking promo banner appears once balances load and moves the controls below it
+      window.localStorage.setItem(stakingBannerKey, 'true')
 
       // Suppress Beamer (product updates widget).
       // KNOWN GAP: Beamer reads these keys suffixed with its PRODUCT_ID, so these unsuffixed
@@ -61,9 +62,17 @@ export async function seedLocalStorage(page: Page): Promise<void> {
       cookiesKey: LS_KEYS.cookiesTerms,
       safeLabsKey: LS_KEYS.safeLabsTerms,
       outreachKey: 'SAFE_v2__outreachPopup_session_v2',
+      stakingBannerKey: LS_KEYS.stakingPromoBannerHidden,
       cookieState: COOKIE_STATE,
     },
   )
+}
+
+/** The workspace tour's seen flag is keyed by the CGW user id, so it can't be pre-seeded; skip it when it opens. */
+export async function dismissWorkspaceTour(page: Page): Promise<void> {
+  await page.addLocatorHandler(page.getByTestId('workspace-tour-welcome'), async () => {
+    await page.getByRole('button', { name: 'Skip for now' }).click()
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -150,7 +159,7 @@ async function attachFailureEvidence(
   const envInfo = [
     `baseURL: ${testInfo.project.use.baseURL || 'not set'}`,
     `CI: ${process.env.CI || 'false'}`,
-    `CGW: ${process.env.SAFE_CGW_BASE_URL || STAGING_CGW_URL}`,
+    `CGW: ${process.env.SAFE_CGW_BASE_URL || 'not set'}`,
     `browser: ${testInfo.project.name}`,
     `retries: ${testInfo.retry}/${testInfo.project.retries}`,
     `worker: ${testInfo.workerIndex}`,
@@ -180,14 +189,14 @@ type SafeFixtures = {
   safeApiClient: SafeApiClient
   /** Wallet page object — connect a private-key wallet and SiWE login */
   walletPage: WalletPage
-  /** Parsed wallet credentials (lazy — only parses env when a test uses it); the scenario's owners in isolated runs */
-  credentials: WalletCredentials
-  /** SAFES on staging; the Safes the spec's scenarios deployed in isolated runs */
+  /** The four owners of the spec's scenarios: Alice, Bob, Carol and Dave */
+  owners: Owners
+  /** The Safes that the spec's scenarios deployed, by the names they return */
   safes: Safes
 }
 
 // Scenarios deploy and index Safes before the first test of a spec file.
-const ISOLATED_DATA_TIMEOUT_MS = 600_000
+const SPEC_DATA_TIMEOUT_MS = 600_000
 
 // ---------------------------------------------------------------------------
 // Extended test with Safe-specific fixtures
@@ -202,6 +211,7 @@ export const test = base.extend<SafeFixtures>({
 
     // Seed localStorage via addInitScript — runs before page scripts, no extra navigation
     await seedLocalStorage(page)
+    await dismissWorkspaceTour(page)
     await provide(page)
 
     // After test: attach evidence if it failed
@@ -217,18 +227,18 @@ export const test = base.extend<SafeFixtures>({
     await provide(new WalletPage(safePage))
   },
 
-  credentials: [
+  owners: [
     async ({}, provide, testInfo) => {
-      await provide(isIsolated ? (await isolatedSpecData(testInfo)).credentials : getWalletCredentials())
+      await provide((await specData(testInfo)).owners)
     },
-    { timeout: ISOLATED_DATA_TIMEOUT_MS },
+    { timeout: SPEC_DATA_TIMEOUT_MS },
   ],
 
   safes: [
     async ({}, provide, testInfo) => {
-      await provide(isIsolated ? (await isolatedSpecData(testInfo)).safes : SAFES)
+      await provide((await specData(testInfo)).safes)
     },
-    { timeout: ISOLATED_DATA_TIMEOUT_MS },
+    { timeout: SPEC_DATA_TIMEOUT_MS },
   ],
 })
 

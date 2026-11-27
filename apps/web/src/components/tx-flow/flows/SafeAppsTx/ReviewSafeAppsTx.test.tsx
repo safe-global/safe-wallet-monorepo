@@ -3,13 +3,15 @@ import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { faker } from '@faker-js/faker'
 import { render, waitFor } from '@/tests/test-utils'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import ReviewSafeAppsTx from './ReviewSafeAppsTx'
 
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
   createTx: jest.fn(),
   createMultiSendCallOnlyTx: jest.fn(),
 }))
@@ -32,9 +34,7 @@ const contextValue = (overrides: Partial<SafeTxContextParams>): SafeTxContextPar
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: jest.fn(),
-  setGtfSelectedGasToken: jest.fn(),
+  setFeeGasToken: jest.fn(),
   ...overrides,
 })
 

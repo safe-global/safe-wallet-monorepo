@@ -1,7 +1,9 @@
 """Configures a forked chain in the config service; docker-compose.test.yml mounts it there."""
 
 import io
+import json
 import os
+from pathlib import Path
 
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
@@ -19,65 +21,11 @@ def create_placeholder_image(color: str = "#B8AAF8") -> ContentFile:
     return ContentFile(buffer.getvalue(), name="currency_logo.png")
 
 
-# Staging Sepolia features for WALLET_WEB, which the specs expect.
-# Left out: SECURITY_HUB stalls transaction signing in the local stack.
-# Added: QUEUE_SERVICE, because CGW runs with FF_SAFE_QUEUE_SERVICE and the wallet must sign for it.
-DEFAULT_FEATURES = [
-    "ADDRESS_POISONING_PROTECTION",
-    "BATCHING",
-    "BRIDGE",
-    "CLASSIC_VIEW",
-    "COUNTERFACTUAL",
-    "CSV_TX_EXPORT",
-    "DEFAULT_TOKENLIST",
-    "DELETE_TX",
-    "DOMAIN_LOOKUP",
-    "EIP1271",
-    "EIP1559",
-    "ERC721",
-    "HYPERNATIVE",
-    "HYPERNATIVE_QUEUE_SCAN",
-    "LENDING",
-    "MASS_PAYOUTS",
-    "MIXPANEL",
-    "MULTI_CHAIN_SAFE_ADD_NETWORK",
-    "MULTI_CHAIN_SAFE_CREATION",
-    "MY_ACCOUNTS",
-    "NATIVE_SWAPS",
-    "NATIVE_SWAPS_COW",
-    "NATIVE_SWAPS_FEE_ENABLED",
-    "NATIVE_WALLETCONNECT",
-    "NESTED_SAFES",
-    "OIDC_AUTH",
-    "POLICIES",
-    "POLICY_INDEXER_SPENDING_LIMIT",
-    "PRIVATE_ADDRESS_BOOK",
-    "PROPOSERS",
-    "PROPOSER_GATING",
-    "PUSH_NOTIFICATIONS",
-    "QUEUE_SERVICE",
-    "RECOVERY",
-    "RELAYING",
-    "RISK_MITIGATION",
-    "SAFE_APPS",
-    "SAFE_PRO",
-    "SAFE_PRO_ANNOUNCEMENT",
-    "SAFE_STAKING",
-    "SPACES",
-    "SPACE_AUDIT_LOG",
-    "SPACE_ONBOARDING_SURVEY",
-    "SPEED_UP_TX",
-    "SPENDING_LIMIT",
-    "SPENDING_LIMIT_GATING",
-    "STAKING",
-    "STAKING_PROMO",
-    "SWITCH_AUTHENTICATOR",
-    "TWO_FACTOR_AWARENESS_BANNER",
-    "TX_NOTES",
-    "TX_SIMULATION",
-    "WELCOME_ACCOUNTS_REDESIGN",
-    "ZODIAC_ROLES",
-]
+# The flags each forked chain gets; apps/web/config/remote-config.test.ts checks the file.
+# QUEUE_SERVICE is on because CGW runs with FF_SAFE_QUEUE_SERVICE and the wallet must sign for it.
+# SECURITY_HUB is off because it stalls transaction signing in the local stack.
+FEATURES_FILE = Path(__file__).resolve().parent.parent / "test-chain-features.json"
+DEFAULT_FEATURES = json.loads(FEATURES_FILE.read_text())["on"]
 
 DEFAULT_WALLETS = [
     "coinbase",
@@ -98,9 +46,8 @@ SAFE_APPS = [
         "Compose custom contract interactions and batch them into a single transaction",
         True,
     ),
-    # Not in this repository, so the hosted app is listed, as on staging.
     (
-        "https://safe-apps.dev.5afe.dev/drain-safe",
+        "http://localhost:4001",
         "Drain Account",
         "Transfer all your assets in batch",
         False,
@@ -147,7 +94,7 @@ def chain_defaults(chain_id: int, chain_name: str, rpc_url: str, txs_url: str) -
         "relayer_safe_creation_sponsored": True,
         "relayer_safe_transaction_sponsored": True,
         # Staging lists SUBSCRIPTION and PAY_FROM_SAFE; existing relay specs need FREE_DAILY_LIMIT.
-        "relayer_gas_payment_options": ["FREE_DAILY_LIMIT", "SUBSCRIPTION"],
+        "relayer_gas_payment_options": ["FREE_DAILY_LIMIT", "SUBSCRIPTION", "PAY_FROM_SAFE"],
         "is_testnet": os.environ.get("TEST_CHAIN_IS_TESTNET", "true") == "true",
         "zk": False,
         **rpc_settings(rpc_url),
@@ -214,7 +161,7 @@ class Command(BaseCommand):
         self.stdout.write(f"  RPC URL: {rpc_url}")
         self.stdout.write(f"  TXS URL: {txs_url}")
         chain = self._setup_chain(chain_id, chain_defaults(chain_id, chain_name, rpc_url, txs_url))
-        self._setup_gas_price(chain)
+        self._clear_gas_price(chain)
         self._setup_features(chain)
         self._setup_wallets(chain)
         self._setup_safe_apps(chain)
@@ -239,13 +186,10 @@ class Command(BaseCommand):
         self.stdout.write(f"  {'Created' if created else 'Updated'} Chain {chain_id}")
         return chain
 
-    def _setup_gas_price(self, chain: Chain):
-        _, created = GasPrice.objects.update_or_create(
-            chain=chain,
-            oracle_uri=None,
-            defaults={"fixed_wei_value": 1_000_000_000, "rank": 1},
-        )
-        self.stdout.write(f"  {'Created' if created else 'Updated'} GasPrice for chain {chain.id}")
+    def _clear_gas_price(self, chain: Chain):
+        # As on production Sepolia: with no gas price config, the app reads the fee pair from the RPC.
+        deleted, _ = GasPrice.objects.filter(chain=chain).delete()
+        self.stdout.write(f"  Removed {deleted} GasPrice rows for chain {chain.id}")
 
     def _setup_features(self, chain: Chain):
         """Enable exactly the default features plus TEST_CHAIN_EXTRA_FEATURES for the chain."""

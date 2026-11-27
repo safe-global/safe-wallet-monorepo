@@ -1,28 +1,29 @@
-import { useState, useCallback, useMemo, Suspense } from 'react'
+import { Fragment, useState, useCallback, useMemo, Suspense } from 'react'
 import dynamic from '@/utils/dynamic'
-import { flattenSafeItems, type SafeItem } from '@/hooks/safes'
-import { useSpaceSafes } from '@/features/spaces'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectUndeployedSafes } from '@/store/slices'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import {
   ESafeAction,
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
   closeSafeActionsModal,
-} from '@/features/spaces/store'
+} from '../../public/store/safeActionsModalSlice'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import SafeCardReadOnly from '../../public/components/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
-import { safeModalTitles } from './constants'
+import { NO_ACTIVATED_SAFES_MESSAGE, safeModalTitles } from './constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
-const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
 
 const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal'))
 
@@ -38,7 +39,13 @@ const SelectSafeModal = () => {
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
-  const filteredSafes = useSearchFilter(flatSafes, query, matchSafe)
+  // Space flows can't handle counterfactual Safes (SafeScopeProvider); ones from other devices still show
+  const selectableSafes = useMemo(
+    () => flatSafes.filter((safe) => !undeployedSafes[safe.chainId]?.[safe.address]),
+    [flatSafes, undeployedSafes],
+  )
+  const areAllSafesUndeployed = flatSafes.length > 0 && selectableSafes.length === 0
+  const filteredSafes = useSearchFilter(selectableSafes, query, matchSafe)
   const { actionMapper, resetActiveSafe } = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
@@ -48,16 +55,18 @@ const SelectSafeModal = () => {
     void resetActiveSafe()
   }, [resetActiveSafe])
 
-  const isSwapAction = actionType === ESafeAction.Swap
-  const getSwapDisabledTooltip = useCallback(
-    (safe: SafeItem): string | undefined => {
-      if (!isSwapAction) return undefined
-      const chain = chains.find((c) => c.chainId === safe.chainId)
-      if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)) return SWAP_DISABLED_TOOLTIP
-      if (undeployedSafes[safe.chainId]?.[safe.address]) return SWAP_DISABLED_CF_TOOLTIP
-      return undefined
+  const getDisabledState = useCallback(
+    (safe: SafeItem): { disabled: boolean; tooltip?: string } => {
+      if (actionType === ESafeAction.Swap) {
+        const chain = chains.find((c) => c.chainId === safe.chainId)
+        if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS))
+          return { disabled: true, tooltip: SWAP_DISABLED_TOOLTIP }
+        return { disabled: false }
+      }
+
+      return { disabled: false }
     },
-    [isSwapAction, chains, undeployedSafes],
+    [actionType, chains],
   )
 
   const handleClose = useCallback(() => {
@@ -97,22 +106,31 @@ const SelectSafeModal = () => {
                   <Skeleton className="h-[72px] w-full rounded-3xl" />
                 </div>
               ) : filteredSafes.length === 0 ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">No safes found</p>
+                <p className="py-8 text-center text-sm text-muted-foreground">
+                  {areAllSafesUndeployed ? NO_ACTIVATED_SAFES_MESSAGE : 'No safes found'}
+                </p>
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {filteredSafes.map((safe) => {
-                    const disabledTooltip = getSwapDisabledTooltip(safe)
-                    return (
+                    const { disabled, tooltip } = getDisabledState(safe)
+                    const card = (
                       <SafeCardReadOnly
-                        key={`${safe.chainId}:${safe.address}`}
                         safe={safe}
                         hideContextMenu
                         showPending={false}
                         onClick={() => void handleSafeClick(safe)}
-                        disabled={Boolean(disabledTooltip)}
-                        disabledTooltip={disabledTooltip}
+                        disabled={disabled}
                         className="px-4 sm:px-4"
                       />
+                    )
+                    const key = `${safe.chainId}:${safe.address}`
+                    if (!tooltip) return <Fragment key={key}>{card}</Fragment>
+                    // A block trigger: the card's own tooltip trigger is `display: contents`, which has no box to anchor to
+                    return (
+                      <Tooltip key={key}>
+                        <TooltipTrigger render={<div />}>{card}</TooltipTrigger>
+                        <TooltipContent>{tooltip}</TooltipContent>
+                      </Tooltip>
                     )
                   })}
                 </div>

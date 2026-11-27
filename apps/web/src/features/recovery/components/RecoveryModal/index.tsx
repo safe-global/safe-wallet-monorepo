@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 
-import { useRecoveryQueue } from '../../hooks/useRecoveryQueue'
+import { useRecoveryQueue } from '../../public/hooks/useRecoveryQueue'
 import { RecoveryInProgressCard } from '../RecoveryCards/RecoveryInProgressCard'
 import { RecoveryProposalCard } from '../RecoveryCards/RecoveryProposalCard'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { useIsRecoverer } from '../../hooks/useIsRecoverer'
+import { useIsRecoverer } from '../../public/hooks/useIsRecoverer'
 import madProps from '@/utils/mad-props'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -14,7 +14,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { useTopbarElevation } from '@/hooks/useTopbarElevation'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 function InternalRecoveryModal({
   isOwner,

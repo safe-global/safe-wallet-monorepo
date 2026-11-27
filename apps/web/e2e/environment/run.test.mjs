@@ -6,15 +6,20 @@ import { join } from 'node:path'
 import {
   checkEnvironment,
   configuration,
-  missingChainCommands,
+  listedSpecs,
+  missingStackCommands,
   planMatrix,
   selectPlaywrightSpecs,
+  missingShardCommands,
+  shardSpecs,
   playwrightRunArguments,
   readManifest,
   stackEnvironment,
+  stackNeeds,
   walletEnvironment,
 } from './run.mjs'
 import { fileURLToPath } from 'node:url'
+import { chainProfiles } from './local-stack.mjs'
 
 const manifest = { gatewayUrl: 'http://localhost:8000/cgw', chainId: 11155111, forkBlock: 10008682 }
 
@@ -42,6 +47,7 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
     SEPOLIA_FORK_RPC_URL: 'sepolia-secret',
     PATH: '/bin',
     NEXT_PUBLIC_IS_PRODUCTION: 'true',
+    NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN: 'https://safe-wallet-web.dev.5afe.dev',
     ELECTRON_RUN_AS_NODE: '1',
   })
   assert.equal(env.FORK_RPC_URL, undefined)
@@ -49,6 +55,7 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
   assert.equal(env.ELECTRON_RUN_AS_NODE, undefined)
   assert.equal(env.NEXT_PUBLIC_CONFIG_SERVICE_KEY, 'WALLET_WEB')
   assert.equal(env.NEXT_PUBLIC_IS_PRODUCTION, 'false')
+  assert.equal(env.NEXT_PUBLIC_CHECKOUT_RETURN_ORIGIN, '')
   assert.equal(env.NEXT_PUBLIC_POLLING_INTERVAL, '2000')
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_STAGING, manifest.gatewayUrl)
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION, manifest.gatewayUrl)
@@ -69,6 +76,13 @@ test('points the wallet at the local Ledger emulator when the stack has one', ()
   )
   assert.equal(walletEnvironment(manifest, {}).NEXT_PUBLIC_LEDGER_EMULATOR_URL, undefined)
   assert.throws(() => walletEnvironment({ ...manifest, ledgerEmulatorUrl: 'https://speculos.example' }), /local/)
+})
+
+test('gives the Trezor specs the local Trezor emulator when the stack has one', () => {
+  const emulator = 'http://localhost:9556'
+  assert.equal(walletEnvironment({ ...manifest, trezorEmulatorUrl: emulator }).TREZOR_EMULATOR_URL, emulator)
+  assert.equal(walletEnvironment(manifest, {}).TREZOR_EMULATOR_URL, undefined)
+  assert.throws(() => walletEnvironment({ ...manifest, trezorEmulatorUrl: 'https://trezor.example' }), /local/)
 })
 
 test('cleans a partially started stack and preserves the original failure', async () => {
@@ -97,31 +111,50 @@ test('runs both backend gates and fails if cleanup fails', async () => {
   assert.deepEqual(calls, ['up', 'test', 'smoke', 'logs', 'reset'])
 })
 
-test('names the fork start command for every selected spec whose chain is not running', () => {
-  const registry = {
-    'e2e/a.spec.ts': { chains: [1] },
-    'e2e/b.spec.ts': { chains: [1, 137] },
-    'e2e/sepolia.spec.ts': {},
-  }
-  assert.deepEqual(missingChainCommands(Object.keys(registry), { chains: { 1: {} } }, '/infra', registry), [
-    'python3 /infra/scripts/test_env.py up --chain polygon',
-  ])
-  assert.deepEqual(missingChainCommands(['e2e/sepolia.spec.ts'], {}, '/infra', registry), [])
+const needsRegistry = {
+  'e2e/a.spec.ts': { chains: [1] },
+  'e2e/b.spec.ts': { chains: [1, 137], devices: ['trezor'] },
+  'e2e/ledger.spec.ts': { devices: ['ledger'] },
+  'e2e/sepolia.spec.ts': {},
+}
+
+test('names the forks and device emulators that the given specs need, each once', () => {
+  assert.deepEqual(stackNeeds(['e2e/a.spec.ts', 'e2e/b.spec.ts'], needsRegistry), {
+    chains: ['mainnet', 'polygon'],
+    devices: ['trezor'],
+  })
+  assert.deepEqual(stackNeeds(['e2e/sepolia.spec.ts'], needsRegistry), { chains: [], devices: [] })
 })
 
-test('plans one matrix entry per Playwright shard, each with the forks that any spec needs', () => {
-  const registry = {
-    'e2e/sepolia.spec.ts': {},
-    'e2e/multichain.spec.ts': { chains: [1, 137] },
-    'e2e/mainnet.spec.ts': { chains: [1] },
+test('names the start command for every fork and device emulator that selected specs need and the stack lacks', () => {
+  const stack = { chains: { 1: {} }, devices: ['ledger'] }
+  assert.deepEqual(missingStackCommands(Object.keys(needsRegistry), stack, '/infra', needsRegistry), [
+    'python3 /infra/scripts/test_env.py up --chain polygon',
+    'python3 /infra/scripts/test_env.py up --device trezor',
+  ])
+  assert.deepEqual(missingStackCommands(['e2e/sepolia.spec.ts'], {}, '/infra', needsRegistry), [])
+})
+
+test('reads the spec files of a Playwright --list report, including nested describe blocks', () => {
+  const report = {
+    suites: [
+      { file: 'e2e/a.spec.ts', specs: [{ title: 'a' }], suites: [] },
+      { file: 'e2e/b.spec.ts', specs: [], suites: [{ file: 'e2e/b.spec.ts', specs: [{ title: 'b' }] }] },
+      { file: 'e2e/empty.spec.ts', specs: [], suites: [] },
+    ],
   }
+  assert.deepEqual(listedSpecs(report), ['e2e/a.spec.ts', 'e2e/b.spec.ts'])
+  assert.deepEqual(listedSpecs({}), [])
+})
+
+test('plans one matrix entry per Playwright shard', () => {
+  const registry = { 'e2e/sepolia.spec.ts': {} }
   assert.deepEqual(planMatrix(2, {}, registry), {
     include: [
-      { shard: 1, chains: 'mainnet polygon' },
-      { shard: 2, chains: 'mainnet polygon' },
+      { shard: '1', total: 2 },
+      { shard: '2', total: 2 },
     ],
   })
-  assert.deepEqual(planMatrix(1, {}, { 'e2e/sepolia.spec.ts': {} }), { include: [{ shard: 1, chains: '' }] })
   for (const count of [0, -1, 1.5, NaN]) {
     assert.throws(() => planMatrix(count, {}, registry), /positive integer/)
   }
@@ -131,6 +164,14 @@ test('refuses to plan a run whose SAFE_E2E_SPECS filter matches no registered sp
   const registry = { 'e2e/batch.spec.ts': {} }
   assert.deepEqual(planMatrix(3, { SAFE_E2E_SPECS: 'batch' }, registry).include.length, 3)
   assert.throws(() => planMatrix(3, { SAFE_E2E_SPECS: 'no-such-spec' }, registry), /matches no registered/)
+})
+
+test('adds a burn-in entry that repeats the specs of the released flags', () => {
+  const registry = { 'e2e/batch.spec.ts': {}, 'e2e/ens.spec.ts': {} }
+  const { include } = planMatrix(2, { SAFE_E2E_BURN_IN_SPECS: 'e2e/ens\\.spec\\.ts' }, registry)
+  assert.deepEqual(include.at(-1), { shard: 'burnin', specs: 'e2e/ens\\.spec\\.ts', repeat: 5 })
+  assert.equal(include.length, 3)
+  assert.throws(() => planMatrix(2, { SAFE_E2E_BURN_IN_SPECS: 'no-such-spec' }, registry), /BURN_IN.*matches no/)
 })
 
 test('selects the Playwright specs that SAFE_E2E_SPECS matches, as Playwright does', () => {
@@ -164,6 +205,16 @@ test('runs one Playwright shard when SAFE_E2E_SHARD names it', () => {
   ])
 })
 
+test('repeats each test when SAFE_E2E_REPEAT names a count', () => {
+  const config = ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts']
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_REPEAT: '5', SAFE_E2E_SPECS: 'batch' }), [
+    ...config,
+    '--repeat-each',
+    '5',
+    'batch',
+  ])
+})
+
 test('gives the Playwright run the local service URLs and the running forks', () => {
   const stack = { ...manifest, transactionServiceUrl: 'http://localhost:8000/txs', rpcUrl: 'http://localhost:8545' }
   const chains = { 137: { rpcUrl: 'http://localhost:8548' } }
@@ -180,4 +231,16 @@ test('gives the Playwright run the local service URLs and the running forks', ()
 test('explains a missing stack instead of failing on the manifest path', async () => {
   const infrastructure = await mkdtemp(join(tmpdir(), 'infra-'))
   await assert.rejects(readManifest(infrastructure, 'safe-e2e-absent'), /No running stack for safe-e2e-absent/)
+})
+
+test('accepts a stack that runs exactly the forks and emulators of its own shard', async () => {
+  const profileChains = Object.fromEntries(
+    Object.entries(chainProfiles).map(([chainId, profile]) => [profile, chainId]),
+  )
+  for (const shard of ['1/2', '2/2']) {
+    const env = { PATH: process.env.PATH, SAFE_E2E_SHARD: shard }
+    const { chains, devices } = stackNeeds(await shardSpecs(env))
+    const manifest = { chains: Object.fromEntries(chains.map((chain) => [profileChains[chain], {}])), devices }
+    assert.deepEqual(await missingShardCommands(env, manifest, '/infra'), [], `shard ${shard}`)
+  }
 })

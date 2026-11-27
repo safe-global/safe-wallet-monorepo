@@ -1,11 +1,16 @@
 // Used for __tests__/testing-library.js
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
+import { configure } from '@testing-library/react'
 import { server } from '@/tests/server'
 import { faker } from '@faker-js/faker'
+import { FAKE_CLOCK_START } from './jest.clock.cjs'
 
 // Seed faker for deterministic test data
 faker.seed(123)
+
+// waitFor and findBy* give up after 1 s by default, which slow CI runners exceed
+configure({ asyncUtilTimeout: process.env.CI ? 3_000 : 1_000 })
 
 // jsdom lacks the Pointer Events API that Base UI components (shadcn/ui) rely on.
 // Polyfill only what's missing so interaction tests (e.g. clicking a Base UI Checkbox)
@@ -64,8 +69,20 @@ globalThis.BroadcastChannel = class BroadcastChannel {
   close() {}
 }
 
-// Set timezone to UTC for consistent date formatting across environments
-process.env.TZ = 'UTC'
+// jsdom checks a cookie's expires date against the real date, so a cookie that expires on the fake clock is dropped at once
+if (typeof Document !== 'undefined') {
+  const cookieProperty = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
+  Object.defineProperty(Document.prototype, 'cookie', {
+    ...cookieProperty,
+    set(value) {
+      const withMaxAge = value.replace(
+        /;\s*expires=([^;]*)/i,
+        (_, date) => `; max-age=${Math.round((Date.parse(date) - Date.now()) / 1000)}`,
+      )
+      cookieProperty.set.call(this, withMaxAge)
+    },
+  })
+}
 
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
@@ -125,6 +142,12 @@ Object.defineProperty = (obj, prop, desc) => {
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' })
+})
+
+// Jest installs the fake clock once per file, so each test puts it back and resets it to the configured start
+beforeEach(() => {
+  if (!Object.prototype.hasOwnProperty.call(setTimeout, 'clock')) jest.useFakeTimers()
+  jest.setSystemTime(FAKE_CLOCK_START)
 })
 
 afterEach(() => server.resetHandlers())

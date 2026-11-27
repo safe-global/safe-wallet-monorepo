@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import dynamic from '@/utils/dynamic'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -6,9 +5,9 @@ import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 
-const LazyEarnPage = dynamic(() => import('@/features/earn'), { ssr: false })
+const LazyEarnPage = dynamic(() => import('@/features/earn/public/components/EarnPage'), { ssr: false })
 
-const EarnPage: NextPage = () => {
+const EarnPage = () => {
   const isFeatureEnabled = useHasFeature(FEATURES.EARN)
 
   return (

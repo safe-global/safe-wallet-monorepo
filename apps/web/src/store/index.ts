@@ -12,28 +12,28 @@ import merge from 'lodash/merge'
 import { APP_ENV, IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
-import {
-  cookiesAndTermsSlice,
-  cookiesAndTermsInitialState,
-  safeMessagesListener,
-  safeInfoListener,
-  swapOrderListener,
-  swapOrderStatusListener,
-  txHistoryListener,
-  txQueueListener,
-  authListener,
-  counterfactualSyncListener,
-  addressBookListener,
-  elevationListener,
-  spaceSafesEntitlementsListener,
-  planChangeSyncListener,
-  checkoutTrackingListener,
-  workspaceTrackingListener,
-  spaceSafesCacheListener,
-  trialReminderListener,
-} from './slices'
+import { cookiesAndTermsSlice, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
+import { safeMessagesListener } from '@/store/safeMessagesSlice'
+import { safeInfoListener } from '@/store/safeInfoSlice'
+import { swapOrderListener, swapOrderStatusListener } from '@/store/swapOrderSlice'
+import { txHistoryListener } from '@/store/txHistorySlice'
+import { txQueueListener } from '@/store/txQueueSlice'
+import { authListener } from '@/store/authSlice'
+import { counterfactualSyncListener } from '@/features/counterfactual/public/store/counterfactualSyncListener'
+import { addressBookListener } from '@/store/addressBookSlice'
+import { spaceSafesEntitlementsListener } from '@/features/spaces/public/store/spaceSafesEntitlementsListener'
+import { planChangeSyncListener } from '@/features/spaces/public/store/planChangeSyncListener'
+import { checkoutTrackingListener } from '@/features/spaces/public/store/checkoutTrackingListener'
+import { workspaceTrackingListener } from '@/features/spaces/public/store/workspaceTrackingListener'
+import { spaceSafesCacheListener } from '@/features/spaces/public/store/spaceSafesCacheListener'
+import { addressBookTagsCacheListener } from '@/features/spaces/public/store/addressBookTagsCacheListener'
+import { trialReminderListener } from '@/features/spaces/public/store/trialReminder'
+import { hnSessionListener } from '@/features/hypernative/public/store/hnSessionListener'
+import { workspaceDraftExpiryListener } from '@/features/spaces/public/store/workspaceDraftExpiryListener'
+import { workspaceDraftCompletionListener } from '@/features/spaces/public/store/workspaceDraftCompletionListener'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
+import { HYDRATE_ACTION } from './hydrateAction'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
 import { beamerApi } from './api/beamer'
@@ -47,7 +47,9 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
+import { safeOverviewsTokenListListener } from './api/gateway/safeOverviewsTokenListListener'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
+import { spaceQueueReconciliationListener } from '@/features/spaces/public/store/spaceQueueReconciliationListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -73,14 +75,18 @@ const rootReducer = combineReducers({
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
   [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
+  [slices.hnSessionSlice.name]: slices.hnSessionSlice.reducer,
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
-  [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
+  [slices.spaceQueueViewSlice.name]: slices.spaceQueueViewSlice.reducer,
+  [slices.spaceQueuePollingSlice.name]: slices.spaceQueuePollingSlice.reducer,
+  [slices.workspaceDraftSlice.name]: slices.workspaceDraftSlice.reducer,
+  [slices.workspaceWizardSlice.name]: slices.workspaceWizardSlice.reducer,
+  [slices.feePaymentSourcePreferenceSlice.name]: slices.feePaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
-  // Deliberately absent from `persistedSlices`: a phase restored from a previous
-  // page load would leave the user on a splash screen with nothing in flight.
+  // Deliberately absent from `persistedSlices`: a restored dialog would wait for a request that is gone.
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
@@ -111,8 +117,10 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.orderByPreferenceSlice.name,
   slices.authSlice.name,
   slices.hnStateSlice.name,
-  slices.gtfPaymentSourcePreferenceSlice.name,
+  slices.feePaymentSourcePreferenceSlice.name,
   slices.featureFlagOverridesSlice.name,
+  slices.workspaceDraftSlice.name,
+  slices.spaceQueueViewSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -144,18 +152,23 @@ const listeners = [
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
   checkoutTrackingListener,
   workspaceTrackingListener,
   spaceSafesCacheListener,
+  addressBookTagsCacheListener,
   trialReminderListener,
+  workspaceDraftExpiryListener,
+  workspaceDraftCompletionListener,
   forbiddenSessionListener,
+  spaceQueueReconciliationListener,
+  hnSessionListener,
+  safeOverviewsTokenListListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
-  if (action.type === hydrate.HYDRATE_ACTION) {
+  if (action.type === HYDRATE_ACTION) {
     /**
      * When changing the schema of a Redux slice, previously stored data in LS might become incompatible.
      * To avoid this, we should always migrate the data on a case-by-case basis in the corresponding slice.
@@ -189,6 +202,13 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
         // Only the default sort direction is reset — the user's custom drag order is preserved.
         manualOrder: orderByState.manualOrder ?? {},
       }
+    }
+
+    // A saved queue view field that is no longer valid falls back to its default, field by field
+    if (nextState[slices.spaceQueueViewSlice.name]) {
+      nextState[slices.spaceQueueViewSlice.name] = slices.migrateSpaceQueueView(
+        nextState[slices.spaceQueueViewSlice.name],
+      )
     }
 
     // Mark the store as hydrated so guards wait for persisted auth state.

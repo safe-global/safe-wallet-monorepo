@@ -1,8 +1,10 @@
 import { jsonToCSV } from 'react-papaparse'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 // import EthHashInfo from '@/components/common/EthHashInfo'
-import { ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
+import { ReplaceOwnerFlow } from '@/components/tx-flow/flows/ReplaceOwnerFlow'
+import { RemoveOwnerFlow } from '@/components/tx-flow/flows/RemoveOwnerFlow'
 import useAddressBook from '@/hooks/useAddressBook'
+import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -12,7 +14,7 @@ import { EditOwnerDialog } from '../EditOwnerDialog'
 import EnhancedTable from '@safe-global/views/components/common/EnhancedTable'
 import EditOwnerIcon from '@/public/images/common/edit-owner.svg'
 import ExportIcon from '@/public/images/common/export.svg'
-import { ManageSignersFlow } from '@/components/tx-flow/flows'
+import { ManageSignersFlow } from '@/components/tx-flow/flows/ManageSignersFlow'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -26,6 +28,7 @@ import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 export const OwnerList = () => {
   const addressBook = useAddressBook()
   const { safe } = useSafeInfo()
+  const { getFromSpace } = useMergedAddressBooks(safe.chainId)
   const { setTxFlow } = useContext(TxModalContext)
 
   const rows = useMemo(() => {
@@ -71,7 +74,12 @@ export const OwnerList = () => {
                   )}
                 </CheckWallet>
 
-                <EditOwnerDialog address={address} name={name} chainId={safe.chainId} />
+                <EditOwnerDialog
+                  address={address}
+                  name={name}
+                  chainId={safe.chainId}
+                  isWorkspaceName={Boolean(getFromSpace(address, safe.chainId)?.name)}
+                />
 
                 {showRemoveOwnerButton && (
                   <CheckWallet>
@@ -105,7 +113,7 @@ export const OwnerList = () => {
         },
       }
     })
-  }, [safe.owners, safe.chainId, addressBook, setTxFlow])
+  }, [safe.owners, safe.chainId, addressBook, getFromSpace, setTxFlow])
 
   return (
     <div className="flex flex-col gap-4">

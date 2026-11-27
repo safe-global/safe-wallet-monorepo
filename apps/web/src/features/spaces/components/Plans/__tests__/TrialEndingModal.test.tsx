@@ -1,10 +1,16 @@
+import { useState } from 'react'
+import { _resetOverlayQueue } from '@/services/overlay-queue/store'
+import { useOverlay } from '@/services/overlay-queue/useOverlay'
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { CONTACT_SALES_URL } from '../../../constants'
 import TrialEndingModal, { _endsIn } from '../TrialEndingModal'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -19,7 +25,7 @@ jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
 }))
-jest.mock('../../../hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   useCurrentMembership: () => ({ id: 1 }),
   useIsAdmin: (spaceId?: string) => mockUseIsAdmin(spaceId),
 }))
@@ -121,9 +127,15 @@ const trial = (daysLeft: number, isTrialEndingSoon = daysLeft <= 7) => ({
   isLoading: false,
 })
 
+const Tour = () => {
+  const [isDue, setIsDue] = useState(true)
+  return useOverlay({ kind: 'guide', isDue }) ? <button onClick={() => setIsDue(false)}>Close tour</button> : null
+}
+
 describe('TrialEndingModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    _resetOverlayQueue()
     for (const key of Object.keys(storage)) delete storage[key]
     mockUseSpacePlan.mockReturnValue(trial(7))
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
@@ -181,6 +193,7 @@ describe('TrialEndingModal', () => {
     expect(mockOpenPortal).toHaveBeenCalled()
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, { 'Entry Point': 'reminder_modal' })
 
+    fireEvent.click(screen.getByRole('tab', { name: '2 Safe accounts' }))
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-to', 'Starter')
     expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-trial', 'true')
@@ -199,6 +212,7 @@ describe('TrialEndingModal', () => {
   it('closes the reminder for good once the plan changed', () => {
     render(<TrialEndingModal spaceId={SPACE_ID} />)
 
+    fireEvent.click(screen.getByRole('tab', { name: '2 Safe accounts' }))
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     fireEvent.click(screen.getByText('plan-changed'))
 
@@ -222,8 +236,10 @@ describe('TrialEndingModal', () => {
         /Acme Inc will be locked on Dec 5, 2026 unless an admin chooses a plan and adds a payment method\.\sYour Safe accounts remain available in My accounts\./,
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText('Starter')).toBeInTheDocument()
-    expect(screen.getByText('Business')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Business' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { selected: true, name: '20 Safe accounts' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: '2 Safe accounts' }))
+    expect(screen.getByRole('heading', { name: 'Starter' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Switch to Starter' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add payment method' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Continue without Safe Pro' })).not.toBeInTheDocument()
@@ -232,5 +248,47 @@ describe('TrialEndingModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
     expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
+  })
+
+  it('comes before a tour that becomes due at the same time', () => {
+    render(
+      <>
+        <Tour />
+        <TrialEndingModal spaceId={SPACE_ID} />
+      </>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
+    // By text: an open dialog hides the rest of the page from role queries
+    expect(screen.queryByText('Close tour')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+
+    expect(screen.getByRole('button', { name: 'Close tour' })).toBeInTheDocument()
+  })
+
+  it('waits while a tour is already on screen, and opens once it closes', () => {
+    const { rerender } = render(<Tour />)
+    rerender(
+      <>
+        <Tour />
+        <TrialEndingModal spaceId={SPACE_ID} />
+      </>,
+    )
+    expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close tour' }))
+
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
+  })
+
+  it('shows the reminder of the next Workspace after the member closed it in another one', () => {
+    const otherSpaceId = '22222222-2222-2222-2222-222222222222'
+    const { rerender } = render(<TrialEndingModal spaceId={SPACE_ID} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
+
+    rerender(<TrialEndingModal spaceId={otherSpaceId} />)
+
+    expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
   })
 })

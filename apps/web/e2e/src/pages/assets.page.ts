@@ -53,7 +53,9 @@ export class AssetsPage {
     await this.page.goto(`${ROUTES.balances}?safe=${safe}`)
   }
 
+  /** Waits for the token rows first: the menu opens on press, and a layout shift before the release closes it again */
   async openManageTokensMenu(): Promise<void> {
+    await this.tokenRows.first().waitFor()
     await this.manageTokensButton.click()
     await this.manageTokensMenu.waitFor({ state: 'visible' })
   }

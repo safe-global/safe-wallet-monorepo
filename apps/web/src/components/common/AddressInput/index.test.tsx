@@ -112,11 +112,7 @@ const TEST_ADDRESS_B = '0x0000000000000000000000000000000000000001'
 
 describe('AddressInput tests', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
-  })
-
-  afterAll(() => {
-    jest.useRealTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   beforeEach(() => {
@@ -451,6 +447,7 @@ describe('AddressInput tests', () => {
       name: mockSafeName,
       address: TEST_ADDRESS_A,
       chainIds: [mockChainId],
+      tagIds: [],
       createdBy: '',
       createdByUserId: 0,
       lastUpdatedBy: '',
@@ -489,6 +486,7 @@ describe('AddressInput tests', () => {
       name: mockSafeName,
       address: TEST_ADDRESS_A,
       chainIds: [mockChainId],
+      tagIds: [],
       createdBy: '',
       createdByUserId: 0,
       lastUpdatedBy: '',
@@ -530,6 +528,7 @@ describe('AddressInput tests', () => {
       name: mockSafeName,
       address: TEST_ADDRESS_A,
       chainIds: [mockChainId],
+      tagIds: [],
       createdBy: '',
       createdByUserId: 0,
       lastUpdatedBy: '',
@@ -571,6 +570,7 @@ describe('AddressInput tests', () => {
         name: mockSafeName,
         address: TEST_ADDRESS_A,
         chainIds: [mockChainId],
+        tagIds: [],
         createdBy: '',
         createdByUserId: 0,
         lastUpdatedBy: '',

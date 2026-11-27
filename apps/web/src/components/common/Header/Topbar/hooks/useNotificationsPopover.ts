@@ -8,7 +8,8 @@ import {
   closeNotification,
   deleteAllNotifications,
 } from '@/store/notificationsSlice'
-import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useShowNotificationsRenewalMessage } from '@/components/settings/PushNotifications/hooks/useShowNotificationsRenewalMessage'
 
 export const NOTIFICATION_CENTER_LIMIT = 4

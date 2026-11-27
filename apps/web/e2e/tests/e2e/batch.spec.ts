@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
@@ -24,8 +24,8 @@ test.describe('Execute a batch', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const [firstRecipient, secondRecipient] = [Wallet.createRandom().address, Wallet.createRandom().address]
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const [firstRecipient, secondRecipient] = [journey.newAddress(), journey.newAddress()]
 
     const batch = new BatchSidebarPage(safePage)
     const sendTokens = new SendTokensPage(safePage)

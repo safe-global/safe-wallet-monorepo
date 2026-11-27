@@ -11,22 +11,22 @@ test.describe('Proposers in the Safe settings', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const { owner3, owner4 } = journey.owners
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const { dave, alice } = journey.owners
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     const { id: workspaceId } = await seedBusinessWorkspace(safePage, { 'Proposer Safe': safe })
 
     const proposers = new ProposersPage(safePage)
     await proposers.goto(safe.prefixedAddress, workspaceId)
-    await proposers.add(owner3.address, PROPOSER_NAME)
+    await proposers.add(dave.address, PROPOSER_NAME)
 
     await expect
       .poll(async () => (await safeApiClient.getDelegates(safe.address)).results.map((d) => [d.delegate, d.delegator]))
-      .toEqual([[owner3.address, owner4.address]])
-    await expect(proposers.row(owner3.address)).toBeVisible()
+      .toEqual([[dave.address, alice.address]])
+    await expect(proposers.row(dave.address)).toBeVisible()
 
-    await proposers.delete(owner3.address)
+    await proposers.delete(dave.address)
 
     await expect.poll(async () => (await safeApiClient.getDelegates(safe.address)).results).toEqual([])
-    await expect(proposers.row(owner3.address)).toHaveCount(0)
+    await expect(proposers.row(dave.address)).toHaveCount(0)
   })
 })

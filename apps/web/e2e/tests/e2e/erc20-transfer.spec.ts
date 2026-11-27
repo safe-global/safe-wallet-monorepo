@@ -1,4 +1,4 @@
-import { Wallet, parseUnits } from 'ethers'
+import { parseUnits } from 'ethers'
 import { erc20TransfersIn } from '../../src/api/transaction-items'
 import { tokenBalanceOf } from '../../src/chain/balances'
 import { HomePage } from '../../src/pages/home.page'
@@ -20,8 +20,8 @@ test.describe('Send an ERC-20 token', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const { address: usdc, decimals, symbol } = SEPOLIA_USDC
-    const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const recipient = journey.newAddress()
     await seedTokenBalance(safe, { token: SEPOLIA_USDC, amount: parseUnits(BALANCE, decimals) })
 
     const sendTokens = new SendTokensPage(safePage)

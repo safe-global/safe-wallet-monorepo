@@ -9,13 +9,15 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 const RemainingRelays = ({ relays, tooltip }: { relays?: RelaysRemaining; tooltip?: string }) => {
   if (!tooltip) {
     const limit = relays?.limit ?? MAX_DAY_RELAYS
-    tooltip = `${limit} transaction${maybePlural(limit)} per day for free`
+    tooltip = `${limit} sponsored transaction${maybePlural(limit)} per day`
   }
+  const remaining = relays?.remaining ?? MAX_DAY_RELAYS
 
   return (
     <div className={css.container}>
       <Typography variant="paragraph-small" className="flex items-center gap-1 text-[var(--color-primary-light)]">
-        <b>{relays?.remaining ?? MAX_DAY_RELAYS}</b> free transactions left today
+        <b>{remaining}</b>
+        {` sponsored transaction${maybePlural(remaining)} left today`}
         <Tooltip>
           <TooltipTrigger
             render={

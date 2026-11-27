@@ -6,12 +6,197 @@ import {
   TransactionListItemType,
   TransactionStatus,
 } from '@safe-global/store/gateway/types'
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { getSDKVersion, Methods } from '@safe-global/safe-apps-sdk'
+import type { Permission } from '@safe-global/safe-apps-sdk/dist/types/types/permissions'
+import { act, render, renderHook, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
+import type { SafePermissions } from '@/hooks/safe-apps/permissions/useSafePermissions'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import type { AddressBookState } from '@/store/addressBookSlice'
+import useChainId from '@/hooks/useChainId'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import * as safeAppFromBackend from '@/hooks/safe-apps/useSafeAppFromBackend'
+import * as customAppCommunicator from '@/hooks/safe-apps/useCustomAppCommunicator'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 const emptySafeApp = getEmptySafeApp()
+
+const APP_ORIGIN = `https://${faker.internet.domainName()}`
+const permissionsTestApp = { ...getEmptySafeApp(APP_ORIGIN), name: 'Permissions test app' }
+
+const renderAppFrameWithLoadedSafe = async (addressBook: AddressBookState = {}) => {
+  render(<AppFrame appUrl={APP_ORIGIN} allowedFeaturesList="" safeAppFromManifest={permissionsTestApp} />, {
+    initialReduxState: { safeInfo: { loading: false, loaded: true, data: defaultSafeInfo }, addressBook },
+  })
+
+  const iframe = await screen.findByTitle<HTMLIFrameElement>(permissionsTestApp.name)
+  const appWindow = iframe.contentWindow
+  if (!appWindow) throw new Error('The Safe App iframe has no window')
+
+  return { appWindow, replyToApp: jest.spyOn(appWindow, 'postMessage') }
+}
+
+const sendFromApp = (appWindow: Window, method: Methods, params?: unknown): string => {
+  const id = faker.string.alphanumeric(10)
+  const data = { id, method, params, env: { sdkVersion: getSDKVersion() } }
+
+  act(() => {
+    window.dispatchEvent(new MessageEvent('message', { data, origin: APP_ORIGIN, source: appWindow }))
+  })
+
+  return id
+}
+
+// Writing through the hook also resets its in-memory cache, which outlives localStorage.clear().
+const storeSafePermissions = (permissions: SafePermissions): void => {
+  const { result } = renderHook(() => useLocalStorage<SafePermissions>('SafeApps__safePermissions'))
+  act(() => result.current[1](permissions))
+}
+
+describe('AppFrame permission requests', () => {
+  beforeEach(() => {
+    storeSafePermissions({})
+  })
+
+  it('asks the user about a wallet_requestPermissions call and replies with the grant', async () => {
+    const { appWindow, replyToApp } = await renderAppFrameWithLoadedSafe()
+
+    const requestId = sendFromApp(appWindow, Methods.wallet_requestPermissions, [{ requestAddressBook: {} }])
+    expect(await screen.findByText('Permissions Request')).toBeInTheDocument()
+    expect(screen.getByText('Access to your address book')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }))
+
+    const grant = expect.objectContaining({ invoker: APP_ORIGIN, parentCapability: 'requestAddressBook', caveats: [] })
+    await waitFor(() =>
+      expect(replyToApp).toHaveBeenCalledWith(
+        expect.objectContaining({ id: requestId, success: true, data: [grant] }),
+        APP_ORIGIN,
+      ),
+    )
+  })
+
+  it('replies with an error when the user rejects a wallet_requestPermissions call', async () => {
+    const { appWindow, replyToApp } = await renderAppFrameWithLoadedSafe()
+
+    const requestId = sendFromApp(appWindow, Methods.wallet_requestPermissions, [{ requestAddressBook: {} }])
+    fireEvent.click(await screen.findByRole('button', { name: 'Reject' }))
+
+    await waitFor(() =>
+      expect(replyToApp).toHaveBeenCalledWith(
+        expect.objectContaining({ id: requestId, success: false, error: 'Permissions were rejected' }),
+        APP_ORIGIN,
+      ),
+    )
+  })
+
+  it('shares the address book with the app only after the user granted access to it', async () => {
+    const chainId = renderHook(() => useChainId()).result.current
+    const address = checksumAddress(faker.finance.ethereumAddress())
+    const name = faker.person.firstName()
+    const { appWindow, replyToApp } = await renderAppFrameWithLoadedSafe({ [chainId]: { [address]: name } })
+
+    const beforeGrant = sendFromApp(appWindow, Methods.requestAddressBook)
+    await waitFor(() =>
+      expect(replyToApp).toHaveBeenCalledWith(expect.objectContaining({ id: beforeGrant, data: [] }), APP_ORIGIN),
+    )
+
+    sendFromApp(appWindow, Methods.wallet_requestPermissions, [{ requestAddressBook: {} }])
+    fireEvent.click(await screen.findByRole('button', { name: 'Accept' }))
+    const afterGrant = sendFromApp(appWindow, Methods.requestAddressBook)
+
+    await waitFor(() =>
+      expect(replyToApp).toHaveBeenCalledWith(
+        expect.objectContaining({ id: afterGrant, data: [{ address, name, chainId }] }),
+        APP_ORIGIN,
+      ),
+    )
+  })
+
+  it('replies to wallet_getPermissions with the permissions stored for the app', async () => {
+    const stored: Permission[] = [
+      { invoker: APP_ORIGIN, parentCapability: 'requestAddressBook', date: faker.date.past().getTime(), caveats: [] },
+    ]
+    storeSafePermissions({ [APP_ORIGIN]: stored })
+    const { appWindow, replyToApp } = await renderAppFrameWithLoadedSafe()
+
+    const requestId = sendFromApp(appWindow, Methods.wallet_getPermissions)
+
+    await waitFor(() =>
+      expect(replyToApp).toHaveBeenCalledWith(
+        expect.objectContaining({ id: requestId, success: true, data: stored }),
+        APP_ORIGIN,
+      ),
+    )
+  })
+})
+
+describe('AppFrame declared source', () => {
+  const listedApp = { ...getEmptySafeApp(APP_ORIGIN), id: faker.number.int({ min: 1, max: 10_000 }) }
+  const chain = chainBuilder().build()
+
+  const renderAppFrame = ({ listed, isNativeEmbed }: { listed: boolean; isNativeEmbed?: boolean }) => {
+    jest
+      .spyOn(safeAppFromBackend, 'useSafeAppFromBackend')
+      .mockReturnValue([listed ? listedApp : undefined, undefined, false])
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chain)
+    const communicatorSpy = jest.spyOn(customAppCommunicator, 'useCustomAppCommunicator')
+
+    render(
+      <AppFrame
+        appUrl={APP_ORIGIN}
+        allowedFeaturesList=""
+        safeAppFromManifest={permissionsTestApp}
+        isNativeEmbed={isNativeEmbed}
+      />,
+    )
+
+    return communicatorSpy
+  }
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('declares a listed Safe App with its id', () => {
+    const communicatorSpy = renderAppFrame({ listed: true })
+
+    expect(communicatorSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      listedApp,
+      chain,
+      { channel: 'SAFE_APP', listedAppId: listedApp.id },
+      expect.anything(),
+    )
+  })
+
+  it('declares a native embed as a widget', () => {
+    const communicatorSpy = renderAppFrame({ listed: true, isNativeEmbed: true })
+
+    expect(communicatorSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      listedApp,
+      chain,
+      { channel: 'WIDGET', listedAppId: listedApp.id },
+      expect.anything(),
+    )
+  })
+
+  it('does not take the app id from the manifest of an unlisted app', () => {
+    const communicatorSpy = renderAppFrame({ listed: false })
+
+    expect(communicatorSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      permissionsTestApp,
+      chain,
+      { channel: 'SAFE_APP', listedAppId: undefined },
+      expect.anything(),
+    )
+  })
+})
 
 describe('AppFrame', () => {
   it('should not show the transaction queue bar when there are no queued transactions', () => {

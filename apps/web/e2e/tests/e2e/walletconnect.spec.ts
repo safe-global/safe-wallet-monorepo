@@ -2,9 +2,9 @@
  * A dApp connects to a Safe over WalletConnect and sends it requests, through the hosted relay.
  *
  * The test plays the dApp with a real WalletConnect client in the Playwright process, so it reads the responses
- * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of OWNER_4.
+ * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of Alice.
  */
-import { Wallet, hashMessage, parseEther, toQuantity } from 'ethers'
+import { hashMessage, parseEther, toQuantity } from 'ethers'
 import { HomePage } from '../../src/pages/home.page'
 import { test as base, expect } from '../../src/fixtures/journey.fixture'
 import { seedSafe, type SeededSafe } from '../../src/seed/safe'
@@ -15,6 +15,7 @@ import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { WalletPage } from '../../src/pages/wallet.page'
+import { nextDeclaredAttribution } from '../../src/api/proposal-request'
 
 type WalletConnectFixtures = {
   safe: SeededSafe
@@ -24,7 +25,7 @@ type WalletConnectFixtures = {
 
 const test = base.extend<WalletConnectFixtures>({
   safe: async ({ journey }, provide) => {
-    await provide(await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }))
+    await provide(await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 }))
   },
 
   dapp: async ({ safePage, safe }, provide, testInfo) => {
@@ -81,7 +82,7 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     dapp,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
+    const recipient = journey.newAddress()
     const value = parseEther('0.01')
 
     const response = dapp.request('eth_sendTransaction', [
@@ -98,6 +99,18 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     await expect.poll(async () => (await receiptOf(dapp, hash))?.status).toBe('0x1')
 
     expect(await balanceOf(journey.env, recipient)).toBe(value)
+  })
+
+  test('should declare the dApp when the owner proposes its transaction', async ({ safePage, safe, dapp, journey }) => {
+    const proposal = nextDeclaredAttribution(safePage, safe.address)
+
+    const response = dapp.request('eth_sendTransaction', [
+      { from: safe.address, to: journey.newAddress(), value: '0x1', data: '0x' },
+    ])
+    await new TxReviewPage(safePage).sign()
+    await response
+
+    expect(await proposal).toEqual(expect.objectContaining({ channel: 'WALLET_CONNECT', appName: DAPP_NAME }))
   })
 
   test('should give the dApp a signature that the Safe contract accepts when the owner signs its message', async ({
@@ -124,9 +137,10 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     safeApiClient,
     safe,
     dapp,
+    journey,
   }) => {
     const response = dapp.request('eth_sendTransaction', [
-      { from: safe.address, to: Wallet.createRandom().address, value: '0x1', data: '0x' },
+      { from: safe.address, to: journey.newAddress(), value: '0x1', data: '0x' },
     ])
     await new TxReviewPage(safePage).discard()
 

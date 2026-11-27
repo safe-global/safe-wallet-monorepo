@@ -3,8 +3,9 @@ import { faker } from '@faker-js/faker'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { dispatchRecoveryProposal } from '../../../services/recovery-sender'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { dispatchRecoveryProposal } from '../../../public/services/recovery-sender'
 import RecoverAccountReview from '../index'
 
 type GasPrice = { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
@@ -12,16 +13,17 @@ const mockUseGasPrice = jest.fn<[GasPrice | undefined, Error | undefined, boolea
 jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: () => mockUseGasPrice() }))
 
 const DELAY_MODIFIER = faker.finance.ethereumAddress()
-jest.mock('../../../hooks/useRecovery', () => ({ __esModule: true, default: () => [[]] }))
-jest.mock('../../../services/selectors', () => ({
+jest.mock('../../../public/hooks/useRecovery', () => ({ __esModule: true, default: () => [[]] }))
+jest.mock('../../../public/store/selectors', () => ({
   selectDelayModifierByRecoverer: () => ({ address: DELAY_MODIFIER, delay: BigInt(0) }),
 }))
 jest.mock('../../../hooks/useIsValidRecoveryExecution', () => ({
   useIsValidRecoveryExecTransactionFromModule: () => [undefined, undefined],
 }))
-jest.mock('../../../services/recovery-sender', () => ({ dispatchRecoveryProposal: jest.fn() }))
-jest.mock('../../../services/transaction', () => ({ getRecoveryProposalTransactions: () => [] }))
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('../../../public/services/recovery-sender', () => ({ dispatchRecoveryProposal: jest.fn() }))
+jest.mock('../../../public/services/transaction', () => ({ getRecoveryProposalTransactions: () => [] }))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
   createTx: jest.fn(() => new Promise(() => {})),
   createMultiSendCallOnlyTx: jest.fn(() => new Promise(() => {})),
 }))

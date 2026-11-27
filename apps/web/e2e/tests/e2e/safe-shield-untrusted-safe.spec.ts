@@ -1,4 +1,4 @@
-import { Wallet, parseEther } from 'ethers'
+import { parseEther } from 'ethers'
 import { balanceOf } from '../../src/chain/balances'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { HomePage } from '../../src/pages/home.page'
@@ -14,8 +14,8 @@ test.describe('Safe Shield untrusted Safe check', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1, inAccounts: false })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1, inAccounts: false })
+    const recipient = journey.newAddress()
 
     const sendTokens = new SendTokensPage(safePage)
     const safeShield = new SafeShieldPage(safePage)

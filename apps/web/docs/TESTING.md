@@ -9,12 +9,41 @@ Testing guide for the `apps/web/` workspace. Follow these conventions to write c
 - Components with conditional rendering, user interaction, or non-trivial logic
 - Bug fixes (write a regression test that fails without the fix)
 
+### Test decision matrix
+
+| What you changed             | Required tests                 | Test type                                      | Example                                                            |
+| ---------------------------- | ------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------ |
+| New hook (`use*.ts`)         | Unit test with `renderHook`    | `hooks/__tests__/useX.test.ts`                 | Mock dependencies, test return values and state changes            |
+| New utility/service (`*.ts`) | Unit test                      | `utils.test.ts` colocated                      | Pure function tests, edge cases, error paths                       |
+| New component with logic     | Unit test + Storybook story    | `Component.test.tsx` + `Component.stories.tsx` | Render with providers, test interactions, story for visual states  |
+| New component (layout only)  | Storybook story only           | `Component.stories.tsx`                        | No unit test needed — story covers visual correctness              |
+| Redux slice                  | State transition test          | `mySlice.test.ts`                              | Test reducers by dispatching actions and asserting resulting state |
+| RTK Query endpoint           | MSW integration test           | `api.test.ts`                                  | Use MSW to mock API, test cache behavior                           |
+| Bug fix (any file)           | Regression test                | Add to existing test file                      | Write a test that fails without the fix, passes with it            |
+| Feature (new feature dir)    | All of the above as applicable | Per-file rules above                           | Plus: add feature flag test showing disabled state                 |
+
 ## When NOT to test
 
 - Pure layout components with zero logic (just JSX composition)
 - Type-only files, barrel re-exports, constants-only files
 - Storybook stories (they have their own snapshot workflow)
 - Auto-generated files (`AUTO_GENERATED/`, contract types)
+
+## Choose the test level
+
+Write each test at the lowest level that can show the behaviour. **A Playwright test is only for behaviour that needs a real browser or several real services together**: a user action that a wallet signs, the chain executes, and the Transaction Service and CGW then show; a Safe App in an iframe; WalletConnect; a session or storage across a redirect or a reload. Everything else goes in Jest.
+
+| The behaviour                                     | Test                                         | Example                                                                                                                                          |
+| ------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A rule or a calculation                           | Unit test                                    | [UntrustedFallbackHandlerTxAlert.test.ts](../src/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert.test.ts)        |
+| A component shows a CGW response                  | Component test with an MSW fixture           | [ExpandableTransactionItem.swaps.fixtures.test.tsx](../src/components/transactions/TxListItem/ExpandableTransactionItem.swaps.fixtures.test.tsx) |
+| A component reacts to the user                    | Component test                               | [TxShareLink.test.tsx](../src/components/transactions/TxShareLink/TxShareLink.test.tsx)                                                          |
+| A user action changes state on chain and in CGW   | Playwright journey on the isolated stack     | [multisig-confirm.spec.ts](../e2e/tests/e2e/multisig-confirm.spec.ts)                                                                            |
+| A browser flow has paths the stack cannot produce | Playwright with `page.route` for those paths | [step-up-auth.spec.ts](../e2e/tests/regression/step-up-auth.spec.ts)                                                                             |
+
+Mock in Playwright only when the flow needs the browser (a redirect, a session, a reload) and the isolated stack cannot produce the path: an error, an expired session, a third-party answer. When the browser adds nothing to a spec that mocks every call, write the test in Jest.
+
+A Playwright test does not make up for missing unit and component tests: if a feature lacks them, add them. Developers own the Jest tests. QA owns the Playwright suite and advises on it, and developers add and change Playwright tests too. Full agreement: [Developer Testability Contract](../e2e/docs/developer-testability-contract.md).
 
 ## Running tests
 
@@ -83,7 +112,7 @@ Available builders:
 
 - `@/tests/builders/safe` — `safeInfoBuilder`, `extendedSafeInfoBuilder`, `addressExBuilder`
 - `@/tests/builders/chains` — `chainBuilder`
-- `@/tests/builders/wallet` — `connectedWalletBuilder`
+- `@/tests/builders/wallet` — `connectedWalletBuilder`, `walletContextBuilder`
 - `@/tests/builders/safeTx` — Safe transaction builders
 - `@/tests/builders/balances` — `tokenInfoBuilder`, `balanceBuilder`, `balancesBuilder`
 - `@/tests/builders/transactionDetails` — `transactionDetailsBuilder`, `multisigExecutionDetailsBuilder`
@@ -181,6 +210,20 @@ jsdom makes `window.location` non-configurable, so `Object.defineProperty(window
 - **Set the origin:** a `/** @jest-environment-options {"url": "https://app.safe.global/"} */` docblock at the top of the file
 - **Assert a redirect or reload:** production code calls `navigateTo` / `reloadPage` from `@/utils/navigation`; tests `jest.mock('@/utils/navigation')` and assert on those
 - **SSR (`typeof window === 'undefined'`):** a separate `*.ssr.test.ts` file with a `/** @jest-environment node */` docblock
+
+### Time and timers
+
+Every test runs on a fake clock (`fakeTimers` in `jest.config.cjs`). It starts at the same instant, `FAKE_CLOCK_START` in `jest.clock.cjs` (2026-01-15 10:30 UTC), and advances with real time, so `waitFor`, `findBy*` and `userEvent` work without setup. `queueMicrotask` stays real: a fake one runs at the next clock step, after promises queued later, and React and Base UI depend on that order.
+
+- **Set a date:** `jest.setSystemTime(...)`. Seed dates relative to the fixed start, not to today.
+- **Move time:** `jest.advanceTimersByTime(ms)` inside `act`, or `advanceClock(ms)` from `@/tests/test-utils`.
+- **On the default clock, do not assert at an exact boundary** such as `delay - 1` when an `await` sits between the steps: real time also moves the clock by a few milliseconds. Check at half the delay, then after it, or wait with `findBy*` / `waitFor`.
+- **For exact timing, give every test in the file a strict clock:** `beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))`. Without the option, `jest.useFakeTimers()` takes `advanceTimers: true` from the config. A strict clock moves only when the test moves it, so a wait on real time (a `setTimeout` promise, `userEvent` without `renderOnFakeClock`) never ends. Move the clock in those steps, or keep the file on the default clock.
+- **Use the same clock for every test in the file, not a different clock for one test or one block.** `beforeEach` is fine, but each call installs a new clock, and a new clock drops the pending timers of the old one. If the code under test keeps a timer between tests (for example the batcher in `safeOverviews`), install the clock once in `beforeAll`.
+- **A `doNotFake` list replaces the one in the config.** List `queueMicrotask` in it again, or it becomes fake.
+- **Cookies:** jsdom checks a cookie's expiry against the real date. `jest.setup.js` changes `expires` to `max-age` from the fake clock, so a cookie lives as long as the code sets. Moving the fake clock does not make a cookie expire.
+- **Never call `jest.useRealTimers()`.** ESLint rejects it in tests. If a test removes the fake clock anyway, `jest.setup.js` puts it back before the next test.
+- **Each test starts at the same instant:** `jest.setup.js` sets the clock back to the start before every test, so `setSystemTime` and advances do not carry over. Pending timers are not cleared, because UI libraries keep timers across tests.
 
 ## Templates
 

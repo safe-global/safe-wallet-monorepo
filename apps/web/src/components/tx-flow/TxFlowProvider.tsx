@@ -8,7 +8,7 @@
  * - Role execution state (canExecuteThroughRole, willExecuteThroughRole)
  */
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
@@ -21,18 +21,18 @@ import {
   type Role,
   useRoles,
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
-import { SafeTxContext } from '../tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { trackTxEvents } from '@/components/tx/shared/tracking'
+import { getGasPaymentSource, trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
-import { useIsCounterfactualSafe } from '@/features/counterfactual'
+import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import useTxDetails from '@/hooks/useTxDetails'
+import { buildDeclared, type DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
+import { useIsPayFromSafeEnabled } from '@/features/fee-payment/public/hooks/useIsPayFromSafeEnabled'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
 import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
@@ -79,7 +79,6 @@ export type TxFlowContextType<T extends unknown = any> = {
   setIsSubmitLoading: Dispatch<SetStateAction<boolean>>
 
   isSubmitDisabled: boolean
-  setIsSubmitDisabled: Dispatch<SetStateAction<boolean>>
 
   submitError?: Error
   setSubmitError: Dispatch<SetStateAction<Error | undefined>>
@@ -96,6 +95,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   isBatch: boolean
   isBatchable: boolean
   role?: Role
+  declared?: DeclaredAttribution
 }
 
 export const initialContext: TxFlowContextType = {
@@ -126,7 +126,6 @@ export const initialContext: TxFlowContextType = {
   setIsSubmitLoading: () => {},
 
   isSubmitDisabled: false,
-  setIsSubmitDisabled: () => {},
 
   submitError: undefined,
   setSubmitError: () => {},
@@ -159,6 +158,7 @@ export type TxFlowProviderProps<T extends unknown> = {
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   isBatch?: TxFlowContextType['isBatch']
   isBatchable?: TxFlowContextType['isBatchable']
+  declared?: DeclaredAttribution
   onContinueToExecute?: (txId: string) => void
 }
 
@@ -177,6 +177,7 @@ const TxFlowProvider = <T extends unknown>({
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
   isBatchable = initialContext.isBatchable,
+  declared,
   onContinueToExecute,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
@@ -189,7 +190,6 @@ const TxFlowProvider = <T extends unknown>({
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(initialContext.isSubmitLoading)
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(initialContext.isSubmitDisabled)
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [gasPaymentOption, setGasPaymentOption] = useState<GasPayer | undefined>(initialContext.gasPaymentOption)
@@ -197,7 +197,8 @@ const TxFlowProvider = <T extends unknown>({
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [signedTxId, setSignedTxId] = useState<string>()
-  const txId = initialTxId ?? signedTxId
+  // Signing a proposal with the Safe paying proposes a new tx, so the signed id wins over the one the flow opened.
+  const txId = signedTxId ?? initialTxId
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
   const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
@@ -257,7 +258,7 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useIsPayFromSafeEnabled() ?? false
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
@@ -267,16 +268,18 @@ const TxFlowProvider = <T extends unknown>({
         details && isMultisigDetailedExecutionInfo(details.detailedExecutionInfo)
           ? details.detailedExecutionInfo
           : undefined
-      const gasPaymentSource = !isGtfChain
-        ? undefined
-        : exec &&
-            isGtfSafePaid({
-              gasPrice: exec.gasPrice,
-              baseGas: exec.baseGas,
-              refundReceiver: exec.refundReceiver?.value,
-            })
-          ? 'safe'
-          : 'signing_wallet'
+      const gasPaymentSource = getGasPaymentSource({
+        isSafePaid:
+          !!exec &&
+          isPaidFromSafe({
+            gasPrice: exec.gasPrice,
+            baseGas: exec.baseGas,
+            refundReceiver: exec.refundReceiver?.value,
+          }),
+        isExecuted,
+        gasPaymentOption,
+        isPayFromSafeChain,
+      })
       // Compute isMassPayout from data (recipients.length > 1)
       const recipients = (data as { recipients?: unknown[] } | undefined)?.recipients
       const isMassPayout = Array.isArray(recipients) && recipients.length > 1
@@ -304,9 +307,14 @@ const TxFlowProvider = <T extends unknown>({
       txOrigin,
       data,
       safe.threshold,
-      isGtfChain,
+      isPayFromSafeChain,
       gasPaymentOption,
     ],
+  )
+
+  const resolvedDeclared = useMemo(
+    () => declared ?? buildDeclared(isBatch ? 'NATIVE_BATCH' : 'NATIVE_TRANSFER'),
+    [declared, isBatch],
   )
 
   const value = {
@@ -338,8 +346,7 @@ const TxFlowProvider = <T extends unknown>({
     isSubmitLoading,
     setIsSubmitLoading,
 
-    isSubmitDisabled: isSubmitDisabled || isSubmitLoading || isUntrustedSafeBlocked,
-    setIsSubmitDisabled,
+    isSubmitDisabled: isSubmitLoading || isUntrustedSafeBlocked,
 
     submitError,
     setSubmitError,
@@ -356,6 +363,7 @@ const TxFlowProvider = <T extends unknown>({
     txDetailsLoading,
     isBatch,
     isBatchable,
+    declared: resolvedDeclared,
   }
 
   return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>

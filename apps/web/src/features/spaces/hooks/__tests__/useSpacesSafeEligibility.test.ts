@@ -14,7 +14,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/entitlements', () => ({
   useEntitlementsGetAllEntitlementsV1Query: (...args: unknown[]) =>
     mockUseEntitlementsGetAllEntitlementsV1Query(...args),
 }))
-jest.mock('../../constants', () => ({ SAFE_ACCOUNTS_LIMIT: 40 }))
+jest.mock('../../constants', () => ({
+  SAFE_ACCOUNTS_LIMIT: 40,
+}))
 
 const spaceId = faker.string.uuid()
 const otherSpaceId = faker.string.uuid()
@@ -36,6 +38,7 @@ const queryResult = (overrides: Record<string, unknown> = {}) => ({
 
 describe('useSpacesSafeEligibility', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     jest.clearAllMocks()
     mockUseIsSafeProEnabled.mockReturnValue(true)
     mockUseSpaceSafesGetAllV1Query.mockReturnValue(
@@ -123,7 +126,6 @@ describe('useSpacesSafeEligibility', () => {
   })
 
   it('stays loading and retries while the entitlements are rate limited', () => {
-    jest.useFakeTimers()
     const refetch = jest.fn()
     mockUseEntitlementsGetAllEntitlementsV1Query.mockReturnValue(queryResult({ error: { status: 429 }, refetch }))
 
@@ -132,7 +134,6 @@ describe('useSpacesSafeEligibility', () => {
 
     act(() => jest.advanceTimersByTime(1_000))
     expect(refetch).toHaveBeenCalledTimes(1)
-    jest.useRealTimers()
   })
 
   it('is not loading after a failure that is not a rate limit', () => {

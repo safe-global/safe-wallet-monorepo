@@ -1,4 +1,4 @@
-import { TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import { TokenTransferType } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import TokenTransferFlow from '@/components/tx-flow/flows/TokenTransfer'
 import CreateTokenTransfer, {
   type CreateTokenTransferProps,
@@ -10,29 +10,43 @@ import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import * as useRecipientAnalysis from '@/features/safe-shield'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
-import * as gtfHooks from '@/features/gtf'
+import * as payFromSafeHooks from '@/features/fee-payment/public/hooks/useResolvedGasToken'
+import * as payFromSafeEnabledHooks from '@/features/fee-payment/public/hooks/useIsPayFromSafeEnabled'
 import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { act, fireEvent, waitFor, within } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { AbiCoder } from 'ethers'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 
-jest.mock('@/features/safe-shield/hooks', () => ({
-  __esModule: true,
-  ...jest.requireActual('@/features/safe-shield/hooks'),
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+const useRecipientAnalysis = jest.requireMock<{ useRecipientAnalysis: jest.Mock }>(
+  '@/features/safe-shield/hooks/useRecipientAnalysis',
+)
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 
@@ -41,7 +55,7 @@ jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleFor
   useRoles: jest.fn(() => []),
 }))
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: jest.fn(() => ({
     isHypernativeEligible: false,
     isHypernativeGuard: false,
@@ -50,13 +64,10 @@ jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
   })),
 }))
 
-jest.mock('@/features/ledger', () => {
-  const actual = jest.requireActual('@/features/ledger')
-  return { __esModule: true, ...actual, LedgerFeature: { ...actual.LedgerFeature, useIsEnabled: () => false } }
-})
+jest.mock('@/features/ledger/public/components/LedgerHashComparison', () => ({ __esModule: true, default: () => null }))
 
-// Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
-jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
+// Mock SpendingLimitRow with the same "Send as" label as the real component
+jest.mock('@/features/spending-limits/public/components/SpendingLimitRow', () => ({
   __esModule: true,
   default: () => (
     <div data-testid="spending-limit-row">
@@ -86,7 +97,7 @@ describe('CreateTokenTransfer', () => {
     jest.clearAllMocks()
     useHasPermissionSpy.mockReturnValue(true)
     useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
-    jest.spyOn(gtfHooks, 'useResolvedGasToken').mockReturnValue({ status: 'resolving' })
+    jest.spyOn(payFromSafeHooks, 'useResolvedGasToken').mockReturnValue({ status: 'resolving' })
     jest.spyOn(sharedTxHooks, 'useRecommendedNonce').mockReturnValue(undefined)
   })
 
@@ -124,33 +135,28 @@ describe('CreateTokenTransfer', () => {
   // With `delayError`, react-hook-form parked the "Invalid address format" from the typed search text
   // in a form-wide timer that setValue never cancelled and that the blur of ANY field flushed.
   it('does not bring back the search-text validation error when another field blurs', async () => {
-    jest.useFakeTimers()
-    try {
-      const contact = '0x1111111111111111111111111111111111111111'
-      const { getByLabelText, getByText, queryByText, getByTestId } = renderCreateTokenTransfer(
-        {},
-        { initialReduxState: { addressBook: { '4': { [contact]: 'E2E Contact' } } } },
-      )
+    const contact = '0x1111111111111111111111111111111111111111'
+    const { getByLabelText, getByText, queryByText, getByTestId } = renderCreateTokenTransfer(
+      {},
+      { initialReduxState: { addressBook: { '4': { [contact]: 'E2E Contact' } } } },
+    )
 
-      // waitFor advances the fake timers, so the debounced labels settle deterministically.
-      fireEvent.input(getByLabelText('Recipient address', { exact: false }), { target: { value: 'E2E' } })
-      await waitFor(() => expect(getByText('Invalid address format')).toBeInTheDocument())
+    // waitFor advances the fake timers, so the debounced labels settle deterministically.
+    fireEvent.input(getByLabelText('Recipient address', { exact: false }), { target: { value: 'E2E' } })
+    await waitFor(() => expect(getByText('Invalid address format')).toBeInTheDocument())
 
-      fireEvent.click(getByText('E2E Contact'))
-      await waitFor(() => expect(getByTestId('address-book-recipient')).toBeInTheDocument())
-      await waitFor(() => expect(queryByText('Invalid address format')).not.toBeInTheDocument())
+    fireEvent.click(getByText('E2E Contact'))
+    await waitFor(() => expect(getByTestId('address-book-recipient')).toBeInTheDocument())
+    await waitFor(() => expect(queryByText('Invalid address format')).not.toBeInTheDocument())
 
-      // Real focus moves, not fireEvent.blur: React maps onBlur to focusout.
-      act(() => getByTestId('token-amount-field').focus())
-      act(() => getByTestId('max-btn').focus())
-      // A flushed stale error lands on the next tick; the label would show it after its 500ms
-      // display debounce, which is only scheduled once that first render has happened.
-      act(() => jest.advanceTimersByTime(100))
-      await act(async () => jest.advanceTimersByTime(1000))
-      expect(queryByText('Invalid address format')).not.toBeInTheDocument()
-    } finally {
-      jest.useRealTimers()
-    }
+    // Real focus moves, not fireEvent.blur: React maps onBlur to focusout.
+    act(() => getByTestId('token-amount-field').focus())
+    act(() => getByTestId('max-btn').focus())
+    // A flushed stale error lands on the next tick; the label would show it after its 500ms
+    // display debounce, which is only scheduled once that first render has happened.
+    act(() => jest.advanceTimersByTime(100))
+    await act(async () => jest.advanceTimersByTime(1000))
+    expect(queryByText('Invalid address format')).not.toBeInTheDocument()
   })
 
   const mockSpendingLimitToken = () => {
@@ -207,6 +213,76 @@ describe('CreateTokenTransfer', () => {
     const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
+  })
+
+  const renderInSafeScope = () => {
+    jest
+      .spyOn(tokenUtils, 'useTokenAmount')
+      .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      },
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
+    const sanctionsCheck = { done: false }
+    server.use(
+      http.post('https://ethereum.publicnode.com/', async ({ request }) => {
+        const body = (await request.json()) as { id: number } | Array<{ id: number }>
+        const answer = ({ id }: { id: number }) => ({
+          jsonrpc: '2.0',
+          id,
+          result: AbiCoder.defaultAbiCoder().encode(['bool'], [false]),
+        })
+        sanctionsCheck.done = true
+        return HttpResponse.json(Array.isArray(body) ? body.map(answer) : answer(body))
+      }),
+    )
+    const scope = safeScopeContextFor({
+      chainId: faker.string.numeric(5),
+      safeAddress: faker.finance.ethereumAddress(),
+    })
+
+    const result = render(
+      <SafeScopeContext.Provider value={scope}>
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>
+      </SafeScopeContext.Provider>,
+    )
+
+    return { ...result, sanctionsCheck }
+  }
+
+  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', () => {
+    const { queryByText } = renderInSafeScope()
+
+    expect(queryByText('Send as')).not.toBeInTheDocument()
+  })
+
+  it('should check a scoped Safe against the sanctions oracle', async () => {
+    const { sanctionsCheck } = renderInSafeScope()
+
+    await waitFor(() => expect(sanctionsCheck.done).toBe(true))
   })
 
   it('should preselect a specific token (USDC) when passed in data', () => {
@@ -432,16 +508,18 @@ describe('CreateTokenTransfer', () => {
     expect(input?.value).toBe(USDC_ADDRESS)
   })
 
-  describe('GTF fee banner', () => {
+  describe('Pay from Safe fee banner', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
-    const useResolvedGasTokenSpy = jest.spyOn(gtfHooks, 'useResolvedGasToken')
+    // Pay from Safe follows the chain's relayer, not a feature flag
+    const isPayFromSafeEnabledSpy = jest.spyOn(payFromSafeEnabledHooks, 'useIsPayFromSafeEnabled')
+    const useResolvedGasTokenSpy = jest.spyOn(payFromSafeHooks, 'useResolvedGasToken')
 
     const mockResolvedToSentToken = () =>
       useResolvedGasTokenSpy.mockImplementation(
         (sent?: string) => ({ status: 'resolved', address: sent ?? ZERO_ADDRESS }) as never,
       )
 
-    const mockBalancesForGtf = () => {
+    const mockBalancesForPayFromSafe = () => {
       const balances = {
         fiatTotal: '0',
         items: [
@@ -472,34 +550,37 @@ describe('CreateTokenTransfer', () => {
 
     it('shows fee banner after MAX click when resolved gas token equals sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
 
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
     })
 
-    it('does not show fee banner when GTF is disabled', async () => {
+    it('does not show fee banner when Pay from Safe is disabled', async () => {
       useHasFeatureSpy.mockImplementation(() => false)
-      mockBalancesForGtf()
+      isPayFromSafeEnabledSpy.mockReturnValue(false)
+      mockBalancesForPayFromSafe()
 
       const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
       await user.click(getByTestId('max-btn'))
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
     })
 
     it('does not show fee banner when resolved gas token differs from sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
+      mockBalancesForPayFromSafe()
       // Resolve to a different address → sent ≠ fee → banner should stay hidden even after MAX
       useResolvedGasTokenSpy.mockReturnValue({
         status: 'resolved',
@@ -510,12 +591,13 @@ describe('CreateTokenTransfer', () => {
 
       await user.click(getByTestId('max-btn'))
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
     })
 
     it('dismisses fee banner on close button click', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
@@ -523,18 +605,19 @@ describe('CreateTokenTransfer', () => {
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
 
       await user.click(getByLabelText('Dismiss fee banner'))
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
     })
 
     // The fee banner renders as an info alert, not the plain default
     it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId } = renderCreateTokenTransfer()
@@ -542,10 +625,10 @@ describe('CreateTokenTransfer', () => {
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
 
-      expect(getByTestId('gtf-fee-banner')).toHaveClass(
+      expect(getByTestId('pay-from-safe-fee-banner')).toHaveClass(
         'bg-[var(--color-info-background)]',
         'text-foreground',
         'border-transparent',
@@ -554,7 +637,8 @@ describe('CreateTokenTransfer', () => {
 
     it('renders the standard info icon inside the fee banner', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId } = renderCreateTokenTransfer()
@@ -562,10 +646,10 @@ describe('CreateTokenTransfer', () => {
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
 
-      expect(getByTestId('gtf-fee-banner').querySelector('svg.lucide-info')).toBeInTheDocument()
+      expect(getByTestId('pay-from-safe-fee-banner').querySelector('svg.lucide-info')).toBeInTheDocument()
     })
   })
 

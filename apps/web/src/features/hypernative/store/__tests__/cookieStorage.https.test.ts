@@ -8,7 +8,7 @@ jest.mock('js-cookie', () => ({ set: jest.fn() }))
 
 describe('cookieStorage on HTTPS', () => {
   it('should set secure flag to true', () => {
-    setAuthCookie('test-token', 'Bearer', 3600)
+    setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: 3600 })
 
     const [, , options] = jest.mocked(Cookies.set).mock.calls[0]
     expect(options?.secure).toBe(true)

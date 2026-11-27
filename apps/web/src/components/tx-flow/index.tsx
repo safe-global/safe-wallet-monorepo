@@ -11,10 +11,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@safe-global/views/components/ui/alert-dialog'
-import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
+import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSuccessScreenFlow'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
 import { useTopbarElevation } from '@/hooks/useTopbarElevation'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope/types'
+import { TxFlowSafeContext, TxFlowSafeReporterContext } from './safe-scope/txFlowSafe'
 
 const noop = () => {}
 
@@ -33,9 +36,11 @@ export const TxModalContext = createContext<TxModalContextType>({
 export const TxModalProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [txFlow, setFlow] = useState<TxModalContextType['txFlow']>(undefined)
   const [fullWidth, setFullWidth] = useState<boolean>(false)
+  // Reported by the flow's SafeScopeProvider; cleared when it unmounts with the flow
+  const [flowSafe, setFlowSafe] = useState<SafeScopeTarget | undefined>(undefined)
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
-  const { setSignerAddress } = useWalletContext() ?? {}
+  const { setSignerAddress, clearParentSafeNonce } = useWalletContext() ?? {}
 
   /* What to run if the user confirms the discard. Non-null is also what opens the dialog, so there
      is no separate `open` flag to keep in step. */
@@ -74,8 +79,10 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
       onClose.current = newOnClose ?? noop
       shouldWarn.current = newShouldWarn ?? true
       setFlow(newTxFlow)
+      // A parent Safe nonce is chosen for one flow, and a flow can end without creating the parent tx
+      clearParentSafeNonce?.()
     },
-    [],
+    [clearParentSafeNonce],
   )
 
   // Open a new tx flow, close the previous one if any
@@ -116,10 +123,12 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
 
   return (
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth }}>
-      {children}
+      <TxFlowSafeContext.Provider value={flowSafe}>{children}</TxFlowSafeContext.Provider>
 
       <TxModalDialog open={!!txFlow} onClose={handleModalClose} fullWidth={fullWidth}>
-        <PlainExternalLinkIcons>{txFlow}</PlainExternalLinkIcons>
+        <TxFlowSafeReporterContext.Provider value={setFlowSafe}>
+          <PlainExternalLinkIcons>{txFlow}</PlainExternalLinkIcons>
+        </TxFlowSafeReporterContext.Provider>
       </TxModalDialog>
 
       <AlertDialog

@@ -13,8 +13,8 @@ import DecoderLinks from '@safe-global/views/components/transactions/TxDetails/S
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
-import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
+import { useHistoryFeesBreakdown } from '@/features/fee-payment/public/hooks/useHistoryFeesBreakdown'
+import HistoryFeesAccordion from '@/features/fee-payment/public/components/HistoryFeesAccordion'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -26,10 +26,8 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
-// GTF (gas-token) fee breakdown for executed txs; the hook returns null when the
-// GTF feature is off, so this renders nothing on non-GTF chains.
+// Fee breakdown on any chain: from the signed payload when the Safe paid, from the receipt otherwise.
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
-  const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
   const feesData = useHistoryFeesBreakdown(txDetails)
 
   if (!feesData) return null

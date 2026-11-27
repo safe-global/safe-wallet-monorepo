@@ -4,7 +4,8 @@ import { makeStore } from '@/store'
 import IdentitySection from '../IdentitySection'
 import { spaceBuilder } from '@/tests/builders/space'
 import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/utils/elevation'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
@@ -12,7 +13,43 @@ const mockUnwrap = jest.fn()
 const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../../public/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MemberStatus
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsInvited() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useIsInvited
+  },
   useIsAdmin: jest.fn(() => mockUseIsAdmin()),
 }))
 
@@ -116,6 +153,25 @@ describe('IdentitySection', () => {
         updateSpaceDto: { name: 'New Name' },
       })
     })
+  })
+
+  it('lets the user save again after they cancel the verification', async () => {
+    mockUnwrap.mockRejectedValueOnce({ status: 403, data: { message: ELEVATION_REQUIRED_ERROR } })
+    mockUnwrap.mockResolvedValueOnce({})
+    setup(true)
+
+    fireEvent.change(getInput(), { target: { value: 'New Name' } })
+    fireEvent.click(getSaveButton())
+    await waitFor(() => expect(mockUpdateSpace).toHaveBeenCalledTimes(1))
+
+    fireEvent.change(getInput(), { target: { value: 'Other Name' } })
+    await waitFor(() => expect(getSaveButton()).not.toBeDisabled())
+    fireEvent.click(getSaveButton())
+
+    await waitFor(() => {
+      expect(mockUpdateSpace).toHaveBeenLastCalledWith({ id: MOCK_SPACE_UUID, updateSpaceDto: { name: 'Other Name' } })
+    })
+    expect(screen.queryByText(ELEVATION_REQUIRED_MESSAGE)).not.toBeInTheDocument()
   })
 
   it('does not show a validation error for the pristine saved name', () => {

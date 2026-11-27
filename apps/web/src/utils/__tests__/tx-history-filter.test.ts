@@ -1,4 +1,5 @@
 import MockDate from 'mockdate'
+import { startOfDay } from 'date-fns'
 import * as router from 'next/router'
 
 import type { TxFilterType } from '@/utils/tx-history-filter'
@@ -216,7 +217,7 @@ describe('tx-history-filter', () => {
         expect(result).toEqual({
           type: 'Incoming',
           filter: {
-            execution_date__gte: '1969-12-31T23:00:00.000Z',
+            execution_date__gte: startOfDay(new Date('1970-01-01')).toISOString(),
             value: '123000000000000000000',
           },
         })
@@ -236,7 +237,7 @@ describe('tx-history-filter', () => {
           type: 'Outgoing',
           filter: {
             to: '0x1234567890123456789012345678901234567890',
-            execution_date__gte: '1969-12-31T23:00:00.000Z',
+            execution_date__gte: startOfDay(new Date('1970-01-01')).toISOString(),
             value: '123',
             nonce: '123',
           },

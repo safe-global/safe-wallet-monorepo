@@ -10,8 +10,8 @@ jest.mock('../../hooks/useMigrationPrompt', () => ({ __esModule: true, default: 
 
 jest.mock('../../hooks/useTrackedSafesCount', () => ({ __esModule: true, default: () => undefined }))
 
-jest.mock('@/hooks/safes', () => ({
-  ...jest.requireActual('@/hooks/safes'),
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
 }))
 
@@ -47,16 +47,16 @@ jest.mock('@/components/common/TrustedSafesModal', () => ({
 jest.mock('../DataWidget', () => ({ DataWidget: () => <div data-testid="data-widget" /> }))
 
 const mockUseIsSafeProAnnouncementEnabled = jest.fn()
-jest.mock('@/features/safe-pro-announcement', () => ({
-  SafeProFeature: { name: 'SafeProFeature' },
+jest.mock('@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: () => ({
-    SafeProBanner: () => <div data-testid="safe-pro-banner" />,
-    SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" />,
-  }),
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-pro-banner" />,
+}))
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProWorkspacesBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-pro-workspaces-banner" />,
 }))
 jest.mock('@/components/common/AddTrustedSafesCard', () => ({
   __esModule: true,

@@ -261,8 +261,16 @@ export const SPACE_EVENTS = {
     action: 'Pending TX widget clicked',
     category: SPACE_CATEGORY,
   },
+  PENDING_TX_WIDGET_VIEW_ALL_CLICKED: {
+    action: 'Pending TX widget view all clicked',
+    category: SPACE_CATEGORY,
+  },
   TRANSACTION_INITIATED: {
     action: 'Transaction initiated',
+    category: SPACE_CATEGORY,
+  },
+  TRANSACTIONS_HISTORY_TAB_OPENED: {
+    action: 'Transactions history tab opened',
     category: SPACE_CATEGORY,
   },
   ONBOARDING_WIZARD: {
@@ -315,6 +323,34 @@ export const SPACE_EVENTS = {
   },
   LOCAL_CONTACT_ADDED: {
     action: 'Local contact added',
+    category: SPACE_CATEGORY,
+  },
+  CONTACT_TAGS_UPDATED: {
+    action: 'Contact tags updated',
+    category: SPACE_CATEGORY,
+  },
+  TAG_CREATED: {
+    action: 'Tag created',
+    category: SPACE_CATEGORY,
+  },
+  TAG_RENAMED: {
+    action: 'Tag renamed',
+    category: SPACE_CATEGORY,
+  },
+  TAG_DELETED: {
+    action: 'Tag deleted',
+    category: SPACE_CATEGORY,
+  },
+  CONTACTS_FILTERED: {
+    action: 'Contacts filtered',
+    category: SPACE_CATEGORY,
+  },
+  TAG_LIMIT_REACHED: {
+    action: 'Tag limit reached',
+    category: SPACE_CATEGORY,
+  },
+  SUGGESTED_CONTACTS_ADDED: {
+    action: 'Suggested contacts added',
     category: SPACE_CATEGORY,
   },
 }

@@ -4,18 +4,25 @@ import type { ReactNode } from 'react'
 import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { SafeScopeProvider } from '../SafeScopeProvider'
+import { TxFlowSafeReporterContext } from '../txFlowSafe'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { hasActiveScope } from '@safe-global/views/components/tx-flow/safe-scope/activeScope'
 import * as safesApi from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import * as useChainsHooks from '@/hooks/useChains'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as web3 from '@/hooks/wallets/web3'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
+import { useSigner } from '@/hooks/wallets/useWallet'
+import { connectedWalletBuilder, walletContextBuilder } from '@/tests/builders/wallet'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/safes'),
   useSafesGetSafeV1Query: jest.fn(),
 }))
-jest.mock('@/hooks/wallets/web3', () => ({ createWeb3ReadOnly: jest.fn() }))
+jest.mock('@/hooks/wallets/web3', () => ({
+  createWeb3ReadOnly: jest.fn(),
+}))
 
 // `trackError` is exported as a live binding, which `jest.spyOn` can't redefine on the required
 // module object — mock it at module scope the same way `useInitSafeCoreSDK.test.ts` does.
@@ -77,6 +84,35 @@ describe('SafeScopeProvider', () => {
     expect(mockQuery).toHaveBeenLastCalledWith(expect.any(Symbol), expect.anything())
   })
 
+  it('polls the Safe info by default', () => {
+    renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    expect(mockQuery).toHaveBeenLastCalledWith(
+      { chainId: safeA.chainId, safeAddress: safeA.address.value },
+      { pollingInterval: POLLING_INTERVAL },
+    )
+  })
+
+  it('fetches the Safe info once when polling is turned off', () => {
+    renderHook(useProbe, {
+      wrapper: function Wrapper({ children }: { children: ReactNode }) {
+        return (
+          <SafeScopeProvider
+            initial={{ chainId: safeA.chainId, safeAddress: safeA.address.value }}
+            pollSafeInfo={false}
+          >
+            {children}
+          </SafeScopeProvider>
+        )
+      },
+    })
+    expect(mockQuery).toHaveBeenLastCalledWith(
+      { chainId: safeA.chainId, safeAddress: safeA.address.value },
+      { pollingInterval: 0 },
+    )
+  })
+
   it('resolves SafeState, provider and SDK for the initial target', async () => {
     const { result } = renderHook(useProbe, {
       wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
@@ -125,6 +161,58 @@ describe('SafeScopeProvider', () => {
     expect(initSafeSDKSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({ address: safeB.address.value, isL2Chain: true }),
     )
+  })
+
+  it('never serves the previous chain provider for the new chain, not even for one render', async () => {
+    const seen: { chainId?: string; providerChainId?: string }[] = []
+    const { result } = renderHook(
+      () => {
+        const probe = useProbe()
+        const provider = probe.scope?.web3ReadOnly as { chainId: string } | undefined
+        seen.push({ chainId: probe.scope?.chainId, providerChainId: provider?.chainId })
+        return probe
+      },
+      { wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }) },
+    )
+    await waitFor(() => expect(result.current.scope?.web3ReadOnly).toEqual({ chainId: sepolia.chainId }))
+
+    act(() => result.current.controls.setScope(safeB.chainId, safeB.address.value))
+    await waitFor(() => expect(result.current.scope?.web3ReadOnly).toEqual({ chainId: polygon.chainId }))
+
+    const mismatched = seen.filter(({ chainId, providerChainId }) => providerChainId && providerChainId !== chainId)
+    expect(mismatched).toEqual([])
+  })
+
+  it('resolves the picked parent Safe signer on the scoped chain for its children', async () => {
+    const parentSafe = safeInfoBuilder().with({ chainId: polygon.chainId }).build()
+    const defaultQuery = mockQuery.getMockImplementation()!
+    mockQuery.mockImplementation((args: { chainId: string; safeAddress: string } | symbol) =>
+      typeof args !== 'symbol' && args.safeAddress === parentSafe.address.value
+        ? {
+            currentData: args.chainId === polygon.chainId ? parentSafe : undefined,
+            isLoading: false,
+            isFetching: false,
+          }
+        : defaultQuery(args),
+    )
+    // The app-wide context sits outside the scope, with the wallet on another chain
+    const wallet = connectedWalletBuilder().with({ chainId: sepolia.chainId }).build()
+    const appWallet = walletContextBuilder()
+      .with({ connectedWallet: wallet, signer: wallet, signerAddress: parentSafe.address.value })
+      .build()
+
+    const { result } = renderHook(useSigner, {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <WalletContext.Provider value={appWallet}>
+          <SafeScopeProvider initial={{ chainId: safeB.chainId, safeAddress: safeB.address.value }}>
+            {children}
+          </SafeScopeProvider>
+        </WalletContext.Provider>
+      ),
+    })
+
+    await waitFor(() => expect(result.current?.isSafe).toBe(true))
+    expect(result.current).toMatchObject({ address: parentSafe.address.value, chainId: polygon.chainId })
   })
 
   it('reports safeLoading=true while a mid-flow switch is in flight, even though isLoading alone is false', async () => {
@@ -234,6 +322,72 @@ describe('SafeScopeProvider', () => {
     expect(hasActiveScope()).toBe(true)
     act(() => result.current.controls.clearScope())
     expect(result.current.scope).toBeUndefined()
+    unmount()
+    expect(hasActiveScope()).toBe(false)
+  })
+
+  describe('telling the topbar which Safe the open flow acts on', () => {
+    const targetA = { chainId: safeA.chainId, safeAddress: safeA.address.value }
+
+    const reportingWrapper = (report: jest.Mock, initial?: typeof targetA) =>
+      function Wrapper({ children }: { children: ReactNode }) {
+        return (
+          <TxFlowSafeReporterContext.Provider value={report}>
+            <SafeScopeProvider initial={initial}>{children}</SafeScopeProvider>
+          </TxFlowSafeReporterContext.Provider>
+        )
+      }
+
+    it('reports its Safe inside the tx modal, follows a switch and clears it on unmount', () => {
+      const report = jest.fn()
+      const { result, unmount } = renderHook(useProbe, { wrapper: reportingWrapper(report, targetA) })
+      expect(report).toHaveBeenLastCalledWith(targetA)
+
+      act(() => result.current.controls.setScope(safeB.chainId, safeB.address.value))
+      expect(report).toHaveBeenLastCalledWith({ chainId: safeB.chainId, safeAddress: safeB.address.value })
+
+      unmount()
+      expect(report).toHaveBeenLastCalledWith(undefined)
+    })
+
+    it('reports no Safe until a policy flow picks one', () => {
+      const report = jest.fn()
+      renderHook(useProbe, { wrapper: reportingWrapper(report) })
+      expect(report).not.toHaveBeenCalledWith(expect.objectContaining({ chainId: expect.any(String) }))
+    })
+
+    it('does not let a nested scope override the flow Safe', () => {
+      const report = jest.fn()
+      const Nested = ({ children }: { children: ReactNode }) => (
+        <TxFlowSafeReporterContext.Provider value={report}>
+          <SafeScopeProvider initial={targetA}>
+            <SafeScopeProvider initial={{ chainId: safeB.chainId, safeAddress: safeB.address.value }}>
+              {children}
+            </SafeScopeProvider>
+          </SafeScopeProvider>
+        </TxFlowSafeReporterContext.Provider>
+      )
+      renderHook(useProbe, { wrapper: Nested })
+      expect(report).toHaveBeenCalledTimes(1)
+      expect(report).toHaveBeenLastCalledWith(targetA)
+    })
+
+    it('reports nothing outside the tx modal', () => {
+      // No reporter in context, e.g. a row of the Workspace queue: nothing to call, nothing thrown
+      expect(() => renderHook(useProbe, { wrapper: wrapperWith(targetA) })).not.toThrow()
+    })
+  })
+
+  it('leaves the active counter alone when armsSdkGuard is off', () => {
+    const target = { chainId: safeA.chainId, safeAddress: safeA.address.value }
+    const { unmount } = renderHook(useProbe, {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <SafeScopeProvider initial={target} armsSdkGuard={false}>
+          {children}
+        </SafeScopeProvider>
+      ),
+    })
+    expect(hasActiveScope()).toBe(false)
     unmount()
     expect(hasActiveScope()).toBe(false)
   })

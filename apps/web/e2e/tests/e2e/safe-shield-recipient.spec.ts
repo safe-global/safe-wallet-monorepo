@@ -1,4 +1,3 @@
-import { Wallet } from 'ethers'
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { transactionsIn } from '../../src/api/transaction-items'
 import { test, expect } from '../../src/fixtures/journey.fixture'
@@ -25,8 +24,8 @@ test.describe('Safe Shield recipient check', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    const recipient = journey.newAddress()
     await seedExecutedTransfer(safe, { recipient, amount: AMOUNT })
     await seedExecutedTransfer(safe, { recipient, amount: AMOUNT })
     await expect

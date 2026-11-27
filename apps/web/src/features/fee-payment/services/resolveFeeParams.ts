@@ -1,0 +1,84 @@
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+
+import { createTx } from '@/services/tx/tx-sender/create'
+import { gatewayApi } from '@/store/api/gateway'
+import { toSupportedFiatCode } from '@/store/api/gateway/payFromSafeFeePreview'
+import type { AppDispatch } from '@/store'
+import { isFeeCollector } from '../public/constants'
+import { trackError, Errors } from '@/services/exceptions'
+
+export type ResolveFeeParamsArgs = {
+  chainId: string
+  safeAddress: string
+  safeTx: SafeTransaction
+  gasToken: string
+  numberSignatures: number
+  currency?: string
+  dispatch: AppDispatch
+}
+
+/**
+ * Merges the CGW fee-preview fee fields into a SafeTransaction so the first
+ * signer's signed payload carries the params Safe's handlePayment() reads on
+ * execution. Must run before any signature is applied.
+ */
+export const resolveFeeParams = async ({
+  chainId,
+  safeAddress,
+  safeTx,
+  gasToken,
+  numberSignatures,
+  currency,
+  dispatch,
+}: ResolveFeeParamsArgs): Promise<SafeTransaction> => {
+  const { to, value, data, operation, nonce } = safeTx.data
+
+  const preview = await dispatch(
+    gatewayApi.endpoints.getPayFromSafeFeePreview.initiate(
+      {
+        chainId,
+        safeAddress,
+        tx: {
+          to,
+          value,
+          data,
+          operation,
+          gasToken,
+          numberSignatures,
+          nonce,
+          fiatCode: toSupportedFiatCode(currency),
+        },
+      },
+      { forceRefetch: true },
+    ),
+  ).unwrap()
+
+  const { safeTxGas, baseGas, gasPrice, gasToken: resolvedGasToken, refundReceiver } = preview.txData
+
+  if (!isFeeCollector(refundReceiver)) {
+    // Surface to Sentry so a Fee collector rotation is observable instead of failing
+    // silently for users who can't recover from the thrown error below.
+    trackError(
+      Errors._821,
+      `Untrusted Pay from Safe refundReceiver ${refundReceiver} returned by CGW on chain ${chainId}`,
+    )
+    throw new Error(`Refusing to sign: untrusted refundReceiver ${refundReceiver} returned by CGW.`)
+  }
+
+  if (!sameAddress(resolvedGasToken, gasToken)) {
+    throw new Error(`Refusing to sign: the fee quote is in ${resolvedGasToken}, not in the gas token picked.`)
+  }
+
+  return createTx(
+    {
+      ...safeTx.data,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken: resolvedGasToken,
+      refundReceiver,
+    },
+    nonce,
+  )
+}

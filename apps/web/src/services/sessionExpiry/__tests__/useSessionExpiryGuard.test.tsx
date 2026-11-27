@@ -1,7 +1,8 @@
 import { useStore } from 'react-redux'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import type { AppStore, RootState } from '@/store'
-import { useSessionExpiryGuard, SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from '../useSessionExpiryGuard'
+import { useSessionExpiryGuard } from '../useSessionExpiryGuard'
+import { SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from '@/services/sessionExpiry/expireSession'
 import { setAuthenticated } from '@/store/authSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import { AppRoutes } from '@/config/routes'
@@ -58,7 +59,7 @@ const renderGuardWithStore = (
 
 describe('useSessionExpiryGuard', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-05-07T12:00:00Z'))
+    jest.useFakeTimers({ advanceTimers: false }).setSystemTime(new Date('2026-05-07T12:00:00Z'))
     mockUnwrap.mockReset()
     mockUnsubscribe.mockReset()
     mockInitiate.mockReset()
@@ -70,10 +71,6 @@ describe('useSessionExpiryGuard', () => {
     // be replayed into this test's store via useHydrateStore's HYDRATE_ACTION
     // and clobber initialReduxState.auth.sessionExpiresAt. Do not remove.
     localStorage.clear()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('does nothing when the user is not signed in (sessionExpiresAt is null)', async () => {

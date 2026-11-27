@@ -2,13 +2,33 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import useGetSpaceAddressBook from '../../public/hooks/useGetSpaceAddressBook'
+import { useWorkspaceAddressBookLabel } from '../../public/hooks/useWorkspaceAddressBookLabel'
 import { getContactAddedMessage } from '@/utils/addressBookNotifications'
-import AddContactDialog from './AddContactDialog'
+import AddContactDialog, { type ContactPrefill, type TriggerSize } from './AddContactDialog'
 
 export type { ContactField } from './AddContactDialog'
 
-const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
+type AddContactProps = {
+  label?: string
+  size?: TriggerSize
+  /** Shows the Tags field; the v2 address book passes them. */
+  workspaceTags?: WorkspaceTag[]
+  onTagLimitReached?: () => void
+  prefill?: ContactPrefill
+  /** Makes the dialog triggerless: it opens on mount and the caller unmounts it here. */
+  onClose?: () => void
+}
+
+const AddContact = ({
+  label = 'Add contact',
+  size,
+  workspaceTags,
+  onTagLimitReached,
+  prefill,
+  onClose,
+}: AddContactProps) => {
   const addressBookItems = useGetSpaceAddressBook()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -16,10 +36,15 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   return (
     <AddContactDialog
       triggerLabel={label}
+      triggerSize={size}
       dialogTitle="Add contact"
       successMessage={getContactAddedMessage(workspaceAddressBookLabel)}
       successGroupKey="add-contact-success"
       validateCharset
+      workspaceTags={workspaceTags}
+      onTagLimitReached={onTagLimitReached}
+      prefill={prefill}
+      onClose={onClose}
       submit={(item, sid) =>
         upsertAddressBook({
           spaceId: sid,

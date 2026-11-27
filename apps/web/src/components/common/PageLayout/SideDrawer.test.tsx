@@ -1,7 +1,7 @@
 import { act, render } from '@/tests/test-utils'
 import SideDrawer from './SideDrawer'
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/public/components/SpacesEnhancedSidebar', () => ({
   SpacesEnhancedSidebar: () => <div data-testid="sidebar" />,
 }))
 
@@ -51,9 +51,8 @@ const setupMatchMedia = () => {
 describe('SideDrawer', () => {
   const originalMatchMedia = window.matchMedia
 
-  beforeEach(() => jest.useFakeTimers())
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
   afterEach(() => {
-    jest.useRealTimers()
     window.matchMedia = originalMatchMedia
   })
 

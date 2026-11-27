@@ -14,28 +14,40 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
 import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
+import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { tagNamesOf } from '../SpaceAddressBookV2/utils'
+import TagsField from './TagsField'
 
 export type ContactField = {
   name: string
   address: string
   networks: Chain[]
+  /** Workspace tag ids. */
+  tags: number[]
 }
 
 export type AddContactItem = {
   name: string
   address: string
   chainIds: string[]
+  tags?: string[]
 }
+
+export type ContactPrefill = { address: string; chainIds: string[] }
+
+/** `lg` in the v2 address book toolbar; the v1 page keeps `action`. */
+export type TriggerSize = 'action' | 'lg'
 
 type AddContactDialogProps = {
   triggerLabel: string
+  triggerSize?: TriggerSize
   dialogTitle: string
   submitLabel?: string
   intro?: ReactNode
@@ -45,10 +57,17 @@ type AddContactDialogProps = {
   onSubmitStart?: () => void
   onSuccess?: () => void
   validateCharset?: boolean
+  /** Shows the Tags field. */
+  workspaceTags?: WorkspaceTag[]
+  onTagLimitReached?: () => void
+  prefill?: ContactPrefill
+  /** Makes the dialog triggerless: it opens on mount and the caller unmounts it here. */
+  onClose?: () => void
 }
 
 const AddContactDialog = ({
   triggerLabel,
+  triggerSize = 'action',
   dialogTitle,
   submitLabel = 'Add contact',
   intro,
@@ -58,8 +77,12 @@ const AddContactDialog = ({
   onSubmitStart,
   onSuccess,
   validateCharset = false,
+  workspaceTags,
+  onTagLimitReached,
+  prefill,
+  onClose,
 }: AddContactDialogProps) => {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(!!onClose)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs: allNetworks } = useChains()
@@ -72,8 +95,9 @@ const AddContactDialog = ({
 
   const defaultValues = {
     name: '',
-    address: '',
-    networks: allNetworks,
+    address: prefill?.address ?? '',
+    networks: prefill ? allNetworks.filter((chain) => prefill.chainIds.includes(chain.chainId)) : allNetworks,
+    tags: [],
   }
 
   const methods = useForm<ContactField>({
@@ -88,6 +112,7 @@ const AddContactDialog = ({
     setOpen(false)
     reset(defaultValues)
     setError('')
+    onClose?.()
   }
 
   const handleOpen = () => {
@@ -103,6 +128,7 @@ const AddContactDialog = ({
       name: validateCharset ? sanitizeName(data.name) : data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
+      ...(workspaceTags && data.tags.length > 0 && { tags: tagNamesOf(data.tags, workspaceTags) }),
     }
 
     try {
@@ -141,10 +167,12 @@ const AddContactDialog = ({
 
   return (
     <>
-      <Button size="action" onClick={handleOpen}>
-        <Plus className="size-4 mr-1 text-green-500" />
-        {triggerLabel}
-      </Button>
+      {!onClose && (
+        <Button size={triggerSize} onClick={handleOpen}>
+          <Plus className="size-4 mr-1 text-green-500" />
+          {triggerLabel}
+        </Button>
+      )}
       <ModalDialog open={open} onClose={handleClose} dialogTitle={dialogTitle} hideChainIndicator>
         <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
           <FormProvider {...methods}>
@@ -186,6 +214,8 @@ const AddContactDialog = ({
                       rules={{ required: true }}
                     />
                   </div>
+
+                  {workspaceTags && <TagsField workspaceTags={workspaceTags} onLimitReached={onTagLimitReached} />}
                 </div>
 
                 {error && (

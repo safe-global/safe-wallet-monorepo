@@ -2,7 +2,8 @@
  * Email sessions of the local Auth0 of the isolated stack, and the Workspace data such a user starts from.
  */
 import { expect, request, test, type APIResponse, type BrowserContext, type Page } from '@playwright/test'
-import { CGW_BASE_URL, CHAIN_IDS, LS_NAMESPACE } from '../data/constants'
+import type { SpacesGetV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwBaseUrl, CHAIN_IDS, LS_NAMESPACE } from '../data/constants'
 import { AUTH0_CODE, Auth0Page } from '../pages/auth0.page'
 
 /** The gateway sends browsers here; playwright.isolated.config.ts maps the name to the published port of the mock. */
@@ -84,7 +85,7 @@ export async function createEmailSession(email: string, { secondFactor = true } 
   // The mock's certificate is self-signed, as for the browser (`ignoreHTTPSErrors` in playwright.isolated.config.ts).
   const api = await request.newContext({ ignoreHTTPSErrors: true, maxRedirects: 0 })
   try {
-    const authorize = new URL(`${CGW_BASE_URL}/v1/auth/oidc/authorize`)
+    const authorize = new URL(`${cgwBaseUrl()}/v1/auth/oidc/authorize`)
     authorize.searchParams.set('redirect_url', `${walletOrigin()}/welcome/spaces`)
     authorize.searchParams.set('connection', 'email')
     const auth0Url = new URL(redirectTarget(await api.get(authorize.toString())))
@@ -104,7 +105,7 @@ export async function createEmailSession(email: string, { secondFactor = true } 
     return {
       email,
       cookies: [
-        responseCookie(callback, GATEWAY_SESSION_COOKIE, new URL(CGW_BASE_URL).hostname),
+        responseCookie(callback, GATEWAY_SESSION_COOKIE, new URL(cgwBaseUrl()).hostname),
         responseCookie(signIn, AUTH0_SESSION_COOKIE, AUTH0_HOST),
       ],
     }
@@ -144,12 +145,12 @@ export async function gatewayRequest(
   path: string,
   body?: unknown,
 ): Promise<unknown> {
-  const gatewayHost = new URL(CGW_BASE_URL).hostname
+  const gatewayHost = new URL(cgwBaseUrl()).hostname
   const cookie = session.cookies
     .filter(({ domain }) => domain === gatewayHost)
     .map(({ name, value }) => `${name}=${value}`)
     .join('; ')
-  const response = await fetch(`${CGW_BASE_URL}${path}`, {
+  const response = await fetch(`${cgwBaseUrl()}${path}`, {
     method,
     headers: { 'Content-Type': 'application/json', Cookie: cookie },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -183,8 +184,26 @@ export async function addWorkspaceSafes(
   })
 }
 
+export async function inviteMember(
+  admin: EmailSession,
+  workspaceId: string,
+  { email, name }: { email: string; name: string },
+): Promise<void> {
+  await gatewayRequest(admin, 'POST', `/v1/spaces/${workspaceId}/members/invite`, {
+    users: [{ type: 'email', email, role: 'MEMBER', name }],
+  })
+}
+
+export async function acceptInvite(member: EmailSession, workspaceId: string, name: string): Promise<void> {
+  await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/members/accept`, { name })
+  // The router guard sends a Workspace URL away until the gateway's (cached) Workspace list contains it.
+  await expect
+    .poll(async () => JSON.stringify(await gatewayRequest(member, 'GET', '/v1/spaces')), { timeout: 30_000 })
+    .toContain(workspaceId)
+}
+
 const billingSubscriptionsUrl = (uuid: string): string =>
-  `${new URL(CGW_BASE_URL).origin}/billing/__test/customers/${uuid}/subscriptions`
+  `${new URL(cgwBaseUrl()).origin}/billing/__test/customers/${uuid}/subscriptions`
 
 const offersTrial = async (session: EmailSession, uuid: string): Promise<boolean> => {
   const links = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/payment-links`)
@@ -198,7 +217,7 @@ const offersTrial = async (session: EmailSession, uuid: string): Promise<boolean
 export async function storeSubscription(
   session: EmailSession,
   uuid: string,
-  subscription: { plan?: 'business' | 'starter'; status?: string } = {},
+  subscription: { plan?: 'business' | 'starter'; status?: string; currentPeriodEnd?: number } = {},
 ): Promise<void> {
   const url = billingSubscriptionsUrl(uuid)
   const response = await fetch(url, {
@@ -210,11 +229,15 @@ export async function storeSubscription(
   await expect.poll(() => offersTrial(session, uuid)).toBe(false)
 }
 
-/** Leaves a Workspace the gateway has not read yet without a plan, as every new Workspace is in production. */
-export async function removeSubscription(uuid: string): Promise<void> {
+/**
+ * Leaves the Workspace without a plan, as a Workspace from before Safe Pro is, and waits until the gateway offers it
+ * the free access. Call it before the gateway reads the Workspace's plan, which the billing service then announces.
+ */
+export async function clearSubscription(session: EmailSession, uuid: string): Promise<void> {
   const url = billingSubscriptionsUrl(uuid)
   const response = await fetch(url, { method: 'DELETE' })
   if (!response.ok) throw new Error(`DELETE ${url} returned ${response.status}: ${await response.text()}`)
+  await expect.poll(() => offersTrial(session, uuid), { message: `the free access of Workspace ${uuid}` }).toBe(true)
 }
 
 /** The name of the Workspace's plan, as the gateway reports it; null without a subscription. */
@@ -223,6 +246,14 @@ export async function planName(session: EmailSession, uuid: string): Promise<str
   if (!Array.isArray(subscriptions) || subscriptions.length === 0) return null
   const [{ metadata }] = subscriptions as Array<{ metadata?: { planName?: string } }>
   return metadata?.planName ?? null
+}
+
+/** Whether the Workspace's subscription has a payment method, as the gateway reports it; false without one. */
+export async function hasPaymentMethod(session: EmailSession, uuid: string): Promise<boolean> {
+  const subscriptions = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/subscriptions`)
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) return false
+  const [subscription] = subscriptions as Array<{ hasPaymentMethod?: boolean }>
+  return subscription.hasPaymentMethod === true
 }
 
 /** Sponsored transactions the Workspace spent in the current cycle, as the gateway counts them; null without the meter. */
@@ -243,6 +274,24 @@ export async function workspaceName(session: EmailSession, uuid: string): Promis
     throw new Error(`GET /v1/spaces/${uuid} returned no name`)
   }
   return String(workspace.name)
+}
+
+/** The UUID of the user's Workspace named `name`, such as one the wizard created in the UI. */
+export async function workspaceIdNamed(session: EmailSession, name: string): Promise<string> {
+  let uuid: string | undefined
+  // The gateway caches the user's Workspace list, so a new Workspace can be missing for a moment.
+  await expect
+    .poll(
+      async () => {
+        const workspaces = (await gatewayRequest(session, 'GET', '/v1/spaces')) as SpacesGetV1ApiResponse
+        uuid = workspaces.find((workspace) => workspace.name === name)?.uuid
+        return uuid
+      },
+      { timeout: 30_000, message: `the Workspace "${name}" of ${session.email}` },
+    )
+    .toBeDefined()
+  if (!uuid) throw new Error(`GET /v1/spaces has no Workspace named "${name}" for ${session.email}`)
+  return uuid
 }
 
 /** The membership status (`INVITED`, `ACTIVE`, …) of the user with `email` in the Workspace, or null when not listed. */
@@ -274,7 +323,7 @@ export async function sessionAuthMethod(page: Page): Promise<string | null> {
   const { status, text } = await page.evaluate(async (url) => {
     const response = await fetch(url, { credentials: 'include' })
     return { status: response.status, text: await response.text() }
-  }, `${CGW_BASE_URL}/v1/auth/me`)
+  }, `${cgwBaseUrl()}/v1/auth/me`)
   if (status === 403) return null
   const session: unknown = JSON.parse(text)
   return typeof session === 'object' && session !== null && 'authMethod' in session ? String(session.authMethod) : null

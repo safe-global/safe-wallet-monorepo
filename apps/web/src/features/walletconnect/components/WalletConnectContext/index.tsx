@@ -9,11 +9,13 @@ import useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWallet
 import { IS_PRODUCTION } from '@/config/constants'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getEip155ChainId, getPeerName, isExpiredProposalError, stripEip155Prefix } from '../../services/utils'
+import { getAttestedOrigin } from '@safe-global/utils/features/walletconnect/verify'
 import { trackRequest } from '../../services/tracking'
-import { wcPopupStore } from '../../store/wcPopupStore'
+import { wcPopupStore } from '../../public/store/wcPopupStore'
 import type WalletConnectWallet from '../../services/WalletConnectWallet'
 import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useSafeAppSuggestion } from '../../hooks/useSafeAppSuggestion'
 import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
 import { WCLoadingState } from '../../types'
 
@@ -47,6 +49,15 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   setLoading: () => {},
   approveSession: () => Promise.resolve(),
   rejectSession: () => Promise.resolve(),
+  safeAppSuggestion: {
+    status: 'off',
+    safeApp: undefined,
+    isShown: false,
+    blocksAutoApprove: false,
+    remember: false,
+    setRemember: () => {},
+    rememberChoice: () => {},
+  },
 })
 
 export const WalletConnectProvider = ({ children }: { children: ReactNode }) => {
@@ -140,6 +151,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
           name: peerName,
           description: session.peer.metadata.description,
           iconUrl: session.peer.metadata.icons[0],
+          dappUrl: getAttestedOrigin(event.verifyContext?.verified),
         })
       }
 
@@ -185,6 +197,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
           name: peerName,
           description: requester.metadata.description,
           iconUrl: requester.metadata.icons[0],
+          dappUrl: getAttestedOrigin(event.verifyContext?.verified),
         }
 
         return safeWalletProvider.request(
@@ -224,6 +237,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // --- Proposals
   //
   const [sessionProposal, setSessionProposal] = useState<WalletKitTypes.SessionProposal | null>(null)
+  const safeAppSuggestion = useSafeAppSuggestion(sessionProposal)
 
   const approveSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -268,14 +282,16 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     setOpen(false)
   }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen])
 
-  // Auto approve previously approved non-malicious dApps
+  // Auto approve previously approved non-malicious dApps, unless the user gets to choose the Safe App instead
+  const { blocksAutoApprove } = safeAppSuggestion
   useEffect(() => {
+    if (blocksAutoApprove) return
     if (sessionProposal && autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {
       approveSession().catch((e) => {
         setError(e as Error)
       })
     }
-  }, [autoApprove, approveSession, sessionProposal, chainId])
+  }, [autoApprove, approveSession, sessionProposal, chainId, blocksAutoApprove])
 
   const rejectSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -322,6 +338,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         sessionProposal,
         approveSession,
         rejectSession,
+        safeAppSuggestion,
       }}
     >
       {children}

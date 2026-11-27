@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { makeStore } from '@/store'
 import { gatewayApi } from '../api/gateway'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 // Neutralize the inner batched fetch so the (timer-driven) network call never runs; this test only
 // inspects the OUTER getMultipleSafeOverviews cache key, which is created synchronously on dispatch.
@@ -29,14 +29,13 @@ describe('getMultipleSafeOverviews cache key (serializeQueryArgs)', () => {
   beforeEach(() => {
     // Cache keys are created synchronously on dispatch; fake timers keep the batched fetcher's 300ms
     // timer from firing (and leaking) after the assertions — this test never resolves the fetch.
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockedInitiate.mockReset()
     mockedInitiate.mockImplementation(jest.fn())
   })
 
   afterEach(() => {
     jest.clearAllTimers()
-    jest.useRealTimers()
   })
 
   it('shares ONE entry for the same safe set regardless of field values, order, and isReadOnly flips', () => {

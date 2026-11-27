@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import CreateSpaceOnboarding from './index'
 import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 
 let mockIsCheckingAccess: boolean | undefined = false
 let mockExistingSpace: {
@@ -27,7 +27,6 @@ jest.mock('./hooks/useOnboardingExit', () => ({
 
 const mockGoToSelectSafes = jest.fn()
 let mockCreatedSpaceId: string | undefined
-const SELECT_SAFES_URL = '/welcome/select-safes?spaceId=space-new'
 jest.mock('./hooks/useSpaceSubmit', () => ({
   __esModule: true,
   default: () => ({
@@ -36,13 +35,7 @@ jest.mock('./hooks/useSpaceSubmit', () => ({
     onSubmit: jest.fn(),
     createdSpaceId: mockCreatedSpaceId,
     goToSelectSafes: mockGoToSelectSafes,
-    selectSafesUrl: mockCreatedSpaceId ? SELECT_SAFES_URL : undefined,
   }),
-}))
-
-const mockUseStepUpReturnUrl = jest.fn()
-jest.mock('@/features/oidc-auth', () => ({
-  useStepUpReturnUrl: (url: string | undefined) => mockUseStepUpReturnUrl(url),
 }))
 
 const mockPush = jest.fn()
@@ -71,7 +64,7 @@ jest.mock('../Plans/ClaimTrialModal', () => ({
   ),
 }))
 
-jest.mock('../../hooks/useSpaceSafes', () => ({
+jest.mock('../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [] }),
 }))
 
@@ -79,20 +72,32 @@ jest.mock('../../hooks/useOnboardingStepCount', () => ({
   useOnboardingStepCount: () => 2,
 }))
 
-jest.mock('../OnboardingLayout', () => ({
-  OnboardingLayout: ({ main, footer }: { main: React.ReactNode; footer: React.ReactNode }) => (
+jest.mock('../OnboardingLayout/OnboardingLayout', () => ({
+  __esModule: true,
+  default: ({ main, footer }: { main: React.ReactNode; footer: React.ReactNode }) => (
     <div>
       {main}
       {footer}
     </div>
   ),
-  StepCounter: () => null,
-  SafeAppMockup: () => null,
+}))
+jest.mock('../OnboardingLayout/StepCounter', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('../OnboardingLayout/mockup/SafeAppMockup', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace', () => ({
   deriveSidePanelAccountsFromSpace: () => [],
+}))
+jest.mock('../OnboardingLayout/mockup/useSafeNameLookup', () => ({
   useSafeNameLookup: () => ({}),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   flattenSafeItems: () => [],
 }))
 
@@ -103,21 +108,6 @@ describe('CreateSpaceOnboarding', () => {
     mockExistingSpace = { spaceId: undefined, isEditMode: false, isSpaceLoading: false, existingSpace: undefined }
     mockCreatedSpaceId = undefined
     mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, reason: 'trial-offered' })
-  })
-
-  it('sends a step-up started from the trial offer on to the Safes step', () => {
-    mockCreatedSpaceId = 'space-new'
-    render(<CreateSpaceOnboarding />)
-
-    expect(mockUseStepUpReturnUrl).toHaveBeenLastCalledWith(SELECT_SAFES_URL)
-  })
-
-  it('keeps a step-up on this page while no trial is offered', () => {
-    mockCreatedSpaceId = 'space-new'
-    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, reason: 'lapsed' })
-    render(<CreateSpaceOnboarding />)
-
-    expect(mockUseStepUpReturnUrl).toHaveBeenLastCalledWith(undefined)
   })
 
   it('offers the trial over the step once the Workspace exists; declining leaves for My accounts', () => {

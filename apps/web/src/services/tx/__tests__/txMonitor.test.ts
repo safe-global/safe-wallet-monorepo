@@ -8,7 +8,7 @@ import { toBeHex } from 'ethers'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { BrowserProvider, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { faker } from '@faker-js/faker'
-import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import type { RelayTaskStatus } from '@safe-global/utils/services/RelayTxWatcher'
 import * as RelayTxWatcherModule from '@safe-global/utils/services/RelayTxWatcher'
 
@@ -41,7 +41,7 @@ describe('txMonitor', () => {
   let watchTxHashSpy = jest.spyOn(simpleTxWatcherInstance, 'watchTxHash')
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     jest.resetAllMocks()
 
     txDispatchSpy = jest.spyOn(txEvents, 'txDispatch')

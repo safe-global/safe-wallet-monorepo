@@ -11,7 +11,7 @@ import {
   RECIPIENT_ALLOWLIST_POLICY_OPTION,
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
-import { useIsAllowlistActiveInSpace } from '@/features/policy-guard'
+import { useIsAllowlistAvailableInSpace } from '@/features/policy-guard/public/hooks/useAllowlistAvailability'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
@@ -87,8 +87,8 @@ const Policies = ({
   locked,
 }: PoliciesProps): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
-  // Existing allowlists stay listed with the experimental toggle off; only creating one needs it on.
-  const canCreateAllowlist = useIsAllowlistActiveInSpace() === true
+  // Existing allowlists stay listed either way; only creating one needs a chain that enables it.
+  const canCreateAllowlist = useIsAllowlistAvailableInSpace()
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 

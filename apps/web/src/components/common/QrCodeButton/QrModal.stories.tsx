@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import QrModal from './QrModal'
 
 const MOCK_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'

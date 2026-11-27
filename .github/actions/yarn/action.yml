@@ -28,7 +28,7 @@ runs:
     - uses: actions/setup-node@v6.4.0
       id: node
       with:
-        node-version: '24.22.1'
+        node-version: '24.22.3'
 
     - name: Export Turbo remote cache env
       if: inputs.turbo-token != ''
@@ -56,7 +56,6 @@ runs:
       with:
         path: |
           **/node_modules
-          ~/.cache/Cypress
           .yarn/install-state.gz
         key: >-
           ${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-modules-${{
@@ -87,6 +86,5 @@ runs:
       with:
         path: |
           **/node_modules
-          ~/.cache/Cypress
           .yarn/install-state.gz
         key: ${{ steps.modules.outputs.cache-primary-key }}

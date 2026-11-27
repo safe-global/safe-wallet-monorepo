@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { withMockProvider } from '@/storybook/decorators'
-import { DashboardHeader } from './DashboardHeader'
+import { DashboardHeader, DashboardHeaderSkeleton } from '../../public/components/DashboardHeader'
 
 const meta = {
   title: 'Features/Spaces/DashboardHeader',
@@ -38,4 +38,10 @@ export const Default: Story = {
       </Button>
     ),
   },
+}
+
+/** Always renders the loading skeleton, on purpose: it must stand out from the gray page behind it, in light and dark */
+export const Loading: Story = {
+  args: Default.args,
+  render: () => <DashboardHeaderSkeleton />,
 }

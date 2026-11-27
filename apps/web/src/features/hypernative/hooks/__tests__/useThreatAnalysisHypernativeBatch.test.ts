@@ -4,13 +4,13 @@ import { useThreatAnalysisHypernativeBatch } from '../useThreatAnalysisHypernati
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ConflictType } from '@safe-global/store/gateway/types'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
-import * as useAuthTokenHook from '../useAuthToken'
+import * as useAuthTokenHook from '../../public/hooks/useAuthToken'
 import * as useThreatAnalysisHypernativeBatchHook from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
-import { hnQueueAssessmentsSlice } from '../../store/hnQueueAssessmentsSlice'
+import { hnQueueAssessmentsSlice } from '../../public/store/hnQueueAssessmentsSlice'
 import type { RootState } from '@/store'
 
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('../useAuthToken')
+jest.mock('../../public/hooks/useAuthToken')
 jest.mock('@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch')
 
 const mockUseSafeInfo = useSafeInfoHook.default as jest.MockedFunction<typeof useSafeInfoHook.default>
@@ -443,6 +443,30 @@ describe('useThreatAnalysisHypernativeBatch', () => {
         authToken: undefined,
         skip: false,
       })
+    })
+
+    it('keeps a stored assessment when a background refresh changes the auth token', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const storedResult = { THREAT: [] }
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+      const { result, rerender } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({ [safeTxHash]: storedResult }),
+      })
+
+      mockUseAuthToken.mockReturnValue([
+        { token: `Bearer ${faker.string.alphanumeric(32)}`, isAuthenticated: true, isExpired: false },
+        jest.fn(),
+        jest.fn(),
+      ])
+      rerender()
+
+      expect(result.current[safeTxHash]).toEqual([storedResult, undefined, false])
     })
   })
 

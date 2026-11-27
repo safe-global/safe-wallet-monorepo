@@ -27,14 +27,9 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SurveyOnboarding: () => <div data-testid="survey-onboarding" />,
-  }),
-}))
-
-jest.mock('@/features/spaces', () => ({
-  SpacesFeature: { name: 'spaces' },
+jest.mock('../../public/components/WorkspaceOnboardingStep', () => ({
+  __esModule: true,
+  default: ({ step }: { step: string }) => <div data-testid={`onboarding-step-${step}`} />,
 }))
 
 describe('SurveyPage (chains-config flag gate)', () => {
@@ -45,9 +40,9 @@ describe('SurveyPage (chains-config flag gate)', () => {
     surveyEnabled = true
   })
 
-  it('renders SurveyOnboarding when the flag is enabled', () => {
+  it('renders the survey onboarding step when the flag is enabled', () => {
     render(<SurveyPage />)
-    expect(screen.getByTestId('survey-onboarding')).toBeInTheDocument()
+    expect(screen.getByTestId('onboarding-step-survey')).toBeInTheDocument()
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
@@ -55,7 +50,7 @@ describe('SurveyPage (chains-config flag gate)', () => {
     surveyEnabled = false
     render(<SurveyPage />)
 
-    expect(screen.queryByTestId('survey-onboarding')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('onboarding-step-survey')).not.toBeInTheDocument()
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '42' } })
     })
@@ -75,7 +70,7 @@ describe('SurveyPage (chains-config flag gate)', () => {
     surveyEnabled = undefined
     render(<SurveyPage />)
 
-    expect(screen.queryByTestId('survey-onboarding')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('onboarding-step-survey')).not.toBeInTheDocument()
     expect(mockReplace).not.toHaveBeenCalled()
   })
 

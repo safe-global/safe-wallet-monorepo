@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import svgr from 'vite-plugin-svgr'
 import mdx from '@mdx-js/rollup'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
-import remarkHeadingId from 'remark-heading-id'
 import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
@@ -50,8 +47,8 @@ export default defineConfig(({ mode }) => {
     NEXT_PUBLIC_COMMIT_HASH: commitHash,
     NEXT_PUBLIC_APP_VERSION: appVersion,
     NEXT_PUBLIC_APP_HOMEPAGE: pkg.homepage ?? '',
-    // Honour an explicit cypress/test NODE_ENV from the host shell so the
-    // existing `cross-env NODE_ENV=cypress cypress run` script can flip
+    // Honour an explicit cypress/test NODE_ENV from the host shell so an E2E
+    // build (NODE_ENV=cypress) can flip
     // `IS_TEST_E2E` in apps/web/src/config/constants.ts (and the require-login
     // gate it gates) without needing a separate NEXT_PUBLIC_IS_TEST_E2E flag.
     NODE_ENV:
@@ -133,28 +130,11 @@ export default defineConfig(({ mode }) => {
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/head', replacement: path.resolve(__dirname, 'src/compat/next-head.tsx') },
         { find: 'next/dynamic', replacement: path.resolve(__dirname, 'src/compat/next-dynamic.tsx') },
-        { find: 'next/app', replacement: path.resolve(__dirname, 'src/compat/next-app.ts') },
         { find: 'next/navigation', replacement: path.resolve(__dirname, 'src/compat/next-navigation.tsx') },
 
         // Node builtins referenced by reused source. `querystring-es3` is the
         // standard browser polyfill webpack/Next uses internally, already in the lockfile.
         { find: /^querystring$/, replacement: 'querystring-es3' },
-
-        // Vite-native fork of the features/__core__ barrel. The original
-        // uses template-literal dynamic imports that Vite cannot analyze;
-        // this fork swaps in a Vite-native createFeatureHandle backed by
-        // import.meta.glob. Must appear BEFORE the broader `@/...` alias
-        // below so it takes precedence. Match the barrel exactly (no
-        // trailing segment) and also the direct module path for callers
-        // that bypass the barrel.
-        {
-          find: /^@\/features\/__core__$/,
-          replacement: path.resolve(__dirname, 'src/compat/features-core.ts'),
-        },
-        {
-          find: /^@\/features\/__core__\/createFeatureHandle$/,
-          replacement: path.resolve(__dirname, 'src/compat/createFeatureHandle.ts'),
-        },
 
         // Cross-workspace source aliases — reuse apps/web/src verbatim during cutover.
         { find: /^@\/public\/(.*)$/, replacement: path.resolve(webRoot, 'public/$1') },
@@ -188,7 +168,7 @@ export default defineConfig(({ mode }) => {
       // @mdx-js/loader. Must run BEFORE react() so React's JSX transform sees
       // the compiled MDX output.
       mdx({
-        remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkHeadingId, remarkGfm],
+        remarkPlugins: [remarkGfm],
       }),
       react(),
       svgr({

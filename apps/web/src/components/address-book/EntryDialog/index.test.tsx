@@ -10,10 +10,11 @@ import {
 } from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
 import * as analytics from '@/services/analytics'
-import { ADDRESS_POISONING_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoisoning'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { RootState } from '@/store'
 import EntryDialog from './index'
-import { useUpsertWorkspaceSafeName } from '@/features/spaces'
+import { useUpsertWorkspaceSafeName } from '@/features/spaces/public/hooks/useUpsertWorkspaceSafeName'
 import * as addressBookSlice from '@/store/addressBookSlice'
 import { getStoreInstance } from '@/store'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -46,11 +47,11 @@ jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
   }),
 }))
 
-jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
+jest.mock('@/features/spaces/public/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
+jest.mock('@/features/spaces/public/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
@@ -137,8 +138,8 @@ describe('EntryDialog scope', () => {
     renderDialog()
     typeName('')
 
-    await waitFor(() => expect(screen.getByTestId('save-btn')).toBeDisabled())
-    expect(screen.getByTestId('name-input')).toHaveAttribute('aria-invalid', 'true')
+    await waitFor(() => expect(screen.getByTestId('name-input')).toHaveAttribute('aria-invalid', 'true'))
+    expect(screen.getByTestId('save-btn')).toBeDisabled()
   })
 
   it('writes to the workspace address book when scoped to workspace', async () => {

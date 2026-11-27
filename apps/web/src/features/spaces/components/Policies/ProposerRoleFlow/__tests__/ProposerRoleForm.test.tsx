@@ -1,16 +1,25 @@
 import type { ReactNode } from 'react'
-import { act, fireEvent, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import {
+  act,
+  advanceClock,
+  fireEvent,
+  renderOnFakeClock,
+  renderWithUserEvent,
+  screen,
+  waitFor,
+} from '@/tests/test-utils'
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useChainsHook from '@/hooks/useChains'
 import * as useChainIdHook from '@/hooks/useChainId'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
-import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
+import useGetSpaceAddressBook from '../../../../public/hooks/useGetSpaceAddressBook'
+import { useIsAdmin } from '../../../../public/hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getNestedSafesNoticeText } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { PARENT_SAFE_WALLET_COPY } from '@safe-global/views/features/spaces/components/Policies/ProposerRoleFlow/constants'
+import { ADDRESS_ERROR_DEBOUNCE_MS } from '@/components/common/AddressInput'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -27,14 +36,14 @@ jest.mock('@/components/common/CheckWallet', () => ({
 
 const NO_WORKSPACE_CONTACTS: SpaceAddressBookItemDto[] = []
 
-jest.mock('../../../../hooks/useGetSpaceAddressBook', () => ({
-  ...jest.requireActual('../../../../hooks/useGetSpaceAddressBook'),
+jest.mock('../../../../public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../../public/hooks/useGetSpaceAddressBook'),
   __esModule: true,
   default: jest.fn(() => NO_WORKSPACE_CONTACTS),
 }))
 
-jest.mock('../../../../hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('../../../../hooks/useSpaceMembers'),
+jest.mock('../../../../public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(() => false),
 }))
 
@@ -67,6 +76,11 @@ const renderForm = (props: Partial<ProposerRoleFormProps> = {}, addressBook = {}
   renderWithUserEvent(
     <ProposerRoleForm onSubmit={jest.fn()} safeAccounts={eligible} onSafeAccountChange={jest.fn()} {...props} />,
     { initialReduxState: { addressBook } },
+  )
+
+const renderFormOnFakeClock = (props: Partial<ProposerRoleFormProps>) =>
+  renderOnFakeClock(
+    <ProposerRoleForm onSubmit={jest.fn()} safeAccounts={eligible} onSafeAccountChange={jest.fn()} {...props} />,
   )
 
 const submitButton = () => screen.getByRole('button', { name: 'Submit' })
@@ -219,14 +233,13 @@ describe('ProposerRoleForm', () => {
 
     it('runs the proposer rule on the typed address and blocks submit on its message', async () => {
       const validateProposer = jest.fn().mockResolvedValue('Cannot add a signer of this Safe account as proposer')
-      const { user } = renderForm({ safeAccount: treasury.id, validateProposer })
+      const { user } = renderFormOnFakeClock({ safeAccount: treasury.id, validateProposer })
 
       await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
 
-      await waitFor(() => expect(validateProposer).toHaveBeenCalledWith(PROPOSER))
-      await waitFor(() =>
-        expect(screen.getByText('Cannot add a signer of this Safe account as proposer')).toBeInTheDocument(),
-      )
+      expect(validateProposer).toHaveBeenCalledWith(PROPOSER)
+      expect(await screen.findByText('Cannot add a signer of this Safe account as proposer')).toBeInTheDocument()
       expect(submitButton()).toBeDisabled()
     })
 
@@ -254,10 +267,11 @@ describe('ProposerRoleForm', () => {
     it('re-validates the proposer when the rule itself changes, e.g. once the Safe has loaded', async () => {
       const loading = jest.fn().mockResolvedValue('Loading the Safe account details, please wait')
       const loaded = jest.fn().mockResolvedValue(undefined)
-      const { user, rerender } = renderForm({ safeAccount: treasury.id, validateProposer: loading })
+      const { user, rerender } = renderFormOnFakeClock({ safeAccount: treasury.id, validateProposer: loading })
 
       await user.type(screen.getByRole('combobox', { name: 'Proposer' }), PROPOSER)
-      await waitFor(() => expect(screen.getByText('Loading the Safe account details, please wait')).toBeInTheDocument())
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
+      expect(await screen.findByText('Loading the Safe account details, please wait')).toBeInTheDocument()
       expect(submitButton()).toBeDisabled()
 
       rerender(
@@ -353,6 +367,7 @@ describe('ProposerRoleForm', () => {
       name: 'Workspace Alice',
       address: PROPOSER,
       chainIds: [CHAIN_ID],
+      tagIds: [],
       createdBy: '',
       createdByUserId: 0,
       lastUpdatedBy: '',
@@ -459,7 +474,7 @@ describe('ProposerRoleForm', () => {
       renderForm({ defaultValues: { proposer: PROPOSER } }, { [CHAIN_ID]: { [PROPOSER]: 'Al' } })
 
       await waitFor(() => expect(nameField()).toHaveValue('Al'))
-      expect(screen.getByText('Names must be at least 3 character(s) long')).toBeInTheDocument()
+      expect(await screen.findByText('Names must be at least 3 character(s) long')).toBeInTheDocument()
     })
   })
 
@@ -489,24 +504,19 @@ describe('ProposerRoleForm', () => {
     })
 
     it('is not marked invalid when focus leaves it while still empty', async () => {
-      jest.useFakeTimers()
-      try {
-        renderForm({ safeAccount: treasury.id })
-        const field = proposerField()
+      renderForm({ safeAccount: treasury.id })
+      const field = proposerField()
 
-        fireEvent.focus(field)
-        fireEvent.blur(field)
-        await act(async () => {
-          jest.advanceTimersByTime(200)
-        })
-        await act(async () => {
-          jest.advanceTimersByTime(1000)
-        })
+      fireEvent.focus(field)
+      fireEvent.blur(field)
+      await act(async () => {
+        jest.advanceTimersByTime(200)
+      })
+      await act(async () => {
+        jest.advanceTimersByTime(1000)
+      })
 
-        expect(field).not.toHaveAttribute('aria-invalid')
-      } finally {
-        jest.useRealTimers()
-      }
+      expect(field).not.toHaveAttribute('aria-invalid')
     })
   })
 

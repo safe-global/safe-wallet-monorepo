@@ -13,7 +13,7 @@ import {
   isSafeSigner,
 } from '@/utils/wallets'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
-import type { SignerWallet } from '@/components/common/WalletProvider'
+import type { SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { fakerChecksummedAddress } from '@/tests/test-utils'
 
 describe('wallets', () => {

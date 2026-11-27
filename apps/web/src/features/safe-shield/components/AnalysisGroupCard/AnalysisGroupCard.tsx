@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode, type TransitionEvent, useMemo, useState, useEffect, useRef } from 'react'
+import { type AnimationEvent, type ReactElement, type ReactNode, useMemo, useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -11,13 +11,16 @@ import {
 } from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
-import { SeverityIcon } from '../SeverityIcon'
+import { SeverityIcon } from '../../public/components/SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { AddressPoisoningCardItem } from './AddressPoisoningCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
-import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
+import type { AnalyticsEvent } from '@/services/analytics/types'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
+import css from '../reveal.module.css'
 
 export interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
@@ -43,9 +46,6 @@ export const AnalysisGroupCard = ({
   expandedGroups,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
-  // The reveal animation caps max-height (can't animate to `auto`); once it finishes we drop the cap
-  // so tall content (many warnings) isn't clipped behind the widget footer.
   const [revealed, setRevealed] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(data, expandedGroups), [data, expandedGroups])
@@ -53,18 +53,11 @@ export const AnalysisGroupCard = ({
   const primarySeverity = primaryResult?.severity
   const isHighlighted = !highlightedSeverity || primarySeverity === highlightedSeverity
   const isDataEmpty = useMemo(() => isEmpty(data), [data])
+  const isShown = !!primaryResult && !isDataEmpty
 
   useEffect(() => {
-    if (!primaryResult || isDataEmpty) {
-      setIsVisible(false)
-      setRevealed(false)
-      return
-    }
-
-    setTimeout(() => {
-      setIsVisible(true)
-    }, delay)
-  }, [delay, primaryResult, isDataEmpty])
+    if (!isShown) setRevealed(false)
+  }, [isShown])
 
   // Track analytics event when results change
   const prevTrackedResultsKeyRef = useRef<string>('')
@@ -79,13 +72,12 @@ export const AnalysisGroupCard = ({
     }
   }, [analyticsEvent, visibleResults])
 
-  if (!primaryResult || isDataEmpty) {
+  if (!isShown) {
     return null
   }
 
-  // Drop the reveal's max-height cap once its own transition ends (ignore opacity + bubbling Collapse height).
-  const handleRevealTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget && e.propertyName === 'max-height' && isVisible) setRevealed(true)
+  const handleRevealEnd = (e: AnimationEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) setRevealed(true)
   }
 
   return (
@@ -93,15 +85,9 @@ export const AnalysisGroupCard = ({
       open={isOpen}
       onOpenChange={setIsOpen}
       data-testid={dataTestId}
-      onTransitionEnd={handleRevealTransitionEnd}
-      style={{
-        // Capped during the reveal (animatable), uncapped after — see `revealed` above.
-        overflow: revealed ? 'visible' : 'hidden',
-        opacity: isVisible ? 1 : 0,
-        maxHeight: revealed ? 'none' : isVisible ? 1000 : 0,
-        transition: `opacity 0.6s ease-in-out, max-height 0.6s ease-in-out`,
-        transitionDelay: `${delay}ms`,
-      }}
+      className={revealed ? undefined : css.reveal}
+      style={revealed ? undefined : { animationDelay: `${delay}ms` }}
+      onAnimationEnd={handleRevealEnd}
     >
       {/* Card header - always visible */}
       <CollapsibleTrigger

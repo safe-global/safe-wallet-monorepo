@@ -15,24 +15,19 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksUpsertAddressBookItemsV1Mutation: () => [jest.fn()],
 }))
 
-jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => MOCK_SPACE_UUID }))
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => MOCK_SPACE_UUID }))
 
-jest.mock('../../../hooks/useGetSpaceAddressBook', () => ({
+jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: () => [],
   useSpaceAddressBookState: () => ({ items: [], isLoading: false, isError: false }),
 }))
 
-jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => IS_ADMIN, useIsInvited: () => false }))
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({ useIsAdmin: () => IS_ADMIN, useIsInvited: () => false }))
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
-}))
-
-jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => MOCK_SPACE_UUID,
-  useGetSpaceAddressBook: () => [],
 }))
 
 describe('RequestToAddButton', () => {
@@ -50,11 +45,9 @@ describe('RequestToAddButton', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
     expect(screen.getByText('Request to add contact')).toBeInTheDocument()
-    expect(screen.getByText('Name')).toBeInTheDocument()
-    expect(screen.getByText('Address')).toBeInTheDocument()
-    expect(screen.getByText('Networks')).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Name for Alice' })).toHaveAttribute('placeholder', 'Alice')
 
-    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+    await userEvent.click(screen.getByTestId('name-contacts-confirm-btn'))
 
     await waitFor(() => {
       expect(mockCreateRequest).toHaveBeenCalledWith({
@@ -73,7 +66,7 @@ describe('RequestToAddButton', () => {
     })
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
-    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+    await userEvent.click(screen.getByTestId('name-contacts-confirm-btn'))
 
     await waitFor(() => {
       expect(mockCreateRequest).toHaveBeenCalledWith({
@@ -83,30 +76,40 @@ describe('RequestToAddButton', () => {
     })
   })
 
-  it('disables the button and does not open the dialog when the name has invalid characters', async () => {
-    render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
+  it('sends the name edited in the dialog', async () => {
+    mockCreateRequest.mockResolvedValue({ data: {} })
+    render(<RequestToAddButton address={address} name="Treasury signer 2" chainIds={['1']} />)
 
-    const button = screen.getByRole('button', { name: 'Request to add' })
-    expect(button).toBeDisabled()
+    await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
+    await userEvent.type(screen.getByRole('textbox', { name: 'Name for Treasury signer 2' }), 'Alice')
+    await userEvent.click(screen.getByTestId('name-contacts-confirm-btn'))
 
-    await userEvent.click(button)
-
-    expect(screen.queryByText('Request to add contact')).not.toBeInTheDocument()
-    expect(mockCreateRequest).not.toHaveBeenCalled()
+    await waitFor(() => {
+      expect(mockCreateRequest).toHaveBeenCalledWith({
+        spaceId: MOCK_SPACE_UUID,
+        createAddressBookRequestDto: { address, name: 'Alice', chainIds: ['1'] },
+      })
+    })
   })
 
-  it('shows a tooltip explaining why an invalid-name contact cannot be requested', async () => {
+  it('blocks an invalid name in the dialog until it is fixed', async () => {
+    mockCreateRequest.mockResolvedValue({ data: {} })
     render(<RequestToAddButton address={address} name="José 🦄" chainIds={['1']} />)
 
-    await userEvent.hover(screen.getByRole('button', { name: 'Request to add' }).parentElement as HTMLElement)
+    await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
+    const input = screen.getByRole('textbox', { name: 'Name for José 🦄' })
+    expect(input).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByTestId('name-contacts-confirm-btn')).toBeDisabled()
 
-    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the Workspace/)).toBeInTheDocument())
-  })
+    await userEvent.type(input, 'Jose')
+    await userEvent.click(screen.getByTestId('name-contacts-confirm-btn'))
 
-  it('keeps the button enabled for a valid name', () => {
-    render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
-
-    expect(screen.getByRole('button', { name: 'Request to add' })).not.toBeDisabled()
+    await waitFor(() => {
+      expect(mockCreateRequest).toHaveBeenCalledWith({
+        spaceId: MOCK_SPACE_UUID,
+        createAddressBookRequestDto: { address, name: 'Jose', chainIds: ['1'] },
+      })
+    })
   })
 
   it('treats an already-pending request (409) as requested', async () => {
@@ -114,7 +117,7 @@ describe('RequestToAddButton', () => {
     render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
-    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+    await userEvent.click(screen.getByTestId('name-contacts-confirm-btn'))
 
     await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument())
   })
@@ -144,7 +147,7 @@ describe('RequestToAddButton', () => {
     render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
-    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+    await userEvent.click(screen.getByTestId('name-contacts-confirm-btn'))
 
     await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_SENT))
   })
@@ -154,7 +157,7 @@ describe('RequestToAddButton', () => {
     render(<RequestToAddButton address={address} name="Alice" chainIds={['1']} />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Request to add' }))
-    await userEvent.click(screen.getByTestId('confirm-request-btn'))
+    await userEvent.click(screen.getByTestId('name-contacts-confirm-btn'))
 
     await waitFor(() => expect(screen.getByText('Requested')).toBeInTheDocument())
     expect(trackEvent).not.toHaveBeenCalled()

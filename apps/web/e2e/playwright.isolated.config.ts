@@ -27,6 +27,8 @@ export default defineConfig({
     ['list'],
     ['html', { outputFolder: `${artifacts}/html`, open: 'never' }],
     ['junit', { outputFile: `${artifacts}/junit.xml` }],
+    // CI merges the shards' blob reports into one HTML report and publishes it to S3.
+    ...(process.env.CI ? [['blob', { outputDir: `${artifacts}/blob` }] as const] : []),
   ],
   use: {
     baseURL,

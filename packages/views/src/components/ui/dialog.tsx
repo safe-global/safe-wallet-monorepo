@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import { usePopupInitialFocus } from '@safe-global/views/hooks/use-popup-initial-focus'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@safe-global/views/utils/cn'
@@ -43,7 +44,7 @@ import { XIcon } from 'lucide-react'
  */
 
 const dialogContentVariants = cva(
-  'bg-dialog data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200',
+  'bg-dialog outline-none data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-starting-style:opacity-0 data-ending-style:opacity-0 fixed top-[50%] left-[50%] z-[var(--z-overlay)] w-full -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-lg duration-200',
   {
     variants: {
       size: {
@@ -123,6 +124,8 @@ function DialogContent({
   size,
   padding,
   surface,
+  ref,
+  initialFocus,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
@@ -131,6 +134,7 @@ function DialogContent({
   forceBackdrop?: boolean
   overlayClassName?: string
 } & VariantProps<typeof dialogContentVariants>) {
+  const popupFocus = usePopupInitialFocus(ref, initialFocus)
   return (
     <DialogPortal keepMounted={keepMounted}>
       <DialogOverlay className={overlayClassName} forceRender={forceBackdrop} />
@@ -138,6 +142,8 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(dialogContentVariants({ size, padding, surface }), className)}
         {...props}
+        ref={popupFocus.ref}
+        initialFocus={popupFocus.initialFocus}
       >
         {children}
         {showCloseButton && (

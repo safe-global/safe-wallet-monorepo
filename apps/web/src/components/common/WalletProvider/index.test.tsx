@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react'
 import { http, HttpResponse } from 'msw'
+import { userEvent } from '@testing-library/user-event'
 import type { OnboardAPI, WalletState } from '@web3-onboard/core'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { act, fakerChecksummedAddress, mockWeb3Provider, renderHook, waitFor } from '@/tests/test-utils'
+import { act, fakerChecksummedAddress, mockWeb3Provider, renderHook, screen, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -10,14 +12,22 @@ import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { eip1193ProviderBuilder } from '@/tests/builders/eip1193Provider'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import * as useOnboardModule from '@/hooks/wallets/useOnboard'
+import * as nestedSafeWalletModule from '@/utils/nested-safe-wallet'
+import ParentSafeNonce from '@/components/tx-flow/features/SignerSelect/ParentSafeNonce'
 import WalletProvider from '.'
 
 jest.mock('@/hooks/useChains')
+jest.mock('@/hooks/useSafeInfo')
 
 const mockUseCurrentChain = jest.requireMock('@/hooks/useChains').useCurrentChain as jest.Mock
+const mockUseChains = jest.requireMock('@/hooks/useChains').default as jest.Mock
+const mockUseSafeInfo = jest.requireMock('@/hooks/useSafeInfo').default as jest.Mock
 
 const CURRENT_CHAIN_ID = '1'
 const OTHER_CHAIN_ID = '137'
+const CURRENT_NONCE = 10
+const QUEUED_NONCE = 11
+const RECOMMENDED_NONCE = 12
 
 const walletState = (address: string, chainId: string): WalletState => ({
   label: 'MetaMask',
@@ -75,6 +85,16 @@ const mockCgwSafes = (safes: SafeState[], options: { pending?: Promise<void> } =
     ),
   )
   return lookups
+}
+
+const mockParentSafeNonces = (parentSafeAddress: string) => {
+  const safePath = `${GATEWAY_URL}/v1/chains/${CURRENT_CHAIN_ID}/safes/${parentSafeAddress}`
+  server.use(
+    http.get(`${safePath}/nonces`, () =>
+      HttpResponse.json({ currentNonce: CURRENT_NONCE, recommendedNonce: RECOMMENDED_NONCE }),
+    ),
+    http.get(`${safePath}/transactions/queued`, () => HttpResponse.json({ next: null, previous: null, results: [] })),
+  )
 }
 
 // Lets in-flight CGW requests reach MSW and settle before asserting that nothing changed
@@ -244,6 +264,85 @@ describe('WalletProvider', () => {
       expect(result.current?.signer).toMatchObject({ address: nestedSafeAddress, threshold: 2 })
       expect(result.current?.signer?.isConnectedSafe).toBeUndefined()
       expect(result.current?.connectedWallet?.address).toBe(ownerAddress)
+    })
+
+    it('gives the nested Safe signer the latest parent Safe nonce without rebuilding the signer', async () => {
+      const getNestedWalletSpy = jest.spyOn(nestedSafeWalletModule, 'getNestedWallet')
+      const nestedSafeAddress = fakerChecksummedAddress()
+      mockOnboard([walletState(fakerChecksummedAddress(), CURRENT_CHAIN_ID)])
+      mockCgwSafes([safeAt(nestedSafeAddress, CURRENT_CHAIN_ID, 2)])
+
+      const { result } = renderWalletContext()
+      act(() => result.current?.setSignerAddress(nestedSafeAddress))
+      await waitFor(() => expect(result.current?.signer?.isSafe).toBe(true))
+      const signer = result.current?.signer
+      const chosenNonce = getNestedWalletSpy.mock.lastCall?.[4]
+
+      expect(chosenNonce?.get()).toBeUndefined()
+      act(() => result.current?.setParentSafeNonce(7))
+      expect(chosenNonce?.get()).toBe(7)
+      expect(result.current?.signer).toBe(signer)
+
+      act(() => chosenNonce?.clear())
+      expect(result.current?.getParentSafeNonce()).toBeUndefined()
+    })
+
+    it.each([
+      ['another signer is selected', fakerChecksummedAddress()],
+      ['the signer selection is reset', undefined],
+    ])('drops the chosen parent Safe nonce when %s', async (_, nextSignerAddress) => {
+      mockOnboard([walletState(fakerChecksummedAddress(), CURRENT_CHAIN_ID)])
+      mockCgwSafes([])
+      const { result } = renderWalletContext()
+      act(() => result.current?.setSignerAddress(fakerChecksummedAddress()))
+      act(() => result.current?.setParentSafeNonce(7))
+
+      act(() => result.current?.setSignerAddress(nextSignerAddress))
+
+      expect(result.current?.getParentSafeNonce()).toBeUndefined()
+    })
+
+    it('keeps the chosen parent Safe nonce when the same signer is selected again', async () => {
+      const parentSafeAddress = fakerChecksummedAddress()
+      mockOnboard([walletState(fakerChecksummedAddress(), CURRENT_CHAIN_ID)])
+      mockCgwSafes([])
+      const { result } = renderWalletContext()
+      act(() => result.current?.setSignerAddress(parentSafeAddress))
+      act(() => result.current?.setParentSafeNonce(7))
+
+      act(() => result.current?.setSignerAddress(parentSafeAddress.toLowerCase()))
+
+      expect(result.current?.getParentSafeNonce()).toBe(7)
+    })
+
+    it('gives the signer the parent Safe nonce chosen in the review step after that step unmounts', async () => {
+      const getNestedWalletSpy = jest.spyOn(nestedSafeWalletModule, 'getNestedWallet')
+      const parentSafeAddress = fakerChecksummedAddress()
+      mockOnboard([walletState(fakerChecksummedAddress(), CURRENT_CHAIN_ID)])
+      mockCgwSafes([safeAt(parentSafeAddress, CURRENT_CHAIN_ID, 2)])
+      mockParentSafeNonces(parentSafeAddress)
+      mockUseSafeInfo.mockReturnValue({ safe: safeAt(fakerChecksummedAddress(), CURRENT_CHAIN_ID, 1) })
+      mockUseChains.mockReturnValue({ configs: [chainBuilder().with({ chainId: CURRENT_CHAIN_ID }).build()] })
+      let isReviewStep = true
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <WalletProvider>
+          {children}
+          {isReviewStep && <ParentSafeNonce parentSafeAddress={parentSafeAddress} />}
+        </WalletProvider>
+      )
+      const { result, rerender } = renderHook(() => useWalletContext(), { wrapper })
+      act(() => result.current?.setSignerAddress(parentSafeAddress))
+      await waitFor(() => expect(result.current?.signer?.isSafe).toBe(true))
+      const input = await screen.findByRole('combobox')
+      await waitFor(() => expect(input).toHaveValue(String(RECOMMENDED_NONCE)))
+      await userEvent.clear(input)
+      await userEvent.type(input, String(QUEUED_NONCE))
+
+      isReviewStep = false
+      rerender()
+
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+      expect(getNestedWalletSpy.mock.lastCall?.[4].get()).toBe(QUEUED_NONCE)
     })
 
     it('prefers the selected nested Safe over a connected wallet that is itself a Safe', async () => {

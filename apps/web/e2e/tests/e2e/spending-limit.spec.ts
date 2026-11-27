@@ -1,5 +1,5 @@
 import { type Page } from '@playwright/test'
-import { Wallet, parseEther, parseUnits } from 'ethers'
+import { parseEther, parseUnits } from 'ethers'
 import { allowanceOf } from '../../src/chain/allowance'
 import { balanceOf, tokenBalanceOf } from '../../src/chain/balances'
 import { HomePage } from '../../src/pages/home.page'
@@ -37,9 +37,9 @@ test.describe('Send with a spending limit', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
-    const beneficiary = journey.owners.owner4.address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const beneficiary = journey.owners.alice.address
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const recipient = journey.newAddress()
     await seedAllowance(safe, { delegate: beneficiary, amount: parseEther(ALLOWANCE) })
     const nonceBefore = await safe.context.safe.getNonce()
 
@@ -59,9 +59,9 @@ test.describe('Send with a spending limit', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const { address: usdc, decimals, symbol } = SEPOLIA_USDC
-    const recipient = Wallet.createRandom().address
-    const beneficiary = journey.owners.owner4.address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const beneficiary = journey.owners.alice.address
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const recipient = journey.newAddress()
     await seedTokenBalance(safe, { token: SEPOLIA_USDC, amount: parseUnits(USDC_BALANCE, decimals) })
     await seedAllowance(safe, { delegate: beneficiary, amount: parseUnits(USDC_ALLOWANCE, decimals), token: usdc })
     const nonceBefore = await safe.context.safe.getNonce()

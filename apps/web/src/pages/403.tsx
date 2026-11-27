@@ -1,9 +1,8 @@
-import type { NextPage } from 'next'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { TERMS_URL } from '@safe-global/utils/config/constants'
 import SafeLogo from '@/components/common/SafeLogo'
 
-const Custom403: NextPage = () => {
+const Custom403 = () => {
   return (
     <main className="px-6 pt-[calc(var(--header-height)+1rem)]">
       <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>

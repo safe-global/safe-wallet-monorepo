@@ -9,7 +9,7 @@ import Track from '@/components/common/Track'
 import { MESSAGE_EVENTS } from '@/services/analytics/events/txList'
 import useIsSafeMessageSignableBy from '@/hooks/messages/useIsSafeMessageSignableBy'
 import { TxModalContext } from '@/components/tx-flow'
-import { SignMessageFlow } from '@/components/tx-flow/flows'
+import { SignMessageFlow } from '@/components/tx-flow/flows/SignMessageFlow'
 import CheckWallet from '@/components/common/CheckWallet'
 
 const SignMsgButton = ({ msg, compact = false }: { msg: MessageItem; compact?: boolean }): ReactElement => {
@@ -19,7 +19,8 @@ const SignMsgButton = ({ msg, compact = false }: { msg: MessageItem; compact?: b
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation()
-    setTxFlow(<SignMessageFlow {...msg} origin={msg.origin || undefined} />)
+    // Only confirms an existing message, which keeps the attribution declared when it was created
+    setTxFlow(<SignMessageFlow {...msg} origin={msg.origin || undefined} declared={undefined} />)
   }
 
   return (

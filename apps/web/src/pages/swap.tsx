@@ -1,12 +1,11 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { SwapFeature } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__'
+import SwapWidget from '@/features/swap/public/components/SwapWidget'
+import FallbackSwapWidget from '@/features/swap/public/components/FallbackSwapWidget'
 
 // Cow Swap expects native token addresses to be in the format '0xeeee...eeee'
 const adjustEthAddress = (address: string) => {
@@ -17,14 +16,11 @@ const adjustEthAddress = (address: string) => {
   return address
 }
 
-const SwapPage: NextPage = () => {
+const SwapPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
   const isCowEnabled = useHasFeature(FEATURES.NATIVE_SWAPS_COW)
-
-  // Access swap widgets via feature architecture (renders null during SSR via proxy stub)
-  const { SwapWidget, FallbackSwapWidget } = useLoadFeature(SwapFeature)
 
   let sell = undefined
   if (token && amount) {

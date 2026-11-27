@@ -8,9 +8,11 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-import { MOCK_SPACE_ID, createChainData, createChainsPageData, createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createChainData, createChainsPageData } from '@/stories/mocks/chains'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { createChainsPageDataV2 } from '@/stories/mocks/chains'
-import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/constants'
+import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/public/constants'
 import {
   ADDRESS_BOOK_TRIGGER_LABEL,
   RECIPIENT_NAME_LABEL,
@@ -34,11 +36,11 @@ const SEPOLIA_LINK = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
 const SEPOLIA_DAI = '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357'
 const SEPOLIA_UNI = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
 
-const logo = (address: string) => `https://safe-transaction-assets.safe.global/tokens/logos/${address}.png`
+const logo = (address: string) => `mock-assets/safe-transaction-assets.safe.global/tokens/logos/${address}.webp`
 const USDC_LOGO = logo('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
-const USDT_LOGO = 'https://assets.coingecko.com/coins/images/325/large/Tether.png'
+const USDT_LOGO = 'mock-assets/assets.coingecko.com/coins/images/325/large/Tether.webp'
 
-const baseChain = createChainData({ spaces: true })
+const baseChain = createChainData()
 const chain: Chain = {
   ...baseChain,
   chainId: CHAIN_ID,
@@ -193,7 +195,7 @@ const rpcHandler = (moduleGuard: string) =>
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   layout: 'fullPage',
   shadcn: true,
   pathname: '/spaces/policies',

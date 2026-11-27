@@ -29,7 +29,7 @@
       "module": {
         "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
         "name": "AllowanceModule",
-        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+        "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.webp"
       }
     }
   },
@@ -65,7 +65,7 @@
       "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134": {
         "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
         "name": "AllowanceModule",
-        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+        "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.webp"
       }
     },
     "tokenInfoIndex": null
@@ -84,7 +84,7 @@
     "refundReceiver": {
       "value": "0x0000000000000000000000000000000000000000",
       "name": null,
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "safeTxHash": "0xb82070c01297392754b4b972c064f48f4ab944c5979813c01b871c8f8d57bc4a",
     "executor": {

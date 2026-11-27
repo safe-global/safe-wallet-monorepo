@@ -20,13 +20,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/multisig-transactions`,
           params: {
+            cursor: queryArg.cursor,
             execution_date__gte: queryArg.executionDateGte,
             execution_date__lte: queryArg.executionDateLte,
             to: queryArg.to,
             value: queryArg.value,
             nonce: queryArg.nonce,
             executed: queryArg.executed,
-            cursor: queryArg.cursor,
           },
         }),
         providesTags: ['transactions'],
@@ -49,10 +49,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/module-transactions`,
           params: {
+            cursor: queryArg.cursor,
             to: queryArg.to,
             module: queryArg['module'],
             transaction_hash: queryArg.transactionHash,
-            cursor: queryArg.cursor,
           },
         }),
         providesTags: ['transactions'],
@@ -75,13 +75,30 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/incoming-transfers`,
           params: {
+            cursor: queryArg.cursor,
             trusted: queryArg.trusted,
             execution_date__gte: queryArg.executionDateGte,
             execution_date__lte: queryArg.executionDateLte,
             to: queryArg.to,
             value: queryArg.value,
             token_address: queryArg.tokenAddress,
+          },
+        }),
+        providesTags: ['transactions'],
+      }),
+      transactionsGetOutgoingTransfersV1: build.query<
+        TransactionsGetOutgoingTransfersV1ApiResponse,
+        TransactionsGetOutgoingTransfersV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/outgoing-transfers`,
+          params: {
             cursor: queryArg.cursor,
+            trusted: queryArg.trusted,
+            execution_date__gte: queryArg.executionDateGte,
+            execution_date__lte: queryArg.executionDateLte,
+            to: queryArg.to,
+            token_address: queryArg.tokenAddress,
           },
         }),
         providesTags: ['transactions'],
@@ -104,8 +121,8 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/transactions/queued`,
           params: {
-            trusted: queryArg.trusted,
             cursor: queryArg.cursor,
+            trusted: queryArg.trusted,
           },
         }),
         providesTags: ['transactions'],
@@ -117,11 +134,11 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/transactions/history`,
           params: {
+            cursor: queryArg.cursor,
             timezone_offset: queryArg.timezoneOffset,
             trusted: queryArg.trusted,
             imitation: queryArg.imitation,
             timezone: queryArg.timezone,
-            cursor: queryArg.cursor,
           },
         }),
         providesTags: ['transactions'],
@@ -163,6 +180,8 @@ export type TransactionsGetMultisigTransactionsV1ApiResponse =
 export type TransactionsGetMultisigTransactionsV1ApiArg = {
   /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
   /** Filter by execution date greater than or equal to (ISO 8601 format) */
@@ -177,8 +196,6 @@ export type TransactionsGetMultisigTransactionsV1ApiArg = {
   nonce?: string
   /** Filter by execution status (true for executed, false for pending) */
   executed?: boolean
-  /** Pagination cursor for retrieving the next set of results */
-  cursor?: string
 }
 export type TransactionsDeleteTransactionV1ApiResponse = unknown
 export type TransactionsDeleteTransactionV1ApiArg = {
@@ -194,6 +211,8 @@ export type TransactionsGetModuleTransactionsV1ApiResponse =
 export type TransactionsGetModuleTransactionsV1ApiArg = {
   /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
   /** Filter by recipient address (0x prefixed hex string) */
@@ -202,8 +221,6 @@ export type TransactionsGetModuleTransactionsV1ApiArg = {
   module?: string
   /** Filter by specific transaction hash */
   transactionHash?: string
-  /** Pagination cursor for retrieving the next set of results */
-  cursor?: string
 }
 export type TransactionsAddConfirmationV1ApiResponse =
   /** status 200 Transaction details with updated confirmation status */ TransactionDetails
@@ -222,6 +239,8 @@ export type TransactionsGetIncomingTransfersV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
   /** Filter by trust status (true for trusted tokens, false for untrusted) */
   trusted?: boolean
   /** Filter by execution date greater than or equal to (ISO 8601 format) */
@@ -234,8 +253,26 @@ export type TransactionsGetIncomingTransfersV1ApiArg = {
   value?: string
   /** Filter by token contract address (0x prefixed hex string for ERC-20 tokens) */
   tokenAddress?: string
+}
+export type TransactionsGetOutgoingTransfersV1ApiResponse =
+  /** status 200 Paginated list of outgoing transfers */ TransferTransactionItemPage
+export type TransactionsGetOutgoingTransfersV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address (0x prefixed hex string) */
+  safeAddress: string
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
+  /** When true (default), ERC-20 transfers of untrusted tokens are omitted, since any token contract can emit a transfer the Safe never made. ERC-721 and native transfers are not filtered. ERC-20 transfers without value are always omitted. */
+  trusted?: boolean
+  /** Filter by execution date greater than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z) */
+  executionDateGte?: string
+  /** Filter by execution date less than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z) */
+  executionDateLte?: string
+  /** Filter by transfer recipient address (0x prefixed hex string) */
+  to?: string
+  /** Filter by token contract address (0x prefixed hex string) */
+  tokenAddress?: string
 }
 export type TransactionsPreviewTransactionV1ApiResponse =
   /** status 200 Transaction preview with simulation results, gas estimates, and potential effects */ TransactionPreview
@@ -254,10 +291,10 @@ export type TransactionsGetTransactionQueueV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
-  /** Filter by trust status (true for trusted transactions, false for untrusted) */
-  trusted?: boolean
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
+  /** Filter by trust status (true for trusted transactions, false for untrusted) */
+  trusted?: boolean
 }
 export type TransactionsGetTransactionsHistoryV1ApiResponse =
   /** status 200 Paginated list of historical transactions */ TransactionItemPage
@@ -266,6 +303,8 @@ export type TransactionsGetTransactionsHistoryV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
   /** Deprecated: Timezone offset in milliseconds for date formatting (use timezone parameter instead) */
   timezoneOffset?: string
   /** Filter by trust status (default: true, set to false to include untrusted transactions) */
@@ -274,8 +313,6 @@ export type TransactionsGetTransactionsHistoryV1ApiArg = {
   imitation?: boolean
   /** IANA timezone identifier for date formatting (e.g., "America/New_York") */
   timezone?: string
-  /** Pagination cursor for retrieving the next set of results */
-  cursor?: string
 }
 export type TransactionsProposeTransactionV1ApiResponse =
   /** status 200 Transaction proposed successfully */ TransactionDetails
@@ -916,6 +953,17 @@ export type IncomingTransferPage = {
   previous?: string | null
   results: IncomingTransfer[]
 }
+export type TransactionItem = {
+  type: 'TRANSACTION'
+  transaction: Transaction
+  conflictType: 'None'
+}
+export type TransferTransactionItemPage = {
+  count?: number | null
+  next?: string | null
+  previous?: string | null
+  results: TransactionItem[]
+}
 export type TransactionPreview = {
   txInfo:
     | CreationTransactionInfo
@@ -961,11 +1009,6 @@ export type QueuedItemPage = {
   previous?: string | null
   results: (ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem)[]
 }
-export type TransactionItem = {
-  type: 'TRANSACTION'
-  transaction: Transaction
-  conflictType: 'None'
-}
 export type DateLabel = {
   type: 'DATE_LABEL'
   timestamp: number
@@ -991,6 +1034,16 @@ export type NestedTransactionDto = {
   nonce: string
   notes?: string | null
 }
+export type DeclaredAttributionDto = {
+  /** Where the user started the request. Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, MCP, CLI. Truncated to 64 characters. */
+  channel?: string | null
+  /** App name. Truncated to 256 characters. */
+  appName?: string | null
+  /** App origin and path. Truncated to 2048 characters. */
+  appUrl?: string | null
+  /** ID of a listed Safe App. */
+  appId?: number | null
+}
 export type ProposeTransactionDto = {
   to: string
   value: string
@@ -1009,6 +1062,8 @@ export type ProposeTransactionDto = {
   origin?: string | null
   /** A child transaction for a second Safe, authorised by the parent transaction being an `approveHash` call committing to its hash. Unknown keys are rejected. */
   nestedTransaction?: NestedTransactionDto | null
+  /** Where the request came from, as reported by the client. */
+  declared?: DeclaredAttributionDto | null
 }
 export type CreationTransaction = {
   created: string
@@ -1031,6 +1086,8 @@ export const {
   useTransactionsAddConfirmationV1Mutation,
   useTransactionsGetIncomingTransfersV1Query,
   useLazyTransactionsGetIncomingTransfersV1Query,
+  useTransactionsGetOutgoingTransfersV1Query,
+  useLazyTransactionsGetOutgoingTransfersV1Query,
   useTransactionsPreviewTransactionV1Mutation,
   useTransactionsGetTransactionQueueV1Query,
   useLazyTransactionsGetTransactionQueueV1Query,

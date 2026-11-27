@@ -14,7 +14,7 @@ This app **reuses `apps/web/src` verbatim** via aliases in `vite.config.ts`. Fea
 
 ## Commands
 
-`yarn workspace @safe-global/web-tanstack dev` — root `yarn verify:changed` does NOT cover this app; run `node scripts/verify.mjs --changed --workspace=web-tanstack`.
+`yarn workspace @safe-global/web-tanstack dev` — root `yarn verify:changed` doesn't cover this app; run `node scripts/verify.mjs --changed --workspace=web-tanstack`.
 
 ## Build specifics
 

@@ -1,13 +1,10 @@
 import { useMemo, useState } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import TableCard from '@safe-global/views/components/common/TableCard'
-import {
-  useIsInvited,
-  useIsAdmin,
-  useAddressBookSearch,
-  useSpaceAddressBookState,
-  useAddressBookRequestsState,
-} from '@/features/spaces'
+import { useIsInvited, useIsAdmin } from '../../public/hooks/useSpaceMembers'
+import useAddressBookSearch from '../../hooks/useAddressBookSearch'
+import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressBook'
+import { useAddressBookRequestsState } from '../../hooks/useGetAddressBookRequests'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -32,6 +29,7 @@ import LocalContactsCsvActions from './LocalContactsCsvActions'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -75,6 +73,7 @@ const SpaceAddressBook = () => {
       name,
       address,
       chainIds: Array.from(chainIds),
+      tagIds: [],
       createdBy: walletAddress,
       createdByUserId: 0,
       lastUpdatedBy: '',
@@ -128,7 +127,7 @@ const SpaceAddressBook = () => {
           }}
         >
           <TabsList variant="underline" className="flex-wrap mb-4">
-            <TabsTrigger value="workspace" className="cursor-pointer">
+            <TabsTrigger value="workspace" className="cursor-pointer" data-tour={TOUR_TARGETS.workspaceContactsTab}>
               <Tooltip>
                 <TooltipTrigger render={<span />}>
                   Workspace contacts{isAddressBookSettled ? ` (${addressBookItems.length})` : ''}
@@ -138,7 +137,7 @@ const SpaceAddressBook = () => {
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
-                <TabsTrigger value="mine" className="cursor-pointer">
+                <TabsTrigger value="mine" className="cursor-pointer" data-tour={TOUR_TARGETS.localContactsTab}>
                   <Tooltip>
                     <TooltipTrigger render={<span />}>Local contacts ({sortedLocalContacts.length})</TooltipTrigger>
                     <TooltipContent>These contacts are in your local browser storage</TooltipContent>
