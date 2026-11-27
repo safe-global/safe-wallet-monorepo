@@ -67,7 +67,7 @@ const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
 export const toActiveRows = (
   dtos: ActivePolicyDto[],
   chains: Chain[],
-  resolveErc20Token: Erc20TokenResolver,
+  resolveErc20Token?: Erc20TokenResolver,
 ): Policy[] => {
   const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
 

@@ -42,3 +42,8 @@ export const EXISTING_LIMIT_IN_POLICY_ERROR =
   'A spender in this policy already has a spending limit for one of these tokens. Go back and remove that token.'
 
 export const REVIEW_STEP_TITLE = 'Confirm policy'
+
+export const ALLOWLIST_NOTICE_TITLE = 'This Safe account has a recipient allowlist'
+export const ALLOWLIST_NOTICE_DESCRIPTION =
+  'Spending limits go through the allowlist too. A spender can only send the allowed tokens to the allowed recipients.'
+export const ALLOWLIST_NOTICE_LINK = 'Learn more'
