@@ -708,8 +708,8 @@ describe('CreateTokenTransfer', () => {
     it('renders the standard warning icon on the max-recipients-reached alert', async () => {
       const { user, getByTestId } = renderCreateTokenTransfer()
 
-      // MAX_RECIPIENTS is 5 — starting from 1 recipient, 4 more clicks fills the cap.
-      for (let i = 0; i < 4; i++) {
+      // The cap is 10 recipients: starting from 1 recipient, 9 more clicks fill it.
+      for (let i = 0; i < 9; i++) {
         await user.click(getByTestId('add-recipient-btn'))
       }
 
@@ -721,7 +721,7 @@ describe('CreateTokenTransfer', () => {
     it('renders the max-recipients-reached alert filled (tinted background, no border)', async () => {
       const { user, getByTestId } = renderCreateTokenTransfer()
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 9; i++) {
         await user.click(getByTestId('add-recipient-btn'))
       }
 
@@ -736,20 +736,20 @@ describe('CreateTokenTransfer', () => {
       }
     }
 
-    it('recommends CSV Airdrop for more than 5 recipients once a second recipient is added', async () => {
+    it('recommends CSV Airdrop for more than 10 recipients once a second recipient is added', async () => {
       const { user, getByTestId } = renderCreateTokenTransfer()
 
       await addRecipients(user, getByTestId, 1)
 
       expect(getByTestId('csv-airdrop-hint')).toHaveTextContent(
-        'If you want to add more than 5 recipients, use CSV Airdrop',
+        'If you want to add more than 10 recipients, use CSV Airdrop',
       )
     })
 
     it('recommends CSV Airdrop when no more recipients can be added', async () => {
       const { user, getByTestId } = renderCreateTokenTransfer()
 
-      await addRecipients(user, getByTestId, 4)
+      await addRecipients(user, getByTestId, 9)
 
       expect(getByTestId('max-recipients-reached')).toHaveTextContent(
         /No more recipients can be added\.\s*Please use CSV Airdrop/,
@@ -757,15 +757,15 @@ describe('CreateTokenTransfer', () => {
     })
 
     it.each([
-      ['the hint', 1, 'csv-airdrop-hint'],
-      ['the max recipients alert', 4, 'max-recipients-reached'],
-    ])('opens the CSV Airdrop app from %s', async (_, added, alertTestId) => {
+      ['the hint', 1, 'csv-airdrop-hint', 'Use CSV Airdrop'],
+      ['the max recipients alert', 9, 'max-recipients-reached', "You've reached the limit of 10 recipients"],
+    ])('opens the CSV Airdrop app from %s', async (_, added, alertTestId, dialogText) => {
       const { user, getByTestId } = renderCreateTokenTransfer()
       await addRecipients(user, getByTestId, added)
 
       await user.click(within(getByTestId(alertTestId)).getByRole('button', { name: 'CSV Airdrop' }))
 
-      expect(getByTestId('csvairdrop-dialog')).toHaveTextContent('Use CSV Airdrop')
+      expect(getByTestId('csvairdrop-dialog')).toHaveTextContent(dialogText)
       expect(getByTestId('open-app-btn')).toHaveAttribute(
         'href',
         expect.stringContaining(encodeURIComponent(csvApp.url)),
@@ -776,7 +776,7 @@ describe('CreateTokenTransfer', () => {
       useRemoteSafeAppsSpy.mockReturnValue([[], undefined, false])
       const { user, getByTestId, queryByTestId, queryByText } = renderCreateTokenTransfer()
 
-      await addRecipients(user, getByTestId, 4)
+      await addRecipients(user, getByTestId, 9)
 
       expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
       expect(getByTestId('max-recipients-reached')).toHaveTextContent('No more recipients can be added.')
@@ -1007,7 +1007,7 @@ describe('CreateTokenTransfer', () => {
       const { getByTestId } = renderForm()
 
       expect(getByTestId('add-recipient-btn')).toBeEnabled()
-      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/10')
     })
 
     it('does not offer to add a recipient when mass payouts are disabled', () => {
@@ -1024,15 +1024,20 @@ describe('CreateTokenTransfer', () => {
       expect(queryByTestId('add-recipient-btn')).not.toBeInTheDocument()
     })
 
-    it('stops at 5 recipients', async () => {
+    it('stops at 10 recipients', async () => {
       const { user, getByTestId, getAllByTestId } = renderForm()
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 8; i++) {
         await user.click(getByTestId('add-recipient-btn'))
       }
 
-      expect(getAllByTestId('token-amount-field')).toHaveLength(5)
-      expect(getByTestId('recipients-count')).toHaveTextContent('5/5')
+      expect(getByTestId('recipients-count')).toHaveTextContent('9/10')
+      expect(getByTestId('add-recipient-btn')).toBeEnabled()
+
+      await user.click(getByTestId('add-recipient-btn'))
+
+      expect(getAllByTestId('token-amount-field')).toHaveLength(10)
+      expect(getByTestId('recipients-count')).toHaveTextContent('10/10')
       expect(getByTestId('add-recipient-btn')).toBeDisabled()
     })
 
@@ -1040,12 +1045,12 @@ describe('CreateTokenTransfer', () => {
       const { user, getByTestId, getAllByTestId } = renderForm()
 
       await user.click(getByTestId('add-recipient-btn'))
-      expect(getByTestId('recipients-count')).toHaveTextContent('2/5')
+      expect(getByTestId('recipients-count')).toHaveTextContent('2/10')
 
       await user.click(getAllByTestId('remove-recipient-btn')[0])
 
       expect(getAllByTestId('token-amount-field')).toHaveLength(1)
-      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/10')
     })
 
     it('fills in the whole balance when Max is clicked for the second recipient', async () => {
