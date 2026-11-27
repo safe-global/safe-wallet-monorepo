@@ -15,7 +15,15 @@ type EditOwnerValues = {
   name: string
 }
 
-export const EditOwnerDialog = ({ chainId, address, name }: { chainId: string; address: string; name?: string }) => {
+type EditOwnerDialogProps = {
+  chainId: string
+  address: string
+  name?: string
+  /** The shown name is the Workspace's, which a local name cannot replace */
+  isWorkspaceName?: boolean
+}
+
+export const EditOwnerDialog = ({ chainId, address, name, isWorkspaceName = false }: EditOwnerDialogProps) => {
   const [open, setOpen] = useState(false)
 
   const dispatch = useAppDispatch()
@@ -55,13 +63,21 @@ export const EditOwnerDialog = ({ chainId, address, name }: { chainId: string; a
           <TooltipTrigger
             render={
               <span>
-                <Button variant="ghost" size="icon-sm" onClick={() => setOpen(true)}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Edit signer"
+                  onClick={() => setOpen(true)}
+                  disabled={isWorkspaceName}
+                >
                   <EditIcon className="size-4 text-muted-foreground" />
                 </Button>
               </span>
             }
           />
-          <TooltipContent>Edit signer</TooltipContent>
+          <TooltipContent>
+            {isWorkspaceName ? 'Rename this signer in the Workspace address book' : 'Edit signer'}
+          </TooltipContent>
         </Tooltip>
       </Track>
 

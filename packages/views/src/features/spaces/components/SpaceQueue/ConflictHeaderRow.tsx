@@ -3,21 +3,38 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { QUEUE_COLUMNS } from './columns'
+import { QUEUE_COLUMNS, QUEUE_ROW_LABEL } from './columns'
+import { ConflictBracketStart } from './ConflictBracket'
+import QueueNonce from './QueueNonce'
 
 const ConflictHeaderRow = ({
   nonce,
   size,
+  stateHint,
   rowProps,
 }: {
   nonce?: number
   size: number
+  /** Where the group's first option stands, e.g. "Next in line. Needs your signature." */
+  stateHint?: string
   rowProps?: ComponentProps<'tr'>
 }): ReactElement => (
   <TableRow data-no-hover data-no-divider {...rowProps}>
-    <TableCell className="pt-4 pb-1 text-center text-sm tabular-nums text-muted-foreground">{nonce}</TableCell>
-    <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="pt-4 pb-1">
-      <span className="flex items-center gap-2 text-xs">
+    {/* Top-aligned beside the badge when the label wraps; ConflictBracketStart's top-10 depends on pt-4 text-sm */}
+    <TableCell
+      data-pin="start"
+      className="relative pt-4 pb-1 align-top text-center text-sm tabular-nums text-muted-foreground"
+    >
+      <QueueNonce
+        nonce={nonce}
+        state="Conflicting transaction"
+        hint={`${stateHint ? `${stateHint} ` : ''}${size} conflicting transactions share this nonce; only one can execute.`}
+      />
+      <ConflictBracketStart />
+    </TableCell>
+    <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="pt-4 pb-1 whitespace-normal">
+      {/* Wraps rather than widening a narrow panel */}
+      <span className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs ${QUEUE_ROW_LABEL}`}>
         <Badge variant="warning">Conflicting</Badge>
         <span className="text-muted-foreground">
           Only 1/{size} transactions can execute. Once it does, the {size === 2 ? 'other becomes' : 'others become'}{' '}

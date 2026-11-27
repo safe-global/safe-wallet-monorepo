@@ -47,9 +47,7 @@ const setup = createMockStory({
 })
 
 const withPrototype: Decorator<Args> = (Story, { args }) => (
-  <DefiV1Context.Provider
-    value={{ framing: 'treasury', nudge: 'off', plan: 'free', setup: 'stepper', milestone: 'm1', scope: 'safe' }}
-  >
+  <DefiV1Context.Provider value={{ framing: 'treasury', nudge: 'off', plan: 'free', scope: 'safe' }}>
     <AppsV1Context.Provider value={{ view: args.view, customApps: [CUSTOM_APP] }}>
       <Story />
     </AppsV1Context.Provider>

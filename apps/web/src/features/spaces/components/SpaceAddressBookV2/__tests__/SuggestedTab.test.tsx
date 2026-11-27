@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker'
 import userEvent from '@testing-library/user-event'
-import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { SuggestedContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { useUpsertWorkspaceSafeNames } from '../../../public/hooks/useUpsertWorkspaceSafeName'
@@ -35,15 +34,9 @@ jest.mock('@safe-global/views/components/common/Identicon', () => {
   return Identicon
 })
 jest.mock('../../SpaceAddressBook/RequestToAddButton', () => {
-  const RequestToAddButton = ({
-    name,
-    alreadyRequested,
-    location,
-  }: {
-    name: string
-    alreadyRequested?: boolean
-    location?: string
-  }) => <button data-location={location}>{alreadyRequested ? `${name} requested` : `Request ${name}`}</button>
+  const RequestToAddButton = ({ name, location }: { name: string; location?: string }) => (
+    <button data-location={location}>Request {name}</button>
+  )
   return RequestToAddButton
 })
 
@@ -63,20 +56,6 @@ const suggestionBuilder = () =>
     reason: { kind: 'signer', safes: [faker.company.name()] },
   })
 
-const requestBuilder = () =>
-  Builder.new<AddressBookRequestItemDto>().with({
-    id: faker.number.int(),
-    name: faker.person.fullName(),
-    address: checksumAddress(faker.finance.ethereumAddress()),
-    chainIds: [CHAIN.chainId],
-    requestedBy: faker.internet.email(),
-    requestedByUserId: faker.number.int(),
-    reviewedBy: null,
-    reviewedByUserId: null,
-    status: 'PENDING',
-    createdAt: faker.date.recent().toISOString(),
-  })
-
 type Props = Parameters<typeof SuggestedTab>[0]
 
 const renderTab = (props: Partial<Props> = {}) =>
@@ -89,8 +68,6 @@ const renderTab = (props: Partial<Props> = {}) =>
       isAdmin
       isInvited={false}
       isPrivateAddressBookEnabled
-      pendingRequests={[]}
-      isRequestsSettled
       {...props}
     />,
   )
@@ -113,6 +90,16 @@ const addSelected = async (suggestions: SuggestedContact[]) => {
   await userEvent.click(screen.getByRole('button', { name: `Add ${suggestions.length} to Workspace` }))
   return screen.findByRole('dialog')
 }
+
+const SEARCH_LABEL = 'Search contacts by name, address or Safe'
+
+const uniqueSuggestion = () =>
+  suggestionBuilder()
+    .with({
+      suggestedName: `${faker.string.alpha(12)} signer 1`,
+      reason: { kind: 'signer', safes: [faker.string.alpha(12)] },
+    })
+    .build()
 
 describe('SuggestedTab', () => {
   beforeEach(() => {
@@ -211,18 +198,13 @@ describe('SuggestedTab', () => {
   })
 
   it('offers Request to add to members when private address books are on', () => {
-    const [open, requested] = [suggestionBuilder().build(), suggestionBuilder().build()]
-    renderTab({
-      suggestions: [open, requested],
-      isAdmin: false,
-      pendingRequests: [requestBuilder().with({ address: requested.address.toLowerCase() }).build()],
-    })
+    const suggestion = suggestionBuilder().build()
+    renderTab({ suggestions: [suggestion], isAdmin: false })
 
-    expect(screen.getByRole('button', { name: `Request ${open.suggestedName}` })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: `Request ${suggestion.suggestedName}` })).toHaveAttribute(
       'data-location',
       'suggested',
     )
-    expect(screen.getByRole('button', { name: `${requested.suggestedName} requested` })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
   })
 
@@ -240,5 +222,53 @@ describe('SuggestedTab', () => {
 
     expect(screen.queryByRole('button', { name: `Request ${suggestion.suggestedName}` })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
+  })
+
+  describe('search', () => {
+    it.each([
+      { field: 'suggested name', queryOf: (item: SuggestedContact) => item.suggestedName.slice(0, 8) },
+      { field: 'address', queryOf: (item: SuggestedContact) => item.address.slice(6, 18).toLowerCase() },
+      { field: 'Safe name', queryOf: (item: SuggestedContact) => item.reason.safes[0].toUpperCase() },
+    ])('narrows the list by $field', async ({ queryOf }) => {
+      const [match, other] = [uniqueSuggestion(), uniqueSuggestion()]
+      renderTab({ suggestions: [match, other] })
+
+      await userEvent.type(screen.getByLabelText(SEARCH_LABEL), queryOf(match))
+
+      expect(screen.getByText(match.suggestedName)).toBeInTheDocument()
+      expect(screen.queryByText(other.suggestedName)).not.toBeInTheDocument()
+    })
+
+    it('shows no results and clears the search', async () => {
+      const suggestion = uniqueSuggestion()
+      renderTab({ suggestions: [suggestion] })
+
+      await userEvent.type(screen.getByLabelText(SEARCH_LABEL), 'no such suggestion')
+      const noResults = screen.getByTestId('address-book-no-results')
+
+      await userEvent.click(within(noResults).getByRole('button', { name: 'Clear search' }))
+
+      expect(screen.getByText(suggestion.suggestedName)).toBeInTheDocument()
+    })
+
+    it('unselects a row the search hides', async () => {
+      const [kept, hidden] = [uniqueSuggestion(), uniqueSuggestion()]
+      renderTab({ suggestions: [kept, hidden] })
+      await userEvent.click(screen.getByRole('checkbox', { name: `Select ${kept.suggestedName}` }))
+      await userEvent.click(screen.getByRole('checkbox', { name: `Select ${hidden.suggestedName}` }))
+
+      await userEvent.type(screen.getByLabelText(SEARCH_LABEL), kept.suggestedName)
+      await userEvent.clear(screen.getByLabelText(SEARCH_LABEL))
+
+      expect(screen.getByRole('button', { name: 'Add 1 to Workspace' })).toBeInTheDocument()
+      expect(screen.getByRole('checkbox', { name: `Select ${hidden.suggestedName}` })).not.toBeChecked()
+    })
+
+    it('has no search when there are no suggestions', () => {
+      renderTab({ suggestions: [] })
+
+      expect(screen.queryByLabelText(SEARCH_LABEL)).not.toBeInTheDocument()
+      expect(screen.getByTestId('suggestions-empty')).toBeInTheDocument()
+    })
   })
 })

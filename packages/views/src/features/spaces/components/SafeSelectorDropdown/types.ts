@@ -72,4 +72,6 @@ export interface SafeSelectorDropdownProps {
    * reordered top-level addresses, in display order.
    */
   onReorder?: (orderedAddresses: string[]) => void
+  /** Shows the selected Safe read-only, e.g. for a Workspace flow whose Safe is fixed. */
+  locked?: boolean
 }

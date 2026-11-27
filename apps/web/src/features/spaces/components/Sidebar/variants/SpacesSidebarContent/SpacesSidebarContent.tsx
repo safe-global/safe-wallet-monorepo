@@ -1,4 +1,5 @@
 import { type ReactElement, useMemo } from 'react'
+import { TrendingUp } from 'lucide-react'
 import { useCurrentSpaceId } from '../../../../public/hooks/useCurrentSpaceId'
 import { useIsActiveMember } from '../../../../public/hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
@@ -13,6 +14,9 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
+import { useDefiV1 } from '@/features/earn/public/hooks/useDefiV1'
+
+const TREASURY: SidebarItemConfig = { icon: TrendingUp, label: 'Treasury', href: '/spaces/treasury' }
 
 export const SpacesSidebarContent = ({
   selectedSpace,
@@ -28,6 +32,8 @@ export const SpacesSidebarContent = ({
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
   const isAnnounced = useIsSafeProAnnouncementEnabled()
   const isSafePro = useIsSafeProEnabled()
+  const defiV1 = useDefiV1()
+  const isOnTreasury = defiV1?.scope === 'workspace'
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -41,7 +47,8 @@ export const SpacesSidebarContent = ({
   // The spaces index (/spaces) is exact-match only — otherwise every space
   // sub-route would also highlight Home.
   const isItemActive = (item: SidebarItemConfig, pathname: string) => {
-    if (item.href === AppRoutes.spaces.index) return pathname === item.href
+    if (item.href === TREASURY.href) return isOnTreasury
+    if (item.href === AppRoutes.spaces.index) return pathname === item.href && !isOnTreasury
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 
@@ -74,10 +81,12 @@ export const SpacesSidebarContent = ({
     [gatedOffHrefs],
   )
 
-  const filteredMainNavigation = useMemo(
-    () => spacesMainNavigation.filter((i) => !gatedOffHrefs.has(i.href)),
-    [gatedOffHrefs],
-  )
+  const filteredMainNavigation = useMemo(() => {
+    const items = spacesMainNavigation.filter((i) => !gatedOffHrefs.has(i.href))
+    if (!defiV1) return items
+    const after = items.findIndex((i) => i.href === AppRoutes.spaces.index) + 1
+    return [...items.slice(0, after), TREASURY, ...items.slice(after)]
+  }, [gatedOffHrefs, defiV1])
 
   const { mainNavItems, setupGroup } = useResolvedSidebarNav(filteredMainNavigation, filteredSetupGroup, {
     getLink,

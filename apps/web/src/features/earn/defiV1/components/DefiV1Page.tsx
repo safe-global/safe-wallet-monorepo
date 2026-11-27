@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Orbit, Repeat2, Sprout } from 'lucide-react'
+import { ArrowRight, Orbit, Repeat2 } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
@@ -14,7 +14,6 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { DEFI_V1_COPY, formatCompactUsd } from '../copy'
 import {
   EXISTING_POSITIONS,
-  IDLE_CASH,
   IDLE_MIX,
   OPERATIONS,
   OPPORTUNITIES,
@@ -24,7 +23,6 @@ import {
 import {
   buildShelf,
   byExitTime,
-  depositRoute,
   groupOpportunities,
   heldIn,
   holdingsFor,
@@ -39,15 +37,11 @@ import {
 import type { AssetType, DefiV1Config, GroupBy, Operation, Opportunity, Position, Sort, SortKey } from '../types'
 import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
-import { DepositButton } from './DepositButton'
 import { MoveFundsDialog, type HubTab } from './MoveFundsDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
-import { SetUpInvestmentDialog } from './SetUpInvestmentDialog'
-import { SetUpInvestmentDrawer } from './SetUpInvestmentDrawer'
 import type { CreatedInvestment } from './InvestmentForm'
-import { SetUpInvestmentFlow, SetUpInvestmentStepper } from './SetUpInvestmentStepper'
-import { InvestButton } from './InvestButton'
+import { SetUpInvestmentFlow } from './SetUpInvestmentStepper'
 import { TreasurySummary } from './TreasurySummary'
 import { OpportunitiesTable, type OpportunityGroup } from './TreasuryTables'
 
@@ -75,8 +69,7 @@ const toPositions = (list: typeof EXISTING_POSITIONS, safe?: string): Position[]
       : []
   })
 
-export const initialPositions = ({ scope, empty }: Pick<DefiV1Config, 'scope' | 'empty'>): Position[] => {
-  if (empty) return []
+export const initialPositions = ({ scope }: Pick<DefiV1Config, 'scope'>): Position[] => {
   if (scope === 'workspace') return WORKSPACE_SAFES.flatMap((safe) => toPositions(safe.positions, safe.name))
   return toPositions(EXISTING_POSITIONS)
 }
@@ -102,14 +95,12 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [showAll, setShowAll] = useState(false)
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [isComparing, setIsComparing] = useState(false)
-  const [hubTab, setHubTab] = useState<HubTab>('swap')
+  const [hubTab, setHubTab] = useState<HubTab>('deposit')
   const [isMoving, setIsMoving] = useState(false)
+  const [depositFor, setDepositFor] = useState<Opportunity | null>(null)
   const [operations, setOperations] = useState<Operation[]>(OPERATIONS)
-  const [isCreating, setIsCreating] = useState(false)
-  const [setupFor, setSetupFor] = useState<Opportunity | null>(null)
   const router = useRouter()
-  const isM2 = config.milestone === 'm2'
-  const canCreate = isM2 && config.plan === 'pro'
+  const isPro = config.plan === 'pro'
   const isWorkspace = config.scope === 'workspace'
   const locked = (item: Opportunity) => isLocked(item, config.plan)
   const goTo = (pathname: string) => router.push({ pathname, query: router.query })
@@ -159,20 +150,19 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
       { key: 'opportunities', title: DEFI_V1_COPY.sections.opportunities, showColumns: true, items: others },
     ]
   }, [listed, groupBy, investedIds, hasInvestments])
-  const heldInOf = (item: Opportunity) => (canCreate ? heldIn(operations, item.id) : undefined)
-  const SetUp = { dialog: SetUpInvestmentDialog, drawer: SetUpInvestmentDrawer, stepper: SetUpInvestmentStepper }[
-    config.setup
-  ]
+  const heldInOf = (item: Opportunity) => (isPro ? heldIn(operations, item.id) : undefined)
   const setupOptions = RANKED.filter((item) => !locked(item))
-  const createInvestment = ({ operation, opportunity, amount }: CreatedInvestment) => {
+  const createInvestment = ({ operation, opportunity, amount, safe }: CreatedInvestment) => {
     if (operation) setOperations((current) => [...current, operation])
-    setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending: true }, ...current])
+    setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending: true, safe }, ...current])
   }
-  const openSetup = (item: Opportunity | null) => {
-    if (config.setup === 'drawer') setSelected(null)
-    setSetupFor(item)
-    setIsCreating(true)
+  const openHub = (tab: HubTab, item: Opportunity | null = null) => {
+    setSelected(null)
+    setDepositFor(item)
+    setHubTab(tab)
+    setIsMoving(true)
   }
+  const deposit = (item: Opportunity | null) => (item && locked(item) ? setSelected(item) : openHub('deposit', item))
 
   const compareItems = RANKED.filter((item) => compareIds.includes(item.id))
   const toggleCompare = (id: string) =>
@@ -181,23 +171,12 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     selection: { selected: compareIds, isFull: compareIds.length >= MAX_COMPARE, onToggle: toggleCompare },
     isLocked: locked,
     onSelect: setSelected,
-    onInvest: canCreate ? openSetup : undefined,
-    actionLabel: (item: Opportunity) =>
-      isM2 ? DEFI_V1_COPY.action.rowLabel[depositRoute(item, IDLE_CASH)] : DEFI_V1_COPY.action.deposit,
+    onDeposit: deposit,
     safesOf: isWorkspace && safeFilter === ALL ? safesOf : undefined,
     sort,
     onSort: (key: SortKey) => setSort((current) => nextSort(current, key)),
     holdingOf,
     heldInOf,
-  }
-
-  const onDeposited = ({ opportunity, amount, pending, operationId, created, safe }: ActionResult) => {
-    setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending, safe }, ...current])
-    if (created) setOperations((current) => [...current, created])
-    if (operationId && !pending)
-      setOperations((current) =>
-        current.map((item) => (item.id === operationId ? { ...item, invested: item.invested + amount } : item)),
-      )
   }
 
   const onWithdrawn = ({ opportunity, amount, pending }: ActionResult) => {
@@ -215,63 +194,69 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     <div className="@container min-w-0 px-6 pb-8 pt-5" data-testid="defi-v1-page">
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Typography as="h1" variant="h3">
-            {DEFI_V1_COPY.tabName[config.framing]}
-          </Typography>
+          <div className="flex flex-col gap-1">
+            <Typography as="h1" variant="h3">
+              {isWorkspace ? DEFI_V1_COPY.workspace.title : DEFI_V1_COPY.tabName[config.framing]}
+            </Typography>
+            <Typography variant="paragraph-small" color="muted">
+              {isWorkspace ? DEFI_V1_COPY.workspace.lead : DEFI_V1_COPY.tabLead}
+            </Typography>
+          </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (!isM2) return goTo(AppRoutes.swap)
-                setHubTab('swap')
-                setIsMoving(true)
-              }}
-            >
+            <Button variant="outline" onClick={() => openHub('swap')}>
               <Repeat2 />
               {DEFI_V1_COPY.swap}
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (!isM2) return goTo(AppRoutes.bridge)
-                setHubTab('bridge')
-                setIsMoving(true)
-              }}
-            >
+            <Button variant="outline" onClick={() => openHub('bridge')}>
               <Orbit />
               {DEFI_V1_COPY.bridge}
             </Button>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          {isWorkspace ? (
-            <>
-              <DropdownMenu>
-                <DropdownMenuTrigger render={<Button variant="outline" size="sm" data-testid="safe-filter" />}>
-                  {safeFilter === ALL ? DEFI_V1_COPY.workspace.allSafes : safeFilter}
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuRadioGroup value={safeFilter} onValueChange={(value) => setSafeFilter(String(value))}>
-                    <DropdownMenuRadioItem value={ALL}>{DEFI_V1_COPY.workspace.allSafes}</DropdownMenuRadioItem>
-                    {SAFE_NAMES.map((name) => (
-                      <DropdownMenuRadioItem key={name} value={name}>
-                        {name}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {safeFilter === ALL && <span>{DEFI_V1_COPY.workspace.across(SAFE_NAMES.length)}</span>}
-            </>
-          ) : (
-            <span>{DEFI_V1_COPY.workspace.thisSafe}</span>
-          )}
-        </div>
-        <TreasurySummary
-          summary={summary}
-          idleAssets={idleByAsset(summary.idle, IDLE_MIX)}
-          earnedBy={earnedByInvestment(positions)}
-        />
+        {isWorkspace && (
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<Button variant="outline" size="sm" data-testid="safe-filter" />}>
+                {safeFilter === ALL ? DEFI_V1_COPY.workspace.allSafes : safeFilter}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuRadioGroup value={safeFilter} onValueChange={(value) => setSafeFilter(String(value))}>
+                  <DropdownMenuRadioItem value={ALL}>{DEFI_V1_COPY.workspace.allSafes}</DropdownMenuRadioItem>
+                  {SAFE_NAMES.map((name) => (
+                    <DropdownMenuRadioItem key={name} value={name}>
+                      {name}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {safeFilter === ALL && <span>{DEFI_V1_COPY.workspace.across(SAFE_NAMES.length)}</span>}
+          </div>
+        )}
+        {isPro && !isWorkspace && (
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground" data-testid="workspace-link">
+            <span>{DEFI_V1_COPY.workspace.partOf}</span>
+            <Button variant="ghost" size="sm" onClick={() => goTo(AppRoutes.spaces.index)}>
+              {DEFI_V1_COPY.workspace.seeAll}
+              <ArrowRight />
+            </Button>
+          </div>
+        )}
+        {isPro ? (
+          <TreasurySummary
+            summary={summary}
+            idleAssets={idleByAsset(summary.idle, IDLE_MIX)}
+            earnedBy={earnedByInvestment(positions)}
+          />
+        ) : (
+          <Typography variant="paragraph-small" color="muted" className="tabular-nums" data-testid="summary-line">
+            {DEFI_V1_COPY.summary.line(
+              formatCompactUsd(summary.invested),
+              formatCompactUsd(summary.earned),
+              formatCompactUsd(summary.idle),
+            )}
+          </Typography>
+        )}
       </div>
 
       <section aria-label={DEFI_V1_COPY.sections.opportunities} className="flex flex-col gap-4">
@@ -284,24 +269,11 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           onCompare={() => setIsComparing(true)}
           hasInvestments={investedIds.length > 0}
           invest={
-            isM2 ? (
-              <InvestButton plan={config.plan} onInvest={() => openSetup(null)} />
-            ) : (
-              <DepositButton options={setupOptions} onPick={setSelected} />
-            )
+            <Button size="action" onClick={() => deposit(null)} data-testid="deposit-button">
+              {DEFI_V1_COPY.action.deposit}
+            </Button>
           }
         />
-        {allPositions.length === 0 && (
-          <div className="flex items-start gap-3 rounded-xl bg-card px-4 py-3" data-testid="treasury-empty">
-            <Sprout className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
-            <div className="flex flex-col gap-0.5">
-              <Typography variant="paragraph-small-medium">{DEFI_V1_COPY.empty.title}</Typography>
-              <Typography variant="paragraph-small" color="muted">
-                {DEFI_V1_COPY.empty.body(formatCompactUsd(summary.idle))}
-              </Typography>
-            </div>
-          </div>
-        )}
         <OpportunitiesTable
           label={hasInvestments ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities}
           groups={groups}
@@ -326,11 +298,14 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         tab={hubTab}
         onTabChange={setHubTab}
         balances={idleByAsset(summary.idle, IDLE_MIX)}
-        invest={(tabs) => (
+        deposit={(tabs) => (
           <SetUpInvestmentFlow
+            key={depositFor?.id ?? 'any'}
             tabs={tabs}
-            opportunity={null}
+            opportunity={depositFor}
             options={setupOptions}
+            nested={isPro}
+            safes={isWorkspace ? (safeFilter === ALL ? SAFE_NAMES : [safeFilter]) : undefined}
             onClose={() => setIsMoving(false)}
             onCreate={createInvestment}
             onView={(item) => {
@@ -354,25 +329,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         }}
         onDeposit={(item) => {
           setIsComparing(false)
-          setSelected(item)
-        }}
-        onInvest={(item) => {
-          setIsComparing(false)
-          if (canCreate) openSetup(item)
-          else setSelected(item)
-        }}
-      />
-
-      <SetUp
-        key={setupFor?.id ?? 'any'}
-        open={isCreating}
-        opportunity={setupFor}
-        options={setupOptions}
-        onClose={() => setIsCreating(false)}
-        onCreate={createInvestment}
-        onView={(item) => {
-          setIsCreating(false)
-          setSelected(item)
+          deposit(item)
         }}
       />
 
@@ -381,15 +338,11 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         list={listed}
         onNavigate={setSelected}
         locked={selected ? locked(selected) : false}
-        operations={canCreate && selected ? operationsFor(operations, selected.id) : []}
-        canCreate={canCreate}
-        milestone={config.milestone}
-        safes={isWorkspace ? (safeFilter === ALL ? SAFE_NAMES : [safeFilter]) : undefined}
-        onGoTo={(route) => goTo(route === 'swap' ? AppRoutes.swap : AppRoutes.bridge)}
-        onCustomise={() => openSetup(selected)}
+        operations={isPro && selected ? operationsFor(operations, selected.id) : []}
+        canCreate={isPro}
+        onDeposit={() => openHub('deposit', selected)}
         holding={selected ? holdingOf(selected) : undefined}
         onClose={() => setSelected(null)}
-        onDeposited={onDeposited}
         onWithdrawn={onWithdrawn}
       />
     </div>

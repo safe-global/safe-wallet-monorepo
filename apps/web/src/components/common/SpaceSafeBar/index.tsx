@@ -33,7 +33,9 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSpaceSafeSelectorItems, type DropdownTab } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
-import SpaceChainSelector from './SpaceChainSelector'
+import SpaceChainSelector, { LockedChainSelector } from './SpaceChainSelector'
+import { useLockedSafeBarItem } from './hooks/useLockedSafeBarItem'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
 
 const HIDDEN_ROUTES = [
@@ -150,7 +152,25 @@ function ManageTrustedFooter({ onManage }: { onManage: () => void }) {
   )
 }
 
-function SpaceSafeBar() {
+// One pill: the Safe, nested Safes and network chips share a single white card (see Figma topbar).
+const PILL_CLASS =
+  'flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]'
+
+/** Read-only bar for a Workspace tx flow's Safe; no nested Safes button, as each would switch Safe. */
+function LockedSpaceSafeBar({ safe }: { safe: SafeScopeTarget }) {
+  const { item, chain } = useLockedSafeBarItem(safe)
+
+  return (
+    <div data-testid="safe-level-navigation" className="flex max-[899px]:justify-end">
+      <div className={PILL_CLASS}>
+        <SafeSelectorDropdown items={[item]} selectedItemId={item.id} locked />
+        <LockedChainSelector chain={chain} safeAddress={safe.safeAddress} />
+      </div>
+    </div>
+  )
+}
+
+function SelectableSpaceSafeBar() {
   const pathname = usePathname()
   const router = useRouter()
   const isHydrated = useIsHydrated()
@@ -296,9 +316,7 @@ function SpaceSafeBar() {
       // PageLayout's .topbarAboveOverlay).
       className={cn('flex max-[899px]:justify-end', isAboveOverlay && 'relative z-[calc(var(--z-overlay)+1)]')}
     >
-      {/* One pill: safe selector + nested safes + network selector render as muted chips
-          sharing a single white card (see Figma topbar). */}
-      <div className="flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
+      <div className={PILL_CLASS}>
         {/* The selector is `w-full` below sm, so it claims the first row on its own and the
             nested/network chips wrap underneath it — the address stays on top at every width. */}
         <SafeSelectorDropdown
@@ -337,6 +355,15 @@ function SpaceSafeBar() {
       )}
     </div>
   )
+}
+
+type SpaceSafeBarProps = {
+  /** The Safe an open Workspace tx flow acts on. Shows it read-only instead of the URL's Safe. */
+  lockedSafe?: SafeScopeTarget
+}
+
+function SpaceSafeBar({ lockedSafe }: SpaceSafeBarProps) {
+  return lockedSafe ? <LockedSpaceSafeBar safe={lockedSafe} /> : <SelectableSpaceSafeBar />
 }
 
 export default SpaceSafeBar

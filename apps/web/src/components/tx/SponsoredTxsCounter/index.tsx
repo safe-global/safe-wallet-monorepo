@@ -23,7 +23,7 @@ const PROMPT = {
 }
 
 /** "Nov 1, 00:00 UTC": the reset moment of a sponsored-transactions cycle, always in UTC so every member reads the same. */
-export const _formatResetsAt = (iso: string | null): string | null => {
+export const formatResetsAt = (iso: string | null): string | null => {
   if (!iso) return null
   const timestamp = Date.parse(iso)
   if (Number.isNaN(timestamp)) return null
@@ -55,7 +55,7 @@ const SponsoredTxsCounter = ({
   /** Shows the Pro chip instead of the upgrade button; null (plan unknown, or Pro does not apply as in Safe creation) shows neither. */
   isPro: boolean | null
 }): ReactElement => {
-  const resets = _formatResetsAt(resetsAt)
+  const resets = formatResetsAt(resetsAt)
   useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, !isPro)
 
   return (
@@ -63,17 +63,20 @@ const SponsoredTxsCounter = ({
       <Typography variant="paragraph-small" className="flex flex-wrap items-baseline gap-1">
         {left === null ? (
           <span>Unlimited sponsored transactions</span>
-        ) : isSubscription && quota !== null ? (
+        ) : isSubscription ? (
           <span>
             <span className="font-semibold" data-testid="sponsored-txs-left">
               {left}
             </span>
-            <span className="text-muted-foreground">/{quota} sponsored transactions left</span>
+            <span className="text-muted-foreground">
+              {` sponsored transaction${maybePlural(left)} left this month`}
+            </span>
           </span>
         ) : (
           <span className="inline-flex items-center gap-1">
             <span data-testid="sponsored-txs-left">
-              <span className="font-semibold">{left}</span> free transactions left today
+              <span className="font-semibold">{left}</span>
+              {` sponsored transaction${maybePlural(left)} left today`}
             </span>
             {quota !== null && (
               <Tooltip>
@@ -85,7 +88,7 @@ const SponsoredTxsCounter = ({
                   }
                 />
                 <TooltipContent>
-                  {quota} transaction{maybePlural(quota)} per day for free
+                  {quota} sponsored transaction{maybePlural(quota)} per day
                 </TooltipContent>
               </Tooltip>
             )}

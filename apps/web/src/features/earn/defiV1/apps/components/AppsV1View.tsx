@@ -127,7 +127,7 @@ export const AppsV1View = ({
   const onSelect = (row: AppRow) => {
     if (row.app) return setPreviewRow(row)
     if (row.builtIn !== 'treasury') return openBuiltIn(row)
-    setHubTab('invest')
+    setHubTab('deposit')
     setIsMoving(true)
   }
 
@@ -210,11 +210,12 @@ export const AppsV1View = ({
         tab={hubTab}
         onTabChange={setHubTab}
         balances={IDLE_BALANCES}
-        invest={(tabs) => (
+        deposit={(tabs) => (
           <SetUpInvestmentFlow
             tabs={tabs}
             opportunity={null}
             options={INVEST_OPTIONS}
+            nested={false}
             onClose={() => setIsMoving(false)}
             onCreate={() => undefined}
             onView={() => router.push({ pathname: AppRoutes.earn, query: router.query })}

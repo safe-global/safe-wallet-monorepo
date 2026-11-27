@@ -3,6 +3,7 @@
  * of the flow (recipient, amount, token, Next).
  */
 import { type Page, type Locator } from '@playwright/test'
+import { HomePage } from './home.page'
 
 export class SendTokensPage {
   readonly newTxButton: Locator
@@ -52,6 +53,18 @@ export class SendTokensPage {
     await this.newTxButton.click()
     await this.sendTokensButton.click()
     await this.recipientInput.waitFor({ state: 'visible' })
+  }
+
+  /** Open the Safe (`sep:0x…`), in a Workspace when `spaceId` is given, fill a transfer and continue to its review */
+  async reviewTransfer(
+    safe: { prefixedAddress: string },
+    { recipient, amount }: { recipient: string; amount: string },
+    spaceId?: string,
+  ): Promise<void> {
+    await new HomePage(this.page).goto(safe.prefixedAddress, spaceId)
+    await this.open()
+    await this.fillTransfer({ recipient, amount })
+    await this.nextButton.click()
   }
 
   /** Choose the token to send by its symbol */

@@ -50,8 +50,8 @@ test('should execute a transfer when a second owner confirms the signature of th
   safeApiClient,
   journey,
 }) => {
-  const recipient = Wallet.createRandom().address
   const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
+  const recipient = journey.newAddress()
 
   const sendTokens = new SendTokensPage(safePage)
   const queue = new TxQueuePage(safePage)
@@ -77,6 +77,7 @@ test('should execute a transfer when a second owner confirms the signature of th
 Full spec: [multisig-confirm.spec.ts](../tests/e2e/multisig-confirm.spec.ts).
 
 - **Seed what the test needs.** `seedSafe(journey, { owners, threshold })` deploys a new Safe for this test, names its owners, and puts its address in the report. The other functions in `src/seed/` add tokens, NFTs, queued transactions, proposers and more. Seed through the SDK and the local APIs, never through the UI.
+- **Make new addresses with `journey.newAddress()`, after seeding the Safes.** It never shares the first or last 4 hex characters with an owner or a seeded Safe. A random address that does is an address-poisoning look-alike, and Safe Shield then blocks the review until the user confirms the risk.
 - **Say who is connected.** The journey starts connected as `alice`. `journey.connectAs(owner)` connects another owner, who stays connected on every later navigation.
 - **Check the outcome, not the screen only.** Poll CGW with `expect.poll` and `SafeApiClient` (`getNonce`, `getQueued`), and read the fork with `src/chain/`.
 - **Register the spec** in `environment/playwright-specs.mjs`. A journey that seeds all its data gets `{}`; add `scenarios` and `safes` for scenario data, and `chains` for a fork besides Sepolia (see [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#specs)). `e2e:env:test` fails for a spec that is not registered.

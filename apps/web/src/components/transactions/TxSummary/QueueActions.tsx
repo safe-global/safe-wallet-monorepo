@@ -6,12 +6,12 @@ import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import SpeedUpMonitor from '@/features/speedup/public/components/SpeedUpMonitor'
 
-const QueueActions = ({ tx, dense = false }: { tx: Transaction; dense?: boolean }) => {
+const QueueActions = ({ tx, dense = false, signHint }: { tx: Transaction; dense?: boolean; signHint?: string }) => {
   const awaitingExecution = isAwaitingExecution(tx.txStatus)
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, tx.id))
   let ExecutionComponent = null
   if (!pendingTx) {
-    ExecutionComponent = <SignTxButton txSummary={tx} compact dense={dense} />
+    ExecutionComponent = <SignTxButton txSummary={tx} compact dense={dense} hint={signHint} />
     if (awaitingExecution) {
       ExecutionComponent = <ExecuteTxButton txSummary={tx} compact dense={dense} />
     }

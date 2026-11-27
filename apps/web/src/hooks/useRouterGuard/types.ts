@@ -16,6 +16,8 @@ export interface GuardResult {
 export interface GuardContext {
   pathname: string
   query: ParsedUrlQuery
+  /** The current page as a relative URL (path and query) */
+  currentUrl: string
   isPublicRoute: boolean
   isOnboardingRoute: boolean
   isSpacesPath: boolean
@@ -24,6 +26,8 @@ export interface GuardContext {
   isSiweAuthenticated: boolean
   hasSpaces: boolean
   isPartOfSpaceUrl: boolean
+  /** The wizard's plan step needs the wizard flag and Safe Pro; undefined while either loads. */
+  isPlanStepEnabled: boolean | undefined
 }
 
 // ---------------------------------------------------------------------------

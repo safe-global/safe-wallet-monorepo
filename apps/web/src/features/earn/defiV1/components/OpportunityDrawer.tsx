@@ -8,7 +8,7 @@ import { DrawerBody } from '@safe-global/views/components/common/Drawer/componen
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
-import type { DefiV1Milestone, Holding, Operation, Opportunity } from '../types'
+import type { Holding, Operation, Opportunity } from '../types'
 import { ActionPanel, type ActionResult } from './ActionPanel'
 import { SigningBlock } from './SigningBlock'
 import { OpportunityMark, SponsoredBadge, Tag } from './TreasuryTables'
@@ -62,13 +62,9 @@ export const OpportunityDrawer = ({
   locked,
   operations,
   canCreate,
-  milestone,
-  safes,
-  onGoTo,
-  onCustomise,
+  onDeposit,
   holding,
   onClose,
-  onDeposited,
   onWithdrawn,
 }: {
   opportunity: Opportunity | null
@@ -77,13 +73,9 @@ export const OpportunityDrawer = ({
   locked: boolean
   operations: Operation[]
   canCreate: boolean
-  milestone: DefiV1Milestone
-  safes?: string[]
-  onGoTo: (route: 'swap' | 'bridge') => void
-  onCustomise: () => void
+  onDeposit: () => void
   holding?: Holding
   onClose: () => void
-  onDeposited: (result: ActionResult) => void
   onWithdrawn: (result: ActionResult) => void
 }) => {
   const index = opportunity ? list.findIndex((item) => item.id === opportunity.id) : -1
@@ -122,7 +114,7 @@ export const OpportunityDrawer = ({
               </div>
 
               {canCreate && !locked && (holding || operations[0]) && (
-                <SigningBlock operation={operations[0]} onSetUp={onCustomise} />
+                <SigningBlock operation={operations[0]} onSetUp={onDeposit} />
               )}
 
               <DrawerSection title={COPY.overview} collapsible defaultOpen>
@@ -235,13 +227,7 @@ export const OpportunityDrawer = ({
             opportunity={opportunity}
             holding={holding}
             locked={locked}
-            operations={operations}
-            canCreate={canCreate}
-            milestone={milestone}
-            safes={safes}
-            onGoTo={onGoTo}
-            onCustomise={onCustomise}
-            onDeposited={onDeposited}
+            onDeposit={onDeposit}
             onWithdrawn={onWithdrawn}
           />
         </>

@@ -11,12 +11,13 @@ import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gate
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type {
+  CreationTransaction,
   QueuedItemPage,
   Transaction,
   TransactionDetails,
   TransactionItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { transactionsIn } from './transaction-items'
+import { nonceOf, transactionsIn } from './transaction-items'
 
 const REQUEST_TIMEOUT_MS = 10_000
 const RETRY_DELAY_MS = 1_000
@@ -119,6 +120,29 @@ export class SafeApiClient {
     if (response.status === 404) return null
     if (!response.ok) throw await apiError(response)
     return response.json() as Promise<TransactionDetails>
+  }
+
+  /** Get the executed multisig transaction at `nonce`; null until the history lists it */
+  async findExecutedTransaction(safeAddress: string, nonce: number): Promise<TransactionDetails | null> {
+    const history = transactionsIn(await this.getTransactionHistory(safeAddress))
+    const executed = history.find((transaction) => nonceOf(transaction) === nonce)
+    return executed ? this.findTransaction(executed.id) : null
+  }
+
+  /** Get the hash of the chain transaction that executed the multisig transaction at `nonce` */
+  async getExecutionTxHash(safeAddress: string, nonce: number): Promise<string> {
+    const txHash = (await this.findExecutedTransaction(safeAddress, nonce))?.txHash
+    if (!txHash) throw new Error(`CGW has no execution hash for nonce ${nonce} of ${safeAddress}`)
+    return txHash
+  }
+
+  /** Get the hash of the chain transaction that deployed the Safe; null until CGW has indexed the creation */
+  async findCreationTxHash(safeAddress: string): Promise<string | null> {
+    const response = await this.request(`/v1/chains/${this.chainId}/safes/${safeAddress}/transactions/creation`)
+    if (response.status === 404) return null
+    if (!response.ok) throw await apiError(response)
+    const creation = (await response.json()) as CreationTransaction
+    return creation.transactionHash
   }
 
   /** Get an off-chain message by its Safe message hash */

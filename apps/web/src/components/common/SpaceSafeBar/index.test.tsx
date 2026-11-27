@@ -65,8 +65,16 @@ jest.mock('./hooks/useSpaceBackLink', () => ({
 jest.mock('./SpaceChainSelector', () => {
   const MockSpaceChainSelector = () => <div data-testid="space-chain-selector" />
   MockSpaceChainSelector.displayName = 'SpaceChainSelector'
-  return { __esModule: true, default: MockSpaceChainSelector }
+  const MockLockedChainSelector = ({ chain }: { chain: { chainId: string } }) => (
+    <div data-testid="locked-chain-selector" data-chain-id={chain.chainId} />
+  )
+  MockLockedChainSelector.displayName = 'LockedChainSelector'
+  return { __esModule: true, default: MockSpaceChainSelector, LockedChainSelector: MockLockedChainSelector }
 })
+
+jest.mock('./hooks/useLockedSafeBarItem', () => ({
+  useLockedSafeBarItem: jest.fn(),
+}))
 
 jest.mock('@/features/spaces/public/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => {
@@ -85,6 +93,7 @@ jest.mock('@/features/spaces/public/components/SafeSelectorDropdown', () => {
         data-has-on-retry={String(typeof props.onRetry === 'function')}
         data-has-footer={String(typeof props.footer === 'function')}
         data-keep-open={String(props.keepOpen)}
+        data-locked={String(Boolean(props.locked))}
       >
         {props.header as React.ReactNode}
         {emptyStateOverride != null && (
@@ -162,6 +171,7 @@ import useIsQualifiedSafe from '@/features/spaces/public/hooks/useIsQualifiedSaf
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
+import { useLockedSafeBarItem } from './hooks/useLockedSafeBarItem'
 
 const mockUsePathname = usePathname as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
@@ -169,6 +179,7 @@ const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
 const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
+const mockUseLockedSafeBarItem = useLockedSafeBarItem as jest.Mock
 
 describe('SpaceSafeBar', () => {
   beforeEach(() => {
@@ -189,6 +200,41 @@ describe('SpaceSafeBar', () => {
     mockUseSpaceBackLink.mockReturnValue({
       space: undefined,
       handleBackToSpace: jest.fn(),
+    })
+  })
+
+  describe('locked to the Safe of a Workspace tx flow', () => {
+    const lockedSafe = { chainId: '137', safeAddress: '0xScoped' }
+    const lockedItem = { ...mockItems[0], id: '137:0xScoped', address: '0xScoped', name: 'Scoped Safe' }
+
+    beforeEach(() => {
+      mockUseLockedSafeBarItem.mockReturnValue({ item: lockedItem, chain: { chainId: '137' } })
+    })
+
+    it('shows only that Safe, locked, instead of the URL Safe', () => {
+      const { getByTestId } = render(<SpaceSafeBar lockedSafe={lockedSafe} />)
+
+      expect(mockUseLockedSafeBarItem).toHaveBeenCalledWith(lockedSafe)
+      const dropdown = getByTestId('safe-selector-dropdown')
+      expect(dropdown).toHaveAttribute('data-locked', 'true')
+      expect(dropdown).toHaveAttribute('data-selected-item-id', '137:0xScoped')
+      expect(JSON.parse(dropdown.getAttribute('data-items') ?? '[]')).toEqual([lockedItem])
+      expect(mockUseSpaceSafeSelectorItems).not.toHaveBeenCalled()
+    })
+
+    it("shows that Safe's network, locked, and no nested Safes button", () => {
+      const { getByTestId, queryByTestId } = render(<SpaceSafeBar lockedSafe={lockedSafe} />)
+
+      expect(getByTestId('locked-chain-selector')).toHaveAttribute('data-chain-id', '137')
+      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+    })
+
+    it('keeps the selector unlocked without a flow Safe', () => {
+      const { getByTestId } = render(<SpaceSafeBar />)
+
+      expect(getByTestId('safe-selector-dropdown')).toHaveAttribute('data-locked', 'false')
+      expect(mockUseLockedSafeBarItem).not.toHaveBeenCalled()
     })
   })
 

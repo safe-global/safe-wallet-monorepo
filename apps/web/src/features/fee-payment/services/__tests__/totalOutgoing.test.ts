@@ -83,13 +83,27 @@ describe('computeTotalOutgoing', () => {
     expect(result?.fees).toEqual({ amount: '1', currency: 'USDC' })
   })
 
-  it('returns gas-only line for empty self-call', () => {
+  it('returns the fee alone for empty self-call', () => {
     const safeTx = createSafeTx()
     safeTx.data.value = '0'
     safeTx.data.data = '0x'
 
     const result = computeTotalOutgoing({ ...baseInputs, safeTx, gasTokenAddress: USDC })
 
-    expect(result?.primary).toEqual([{ amount: '1', currency: 'USDC' }])
+    expect(result?.primary).toEqual([])
+    expect(result?.fees).toEqual({ amount: '1', currency: 'USDC' })
+  })
+
+  it('returns the fee alone for a contract call that moves no funds (e.g. adding an owner)', () => {
+    const safeTx = createSafeTx()
+    safeTx.data.value = '0'
+    // addOwnerWithThreshold(address,uint256)
+    safeTx.data.data =
+      '0x0d582f1300000000000000000000000006de3714a10f9af1c870aa7737a3eeb1b42649730000000000000000000000000000000000000000000000000000000000000001'
+
+    const result = computeTotalOutgoing({ ...baseInputs, safeTx, gasTokenAddress: USDC })
+
+    expect(result?.primary).toEqual([])
+    expect(result?.fees).toEqual({ amount: '1', currency: 'USDC' })
   })
 })

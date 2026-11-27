@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { PropsWithChildren } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
@@ -28,6 +29,10 @@ jest.mock('../useTxStepper', () => ({
   default: () => ({ step: 0, data: undefined, nextStep: jest.fn(), prevStep: jest.fn() }),
 }))
 jest.mock('@/components/tx/shared/tracking', () => ({ useTrackTimeSpent: () => jest.fn() }))
+jest.mock('../FeePayerProvider', () => ({
+  __esModule: true,
+  default: ({ children }: { children: ReactNode }) => children,
+}))
 jest.mock('@/components/tx-flow/features/TxNote', () => ({
   __esModule: true,
   default: () => null,
@@ -40,11 +45,7 @@ jest.mock('@/components/tx-flow/features/BalanceChanges', () => ({
   __esModule: true,
   default: () => null,
 }))
-jest.mock('@/components/tx-flow/features/FeeInfoBanner', () => ({
-  __esModule: true,
-  default: () => null,
-}))
-jest.mock('@/components/tx-flow/features/FeesPreview', () => ({
+jest.mock('@/components/tx-flow/features/FeeCard', () => ({
   __esModule: true,
   default: () => null,
 }))

@@ -12,6 +12,7 @@ import ProposersList from '@/components/settings/ProposersList'
 import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
 import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import SpendingLimitsSettings from '@/features/spending-limits/public/components/SpendingLimitsSettings'
 
 const Setup = () => {
@@ -71,10 +72,13 @@ const Setup = () => {
             </div>
 
             <div className="lg:min-w-0 lg:flex-1">
-              <div className="flex flex-col gap-4">
-                <OwnerList />
-                <ProposersList />
-              </div>
+              {/* Workspace names first, then local: a spaceId in the URL would otherwise hide local names */}
+              <AddressBookSourceProvider source="merged">
+                <div className="flex flex-col gap-4">
+                  <OwnerList />
+                  <ProposersList />
+                </div>
+              </AddressBookSourceProvider>
             </div>
           </div>
 

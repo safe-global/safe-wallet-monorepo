@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type Safe from '@safe-global/protocol-kit'
 import type { JsonRpcProvider } from 'ethers'
@@ -8,6 +8,7 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { initSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import ScopedWalletProvider from '@/components/common/WalletProvider/ScopedWalletProvider'
 import { useChain } from '@/hooks/useChains'
 import { trackError } from '@/services/exceptions'
 import { useAppSelector } from '@/store'
@@ -20,6 +21,7 @@ import type {
   SafeScopeTarget,
 } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
+import { TxFlowSafeReporterContext } from './txFlowSafe'
 
 type SafeScopeProviderProps = {
   /** Start with a Safe already selected (e.g. signing an existing transaction). Omit when the flow's first step picks it. */
@@ -43,6 +45,14 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
   // Tell `getAndValidateSafeSDK` a scope is live so a forgotten `scope` argument is logged, not silent.
   useEffect(() => registerActiveScope(), [])
 
+  // Inside the tx modal, report this flow's Safe to the topbar.
+  const reportFlowSafe = useContext(TxFlowSafeReporterContext)
+  useEffect(() => {
+    if (!reportFlowSafe) return
+    reportFlowSafe(target)
+    return () => reportFlowSafe(undefined)
+  }, [reportFlowSafe, target])
+
   // 1. SafeState for the target. `currentData` (not `data`) so a previous target's result never shows.
   // `isFetching` is included because RTK Query's `isLoading` is false once ANY result exists — after
   // Safe A resolves and the user switches to B, `isLoading` alone would falsely report `safeLoading=false`
@@ -63,16 +73,20 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
   const chain = useChain(target?.chainId ?? '')
   const customRpc = useAppSelector(selectRpc)
   const customRpcUrl = chain ? customRpc?.[chain.chainId] : undefined
-  const [web3ReadOnly, setWeb3ReadOnly] = useState<JsonRpcProvider>()
+  // Tagged with its chain: the reset below runs after the render that switches chains, so without the
+  // tag that render would hand the old chain's provider to signers and the SDK for the new chain.
+  const [providerState, setProviderState] = useState<{ chainId: string; provider: JsonRpcProvider }>()
+  const web3ReadOnly = providerState?.chainId === target?.chainId ? providerState?.provider : undefined
 
   useEffect(() => {
-    setWeb3ReadOnly(undefined)
+    setProviderState(undefined)
     if (!chain) return
     let cancelled = false
     // Dynamic import keeps ethers out of the main bundle, same as `useInitWeb3`.
     import('@/hooks/wallets/web3').then(({ createWeb3ReadOnly }) => {
       if (cancelled) return
-      setWeb3ReadOnly(createWeb3ReadOnly(chain, customRpcUrl))
+      const provider = createWeb3ReadOnly(chain, customRpcUrl)
+      setProviderState(provider ? { chainId: chain.chainId, provider } : undefined)
     })
     return () => {
       cancelled = true
@@ -148,7 +162,13 @@ export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: Sa
 
   const value = useMemo<SafeScopeContextValue>(() => ({ scope, setScope, clearScope }), [scope, setScope, clearScope])
 
-  return <SafeScopeContext.Provider value={value}>{children}</SafeScopeContext.Provider>
+  return (
+    <SafeScopeContext.Provider value={value}>
+      <TxFlowSafeReporterContext.Provider value={undefined}>
+        <ScopedWalletProvider>{children}</ScopedWalletProvider>
+      </TxFlowSafeReporterContext.Provider>
+    </SafeScopeContext.Provider>
+  )
 }
 
 export default SafeScopeProvider

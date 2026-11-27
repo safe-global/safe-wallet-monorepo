@@ -215,13 +215,13 @@ const Timeline = ({ items }: { items: { icon: LucideIcon; text: string; done?: b
   </ol>
 )
 
-export type HubTab = 'invest' | MoveMode
+export type HubTab = 'deposit' | MoveMode
 
-/** Invest, swap and bridge as one set of tabs, shown when the user starts from swap or bridge. */
+/** Deposit, swap and bridge as one set of tabs. */
 export const HubTabs = ({ value, onChange }: { value: HubTab; onChange: (value: HubTab) => void }) => (
   <Tabs value={value} onValueChange={(next) => onChange(next as HubTab)}>
     <TabsList className="w-full">
-      <TabsTrigger value="invest">{DEFI_V1_COPY.operations.invest}</TabsTrigger>
+      <TabsTrigger value="deposit">{DEFI_V1_COPY.operations.deposit}</TabsTrigger>
       <TabsTrigger value="swap">{DEFI_V1_COPY.swap}</TabsTrigger>
       <TabsTrigger value="bridge">{DEFI_V1_COPY.bridge}</TabsTrigger>
     </TabsList>
@@ -232,13 +232,13 @@ export const HubTabs = ({ value, onChange }: { value: HubTab; onChange: (value: 
 export const MoveFundsFlow = ({
   mode,
   onModeChange,
-  onInvest,
+  onDeposit,
   balances,
   onClose,
 }: {
   mode: MoveMode
   onModeChange: (mode: MoveMode) => void
-  onInvest: () => void
+  onDeposit: () => void
   balances: Slice[]
   onClose: () => void
 }) => {
@@ -394,7 +394,7 @@ export const MoveFundsFlow = ({
 
   const details = (
     <div className="min-h-0 flex-1 flex flex-col gap-3 overflow-y-auto px-4 py-4">
-      <HubTabs value={mode} onChange={(next) => (next === 'invest' ? onInvest() : onModeChange(next))} />
+      <HubTabs value={mode} onChange={(next) => (next === 'deposit' ? onDeposit() : onModeChange(next))} />
 
       <div className="relative flex flex-col gap-1">
         <Leg
@@ -668,31 +668,31 @@ export const MoveFundsFlow = ({
   )
 }
 
-/** Invest, swap and bridge in one dialog, so switching tabs only swaps the content. */
+/** Deposit, swap and bridge in one dialog, so switching tabs only swaps the content. */
 export const MoveFundsDialog = ({
   open,
   tab,
   onTabChange,
   balances,
-  invest,
+  deposit,
   onClose,
 }: {
   open: boolean
   tab: HubTab
   onTabChange: (tab: HubTab) => void
   balances: Slice[]
-  invest: (tabs: ReactNode) => ReactNode
+  deposit: (tabs: ReactNode) => ReactNode
   onClose: () => void
 }) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
     <DialogContent size="sm" className={FLOW_DIALOG} data-testid="move-funds-dialog">
-      {tab === 'invest' ? (
-        invest(<HubTabs value="invest" onChange={onTabChange} />)
+      {tab === 'deposit' ? (
+        deposit(<HubTabs value="deposit" onChange={onTabChange} />)
       ) : (
         <MoveFundsFlow
           mode={tab}
           onModeChange={onTabChange}
-          onInvest={() => onTabChange('invest')}
+          onDeposit={() => onTabChange('deposit')}
           balances={balances}
           onClose={onClose}
         />

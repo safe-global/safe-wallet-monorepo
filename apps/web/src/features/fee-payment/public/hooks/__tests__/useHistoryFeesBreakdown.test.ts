@@ -25,8 +25,22 @@ const OWNER = '0x56f9403170Cc799C524Dcfc1c373Ee874b41AA0D'
 const OTHER_ACCOUNT = '0x1111111111111111111111111111111111111111'
 const INTENT_EXECUTED_LOG = { address: RHINESTONE_INTENT_EXECUTOR, topics: [id('IntentExecuted(uint256,bytes32)')] }
 
+const relayer = (gasPaymentOptions: string[]) =>
+  ({
+    type: 'RELAY_FEE',
+    safeCreationSponsored: false,
+    safeTransactionSponsored: false,
+    enableTenderlySimulationBeforeRelay: false,
+    gasPaymentOptions,
+  }) as never
+
+const nativeCurrency = { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' }
 const mockChain = chainBuilder()
-  .with({ chainId: '1', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' } })
+  .with({ chainId: '1', nativeCurrency, relayer: relayer(['PAY_FROM_SAFE']) })
+  .build()
+// A chain whose relayer no longer offers Pay from Safe
+const mockChainWithoutPayFromSafe = chainBuilder()
+  .with({ chainId: '1', nativeCurrency, relayer: relayer(['SUBSCRIPTION']) })
   .build()
 
 const buildBalances = (items: unknown[] = []): ReturnType<typeof useBalancesModule.default> => ({
@@ -136,7 +150,6 @@ const buildFailingProvider = (error: unknown) =>
 describe('useHistoryFeesBreakdown', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChain)
     jest.spyOn(useBalancesModule, 'default').mockReturnValue(buildBalances([nativeBalance, wethBalance]))
     jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(buildProvider(null))
@@ -147,7 +160,7 @@ describe('useHistoryFeesBreakdown', () => {
       const { result } = renderHook(() => useHistoryFeesBreakdown(mockSafePaysTx))
 
       await waitFor(() => expect(result.current).not.toBeNull())
-      expect(result.current?.gasFee).toEqual(expect.objectContaining({ label: 'Max gas fee', currency: 'WETH' }))
+      expect(result.current?.gasFee).toEqual(expect.objectContaining({ label: 'Gas fee', currency: 'WETH' }))
       expect(result.current?.gasFee.amount).toMatch(/^0\.0001/)
       expect(result.current?.gasFee.fiatAmount).toBeDefined()
     })
@@ -189,7 +202,7 @@ describe('useHistoryFeesBreakdown', () => {
 
       expect(result.current?.paidFrom).toBe('signer')
       expect(result.current?.gasFee).toEqual(
-        expect.objectContaining({ label: 'Max gas fee', currency: 'ETH', amount: '0.0024' }),
+        expect.objectContaining({ label: 'Gas fee', currency: 'ETH', amount: '0.0024' }),
       )
       expect(result.current?.gasFee.fiatAmount).toBeDefined()
       expect(result.current?.executionFee).toEqual({ label: 'Execution fee', isFree: true })
@@ -314,12 +327,20 @@ describe('useHistoryFeesBreakdown', () => {
     expect(provider.getTransactionReceipt).not.toHaveBeenCalled()
   })
 
-  it('returns null when GTF feature is disabled', async () => {
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+  it('still shows a Safe-paid breakdown where the relayer no longer offers Pay from Safe', async () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChainWithoutPayFromSafe)
 
     const { result } = renderHook(() => useHistoryFeesBreakdown(mockSafePaysTx))
 
-    await waitFor(() => expect(result.current).toBeNull())
+    await waitFor(() => expect(result.current?.paidFrom).toBe('safe'))
+  })
+
+  it('shows the signer-paid breakdown where the relayer does not offer Pay from Safe', () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChainWithoutPayFromSafe)
+
+    const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+
+    expect(result.current?.paidFrom).toBe('signer')
   })
 
   it('returns null for module-executed transactions', async () => {

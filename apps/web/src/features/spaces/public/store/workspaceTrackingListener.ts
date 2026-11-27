@@ -41,23 +41,6 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
     effect: () => trackEvent({ ...SPACE_EVENTS.DELETE_SPACE }),
   })
 
-  // Name updates are tracked by the form that submits them (useUpdateSpace).
-  startListening({
-    matcher: endpoints.spacesUpdateV1.matchFulfilled,
-    effect: ({ meta }) => {
-      const { id, updateSpaceDto } = meta.arg.originalArgs
-      if (!updateSpaceDto.experimentalFeatures) return
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_UPDATED, label: id },
-        {
-          [MixpanelEventParams.SOURCE]: 'experimental_features',
-          workspace_id: id,
-          experimental_features: updateSpaceDto.experimentalFeatures.join(','),
-        },
-      )
-    },
-  })
-
   startListening({
     matcher: endpoints.membersSelfRemoveV1.matchFulfilled,
     effect: () => trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE }),

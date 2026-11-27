@@ -19,6 +19,7 @@ const TokenAmount = ({
   preciseAmount,
   iconSize,
   chainId,
+  noTooltip = false,
 }: {
   value: string
   decimals?: number | null
@@ -29,6 +30,8 @@ const TokenAmount = ({
   preciseAmount?: boolean
   iconSize?: number
   chainId?: string
+  /** Leaves out the full-amount tooltip, for a parent that shows its own */
+  noTooltip?: boolean
 }): ReactElement => {
   const sign = direction === TransferDirection.OUTGOING ? '-' : ''
   const amount =
@@ -39,28 +42,30 @@ const TokenAmount = ({
       ? sign + formatVisualAmount(value, decimals, PRECISION) + (tokenSymbol ? ' ' + tokenSymbol : '')
       : value
 
+  const label = (
+    <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
+      {logoUri && (
+        <TokenIcon
+          logoUri={logoUri}
+          tokenSymbol={tokenSymbol}
+          fallbackSrc={fallbackSrc}
+          size={iconSize}
+          chainId={chainId}
+          noRadius
+        />
+      )}
+      <b className={css.tokenText}>
+        {sign}
+        {amount} {tokenSymbol && tokenSymbol}
+      </b>
+    </span>
+  )
+
+  if (noTooltip) return label
+
   return (
     <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
-            {logoUri && (
-              <TokenIcon
-                logoUri={logoUri}
-                tokenSymbol={tokenSymbol}
-                fallbackSrc={fallbackSrc}
-                size={iconSize}
-                chainId={chainId}
-                noRadius
-              />
-            )}
-            <b className={css.tokenText}>
-              {sign}
-              {amount} {tokenSymbol && tokenSymbol}
-            </b>
-          </span>
-        }
-      />
+      <TooltipTrigger render={label} />
       <TooltipContent>{fullAmount}</TooltipContent>
     </Tooltip>
   )

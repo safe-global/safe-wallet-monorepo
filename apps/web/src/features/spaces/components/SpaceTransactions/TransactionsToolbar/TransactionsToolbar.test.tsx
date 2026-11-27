@@ -56,10 +56,10 @@ const openFilterSection = (section: string) => {
 }
 
 describe('TransactionsToolbar', () => {
-  it('has no Status or Safe button beside the Filter menu', () => {
+  it('has no Urgency or Safe button beside the Filter menu', () => {
     renderToolbar()
 
-    expect(screen.queryByRole('button', { name: 'Status' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Urgency' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Safe' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
   })
@@ -67,7 +67,7 @@ describe('TransactionsToolbar', () => {
   it('lists every status and flag with its count', () => {
     renderToolbar()
 
-    openFilterSection('Status')
+    openFilterSection('Urgency')
 
     expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute1',
@@ -82,7 +82,7 @@ describe('TransactionsToolbar', () => {
   it('checks the selected statuses', () => {
     renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
 
-    openFilterSection('Status')
+    openFilterSection('Urgency')
 
     expect(screen.getByRole('menuitemcheckbox', { name: /Execute/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.getByRole('menuitemcheckbox', { name: /Sign/ })).toHaveAttribute('aria-checked', 'false')
@@ -91,16 +91,16 @@ describe('TransactionsToolbar', () => {
   it('adds a status that is picked to the filters', () => {
     const onFiltersChange = renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
 
-    openFilterSection('Status')
+    openFilterSection('Urgency')
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Sign/ }))
 
     expect(onFiltersChange).toHaveBeenCalledWith({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute', 'sign'] })
   })
 
-  it('hides the flag counts in the Status menu while a status is selected', () => {
+  it('hides the flag counts in the Urgency menu while a status is selected', () => {
     renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['sign'] })
 
-    openFilterSection('Status')
+    openFilterSection('Urgency')
 
     expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute1',
@@ -112,10 +112,10 @@ describe('TransactionsToolbar', () => {
     ])
   })
 
-  it('hides the status counts in the Status menu while a flag is selected', () => {
+  it('hides the status counts in the Urgency menu while a flag is selected', () => {
     renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['conflicting'] })
 
-    openFilterSection('Status')
+    openFilterSection('Urgency')
 
     expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute',
@@ -130,7 +130,7 @@ describe('TransactionsToolbar', () => {
   it('removes a status that is picked again', () => {
     const onFiltersChange = renderToolbar({ statuses: ['execute', 'sign'], safes: [], chainIds: [], signers: [] })
 
-    openFilterSection('Status')
+    openFilterSection('Urgency')
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Execute/ }))
 
     expect(onFiltersChange).toHaveBeenCalledWith({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
@@ -188,6 +188,38 @@ describe('TransactionsToolbar', () => {
     expect(onFiltersChange).toHaveBeenCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
+  it('finds a signer in the Filter menu by its address', () => {
+    renderToolbar()
+
+    openFilterSection('Signer')
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search signers' }), {
+      target: { value: signerA.slice(2, 12).toLowerCase() },
+    })
+
+    const options = screen.getAllByRole('menuitemcheckbox')
+    expect(options).toHaveLength(1)
+    expect(options[0]).toHaveTextContent(/2$/)
+  })
+
+  it('finds the ready statuses in the Urgency menu by their chip wording', () => {
+    renderToolbar()
+
+    openFilterSection('Urgency')
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search urgency' }), { target: { value: 'ready' } })
+
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual(['Execute1', 'Sign10'])
+  })
+
+  it('shows no matches in the Urgency menu when the search names no status', () => {
+    renderToolbar()
+
+    openFilterSection('Urgency')
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search urgency' }), { target: { value: 'xyz' } })
+
+    expect(screen.queryAllByRole('menuitemcheckbox')).toHaveLength(0)
+    expect(screen.getByText('No matches')).toBeInTheDocument()
+  })
+
   it('removes the networks with the Network chip', () => {
     const filters = { ...NO_SPACE_QUEUE_FILTERS, chainIds: ['1'], signers: [signerA] }
     const onFiltersChange = renderToolbar(filters)
@@ -217,10 +249,10 @@ describe('TransactionsToolbar', () => {
   it('shows one chip per filter, naming up to two values', () => {
     renderToolbar({ statuses: ['sign', 'execute', 'blocked', 'conflicting'], safes: [], chainIds: [], signers: [] })
 
-    expect(screen.getByText('Status:').parentElement).toHaveTextContent('Status:Ready to sign, Ready to execute +2')
+    expect(screen.getByText('Urgency:').parentElement).toHaveTextContent('Urgency:Ready to sign, Ready to execute +2')
   })
 
-  it('removes the statuses with the Status chip', () => {
+  it('removes the statuses with the Urgency chip', () => {
     const filters = {
       ...NO_SPACE_QUEUE_FILTERS,
       statuses: ['sign' as const],
@@ -228,7 +260,7 @@ describe('TransactionsToolbar', () => {
     }
     const onFiltersChange = renderToolbar(filters)
 
-    const statusChip = screen.getByText('Status:').parentElement as HTMLElement
+    const statusChip = screen.getByText('Urgency:').parentElement as HTMLElement
     fireEvent.click(within(statusChip).getByRole('button', { name: 'Remove' }))
 
     expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, statuses: [] })
@@ -260,7 +292,7 @@ describe('TransactionsToolbar', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Group by Status' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Group by Urgency' }))
     fireEvent.click(screen.getByRole('menuitemradio', { name: /Up next/ }))
 
     expect(onGroupByChange).toHaveBeenCalledWith('next')

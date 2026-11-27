@@ -3,6 +3,7 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import { describeSuggestion } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
+import { spaceAddressBookRequestBuilder } from '@/tests/builders/space'
 import type { SignedSafe, WorkspaceSigner } from '../../../hooks/useWorkspaceSigners'
 import { suggestedSignerName, toSuggestedContacts } from '../suggestions'
 
@@ -65,6 +66,26 @@ describe('toSuggestedContacts', () => {
     const book = [bookItem(known.address.toUpperCase().replace('0X', '0x'))]
 
     const contacts = toSuggestedContacts([known, other], book, [])
+
+    expect(contacts.map((contact) => contact.address)).toEqual([other.address])
+  })
+
+  it('skips addresses with a pending request in any casing', () => {
+    const requested = signer()
+    const other = signer()
+    const requests = [spaceAddressBookRequestBuilder().with({ address: requested.address.toLowerCase() }).build()]
+
+    const contacts = toSuggestedContacts([requested, other], [], [], { pendingRequests: requests })
+
+    expect(contacts.map((contact) => contact.address)).toEqual([other.address])
+  })
+
+  it('skips addresses in a local address book on any chain in any casing', () => {
+    const saved = signer({ chainIds: ['1'] })
+    const other = signer()
+    const localBooks = { '137': { [saved.address.toLowerCase()]: faker.person.fullName() } }
+
+    const contacts = toSuggestedContacts([saved, other], [], [], { localBooks })
 
     expect(contacts.map((contact) => contact.address)).toEqual([other.address])
   })

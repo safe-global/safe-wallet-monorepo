@@ -1,11 +1,12 @@
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useRouter } from 'next/router'
-import { useContext, useCallback, useState } from 'react'
+import { useContext, useCallback, useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { useChain } from '@/hooks/useChains'
+import useChains, { useChain } from '@/hooks/useChains'
+import usePortfolioSummaries from '@/features/portfolio/public/hooks/usePortfolioSummaries'
+import { aggregateBalance } from './aggregateBalance'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { AppRoutes } from '@/config/routes'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
@@ -13,15 +14,17 @@ import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { DashboardHeader } from '../../public/components/DashboardHeader'
+import { DashboardHeader, DashboardHeaderSkeleton } from '../../public/components/DashboardHeader'
 import QrModal from '@/components/common/QrCodeButton/QrModal'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const AggregatedBalance = ({
   safeItems,
+  safesLoading = false,
   accountsLoading = false,
 }: {
   safeItems: SafeItem[]
+  safesLoading?: boolean
   accountsLoading?: boolean
 }) => {
   const currency = useAppSelector(selectCurrency)
@@ -33,8 +36,19 @@ const AggregatedBalance = ({
   const chain = useChain(firstSafe?.chainId ?? '')
   const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false)
 
-  const { data: safeOverviews, isLoading } = useGetMultipleSafeOverviewsQuery({ safes: safeItems, currency })
-  const aggregatedBalance = safeOverviews ? safeOverviews.reduce((prev, next) => prev + Number(next.fiatTotal), 0) : 0
+  const { configs } = useChains()
+  // currentData, not data: data keeps the previous Safes' result while the new list loads, which summed to $0
+  const { currentData: safeOverviews, isFetching: overviewsFetching } = useGetMultipleSafeOverviewsQuery({
+    safes: safeItems,
+    currency,
+  })
+  const summaries = usePortfolioSummaries(safeItems)
+  const testnetChainIds = useMemo(
+    () => new Set(configs.filter((config) => config.isTestnet).map((config) => config.chainId)),
+    [configs],
+  )
+  const aggregatedBalance = aggregateBalance(safeItems, safeOverviews, summaries, testnetChainIds)
+  const isLoading = safesLoading || (overviewsFetching && !safeOverviews) || summaries.isLoading
 
   const safeQueryParam = chain && firstSafe ? `${chain.shortName}:${firstSafe.address}` : undefined
 
@@ -53,7 +67,7 @@ const AggregatedBalance = ({
     })
   }, [router])
 
-  if (isLoading) return <AggregatedBalanceSkeleton />
+  if (isLoading) return <DashboardHeaderSkeleton />
 
   const isDimmed = safeItems.length === 0 || accountsLoading
   const formattedValue = formatCurrencyPrecise(aggregatedBalance, currency)
@@ -105,18 +119,6 @@ const AggregatedBalance = ({
       </div>
       {isReceiveModalOpen && <QrModal onClose={handleReceiveClose} />}
     </>
-  )
-}
-
-const AggregatedBalanceSkeleton = () => {
-  return (
-    <div className="mb-4 flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-[30px] w-[200px]" />
-      </div>
-      <Skeleton className="h-9 w-[400px]" />
-    </div>
   )
 }
 

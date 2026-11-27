@@ -56,7 +56,7 @@ export const SafeSidebarContent = ({
   )
 
   const defiV1 = useDefiV1()
-  const earnLabel = defiV1 ? (defiV1.framing === 'treasury' ? 'Treasury' : 'DeFi') : undefined
+  const earnLabel = defiV1 ? (defiV1.framing === 'treasury' ? 'Deposits' : 'DeFi') : undefined
 
   const isItemDisabled = useCallback(
     (item: SidebarItemConfig) => {

@@ -302,8 +302,7 @@ const OpportunityRow = ({
   opportunity,
   isLocked,
   onSelect,
-  onInvest,
-  actionLabel,
+  onDeposit,
   holding,
   safes,
   heldIn,
@@ -312,8 +311,7 @@ const OpportunityRow = ({
   opportunity: Opportunity
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
-  onInvest?: (item: Opportunity) => void
-  actionLabel: (item: Opportunity) => string
+  onDeposit: (item: Opportunity) => void
   holding?: Holding
   safes?: string[]
   heldIn?: Operation
@@ -363,18 +361,14 @@ const OpportunityRow = ({
           >
             {DEFI_V1_COPY.manage}
           </Button>
-        ) : onInvest ? (
+        ) : (
           <Button
             variant="outline"
             size="xs"
-            onClick={stop(() => onInvest(opportunity))}
-            data-testid={`invest-${opportunity.id}`}
+            onClick={stop(() => onDeposit(opportunity))}
+            data-testid={`deposit-${opportunity.id}`}
           >
-            {DEFI_V1_COPY.operations.invest}
-          </Button>
-        ) : (
-          <Button variant="outline" size="xs" onClick={stop(() => onSelect(opportunity))}>
-            {actionLabel(opportunity)}
+            {DEFI_V1_COPY.action.deposit}
           </Button>
         )}
       </TableCell>
@@ -387,8 +381,7 @@ export const OpportunitiesTable = ({
   groups,
   isLocked,
   onSelect,
-  onInvest,
-  actionLabel,
+  onDeposit,
   safesOf,
   sort,
   onSort,
@@ -400,8 +393,7 @@ export const OpportunitiesTable = ({
   groups: OpportunityGroup[]
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
-  onInvest?: (item: Opportunity) => void
-  actionLabel: (item: Opportunity) => string
+  onDeposit: (item: Opportunity) => void
   safesOf?: (item: Opportunity) => string[]
   sort: Sort | null
   onSort: (key: SortKey) => void
@@ -442,8 +434,7 @@ export const OpportunitiesTable = ({
                 opportunity={item}
                 isLocked={isLocked}
                 onSelect={onSelect}
-                onInvest={onInvest}
-                actionLabel={actionLabel}
+                onDeposit={onDeposit}
                 holding={holdingOf(item)}
                 safes={safesOf?.(item)}
                 heldIn={heldInOf(item)}
