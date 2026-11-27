@@ -45,7 +45,7 @@ type RecipientRowProps = {
 }
 
 const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
-  const balancesItems = useVisibleTokens()
+  const { tokens: balancesItems, loading: isTokenListLoading } = useVisibleTokens()
   const { spendingLimits } = useSpendingLimits()
 
   const {
@@ -128,6 +128,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
             maxAmount={maxAmount}
             deps={[MultiTokenTransferFields.recipients]}
             defaultTokenAddress={tokenAddress}
+            isTokenListLoading={isTokenListLoading}
             onMaxClick={() => setMaxPressed(true)}
           />
         </div>
