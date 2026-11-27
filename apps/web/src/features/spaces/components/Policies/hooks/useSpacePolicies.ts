@@ -63,7 +63,12 @@ const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
   }
 }
 
-const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[], resolveErc20Token: Erc20TokenResolver): Policy[] => {
+/** The active rows the table shows: an allowlist only on a chain that supports it. */
+export const toActiveRows = (
+  dtos: ActivePolicyDto[],
+  chains: Chain[],
+  resolveErc20Token: Erc20TokenResolver,
+): Policy[] => {
   const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
 
   return mapActivePolicies(dtos, toNativeTokenResolver(chains), resolveErc20Token).filter(
@@ -121,16 +126,14 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const resolveErc20Token = useAllowlistTokenResolver(dtos)
   const activeRows = useMemo(() => toActiveRows(dtos, chains, resolveErc20Token), [dtos, chains, resolveErc20Token])
   const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
+  const listed = useMemo(() => [...activeRows, ...pendingRows], [activeRows, pendingRows])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
     resetKey: spaceId,
     enabled: !skip,
   })
 
-  const policies = useMemo(
-    () => [...activeRows, ...pendingRows, ...activatingRows],
-    [activeRows, pendingRows, activatingRows],
-  )
+  const policies = useMemo(() => [...listed, ...activatingRows], [listed, activatingRows])
 
   // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
   const isLoadingActive = active.isFetching && !active.currentData
