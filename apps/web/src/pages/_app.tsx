@@ -129,13 +129,14 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     <ShadcnProvider dark={isDarkMode}>
       <WalletProvider>
         <GeoblockingProvider>
-          <TxModalProvider>
-            <AddressBookSourceProvider>
-              <HnQueueAssessmentProvider>
-                <PrivateNotesAppProvider>{children}</PrivateNotesAppProvider>
-              </HnQueueAssessmentProvider>
-            </AddressBookSourceProvider>
-          </TxModalProvider>
+          {/* Around the tx flow modal too: the note is written there and read on the pages */}
+          <PrivateNotesAppProvider>
+            <TxModalProvider>
+              <AddressBookSourceProvider>
+                <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+              </AddressBookSourceProvider>
+            </TxModalProvider>
+          </PrivateNotesAppProvider>
         </GeoblockingProvider>
       </WalletProvider>
     </ShadcnProvider>
