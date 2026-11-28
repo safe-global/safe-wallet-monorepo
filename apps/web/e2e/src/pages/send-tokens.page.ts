@@ -23,6 +23,8 @@ export class SendTokensPage {
   readonly amountField: Locator
   readonly maxButton: Locator
   readonly tokenSelector: Locator
+  /** The tokens offered while the token list is open */
+  readonly tokenOptions: Locator
   readonly addRecipientButton: Locator
   readonly nextButton: Locator
   readonly spendingLimitOption: Locator
@@ -43,6 +45,7 @@ export class SendTokensPage {
     this.amountField = page.getByTestId('token-amount-field')
     this.maxButton = page.getByTestId('max-btn')
     this.tokenSelector = page.getByTestId('token-selector').getByRole('combobox')
+    this.tokenOptions = page.getByRole('option')
     this.addRecipientButton = page.getByTestId('add-recipient-btn')
     this.nextButton = page.getByRole('button', { name: 'Next' })
     this.spendingLimitOption = page.getByTestId('spending-limit-tx')
@@ -67,10 +70,21 @@ export class SendTokensPage {
     await this.nextButton.click()
   }
 
+  /** Close the transaction flow and wait for the page behind it, without a page load */
+  async closeFlow(): Promise<void> {
+    await this.page.keyboard.press('Escape')
+    await this.newTxButton.waitFor({ state: 'visible' })
+  }
+
+  /** Open the list of tokens to send */
+  async openTokenList(): Promise<void> {
+    await this.tokenSelector.click()
+  }
+
   /** Choose the token to send by its symbol */
   async selectToken(symbol: string): Promise<void> {
-    await this.tokenSelector.click()
-    await this.page.getByRole('option').filter({ hasText: symbol }).click()
+    await this.openTokenList()
+    await this.tokenOptions.filter({ hasText: symbol }).click()
   }
 
   /** Enter the recipient's address and an amount of the selected token */
