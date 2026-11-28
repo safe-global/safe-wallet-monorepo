@@ -1,7 +1,7 @@
 import type { JsonRpcProvider } from 'ethers'
-import type { SpendingLimitState } from '../types'
-import { getSpendingLimitContract } from '../../services/spendingLimitContracts'
-import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import type { SpendingLimitState } from '../public/types'
+import { getSpendingLimitContract } from './spendingLimitContracts'
+import { type NativeToken } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
@@ -17,17 +17,12 @@ const DEFAULT_TOKEN_INFO = {
 const discardZeroAllowance = (spendingLimit: SpendingLimitState): boolean =>
   !(spendingLimit.amount === '0' && spendingLimit.resetTimeMin === '0')
 
-const getTokenInfoFromBalances = (
-  tokenInfoFromBalances: Balance['tokenInfo'][],
-  address: string,
-): Balance['tokenInfo'] | undefined => tokenInfoFromBalances.find((token) => token.address === address)
-
 export const getTokenAllowances = async (
   contract: AllowanceModule,
   provider: JsonRpcProvider,
   safeAddress: string,
   allowanceRequests: { delegate: string; token: string }[],
-  tokenInfoFromBalances: Balance['tokenInfo'][],
+  nativeToken: NativeToken,
 ): Promise<SpendingLimitState[]> => {
   const moduleAddress = await contract.getAddress()
   const calls = allowanceRequests.map(({ delegate, token }) => ({
@@ -41,19 +36,16 @@ export const getTokenAllowances = async (
   )
 
   // Removed limits are discarded later, so their tokens aren't looked up.
-  const missingTokenAddresses = tokenAllowances
+  const erc20Addresses = tokenAllowances
     .map((tokenAllowance, index) => ({ tokenAllowance, token: allowanceRequests[index].token }))
     .filter(({ tokenAllowance: [amount, , resetTimeMin] }) => !(amount === 0n && resetTimeMin === 0n))
     .map(({ token }) => token)
-    .filter(
-      (tokenAddress) =>
-        !sameAddress(tokenAddress, ZERO_ADDRESS) && !getTokenInfoFromBalances(tokenInfoFromBalances, tokenAddress),
-    )
+    .filter((tokenAddress) => !sameAddress(tokenAddress, ZERO_ADDRESS))
 
   // One lookup per token, so a non-ERC-20 token address can't fail the others.
-  const missingTokenInfos = (
+  const erc20TokenInfos = (
     await Promise.all(
-      missingTokenAddresses.map((address) => getERC20TokenInfoOnChain(address, provider).catch(() => undefined)),
+      erc20Addresses.map((address) => getERC20TokenInfoOnChain(address, provider).catch(() => undefined)),
     )
   ).flatMap((tokenInfos) => tokenInfos ?? [])
 
@@ -62,11 +54,12 @@ export const getTokenAllowances = async (
     const [amount, spent, resetTimeMin, lastResetMin, nonce] = tokenAllowance
     return {
       beneficiary: delegate,
-      token: getTokenInfoFromBalances(tokenInfoFromBalances, token) ||
-        missingTokenInfos.find((tokenInfo) => sameAddress(tokenInfo.address, token)) || {
-          ...DEFAULT_TOKEN_INFO,
-          address: token,
-        },
+      token: sameAddress(token, ZERO_ADDRESS)
+        ? nativeToken
+        : (erc20TokenInfos.find((tokenInfo) => sameAddress(tokenInfo.address, token)) ?? {
+            ...DEFAULT_TOKEN_INFO,
+            address: token,
+          }),
       amount: amount.toString(),
       spent: spent.toString(),
       resetTimeMin: resetTimeMin.toString(),
@@ -81,7 +74,7 @@ export const getTokensForDelegates = async (
   provider: JsonRpcProvider,
   safeAddress: string,
   delegates: string[],
-  tokenInfoFromBalances: Balance['tokenInfo'][],
+  nativeToken: NativeToken,
 ) => {
   const allowanceAddress = await contract.getAddress()
   const calls = delegates.map((delegate) => ({
@@ -103,7 +96,7 @@ export const getTokensForDelegates = async (
     }))
   })
 
-  return getTokenAllowances(contract, provider, safeAddress, spendingLimitRequests, tokenInfoFromBalances)
+  return getTokenAllowances(contract, provider, safeAddress, spendingLimitRequests, nativeToken)
 }
 
 export const loadSpendingLimits = async (
@@ -111,7 +104,7 @@ export const loadSpendingLimits = async (
   safeModules: AddressInfo[],
   safeAddress: string,
   chainId: string,
-  tokenInfoFromBalances: Balance['tokenInfo'][],
+  nativeToken: NativeToken,
 ): Promise<SpendingLimitState[] | undefined> => {
   let contract: ReturnType<typeof getSpendingLimitContract>
   try {
@@ -121,13 +114,7 @@ export const loadSpendingLimits = async (
   }
   const delegates = await contract.getDelegates(safeAddress, 0, 100)
 
-  const spendingLimits = await getTokensForDelegates(
-    contract,
-    provider,
-    safeAddress,
-    delegates.results,
-    tokenInfoFromBalances,
-  )
+  const spendingLimits = await getTokensForDelegates(contract, provider, safeAddress, delegates.results, nativeToken)
 
   return spendingLimits.flat().filter(discardZeroAllowance)
 }
