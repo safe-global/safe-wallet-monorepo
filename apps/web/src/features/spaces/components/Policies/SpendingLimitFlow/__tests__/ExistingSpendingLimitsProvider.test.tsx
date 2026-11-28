@@ -160,6 +160,30 @@ describe('ExistingSpendingLimitsProvider', () => {
     await waitFor(() => expect(mockLoad).toHaveBeenCalledTimes(2))
   })
 
+  it('shows none of the limits of an earlier read while the flow reads them again', async () => {
+    mockUseSafeScope.mockReturnValue(scopeFor(faker.finance.ethereumAddress()))
+    mockLoad.mockResolvedValueOnce([spendingLimitStateBuilder().build()]).mockReturnValueOnce(new Promise(() => {}))
+    const store = storeWithChain()
+    const first = renderLimits(true, store)
+    await waitFor(() => expect(first.result.current.limits).toHaveLength(1))
+    first.unmount()
+
+    const { result } = renderLimits(true, store)
+
+    await waitFor(() => expect(mockLoad).toHaveBeenCalledTimes(2))
+    expect(result.current).toEqual({ limits: undefined, loading: true, error: undefined })
+  })
+
+  it('takes the symbol and decimals of a limit from the token options, not the chain fallback', async () => {
+    mockUseSafeScope.mockReturnValue(scopeFor(faker.finance.ethereumAddress()))
+    const limit = spendingLimitStateBuilder().build()
+    mockLoad.mockResolvedValue([{ ...limit, token: { address: usdc.address, symbol: '', decimals: 18 } }])
+
+    const { result } = renderLimits()
+
+    await waitFor(() => expect(result.current.limits?.[0].token).toMatchObject({ symbol: 'USDC', decimals: 6 }))
+  })
+
   it('takes the token logo of a limit from the token options', async () => {
     mockUseSafeScope.mockReturnValue(scopeFor(faker.finance.ethereumAddress()))
     const limit = spendingLimitStateBuilder().build()

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -22,7 +23,7 @@ export type UseSafeSpendingLimitsResult = {
 }
 
 type UseSafeSpendingLimitsOptions = {
-  /** Reads the chain again on mount instead of a cached read, for a caller that builds a transaction from it. */
+  /** Reads the chain again on mount and hides a read from before it, for a caller that builds a transaction. */
   refetchOnMount?: boolean
 }
 
@@ -35,15 +36,18 @@ export const useSafeSpendingLimits = (
   const customRpcs = useAppSelector(selectRpc)
   const args = isEnabled && safe ? toSpendingLimitsArgs(safe, customRpcs) : skipToken
   const { isError } = spendingLimitsApi.endpoints.getSpendingLimits.useQueryState(args)
-  const { currentData, isFetching, error } = useGetSpendingLimitsQuery(args, {
+  const [mountedAt] = useState(Date.now)
+  const { currentData, isFetching, error, fulfilledTimeStamp } = useGetSpendingLimitsQuery(args, {
     pollingInterval: isError ? SPENDING_LIMITS_RETRY_MS : 0,
     refetchOnMountOrArgChange: refetchOnMount,
   })
+  const isReadSinceMount = (fulfilledTimeStamp ?? 0) >= mountedAt
+  const spendingLimits = refetchOnMount && !isReadSinceMount ? undefined : currentData
 
   return {
-    spendingLimits: currentData,
-    loading: !currentData && isFetching,
-    error: !currentData && error ? asError(error) : undefined,
+    spendingLimits,
+    loading: !spendingLimits && isFetching,
+    error: !spendingLimits && error ? asError(error) : undefined,
   }
 }
 
