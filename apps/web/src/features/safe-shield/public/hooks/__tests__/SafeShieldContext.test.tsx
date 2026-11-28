@@ -1,6 +1,7 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { SafeShieldProvider } from '../../components/SafeShieldProvider'
-import { useSafeShield, useSafeShieldForAddressPoisoning } from '../useSafeShield'
+import { useSafeShield, useSafeShieldForAddressPoisoning, useSafeShieldForDraftTx } from '../useSafeShield'
+import { toGuardCheckCalls } from '../../../utils/toGuardCheckCalls'
 import { RecipientStatus, Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import {
   DeadlockAnalysisBuilder,
@@ -28,6 +29,11 @@ jest.mock('../../../hooks/useThreatAnalysis', () => ({
 }))
 jest.mock('../../../hooks/useRecipientAnalysisWithPoisoning', () => ({
   useRecipientAnalysisWithPoisoning: jest.fn(),
+}))
+
+const mockUseGuardPolicyChecks = jest.fn<{ isAllowed: boolean }, [unknown]>(() => ({ isAllowed: false }))
+jest.mock('../../../hooks/useGuardPolicyChecks', () => ({
+  useGuardPolicyChecks: (calls: unknown) => mockUseGuardPolicyChecks(calls),
 }))
 
 const mockUseSafeProAccess = jest.fn(() => ({ hasProFeatures: true, isLoading: false }))
@@ -114,6 +120,51 @@ describe('SafeShieldContext', () => {
     jest.clearAllMocks()
     mockUseRecipientAnalysisWithPoisoning.mockImplementation((recipient: unknown) => recipient)
     mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false })
+  })
+
+  describe('policy guard check', () => {
+    const draftTx = buildSafeTransaction('0xa9059cbb')
+
+    it('checks a draft before a transaction is built', () => {
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <SafeTxContext.Provider value={mockSafeTxContextValue}>
+          <SafeShieldProvider>{children}</SafeShieldProvider>
+        </SafeTxContext.Provider>
+      )
+
+      renderHook(() => useSafeShieldForDraftTx(draftTx), { wrapper })
+
+      expect(mockUseGuardPolicyChecks).toHaveBeenLastCalledWith(toGuardCheckCalls(draftTx))
+    })
+
+    it('checks the built transaction instead of the draft', () => {
+      const builtTx = buildSafeTransaction('0x8d80ff0a')
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <SafeTxContext.Provider value={{ ...mockSafeTxContextValue, safeTx: builtTx }}>
+          <SafeShieldProvider>{children}</SafeShieldProvider>
+        </SafeTxContext.Provider>
+      )
+
+      renderHook(() => useSafeShieldForDraftTx(draftTx), { wrapper })
+
+      expect(mockUseGuardPolicyChecks).toHaveBeenLastCalledWith(toGuardCheckCalls(builtTx))
+    })
+
+    it('clears the draft when the flow drops it', () => {
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <SafeTxContext.Provider value={mockSafeTxContextValue}>
+          <SafeShieldProvider>{children}</SafeShieldProvider>
+        </SafeTxContext.Provider>
+      )
+
+      const { rerender } = renderHook(({ tx }) => useSafeShieldForDraftTx(tx), {
+        wrapper,
+        initialProps: { tx: draftTx as SafeTransaction | undefined },
+      })
+      rerender({ tx: undefined })
+
+      expect(mockUseGuardPolicyChecks).toHaveBeenLastCalledWith(undefined)
+    })
   })
 
   describe('Safe Pro gating', () => {

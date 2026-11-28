@@ -325,3 +325,53 @@ describe('SafeShieldContent Safe Pro gating', () => {
     },
   )
 })
+
+describe('SafeShieldContent policy guard row', () => {
+  const refused = { blocked: { status: 'no-policy' as const }, isAllowed: false }
+  const passed = { isAllowed: true }
+
+  const renderWithGuard = (guardCheck: typeof refused | typeof passed, hasProFeatures: boolean, isSafePro = true) =>
+    render(
+      <SafeShieldContent
+        recipient={emptyAnalysis}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={safeTx}
+        guardCheck={guardCheck}
+        hasProFeatures={hasProFeatures}
+        isSafePro={isSafePro}
+      />,
+    )
+
+  it.each([
+    ['a refusal', refused],
+    ['a pass', passed],
+  ])('shows %s inside the Safe Pro section with Safe Pro', (_label, guardCheck) => {
+    renderWithGuard(guardCheck, true)
+
+    expect(screen.getByTestId('pro-checks-section')).toContainElement(screen.getByTestId('policy-guard-check'))
+  })
+
+  it('shows only a refusal, above the Safe Pro section, without Safe Pro', () => {
+    renderWithGuard(refused, false)
+
+    expect(screen.getByTestId('policy-guard-check')).toHaveTextContent("This account's policies will refuse")
+    expect(screen.getByTestId('pro-checks-section')).not.toContainElement(screen.getByTestId('policy-guard-check'))
+  })
+
+  it.each([
+    ['without Safe Pro', false, true],
+    ['in the pre-Pro layout', true, false],
+  ])('shows no pass %s', (_label, hasProFeatures, isSafePro) => {
+    renderWithGuard(passed, hasProFeatures, isSafePro)
+
+    expect(screen.queryByTestId('policy-guard-check')).not.toBeInTheDocument()
+  })
+
+  it('shows a refusal in the pre-Pro layout', () => {
+    renderWithGuard(refused, true, false)
+
+    expect(screen.getByTestId('policy-guard-check')).toBeInTheDocument()
+  })
+})

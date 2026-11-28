@@ -44,7 +44,11 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/public/hooks/useNoFeeCampaignEligibility'
 import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/hooks/useIsNoFeeCampaignEnabled'
-import { useSafeShieldForRecipients } from '@/features/safe-shield/public/hooks/useSafeShield'
+import { useSafeShieldForDraftTx, useSafeShieldForRecipients } from '@/features/safe-shield/public/hooks/useSafeShield'
+import { createMultiTokenTransferParams } from '@/services/tx/tokenTransferParams'
+import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
+import useAsync from '@safe-global/utils/hooks/useAsync'
+import { isAddress } from 'ethers'
 import uniq from 'lodash/uniq'
 import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/public/components/NoFeeCampaignTransactionCard'
 
@@ -171,6 +175,18 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
   )
 
   useSafeShieldForRecipients(recipientAddresses)
+
+  const transfers = useMemo(
+    () =>
+      createMultiTokenTransferParams(
+        recipientsWatched.filter((recipient) => isAddress(recipient.recipient) && Number(recipient.amount) > 0),
+        balancesItems,
+      ),
+    [recipientsWatched, balancesItems],
+  )
+  const [draftTx] = useAsync(() => (transfers.length ? createMultiSendCallOnlyTx(transfers) : undefined), [transfers])
+
+  useSafeShieldForDraftTx(draftTx)
 
   return (
     <TxCard>

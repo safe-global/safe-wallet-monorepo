@@ -4,6 +4,8 @@ import { useCounterpartyAnalysis } from '../../hooks/useCounterpartyAnalysis'
 import { useRecipientAnalysis } from '../../hooks/useRecipientAnalysis'
 import { useThreatAnalysis } from '../../hooks/useThreatAnalysis'
 import useUntrustedSafeAnalysis from '../../hooks/useUntrustedSafeAnalysis'
+import { useGuardPolicyChecks } from '../../hooks/useGuardPolicyChecks'
+import { toGuardCheckCalls } from '../../utils/toGuardCheckCalls'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeShieldContext } from '../hooks/useSafeShield'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -49,6 +51,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   // Addresses registered for the poisoning check only (flows without recipient analysis)
   const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
+  const [draftTx, setDraftTx] = useState<SafeTransaction | undefined>(undefined)
 
   const { hasProFeatures: hasProAccess, isSafePro } = useSafeProAccess()
   const scopeContext = useSafeScopeContext()
@@ -81,6 +84,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
   const isOffchainMessage = !safeShieldTx && !!safeTxContext.safeMessage
+  const guardCheck = useGuardPolicyChecks(toGuardCheckCalls(safeShieldTx ?? draftTx))
   const safeShieldTxKey = safeShieldTx ? JSON.stringify(safeShieldTx.data).toLowerCase() : undefined
 
   // Safe-level analysis: untrusted Safe check
@@ -112,6 +116,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         setPoisoningAddresses,
         setSafeTx,
         safeTx: safeShieldTx,
+        setDraftTx,
+        guardCheck,
         recipient,
         contract,
         threat,
