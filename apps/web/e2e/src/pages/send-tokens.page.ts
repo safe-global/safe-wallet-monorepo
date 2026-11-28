@@ -70,6 +70,12 @@ export class SendTokensPage {
     await this.nextButton.click()
   }
 
+  /** Close the transaction flow and wait for the page behind it, without a page load */
+  async closeFlow(): Promise<void> {
+    await this.page.keyboard.press('Escape')
+    await this.newTxButton.waitFor({ state: 'visible' })
+  }
+
   /** Open the list of tokens to send */
   async openTokenList(): Promise<void> {
     await this.tokenSelector.click()
