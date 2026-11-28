@@ -18,6 +18,8 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
+  // @date-fns/tz copies Date's methods when it loads, so it must load before the fake clock replaces Date
+  setupFiles: [require.resolve('@date-fns/tz', { paths: [path.join(__dirname, '../../packages/utils')] })],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   // CI runners are several times slower than a laptop; the 5 s default fails tests that pass locally
   testTimeout: process.env.CI ? 15_000 : 5_000,
