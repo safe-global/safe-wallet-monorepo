@@ -52,10 +52,7 @@ export type UseSpendingLimitsResult = {
   loading: boolean
 }
 
-/**
- * The spending limits of the Safe in the URL, read from the chain once and shared by every caller.
- * Inside a Space flow too: unlike useSafeInfo, it does not follow the Safe scope.
- */
+/** The spending limits of the Safe in the URL, also inside a Space flow: unlike useSafeInfo, it ignores the Safe scope. */
 const useSpendingLimits = (): UseSpendingLimitsResult => {
   const safe = useAppSelector(selectSafeInfo).data
   const { spendingLimits, loading } = useSafeSpendingLimits(safe)

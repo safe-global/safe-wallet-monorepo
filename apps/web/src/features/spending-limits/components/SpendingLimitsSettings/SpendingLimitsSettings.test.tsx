@@ -73,11 +73,11 @@ describe('SpendingLimitsSettings', () => {
     expect(screen.queryByTestId('safe-pro-lock')).not.toBeInTheDocument()
   })
 
-  it('shows the token logo from the balances for a limit read from the chain', () => {
-    const token = erc20TokenBuilder().build()
-    const spendingLimit = spendingLimitStateBuilder().build()
+  it('shows a limit read from the chain with the symbol, decimals and logo of the token in the balances', () => {
+    const token = erc20TokenBuilder().with({ decimals: 6 }).build()
+    const spendingLimit = spendingLimitStateBuilder().with({ amount: '5000000', spent: '0' }).build()
     jest.mocked(useSpendingLimits).mockReturnValue({
-      spendingLimits: [{ ...spendingLimit, token: { address: token.address, symbol: token.symbol, decimals: 18 } }],
+      spendingLimits: [{ ...spendingLimit, token: { address: token.address, symbol: '', decimals: 18 } }],
       loading: false,
     })
     jest.mocked(useBalances).mockReturnValue({
@@ -88,6 +88,7 @@ describe('SpendingLimitsSettings', () => {
 
     render(<SpendingLimitsSettings />)
 
+    expect(screen.getByTestId('spent-amount')).toHaveTextContent(`0 of 5 ${token.symbol}`)
     expect(screen.getAllByTitle(token.symbol)[0]).toHaveAttribute('srcdoc', expect.stringContaining(token.logoUri))
   })
 })

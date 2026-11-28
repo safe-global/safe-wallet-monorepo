@@ -3,7 +3,7 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
 import { useSafeSpendingLimits } from '@/features/spending-limits/public/hooks/useSpendingLimits'
-import { withTokenLogos } from '@/features/spending-limits/public/services/withTokenLogos'
+import { withKnownTokenInfo } from '@/features/spending-limits/public/services/withKnownTokenInfo'
 
 export type ExistingSpendingLimits = {
   /** Undefined until loaded for the selected Safe, or while no Safe is selected. */
@@ -30,15 +30,17 @@ export const ExistingSpendingLimitsProvider = ({ children }: { children: ReactNo
   const { spendingLimits, loading, error } = useSafeSpendingLimits(scope?.safeLoaded ? scope.safe : undefined, {
     refetchOnMount: true,
   })
-  // No `extraTokens` here: those come from these limits, so they would add no logo the options lack.
+  // No `extraTokens` here: those come from these limits, so they would add nothing the options lack.
   const { options } = useSpendingLimitTokenOptions()
 
-  // The options are a new array on every balance poll, so key on the logos: new limits rebuild the Review tx.
-  const logoKey = options.map(({ address, logoUri }) => `${address}:${logoUri ?? ''}`).join(',')
+  // The options are a new array on every balance poll, so key on what is merged: new limits rebuild the Review tx.
+  const tokenInfoKey = options
+    .map(({ address, symbol, decimals, logoUri }) => `${address}:${symbol}:${decimals}:${logoUri ?? ''}`)
+    .join(',')
   const limits = useMemo(
-    () => spendingLimits && withTokenLogos(spendingLimits, options),
+    () => spendingLimits && withKnownTokenInfo(spendingLimits, options),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [spendingLimits, logoKey],
+    [spendingLimits, tokenInfoKey],
   )
   const value = useMemo<ExistingSpendingLimits>(() => ({ limits, loading, error }), [limits, loading, error])
 
