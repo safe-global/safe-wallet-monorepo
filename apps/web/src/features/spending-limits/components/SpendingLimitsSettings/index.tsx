@@ -17,7 +17,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePlanGate } from '@/features/spaces/public/hooks/usePlanGate'
 import useSpendingLimits from '../../public/hooks/useSpendingLimits'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
-import { withKnownTokenInfo } from '../../services/withKnownTokenInfo'
+import { withKnownTokenInfo } from '../../public/services/withKnownTokenInfo'
 import useBalances from '@/hooks/useBalances'
 
 const SpendingLimitsSettings = () => {

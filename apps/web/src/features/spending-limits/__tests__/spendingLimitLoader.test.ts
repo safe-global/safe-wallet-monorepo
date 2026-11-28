@@ -2,8 +2,8 @@ import * as spendingLimit from '../services/spendingLimitContracts'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { AllowanceModule } from '@safe-global/utils/types/contracts'
 import { AllowanceModule__factory } from '@safe-global/utils/types/contracts'
-import { loadSpendingLimits, getTokenAllowances, getTokensForDelegates } from '../public/services/spendingLimitLoader'
-import { TokenType } from '@safe-global/store/gateway/types'
+import { loadSpendingLimits, getTokenAllowances, getTokensForDelegates } from '../services/spendingLimitLoader'
+import { nativeTokenBuilder } from '@/tests/builders/balances'
 import { mockWeb3Provider } from '@/tests/test-utils'
 import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
 import { faker } from '@faker-js/faker'
@@ -17,6 +17,7 @@ jest.mock('@/utils/tokens', () => ({
 
 const spendingLimitInterface = AllowanceModule__factory.createInterface()
 const mockProvider = createMockWeb3Provider([], undefined, '4')
+const nativeToken = nativeTokenBuilder().build()
 const mockModule = {
   value: '0x1',
 }
@@ -36,7 +37,7 @@ describe('loadSpendingLimits', () => {
   it('should return undefined if no spending limit module address was found', async () => {
     jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue(undefined)
 
-    const result = await loadSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', nativeToken)
 
     expect(result).toBeUndefined()
   })
@@ -44,7 +45,7 @@ describe('loadSpendingLimits', () => {
   it('should return undefined if the safe has no spending limit module', async () => {
     jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue('0x1')
 
-    const result = await loadSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(mockProvider, [], ZERO_ADDRESS, '4', nativeToken)
 
     expect(result).toBeUndefined()
   })
@@ -65,7 +66,7 @@ describe('loadSpendingLimits', () => {
       value: '0x1',
     }
 
-    await loadSpendingLimits(mockProvider, [mockModule], ZERO_ADDRESS, '4', [])
+    await loadSpendingLimits(mockProvider, [mockModule], ZERO_ADDRESS, '4', nativeToken)
 
     expect(getDelegatesMock).toHaveBeenCalledWith(ZERO_ADDRESS, 0, 100)
   })
@@ -106,7 +107,7 @@ describe('loadSpendingLimits', () => {
       }),
     )
 
-    const result = await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', nativeToken)
 
     expect(result?.length).toBe(4)
 
@@ -146,7 +147,7 @@ describe('loadSpendingLimits', () => {
       }),
     )
 
-    await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
+    await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', nativeToken)
 
     // ethers checksums addresses when ABI-decoding them, so compare against the checksummed form
     expect(tokens.getERC20TokenInfoOnChain).toHaveBeenCalledWith(getAddress(token), web3Provider)
@@ -188,7 +189,7 @@ describe('loadSpendingLimits', () => {
       }),
     )
 
-    const result = await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
+    const result = await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', nativeToken)
 
     expect(result?.length).toBe(0)
   })
@@ -220,7 +221,13 @@ describe('getTokensForDelegates', () => {
       undefined,
       '5',
     )
-    const spendingLimits = await getTokensForDelegates(mockContract, mockProvider, ZERO_ADDRESS, [delegate], [])
+    const spendingLimits = await getTokensForDelegates(
+      mockContract,
+      mockProvider,
+      ZERO_ADDRESS,
+      [delegate],
+      nativeToken,
+    )
     expect(spendingLimits.length).toBe(2)
   })
 
@@ -235,7 +242,13 @@ describe('getTokensForDelegates', () => {
       spendingLimitInterface.encodeFunctionResult('getDelegates', [[], 0]),
     ).results
 
-    const spendingLimits = await getTokensForDelegates(mockContract, mockProvider, ZERO_ADDRESS, emptyDelegates, [])
+    const spendingLimits = await getTokensForDelegates(
+      mockContract,
+      mockProvider,
+      ZERO_ADDRESS,
+      emptyDelegates,
+      nativeToken,
+    )
 
     expect(spendingLimits).toEqual([])
   })
@@ -260,7 +273,9 @@ describe('getTokenAllowanceForDelegate', () => {
       undefined,
       '5',
     )
-    const result = (await getTokenAllowances(mockContract, mockProvider, ZERO_ADDRESS, [{ delegate, token }], []))[0]
+    const result = (
+      await getTokenAllowances(mockContract, mockProvider, ZERO_ADDRESS, [{ delegate, token }], nativeToken)
+    )[0]
 
     expect(result.beneficiary).toBe(delegate)
     expect(result.nonce).toBe('0')
@@ -270,53 +285,7 @@ describe('getTokenAllowanceForDelegate', () => {
     expect(result.resetTimeMin).toBe('0')
   })
 
-  it('should return tokenInfo from balance', async () => {
-    const mockContract = {
-      getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
-      interface: spendingLimitInterface,
-    } as unknown as AllowanceModule
-    const delegate = faker.finance.ethereumAddress()
-    const token = faker.finance.ethereumAddress()
-    const mockProvider = createMockWeb3Provider(
-      [
-        {
-          signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
-          returnType: 'uint256[5]',
-          returnValue: [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
-        },
-      ],
-      undefined,
-      '5',
-    )
-
-    const mockTokenInfoFromBalances = [
-      {
-        address: token,
-        name: 'Test',
-        type: TokenType.ERC20,
-        symbol: 'TST',
-        decimals: 10,
-        logoUri: 'https://mock.images/0x10.png',
-      },
-    ]
-
-    const result = (
-      await getTokenAllowances(
-        mockContract,
-        mockProvider,
-        ZERO_ADDRESS,
-        [{ delegate, token }],
-        mockTokenInfoFromBalances,
-      )
-    )[0]
-
-    expect(result.token.address).toBe(token)
-    expect(result.token.decimals).toBe(10)
-    expect(result.token.symbol).toBe('TST')
-    expect(result.token.logoUri).toBe('https://mock.images/0x10.png')
-  })
-
-  it('should return tokenInfo from on-chain if not in balance', async () => {
+  it('should read the info of an ERC-20 token on-chain', async () => {
     // This test exercises the real on-chain fallback, so restore it for this one call:
     // the top-level `jest.mock('@/utils/tokens', ...)` stubs it for the `loadSpendingLimits` tests.
     const { getERC20TokenInfoOnChain: realGetERC20TokenInfoOnChain } =
@@ -351,7 +320,9 @@ describe('getTokenAllowanceForDelegate', () => {
       '5',
     )
 
-    const result = (await getTokenAllowances(mockContract, mockProvider, ZERO_ADDRESS, [{ delegate, token }], []))[0]
+    const result = (
+      await getTokenAllowances(mockContract, mockProvider, ZERO_ADDRESS, [{ delegate, token }], nativeToken)
+    )[0]
 
     expect(result.token.address).toBe(token)
     expect(result.token.decimals).toBe(10)
@@ -359,7 +330,7 @@ describe('getTokenAllowanceForDelegate', () => {
     expect(result.token.logoUri).toBe(undefined)
   })
 
-  it('should not look up the native token on-chain', async () => {
+  it('should name the native token with the given info, without an on-chain lookup', async () => {
     const mockContract = {
       getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
       interface: spendingLimitInterface,
@@ -381,11 +352,11 @@ describe('getTokenAllowanceForDelegate', () => {
       mockProvider,
       ZERO_ADDRESS,
       [{ delegate: faker.finance.ethereumAddress(), token: ZERO_ADDRESS }],
-      [],
+      nativeToken,
     )
 
     expect(tokens.getERC20TokenInfoOnChain).not.toHaveBeenCalled()
-    expect(result.token).toEqual({ address: ZERO_ADDRESS, decimals: 18, symbol: '' })
+    expect(result.token).toEqual(nativeToken)
   })
 
   it('should not fail on a removed allowance whose token is not a contract', async () => {
@@ -425,7 +396,7 @@ describe('getTokenAllowanceForDelegate', () => {
         mockProvider,
         ZERO_ADDRESS,
         [{ delegate: faker.finance.ethereumAddress(), token: faker.finance.ethereumAddress() }],
-        [],
+        nativeToken,
       ),
     ).resolves.toHaveLength(1)
   })
@@ -469,7 +440,7 @@ describe('getTokenAllowanceForDelegate', () => {
         { delegate, token: eoaToken },
         { delegate, token: erc20Token },
       ],
-      [],
+      nativeToken,
     )
 
     expect(eoaResult.token).toEqual({ address: eoaToken, decimals: 18, symbol: '' })

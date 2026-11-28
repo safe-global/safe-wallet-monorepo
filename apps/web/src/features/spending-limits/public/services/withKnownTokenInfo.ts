@@ -1,5 +1,5 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpendingLimitState } from '../public/types'
+import type { SpendingLimitState } from '../types'
 
 export type KnownToken = { address: string; symbol: string; decimals: number; logoUri?: string | null }
 

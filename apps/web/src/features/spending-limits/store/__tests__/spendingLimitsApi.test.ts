@@ -9,12 +9,12 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { getReadOnlyProvider } from '@/hooks/wallets/getReadOnlyProvider'
 import { Errors, logError } from '@/services/exceptions'
-import { loadSpendingLimits } from '../../public/services/spendingLimitLoader'
+import { loadSpendingLimits } from '../../services/spendingLimitLoader'
 import { spendingLimitsApi, type SpendingLimitsArgs } from '../spendingLimitsApi'
 
 jest.mock('@/hooks/wallets/getReadOnlyProvider', () => ({ getReadOnlyProvider: jest.fn() }))
 jest.mock('@/services/exceptions', () => ({ ...jest.requireActual('@/services/exceptions'), logError: jest.fn() }))
-jest.mock('../../public/services/spendingLimitLoader', () => ({ loadSpendingLimits: jest.fn() }))
+jest.mock('../../services/spendingLimitLoader', () => ({ loadSpendingLimits: jest.fn() }))
 
 const mockGetProvider = jest.mocked(getReadOnlyProvider)
 const mockLoad = jest.mocked(loadSpendingLimits)
@@ -59,7 +59,7 @@ describe('spendingLimitsApi.getSpendingLimits', () => {
     await expect(read(store, args).unwrap()).resolves.toEqual(spendingLimits)
 
     const modules = args.moduleAddresses.map((value) => ({ value }))
-    expect(mockLoad).toHaveBeenCalledWith(provider, modules, args.safeAddress, chain.chainId, expect.any(Array))
+    expect(mockLoad).toHaveBeenCalledWith(provider, modules, args.safeAddress, chain.chainId, expect.any(Object))
   })
 
   it('names the native token from the chain config', async () => {
@@ -68,10 +68,8 @@ describe('spendingLimitsApi.getSpendingLimits', () => {
 
     await read(store, argsFor()).unwrap()
 
-    const [, , , , knownTokens] = mockLoad.mock.lastCall ?? []
-    expect(knownTokens).toEqual([
-      expect.objectContaining({ ...chain.nativeCurrency, address: ZERO_ADDRESS, type: 'NATIVE_TOKEN' }),
-    ])
+    const [, , , , nativeToken] = mockLoad.mock.lastCall ?? []
+    expect(nativeToken).toEqual({ ...chain.nativeCurrency, address: ZERO_ADDRESS, type: 'NATIVE_TOKEN' })
   })
 
   it('returns no limits when the Safe has no spending limit module', async () => {
