@@ -11,8 +11,8 @@ const RESET_TIME_OPTIONS: ResetTimeOption[] = [
 ]
 
 /**
- * Short periods that make reset behaviour observable within one QA session. Offered on test chains in
- * addition to the production periods; the divergence is written up in docs/README.md → Reset Periods.
+ * Short periods that make reset behaviour observable within one QA session. Test chains offer them in
+ * addition to the production periods, in the Safe-level and the Workspace flows alike.
  */
 const TEST_RESET_TIME_OPTIONS: ResetTimeOption[] = [
   { label: '5 minutes', value: '5' },
