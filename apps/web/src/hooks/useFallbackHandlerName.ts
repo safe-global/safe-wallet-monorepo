@@ -24,6 +24,10 @@ export const useFallbackHandlerName = (): string | undefined => {
       return 'CompatibilityFallbackHandler'
     }
 
+    if (officialHandler === 'token-callback') {
+      return 'TokenCallbackHandler'
+    }
+
     // CoW's TWAP handler is CoW's own instance of the ExtensibleFallbackHandler
     if (officialHandler === 'extensible' || sameAddress(address, twapFallbackHandler)) {
       return 'ExtensibleFallbackHandler'
