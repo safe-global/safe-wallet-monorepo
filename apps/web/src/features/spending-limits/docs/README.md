@@ -130,7 +130,7 @@ src/features/spending-limits/
 
 The `getSpendingLimits` RTK Query endpoint in `store/spendingLimitsApi.ts` reads the limits from the chain. The key is the chain, the Safe address, its module addresses and the custom RPC, so every caller shares one read per Safe. The loader service is imported on the first read only.
 
-- The read gets no token list. ERC-20 symbols and decimals come from the chain, and the native token comes from the chain config. The settings table adds the logos from the balances (`services/withTokenLogos.ts`).
+- The read gets no token list. ERC-20 symbols and decimals come from the chain, and the native token comes from the chain config. The settings table takes the symbol, decimals and logo of a token the Safe holds from its balances (`services/withKnownTokenInfo.ts`), because the chain read has no logos and falls back to 18 decimals when a token's calls fail.
 - When the Safe's `txHistoryTag` changes, `spendingLimitsRefreshListener` invalidates that Safe's tag. The refetch keeps the old limits on screen until the new ones arrive.
 - A Safe without modules reads nothing.
 - A failed read is read again every 30 seconds (`SPENDING_LIMITS_RETRY_MS`) until it succeeds.
