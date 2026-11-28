@@ -44,11 +44,15 @@ const readSpendingLimits = async (
   chain: Chain,
   { safeAddress, moduleAddresses }: SpendingLimitsArgs,
 ): Promise<SpendingLimitState[]> => {
-  const { loadSpendingLimits } = await import('../public/services/spendingLimitLoader')
+  const { loadSpendingLimits } = await import('../services/spendingLimitLoader')
   const modules = moduleAddresses.map((value) => ({ value }))
-  const spendingLimits = await loadSpendingLimits(provider, modules, safeAddress, chain.chainId, [
+  const spendingLimits = await loadSpendingLimits(
+    provider,
+    modules,
+    safeAddress,
+    chain.chainId,
     toNativeTokenInfo(chain),
-  ])
+  )
   return spendingLimits ?? []
 }
 

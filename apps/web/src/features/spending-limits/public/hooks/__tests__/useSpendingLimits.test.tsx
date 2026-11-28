@@ -14,12 +14,12 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { addressExBuilder, extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import type { SpendingLimitState } from '../../types'
-import { loadSpendingLimits } from '../../services/spendingLimitLoader'
+import { loadSpendingLimits } from '../../../services/spendingLimitLoader'
 import useSpendingLimits, { SPENDING_LIMITS_RETRY_MS } from '../useSpendingLimits'
 
 jest.mock('@/hooks/useChains', () => ({ __esModule: true, useHasFeature: jest.fn() }))
 jest.mock('@/hooks/wallets/getReadOnlyProvider', () => ({ getReadOnlyProvider: jest.fn() }))
-jest.mock('../../services/spendingLimitLoader', () => ({ loadSpendingLimits: jest.fn() }))
+jest.mock('../../../services/spendingLimitLoader', () => ({ loadSpendingLimits: jest.fn() }))
 
 const mockLoad = jest.mocked(loadSpendingLimits)
 const chain = chainBuilder().build()

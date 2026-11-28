@@ -22,6 +22,7 @@ import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-app
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { act, fireEvent, waitFor, within } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
+import { balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { AbiCoder } from 'ethers'
@@ -385,6 +386,34 @@ describe('CreateTokenTransfer', () => {
     // The input should still have USDC address even though balances aren't loaded
     // This is the critical test - does the form preserve the token address?
     expect(input?.value).toBe(USDC_ADDRESS)
+  })
+
+  it('keeps the picked token while the balances load again', async () => {
+    const eth = balanceBuilder().build()
+    const usdc = balanceBuilder()
+      .with({ tokenInfo: erc20TokenBuilder().with({ address: USDC_ADDRESS, name: 'USD Coin' }).build() })
+      .build()
+    const balances = { fiatTotal: '0', items: [eth, usdc] }
+    const trustedBalances = jest
+      .spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances')
+      .mockReturnValue([balances, undefined, false])
+    const flow = (
+      <SafeShieldProvider>
+        <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+          <CreateTokenTransfer />
+        </TxFlowProvider>
+      </SafeShieldProvider>
+    )
+    const { user, getByTestId, findByRole, rerender } = renderWithUser(flow)
+    await user.click(within(getByTestId('token-selector')).getByRole('combobox'))
+    await user.click(await findByRole('option', { name: /USD Coin/ }))
+
+    trustedBalances.mockReturnValue([undefined, undefined, true])
+    rerender(flow)
+    trustedBalances.mockReturnValue([balances, undefined, false])
+    rerender(flow)
+
+    expect(getByTestId('token-selector').querySelector('input')?.value).toBe(USDC_ADDRESS)
   })
 
   // Test exactly how SendButton opens the flow - only tokenAddress is passed

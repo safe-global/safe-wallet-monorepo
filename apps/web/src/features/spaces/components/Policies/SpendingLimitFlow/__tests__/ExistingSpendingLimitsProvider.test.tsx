@@ -22,7 +22,7 @@ jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
-jest.mock('@/features/spending-limits/public/services/spendingLimitLoader', () => ({
+jest.mock('@/features/spending-limits/services/spendingLimitLoader', () => ({
   loadSpendingLimits: (...args: unknown[]) => mockLoad(...args),
 }))
 jest.mock('@/services/exceptions', () => ({
@@ -131,7 +131,13 @@ describe('ExistingSpendingLimitsProvider', () => {
     await waitFor(() => expect(result.current.limits).toEqual(limits))
     expect(mockLoad).toHaveBeenCalledTimes(1)
     const modules = scope.safe?.modules?.map(({ value }) => ({ value }))
-    expect(mockLoad).toHaveBeenCalledWith(provider, modules, scope.safe?.address.value, '1', expect.any(Array))
+    expect(mockLoad).toHaveBeenCalledWith(
+      provider,
+      modules,
+      scope.safe?.address.value,
+      '1',
+      expect.objectContaining({ type: 'NATIVE_TOKEN' }),
+    )
   })
 
   it('keeps the same limits when a balance poll gives new token options', async () => {
@@ -230,7 +236,7 @@ describe('ExistingSpendingLimitsProvider', () => {
       expect.any(Array),
       second.safe?.address.value,
       '1',
-      expect.any(Array),
+      expect.objectContaining({ type: 'NATIVE_TOKEN' }),
     )
   })
 
