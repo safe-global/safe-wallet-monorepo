@@ -4,6 +4,7 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 import { payFromSafeFeePreviewEndpoints } from './payFromSafeFeePreview'
 import { proposerSafesEndpoints } from './proposerSafes'
+import { GATEWAY_TAG_TYPES } from './tagTypes'
 
 async function _buildQueryFn<T>(fn: () => Promise<T>) {
   try {
@@ -24,7 +25,7 @@ export const makeSafeOverviewTag = (chainId: string, address: string): string =>
 export const gatewayApi = createApi({
   reducerPath: 'gatewayApi',
   baseQuery: fakeBaseQuery<Error>(),
-  tagTypes: ['Submissions', 'SafeOverviews'],
+  tagTypes: GATEWAY_TAG_TYPES,
   endpoints: (builder) => ({
     ...safeOverviewEndpoints(builder),
     ...payFromSafeFeePreviewEndpoints(builder),

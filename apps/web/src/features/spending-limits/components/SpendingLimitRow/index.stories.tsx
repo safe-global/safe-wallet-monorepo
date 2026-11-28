@@ -10,6 +10,7 @@ import {
   MultiTransfersFields,
   TokenTransferType,
 } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
+import { withSpendingLimits } from '../../stories/withSpendingLimits'
 import SpendingLimitRow from './index'
 
 // First owner of the `efSafe` fixture — this is the address the `owner` wallet
@@ -70,14 +71,11 @@ export const BothOptions: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     shadcn: true,
-    store: {
-      spendingLimits: { data: [spendingLimit(OWNER_ADDRESS)], loading: false, loaded: true },
-    },
   })
   return {
     args: { availableAmount: AVAILABLE_AMOUNT, selectedToken: DAI },
     parameters: { ...setup.parameters },
-    decorators: [withForm, setup.decorator],
+    decorators: [withForm, withSpendingLimits([spendingLimit(OWNER_ADDRESS)]), setup.decorator],
   }
 })()
 
@@ -90,14 +88,11 @@ export const StandardOnly: Story = (() => {
     scenario: 'efSafe',
     wallet: 'owner',
     shadcn: true,
-    store: {
-      spendingLimits: { data: [], loading: false, loaded: true },
-    },
   })
   return {
     args: { availableAmount: AVAILABLE_AMOUNT, selectedToken: DAI },
     parameters: { ...setup.parameters },
-    decorators: [withForm, setup.decorator],
+    decorators: [withForm, withSpendingLimits([]), setup.decorator],
   }
 })()
 
@@ -124,13 +119,10 @@ export const SpendingLimitOnly: Story = (() => {
       isReady: true,
     },
     shadcn: true,
-    store: {
-      spendingLimits: { data: [spendingLimit(OTHER_ADDRESS)], loading: false, loaded: true },
-    },
   })
   return {
     args: { availableAmount: AVAILABLE_AMOUNT, selectedToken: DAI },
     parameters: { ...setup.parameters },
-    decorators: [withForm, setup.decorator],
+    decorators: [withForm, withSpendingLimits([spendingLimit(OTHER_ADDRESS)]), setup.decorator],
   }
 })()

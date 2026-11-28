@@ -63,7 +63,6 @@ import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiry
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
-import SpendingLimitsLoader from '@/features/spending-limits/public/components/SpendingLimitsLoader'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -177,8 +176,6 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           <Recovery />
 
           <CounterfactualHooks />
-
-          <SpendingLimitsLoader />
         </CaptchaProvider>
       </AppProviders>
     </Provider>

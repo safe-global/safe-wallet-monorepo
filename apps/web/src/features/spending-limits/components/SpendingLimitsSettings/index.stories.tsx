@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import type { SpendingLimitState } from '../../public/types'
+import { withSpendingLimits } from '../../stories/withSpendingLimits'
 import SpendingLimitsSettings from './index'
 
 const spendingLimits: SpendingLimitState[] = [
@@ -35,24 +36,19 @@ const spendingLimits: SpendingLimitState[] = [
   },
 ]
 
-const spendingLimitsSlice = (data: SpendingLimitState[], loading: boolean) => ({
-  spendingLimits: { data, loaded: !loading, loading, error: undefined },
-})
-
-// Feature enabled, store empty and not loading -> renders the "how it works" explainer
+// Feature enabled, no limits read -> renders the "how it works" explainer
 const emptySetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
   pathname: '/settings/spending-limits',
   shadcn: true,
-  store: spendingLimitsSlice([], false),
 })
 
 const meta = {
   title: 'Features/SpendingLimits/SpendingLimitsSettings',
   component: SpendingLimitsSettings,
   loaders: [mswLoader],
-  decorators: [emptySetup.decorator],
+  decorators: [withSpendingLimits([]), emptySetup.decorator],
   parameters: {
     layout: 'padded',
     ...emptySetup.parameters,
@@ -72,30 +68,12 @@ const populatedSetup = createMockStory({
   wallet: 'owner',
   pathname: '/settings/spending-limits',
   shadcn: true,
-  store: spendingLimitsSlice(spendingLimits, false),
 })
 
 export const WithLimits: Story = {
-  decorators: [populatedSetup.decorator],
+  decorators: [withSpendingLimits(spendingLimits), populatedSetup.decorator],
   parameters: {
     layout: 'padded',
     ...populatedSetup.parameters,
-  },
-}
-
-/** Limits are still loading — the table renders skeleton placeholder rows. */
-const loadingSetup = createMockStory({
-  scenario: 'efSafe',
-  wallet: 'owner',
-  pathname: '/settings/spending-limits',
-  shadcn: true,
-  store: spendingLimitsSlice(spendingLimits, true),
-})
-
-export const Loading: Story = {
-  decorators: [loadingSetup.decorator],
-  parameters: {
-    layout: 'padded',
-    ...loadingSetup.parameters,
   },
 }

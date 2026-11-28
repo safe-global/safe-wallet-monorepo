@@ -1,16 +1,9 @@
-import type { fakeBaseQuery } from '@reduxjs/toolkit/query/react'
-import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 import type { OperationType } from '@safe-global/types-kit'
 
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isFeeCollector } from '@/features/fee-payment/public/constants'
-
-type GatewayEndpointBuilder = EndpointBuilder<
-  ReturnType<typeof fakeBaseQuery<Error>>,
-  'Submissions' | 'SafeOverviews',
-  'gatewayApi'
->
+import type { GatewayEndpointBuilder } from './tagTypes'
 
 // prettier-ignore
 const SUPPORTED_FIAT_CODES = new Set(

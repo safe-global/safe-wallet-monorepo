@@ -1,8 +1,7 @@
 import useIsOnlySpendingLimitBeneficiary from '@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'
 import useSpendingLimit from '@/features/spending-limits/public/hooks/useSpendingLimit'
-import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
+import useSpendingLimits from '@/features/spending-limits/public/hooks/useSpendingLimits'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAppSelector } from '@/store'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
@@ -24,16 +23,17 @@ export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) 
 const filterHiddenTokens = (items: Balances['items'], hiddenAssets: string[]) =>
   items.filter((balanceItem) => !hiddenAssets.includes(balanceItem.tokenInfo.address))
 
-export const useVisibleTokens = () => {
+/** The tokens the wallet may send; `loading` until the balances and the spending limits are read. */
+export const useVisibleTokens = (): { tokens: Balances['items']; loading: boolean } => {
   const isOnlySpendingLimitBeneficiary = useIsOnlySpendingLimitBeneficiary()
   const [balances] = useTrustedTokenBalances()
-  const spendingLimits = useAppSelector(selectSpendingLimits)
+  const { spendingLimits, loading: spendingLimitsLoading } = useSpendingLimits()
   const wallet = useWallet()
   const hiddenTokens = useHiddenTokens()
   const { showNativeInBalances } = useNativeTokenDisplay()
   const isScoped = !!useSafeScope()
 
-  return useMemo(() => {
+  const tokens = useMemo(() => {
     if (!balances) {
       return []
     }
@@ -46,7 +46,7 @@ export const useVisibleTokens = () => {
 
     if (isOnlySpendingLimitBeneficiary && !isScoped) {
       return items.filter(({ tokenInfo }) => {
-        return spendingLimits?.some(({ beneficiary, token }) => {
+        return spendingLimits.some(({ beneficiary, token }) => {
           return sameAddress(beneficiary, wallet?.address) && sameAddress(tokenInfo.address, token.address)
         })
       })
@@ -62,4 +62,6 @@ export const useVisibleTokens = () => {
     spendingLimits,
     wallet?.address,
   ])
+
+  return { tokens, loading: !balances || spendingLimitsLoading }
 }

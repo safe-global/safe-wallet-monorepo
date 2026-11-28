@@ -18,6 +18,7 @@ import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { createNewSpendingLimitTx } from '../../public/services/spendingLimitExecution'
 import type { NewSpendingLimitFlowProps, SpendingLimitState } from '../../public/types'
+import useSpendingLimits from '../../public/hooks/useSpendingLimits'
 import ReviewSpendingLimit from '.'
 
 const MAINNET = '1'
@@ -27,6 +28,7 @@ const ONE_USDC = '1000000'
 const ONE_THOUSAND_USDC = '1000000000'
 
 jest.mock('../../public/services/spendingLimitExecution', () => ({ createNewSpendingLimitTx: jest.fn() }))
+jest.mock('../../public/hooks/useSpendingLimits')
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -64,13 +66,13 @@ const givenTokenOptions = (tokens: Erc20Token[], { untrusted }: { untrusted?: bo
 const renderReview = (spendingLimits: SpendingLimitState[] = [], limit: NewSpendingLimitFlowProps = newLimit) => {
   const context = safeTxContextBuilder().build()
   const txFlow: TxFlowContextType<NewSpendingLimitFlowProps> = { ...initialContext, data: limit }
+  jest.mocked(useSpendingLimits).mockReturnValue({ spendingLimits, loading: false })
   render(
     <SafeTxContext.Provider value={context}>
       <TxFlowContext.Provider value={txFlow}>
         <ReviewSpendingLimit onSubmit={jest.fn()} />
       </TxFlowContext.Provider>
     </SafeTxContext.Provider>,
-    { initialReduxState: { spendingLimits: { data: spendingLimits, loaded: true, loading: false } } },
   )
   return context
 }

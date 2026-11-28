@@ -212,27 +212,40 @@ const SubmitTestWrapper = ({
   )
 }
 
-// Derives the selected token from the form like RecipientRow does, so a token pick reaches the
-// amount validators.
-const TokenSwitchTestWrapper = () => {
+// Like RecipientRow: the token comes from the form, and the recipient field it re-validates is async.
+const TokenSwitchTestWrapper = ({
+  balances = mockBalances,
+  defaultTokenAddress = ZERO_ADDRESS,
+  validateRecipient = async () => undefined,
+  isTokenListLoading = false,
+}: {
+  balances?: Balances['items']
+  defaultTokenAddress?: string
+  validateRecipient?: () => Promise<undefined>
+  isTokenListLoading?: boolean
+}) => {
   const methods = useForm({
     defaultValues: {
-      recipients: [{ recipient: '', [TokenAmountFields.tokenAddress]: ZERO_ADDRESS, [TokenAmountFields.amount]: '' }],
+      recipients: [
+        { recipient: '', [TokenAmountFields.tokenAddress]: defaultTokenAddress, [TokenAmountFields.amount]: '' },
+      ],
     },
     mode: 'onChange',
   })
   const tokenAddress = useWatch({ control: methods.control, name: 'recipients.0.tokenAddress' })
-  const selectedToken = mockBalances.find((b) => b.tokenInfo.address === tokenAddress)
+  const selectedToken = balances.find((b) => b.tokenInfo.address === tokenAddress)
 
   return (
     <FormProvider {...methods}>
       <TokenAmountInput
-        balances={mockBalances}
+        balances={balances}
         selectedToken={selectedToken}
         maxAmount={BigInt(selectedToken?.balance || '0')}
         fieldArray={{ name: 'recipients', index: 0 }}
         deps={['recipients']}
+        isTokenListLoading={isTokenListLoading}
       />
+      <input aria-label="Recipient" {...methods.register('recipients.0.recipient', { validate: validateRecipient })} />
     </FormProvider>
   )
 }
@@ -267,6 +280,40 @@ describe('TokenAmountInput', () => {
 
       expect(await screen.findByText('Should have 1 to 6 decimals')).toBeInTheDocument()
       expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
+    })
+
+    it('keeps the picked token while the token list loads again', async () => {
+      const { user, rerender } = renderOnFakeClock(<TokenSwitchTestWrapper />)
+      await pickToken(user, 'USD Coin')
+
+      rerender(<TokenSwitchTestWrapper balances={[]} isTokenListLoading />)
+      rerender(<TokenSwitchTestWrapper />)
+
+      expect(within(screen.getByTestId('token-selector')).getByText('USD Coin')).toBeInTheDocument()
+    })
+
+    it('drops the picked token once a loaded token list no longer has it', async () => {
+      const { user, rerender } = renderOnFakeClock(<TokenSwitchTestWrapper />)
+      await pickToken(user, 'USD Coin')
+
+      rerender(<TokenSwitchTestWrapper balances={[]} />)
+      rerender(<TokenSwitchTestWrapper />)
+
+      expect(within(screen.getByTestId('token-selector')).queryByText('USD Coin')).not.toBeInTheDocument()
+    })
+
+    it('stops re-validating the form once the amount is typed while no token is picked', async () => {
+      const validateRecipient = jest.fn(async () => undefined)
+      const { user } = renderOnFakeClock(
+        <TokenSwitchTestWrapper balances={[]} defaultTokenAddress="" validateRecipient={validateRecipient} />,
+      )
+      await user.type(screen.getByTestId('token-amount-field'), '0.001')
+      await advanceClock(1000)
+      validateRecipient.mockClear()
+
+      await advanceClock(1000)
+
+      expect(validateRecipient).not.toHaveBeenCalled()
     })
   })
 
